@@ -22,6 +22,7 @@ import {
   convertExecutionResultToItemList,
   IVinesExecutionResultItem,
   newConvertExecutionResultToItemList,
+  removeRepeatKey,
 } from '@/utils/execution.ts';
 
 import { ErrorFilter } from './grid/error-filter';
@@ -37,16 +38,6 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
 }
 
 export const LOAD_LIMIT = 50;
-
-const removeRepeatKey = (executionResultList: IVinesExecutionResultItem[]) => {
-  const map = new Map<string, IVinesExecutionResultItem>();
-  for (const item of executionResultList) {
-    if (!map.has(item.render.key)) {
-      map.set(item.render.key, item);
-    }
-  }
-  return Array.from(map.values());
-};
 
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   className,
@@ -91,11 +82,15 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
         list.push(...newConvertExecutionResultToItemList(execution.data));
       }
     }
-    setExecutionResultList([...list]);
+    // 使用去重函数防止重复数据
+    setExecutionResultList(removeRepeatKey(list));
   }, [executionListData]);
 
   // 第一页任务及状态变化
   useEffect(() => {
+    // 如果没有基础数据，不处理
+    if (executionResultList.length === 0) return;
+
     // 筛选状态变更的替换原 result
     const changed = firstPageExecutionRenderList.filter(
       (r) =>
@@ -104,30 +99,33 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
         ) != -1,
     );
 
-    // 筛选不存在的拼接到头部
-    const nonExist = firstPageExecutionList.filter(
-      (r) => !executionResultList.map(({ instanceId }) => instanceId).includes(r.instanceId),
-    );
+    // 筛选不存在的拼接到头部 - 只添加真正不存在的instanceId
+    const existingInstanceIds = new Set(executionResultList.map(({ instanceId }) => instanceId));
+    const nonExist = firstPageExecutionList.filter((r) => !existingInstanceIds.has(r.instanceId));
 
     // 没有变化返回
     if (changed.length == 0 && nonExist.length == 0) return;
 
     setExecutionResultList((prevList) => {
-      for (const changedExecution of changed) {
-        const index = prevList.findIndex((pr) => changedExecution.instanceId === pr.instanceId);
-        // prevList[index].render = {
-        //   ...prevList[index].render,
-        //   isDeleted: true,
-        // };
-        prevList = prevList.filter((_, i) => i != index);
-        prevList.splice(index, 0, ...convertExecutionResultToItemList(changedExecution));
+      const newList = [...prevList];
+
+      // 处理状态变化的项目 - 直接替换，不需要重新转换
+      for (const changedItem of changed) {
+        const index = newList.findIndex((pr) => changedItem.render.key === pr.render.key);
+        if (index !== -1) {
+          newList[index] = changedItem;
+        }
       }
+
+      // 处理新增的项目 - 添加到头部
       for (const nonExistExecution of nonExist.reverse()) {
-        prevList.unshift(...convertExecutionResultToItemList(nonExistExecution));
+        newList.unshift(...convertExecutionResultToItemList(nonExistExecution));
       }
-      return [...prevList];
+
+      // 最终去重确保没有重复key
+      return removeRepeatKey(newList);
     });
-  }, [firstPageExecutionList]);
+  }, [firstPageExecutionList, executionResultList]);
 
   const { setImages } = useExecutionImageResultStore();
   const setThumbImages = useSetThumbImages();
@@ -141,11 +139,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       if (!filerMap.has(url)) {
         filerMap.set(url, image);
         const thumbUrl = getThumbUrl(url);
-        // if (await checkImageUrlAvailable(thumbUrl)) {
         thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl } } as ImagesResult);
-        // } else {
-        //   thumbImages.push(image as ImagesResult);
-        // }
       } else {
         continue;
       }

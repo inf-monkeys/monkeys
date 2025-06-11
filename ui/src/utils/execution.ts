@@ -60,3 +60,12 @@ export const newConvertExecutionResultToItemList = (
     });
   });
 };
+export const removeRepeatKey = (executionResultList: IVinesExecutionResultItem[]) => {
+  const map = new Map<string, IVinesExecutionResultItem>();
+  for (const item of executionResultList) {
+    if (!map.has(item.render.key)) {
+      map.set(item.render.key, item);
+    }
+  }
+  return Array.from(map.values());
+};
