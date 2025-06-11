@@ -5,6 +5,7 @@ import { IRequest } from '@/common/typings/request';
 import { BUILT_IN_PAGE_INSTANCES } from '@/database/repositories/workflow.repository';
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { isArray } from 'lodash';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageService } from './workflow.page.service';
@@ -153,7 +154,8 @@ export class WorkflowPageController {
   @UseGuards(CompatibleAuthGuard)
   async updatePageGroupSort(@Req() request: IRequest, @Body('groupIds') groupIds: string[]) {
     const { teamId } = request;
-    const data = await this.pageService.updatePageGroupSort(teamId, groupIds);
+    if (!isArray(groupIds)) throw new BadRequestException('groupIds should be array');
+    const data = await this.pageService.updatePageGroupSort(teamId, groupIds.filter(Boolean));
     return new SuccessResponse({ data });
   }
 
@@ -189,7 +191,8 @@ export class WorkflowPageController {
   @UseGuards(CompatibleAuthGuard)
   async updatePageGroupPageSort(@Req() request: IRequest, @Param('groupId') groupId: string, @Body('pageIds') pageIds: string[]) {
     const { teamId } = request;
-    const data = await this.pageService.updatePageGroupPageSort(teamId, groupId, pageIds);
+    if (!isArray(pageIds)) throw new BadRequestException('pageIds should be array');
+    const data = await this.pageService.updatePageGroupPageSort(teamId, groupId, pageIds.filter(Boolean));
     return new SuccessResponse({ data });
   }
 }
