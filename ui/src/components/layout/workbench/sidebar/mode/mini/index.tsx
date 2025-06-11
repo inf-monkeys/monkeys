@@ -210,7 +210,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
         <WorkbenchMiniGroupList data={lists} groupId={groupId} setGroupId={setGroupId} height={height} />
       </div>
       <div className="h-full w-px bg-input" />
-      <div className="flex min-w-10 flex-col">
+      <div className="flex min-w-12 flex-col">
         <VirtuaWorkbenchMiniViewList
           data={currentGroupPages}
           height={height}
