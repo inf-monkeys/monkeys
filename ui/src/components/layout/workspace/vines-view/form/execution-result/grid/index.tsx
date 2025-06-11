@@ -30,7 +30,7 @@ interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'
 }
 
 export type IAddDeletedInstanceId = (instanceId: string) => void;
-const RETRY_LIMIT = 3;
+const RETRY_LIMIT = 5;
 export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   workflowId,
   height,
@@ -108,8 +108,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           if (Math.abs(scrollRef.current!.scrollTop - lastScrollTop) > 20) {
             setTimeout(() => {
               retryRef.current++;
-              console.log('retryRef.current', retryRef.current);
-
+              // console.log('retryRef.current', retryRef.current);
               tryRestorePosition();
             }, 200);
           } else {
