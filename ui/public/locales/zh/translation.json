@@ -88,7 +88,7 @@
     },
     "form": {
       "description": {
-        "upload-file-auto-store": "在此处上传文件将自动存入「富媒体数据」"
+        "upload-file-auto-store": "在此处上传文件将自动存入「设计资产」"
       }
     },
     "time": {
@@ -427,7 +427,7 @@
                 "label": "表格数据"
               },
               "media-data": {
-                "label": "富媒体数据"
+                "label": "设计资产"
               }
             },
             "store": {
@@ -1835,7 +1835,7 @@
             "title": "导入文档",
             "form": {
               "fileURL": {
-                "description": "在此处上传文件将自动存入「富媒体数据」"
+                "description": "在此处上传文件将自动存入「设计资产」"
               }
             }
           },
@@ -2157,7 +2157,7 @@
           }
         },
         "operate-area": {
-          "dropdown-label": "富媒体数据操作",
+          "dropdown-label": "设计资产操作",
           "options": {
             "copy-link": "复制文件直链"
           }
