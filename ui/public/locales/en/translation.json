@@ -87,7 +87,7 @@
     },
     "form": {
       "description": {
-        "upload-file-auto-store": "Files uploaded here will be automatically stored in \"Media Data\"."
+        "upload-file-auto-store": "Files uploaded here will be automatically stored in \"Design Assets\"."
       }
     },
     "time": {
@@ -433,7 +433,7 @@
                 "label": "Table Data"
               },
               "media-data": {
-                "label": "Media Data"
+                "label": "Design Assets"
               }
             },
             "store": {
@@ -1834,7 +1834,7 @@
             "title": "Import file",
             "form": {
               "fileURL": {
-                "description": "Files uploaded here will be automatically stored in \"Media Data\"."
+                "description": "Files uploaded here will be automatically stored in \"Design Assets\"."
               }
             }
           },

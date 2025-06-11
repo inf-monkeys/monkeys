@@ -48,3 +48,24 @@ export const convertExecutionResultToItemList = (
 export const concatResultListReducer = (acc: IVinesExecutionResultItem[], current: IVinesExecutionResultItem[]) => {
   return [...acc, ...current];
 };
+export const newConvertExecutionResultToItemList = (
+  result: VinesWorkflowExecutionOutputListItem[],
+): IVinesExecutionResultItem[] => {
+  return result.flatMap((output, index) => {
+    return output.output.map((item, index) => {
+      return {
+        ...output,
+        render: { ...item, key: output.instanceId + '-' + output.status + '-' + index, status: output.status },
+      };
+    });
+  });
+};
+export const removeRepeatKey = (executionResultList: IVinesExecutionResultItem[]) => {
+  const map = new Map<string, IVinesExecutionResultItem>();
+  for (const item of executionResultList) {
+    if (!map.has(item.render.key)) {
+      map.set(item.render.key, item);
+    }
+  }
+  return Array.from(map.values());
+};
