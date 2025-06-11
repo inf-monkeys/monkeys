@@ -96,31 +96,28 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   // console.log('last scrollTop', lastScrollTop);
   // }, [lastScrollTop]);
   useEffect(() => {
-    const timeout: NodeJS.Timeout | null = null;
     startTransition(() => {
       // setIsScrolling(true);
       if (lastScrollTop && !hasUsedCacheScrollTop.current) {
         // console.log('timeout fired');
         setScrollTop(lastScrollTop);
         currentScrollTopRef.current = lastScrollTop;
+        scrollRef.current!.scrollTop = lastScrollTop;
         lastUpdateTimeRef.current = Date.now();
         // console.log('scroll top set');
-        scrollRef.current!.scrollTop = lastScrollTop;
         // setIsScrolling(false);
         hasUsedCacheScrollTop.current = true;
       }
     });
     return () => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
+      hasUsedCacheScrollTop.current = false;
     };
   }, [lastScrollTop]);
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
     scrollTop,
     isScrolling,
-    height,
+    height: height === Infinity ? 800 : height,
     containerRef,
     items: data,
     overscanBy: 3,
@@ -146,7 +143,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     <ScrollArea
       className={cn('z-20 mr-0.5 bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2')}
       ref={scrollRef}
-      style={{ height }}
+      style={{ height: height === Infinity ? 800 : height }}
       disabledOverflowMask
     >
       <ErrorFilter />
