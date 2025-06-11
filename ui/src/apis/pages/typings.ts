@@ -60,6 +60,7 @@ export interface IPageGroup {
   displayName: string | Record<string, string>;
   isBuiltIn: boolean;
   iconUrl?: string;
+  sortIndex?: number | null;
 }
 
 export type IPinningPage = {

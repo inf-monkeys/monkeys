@@ -8,6 +8,7 @@ import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { WorkbenchMiniGroupList } from '@/components/layout/workbench/sidebar/mode/mini/group.tsx';
 import { VirtuaWorkbenchMiniViewList } from '@/components/layout/workbench/sidebar/mode/mini/virtua';
+import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
 import { useElementSize } from '@/hooks/use-resize-observer';
@@ -73,19 +74,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   }, [data?.groups, originalPages, data]);
 
   const pagesMap = keyBy(originalPages ?? [], 'id');
-  const lists = map(originalGroups, ({ pageIds, ...attr }) => ({
-    ...attr,
-    pages: map(pageIds, (pageId) => pagesMap[pageId]).filter(Boolean),
-  }))
-    .filter((it) => it.pages?.length)
-    .sort((a, b) => {
-      if (a.isBuiltIn !== b.isBuiltIn) {
-        return a.isBuiltIn ? -1 : 1;
-      }
-      const aDisplayName = getI18nContent(a.displayName) || 'Unknown';
-      const bDisplayName = getI18nContent(b.displayName) || 'Unknown';
-      return aDisplayName.localeCompare(bDisplayName, undefined, { numeric: true });
-    });
+  const lists = pageGroupProcess(originalGroups, pagesMap);
 
   // Get current group's pages for display
   const currentGroupPages = (lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[];

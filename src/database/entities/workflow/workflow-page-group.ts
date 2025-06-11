@@ -32,4 +32,11 @@ export class WorkflowPageGroupEntity extends BaseEntity {
     nullable: true,
   })
   pageIds: string[];
+
+  @Column({
+    name: 'sort_index',
+    type: 'integer',
+    nullable: true,
+  })
+  sortIndex?: number;
 }

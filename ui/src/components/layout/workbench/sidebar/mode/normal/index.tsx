@@ -4,13 +4,14 @@ import { Link } from '@tanstack/react-router';
 
 import { useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence } from 'framer-motion';
-import { keyBy, map } from 'lodash';
+import { keyBy } from 'lodash';
 import { CircleSlash, Maximize2Icon, Minimize2Icon, PlusIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useWorkspacePages } from '@/apis/pages';
-import { IPinPage } from '@/apis/pages/typings.ts';
+import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
+import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
+import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
@@ -33,7 +34,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const { teamId } = useVinesTeam();
 
-  const { data, isLoading } = useWorkspacePages();
+  const { data, isLoading, mutate } = useWorkspacePages();
+
+  const { trigger: updateGroupSortTrigger } = useUpdateGroupSort();
 
   const [{ activePageFromWorkflowDisplayName }, setUrlState] = useUrlState<{
     activePageFromWorkflowDisplayName?: string;
@@ -54,20 +57,11 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     );
   }, [data?.groups, originalPages, data]);
 
+  const { trigger: updateGroupPageSortTrigger } = useUpdateGroupPageSort(groupId);
+
   const pagesMap = keyBy(originalPages, 'id');
   const groupMap = new Map(originalGroups.map((item, index) => [item.id, index]));
-  const lists = map(originalGroups, ({ pageIds, ...attr }) => ({
-    ...attr,
-    pages: map(pageIds, (pageId) => pagesMap[pageId]).filter(Boolean),
-  }))
-    .filter((it) => it.pages?.length)
-    .sort((a, b) => {
-      if (a.isBuiltIn !== b.isBuiltIn) {
-        return a.isBuiltIn ? -1 : 1;
-      }
-      return (groupMap.get(a.id) ?? Infinity) - (groupMap.get(b.id) ?? Infinity);
-      // return a.displayName.localeCompare(b.displayName, undefined, { numeric: true });
-    });
+  const lists = pageGroupProcess(originalGroups, pagesMap);
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
   const toggleToActivePageRef = useRef(activePage ? false : null);
@@ -176,6 +170,26 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     },
     [teamId, groupId, setCurrentPage],
   );
+
+  const onPageGroupReorder = (
+    newData: (Omit<IPageGroup, 'pageIds'> & {
+      pages: IPinPage[];
+    })[],
+  ) => {
+    void updateGroupSortTrigger({
+      groupIds: newData.map((it) => it.id),
+    }).then(() => {
+      void mutate();
+    });
+  };
+
+  const onPageGroupPageReorder = (newData: IPinPage[]) => {
+    void updateGroupPageSortTrigger({
+      pageIds: newData.map((it) => it.id),
+    }).then(() => {
+      void mutate();
+    });
+  };
   return (
     <div
       className={cn('mr-4 flex h-full items-center justify-center rounded-xl border border-input bg-neocard shadow-sm')}
@@ -199,7 +213,12 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                   className="flex justify-between rounded-l-xl bg-slate-1"
                 >
                   {/* leftmost nav */}
-                  <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
+                  <VirtuaWorkbenchViewGroupList
+                    data={lists}
+                    groupId={groupId}
+                    setGroupId={setGroupId}
+                    onReorder={onPageGroupReorder}
+                  />
                 </div>
                 {/* <Separator orientation="vertical" className="vines-center">
                   <Tooltip>
@@ -236,6 +255,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               currentPageId={currentPage?.[teamId]?.id}
               currentGroupId={groupId}
               onChildClick={onPageClick}
+              onReorder={onPageGroupPageReorder}
             />
             <div
               className={cn(

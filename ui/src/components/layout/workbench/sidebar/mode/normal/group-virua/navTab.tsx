@@ -1,6 +1,8 @@
 import React, { memo } from 'react';
 
+import { useMemoizedFn } from 'ahooks';
 import { EllipsisIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -9,12 +11,10 @@ import {
   DropdownMenuGroup,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 import { RenameGroup } from './renameGroup';
 import { SetGroupIcon } from './setGroupIcon';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useMemoizedFn } from 'ahooks';
-import { useTranslation } from 'react-i18next';
 
 interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
@@ -35,7 +35,7 @@ export const NavDropdown: React.FC<ITabMenuProps> = memo(({ groupId }) => {
             <Button
               variant="outline"
               icon={<EllipsisIcon />}
-              className="pointer-events-none absolute right-2 !p-1.5 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 [&>div>svg]:size-3"
+              className="pointer-events-none absolute right-6 !p-1.5 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 [&>div>svg]:size-3"
               onClick={handleClickMoreMenu}
             />
           </TooltipTrigger>

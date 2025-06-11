@@ -5,7 +5,7 @@ import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isEmpty, keyBy, pick, pickBy, set, uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
@@ -164,6 +164,9 @@ export class WorkflowPageService {
       where: {
         teamId,
       },
+      order: {
+        sortIndex: 1,
+      },
     });
 
     const pageIds = uniq(groups.map((it) => it.pageIds).flat(1)) as string[];
@@ -291,7 +294,7 @@ export class WorkflowPageService {
         ...agentPages,
         ...designBoardPages,
       ],
-      groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn', 'iconUrl'])),
+      groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn', 'iconUrl', 'sortIndex'])),
     };
   }
 
@@ -377,7 +380,7 @@ export class WorkflowPageService {
     return await this.workflowRepository.updatePagePinStatus(teamId, pageId, pin);
   }
 
-  async createPageGroup(teamId: string, displayName: string, pageId?: string) {
+  async createPageGroup(teamId: string, displayName: string, iconUrl?: string, pageId?: string) {
     const teamGroups = await this.pageGroupRepository.find({
       where: {
         teamId,
@@ -390,12 +393,30 @@ export class WorkflowPageService {
       isBuiltIn: false,
       teamId,
       pageIds: pageId ? [pageId] : [],
+      iconUrl,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
     };
     await this.pageGroupRepository.save(pageGroup);
 
     return [...teamGroups, pageGroup];
+  }
+
+  async updatePageGroupSort(teamId: string, groupIds: string[]) {
+    const groups = await this.pageGroupRepository.find({
+      where: {
+        teamId,
+      },
+    });
+    const groupMap = keyBy(groups, 'id');
+    for (const groupId of groupIds) {
+      const group = groupMap[groupId];
+      if (group) {
+        group.sortIndex = groupIds.indexOf(groupId);
+      }
+    }
+    await this.pageGroupRepository.save(groups);
+    return groups;
   }
 
   async removePageGroup(teamId: string, groupId: string) {
@@ -482,6 +503,23 @@ export class WorkflowPageService {
       where: {
         teamId,
       },
+      order: {
+        sortIndex: 1,
+      },
     });
+  }
+
+  async updatePageGroupPageSort(teamId: string, groupId: string, pageIds: string[]) {
+    const group = await this.pageGroupRepository.findOne({
+      where: {
+        id: groupId,
+        teamId,
+      },
+    });
+    if (!group) throw new NotFoundException('Group not found');
+
+    group.pageIds = pageIds;
+    await this.pageGroupRepository.save(group);
+    return group;
   }
 }
