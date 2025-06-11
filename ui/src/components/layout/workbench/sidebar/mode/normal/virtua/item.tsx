@@ -1,10 +1,12 @@
 import { createContext, forwardRef, useContext } from 'react';
 
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from 'react-i18next';
 
 import { IPageInstanceType, IPinPage } from '@/apis/pages/typings.ts';
-import { ViewItemMenu } from '@/components/layout/workbench/sidebar/mode/normal/virtua/menu.tsx';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
+import { ViewItemMenu } from '@/components/layout/workbench/sidebar/mode/normal/virtua/menu.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { cn, getI18nContent } from '@/utils';
@@ -22,23 +24,33 @@ export interface IWorkbenchViewItemProps {
 export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
   ({ page, onClick, onlyShowWorkbenchIcon = false }) => {
     const { t } = useTranslation();
-
     const { pageId: currentPageId, groupId: currentGroupId } = useContext(WorkbenchViewItemCurrentData);
 
     const info = page?.workflow || page?.agent || page?.designProject;
     const viewIcon = page?.instance?.icon ?? '';
     const pageId = page?.id ?? '';
 
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pageId });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
     return (
       <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
         key={pageId}
         className={cn(
           'z-10 flex cursor-pointer items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
           currentPageId === pageId
             ? 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]'
-            : // : 'p-[calc(0.5rem+1px)]',
-              'p-2',
+            : 'p-2',
           onlyShowWorkbenchIcon ? 'mb-1 size-11 justify-center' : 'mb-2',
+          isDragging && 'opacity-50',
         )}
         onClick={() => onClick?.(page)}
       >

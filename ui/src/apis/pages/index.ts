@@ -65,3 +65,15 @@ export const useUpdateGroupPages = (groupId?: string) =>
     groupId ? `/api/workflow/page-groups/${groupId}` : null,
     vinesFetcher({ method: 'PUT' }),
   );
+
+export const useUpdateGroupSort = () =>
+  useSWRMutation<IPageGroup[] | undefined, unknown, string | null, { groupIds: string[] }>(
+    '/api/workflow/page-groups/sort',
+    vinesFetcher({ method: 'PUT' }),
+  );
+
+export const useUpdateGroupPageSort = (groupId?: string) =>
+  useSWRMutation<IPageGroup[] | undefined, unknown, string | null, { pageIds: string[] }>(
+    groupId ? `/api/workflow/page-groups/${groupId}/sort` : null,
+    vinesFetcher({ method: 'PUT' }),
+  );

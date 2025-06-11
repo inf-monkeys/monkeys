@@ -1,6 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useContext } from 'react';
 
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { cva } from 'class-variance-authority';
 import { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -60,8 +62,20 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
     }
   })();
 
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: groupId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   return (
     <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
       className={cn(
         'z-10 mb-1 flex h-11 cursor-pointer select-none items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
         onlyShowWorkbenchIcon
