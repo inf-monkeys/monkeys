@@ -19,9 +19,9 @@ import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import {
-  concatResultListReducer,
   convertExecutionResultToItemList,
   IVinesExecutionResultItem,
+  newConvertExecutionResultToItemList,
 } from '@/utils/execution.ts';
 
 import { ErrorFilter } from './grid/error-filter';
@@ -37,6 +37,16 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
 }
 
 export const LOAD_LIMIT = 50;
+
+const removeRepeatKey = (executionResultList: IVinesExecutionResultItem[]) => {
+  const map = new Map<string, IVinesExecutionResultItem>();
+  for (const item of executionResultList) {
+    if (!map.has(item.render.key)) {
+      map.set(item.render.key, item);
+    }
+  }
+  return Array.from(map.values());
+};
 
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   className,
@@ -65,7 +75,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const { data: firstPageExecutionListData } = useWorkflowExecutionList(workflowId, 1, LOAD_LIMIT);
   const firstPageExecutionList = firstPageExecutionListData?.data ?? [];
-
+  const firstPageExecutionRenderList = newConvertExecutionResultToItemList(firstPageExecutionList);
   const hasMore =
     executionListData?.length != 0 &&
     executionListData?.[currentPage - 1]?.total != 0 &&
@@ -77,8 +87,9 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     if (!executionListData || executionListData.length == 0 || executionListData[0]?.total == 0) return;
     const list: IVinesExecutionResultItem[] = [];
     for (const execution of executionListData ?? []) {
-      if (execution && execution.data)
-        list.push(...execution.data.map(convertExecutionResultToItemList).reduce(concatResultListReducer, []));
+      if (execution && execution.data) {
+        list.push(...newConvertExecutionResultToItemList(execution.data));
+      }
     }
     setExecutionResultList([...list]);
   }, [executionListData]);
@@ -86,10 +97,10 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   // 第一页任务及状态变化
   useEffect(() => {
     // 筛选状态变更的替换原 result
-    const changed = firstPageExecutionList.filter(
+    const changed = firstPageExecutionRenderList.filter(
       (r) =>
         executionResultList.findIndex(
-          (pr) => r.instanceId === pr.instanceId && r.status != pr.status && !pr.render.isDeleted,
+          (pr) => r.render.key === pr.render.key && r.status != pr.status && !pr.render.isDeleted,
         ) != -1,
     );
 
@@ -150,6 +161,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   });
   const shouldFilterError = useShouldFilterError();
   const [filteredData, setFilteredData] = useState<IVinesExecutionResultItem[]>([]);
+
   useEffect(() => {
     if (shouldFilterError) {
       const filtered = executionResultList.filter((item) => {

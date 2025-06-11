@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
 interface IOnlyShowWorkbenchIconStore {
   onlyShowWorkbenchIcon: boolean;
@@ -8,17 +8,15 @@ interface IOnlyShowWorkbenchIconStore {
 }
 
 export const useOnlyShowWorkbenchIconStore = create<IOnlyShowWorkbenchIconStore>()(
-  devtools(
-    persist(
-      (set) => ({
-        onlyShowWorkbenchIcon: false,
-        setOnlyShowWorkbenchIcon: (onlyShowWorkbenchIcon) => set({ onlyShowWorkbenchIcon }),
-        toggleOnlyShowWorkbenchIcon: () => set((state) => ({ onlyShowWorkbenchIcon: !state.onlyShowWorkbenchIcon })),
-      }),
-      {
-        name: 'onlyShowWorkbenchIcon',
-      },
-    ),
+  persist(
+    (set) => ({
+      onlyShowWorkbenchIcon: false,
+      setOnlyShowWorkbenchIcon: (onlyShowWorkbenchIcon) => set({ onlyShowWorkbenchIcon }),
+      toggleOnlyShowWorkbenchIcon: () => set((state) => ({ onlyShowWorkbenchIcon: !state.onlyShowWorkbenchIcon })),
+    }),
+    {
+      name: 'onlyShowWorkbenchIcon',
+    },
   ),
 );
 export const useOnlyShowWorkbenchIcon = () => useOnlyShowWorkbenchIconStore((state) => state.onlyShowWorkbenchIcon);
