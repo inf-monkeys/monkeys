@@ -7,9 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import {
-    updateComfyuiModelTypesFromInternals,
-    updateComfyuiModelTypesToInternals,
-    useComfyuiModelTypes,
+  updateComfyuiModelTypesFromInternals,
+  updateComfyuiModelTypesToInternals,
+  useComfyuiModelTypes,
 } from '@/apis/comfyui-model';
 import { CreateTypeModal } from '@/components/layout/ugc-pages/image-models/model-type-modal/create-type-modal';
 import { ModelTypeOperateDropdown } from '@/components/layout/ugc-pages/image-models/model-type-modal/operate-dropdown';
@@ -100,19 +100,15 @@ export const ImageModelTypeModal: React.FC<IImageModelTypeModalProps> = ({ child
           <TableBody>
             {data?.map((type, i) => (
               <TableRow key={i} className="table-row">
-                <TableCell className="sticky left-0 min-w-24 max-w-64 break-words bg-dialog">
+                <TableCell className="bg-dialog sticky left-0 min-w-24 max-w-64 break-words">
                   {type.displayName}
                 </TableCell>
-                <TableCell className="max-w-100 sticky left-1 min-w-24 break-words bg-dialog">
+                <TableCell className="max-w-100 bg-dialog sticky left-1 min-w-24 break-words">
                   {type.description}
                 </TableCell>
-                <TableCell className="max-w-100 sticky left-1 min-w-24 break-words bg-dialog">
-                  {type.path}
-                </TableCell>
-                <TableCell className="max-w-100 sticky left-1 min-w-24 break-words bg-dialog">
-                  {type.name}
-                </TableCell>
-                <TableCell className="sticky right-0 min-w-16 max-w-64 bg-dialog">
+                <TableCell className="max-w-100 bg-dialog sticky left-1 min-w-24 break-words">{type.path}</TableCell>
+                <TableCell className="max-w-100 bg-dialog sticky left-1 min-w-24 break-words">{type.name}</TableCell>
+                <TableCell className="bg-dialog sticky right-0 min-w-16 max-w-64">
                   <ModelTypeOperateDropdown
                     item={type}
                     trigger={<Button variant="outline" icon={<Ellipsis />} />}

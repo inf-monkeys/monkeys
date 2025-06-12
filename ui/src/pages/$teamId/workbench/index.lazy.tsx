@@ -31,7 +31,7 @@ export const Workbench: React.FC = () => {
   }, [mode, showGroup]);
 
   return (
-    <main className="flex size-full">
+    <main className="relative flex size-full">
       <WorkbenchSidebar mode={mode} showGroup={showGroup} />
       <WorkbenchView mode={mode} />
     </main>

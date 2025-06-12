@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import { KeyedMutator } from 'swr/_internal';
+import { SWRInfiniteResponse } from 'swr/infinite';
 
 import { useMemoizedFn } from 'ahooks';
 import { isString, omit } from 'lodash';
@@ -12,7 +13,6 @@ import {
 } from '@/package/vines-flow/core/typings.ts';
 import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
-import { SWRInfiniteHook, SWRInfiniteResponse } from 'swr/infinite';
 
 interface IVinesIframeMessage {
   outputs?: VinesWorkflowExecutionOutputListItem[];

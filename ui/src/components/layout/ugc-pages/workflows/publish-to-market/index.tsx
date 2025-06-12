@@ -18,9 +18,9 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesUploader } from '@/components/ui/vines-uploader';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
 import { getI18nContent } from '@/utils';
-import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 
 interface IPublishToMarketProps {
   visible: boolean;

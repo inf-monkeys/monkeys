@@ -10,16 +10,16 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useLoginByPassword, useLoginByPhone } from '@/apis/authz';
+import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { AuthMethod } from '@/apis/common/typings.ts';
 import { saveAuthToken } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
 import { VinesFullLoading } from '@/components/ui/loading';
+import { useGetDefaultLoginTeam } from '@/hooks/use-get-default-login-team.ts';
 import { setLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
 import VinesEvent from '@/utils/events.ts';
-import { IVinesTeam } from '@/apis/authz/team/typings.ts';
-import { useGetDefaultLoginTeam } from '@/hooks/use-get-default-login-team.ts';
 
 export type AuthEvent = 'trigger-login' | 'clear-sms-code-input';
 

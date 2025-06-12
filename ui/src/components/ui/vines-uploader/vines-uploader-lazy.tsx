@@ -17,7 +17,7 @@ import FileMd5 from '@/components/ui/vines-uploader/plugin/file-md5.ts';
 import RapidUpload from '@/components/ui/vines-uploader/plugin/rapid-upload-with-md5.ts';
 import RemoteUrlToFile from '@/components/ui/vines-uploader/plugin/remote-url-to-file.ts';
 import VinesUpload from '@/components/ui/vines-uploader/plugin/vines-upload.ts';
-import { checkIfCorrectURL, getFileNameByOssUrl } from '@/components/ui/vines-uploader/utils.ts';
+import { addProtocolToURL, checkIfCorrectURL, getFileNameByOssUrl } from '@/components/ui/vines-uploader/utils.ts';
 import { cn } from '@/utils';
 
 const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
@@ -141,14 +141,177 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
 
   const filesLength = files.length;
 
+  // 添加自定义拖拽处理状态
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+  // 自定义拖拽处理函数
+  const handleCustomDragOver = useMemoizedFn((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // 检查是否包含可处理的数据类型
+    const hasFiles = e.dataTransfer.types.includes('Files');
+    const hasUriList = e.dataTransfer.types.includes('text/uri-list');
+
+    if (hasFiles || hasUriList) {
+      setIsDraggingOver(true);
+      setIsHovering(true);
+    }
+  });
+
+  const handleCustomDragLeave = useMemoizedFn((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // 只有当真正离开容器时才取消状态
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setIsDraggingOver(false);
+      setIsHovering(false);
+    }
+  });
+
+  const handleCustomDrop = useMemoizedFn(async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsDraggingOver(false);
+    setIsHovering(false);
+
+    // console.log('Drop event triggered');
+    // console.log('DataTransfer types:', Array.from(e.dataTransfer.types));
+    // console.log('DataTransfer items:', Array.from(e.dataTransfer.items));
+
+    // 处理文件拖拽（标准情况）
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      // console.log('Processing files:', e.dataTransfer.files);
+      const files = Array.from(e.dataTransfer.files);
+
+      if (max === 1 && !isEmpty(filesMapper)) {
+        const existingFiles = uppy.getFiles();
+        existingFiles.forEach((file) => uppy.removeFile(file.id));
+      }
+
+      uppy.addFiles(files.map((file) => handleConvertFile(file)));
+      return;
+    }
+
+    // 处理网页图片拖拽
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      const items = Array.from(e.dataTransfer.items);
+      // console.log('Processing dataTransfer items:', items);
+
+      for (const item of items) {
+        // console.log('Item kind:', item.kind, 'type:', item.type);
+        // console.log('item', item.type, item);
+
+        if (item.kind === 'string') {
+          // 处理各种字符串类型的数据
+          if (item.type === 'text/uri-list') {
+            item.getAsString(async (data) => {
+              // console.log(`Got data:`, data);
+              // console.log('item string data', data);
+              const url = data;
+
+              // 根据数据类型提取URL
+              // if (item.type === 'text/uri-list') {
+              //   url = data.trim();
+              // } else if (item.type === 'text/plain') {
+              //   // 检查是否是URL
+              //   url = data.trim();
+              // } else if (item.type === 'text/html') {
+              //   // 从HTML中提取图片URL
+              //   const imgMatch = data.match(/<img[^>]+src=['"]+([^'"]*)['"]/i);
+              //   if (imgMatch) {
+              //     url = imgMatch[1];
+              //   }
+              // }
+
+              if (url) {
+                // console.log('Extracted URL:', url);
+                const cleanUrl = addProtocolToURL(url);
+
+                if (checkIfCorrectURL(cleanUrl)) {
+                  try {
+                    // console.log('Attempting to fetch:', cleanUrl);
+
+                    // 尝试获取图片数据
+                    const response = await fetch(cleanUrl, {
+                      mode: 'cors',
+                      credentials: 'omit',
+                      headers: {
+                        Accept: 'image/*,*/*;q=0.9',
+                      },
+                    });
+
+                    if (response.ok) {
+                      const blob = await response.blob();
+                      // console.log('Fetched blob:', blob.type, blob.size);
+
+                      if (blob.type.startsWith('image/') || blob.size > 0) {
+                        const filename = getFileNameByOssUrl(cleanUrl) || `image_${Date.now()}.png`;
+                        const file = new File([blob], filename, {
+                          type: blob.type || 'image/png',
+                        });
+
+                        // console.log('Created file:', file.name, file.type, file.size);
+
+                        if (max === 1 && !isEmpty(filesMapper)) {
+                          const existingFiles = uppy.getFiles();
+                          existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
+                        }
+
+                        const convertedFile = handleConvertFile(file);
+                        // console.log('Adding file to uppy:', convertedFile);
+                        uppy.addFile(convertedFile);
+
+                        return; // 成功处理，退出
+                      }
+                    }
+                  } catch (error) {
+                    // console.error('Failed to fetch image:', error);
+                    // console.error('Failed url', url);
+                  }
+
+                  // 如果无法作为文件下载，作为远程URL处理
+                  // console.log('Fallback: treating as remote URL');
+                  const file = new File([], getFileNameByOssUrl(cleanUrl), {
+                    type: 'text/plain',
+                  }) as File & { meta?: { remoteUrl: string } };
+                  file.meta = { remoteUrl: cleanUrl };
+
+                  if (max === 1 && !isEmpty(filesMapper)) {
+                    const existingFiles = uppy.getFiles();
+                    existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
+                  }
+
+                  const convertedFile = handleConvertFile(file);
+                  // console.log('Adding remote URL file to uppy:', convertedFile);
+                  uppy.addFile(convertedFile);
+                }
+              }
+            });
+          }
+        }
+      }
+    }
+  });
+
   return (
     <Dropzone
-      onDrop={(f) => {
-        if (max === 1 && !isEmpty(filesMapper)) {
-          const existingFiles = uppy.getFiles();
-          existingFiles.forEach((file) => uppy.removeFile(file.id));
+      onDrop={(files, _rejected, event) => {
+        // 这里只处理react-dropzone能识别的文件拖拽
+        // console.log('React-dropzone onDrop:', files);
+        if (files.length > 0) {
+          if (max === 1 && !isEmpty(filesMapper)) {
+            const existingFiles = uppy.getFiles();
+            existingFiles.forEach((file) => uppy.removeFile(file.id));
+          }
+          uppy.addFiles(files.map((file) => handleConvertFile(file)));
         }
-        uppy.addFiles(f.map((file) => handleConvertFile(file)));
         setIsHovering(false);
       }}
       onDropRejected={onDropRejected}
@@ -156,19 +319,25 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
       maxSize={maxFileSize}
       maxFiles={max}
       noClick
+      // 禁用react-dropzone的默认拖拽处理
+      preventDropOnDocument={false}
     >
       {({ getRootProps, getInputProps, isDragAccept, isDragActive, isFocused, open }) => {
-        const isDropzoneActive = isDragAccept || isDragActive || isHovering;
+        const isDropzoneActive = isDragAccept || isDragActive || isHovering || isDraggingOver;
         const isEmptyFilesOrDragAccept = isFilesEmpty || isDropzoneActive;
+
         return (
           <div
             className={cn('relative h-[15.5rem] rounded dark:bg-card-dark', className)}
             {...getRootProps({
               onPaste: onPaste as any,
-              onDrag: onDrag as any,
               ref,
               onClick: () => setIsClickOutside(false),
             })}
+            // 覆盖react-dropzone的拖拽事件处理
+            // onDragOver={handleCustomDragOver}
+            // onDragLeave={handleCustomDragLeave}
+            onDrop={handleCustomDrop}
           >
             <input {...getInputProps()} />
             {!isFilesEmpty && <VinesFiles uppy={uppy} files={files} />}
