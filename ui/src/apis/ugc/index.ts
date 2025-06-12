@@ -8,6 +8,7 @@ import { undefined } from 'zod';
 import { IAgent } from '@/apis/agents/typings.ts';
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
 import { IComfyuiModel } from '@/apis/comfyui-model/typings.ts';
+import { IDesignProject } from '@/apis/designs/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { ILLMChannel, ILLMModel } from '@/apis/llm/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
@@ -22,7 +23,6 @@ import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
 import { IAssetItem, IAssetPublicCategory, IAssetTag, IListUgcDto, IUgcFilterRules } from './typings';
-import { IDesignProject } from '@/apis/designs/typings.ts';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
   const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;

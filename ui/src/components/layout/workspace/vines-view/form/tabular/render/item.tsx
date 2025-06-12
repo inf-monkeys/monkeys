@@ -24,8 +24,8 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
+import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 import { cn, getI18nContent } from '@/utils';
 
 interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -143,9 +143,9 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                         filter={
                           targetLinkage
                             ? (m) =>
-                              enableFilter
-                                ? filterList?.includes(m.serverRelations?.[0]?.apiPath) === filterReserve
-                                : true
+                                enableFilter
+                                  ? filterList?.includes(m.serverRelations?.[0]?.apiPath) === filterReserve
+                                  : true
                             : void 0
                         }
                       />

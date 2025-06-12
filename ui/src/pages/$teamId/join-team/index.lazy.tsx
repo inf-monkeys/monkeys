@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 import { useSWRConfig } from 'swr';
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { toast } from 'sonner';
 

@@ -3,10 +3,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { createWorkflow as createWorkflowFromAPI } from '@/apis/workflow';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { useVinesRefresher } from '@/package/vines-flow';
 import { VINES_CANVAS_PADDING } from '@/package/vines-flow/core/consts.ts';
 import { TaskType, WorkflowDef } from '@/package/vines-flow/share/types.ts';
-import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 
 export const useVinesFlow = () => {
   const { _refresher, _vines } = useVinesRefresher();
