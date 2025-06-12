@@ -205,29 +205,30 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
       console.log('Processing dataTransfer items:', items);
 
       for (const item of items) {
-        console.log('Item kind:', item.kind, 'type:', item.type);
+        // console.log('Item kind:', item.kind, 'type:', item.type);
+        console.log('item', item.type, item);
 
         if (item.kind === 'string') {
           // 处理各种字符串类型的数据
-          if (item.type === 'text/uri-list' || item.type === 'text/plain' || item.type === 'text/html') {
+          if (item.type === 'text/uri-list') {
             item.getAsString(async (data) => {
-              console.log(`Got ${item.type} data:`, data);
-
-              let url = '';
+              console.log(`Got data:`, data);
+              console.log('item string data', data);
+              const url = data;
 
               // 根据数据类型提取URL
-              if (item.type === 'text/uri-list') {
-                url = data.trim();
-              } else if (item.type === 'text/plain') {
-                // 检查是否是URL
-                url = data.trim();
-              } else if (item.type === 'text/html') {
-                // 从HTML中提取图片URL
-                const imgMatch = data.match(/<img[^>]+src=['"]+([^'"]*)['"]/i);
-                if (imgMatch) {
-                  url = imgMatch[1];
-                }
-              }
+              // if (item.type === 'text/uri-list') {
+              //   url = data.trim();
+              // } else if (item.type === 'text/plain') {
+              //   // 检查是否是URL
+              //   url = data.trim();
+              // } else if (item.type === 'text/html') {
+              //   // 从HTML中提取图片URL
+              //   const imgMatch = data.match(/<img[^>]+src=['"]+([^'"]*)['"]/i);
+              //   if (imgMatch) {
+              //     url = imgMatch[1];
+              //   }
+              // }
 
               if (url) {
                 console.log('Extracted URL:', url);
@@ -272,6 +273,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                     }
                   } catch (error) {
                     console.error('Failed to fetch image:', error);
+                    console.error('Failed url', url);
                   }
 
                   // 如果无法作为文件下载，作为远程URL处理
@@ -333,8 +335,8 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
               onClick: () => setIsClickOutside(false),
             })}
             // 覆盖react-dropzone的拖拽事件处理
-            onDragOver={handleCustomDragOver}
-            onDragLeave={handleCustomDragLeave}
+            // onDragOver={handleCustomDragOver}
+            // onDragLeave={handleCustomDragLeave}
             onDrop={handleCustomDrop}
           >
             <input {...getInputProps()} />
