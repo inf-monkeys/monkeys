@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
-import { MoreHorizontal, Trash2 } from 'lucide-react';
+import { Link, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -24,12 +24,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFlowStore } from '@/store/useFlowStore';
 
-interface IMoreToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
+import { WorkflowAssociationEditorDialog } from './more/association-editor';
+
+interface IMoreToolbarProps extends React.ComponentPropsWithoutRef<'div'> { }
 
 export const MoreToolbar: React.FC<IMoreToolbarProps> = () => {
   const { t } = useTranslation();
@@ -60,6 +63,18 @@ export const MoreToolbar: React.FC<IMoreToolbarProps> = () => {
             </TooltipTrigger>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="right" align="start" sideOffset={12}>
+            <WorkflowAssociationEditorDialog>
+              <DropdownMenuItem
+                className="flex items-center gap-2"
+                onSelect={(e) => {
+                  e.preventDefault();
+                }}
+              >
+                <Link strokeWidth={1.5} size={16} />
+                <p>{t('workspace.flow-view.tooltip.more.association-editor.button')}</p>
+              </DropdownMenuItem>
+            </WorkflowAssociationEditorDialog>
+            <DropdownMenuSeparator />
             <AlertDialogTrigger asChild>
               <DropdownMenuItem className="flex items-center gap-2 text-red-10">
                 <Trash2 strokeWidth={1.5} size={16} />

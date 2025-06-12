@@ -3,12 +3,15 @@ import React, { Dispatch, SetStateAction, startTransition, useCallback, useEffec
 import { SWRInfiniteResponse } from 'swr/infinite';
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import { Square, SquareCheck } from 'lucide-react';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import useUrlState from '@/hooks/use-url-state';
+import { useOutputSelectionStore } from '@/store/useOutputSelectionStore';
 import { usePageStore } from '@/store/usePageStore';
 import { useLastScrollTop, useSetScrollTop } from '@/store/useScrollPositionStore';
 import { useShouldFilterError } from '@/store/useShouldErrorFilterStore.ts';
@@ -27,6 +30,7 @@ interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'
   hasMore: boolean;
   event$: EventEmitter<void>;
   mutate?: SWRInfiniteResponse['mutate'];
+  onSelectionChange?: (selectedItems: IVinesExecutionResultItem[]) => void;
 }
 
 export type IAddDeletedInstanceId = (instanceId: string) => void;
@@ -39,12 +43,21 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   hasMore,
   event$,
   mutate,
+  onSelectionChange,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const retryRef = useRef(0);
   const formContainerWidth = usePageStore((s) => s.containerWidth);
   const { isUseWorkSpace } = useVinesRoute();
+  const { isSelectionMode, setSelectionMode, selectedOutputs, toggleOutputSelection } = useOutputSelectionStore();
+
+  useEffect(() => {
+    if (onSelectionChange) {
+      const selectedItemsList = data.filter((item) => selectedOutputs.has(item.instanceId));
+      onSelectionChange(selectedItemsList);
+    }
+  }, [selectedOutputs, data, onSelectionChange]);
 
   const loadMore = useInfiniteLoader(
     async () => {
@@ -82,25 +95,15 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   );
 
   const lastScrollTop = useLastScrollTop(workflowId ?? '');
-  // useEffect(() => {});
   const addDeletedInstanceId = (instanceId: string) => {
     if (!deletedInstanceIdList.includes(instanceId))
       setDeletedInstanceIdList((prevState) => [...prevState, instanceId]);
   };
   const hasUsedCacheScrollTop = useRef(false);
-  // useEffect(() => {
-  // console.log('scrollTop', scrollTop);
-  // console.log('container scrollTop', containerRef.current?.scrollTop);
-  // }, [scrollTop]);
-  // useEffect(() => {
-  // console.log('last scrollTop', lastScrollTop);
-  // }, [lastScrollTop]);
-  useEffect(() => {
-    // console.log('lastScrollTop', lastScrollTop);
 
+  useEffect(() => {
     const tryRestorePosition = () => {
       startTransition(() => {
-        // setIsScrolling(true);
         if (lastScrollTop && !hasUsedCacheScrollTop.current && retryRef.current < RETRY_LIMIT) {
           setScrollTop(lastScrollTop);
           currentScrollTopRef.current = lastScrollTop;
@@ -108,7 +111,6 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           if (Math.abs(scrollRef.current!.scrollTop - lastScrollTop) > 20) {
             setTimeout(() => {
               retryRef.current++;
-              // console.log('retryRef.current', retryRef.current);
               tryRestorePosition();
             }, 200);
           } else {
@@ -124,6 +126,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       retryRef.current = 0;
     };
   }, [lastScrollTop]);
+
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
     scrollTop,
@@ -140,9 +143,12 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.instanceId)}
           addDeletedInstanceId={addDeletedInstanceId}
           mutate={mutate}
+          isSelectionMode={isSelectionMode}
+          isSelected={selectedOutputs.has(item.instanceId)}
+          onSelect={(id) => toggleOutputSelection(id, item)}
         />
       ),
-      [data, deletedInstanceIdList],
+      [data, deletedInstanceIdList, isSelectionMode, selectedOutputs, toggleOutputSelection],
     ),
     itemKey: (item, index) => `${index}-${item.render.key}`,
     onRender: loadMore,
@@ -157,7 +163,17 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       style={{ height: height === Infinity ? 800 : height }}
       disabledOverflowMask
     >
-      <ErrorFilter />
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <ErrorFilter />
+        <Button
+          variant="borderless"
+          className="hover:bg-slate-1 active:bg-slate-1"
+          icon={isSelectionMode ? <SquareCheck /> : <Square />}
+          onClick={() => setSelectionMode(!isSelectionMode)}
+        >
+          选择模式
+        </Button>
+      </div>
       {/* <ExtraButtonFilter /> */}
       {masonryGrid}
     </ScrollArea>
