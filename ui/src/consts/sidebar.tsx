@@ -2,7 +2,7 @@ import React from 'react';
 
 import { LinkOptions } from '@tanstack/react-router';
 
-import { Bot, Calculator, Database, Package } from 'lucide-react';
+import { Bot, Calculator, Database, Package, PaletteIcon } from 'lucide-react';
 
 export interface NavItemWithoutLabel {
   name: string;
@@ -31,9 +31,19 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
         name: 'workflows',
         path: '/$teamId/workflows',
       },
+    ],
+  },
+  {
+    name: 'designs',
+    icon: <PaletteIcon />,
+    items: [
       {
         name: 'designs',
         path: '/$teamId/designs',
+      },
+      {
+        path: '/$teamId/media-data',
+        name: 'design-assets',
       },
     ],
   },
@@ -67,10 +77,6 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
       {
         path: '/$teamId/table-data',
         name: 'table-data',
-      },
-      {
-        path: '/$teamId/media-data',
-        name: 'media-data',
       },
     ],
   },
