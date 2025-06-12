@@ -693,7 +693,7 @@ const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
       orientation="horizontal"
       className={cn(className, 'overflow-hidden')}
     >
-      <CarouselContent className="ml-0">
+      <CarouselContent className="flex justify-center">
         <CarouselItemList carouselApi={carouselApi} />
       </CarouselContent>
     </Carousel>
@@ -726,7 +726,7 @@ function CarouselItemList({ carouselApi }: { carouselApi: any }) {
     return (
       <CarouselItem
         key={image.render.key || index}
-        className="mr-0 basis-auto hover:cursor-pointer"
+        className="-mr-2 basis-auto hover:cursor-pointer"
         onClick={() => handleThumbnailClick(index)}
       >
         <CarouselItemImage image={image} index={index} />
