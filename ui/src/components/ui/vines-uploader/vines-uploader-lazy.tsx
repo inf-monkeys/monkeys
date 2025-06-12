@@ -181,13 +181,13 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     setIsDraggingOver(false);
     setIsHovering(false);
 
-    console.log('Drop event triggered');
-    console.log('DataTransfer types:', Array.from(e.dataTransfer.types));
-    console.log('DataTransfer items:', Array.from(e.dataTransfer.items));
+    // console.log('Drop event triggered');
+    // console.log('DataTransfer types:', Array.from(e.dataTransfer.types));
+    // console.log('DataTransfer items:', Array.from(e.dataTransfer.items));
 
     // 处理文件拖拽（标准情况）
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      console.log('Processing files:', e.dataTransfer.files);
+      // console.log('Processing files:', e.dataTransfer.files);
       const files = Array.from(e.dataTransfer.files);
 
       if (max === 1 && !isEmpty(filesMapper)) {
@@ -202,18 +202,18 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     // 处理网页图片拖拽
     if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
       const items = Array.from(e.dataTransfer.items);
-      console.log('Processing dataTransfer items:', items);
+      // console.log('Processing dataTransfer items:', items);
 
       for (const item of items) {
         // console.log('Item kind:', item.kind, 'type:', item.type);
-        console.log('item', item.type, item);
+        // console.log('item', item.type, item);
 
         if (item.kind === 'string') {
           // 处理各种字符串类型的数据
           if (item.type === 'text/uri-list') {
             item.getAsString(async (data) => {
-              console.log(`Got data:`, data);
-              console.log('item string data', data);
+              // console.log(`Got data:`, data);
+              // console.log('item string data', data);
               const url = data;
 
               // 根据数据类型提取URL
@@ -231,12 +231,12 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
               // }
 
               if (url) {
-                console.log('Extracted URL:', url);
+                // console.log('Extracted URL:', url);
                 const cleanUrl = addProtocolToURL(url);
 
                 if (checkIfCorrectURL(cleanUrl)) {
                   try {
-                    console.log('Attempting to fetch:', cleanUrl);
+                    // console.log('Attempting to fetch:', cleanUrl);
 
                     // 尝试获取图片数据
                     const response = await fetch(cleanUrl, {
@@ -249,7 +249,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
 
                     if (response.ok) {
                       const blob = await response.blob();
-                      console.log('Fetched blob:', blob.type, blob.size);
+                      // console.log('Fetched blob:', blob.type, blob.size);
 
                       if (blob.type.startsWith('image/') || blob.size > 0) {
                         const filename = getFileNameByOssUrl(cleanUrl) || `image_${Date.now()}.png`;
@@ -257,7 +257,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                           type: blob.type || 'image/png',
                         });
 
-                        console.log('Created file:', file.name, file.type, file.size);
+                        // console.log('Created file:', file.name, file.type, file.size);
 
                         if (max === 1 && !isEmpty(filesMapper)) {
                           const existingFiles = uppy.getFiles();
@@ -265,19 +265,19 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                         }
 
                         const convertedFile = handleConvertFile(file);
-                        console.log('Adding file to uppy:', convertedFile);
+                        // console.log('Adding file to uppy:', convertedFile);
                         uppy.addFile(convertedFile);
 
                         return; // 成功处理，退出
                       }
                     }
                   } catch (error) {
-                    console.error('Failed to fetch image:', error);
-                    console.error('Failed url', url);
+                    // console.error('Failed to fetch image:', error);
+                    // console.error('Failed url', url);
                   }
 
                   // 如果无法作为文件下载，作为远程URL处理
-                  console.log('Fallback: treating as remote URL');
+                  // console.log('Fallback: treating as remote URL');
                   const file = new File([], getFileNameByOssUrl(cleanUrl), {
                     type: 'text/plain',
                   }) as File & { meta?: { remoteUrl: string } };
@@ -289,7 +289,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                   }
 
                   const convertedFile = handleConvertFile(file);
-                  console.log('Adding remote URL file to uppy:', convertedFile);
+                  // console.log('Adding remote URL file to uppy:', convertedFile);
                   uppy.addFile(convertedFile);
                 }
               }
@@ -304,7 +304,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     <Dropzone
       onDrop={(files, _rejected, event) => {
         // 这里只处理react-dropzone能识别的文件拖拽
-        console.log('React-dropzone onDrop:', files);
+        // console.log('React-dropzone onDrop:', files);
         if (files.length > 0) {
           if (max === 1 && !isEmpty(filesMapper)) {
             const existingFiles = uppy.getFiles();
