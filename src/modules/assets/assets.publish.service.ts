@@ -1,13 +1,16 @@
 import { getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { AssetPublishConfig, BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AssetType, MonkeyWorkflowDef } from '@inf-monkeys/monkeys';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import _ from 'lodash';
 import { AssetsMapperService } from './assets.common.service';
 
 @Injectable()
 export class AssetsPublishService {
-  constructor(private readonly assetsMapperService: AssetsMapperService) {}
+  constructor(
+    @Inject(forwardRef(() => AssetsMapperService))
+    private readonly assetsMapperService: AssetsMapperService,
+  ) {}
 
   public async publishAsset(teamId: string, assetType: AssetType, assetId: string, publishConfig: AssetPublishConfig) {
     const repo = this.assetsMapperService.getRepositoryByAssetType(assetType);

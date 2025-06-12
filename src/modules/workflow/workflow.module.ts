@@ -4,7 +4,7 @@ import { DesignMetadataEntity } from '@/database/entities/design/design-metatdat
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssetsModule } from '../assets/assets.module';
 import { ToolsModule } from '../tools/tools.module';
@@ -75,7 +75,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
   ],
   imports: [
     ConductorModule,
-    AssetsModule,
+    forwardRef(() => AssetsModule),
     TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity, DesignMetadataEntity, DesignProjectEntity]),
     ToolsModule,
     CommonModule,
