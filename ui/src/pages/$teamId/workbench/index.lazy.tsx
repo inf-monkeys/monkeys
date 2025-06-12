@@ -41,7 +41,7 @@ export const Workbench: React.FC = () => {
         const response = await getWorkflowExecutionAllOutputs();
         if (response && Array.isArray(response)) {
           const items = response.flatMap((output) => convertExecutionResultToItemList(output));
-          const imageItems = items.filter(item => item.render.type === 'image') as ImagesResult[];
+          const imageItems = items.filter((item): item is ImagesResult => item.render.type === 'image');
           setImages(imageItems);
         }
       } catch (error) {

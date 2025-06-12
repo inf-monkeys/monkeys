@@ -16,11 +16,12 @@ import { cn } from '@/utils';
 import { convertExecutionResultToItemList } from '@/utils/execution';
 import { getWorkflowExecutionAllOutputs } from '@/apis/workflow/execution';
 import { IVinesExecutionResultItem } from '@/utils/execution';
+import { useExecutionImageResultStore, ImagesResult } from '@/store/useExecutionImageResultStore';
 
 const VinesForm: React.FC = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const [imageItems, setImageItems] = useState<IVinesExecutionResultItem[]>([]);
+  const { setImages } = useExecutionImageResultStore();
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
@@ -51,9 +52,9 @@ const VinesForm: React.FC = () => {
         const response = await getWorkflowExecutionAllOutputs();
         if (response && Array.isArray(response)) {
           const items = response.flatMap((output) => convertExecutionResultToItemList(output));
-          setImageItems(items);
+          const imageItems = items.filter((item): item is ImagesResult => item.render.type === 'image');
+          setImages(imageItems);
         }
-        console.log(imageItems);
       } catch (error) {
         console.error('Failed to fetch execution outputs:', error);
       } finally {
@@ -61,7 +62,7 @@ const VinesForm: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [setImages]);
 
   useEffect(() => {
     if (isMiniFrame) {
