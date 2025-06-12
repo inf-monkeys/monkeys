@@ -24,6 +24,13 @@ export class MarketplacePublicController {
     });
   }
 
+  @Get('/categories')
+  @ApiOperation({ summary: '获取所有唯一的分类列表' })
+  async getAllCategories() {
+    const categories = await this.marketplaceService.getAllCategories();
+    return new SuccessResponse({ data: categories });
+  }
+
   @Get(':appId')
   @ApiOperation({ summary: 'Get app details' })
   async getAppDetails(@Param('appId') appId: string) {

@@ -7,11 +7,12 @@ import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { AssetsMapperService } from '@/modules/assets/assets.common.service';
 import { WorkflowCrudService } from '@/modules/workflow/workflow.curd.service';
 import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateMarketplaceAppWithVersionDto } from '../dto/create-app.dto';
+import { UpdateMarketplaceAppDto } from '../dto/update-app.dto';
 import { InstalledAssetInfo, MarketplaceAssetSnapshot, SourceAssetReference } from '../types';
 
 @Injectable()
@@ -73,6 +74,7 @@ export class MarketplaceService {
       }
 
       const newVersion = transactionalEntityManager.create(MarketplaceAppVersionEntity, {
+        id: generateDbId(),
         appId: app.id,
         version: versionDto.version,
         releaseNotes: versionDto.releaseNotes,
@@ -87,6 +89,22 @@ export class MarketplaceService {
 
       return app;
     });
+  }
+
+  public async resubmitRejectedApp(teamId: string, userId: string, appId: string, body: CreateMarketplaceAppWithVersionDto) {
+    const app = await this.appRepo.findOne({ where: { id: appId, authorTeamId: teamId } });
+    if (!app) {
+      throw new NotFoundException(`Application with id ${appId} not found or you are not the author.`);
+    }
+    if (app.status !== MarketplaceAppStatus.REJECTED) {
+      throw new BadRequestException('Only rejected applications can be resubmitted.');
+    }
+
+    if (body.app.name !== app.name) {
+      throw new BadRequestException('Resubmission app name must match the original app name.');
+    }
+
+    return this.createAppWithVersion(teamId, userId, body);
   }
 
   public async approveSubmission(appId: string) {
@@ -143,6 +161,61 @@ export class MarketplaceService {
       order: { updatedTimestamp: 'DESC' },
     });
     return { list, total };
+  }
+
+  public async updateSubmission(appId: string, updates: UpdateMarketplaceAppDto) {
+    const app = await this.appRepo.findOne({ where: { id: appId } });
+    if (!app) throw new NotFoundException('Application not found.');
+    if (app.status !== MarketplaceAppStatus.PENDING_APPROVAL) {
+      throw new BadRequestException('Only pending applications can be updated.');
+    }
+
+    app.name = updates.name ?? app.name;
+    app.description = updates.description ?? app.description;
+    app.iconUrl = updates.iconUrl ?? app.iconUrl;
+    app.categories = updates.categories ?? app.categories;
+    app.updatedTimestamp = new Date().getTime();
+
+    return this.appRepo.save(app);
+  }
+
+  public async getAllCategories(): Promise<string[]> {
+    const apps = await this.appRepo.find({
+      select: ['categories'],
+      where: { status: MarketplaceAppStatus.APPROVED },
+    });
+
+    const allCategories = apps.flatMap((app) => app.categories || []);
+    return [...new Set(allCategories)];
+  }
+
+  public async listDeveloperSubmissions(teamId: string, dto: ListDto) {
+    const { page = 1, limit = 10 } = dto;
+    const [list, total] = await this.appRepo.findAndCount({
+      where: { authorTeamId: teamId },
+      take: limit,
+      skip: (page - 1) * limit,
+      order: { updatedTimestamp: 'DESC' },
+      relations: ['versions'],
+    });
+    return { list, total };
+  }
+
+  public async archiveApp(teamId: string, appId: string): Promise<MarketplaceAppEntity> {
+    const app = await this.appRepo.findOne({ where: { id: appId } });
+    if (!app) {
+      throw new NotFoundException(`Application with id ${appId} not found.`);
+    }
+    if (app.authorTeamId !== teamId) {
+      throw new UnauthorizedException('You are not the author of this application.');
+    }
+
+    if (app.status !== MarketplaceAppStatus.APPROVED && app.status !== MarketplaceAppStatus.REJECTED) {
+      throw new BadRequestException('Only approved or rejected applications can be archived.');
+    }
+
+    app.status = MarketplaceAppStatus.ARCHIVED;
+    return this.appRepo.save(app);
   }
 
   public async getAppDetails(appId: string) {

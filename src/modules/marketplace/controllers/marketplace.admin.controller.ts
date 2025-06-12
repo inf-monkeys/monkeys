@@ -1,7 +1,8 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
-import { Controller, Get, Param, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UpdateMarketplaceAppDto } from '../dto/update-app.dto';
 import { MarketplaceService } from '../services/marketplace.service';
 
 @ApiTags('Marketplace Admin')
@@ -19,6 +20,13 @@ export class MarketplaceAdminController {
       page: listDto.page,
       limit: listDto.limit,
     });
+  }
+
+  @Put('/submissions/:appId')
+  @ApiOperation({ summary: 'Update the application information pending review' })
+  async updateSubmission(@Param('appId') appId: string, @Body() body: UpdateMarketplaceAppDto) {
+    const app = await this.marketplaceService.updateSubmission(appId, body);
+    return new SuccessResponse({ data: app });
   }
 
   @Put('/submissions/:appId/approve')
