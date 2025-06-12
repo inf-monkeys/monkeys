@@ -43,7 +43,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
         )}
         style={{ height: '180px' }}
       />
-      {shouldShouldFormButtons && (
+      {false && (
         <div className="absolute bottom-4 left-4 flex gap-2">
           <Button
             variant="outline"

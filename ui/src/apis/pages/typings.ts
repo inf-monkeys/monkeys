@@ -2,8 +2,8 @@
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { IAgent } from '@/apis/agents/typings.ts';
-import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IDesignProject } from '@/apis/designs/typings.ts';
+import { IAssetItem } from '@/apis/ugc/typings.ts';
 
 export type IPagePermission = 'read' | 'write' | 'exec' | 'permission';
 
@@ -57,8 +57,10 @@ export type IPinPage = IPageType & {
 export interface IPageGroup {
   id: string;
   pageIds: string[];
-  displayName: string;
+  displayName: string | Record<string, string>;
   isBuiltIn: boolean;
+  iconUrl?: string;
+  sortIndex?: number | null;
 }
 
 export type IPinningPage = {

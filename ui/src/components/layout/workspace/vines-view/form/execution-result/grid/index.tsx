@@ -16,7 +16,6 @@ import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 import { ErrorFilter } from './error-filter';
-import { ExtraButtonFilter } from './extra-button-filter';
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
 
@@ -31,7 +30,7 @@ interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'
 }
 
 export type IAddDeletedInstanceId = (instanceId: string) => void;
-
+const RETRY_LIMIT = 5;
 export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   workflowId,
   height,
@@ -43,7 +42,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const retryRef = useRef(0);
   const formContainerWidth = usePageStore((s) => s.containerWidth);
   const { isUseWorkSpace } = useVinesRoute();
 
@@ -83,45 +82,53 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   );
 
   const lastScrollTop = useLastScrollTop(workflowId ?? '');
-  useEffect(() => {});
+  // useEffect(() => {});
   const addDeletedInstanceId = (instanceId: string) => {
     if (!deletedInstanceIdList.includes(instanceId))
       setDeletedInstanceIdList((prevState) => [...prevState, instanceId]);
   };
   const hasUsedCacheScrollTop = useRef(false);
+  // useEffect(() => {
+  // console.log('scrollTop', scrollTop);
+  // console.log('container scrollTop', containerRef.current?.scrollTop);
+  // }, [scrollTop]);
+  // useEffect(() => {
+  // console.log('last scrollTop', lastScrollTop);
+  // }, [lastScrollTop]);
   useEffect(() => {
-    console.log('scrollTop', scrollTop);
-    console.log('container scrollTop', containerRef.current?.scrollTop);
-  }, [scrollTop]);
-  useEffect(() => {
-    console.log('last scrollTop', lastScrollTop);
-  }, [lastScrollTop]);
-  useEffect(() => {
-    const timeout: NodeJS.Timeout | null = null;
-    startTransition(() => {
-      // setIsScrolling(true);
-      if (lastScrollTop && !hasUsedCacheScrollTop.current) {
-        // console.log('timeout fired');
-        setScrollTop(lastScrollTop);
-        currentScrollTopRef.current = lastScrollTop;
-        lastUpdateTimeRef.current = Date.now();
-        // console.log('scroll top set');
-        scrollRef.current!.scrollTop = lastScrollTop;
-        // setIsScrolling(false);
-        hasUsedCacheScrollTop.current = true;
-      }
-    });
+    // console.log('lastScrollTop', lastScrollTop);
+
+    const tryRestorePosition = () => {
+      startTransition(() => {
+        // setIsScrolling(true);
+        if (lastScrollTop && !hasUsedCacheScrollTop.current && retryRef.current < RETRY_LIMIT) {
+          setScrollTop(lastScrollTop);
+          currentScrollTopRef.current = lastScrollTop;
+          scrollRef.current!.scrollTop = lastScrollTop;
+          if (Math.abs(scrollRef.current!.scrollTop - lastScrollTop) > 20) {
+            setTimeout(() => {
+              retryRef.current++;
+              // console.log('retryRef.current', retryRef.current);
+              tryRestorePosition();
+            }, 200);
+          } else {
+            lastUpdateTimeRef.current = Date.now();
+            hasUsedCacheScrollTop.current = true;
+          }
+        }
+      });
+    };
+    tryRestorePosition();
     return () => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
+      hasUsedCacheScrollTop.current = false;
+      retryRef.current = 0;
     };
   }, [lastScrollTop]);
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
     scrollTop,
     isScrolling,
-    height,
+    height: height === Infinity ? 800 : height,
     containerRef,
     items: data,
     overscanBy: 3,
@@ -147,11 +154,11 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     <ScrollArea
       className={cn('z-20 mr-0.5 bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2')}
       ref={scrollRef}
-      style={{ height }}
+      style={{ height: height === Infinity ? 800 : height }}
       disabledOverflowMask
     >
       <ErrorFilter />
-      <ExtraButtonFilter />
+      {/* <ExtraButtonFilter /> */}
       {masonryGrid}
     </ScrollArea>
   );

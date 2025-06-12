@@ -23,6 +23,6 @@ import { SqlKnowledgeBaseModule } from './sql-knowledge-base/sql-knowledge-base.
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController, AssetsReferenceController, AssetsMarketplaceController],
   providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsMapperService, AssetsReferenceService, AssetsMarketplaceService],
   imports: [CanvasModule, MediaModule, KnowledgeBaseModule, SqlKnowledgeBaseModule, LlmModelModule, SdModelModule, ConversationAppModule, ComfyuiModelModule],
-  exports: [AssetsMarketplaceService, AssetsPublishService],
+  exports: [AssetsMarketplaceService, AssetsPublishService, MediaModule],
 })
 export class AssetsModule {}

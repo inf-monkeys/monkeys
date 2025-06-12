@@ -11,8 +11,8 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea.tsx';
+import { I18nInput } from '@/components/ui/i18n-input';
+import { I18nTextarea } from '@/components/ui/i18n-textarea';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { useWorkflow } from '@/package/vines-flow';
@@ -93,11 +93,12 @@ export const WorkflowCreateForm: React.FC<{
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormControl>
-                    <Input
+                    <I18nInput
+                      value={field.value}
+                      onChange={field.onChange}
                       placeholder={t('ugc-page.app.create.dialog.info.placeholder')}
-                      {...field}
-                      className=""
                       autoFocus
+                      dialogTitle={t('ugc-page.app.create.dialog.info.label')}
                     />
                   </FormControl>
                   <FormMessage />
@@ -114,10 +115,12 @@ export const WorkflowCreateForm: React.FC<{
             <FormItem>
               <FormLabel>{t('ugc-page.app.create.dialog.description.label')}</FormLabel>
               <FormControl>
-                <Textarea
+                <I18nTextarea
+                  value={field.value}
+                  onChange={field.onChange}
                   placeholder={t('ugc-page.app.create.dialog.description.placeholder')}
                   className="h-28 resize-none"
-                  {...field}
+                  dialogTitle={t('ugc-page.app.create.dialog.description.label')}
                 />
               </FormControl>
               <FormMessage />

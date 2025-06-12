@@ -32,7 +32,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   outputIndex?: number;
 }
 
-function getThumbUrl(url: string) {
+export function getThumbUrl(url: string) {
   const urlPath = url.split('/');
   const urlPathLength = urlPath.length;
   return urlPath.map((it, i) => (i === urlPathLength - 2 ? `${it}_thumb` : it)).join('/');

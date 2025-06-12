@@ -76,6 +76,6 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     ToolsModule,
     CommonModule,
   ],
-  exports: [WorkflowCrudService, WorkflowExecutionService, WorkflowTrackerService, WorkflowExecutionPersistenceService],
+  exports: [WorkflowCrudService, WorkflowExecutionService, WorkflowTrackerService, WorkflowExecutionPersistenceService , WorkflowPageService, TypeOrmModule],
 })
 export class WorkflowModule {}

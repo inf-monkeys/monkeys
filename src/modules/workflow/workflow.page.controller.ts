@@ -5,6 +5,7 @@ import { IRequest } from '@/common/typings/request';
 import { BUILT_IN_PAGE_INSTANCES } from '@/database/repositories/workflow.repository';
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { isArray } from 'lodash';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageService } from './workflow.page.service';
@@ -139,9 +140,22 @@ export class WorkflowPageController {
   })
   @Post('/page-groups')
   @UseGuards(CompatibleAuthGuard)
-  async createPageGroup(@Req() request: IRequest, @Body('displayName') displayName: string, @Body('pageId') pageId?: string) {
+  async createPageGroup(@Req() request: IRequest, @Body('displayName') displayName: string, @Body('iconUrl') iconUrl?: string, @Body('pageId') pageId?: string) {
     const { teamId } = request;
-    const data = await this.pageService.createPageGroup(teamId, displayName, pageId);
+    const data = await this.pageService.createPageGroup(teamId, displayName, iconUrl, pageId);
+    return new SuccessResponse({ data });
+  }
+
+  @ApiOperation({
+    summary: '更新视图分组排序',
+    description: '更新视图分组排序',
+  })
+  @Put('/page-groups/sort')
+  @UseGuards(CompatibleAuthGuard)
+  async updatePageGroupSort(@Req() request: IRequest, @Body('groupIds') groupIds: string[]) {
+    const { teamId } = request;
+    if (!isArray(groupIds)) throw new BadRequestException('groupIds should be array');
+    const data = await this.pageService.updatePageGroupSort(teamId, groupIds.filter(Boolean));
     return new SuccessResponse({ data });
   }
 
@@ -167,5 +181,18 @@ export class WorkflowPageController {
     const { teamId } = request;
     const { groups, message } = await this.pageService.updatePageGroup(teamId, groupId, body);
     return new SuccessResponse({ data: groups, message });
+  }
+
+  @ApiOperation({
+    summary: '更新视图分组页面排序',
+    description: '更新视图分组页面排序',
+  })
+  @Put('/page-groups/:groupId/sort')
+  @UseGuards(CompatibleAuthGuard)
+  async updatePageGroupPageSort(@Req() request: IRequest, @Param('groupId') groupId: string, @Body('pageIds') pageIds: string[]) {
+    const { teamId } = request;
+    if (!isArray(pageIds)) throw new BadRequestException('pageIds should be array');
+    const data = await this.pageService.updatePageGroupPageSort(teamId, groupId, pageIds.filter(Boolean));
+    return new SuccessResponse({ data });
   }
 }

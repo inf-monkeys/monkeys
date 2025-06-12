@@ -1,8 +1,8 @@
 import z from 'zod';
 
 export const createAgentSchema = z.object({
-  displayName: z.string(),
-  description: z.string().max(200, '描述不能超过200个字符').optional(),
+  displayName: z.union([z.string(), z.record(z.string(), z.string())]),
+  description: z.union([z.string(), z.record(z.string(), z.string())]).optional(),
   iconUrl: z.string().optional(),
   model: z.string(),
   customModelName: z.string().optional(),

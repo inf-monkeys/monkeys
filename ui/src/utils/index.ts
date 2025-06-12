@@ -19,11 +19,22 @@ const I18N_MAPPER = {
   en: 'en-US',
   zh: 'zh-CN',
 };
+
+export const LANGUAGE = {
+  'en-US': 'English',
+  'zh-CN': '中文',
+};
+
 export const getI18nContent = (content: string | I18nValue | null | undefined): string | undefined => {
   if (!content) return;
   const contentType = typeof content;
   if (contentType === 'string' || contentType === 'number') {
-    return content.toString();
+    try {
+      const parseContent = JSON.parse(content.toString());
+      return parseContent[I18N_MAPPER[i18n.language] ?? 'en-US'] ?? parseContent['en-US'];
+    } catch (e) {
+      return content.toString();
+    }
   }
   return content[I18N_MAPPER[i18n.language] ?? 'en-US'] ?? content['en-US'];
 };

@@ -23,22 +23,21 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
   const pageId = data?.id ?? '';
 
   const { data: workflowThumbs } = useWorkflowExecutionThumbnails(data.agent ? null : data.workflowId);
-
   const thumbs = workflowThumbs?.filter((it) => /(png|jpg|jpeg|webp)/.test(it)) ?? [];
 
   return (
     <div
       key={pageId}
       className={cn(
-        'flex cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-transparent py-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-        currentPageId === pageId && 'border-input bg-background text-accent-foreground',
-        mini && 'gap-0 pb-1 pt-0',
+        'mb-2 flex h-12 w-12 shrink-0 grow-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-transparent transition-colors hover:bg-accent hover:text-accent-foreground',
+        currentPageId === pageId && 'border-input bg-neocard text-accent-foreground',
+        mini && 'gap-0',
       )}
       onClick={() => onClick?.(data)}
     >
       <Tooltip>
         <TooltipTrigger>
-          <VinesIcon size="xs" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
+          <VinesIcon size="sm" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
             {info?.iconUrl}
           </VinesIcon>
         </TooltipTrigger>
@@ -53,7 +52,7 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
                 {thumbs.length ? thumbs[0] : info?.iconUrl}
               </VinesIcon>
             </span>
-            <span>{getI18nContent(info.displayName)}</span>
+            <span>{getI18nContent(info?.displayName)}</span>
           </div>
         </TooltipContent>
       </Tooltip>

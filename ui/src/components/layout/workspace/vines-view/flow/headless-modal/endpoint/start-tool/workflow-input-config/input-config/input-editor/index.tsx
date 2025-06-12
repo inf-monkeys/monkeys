@@ -84,7 +84,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     if (!currentVariable) return;
 
     const defaultValues = {
-      displayName: getI18nContent(currentVariable.displayName) ?? t('common.utils.unknown'),
+      displayName: currentVariable.displayName ?? t('common.utils.unknown'),
       name: currentVariable.name,
       description: getI18nContent(currentVariable.description) ?? '',
       placeholder: get(currentVariable, 'typeOptions.placeholder', ''),

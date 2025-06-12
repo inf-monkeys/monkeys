@@ -6,6 +6,7 @@ export enum MediaSource {
   UPLOAD = 1,
   AIGC_INFER = 2,
   AUTO_GENERATE = 3,
+  OUTPUT = 4,
 }
 
 export type MediaType = 'image' | 'text' | 'video' | 'audio';

@@ -13,19 +13,21 @@ import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { ImagesResult, useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
+import { useSetThumbImages } from '@/store/useExecutionImageTumbStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import {
-  concatResultListReducer,
   convertExecutionResultToItemList,
   IVinesExecutionResultItem,
+  newConvertExecutionResultToItemList,
+  removeRepeatKey,
 } from '@/utils/execution.ts';
 
 import { ErrorFilter } from './grid/error-filter';
-import { ExtraButtonFilter } from './grid/extra-button-filter';
 import { useVinesIframeMessage } from './iframe-message';
+import { getThumbUrl } from './virtua/item/image';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -36,7 +38,6 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
 }
 
 export const LOAD_LIMIT = 50;
-
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   className,
   event$,
@@ -64,7 +65,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const { data: firstPageExecutionListData } = useWorkflowExecutionList(workflowId, 1, LOAD_LIMIT);
   const firstPageExecutionList = firstPageExecutionListData?.data ?? [];
-
+  const firstPageExecutionRenderList = newConvertExecutionResultToItemList(firstPageExecutionList);
   const hasMore =
     executionListData?.length != 0 &&
     executionListData?.[currentPage - 1]?.total != 0 &&
@@ -76,53 +77,70 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     if (!executionListData || executionListData.length == 0 || executionListData[0]?.total == 0) return;
     const list: IVinesExecutionResultItem[] = [];
     for (const execution of executionListData ?? []) {
-      if (execution && execution.data)
-        list.push(...execution.data.map(convertExecutionResultToItemList).reduce(concatResultListReducer, []));
+      if (execution && execution.data) {
+        list.push(...newConvertExecutionResultToItemList(execution.data));
+      }
     }
-    setExecutionResultList([...list]);
+    // 使用去重函数防止重复数据
+    setExecutionResultList(removeRepeatKey(list));
   }, [executionListData]);
 
   // 第一页任务及状态变化
   useEffect(() => {
+    // 如果没有基础数据，不处理
+    if (executionResultList.length === 0) return;
+
     // 筛选状态变更的替换原 result
-    const changed = firstPageExecutionList.filter(
+    const changed = firstPageExecutionRenderList.filter(
       (r) =>
         executionResultList.findIndex(
-          (pr) => r.instanceId === pr.instanceId && r.status != pr.status && !pr.render.isDeleted,
+          (pr) => r.render.key === pr.render.key && r.status != pr.status && !pr.render.isDeleted,
         ) != -1,
     );
 
-    // 筛选不存在的拼接到头部
-    const nonExist = firstPageExecutionList.filter(
-      (r) => !executionResultList.map(({ instanceId }) => instanceId).includes(r.instanceId),
-    );
+    // 筛选不存在的拼接到头部 - 只添加真正不存在的instanceId
+    const existingInstanceIds = new Set(executionResultList.map(({ instanceId }) => instanceId));
+    const nonExist = firstPageExecutionList.filter((r) => !existingInstanceIds.has(r.instanceId));
 
     // 没有变化返回
     if (changed.length == 0 && nonExist.length == 0) return;
 
     setExecutionResultList((prevList) => {
-      for (const changedExecution of changed) {
-        const index = prevList.findIndex((pr) => changedExecution.instanceId === pr.instanceId);
-        // prevList[index].render = {
-        //   ...prevList[index].render,
-        //   isDeleted: true,
-        // };
-        prevList = prevList.filter((_, i) => i != index);
-        prevList.splice(index, 0, ...convertExecutionResultToItemList(changedExecution));
+      const newList = [...prevList];
+
+      // 处理状态变化的项目 - 直接替换，不需要重新转换
+      for (const changedItem of changed) {
+        const index = newList.findIndex((pr) => changedItem.render.key === pr.render.key);
+        if (index !== -1) {
+          newList[index] = changedItem;
+        }
       }
+
+      // 处理新增的项目 - 添加到头部
       for (const nonExistExecution of nonExist.reverse()) {
-        prevList.unshift(...convertExecutionResultToItemList(nonExistExecution));
+        newList.unshift(...convertExecutionResultToItemList(nonExistExecution));
       }
-      return [...prevList];
+
+      // 最终去重确保没有重复key
+      return removeRepeatKey(newList);
     });
-  }, [firstPageExecutionList]);
+  }, [firstPageExecutionList, executionResultList]);
 
   const { setImages } = useExecutionImageResultStore();
+  const setThumbImages = useSetThumbImages();
   // filter results for image detail route
   useEffect(() => {
-    const images = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
-    setImages(images as ImagesResult[]);
-  }, [executionResultList, setImages]);
+    const allImages = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
+    // const filerMap = new Map<string, any>();
+    const thumbImages: ImagesResult[] = [];
+    for (const image of allImages) {
+      const url = image.render.data as string;
+      const thumbUrl = getThumbUrl(url);
+      thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl } } as ImagesResult);
+    }
+    setImages(allImages as ImagesResult[]);
+    setThumbImages(thumbImages);
+  }, [executionResultList, setImages, setThumbImages]);
 
   useVinesIframeMessage({
     outputs: executionResultList,
@@ -131,6 +149,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   });
   const shouldFilterError = useShouldFilterError();
   const [filteredData, setFilteredData] = useState<IVinesExecutionResultItem[]>([]);
+
   useEffect(() => {
     if (shouldFilterError) {
       const filtered = executionResultList.filter((item) => {
@@ -173,7 +192,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
             className="z-20 mr-0.5 rounded-xl bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2"
           >
             <ErrorFilter />
-            <ExtraButtonFilter />
+            {/* <ExtraButtonFilter /> */}
             <div className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2">
               <History size={64} />
               {/* // Execution records filtered to empty */}

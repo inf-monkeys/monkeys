@@ -11,12 +11,11 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea.tsx';
+import { I18nInput } from '@/components/ui/i18n-input';
+import { I18nTextarea } from '@/components/ui/i18n-textarea';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { DEFAULT_AGENT_ICON_URL } from '@/consts/icons.ts';
 import { agentInfoSchema, IAgentInfo } from '@/schema/agent/agent-info.ts';
-import { getI18nContent } from '@/utils';
 
 interface IAgentInfoEditorProps {
   children?: React.ReactNode;
@@ -53,18 +52,20 @@ export const AgentInfoEditor: React.FC<IAgentInfoEditorProps> = ({
   const form = useForm<IAgentInfo>({
     resolver: zodResolver(agentInfoSchema),
     defaultValues: {
-      displayName: getI18nContent(agent?.displayName) ?? t('agent.info.default-agent-name'),
-      description: getI18nContent(agent?.description) ?? '',
+      displayName: agent?.displayName ?? t('agent.info.default-agent-name'),
+      description: agent?.description ?? '',
       iconUrl: agent?.iconUrl ?? DEFAULT_AGENT_ICON_URL,
     },
   });
 
   useEffect(() => {
     if (!agent) return;
-    form.setValue('displayName', getI18nContent(agent.displayName) || t('agent.info.default-agent-name'));
-    form.setValue('description', getI18nContent(agent.description) || '');
-    form.setValue('iconUrl', agent.iconUrl || DEFAULT_AGENT_ICON_URL);
-  }, [agent]);
+    form.reset({
+      displayName: agent.displayName || t('agent.info.default-agent-name'),
+      description: agent.description || '',
+      iconUrl: agent.iconUrl || DEFAULT_AGENT_ICON_URL,
+    });
+  }, [agent, form, t]);
 
   const agentId = agent?.id;
   const { mutate } = useGetAgent(agentId);
@@ -103,11 +104,12 @@ export const AgentInfoEditor: React.FC<IAgentInfoEditorProps> = ({
                 <FormItem>
                   <FormLabel>{t('agent.info.form.agent-name')}</FormLabel>
                   <FormControl>
-                    <Input
+                    <I18nInput
+                      value={field.value}
+                      onChange={field.onChange}
                       placeholder={t('agent.info.form.agent-name-placeholder')}
-                      {...field}
-                      className="grow"
                       autoFocus
+                      dialogTitle={t('agent.info.form.agent-name')}
                     />
                   </FormControl>
                   <FormMessage />
@@ -122,10 +124,12 @@ export const AgentInfoEditor: React.FC<IAgentInfoEditorProps> = ({
                 <FormItem>
                   <FormLabel>{t('agent.info.form.agent-desc')}</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <I18nTextarea
+                      value={field.value}
+                      onChange={field.onChange}
                       placeholder={t('agent.info.form.agent-desc-placeholder')}
                       className="h-28 resize-none"
-                      {...field}
+                      dialogTitle={t('agent.info.form.agent-desc')}
                     />
                   </FormControl>
                   <FormMessage />

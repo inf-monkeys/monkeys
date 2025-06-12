@@ -15,6 +15,12 @@ export class WorkflowPageGroupEntity extends BaseEntity {
   isBuiltIn: boolean;
 
   @Column({
+    name: 'icon_url',
+    nullable: true,
+  })
+  iconUrl?: string;
+
+  @Column({
     name: 'team_id',
     type: 'varchar',
   })
@@ -26,4 +32,11 @@ export class WorkflowPageGroupEntity extends BaseEntity {
     nullable: true,
   })
   pageIds: string[];
+
+  @Column({
+    name: 'sort_index',
+    type: 'integer',
+    nullable: true,
+  })
+  sortIndex?: number;
 }

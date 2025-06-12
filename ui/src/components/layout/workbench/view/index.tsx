@@ -65,7 +65,10 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   return (
     <div
       ref={ref}
-      className="relative w-full flex-1 overflow-hidden rounded-l-xl rounded-r-xl border-b border-r border-t border-input bg-slate-1 p-0 shadow-sm"
+      className={cn(
+        'relative w-full flex-1 overflow-hidden rounded-xl border-b border-r border-t border-input bg-slate-1 p-0 shadow-sm',
+        mode === 'mini' && 'rounded-none',
+      )}
     >
       <AnimatePresence>
         {hasPages && hasPage ? (
