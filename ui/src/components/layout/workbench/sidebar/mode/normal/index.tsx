@@ -203,15 +203,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         <WorkbenchViewItemCurrentData.Provider value={{ pageId, groupId }}>
           {hasGroups ? (
             showGroup ? (
-              <>
-                <div
-                  style={{
-                    height: '100%',
-                    // maxWidth: !onlyShowWorkbenchIcon ? '20rem' : '0',
-                    // minWidth: !onlyShowWorkbenchIcon ? '8rem' : '8rem',
-                  }}
-                  className="flex justify-between rounded-l-xl bg-slate-1"
-                >
+              <div className="flex h-full w-full">
+                <div className="flex-shrink-0 rounded-l-xl bg-slate-1">
                   {/* leftmost nav */}
                   <VirtuaWorkbenchViewGroupList
                     data={lists}
@@ -220,22 +213,51 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                     onReorder={onPageGroupReorder}
                   />
                 </div>
-                {/* <Separator orientation="vertical" className="vines-center">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
-                        onClick={() => setSidebarVisible(!sidebarVisible)}
-                      >
-                        <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}
-                    </TooltipContent>
-                  </Tooltip>
-                </Separator> */}
-              </>
+                <div className="grid h-full flex-1 grid-rows-[1fr_auto] rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+                  {/* Second nav */}
+                  <VirtuaWorkbenchViewList
+                    height={height}
+                    data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
+                    currentPageId={currentPage?.[teamId]?.id}
+                    currentGroupId={groupId}
+                    onChildClick={onPageClick}
+                    onReorder={onPageGroupPageReorder}
+                  />
+                  <div
+                    className={cn(
+                      'flex items-center justify-between gap-4 px-2 pb-4 pt-2',
+                      onlyShowWorkbenchIcon && 'justify-center',
+                    )}
+                  >
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          onClick={() => toggleOnlyShowWorkbenchIcon()}
+                          icon={onlyShowWorkbenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
+                          size={'icon'}
+                          className={cn('shrink-0', onlyShowWorkbenchIcon && '')}
+                          variant="outline"
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
+                    </Tooltip>
+                    {!onlyShowWorkbenchIcon && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="vines-center shrink grow">
+                            <Link to="/$teamId/workflows/" className="contents" params={{ teamId }}>
+                              <Button icon={<PlusIcon />} className="shrink grow" variant="outline" />
+                            </Link>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent align="start" side="top" className="z-10">
+                          {t('workbench.sidebar.add')}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+                </div>
+              </div>
             ) : (
               <></>
             )
@@ -247,50 +269,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               </div>
             </div>
           )}
-          <div className="grid h-full grid-rows-[1fr_auto] rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
-            {/* Second nav */}
-            <VirtuaWorkbenchViewList
-              height={height}
-              data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
-              currentPageId={currentPage?.[teamId]?.id}
-              currentGroupId={groupId}
-              onChildClick={onPageClick}
-              onReorder={onPageGroupPageReorder}
-            />
-            <div
-              className={cn(
-                'flex items-center justify-between gap-2 pb-4 pr-2 pt-2',
-                onlyShowWorkbenchIcon && 'justify-center',
-              )}
-            >
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    onClick={() => toggleOnlyShowWorkbenchIcon()}
-                    icon={onlyShowWorkbenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
-                    size={'icon'}
-                    className={cn('shrink-0', onlyShowWorkbenchIcon && '')}
-                    variant="outline"
-                  />
-                </TooltipTrigger>
-                <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
-              </Tooltip>
-              {!onlyShowWorkbenchIcon && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="vines-center shrink grow">
-                      <Link to="/$teamId/workflows/" className="contents" params={{ teamId }}>
-                        <Button icon={<PlusIcon />} className="shrink grow" variant="outline" />
-                      </Link>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent align="start" side="top" className="z-10">
-                    {t('workbench.sidebar.add')}
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          </div>
         </WorkbenchViewItemCurrentData.Provider>
       )}
     </div>
