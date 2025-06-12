@@ -15,7 +15,7 @@ export const ErrorFilter = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="borderless" className="mb-2 hover:bg-slate-1 active:bg-slate-1" icon={<FilterIcon />}>
+        <Button variant="borderless" className="hover:bg-slate-1 active:bg-slate-1" icon={<FilterIcon />}>
           {t('workspace.image-detail.error-filter.title')}
         </Button>
       </DropdownMenuTrigger>

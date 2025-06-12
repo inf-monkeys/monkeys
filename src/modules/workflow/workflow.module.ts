@@ -11,6 +11,8 @@ import { ToolsModule } from '../tools/tools.module';
 import { ConductorModule } from './conductor/conductor.module';
 import { WorkflowAssetsController } from './workflow.assets.controller';
 import { WorkflowAssetsService } from './workflow.assets.service';
+import { WorkflowAssociationController } from './workflow.association.controller';
+import { WorkflowAssociationService } from './workflow.association.service';
 import { WorkflowChatSessionController } from './workflow.chat-sessions.controller';
 import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
 import { WorkflowCommonService } from './workflow.common.service';
@@ -51,6 +53,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowLogsController,
     WorkflowStatisticsController,
     WorkflowObservabilityController,
+    WorkflowAssociationController,
   ],
   providers: [
     WorkflowCrudService,
@@ -68,6 +71,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowTrackerService,
     WorkflowObservabilityService,
     WorkflowExecutionPersistenceService,
+    WorkflowAssociationService,
   ],
   imports: [
     ConductorModule,
@@ -76,6 +80,6 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     ToolsModule,
     CommonModule,
   ],
-  exports: [WorkflowCrudService, WorkflowExecutionService, WorkflowTrackerService, WorkflowExecutionPersistenceService , WorkflowPageService, TypeOrmModule],
+  exports: [WorkflowCrudService, WorkflowExecutionService, WorkflowTrackerService, WorkflowExecutionPersistenceService, WorkflowPageService, TypeOrmModule],
 })
-export class WorkflowModule {}
+export class WorkflowModule { }

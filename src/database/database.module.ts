@@ -45,6 +45,7 @@ import { TeamMembersEntity } from './entities/identity/user-team-relationship';
 import { WorkflowObservabilityEntity } from './entities/observability/workflow-observability';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
+import { WorkflowAssociationsEntity } from './entities/workflow/workflow-association';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
 
 export const entities: EntityClassOrSchema[] = [
@@ -57,6 +58,7 @@ export const entities: EntityClassOrSchema[] = [
   WorkflowExecutionEntity,
   WorkflowMetadataEntity,
   WorkflowChatSessionEntity,
+  WorkflowAssociationsEntity,
   WorkflowTriggersEntity,
   WorkflowTemplateEntity,
   SystemConfigurationEntity,
