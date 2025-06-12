@@ -77,11 +77,11 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
       {...attributes}
       {...listeners}
       className={cn(
-        'z-10 mb-1 flex h-11 cursor-pointer select-none items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+        'z-10 mb-2 flex h-11 cursor-pointer select-none items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
         onlyShowWorkbenchIcon
-          ? 'flex size-11 items-center justify-center'
+          ? 'flex size-10 items-center justify-center'
           : 'flex w-full shrink-0 items-center justify-start gap-2 px-2',
-        groupId === currentGroupId && 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]',
+        groupId === currentGroupId && 'group border border-input bg-muted/80 text-accent-foreground dark:bg-[#393939]',
       )}
       {...attr}
     >

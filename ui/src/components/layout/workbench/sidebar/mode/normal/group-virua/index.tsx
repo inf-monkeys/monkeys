@@ -90,7 +90,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
   };
 
   return (
-    <div className="flex h-full pr-[1px]">
+    <div className="flex h-full">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -98,7 +98,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
         onDragEnd={handleDragEnd}
       >
         <ScrollArea
-          className={cn('px-4 pt-4', onlyShowWorkbenchIcon ? 'w-[4.8rem]' : 'min-w-44')}
+          className={cn('py-4 pl-2 pr-0', onlyShowWorkbenchIcon ? 'w-[3.7rem]' : 'min-w-44')}
           ref={scrollRef}
           disabledOverflowMask
         >
@@ -117,7 +117,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
             ))}
           </SortableContext>
         </ScrollArea>
-        <Separator orientation="vertical" />
+        <Separator orientation="vertical" className="mx-2" />
       </DndContext>
     </div>
   );

@@ -5,8 +5,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from 'react-i18next';
 
 import { IPageInstanceType, IPinPage } from '@/apis/pages/typings.ts';
-import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
 import { ViewItemMenu } from '@/components/layout/workbench/sidebar/mode/normal/virtua/menu.tsx';
+import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { cn, getI18nContent } from '@/utils';
@@ -49,7 +49,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
           currentPageId === pageId
             ? 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]'
             : 'p-2',
-          onlyShowWorkbenchIcon ? 'mb-1 size-11 justify-center' : 'mb-2',
+          onlyShowWorkbenchIcon ? 'mb-2 size-11 justify-center' : 'mb-2',
           isDragging && 'opacity-50',
         )}
         onClick={() => onClick?.(page)}
@@ -64,7 +64,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
                 {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
               </h1>
               <div className="flex items-center gap-0.5">
-                <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
+                <VinesLucideIcon className="size-3" size={10} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
                 <span className="text-xxs line-clamp-1 max-w-36 text-ellipsis">
                   {getI18nContent(info?.description) ??
                     t([`workspace.wrapper.space.tabs.${page?.displayName ?? ''}`, page?.displayName ?? ''])}
