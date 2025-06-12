@@ -391,7 +391,7 @@
                 "label": "智能体"
               },
               "designs": {
-                "label": "设计"
+                "label": "设计项目"
               }
             },
             "tools": {
@@ -446,6 +446,15 @@
               },
               "comfyui-store": {
                 "label": "ComfyUI 市场"
+              }
+            },
+            "designs": {
+              "label": "设计",
+              "design-assets": {
+                "label": "设计资产"
+              },
+              "designs": {
+                "label": "设计项目"
               }
             }
           },

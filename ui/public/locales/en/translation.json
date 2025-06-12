@@ -397,7 +397,7 @@
                 "label": "Agents"
               },
               "designs": {
-                "label": "Designs"
+                "label": "Design Projects"
               }
             },
             "tools": {
@@ -452,6 +452,15 @@
               },
               "comfyui-store": {
                 "label": "ComfyUI Store"
+              }
+            },
+            "designs": {
+              "label": "Designs",
+              "design-assets": {
+                "label": "Design Assets"
+              },
+              "designs": {
+                "label": "Design Projects"
               }
             }
           },
