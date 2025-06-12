@@ -25,6 +25,7 @@ import { DesignProjectRepository } from './repositories/design-project.repositor
 import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.repository';
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
 import { LlmModelRepository } from './repositories/llm-model.repository';
+import { MarketplaceRepository } from './repositories/marketplace.repository';
 import { MediaFileRepository } from './repositories/media.repository';
 import { ObservabilityRepository } from './repositories/observability.repository';
 import { OneApiRepository } from './repositories/oneapi.respository';
@@ -73,6 +74,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     ObservabilityRepository,
     DesignMetadataRepository,
     DesignProjectRepository,
+    MarketplaceRepository,
   ],
   exports: [
     ToolsRepository,
@@ -109,6 +111,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     ObservabilityRepository,
     DesignMetadataRepository,
     DesignProjectRepository,
+    MarketplaceRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })

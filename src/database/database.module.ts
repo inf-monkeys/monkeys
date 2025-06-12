@@ -42,6 +42,9 @@ import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
 import { TeamMembersEntity } from './entities/identity/user-team-relationship';
+import { InstalledAppEntity } from './entities/marketplace/installed-app.entity';
+import { MarketplaceAppVersionEntity } from './entities/marketplace/marketplace-app-version.entity';
+import { MarketplaceAppEntity } from './entities/marketplace/marketplace-app.entity';
 import { WorkflowObservabilityEntity } from './entities/observability/workflow-observability';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
@@ -94,6 +97,9 @@ export const entities: EntityClassOrSchema[] = [
   WorkflowObservabilityEntity,
   DesignMetadataEntity,
   DesignProjectEntity,
+  MarketplaceAppEntity,
+  MarketplaceAppVersionEntity,
+  InstalledAppEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
