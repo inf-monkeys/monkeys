@@ -9,3 +9,8 @@ conductor:
 database:
   type: better-sqlite3
   database: data/db.sqlite
+
+admin:
+  username: "admin"
+  email: "admin@example.com"
+  password: "123456"
