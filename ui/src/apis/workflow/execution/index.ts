@@ -16,8 +16,8 @@ import {
 import { paginationWrapper } from '@/apis/wrapper.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution, VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
-import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
 import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
+import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
 
 export const executionWorkflow = (
   workflowId: string,

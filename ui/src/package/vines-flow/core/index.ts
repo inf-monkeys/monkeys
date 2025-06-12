@@ -12,6 +12,7 @@ import {
   executionWorkflowWithDebug,
   getWorkflowExecution,
 } from '@/apis/workflow/execution';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { VinesBase } from '@/package/vines-flow/core/base';
 import { VINES_DEF_NODE, VINES_ENV_VARIABLES } from '@/package/vines-flow/core/consts.ts';
 import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
@@ -38,7 +39,6 @@ import {
 import { createTask } from '@/package/vines-flow/core/utils.ts';
 import { getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events';
-import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 
 export class VinesCore extends VinesTools(VinesBase) {
   public workflowId: string | undefined;

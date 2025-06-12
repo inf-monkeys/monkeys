@@ -2,10 +2,10 @@ import React from 'react';
 
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import {
+  composeRenderProps,
   Input as AriaInput,
   InputProps as AriaInputProps,
   NumberField as AriaNumberField,
-  composeRenderProps,
 } from 'react-aria-components';
 
 import { Button, ButtonProps } from '@/components/ui/button';

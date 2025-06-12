@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { SWRInfiniteResponse } from 'swr/infinite';
+
 import { useMemoizedFn } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isBoolean } from 'lodash';
@@ -9,13 +11,12 @@ import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
 import { deleteWorkflowExecution } from '@/apis/workflow/execution';
+import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
 import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
-import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
-import { SWRInfiniteResponse } from 'swr/infinite';
 
 interface IVirtuaExecutionResultGridWrapperProps {
   data: IVinesExecutionResultItem;
