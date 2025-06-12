@@ -13,9 +13,14 @@ import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
+import { convertExecutionResultToItemList } from '@/utils/execution';
+import { getWorkflowExecutionAllOutputs } from '@/apis/workflow/execution';
+import { IVinesExecutionResultItem } from '@/utils/execution';
 
 const VinesForm: React.FC = () => {
   const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const [imageItems, setImageItems] = useState<IVinesExecutionResultItem[]>([]);
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
@@ -38,6 +43,25 @@ const VinesForm: React.FC = () => {
   const [inViewport] = useInViewport(ref);
 
   const setVisible = useViewStore((s) => s.setVisible);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await getWorkflowExecutionAllOutputs();
+        if (response && Array.isArray(response)) {
+          const items = response.flatMap((output) => convertExecutionResultToItemList(output));
+          setImageItems(items);
+        }
+        console.log(imageItems);
+      } catch (error) {
+        console.error('Failed to fetch execution outputs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (isMiniFrame) {
