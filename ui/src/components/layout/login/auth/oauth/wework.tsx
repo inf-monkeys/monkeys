@@ -55,7 +55,7 @@ export const OAuthWeWorkProvider: React.FC<IOAuthWeWorkProviderProps> = ({ child
             {isLoading && (
               <VinesLoading
                 key="vines-oauth-wework-loading"
-                className="vines-center absolute top-0 z-10 size-full bg-dialog"
+                className="vines-center bg-dialog absolute top-0 z-10 size-full"
                 immediately
               />
             )}

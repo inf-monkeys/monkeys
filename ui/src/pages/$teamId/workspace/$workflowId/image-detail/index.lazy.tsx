@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import { useSystemConfig } from '@/apis/common';
 import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
+import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -48,7 +49,6 @@ import {
 } from '@/store/useExecutionImageResultStore';
 import { useThumbImages } from '@/store/useExecutionImageTumbStore';
 import { cn } from '@/utils';
-import { useVinesTeam } from '@/components/router/guard/team';
 
 import 'rc-image/assets/index.css';
 

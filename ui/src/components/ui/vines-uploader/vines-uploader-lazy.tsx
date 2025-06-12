@@ -17,7 +17,7 @@ import FileMd5 from '@/components/ui/vines-uploader/plugin/file-md5.ts';
 import RapidUpload from '@/components/ui/vines-uploader/plugin/rapid-upload-with-md5.ts';
 import RemoteUrlToFile from '@/components/ui/vines-uploader/plugin/remote-url-to-file.ts';
 import VinesUpload from '@/components/ui/vines-uploader/plugin/vines-upload.ts';
-import { checkIfCorrectURL, getFileNameByOssUrl } from '@/components/ui/vines-uploader/utils.ts';
+import { addProtocolToURL, checkIfCorrectURL, getFileNameByOssUrl } from '@/components/ui/vines-uploader/utils.ts';
 import { cn } from '@/utils';
 
 const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
@@ -73,8 +73,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
 
   const { onDropRejected, validator, onDrag, onPaste } = useVinesDropzone({
     ...props,
-    onPasteOrDropCallback: (file, _, e) => {
-      console.log('e', e);
+    onPasteOrDropCallback: (file) => {
       if (max === 1 && !isEmpty(filesMapper)) {
         const existingFiles = uppy.getFiles();
         existingFiles.forEach((file) => uppy.removeFile(file.id));
@@ -183,8 +182,8 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     setIsHovering(false);
 
     console.log('Drop event triggered');
-    console.log('DataTransfer types:', e.dataTransfer.types);
-    console.log('DataTransfer items:', e.dataTransfer.items);
+    console.log('DataTransfer types:', Array.from(e.dataTransfer.types));
+    console.log('DataTransfer items:', Array.from(e.dataTransfer.items));
 
     // 处理文件拖拽（标准情况）
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -201,71 +200,99 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     }
 
     // 处理网页图片拖拽
-    if (e.dataTransfer.items) {
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
       const items = Array.from(e.dataTransfer.items);
       console.log('Processing dataTransfer items:', items);
 
       for (const item of items) {
         console.log('Item kind:', item.kind, 'type:', item.type);
 
-        if (item.kind === 'string' && item.type === 'text/uri-list') {
-          item.getAsString(async (url) => {
-            console.log('Got URL:', url);
+        if (item.kind === 'string') {
+          // 处理各种字符串类型的数据
+          if (item.type === 'text/uri-list' || item.type === 'text/plain' || item.type === 'text/html') {
+            item.getAsString(async (data) => {
+              console.log(`Got ${item.type} data:`, data);
 
-            const cleanUrl = addProtocolToURL(url);
-            if (checkIfCorrectURL(cleanUrl)) {
-              try {
-                // 尝试获取图片数据
-                const response = await fetch(cleanUrl, {
-                  mode: 'cors',
-                  credentials: 'omit',
-                });
+              let url = '';
 
-                if (response.ok) {
-                  const blob = await response.blob();
+              // 根据数据类型提取URL
+              if (item.type === 'text/uri-list') {
+                url = data.trim();
+              } else if (item.type === 'text/plain') {
+                // 检查是否是URL
+                url = data.trim();
+              } else if (item.type === 'text/html') {
+                // 从HTML中提取图片URL
+                const imgMatch = data.match(/<img[^>]+src=['"]+([^'"]*)['"]/i);
+                if (imgMatch) {
+                  url = imgMatch[1];
+                }
+              }
 
-                  if (blob.type.startsWith('image/')) {
-                    const filename = getFileNameByOssUrl(cleanUrl) || `image_${Date.now()}.png`;
-                    const file = new File([blob], filename, { type: blob.type });
+              if (url) {
+                console.log('Extracted URL:', url);
+                const cleanUrl = addProtocolToURL(url);
 
-                    if (max === 1 && !isEmpty(filesMapper)) {
-                      const existingFiles = uppy.getFiles();
-                      existingFiles.forEach((file) => uppy.removeFile(file.id));
+                if (checkIfCorrectURL(cleanUrl)) {
+                  try {
+                    console.log('Attempting to fetch:', cleanUrl);
+
+                    // 尝试获取图片数据
+                    const response = await fetch(cleanUrl, {
+                      mode: 'cors',
+                      credentials: 'omit',
+                      headers: {
+                        Accept: 'image/*,*/*;q=0.9',
+                      },
+                    });
+
+                    if (response.ok) {
+                      const blob = await response.blob();
+                      console.log('Fetched blob:', blob.type, blob.size);
+
+                      if (blob.type.startsWith('image/') || blob.size > 0) {
+                        const filename = getFileNameByOssUrl(cleanUrl) || `image_${Date.now()}.png`;
+                        const file = new File([blob], filename, {
+                          type: blob.type || 'image/png',
+                        });
+
+                        console.log('Created file:', file.name, file.type, file.size);
+
+                        if (max === 1 && !isEmpty(filesMapper)) {
+                          const existingFiles = uppy.getFiles();
+                          existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
+                        }
+
+                        const convertedFile = handleConvertFile(file);
+                        console.log('Adding file to uppy:', convertedFile);
+                        uppy.addFile(convertedFile);
+
+                        return; // 成功处理，退出
+                      }
                     }
-
-                    uppy.addFile(handleConvertFile(file));
+                  } catch (error) {
+                    console.error('Failed to fetch image:', error);
                   }
-                } else {
-                  // 如果无法获取文件，作为远程URL处理
-                  const file = new File([], getFileNameByOssUrl(cleanUrl), { type: 'text/plain' }) as File & {
-                    meta?: { remoteUrl: string };
-                  };
+
+                  // 如果无法作为文件下载，作为远程URL处理
+                  console.log('Fallback: treating as remote URL');
+                  const file = new File([], getFileNameByOssUrl(cleanUrl), {
+                    type: 'text/plain',
+                  }) as File & { meta?: { remoteUrl: string } };
                   file.meta = { remoteUrl: cleanUrl };
 
                   if (max === 1 && !isEmpty(filesMapper)) {
                     const existingFiles = uppy.getFiles();
-                    existingFiles.forEach((file) => uppy.removeFile(file.id));
+                    existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
                   }
 
-                  uppy.addFile(handleConvertFile(file));
+                  const convertedFile = handleConvertFile(file);
+                  console.log('Adding remote URL file to uppy:', convertedFile);
+                  uppy.addFile(convertedFile);
                 }
-              } catch (error) {
-                console.error('Failed to fetch image:', error);
-                // 回退到URL处理
-                const file = new File([], getFileNameByOssUrl(cleanUrl), { type: 'text/plain' }) as File & {
-                  meta?: { remoteUrl: string };
-                };
-                file.meta = { remoteUrl: cleanUrl };
-
-                if (max === 1 && !isEmpty(filesMapper)) {
-                  const existingFiles = uppy.getFiles();
-                  existingFiles.forEach((file) => uppy.removeFile(file.id));
-                }
-
-                uppy.addFile(handleConvertFile(file));
               }
-            }
-          });
+            });
+          }
         }
       }
     }
