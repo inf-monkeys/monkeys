@@ -51,7 +51,12 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
   };
 
   return (
-    <div className={cn('relative col-span-5 mt-4 rounded-lg border border-slate-200 bg-slate-1 px-12 py-6 shadow-sm', isMiniFrame && 'mt-2')}>
+    <div
+      className={cn(
+        'relative col-span-5 mt-4 rounded-xl border border-slate-200 bg-slate-1 px-12 py-6 shadow-sm',
+        isMiniFrame && 'mt-2',
+      )}
+    >
       <Carousel
         opts={{
           align: 'start',
@@ -62,10 +67,10 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
           inViewThreshold: 0.7,
           watchDrag: !isDragging,
         }}
-        className="w-full"
+        className="w-full px-4"
         ref={carouselRef}
       >
-        <CarouselContent className="px-2">
+        <CarouselContent className=" overflow-hidden">
           {loading ? (
             <div className="flex w-full items-center justify-center">
               <span>Loading...</span>
@@ -95,13 +100,13 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
               </CarouselItem>
             ))
           ) : (
-            <div className=" flex w-full items-center justify-center">
+            <div className="flex w-full items-center justify-center">
               <span>No images available</span>
             </div>
           )}
         </CarouselContent>
-        <CarouselPrevious className="absolute -left-8 top-1/2 h-6 w-6 -translate-y-1/2" />
-        <CarouselNext className="absolute -right-8 top-1/2 h-6 w-6 -translate-y-1/2" />
+        <CarouselPrevious className="h-8.5 absolute -left-8 top-1/2 w-9.5 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5 text-black shadow-sm hover:bg-slate-500" />
+        <CarouselNext className="h-8.5 absolute -right-8 top-1/2 w-9.5 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5 text-black shadow-sm hover:bg-slate-500" />
       </Carousel>
     </div>
   );
