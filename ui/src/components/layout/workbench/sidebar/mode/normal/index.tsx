@@ -259,7 +259,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             />
             <div
               className={cn(
-                'flex items-center justify-between gap-4 px-2 pb-4 pt-2',
+                'flex items-center justify-between gap-2 pb-4 pr-2 pt-2',
                 onlyShowWorkbenchIcon && 'justify-center',
               )}
             >

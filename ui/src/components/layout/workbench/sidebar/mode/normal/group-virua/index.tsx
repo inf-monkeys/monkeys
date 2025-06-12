@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
+import { Separator } from '@/components/ui/separator';
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { cn } from '@/utils';
 
@@ -98,7 +98,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
         onDragEnd={handleDragEnd}
       >
         <ScrollArea
-          className={cn('py-4 pl-2 pr-0', onlyShowWorkbenchIcon ? 'w-[3.7rem]' : 'min-w-44')}
+          className={cn('px-2 py-4', onlyShowWorkbenchIcon ? '' : 'min-w-44')}
           ref={scrollRef}
           disabledOverflowMask
         >
@@ -117,7 +117,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
             ))}
           </SortableContext>
         </ScrollArea>
-        <Separator orientation="vertical" className="mx-2" />
+        <Separator className="mr-2" orientation="vertical" />
       </DndContext>
     </div>
   );
