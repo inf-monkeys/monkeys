@@ -56,3 +56,8 @@ models:
       stop:
         - <|im_start|>
         - <|im_end|>
+
+admin:
+  username: "admin"
+  email: "admin@example.com"
+  password: "123456"

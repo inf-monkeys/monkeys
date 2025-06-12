@@ -52,3 +52,8 @@ oneapi:
   baseURL: http://oneapi:3000
   rootUsername: root
   rootPassword: 123456
+
+admin:
+  username: "admin"
+  email: "admin@example.com"
+  password: "123456"
