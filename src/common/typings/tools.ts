@@ -1,4 +1,11 @@
-import { ToolProperty } from '@inf-monkeys/monkeys';
+import { AssetType, ToolProperty } from '@inf-monkeys/monkeys';
+
+export interface ExtendedToolProperty extends ToolProperty {
+  typeOptions?: {
+    assetType?: AssetType;
+    multipleValues?: boolean;
+  };
+}
 
 export enum AuthType {
   none = 'none',
