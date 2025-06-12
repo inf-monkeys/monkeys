@@ -48,6 +48,7 @@ import {
 } from '@/store/useExecutionImageResultStore';
 import { useThumbImages } from '@/store/useExecutionImageTumbStore';
 import { cn } from '@/utils';
+import { useVinesTeam } from '@/components/router/guard/team';
 
 import 'rc-image/assets/index.css';
 
@@ -297,7 +298,7 @@ const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedIn
 
   return (
     <div className="z-10 flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
-      <Button icon={<Copy />} variant="outline" size="small" onClick={handleCopy}>
+      <Button icon={<Copy />} variant="outline" size="small" onClick={handleCopy} className="text-base">
         {t('workspace.pre-view.actuator.detail.form-render.actions.copy-input', '复制输入')}
       </Button>
       <Button
@@ -334,7 +335,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="ml-4 flex h-full w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm dark:bg-[#111113]">
+    <div className="ml-4 flex h-full w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 pb-6 pt-8 shadow-sm dark:bg-[#111113]">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button icon={<X />} variant="outline" size="small" onClick={onBack} />
@@ -358,7 +359,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
         </Tooltip>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-5">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button icon={<Trash />} variant="outline" size="small" onClick={onDeleteImage} />
@@ -374,12 +375,13 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { history } = router;
+  const { team } = useVinesTeam();
   const [imageRotation, setImageRotation] = useState(0);
   const [imageFlipX, setImageFlipX] = useState(false);
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'mini' });
-  const isMiniFrame = mode === 'mini';
+  const isMiniFrame = mode === 'mini' || !!team;
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
 
   // 提升的状态管理
@@ -520,14 +522,24 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   return (
     <VinesFlowProvider workflowId={workflowId}>
-      <div className="flex h-full w-full bg-neocard">
+      <div className={cn('flex h-full w-full bg-neocard', isMiniFrame && 'justify-center')}>
         {/* 主内容区域 */}
-        <main className="flex size-full flex-1 rounded-xl border border-input bg-background py-2 pb-6 shadow-sm dark:bg-[#111113] md:flex-row">
+        <main
+          className={cn(
+            'flex size-full flex-1 rounded-xl border border-input bg-background py-2 pb-6 shadow-sm dark:bg-[#111113] md:flex-row',
+            isMiniFrame && 'justify-center',
+          )}
+        >
           {/* 左侧图片展示区 */}
-          <div className="flex h-full w-[450px] flex-col items-center overflow-auto bg-background dark:bg-[#111113] sm:w-full md:w-[70%]">
+          <div
+            className={cn(
+              'flex h-full flex-col items-center overflow-auto bg-background dark:bg-[#111113]',
+              isMiniFrame ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
+            )}
+          >
             {imageUrl ? (
               <>
-                <div className="flex w-full basis-4/5 items-center justify-center overflow-auto p-4">
+                <div className="flex w-full basis-4/5 items-center justify-center p-4">
                   {/* <Image
                     src={imageUrl}
                     alt="详情图片"
@@ -594,7 +606,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                   </div>
                 </div>
                 {/* 图片操作按钮 - 中间 */}
-                <div className="basis:1/5 w-[440px] overflow-hidden px-20 md:w-[570px] lg:w-[740px] xl:w-[950px]">
+                <div className="basis:1/5 w-full overflow-hidden px-4">
                   <ImageOperations
                     // imageUrl={imageUrl}
                     imageRotation={imageRotation}
@@ -610,7 +622,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                     onDownload={handleDownload}
                   />
                   {/* 图片缩略图轮播 - 底部 */}
-                  <ImagesCarousel className="" />
+                  <ImagesCarousel className="w-full" />
                 </div>
               </>
             ) : (
@@ -674,14 +686,14 @@ const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
     <Carousel
       setApi={setCarouselApi}
       opts={{
-        align: 'center',
+        align: 'start',
         containScroll: 'trimSnaps',
         slidesToScroll: 1,
       }}
       orientation="horizontal"
       className={cn(className, 'overflow-hidden')}
     >
-      <CarouselContent className="space-x-2">
+      <CarouselContent className="ml-0">
         <CarouselItemList carouselApi={carouselApi} />
       </CarouselContent>
     </Carousel>
@@ -714,7 +726,7 @@ function CarouselItemList({ carouselApi }: { carouselApi: any }) {
     return (
       <CarouselItem
         key={image.render.key || index}
-        className="basis-auto hover:cursor-pointer"
+        className="mr-0 basis-auto hover:cursor-pointer"
         onClick={() => handleThumbnailClick(index)}
       >
         <CarouselItemImage image={image} index={index} />
