@@ -213,7 +213,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                     onReorder={onPageGroupReorder}
                   />
                 </div>
-                <div className="grid h-full flex-1 grid-rows-[1fr_auto] rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+                <div className="flex h-full grow flex-col rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
                   {/* Second nav */}
                   <VirtuaWorkbenchViewList
                     height={height}
@@ -225,8 +225,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                   />
                   <div
                     className={cn(
-                      'flex items-center justify-between gap-4 px-2 pb-4 pt-2',
-                      onlyShowWorkbenchIcon && 'justify-center',
+                      'flex -translate-x-1 translate-y-[18px] items-center justify-between gap-2 px-2 pt-2',
+                      onlyShowWorkbenchIcon ? 'justify-center' : 'px-2',
                     )}
                   >
                     <Tooltip>
