@@ -53,7 +53,7 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
   return (
     <div
       className={cn(
-        'relative col-span-5 mt-4 rounded-xl border border-slate-200 bg-slate-1 px-12 py-6 shadow-sm',
+        'w-full h-35 relative col-span-5 mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-1 px-12 py-6 shadow-sm',
         isMiniFrame && 'mt-2',
       )}
     >
@@ -105,8 +105,8 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
             </div>
           )}
         </CarouselContent>
-        <CarouselPrevious className="h-8.5 absolute -left-8 top-1/2 w-9.5 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5 text-black shadow-sm hover:bg-slate-500" />
-        <CarouselNext className="h-8.5 absolute -right-8 top-1/2 w-9.5 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5 text-black shadow-sm hover:bg-slate-500" />
+        <CarouselPrevious className="h-8.5 absolute -left-8 top-1/2 w-9.5 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5 " />
+        <CarouselNext className="h-8.5 absolute -right-8 top-1/2 w-9.5 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5 " />
       </Carousel>
     </div>
   );
