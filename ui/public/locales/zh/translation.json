@@ -2552,6 +2552,55 @@
             "desc": "删除后无法恢复，且所有相关数据将被永久删除。",
             "cancel": "取消",
             "action": "继续"
+          },
+          "association-editor": {
+            "button": "关联编辑器",
+            "title": "关联编辑器",
+            "add": "新建关联",
+            "delete": {
+              "title": "确定要删除此关联吗",
+              "desc": "删除后将无法恢复，请确认是否删除此关联"
+            },
+            "enabled": {
+              "t": "已启用",
+              "f": "已禁用"
+            },
+            "editor": {
+              "title": "关联配置",
+              "field": {
+                "enabled": {
+                  "label": "启用",
+                  "description": "启用后，关联将展示在该工作流的「工作台」固定「表单视图」右侧"
+                },
+                "display-name": {
+                  "label": "显示名称",
+                  "placeholder": "请输入显示名称"
+                },
+                "icon-url": {
+                  "label": "图标",
+                  "select-icon": "选择图标",
+                  "dialog-title": "选择图标"
+                },
+                "description": {
+                  "label": "描述",
+                  "placeholder": "请输入描述"
+                },
+                "target-workflow-id": {
+                  "label": "关联工作流",
+                  "placeholder": "请选择关联工作流",
+                  "search-placeholder": "搜索工作流",
+                  "search-empty": "找不到工作流"
+                },
+                "mapper": {
+                  "label": "映射字段",
+                  "description": "格式为 JSON Path，源工作流输出支持使用 __value 获取当前选中内容",
+                  "origin-placeholder": "源工作流输出字段",
+                  "target-placeholder": "目标工作流输入字段",
+                  "default": "默认值",
+                  "add": "新增映射"
+                }
+              }
+            }
           }
         }
       },
@@ -3307,6 +3356,9 @@
           "prev-param-empty": "暂无历史运行记录",
           "error": "恢复上次生成参数失败"
         }
+      },
+      "operation-bar": {
+        "select-none": "请先选择内容"
       }
     },
     "image-detail": {

@@ -23,7 +23,7 @@ import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { cloneDeep, cn, getI18nContent } from '@/utils';
 
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
-import { WorkbenchViewItemCurrentData } from './virtua/item';
+import { IWorkbenchViewItemPage, WorkbenchViewItemCurrentData } from './virtua/item';
 
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   showGroup?: boolean;
@@ -161,7 +161,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const hasGroups = lists.length && !isLoading;
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const onPageClick = useCallback(
-    (page) => {
+    (page: IWorkbenchViewItemPage) => {
       startTransition(() => {
         // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
         // setUrlState({ activePageFromWorkflowDisplayName: undefined });

@@ -24,6 +24,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const { data, isLoading } = useWorkspacePages();
   const [pages, setPages] = useState(data?.pages);
 
+  // const [fullFrameMode, setFullFrameMode] = useState(true);
+
   useEffect(() => {
     if (typeof data !== 'undefined') {
       setPages(data?.pages ?? []);
@@ -63,13 +65,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   }, [teamPage]);
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        'relative w-full flex-1 overflow-hidden rounded-xl border-b border-r border-t border-input bg-slate-1 p-0 shadow-sm',
-        mode === 'mini' && 'rounded-none',
-      )}
-    >
+    <div ref={ref} className={cn('relative w-full flex-1 overflow-hidden p-0', mode === 'mini' && 'rounded-none')}>
       <AnimatePresence>
         {hasPages && hasPage ? (
           <motion.div
