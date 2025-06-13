@@ -941,6 +941,12 @@
         "lightmode": "点击更换浅色图标",
         "darkmode": "点击更换深色图标"
       },
+      "team-form": {
+        "title": "自定义配置",
+        "description": "自定义您的工作区设置",
+        "form-configuration": "表单配置",
+        "displayed": "设置是否显示表单"
+      },
       "market": {
         "title": "主题市场",
         "operate": {
