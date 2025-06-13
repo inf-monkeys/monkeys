@@ -22,7 +22,11 @@ export const workflowAssociationSchema = z.object({
     ])
     .optional(),
   iconUrl: z.string().optional(),
-  sortIndex: z.number().optional(),
+  sortIndex: z
+    .number()
+    .nullable()
+    .optional()
+    .transform((val) => val ?? undefined),
   enabled: z.boolean(),
   targetWorkflowId: z.string(),
   mapper: z.array(
