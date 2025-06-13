@@ -2557,6 +2557,55 @@
             "desc": "Deletion cannot be recovered and all relevant data will be permanently deleted.",
             "cancel": "cancel",
             "action": "Delete"
+          },
+          "association-editor": {
+            "button": "Association Editor",
+            "title": "Association Editor",
+            "add": "New Association",
+            "delete": {
+              "title": "Sure you want to delete this association?",
+              "desc": "Deletion cannot be recovered and all relevant data will be permanently deleted."
+            },
+            "enabled": {
+              "t": "Enabled",
+              "f": "Disabled"
+            },
+            "editor": {
+              "title": "Association Config",
+              "field": {
+                "enabled": {
+                  "label": "Enabled",
+                  "description": "After enabling, the association will be displayed on the right side of the \"Workspace\" fixed \"Form View\" in the workflow"
+                },
+                "display-name": {
+                  "label": "Display Name",
+                  "placeholder": "Please enter a display name"
+                },
+                "icon-url": {
+                  "label": "Icon",
+                  "select-icon": "Select Icon",
+                  "dialog-title": "Select Icon"
+                },
+                "description": {
+                  "label": "Description",
+                  "placeholder": "Please enter a description"
+                },
+                "target-workflow-id": {
+                  "label": "Association Workflow",
+                  "placeholder": "Please select an association workflow",
+                  "search-placeholder": "Search workflow",
+                  "search-empty": "No workflow found"
+                },
+                "mapper": {
+                  "label": "Mapping Field",
+                  "description": "The format is JSON Path, and the source workflow output supports using __value to get the currently selected content",
+                  "origin-placeholder": "Source workflow output field",
+                  "target-placeholder": "Target workflow input field",
+                  "default": "Default value",
+                  "add": "Add mapping"
+                }
+              }
+            }
           }
         }
       },
@@ -3311,6 +3360,9 @@
           "prev-param-empty": "No historical operation records",
           "error": "Failed to restore last generated parameters"
         }
+      },
+      "operation-bar": {
+        "select-none": "No content selected, please select content first"
       }
     },
     "image-detail": {

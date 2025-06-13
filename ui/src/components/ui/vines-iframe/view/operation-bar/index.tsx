@@ -30,40 +30,16 @@ import { OperationItem } from './item';
 interface IWorkbenchOperationBarProps extends React.ComponentPropsWithoutRef<'div'> { }
 
 export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ }) => {
-  // const initialData: IWorkflowAssociation[] = [
-  //   {
-  //     enabled: true,
-  //     id: 'demo',
-  //     displayName: {
-  //       'zh-CN': '测试',
-  //       'en-US': 'demo',
-  //     },
-  //     originWorkflowId: '684a51c172d6c876c7222113',
-  //     targetWorkflowId: '684a51c73ae01ac36bb92313',
-  //     mapper: [
-  //       {
-  //         origin: '__value',
-  //         target: 'ntdwzd',
-  //         default: 'demo',
-  //       },
-  //     ],
-  //     uuid: '1',
-  //     createdTimestamp: 1,
-  //     updatedTimestamp: 1,
-  //     isDeleted: false,
-  //   },
-  // ];
-
   const { workflowId } = useFlowStore();
 
   const { data: initialData } = useWorkflowAssociationList(workflowId);
 
   // 添加本地状态
-  const [localData, setLocalData] = useState<IWorkflowAssociation[]>(initialData ?? []);
+  const [localData, setLocalData] = useState<IWorkflowAssociation[]>(initialData?.filter((it) => it.enabled) ?? []);
 
   // 当外部数据变化时更新本地状态
   useEffect(() => {
-    setLocalData(initialData ?? []);
+    setLocalData(initialData?.filter((it) => it.enabled) ?? []);
   }, [initialData]);
 
   const scrollRef = useRef<HTMLDivElement>(null);

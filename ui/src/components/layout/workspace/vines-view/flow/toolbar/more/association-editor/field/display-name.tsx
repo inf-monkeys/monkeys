@@ -94,11 +94,15 @@ export const FieldDisplayName: React.FC<IFieldDisplayNameProps> = ({ form }) => 
       control={form.control}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{t('workspace.flow-view.endpoint.start-tool.input.config-form.display-name.label')}</FormLabel>
+          <FormLabel>
+            {t('workspace.flow-view.tooltip.more.association-editor.editor.field.display-name.label')}
+          </FormLabel>
           <FormControl>
             <div className="relative">
               <Input
-                placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.display-name.placeholder')}
+                placeholder={t(
+                  'workspace.flow-view.tooltip.more.association-editor.editor.field.display-name.placeholder',
+                )}
                 value={getCurrentLanguageValue(i18nDisplayName)}
                 onChange={(value: string) => handleMainInputChange(value)}
                 className="grow pr-14"
@@ -121,7 +125,7 @@ export const FieldDisplayName: React.FC<IFieldDisplayNameProps> = ({ form }) => 
                           <Input
                             id={`i18n-input-${languageKey}`}
                             placeholder={t(
-                              'workspace.flow-view.endpoint.start-tool.input.config-form.display-name.placeholder',
+                              'workspace.flow-view.tooltip.more.association-editor.editor.field.display-name.placeholder',
                             )}
                             value={i18nDisplayName[languageKey] || ''}
                             onChange={(value: string) => handleLanguageValueChange(languageKey, value)}

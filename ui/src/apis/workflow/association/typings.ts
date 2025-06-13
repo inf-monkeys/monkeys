@@ -7,7 +7,7 @@ export type IWorkflowAssociation = {
   displayName?: I18nValue | string | null;
   description?: I18nValue | string | null;
   iconUrl?: string;
-  sortIndex?: number;
+  sortIndex?: number | null;
   originWorkflowId: string;
   targetWorkflowId: string;
   mapper: {

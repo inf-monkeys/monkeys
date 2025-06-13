@@ -94,11 +94,15 @@ export const FieldDescription: React.FC<IFieldDescriptionProps> = ({ form }) => 
       control={form.control}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{t('workspace.flow-view.endpoint.start-tool.input.config-form.description.label')}</FormLabel>
+          <FormLabel>
+            {t('workspace.flow-view.tooltip.more.association-editor.editor.field.description.label')}
+          </FormLabel>
           <FormControl>
             <div className="relative">
               <Textarea
-                placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.description.placeholder')}
+                placeholder={t(
+                  'workspace.flow-view.tooltip.more.association-editor.editor.field.description.placeholder',
+                )}
                 value={getCurrentLanguageValue(i18nDescription)}
                 onChange={(e) => handleMainInputChange(e.target.value)}
                 className="min-h-[100px] grow pr-14"
@@ -121,7 +125,7 @@ export const FieldDescription: React.FC<IFieldDescriptionProps> = ({ form }) => 
                           <Textarea
                             id={`i18n-input-${languageKey}`}
                             placeholder={t(
-                              'workspace.flow-view.endpoint.start-tool.input.config-form.description.placeholder',
+                              'workspace.flow-view.tooltip.more.association-editor.editor.field.description.placeholder',
                             )}
                             value={i18nDescription[languageKey] || ''}
                             onChange={(e) => handleLanguageValueChange(languageKey, e.target.value)}

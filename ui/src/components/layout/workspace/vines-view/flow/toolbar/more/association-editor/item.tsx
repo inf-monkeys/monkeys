@@ -57,13 +57,17 @@ export const WorkflowAssociationEditorItem: React.FC<IWorkflowAssociationEditorI
           <h1 className="font-bold">{getI18nContent(data.displayName)}</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Tag className="bg-muted">{data.enabled ? '已启用' : '未启用'}</Tag>
+          <Tag className="bg-muted">
+            {data.enabled
+              ? t('workspace.flow-view.tooltip.more.association-editor.enabled.t')
+              : t('workspace.flow-view.tooltip.more.association-editor.enabled.f')}
+          </Tag>
           <Button
             icon={<Edit />}
             variant="outline"
             className="scale-80"
             onClick={() => {
-              VinesEvent.emit('flow-association-editor', data);
+              VinesEvent.emit('flow-association-editor', data, 'update');
             }}
           />
           <AlertDialog>

@@ -41,7 +41,7 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
 
   const onItemClick = () => {
     if (selectedOutputItems.length == 0) {
-      toast.error('请先选择内容');
+      toast.error(t('workspace.form-view.operation-bar.select-none'));
       return;
     }
 
