@@ -7,9 +7,8 @@ import { getWorkflowExecutionAllOutputs } from '@/apis/workflow/execution';
 import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
 import { WorkbenchView } from '@/components/layout/workbench/view';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { ImagesResult, useExecutionImageResultStore, useExecutionImages } from '@/store/useExecutionImageResultStore';
 import { usePageStore } from '@/store/usePageStore';
-import { HistoryResult } from '@/components/layout/workbench/history';
-import { useExecutionImages, useExecutionImageResultStore, ImagesResult } from '@/store/useExecutionImageResultStore';
 import { convertExecutionResultToItemList } from '@/utils/execution';
 
 export const Workbench: React.FC = () => {
@@ -55,9 +54,9 @@ export const Workbench: React.FC = () => {
   return (
     <main className="relative flex size-full">
       <WorkbenchSidebar mode={mode} showGroup={showGroup} />
-      <div className="flex flex-col size-full">
-        <WorkbenchView mode={mode}/>
-        <HistoryResult loading={false} imageItems={images} isMiniFrame={mode === 'mini'} />
+      <div className="flex size-full flex-col">
+        <WorkbenchView mode={mode} />
+        {/* <HistoryResult loading={false} imageItems={images} isMiniFrame={mode === 'mini'} /> */}
       </div>
     </main>
   );
