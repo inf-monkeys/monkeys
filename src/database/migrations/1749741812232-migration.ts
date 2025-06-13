@@ -5,6 +5,8 @@ const appId = config.server.appId;
 
 const tableName = `${appId}_workflow_associations`;
 
+const tableName2 = `${appId}_workflow_metadatas`;
+
 export class Migration1749741812232 implements MigrationInterface {
     name = 'Migration1749741812232';
 
@@ -15,10 +17,10 @@ export class Migration1749741812232 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "${tableName}" ADD "sort_index" integer`);
 
         await queryRunner.query(
-            `ALTER TABLE "${tableName}" ADD CONSTRAINT "FK_73b8050704d0dc2e964de99331e" FOREIGN KEY ("origin_workflow_id") REFERENCES "monkeys_workflow_metadatas"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+            `ALTER TABLE "${tableName}" ADD CONSTRAINT "FK_73b8050704d0dc2e964de99331e" FOREIGN KEY ("origin_workflow_id") REFERENCES "${tableName2}"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
         );
         await queryRunner.query(
-            `ALTER TABLE "${tableName}" ADD CONSTRAINT "FK_9ccbabc8e32c74e347dbaea384a" FOREIGN KEY ("target_workflow_id") REFERENCES "monkeys_workflow_metadatas"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+            `ALTER TABLE "${tableName}" ADD CONSTRAINT "FK_9ccbabc8e32c74e347dbaea384a" FOREIGN KEY ("target_workflow_id") REFERENCES "${tableName2}"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
         );
     }
 
