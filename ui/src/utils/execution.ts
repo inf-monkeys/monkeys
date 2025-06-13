@@ -1,3 +1,4 @@
+import { getThumbUrl } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image';
 import { JSONValue } from '@/components/ui/code-editor';
 import {
   VinesWorkflowExecutionInput,
@@ -16,13 +17,13 @@ export type IVinesExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
     type: 'image' | 'video' | 'text' | 'json' | 'empty';
     data: JSONValue;
     alt?:
-      | string
-      | string[]
-      | { [imgUrl: string]: string }
-      | {
-          [imgUrl: string]: IVinesExecutionResultImageAltCopy;
-        }
-      | undefined;
+    | string
+    | string[]
+    | { [imgUrl: string]: string }
+    | {
+      [imgUrl: string]: IVinesExecutionResultImageAltCopy;
+    }
+    | undefined;
     // index: number;
     key: string;
     status: VinesWorkflowExecutionType;
@@ -38,6 +39,22 @@ export const convertExecutionResultToItemList = (
       ...result,
       render: {
         ...item,
+        key: result.instanceId + '-' + result.status + '-' + index,
+        status: result.status,
+      },
+    };
+  });
+};
+
+export const convertExecutionResultToThumbnailList = (
+  result: VinesWorkflowExecutionOutputListItem,
+): IVinesExecutionResultItem[] => {
+  return result.output.map((item, index) => {
+    return {
+      ...result,
+      render: {
+        ...item,
+        data: getThumbUrl(item.data as string),
         key: result.instanceId + '-' + result.status + '-' + index,
         status: result.status,
       },
@@ -68,4 +85,16 @@ export const removeRepeatKey = (executionResultList: IVinesExecutionResultItem[]
     }
   }
   return Array.from(map.values());
+};
+
+export const convertImageListToThumbnailList = (imageList: IVinesExecutionResultItem[]) => {
+  return imageList.map((item) => {
+    return {
+      ...item,
+      render: {
+        ...item.render,
+        data: getThumbUrl(item.render.data as string),
+      },
+    };
+  });
 };
