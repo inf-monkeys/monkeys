@@ -3359,6 +3359,11 @@
       },
       "operation-bar": {
         "select-none": "请先选择内容"
+      },
+      "execution-result": {
+        "select-mode": {
+          "title": "选择模式"
+        }
       }
     },
     "image-detail": {

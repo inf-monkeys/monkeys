@@ -3363,6 +3363,11 @@
       },
       "operation-bar": {
         "select-none": "No content selected, please select content first"
+      },
+      "execution-result": {
+        "select-mode": {
+          "title": "Select Mode"
+        }
       }
     },
     "image-detail": {
