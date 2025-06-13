@@ -9,7 +9,7 @@ import { WorkbenchView } from '@/components/layout/workbench/view';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { ImagesResult, useExecutionImageResultStore, useExecutionImages } from '@/store/useExecutionImageResultStore';
 import { usePageStore } from '@/store/usePageStore';
-import { convertExecutionResultToItemList } from '@/utils/execution';
+import { convertExecutionResultToThumbnailList } from '@/utils/execution';
 
 export const Workbench: React.FC = () => {
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
@@ -40,7 +40,7 @@ export const Workbench: React.FC = () => {
       try {
         const response = await getWorkflowExecutionAllOutputs();
         if (response && Array.isArray(response)) {
-          const items = response.flatMap((output) => convertExecutionResultToItemList(output));
+          const items = response.flatMap((output) => convertExecutionResultToThumbnailList(output));
           const imageItems = items.filter((item): item is ImagesResult => item.render.type === 'image');
           setImages(imageItems);
         }
