@@ -3,6 +3,7 @@ import React, { Dispatch, SetStateAction, startTransition, useCallback, useEffec
 import { SWRInfiniteResponse } from 'swr/infinite';
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import { t } from 'i18next';
 import { Square, SquareCheck } from 'lucide-react';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
@@ -171,7 +172,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           icon={isSelectionMode ? <SquareCheck /> : <Square />}
           onClick={() => setSelectionMode(!isSelectionMode)}
         >
-          选择模式
+          {t('workspace.form-view.execution-result.select-mode.title')}
         </Button>
       </div>
       {/* <ExtraButtonFilter /> */}
