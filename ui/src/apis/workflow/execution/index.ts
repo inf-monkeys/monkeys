@@ -231,3 +231,9 @@ export const useWorkflowInstanceByImageUrl = (workflowId?: string | null) =>
     workflowId ? `/api/workflow/executions/${workflowId}/get-instance-by-image-url` : null,
     vinesFetcher({ method: 'POST' }),
   );
+
+export const getWorkflowExecutionOutputs = (workflowId: string) =>
+  vinesFetcher({method: 'GET'})(`/api/workflow/executions/${workflowId}/outputs`);
+
+export const getWorkflowExecutionAllOutputs = () =>
+  vinesFetcher({method: 'GET'})(`/api/workflow/executions/all/outputs`);
