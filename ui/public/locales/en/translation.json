@@ -2601,7 +2601,7 @@
                   "description": "The format is JSON Path, and the source workflow output supports using __value to get the currently selected content",
                   "origin-placeholder": "Source workflow output field",
                   "target-placeholder": "Target workflow input field",
-                  "default": "Default value",
+                  "default-placeholder": "Default value",
                   "add": "Add mapping"
                 }
               }

@@ -2596,7 +2596,7 @@
                   "description": "格式为 JSON Path，源工作流输出支持使用 __value 获取当前选中内容",
                   "origin-placeholder": "源工作流输出字段",
                   "target-placeholder": "目标工作流输入字段",
-                  "default": "默认值",
+                  "default-placeholder": "默认值",
                   "add": "新增映射"
                 }
               }
