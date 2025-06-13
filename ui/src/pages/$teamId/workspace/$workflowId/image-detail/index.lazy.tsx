@@ -48,7 +48,7 @@ import {
 } from '@/store/useExecutionImageResultStore';
 import { useThumbImages } from '@/store/useExecutionImageTumbStore';
 import { cn } from '@/utils';
-import { useVinesTeam } from '@/components/router/guard/team';
+import { useFormVisibilityStore } from '@/store/useFormVisibilityStore';
 
 import 'rc-image/assets/index.css';
 
@@ -359,7 +359,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
         </Tooltip>
       </div>
 
-      <div className="mb-5">
+      <div className="mb-4">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button icon={<Trash />} variant="outline" size="small" onClick={onDeleteImage} />
@@ -375,14 +375,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { history } = router;
-  const { team } = useVinesTeam();
   const [imageRotation, setImageRotation] = useState(0);
   const [imageFlipX, setImageFlipX] = useState(false);
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'mini' });
-  const isMiniFrame = mode === 'mini' || !!team;
+  const isMiniFrame = mode === 'mini';  
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
+  const { isFormVisible } = useFormVisibilityStore();
 
   // 提升的状态管理
   const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
@@ -528,13 +528,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           className={cn(
             'flex size-full flex-1 rounded-xl border border-input bg-background py-2 pb-6 shadow-sm dark:bg-[#111113] md:flex-row',
             isMiniFrame && 'justify-center',
+            !isMiniFrame && !isFormVisible && 'justify-center',
           )}
         >
           {/* 左侧图片展示区 */}
           <div
             className={cn(
               'flex h-full flex-col items-center overflow-auto bg-background dark:bg-[#111113]',
-              isMiniFrame ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
+              isMiniFrame ? 'w-full' : !isFormVisible ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
             )}
           >
             {imageUrl ? (
@@ -633,7 +634,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           </div>
 
           {/* 右侧表单区域 */}
-          {!isMiniFrame && (
+          {!isMiniFrame && isFormVisible && (
             <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
               <ScrollArea disabledOverflowMask className="flex-1 overflow-hidden">
                 <TabularRenderWrapper
