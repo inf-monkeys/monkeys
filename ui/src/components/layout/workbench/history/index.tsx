@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { cn } from '@/utils';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+
 import { Card } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution';
-import { usePageStore } from '@/store/usePageStore';
 
 interface HistoryResultProps {
   loading: boolean;
@@ -54,7 +54,7 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
   return (
     <div
       className={cn(
-        ' relative col-span-5 mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-1 px-12 py-6 shadow-sm',
+        'relative col-span-5 mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-1 px-12 py-6 shadow-sm',
         isMiniFrame && 'mt-2',
         className,
       )}
@@ -75,7 +75,7 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
         className="w-full px-4"
         ref={carouselRef}
       >
-        <CarouselContent className=" overflow-hidden space-x-0">
+        <CarouselContent className="space-x-0 overflow-hidden">
           {loading ? (
             <div className="flex w-full items-center justify-center">
               <span>Loading...</span>
@@ -110,8 +110,8 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
             </div>
           )}
         </CarouselContent>
-        <CarouselPrevious className="h-8.5 absolute -left-8 top-1/2 w-9.5 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5 " />
-        <CarouselNext className="h-8.5 absolute -right-8 top-1/2 w-9.5 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5 " />
+        <CarouselPrevious className="h-8.5 w-9.5 absolute -left-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
+        <CarouselNext className="h-8.5 w-9.5 absolute -right-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
       </Carousel>
     </div>
   );
