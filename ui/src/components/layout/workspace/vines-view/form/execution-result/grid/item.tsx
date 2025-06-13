@@ -3,13 +3,13 @@ import React from 'react';
 import { SWRInfiniteResponse } from 'swr/infinite';
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { CirclePause, FileMinus } from 'lucide-react';
+import { CirclePause, FileMinus, SquareCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid/index.tsx';
 import { VinesLoading } from '@/components/ui/loading';
-import { getAlt } from '@/utils';
+import { cn, getAlt } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 import { VirtuaExecutionResultGridImageItem } from '../virtua/item/image';
@@ -21,6 +21,9 @@ interface IExecutionResultItemProps {
   isDeleted?: boolean;
   addDeletedInstanceId?: IAddDeletedInstanceId;
   mutate?: SWRInfiniteResponse['mutate'];
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
+  onSelect?: (instanceId: string) => void;
 }
 
 export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
@@ -29,11 +32,34 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   isDeleted = false,
   addDeletedInstanceId,
   mutate,
+  isSelectionMode = false,
+  isSelected = false,
+  onSelect,
 }) => {
   const { render } = result;
   const { type, data, status } = render;
   const { t } = useTranslation();
   const alt = getAlt(result);
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isSelectionMode && onSelect) {
+      e.stopPropagation();
+      onSelect(result.instanceId);
+    }
+  };
+
+  const renderSelectionOverlay = () => {
+    if (!isSelectionMode) return null;
+    return (
+      <div
+        className={cn(
+          'absolute inset-0 z-10 flex cursor-pointer items-end justify-end bg-transparent p-2 transition-opacity',
+        )}
+      >
+        {isSelected && <SquareCheck className="stroke-vines-500" size={36} />}
+      </div>
+    );
+  };
 
   if (isDeleted)
     return (
@@ -49,7 +75,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
       return (
         <div
           key={render.key}
-          className="flex h-40 items-center justify-center rounded-lg border border-input shadow-sm"
+          className="relative flex h-40 items-center justify-center rounded-lg border border-input shadow-sm"
         >
           <VinesLoading />
         </div>
@@ -58,7 +84,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
       return (
         <div
           key={render.key}
-          className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border border-input shadow-sm"
+          className="relative flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border border-input shadow-sm"
         >
           <CirclePause className="stroke-yellow-10" size={36} />
           <h1 className="text-sm font-bold">{t('common.workflow.status.PAUSED')}</h1>
@@ -68,9 +94,8 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
 
   switch (type) {
     case 'image':
-      // 使用包装组件来支持下载和删除功能
       return (
-        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
+        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm" onClick={handleClick}>
           <VirtuaExecutionResultGridWrapper
             data={result}
             src={data as string}
@@ -78,15 +103,16 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
             addDeletedInstanceId={addDeletedInstanceId}
             mutate={mutate}
           >
-            <div className="h-full w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="h-full w-full">
               <VirtuaExecutionResultGridImageItem src={data as string} alt={alt} instanceId={result.instanceId} />
+              {renderSelectionOverlay()}
             </div>
           </VirtuaExecutionResultGridWrapper>
         </div>
       );
     default:
       return (
-        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
+        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm" onClick={handleClick}>
           <VirtuaExecutionResultGridWrapper
             data={result}
             event$={event$}
@@ -94,6 +120,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
             mutate={mutate}
           >
             <div className="max-h-96 min-h-40 overflow-auto p-2">
+              {renderSelectionOverlay()}
               <VinesAbstractDataPreview data={data} className="h-full" />
             </div>
           </VirtuaExecutionResultGridWrapper>

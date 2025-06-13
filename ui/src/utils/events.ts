@@ -28,7 +28,8 @@ export type FlowEventType =
   | 'flow-trigger-selector'
   | 'flow-trigger-schedule'
   | 'flow-trigger-webhook'
-  | 'flow-trigger-custom';
+  | 'flow-trigger-custom'
+  | 'flow-association-editor';
 
 export type FromEventType = 'form-fill-data-by-image-url';
 

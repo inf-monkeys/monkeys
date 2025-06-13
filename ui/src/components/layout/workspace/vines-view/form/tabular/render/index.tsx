@@ -26,8 +26,8 @@ import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
-import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { useSetWorkbenchCacheVal, useWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -237,7 +237,6 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
       }
     } else if (typeof event === 'object') {
       if (event.type === 'paste-param') {
-        console.log(event.data);
         for (const inputDef of event.data) {
           const { id, data } = inputDef;
           form.setValue(id, data as unknown as any);
