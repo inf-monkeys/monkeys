@@ -1,6 +1,6 @@
 import { logger } from '@/common/logger';
 import { ComfyuiWorkflowEntity } from '@/database/entities/comfyui/comfyui-workflow.entity';
-import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
+import { CustomConfigs, CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-marketplace.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { ComfyuiModelService } from '@/modules/assets/comfyui-model/comfyui-model.service';
@@ -98,6 +98,7 @@ export class TeamsService {
       iconUrl?: string;
       customTheme?: CustomTheme;
       darkmodeIconUrl?: string;
+      configs?: CustomConfigs;
     },
   ) {
     return await this.teamRepository.updateTeam(teamId, updates);
