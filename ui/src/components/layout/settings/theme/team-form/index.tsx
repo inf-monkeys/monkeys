@@ -1,11 +1,35 @@
+import { useTeams } from "@/apis/authz/team";
+import { useCustomConfigs } from "@/apis/authz/team/custom-configs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTranslation } from "react-i18next";
 import { Switch } from "@/components/ui/switch";
-import { useFormVisibilityStore } from "@/store/useFormVisibilityStore";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 export const TeamForm = () => {
-    const { t } = useTranslation();
-    const { isFormVisible, toggleFormVisibility } = useFormVisibilityStore();
+  const { t } = useTranslation();
+
+  const { mutate } = useTeams();
+
+  const { showFormInImageDetail, update } = useCustomConfigs();
+
+  const onFormVisibilityChange = async (checked: boolean) => {
+    toast.promise(
+      update('showFormInImageDetail', checked)
+        .then((team) => {
+          void mutate();
+          return team;
+        })
+        .catch((error) => {
+          console.log('error', error);
+          throw error;
+        }),
+      {
+        loading: t('common.update.loading'),
+        success: t('common.update.success'),
+        error: t('common.update.error'),
+      },
+    );
+  }
 
   return (
     <Card>
@@ -23,8 +47,8 @@ export const TeamForm = () => {
             <div className="flex items-center space-x-2">
               <Switch
                 id="form-visibility"
-                checked={isFormVisible}
-                onCheckedChange={toggleFormVisibility}
+                checked={showFormInImageDetail}
+                onCheckedChange={(checked) => onFormVisibilityChange(checked)}
               />
             </div>
           </div>

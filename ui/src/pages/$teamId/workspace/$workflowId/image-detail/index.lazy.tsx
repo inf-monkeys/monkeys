@@ -48,11 +48,11 @@ import {
 } from '@/store/useExecutionImageResultStore';
 import { useThumbImages } from '@/store/useExecutionImageTumbStore';
 import { cn } from '@/utils';
-import { useFormVisibilityStore } from '@/store/useFormVisibilityStore';
 
+import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
 import 'rc-image/assets/index.css';
 
-interface IImageDetailProps {}
+interface IImageDetailProps { }
 
 interface TabularRenderWrapperProps {
   height?: number;
@@ -191,11 +191,11 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
 
     const newInputs = execution
       ? inputs.map((input) => {
-          return {
-            ...input,
-            default: execution.input?.[input.name] ?? input.default,
-          };
-        })
+        return {
+          ...input,
+          default: execution.input?.[input.name] ?? input.default,
+        };
+      })
       : [];
     // console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
     onProcessedInputsChange(newInputs);
@@ -380,9 +380,9 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'mini' });
-  const isMiniFrame = mode === 'mini';  
+  const isMiniFrame = mode === 'mini';
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
-  const { isFormVisible } = useFormVisibilityStore();
+  const { showFormInImageDetail } = useCustomConfigs();
 
   // 提升的状态管理
   const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
@@ -528,14 +528,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           className={cn(
             'flex size-full flex-1 rounded-xl border border-input bg-background py-2 pb-6 shadow-sm dark:bg-[#111113] md:flex-row',
             isMiniFrame && 'justify-center',
-            !isMiniFrame && !isFormVisible && 'justify-center',
+            !isMiniFrame && !showFormInImageDetail && 'justify-center',
           )}
         >
           {/* 左侧图片展示区 */}
           <div
             className={cn(
               'flex h-full flex-col items-center overflow-auto bg-background dark:bg-[#111113]',
-              isMiniFrame ? 'w-full' : !isFormVisible ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
+              isMiniFrame ? 'w-full' : !showFormInImageDetail ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
             )}
           >
             {imageUrl ? (
@@ -602,7 +602,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         // `,
                         transition: 'transform 0.3s ease',
                       }}
-                      // preview={false}
+                    // preview={false}
                     />
                   </div>
                 </div>
@@ -634,7 +634,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           </div>
 
           {/* 右侧表单区域 */}
-          {!isMiniFrame && isFormVisible && (
+          {!isMiniFrame && showFormInImageDetail && (
             <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
               <ScrollArea disabledOverflowMask className="flex-1 overflow-hidden">
                 <TabularRenderWrapper
