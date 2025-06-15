@@ -960,6 +960,12 @@
         "lightmode": "Click to change light mode logo",
         "darkmode": "Click to change dark mode logo"
       },
+      "team-form": {
+        "title": "Custom configuration",
+        "description": "Customize your workspace settings",
+        "form-configuration": "Form configuration",
+        "displayed": "Set whether the form should be displayed"
+      },
       "market": {
         "title": "Theme Market",
         "operate": {

@@ -34,6 +34,9 @@ export interface ISystemConfig {
     hideSpaceHeader: boolean;
     showSidebarPageGroup: boolean;
     showSidebarTeamSelector: boolean;
+    defaults: {
+      showFormInImageDetail?: boolean;
+    };
   };
   auth: {
     enabled: AuthMethod[];
