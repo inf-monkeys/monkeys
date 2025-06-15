@@ -61,6 +61,9 @@ export interface ServerConfig {
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
     showSidebarPageGroup?: boolean;
+    defaults?: {
+      showFormInImageDetail?: boolean;
+    }
   };
 }
 
@@ -326,6 +329,9 @@ export const config: Config = {
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
       showSidebarPageGroup: readConfig('server.customization.showSidebarPageGroup', true),
       showSidebarTeamSelector: readConfig('server.customization.showSidebarTeamSelector', false),
+      defaults: {
+        showFormInImageDetail: readConfig('server.customization.defaults.showFormInImageDetail', true),
+      },
     },
   },
   conductor: {
