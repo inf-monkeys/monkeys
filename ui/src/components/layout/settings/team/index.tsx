@@ -1,9 +1,9 @@
 import { Team } from '../account/team';
 import { TeamMember } from '../account/team-member';
+import { TeamCustomConfig } from '../theme/team-custom-config';
 import { TeamLogo } from '../theme/team-logo';
 import { TeamNeocardColor } from '../theme/team-neocard-color';
 import { TeamPrimaryColor } from '../theme/team-primary-color';
-import { TeamForm } from '../theme/team-form';
 
 export const TeamSettings = () => {
   return (
@@ -13,7 +13,7 @@ export const TeamSettings = () => {
         <Team />
         <TeamMember />
         <TeamLogo />
-        <TeamForm />
+        <TeamCustomConfig />
       </div>
       <div className="grid items-start gap-4">
         <div className="grid items-start gap-4">

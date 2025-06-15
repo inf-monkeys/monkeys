@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-export const TeamForm = () => {
+export const TeamCustomConfig = () => {
   const { t } = useTranslation();
 
   const { mutate } = useTeams();
@@ -34,15 +34,17 @@ export const TeamForm = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('settings.theme.team-form.title')}</CardTitle>
-        <CardDescription>{t('settings.theme.team-form.description')}</CardDescription>
+        <CardTitle>{t('settings.theme.team-custom-config.title')}</CardTitle>
+        <CardDescription>{t('settings.theme.team-custom-config.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Card className="border-0 shadow-none p-0">
-          <div className="flex items-center justify-between pl-6">
-            <div>
-              <CardTitle>{t('settings.theme.team-form.form-configuration')}</CardTitle>
-              <CardDescription>{t('settings.theme.team-form.displayed')}</CardDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <div className="flex flex-col">
+                <h3 className="line-clamp-1 font-semibold leading-tight">{t('settings.theme.team-custom-config.configs.show-form-in-image-detail.title')}</h3>
+                <p className="text-xs text-muted-foreground">{t('settings.theme.team-custom-config.configs.show-form-in-image-detail.description')}</p>
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <Switch
