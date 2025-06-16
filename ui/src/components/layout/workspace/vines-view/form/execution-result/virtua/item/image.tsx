@@ -21,9 +21,9 @@ import 'rc-image/assets/index.css';
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-      label: string;
-      value: string;
-    };
+    label: any;
+    value: string;
+  };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
@@ -50,7 +50,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const workflowId = useFlowStore((s) => s.workflowId);
   const { images, setPosition } = useExecutionImageResultStore();
 
-  const altLabel = isObject(alt) ? alt.label : alt;
+  const altLabel = isObject(alt) ? alt.label.toString() : alt;
+
   const altContent = isObject(alt) ? alt.value : alt;
   const [previewSrc, setPreviewSrc] = React.useState(src);
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });

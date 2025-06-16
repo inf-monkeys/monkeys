@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useWorkspacePages } from '@/apis/pages';
+import { useGetWorkflow } from '@/apis/workflow';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -19,13 +20,13 @@ import { cn, getI18nContent } from '@/utils';
 
 export interface IWorkbenchOperationItemProps {
   data: IWorkflowAssociation;
-  onClick?: () => void;
 }
 
-export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemProps>(({ data, onClick }) => {
+export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemProps>(({ data }) => {
   const { t } = useTranslation();
   const { teamId } = useVinesTeam();
   const setCurrentPage = useSetCurrentPage();
+  const { data: workflow } = useGetWorkflow(data.targetWorkflowId);
   const { data: workspaceData } = useWorkspacePages();
 
   const { selectedOutputItems } = useOutputSelectionStore();
@@ -48,6 +49,10 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
     const originData = selectedOutputItems[0];
 
     const targetInput = {};
+
+    workflow?.variables?.forEach((variable) => {
+      _.set(targetInput, variable.name, variable.default);
+    });
 
     for (const { origin, target, default: defaultVal } of data.mapper) {
       if (origin === '__value') {

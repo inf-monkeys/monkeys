@@ -28,7 +28,7 @@ import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.t
 import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
-import { useSetWorkbenchCacheVal, useWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
+import { useResetWorkbenchCacheVal, useSetWorkbenchCacheVal, useWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
@@ -94,9 +94,11 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   });
 
   const [defValues, setDefValues] = useState<IWorkflowInputForm>({});
+  const [initValues, setInitValues] = useState<IWorkflowInputForm>({});
 
   const { watch } = form;
   const setWorkbenchCacheVal = useSetWorkbenchCacheVal();
+  const resetWorkbenchCacheVal = useResetWorkbenchCacheVal();
   const workbenchCacheVal = useWorkbenchCacheVal(workflowId ?? '');
   const useFormResetRef = useRef<boolean>(false);
 
@@ -109,7 +111,8 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   useEffect(() => {
     if (workbenchCacheVal && !hasRestoreValues && !inImageDetailRoute) {
       useFormResetRef.current = true;
-      setDefValues(workbenchCacheVal);
+      // setDefValues(workbenchCacheVal);
+      setInitValues(workbenchCacheVal);
       form.reset(workbenchCacheVal);
       setHasRestoreValues(true);
       useFormResetRef.current = false;
@@ -128,9 +131,6 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
 
   useEffect(() => {
     if (!inputs) return;
-    if (!inImageDetailRoute) {
-      if (workbenchCacheVal) return;
-    }
     const targetInputs = inputs.filter(({ default: v }) => typeof v !== 'undefined');
     const defaultValues = fromPairs(
       targetInputs.map((it) => {
@@ -169,7 +169,13 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
 
     setDefValues(defaultValues);
 
-    form.reset(defaultValues);
+    if (!inImageDetailRoute && (!workbenchCacheVal || Object.keys(workbenchCacheVal).length === 0)) {
+      form.reset(defaultValues);
+    } else if (!inImageDetailRoute) {
+      form.reset(initValues);
+    } else {
+      form.reset(defaultValues);
+    }
   }, [inputs]);
 
   // 监听表单值变化
@@ -203,6 +209,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     if (typeof event === 'string') {
       switch (event) {
         case 'reset':
+          resetWorkbenchCacheVal(workflowId ?? '');
           form.reset(latestValues.current);
           break;
         case 'restore-previous-param':

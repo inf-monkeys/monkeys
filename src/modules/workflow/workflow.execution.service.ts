@@ -41,7 +41,7 @@ export class WorkflowExecutionService {
     @Inject(forwardRef(() => WorkflowTrackerService))
     private readonly workflowTrackerService: WorkflowTrackerService,
     private readonly workflowObservabilityService: WorkflowObservabilityService,
-  ) {}
+  ) { }
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
     const workflowInstanceIds = executions.map((x) => x.workflowId);
@@ -290,35 +290,67 @@ export class WorkflowExecutionService {
       alt = dataVal;
     });
 
+    const outputKeys = Object.keys(flattenOutput);
     const outputValues = Object.values(flattenOutput);
-
-    const images = outputValues.map((it) => extractImageUrls(it)).flat();
-    const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
-
     const finalOutput = [];
     let isInserted = false;
 
-    if (outputValues.length === 1 && !images.length && !videos.length) {
-      const currentOutput = outputValues[0];
-      if (typeof currentOutput === 'string') {
-        finalOutput.push({ type: 'text', data: currentOutput });
-      } else {
-        finalOutput.push({ type: 'json', data: currentOutput });
+    // 为每个 key-value 对单独处理
+    for (let i = 0; i < outputKeys.length; i++) {
+      const key = outputKeys[i];
+      const value = outputValues[i];
+
+      // 提取图片和视频
+      const images = extractImageUrls(value);
+      const videos = extractVideoUrls(value);
+
+      // 处理图片
+      for (const image of images) {
+        finalOutput.push({
+          type: 'image',
+          data: image,
+          alt,
+          key: key // 添加对应的 key
+        });
+        isInserted = true;
       }
-      isInserted = true;
+
+      // 处理视频
+      for (const video of videos) {
+        finalOutput.push({
+          type: 'video',
+          data: video,
+          key: key // 添加对应的 key
+        });
+        isInserted = true;
+      }
+
+      // 如果没有图片和视频，处理文本或 JSON
+      if (images.length === 0 && videos.length === 0) {
+        if (typeof value === 'string') {
+          finalOutput.push({
+            type: 'text',
+            data: value,
+            key: key // 添加对应的 key
+          });
+        } else {
+          finalOutput.push({
+            type: 'json',
+            data: value,
+            key: key // 添加对应的 key
+          });
+        }
+        isInserted = true;
+      }
     }
 
-    for (const image of images) {
-      finalOutput.push({ type: 'image', data: image, alt });
-      isInserted = true;
-    }
-
-    for (const video of videos) {
-      finalOutput.push({ type: 'video', data: video });
-      isInserted = true;
-    }
+    // 如果没有插入任何内容，添加原始输出
     if (!isInserted && output) {
-      finalOutput.push({ type: 'json', data: output });
+      finalOutput.push({
+        type: 'json',
+        data: output,
+        key: 'root' // 或者使用其他标识
+      });
     }
 
     let formattedInput = null;
@@ -421,6 +453,7 @@ export class WorkflowExecutionService {
       const flattenOutput = flattenKeys(output, undefined, ['__display_text'], (_, dataVal) => {
         alt = dataVal;
       });
+      const outputKeys = Object.keys(flattenOutput);
       const outputValues = Object.values(flattenOutput);
       const images = outputValues.map((it) => extractImageUrls(it)).flat();
       const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
@@ -524,34 +557,73 @@ export class WorkflowExecutionService {
             alt = dataVal;
           });
 
+          const outputKeys = Object.keys(flattenOutput);
           const outputValues = Object.values(flattenOutput);
-          const images = outputValues.map((item) => extractImageUrls(item)).flat();
-          const videos = outputValues.map((item) => extractVideoUrls(item)).flat();
           const finalOutput = [];
           let isInserted = false;
 
-          if (outputValues.length === 1 && !images.length && !videos.length) {
-            const currentOutput = outputValues[0];
-            if (typeof currentOutput === 'string') {
-              finalOutput.push({ type: 'text', data: currentOutput });
-            } else {
-              finalOutput.push({ type: 'json', data: currentOutput });
+          // 为每个 key-value 对单独处理
+          for (let i = 0; i < outputKeys.length; i++) {
+            const key = outputKeys[i];
+            const currentKey = key.split('.')[key.split('.').length - 1];
+            const value = outputValues[i];
+
+            // __ 开头的 key 不处理
+            if (currentKey.startsWith('__')) {
+              continue;
             }
-            isInserted = true;
+
+            // 提取图片和视频
+            const images = extractImageUrls(value);
+            const videos = extractVideoUrls(value);
+
+            // 处理图片
+            for (const image of images) {
+              finalOutput.push({
+                type: 'image',
+                data: image,
+                alt,
+                key: key
+              });
+              isInserted = true;
+            }
+
+            // 处理视频
+            for (const video of videos) {
+              finalOutput.push({
+                type: 'video',
+                data: video,
+                key: key
+              });
+              isInserted = true;
+            }
+
+            // 如果没有图片和视频，处理文本或 JSON
+            if (images.length === 0 && videos.length === 0) {
+              if (typeof value === 'string') {
+                finalOutput.push({
+                  type: 'text',
+                  data: value,
+                  key: key // 添加对应的 key
+                });
+              } else {
+                finalOutput.push({
+                  type: 'json',
+                  data: value,
+                  key: key // 添加对应的 key
+                });
+              }
+              isInserted = true;
+            }
           }
 
-          for (const image of images) {
-            finalOutput.push({ type: 'image', data: image, alt });
-            isInserted = true;
-          }
-
-          for (const video of videos) {
-            finalOutput.push({ type: 'video', data: video });
-            isInserted = true;
-          }
-
+          // 如果没有插入任何内容，添加原始输出
           if (!isInserted && output) {
-            finalOutput.push({ type: 'json', data: output });
+            finalOutput.push({
+              type: 'json',
+              data: output,
+              key: 'root' // 或者使用其他标识
+            });
           }
 
           const ctx = input?.['__context'];
