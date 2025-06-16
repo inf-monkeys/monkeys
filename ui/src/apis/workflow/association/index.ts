@@ -4,7 +4,7 @@ import { vinesFetcher } from '@/apis/fetcher';
 
 import { IWorkflowAssociation } from './typings';
 
-export const useWorkflowAssociationList = (workflowId?: string) =>
+export const useWorkflowAssociationList = (workflowId?: string | null) =>
   useSWR<IWorkflowAssociation[] | undefined>(
     workflowId ? `/api/workflow/${workflowId}/associations` : null,
     vinesFetcher(),
