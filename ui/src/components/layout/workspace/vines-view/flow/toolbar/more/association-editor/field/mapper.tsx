@@ -125,7 +125,11 @@ export const FieldMapper: React.FC<IFieldMapperProps> = ({ form }) => {
                   />
                 </div>
               ))}
-              <Button icon={<Plus />} variant="outline" onClick={handleAddMapper} className="w-full">
+              <Button icon={<Plus />} variant="outline" onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                handleAddMapper();
+              }} className="w-full">
                 {t('workspace.flow-view.tooltip.more.association-editor.editor.field.mapper.add')}
               </Button>
             </div>
