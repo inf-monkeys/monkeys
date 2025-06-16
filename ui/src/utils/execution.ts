@@ -17,13 +17,13 @@ export type IVinesExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
     type: 'image' | 'video' | 'text' | 'json' | 'empty';
     data: JSONValue;
     alt?:
-    | string
-    | string[]
-    | { [imgUrl: string]: string }
-    | {
-      [imgUrl: string]: IVinesExecutionResultImageAltCopy;
-    }
-    | undefined;
+      | string
+      | string[]
+      | { [imgUrl: string]: string }
+      | {
+          [imgUrl: string]: IVinesExecutionResultImageAltCopy;
+        }
+      | undefined;
     // index: number;
     key: string;
     status: VinesWorkflowExecutionType;

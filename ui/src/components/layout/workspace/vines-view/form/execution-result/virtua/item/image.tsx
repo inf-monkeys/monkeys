@@ -21,15 +21,16 @@ import 'rc-image/assets/index.css';
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-    label: any;
-    value: string;
-  };
+      label: any;
+      value: string;
+    };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
   alt: IVinesExecutionResultImageAlt;
   instanceId?: string;
   outputIndex?: number;
+  renderKey: string;
 }
 
 export function getThumbUrl(url: string) {
@@ -43,6 +44,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   alt,
   instanceId,
   outputIndex = 0,
+  renderKey,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -70,7 +72,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (workflowId && src) {
-      const position = images?.findIndex((image) => (image.render.data as string) === src);
+      const position = images?.findIndex((image) => image.render.key === renderKey);
       setPosition(position);
       navigate({
         to: '/$teamId/workspace/$workflowId/image-detail/',
