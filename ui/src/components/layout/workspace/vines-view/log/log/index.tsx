@@ -46,8 +46,8 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
     },
   });
 
-  const { data: searchWorkflowExecutionsData, trigger, isMutating } = useMutationSearchWorkflowExecutions();
-
+  const { data: searchWorkflowExecutionsData, trigger } = useMutationSearchWorkflowExecutions();
+  const isMutating = false;
   const workflowPageRef = useRef(1);
 
   const handleSubmit = async (
@@ -89,6 +89,12 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
     toast.warning(t('workspace.logs-view.workflow-id-error'));
     return;
   };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void handleSubmit(void 0, false);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleMutate = async () => {
     if (!vines.workflowId) {
