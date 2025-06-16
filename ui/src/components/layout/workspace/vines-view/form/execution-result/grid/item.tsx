@@ -3,7 +3,7 @@ import React from 'react';
 import { SWRInfiniteResponse } from 'swr/infinite';
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { CirclePause, FileMinus, SquareCheck } from 'lucide-react';
+import { Check, CirclePause, FileMinus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
@@ -12,6 +12,7 @@ import { VinesLoading } from '@/components/ui/loading';
 import { cn, getAlt } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
+import { Button } from '@/components/ui/button';
 import { VirtuaExecutionResultGridImageItem } from '../virtua/item/image';
 import { VirtuaExecutionResultGridWrapper } from '../virtua/item/wrapper';
 
@@ -23,7 +24,7 @@ interface IExecutionResultItemProps {
   mutate?: SWRInfiniteResponse['mutate'];
   isSelectionMode?: boolean;
   isSelected?: boolean;
-  onSelect?: (instanceId: string) => void;
+  onSelect?: (renderKey: string) => void;
 }
 
 export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
@@ -44,7 +45,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   const handleClick = (e: React.MouseEvent) => {
     if (isSelectionMode && onSelect) {
       e.stopPropagation();
-      onSelect(result.instanceId);
+      onSelect(render.key);
     }
   };
 
@@ -56,7 +57,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
           'absolute inset-0 z-10 flex cursor-pointer items-end justify-end bg-transparent p-2 transition-opacity',
         )}
       >
-        {isSelected && <SquareCheck className="stroke-vines-500" size={36} />}
+        {isSelected && <Button variant="outline" icon={<Check />} />}
       </div>
     );
   };
