@@ -141,11 +141,11 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         <ExecutionResultItem
           result={item}
           event$={event$}
-          isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.instanceId)}
+          isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.render.key)}
           addDeletedInstanceId={addDeletedInstanceId}
           mutate={mutate}
           isSelectionMode={isSelectionMode}
-          isSelected={selectedOutputs.has(item.instanceId)}
+          isSelected={selectedOutputs.has(item.render.key)}
           onSelect={(id) => toggleOutputSelection(id, item)}
         />
       ),
