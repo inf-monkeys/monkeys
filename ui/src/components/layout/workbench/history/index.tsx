@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 
+import { useWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { Card } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { cn } from '@/utils';
@@ -7,12 +8,13 @@ import { IVinesExecutionResultItem } from '@/utils/execution';
 
 interface HistoryResultProps {
   loading: boolean;
-  imageItems: IVinesExecutionResultItem[];
+  images: IVinesExecutionResultItem[];
   isMiniFrame?: boolean;
   className?: string;
 }
 
-export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItems, isMiniFrame, className }) => {
+const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isMiniFrame, className }) => {
+  console.log('images', images);
   const [draggedItem, setDraggedItem] = useState<IVinesExecutionResultItem | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -41,7 +43,7 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
     e.preventDefault();
     const draggedKey = e.dataTransfer.getData('text/plain');
     if (draggedKey && dragOverIndex !== null) {
-      const newItems = [...imageItems];
+      const newItems = [...images];
       const draggedIndex = newItems.findIndex((item) => item.render.key === draggedKey);
       if (draggedIndex !== -1) {
         const [removed] = newItems.splice(draggedIndex, 1);
@@ -60,6 +62,7 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
       )}
       style={{
         width: window.innerWidth * 0.765,
+        height: '140px',
       }}
     >
       <Carousel
@@ -80,8 +83,8 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
             <div className="flex w-full items-center justify-center">
               <span>Loading...</span>
             </div>
-          ) : imageItems.length > 0 ? (
-            imageItems.map((item, index) => (
+          ) : images.length > 0 ? (
+            images.map((item, index) => (
               <CarouselItem key={item.render.key} className={cn('basis-auto', dragOverIndex === index && '')}>
                 <Card
                   className={cn(
@@ -116,3 +119,16 @@ export const HistoryResult: React.FC<HistoryResultProps> = ({ loading, imageItem
     </div>
   );
 };
+
+const HistoryResultOg = () => {
+  const { data: imagesResult } = useWorkflowExecutionAllOutputs();
+  console.log('imagesResult', imagesResult);
+  // const images = convertExecutionResultToItemList(imagesResult ?? []);
+  return <HistoryResultInner loading={false} images={[]} isMiniFrame={false} />;
+};
+
+export default function HistoryResultDefault() {
+  return React.memo(HistoryResultOg);
+}
+
+export const HistoryResult = React.memo(HistoryResultOg);
