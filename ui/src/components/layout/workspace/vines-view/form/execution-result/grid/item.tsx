@@ -8,11 +8,11 @@ import { useTranslation } from 'react-i18next';
 
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid/index.tsx';
+import { Button } from '@/components/ui/button';
 import { VinesLoading } from '@/components/ui/loading';
 import { cn, getAlt } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
-import { Button } from '@/components/ui/button';
 import { VirtuaExecutionResultGridImageItem } from '../virtua/item/image';
 import { VirtuaExecutionResultGridWrapper } from '../virtua/item/wrapper';
 
@@ -105,7 +105,12 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
             mutate={mutate}
           >
             <div className="h-full w-full">
-              <VirtuaExecutionResultGridImageItem src={data as string} alt={alt} instanceId={result.instanceId} />
+              <VirtuaExecutionResultGridImageItem
+                src={data as string}
+                alt={alt}
+                instanceId={result.instanceId}
+                renderKey={render.key}
+              />
               {renderSelectionOverlay()}
             </div>
           </VirtuaExecutionResultGridWrapper>
