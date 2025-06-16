@@ -21,7 +21,7 @@ import 'rc-image/assets/index.css';
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-      label: string;
+      label: any;
       value: string;
     };
 
@@ -30,6 +30,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   alt: IVinesExecutionResultImageAlt;
   instanceId?: string;
   outputIndex?: number;
+  renderKey: string;
 }
 
 export function getThumbUrl(url: string) {
@@ -43,6 +44,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   alt,
   instanceId,
   outputIndex = 0,
+  renderKey,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -50,7 +52,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const workflowId = useFlowStore((s) => s.workflowId);
   const { images, setPosition } = useExecutionImageResultStore();
 
-  const altLabel = isObject(alt) ? alt.label : alt;
+  const altLabel = isObject(alt) ? alt.label.toString() : alt;
+
   const altContent = isObject(alt) ? alt.value : alt;
   const [previewSrc, setPreviewSrc] = React.useState(src);
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
@@ -69,7 +72,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (workflowId && src) {
-      const position = images?.findIndex((image) => (image.render.data as string) === src);
+      const position = images?.findIndex((image) => image.render.key === renderKey);
       setPosition(position);
       navigate({
         to: '/$teamId/workspace/$workflowId/image-detail/',

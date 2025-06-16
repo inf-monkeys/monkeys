@@ -187,24 +187,27 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
             mutate={mutateExecutionList}
           />
         ) : (
-          <ScrollArea
-            style={{ height }}
-            className="z-20 mr-0.5 rounded-xl bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2"
-          >
-            <ErrorFilter />
-            {/* <ExtraButtonFilter /> */}
-            <div className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2">
-              <History size={64} />
-              {/* // Execution records filtered to empty */}
-              <Label className="text-sm">
-                {t(
-                  executionResultList.length === filteredData.length
-                    ? 'workspace.logs-view.log.list.empty'
-                    : 'workspace.logs-view.log.list.filtered-empty',
-                )}
-              </Label>
+          <>
+            <div className="p-2 flex gap-2 justify-between">
+              <ErrorFilter />
+              {/* <ExtraButtonFilter /> */}
+              <div className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2">
+                <History size={64} />
+                {/* // Execution records filtered to empty */}
+                <Label className="text-sm">
+                  {t(
+                    executionResultList.length === filteredData.length
+                      ? 'workspace.logs-view.log.list.empty'
+                      : 'workspace.logs-view.log.list.filtered-empty',
+                  )}
+                </Label>
+              </div>
             </div>
-          </ScrollArea>
+            <ScrollArea
+              style={{ height: height - 40 }}
+              className="z-20 mr-0.5 rounded-xl bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2"
+            >
+            </ScrollArea></>
         )}
         <AnimatePresence mode="popLayout">
           {isLoading ? (
