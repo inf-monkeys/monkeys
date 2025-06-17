@@ -136,9 +136,6 @@ function CarouselItemImage({ image, index }: { image: ImagesResult; index: numbe
       alt={`Thumbnail`}
       className="size-[90px] flex-shrink-0 rounded-md border border-border object-cover"
       loading="lazy"
-      /*       onError={(e) => {
-        console.log('Image load error:', e);
-      }} */
     />
   );
 }
