@@ -2,374 +2,29 @@ import React, { startTransition, useCallback, useEffect, useState } from 'react'
 
 import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-router';
 
-import { useAsyncEffect, useEventEmitter, useMemoizedFn } from 'ahooks';
-import { isBoolean } from 'lodash';
-import {
-  ChevronDown,
-  ChevronUp,
-  Copy,
-  Download,
-  FlipHorizontal,
-  FlipVertical,
-  RotateCcw,
-  RotateCw,
-  Sparkles,
-  Trash,
-  X,
-  ZoomIn,
-  ZoomOut,
-} from 'lucide-react';
+import { useMemoizedFn } from 'ahooks';
 import Image from 'rc-image';
-import { useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { useSystemConfig } from '@/apis/common';
+import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
 import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
-import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
-import { Button } from '@/components/ui/button';
-import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { ImageOperations } from '@/components/layout/workbench/image-detail/image-operation';
+import { RightSidebar } from '@/components/layout/workbench/image-detail/right-side-bar';
+import { ImagesCarousel } from '@/components/layout/workbench/image-detail/swiper-carousel';
+import { TabularFooterButtons } from '@/components/layout/workbench/image-detail/tabular-footer-buttons';
+import { TabularRenderWrapper } from '@/components/layout/workbench/image-detail/tabular-wrapper';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
-import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
-import { useCopy } from '@/hooks/use-copy';
 import useUrlState from '@/hooks/use-url-state';
-import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import {
-  ImagesResult,
-  useExecutionImageResultStore,
-  useExecutionImages,
-  useExecutionPosition,
-  useHasNextImage,
-  useHasPrevImage,
-  useSetExecutionPosition,
-} from '@/store/useExecutionImageResultStore';
-import { useThumbImages } from '@/store/useExecutionImageTumbStore';
+import { useExecutionImageResultStore, useHasNextImage, useHasPrevImage } from '@/store/useExecutionImageResultStore';
 import { cn } from '@/utils';
 
-import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
+// Import Swiper styles
 import 'rc-image/assets/index.css';
 
-interface IImageDetailProps { }
-
-interface TabularRenderWrapperProps {
-  height?: number;
-  execution?: VinesWorkflowExecution;
-  processedInputs: any[];
-  showInputDiffBanner: boolean;
-  originalInputValues: Record<string, any>;
-  onProcessedInputsChange: (inputs: any[]) => void;
-  onShowInputDiffBannerChange: (show: boolean) => void;
-  onOriginalInputValuesChange: (values: Record<string, any>) => void;
-}
-
-interface ImageOperationsProps {
-  // imageUrl?: string;
-  imageRotation: number;
-  imageFlipX: boolean;
-  imageFlipY: boolean;
-  imageScale: number;
-  onRotateLeft: () => void;
-  onRotateRight: () => void;
-  onFlipHorizontal: () => void;
-  onFlipVertical: () => void;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onDownload: () => void;
-}
-
-const ImageOperations: React.FC<ImageOperationsProps> = ({
-  // imageUrl,
-  onRotateLeft,
-  onRotateRight,
-  onFlipHorizontal,
-  onFlipVertical,
-  onZoomIn,
-  onZoomOut,
-  onDownload,
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex w-full basis-1/5 items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<FlipVertical />} variant="outline" size="small" onClick={onFlipVertical} />
-        </TooltipTrigger>
-        <TooltipContent>{t('workspace.image-detail.flipY', '垂直翻转')}</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<FlipHorizontal />} variant="outline" size="small" onClick={onFlipHorizontal} />
-        </TooltipTrigger>
-        <TooltipContent>{t('workspace.image-detail.flipX', '水平翻转')}</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<RotateCcw />} variant="outline" size="small" onClick={onRotateLeft} />
-        </TooltipTrigger>
-        <TooltipContent>{t('workspace.image-detail.rotateLeft', '向左旋转')}</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<RotateCw />} variant="outline" size="small" onClick={onRotateRight} />
-        </TooltipTrigger>
-        <TooltipContent>{t('workspace.image-detail.rotateRight', '向右旋转')}</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<ZoomIn />} variant="outline" size="small" onClick={onZoomIn} />
-        </TooltipTrigger>
-        <TooltipContent>{t('workspace.image-detail.zoomIn', '放大')}</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<ZoomOut />} variant="outline" size="small" onClick={onZoomOut} />
-        </TooltipTrigger>
-        <TooltipContent>{t('workspace.image-detail.zoomOut', '缩小')}</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<Download />} variant="outline" size="small" onClick={onDownload} />
-        </TooltipTrigger>
-        <TooltipContent>{t('workspace.image-detail.download', '下载')}</TooltipContent>
-      </Tooltip>
-    </div>
-  );
-};
-
-// TabularRender包装组件，用于获取工作流输入参数
-const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
-  height,
-  execution,
-  processedInputs,
-  showInputDiffBanner,
-  originalInputValues,
-  onProcessedInputsChange,
-  onShowInputDiffBannerChange,
-  onOriginalInputValuesChange,
-}) => {
-  const { vines } = useVinesFlow();
-  const tabular$ = useEventEmitter<TTabularEvent>();
-  const { t } = useTranslation();
-  const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
-
-  // 监听窗口大小变化
-  React.useEffect(() => {
-    const handleResize = () => {
-      setWindowHeight(window.innerHeight);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // 从vines中获取工作流输入参数
-  const inputs = vines.workflowInput;
-  const workflowId = vines.workflowId;
-
-  // 计算动态高度，确保表单能够适应窗口高度
-  const dynamicHeight = height || Math.max(1000, windowHeight - 150);
-
-  // 处理输入字段和原始图片
-  React.useEffect(() => {
-    if (!inputs || inputs.length === 0) {
-      // console.log('TabularRenderWrapper: 没有输入字段可用');
-      onProcessedInputsChange([]);
-      return;
-    }
-
-    const newInputs = execution
-      ? inputs.map((input) => {
-        return {
-          ...input,
-          default: execution.input?.[input.name] ?? input.default,
-        };
-      })
-      : [];
-    // console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
-    onProcessedInputsChange(newInputs);
-
-    // 保存原始输入值
-    if (execution?.input) {
-      onOriginalInputValuesChange(execution.input);
-    }
-  }, [inputs, execution, onProcessedInputsChange, onOriginalInputValuesChange]);
-
-  // 监听表单值变化
-  useEffect(() => {
-    if (!execution?.input || !processedInputs.length) return;
-
-    const currentValues = processedInputs.reduce(
-      (acc, input) => {
-        acc[input.name] = input.default;
-        return acc;
-      },
-      {} as Record<string, any>,
-    );
-
-    // 比较当前值与原始值
-    const hasChanged = Object.keys(originalInputValues).some((key) => originalInputValues[key] !== currentValues[key]);
-
-    onShowInputDiffBannerChange(hasChanged);
-  }, [processedInputs, originalInputValues, execution, onShowInputDiffBannerChange]);
-
-  if (!processedInputs.length) {
-    return (
-      <div className="vines-center size-full text-center text-xl text-muted-foreground">
-        {t('workspace.image-detail.no-inputs', '无输入参数')}
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative size-full">
-      {false && (
-        <div className="left-0 right-0 top-0 z-10 mb-4 rounded bg-yellow-100 px-4 py-2 text-center text-sm text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-          {t('workspace.image-detail.input-diff-banner', '输入参数已修改')}
-        </div>
-      )}
-      <TabularRender
-        inputs={processedInputs}
-        height={dynamicHeight}
-        event$={tabular$}
-        workflowId={workflowId}
-        scrollAreaClassName=""
-      ></TabularRender>
-    </div>
-  );
-};
-
-interface TabularFooterButtonsProps {
-  processedInputs: any[];
-}
-
-const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedInputs }) => {
-  const { t } = useTranslation();
-  const { copy } = useCopy();
-  const { vines } = useVinesFlow();
-  const { data: oem } = useSystemConfig();
-  const [loading, setLoading] = useState(false);
-  const form = useFormContext();
-
-  // 生成按钮通过事件触发提交
-  const handleGenerate = () => {
-    form.handleSubmit(async (values) => {
-      setLoading(true);
-      try {
-        await vines.start({ inputData: values, onlyStart: true });
-        if (
-          !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
-          oem?.theme?.views?.form?.toast?.afterCreate != false
-        )
-          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
-      } catch (error) {
-        // console.error('生成失败:', error);
-        toast.error(t('workspace.pre-view.actuator.execution.error'));
-      } finally {
-        setLoading(false);
-      }
-    })();
-  };
-
-  // 复制当前表单参数
-  const handleCopy = () => {
-    const values = form.getValues();
-    const data = processedInputs.map((input) => ({
-      id: input.name,
-      displayName: input.displayName,
-      description: input.description,
-      data: values[input.name],
-      type: input.type,
-    }));
-    copy(JSON.stringify({ type: 'input-parameters', data }));
-    toast.success(t('workspace.pre-view.actuator.detail.form-render.actions.copy-input-success'));
-  };
-
-  return (
-    <div className="z-10 flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
-      <Button icon={<Copy />} variant="outline" size="small" onClick={handleCopy} className="text-base">
-        {t('workspace.pre-view.actuator.detail.form-render.actions.copy-input', '复制输入')}
-      </Button>
-      <Button
-        icon={<Sparkles className="fill-white" />}
-        variant="solid"
-        size="small"
-        className="text-base"
-        onClick={handleGenerate}
-        loading={loading}
-      >
-        {t('workspace.pre-view.actuator.execution.label', '生成')}
-      </Button>
-    </div>
-  );
-};
-
-interface RightSidebarProps {
-  onBack: () => void;
-  hasPrev: boolean;
-  hasNext: boolean;
-  onPrevImage: () => void;
-  onNextImage: () => void;
-  onDeleteImage: () => void;
-}
-
-const RightSidebar: React.FC<RightSidebarProps> = ({
-  onBack,
-  hasPrev,
-  hasNext,
-  onPrevImage,
-  onNextImage,
-  onDeleteImage,
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className="ml-4 flex h-full w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 pb-6 pt-8 shadow-sm dark:bg-[#111113]">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<X />} variant="outline" size="small" onClick={onBack} />
-        </TooltipTrigger>
-        <TooltipContent>{t('common.utils.back', '返回')}</TooltipContent>
-      </Tooltip>
-
-      <div className="flex flex-col items-center gap-4">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button icon={<ChevronUp />} variant="outline" size="small" disabled={!hasPrev} onClick={onPrevImage} />
-          </TooltipTrigger>
-          <TooltipContent>{t('workspace.image-detail.prev-image', '上一张')}</TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button icon={<ChevronDown />} variant="outline" size="small" disabled={!hasNext} onClick={onNextImage} />
-          </TooltipTrigger>
-          <TooltipContent>{t('workspace.image-detail.next-image', '下一张')}</TooltipContent>
-        </Tooltip>
-      </div>
-
-      <div className="mb-4">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button icon={<Trash />} variant="outline" size="small" onClick={onDeleteImage} />
-          </TooltipTrigger>
-          <TooltipContent>{t('workspace.image-detail.delete', '删除')}</TooltipContent>
-        </Tooltip>
-      </div>
-    </div>
-  );
-};
+interface IImageDetailProps {}
 
 export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { t } = useTranslation();
@@ -602,7 +257,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         // `,
                         transition: 'transform 0.3s ease',
                       }}
-                    // preview={false}
+                      // preview={false}
                     />
                   </div>
                 </div>
@@ -623,7 +278,9 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                     onDownload={handleDownload}
                   />
                   {/* 图片缩略图轮播 - 底部 */}
-                  <ImagesCarousel className="w-full" />
+                  <div className="">
+                    <ImagesCarousel />
+                  </div>
                 </div>
               </>
             ) : (
@@ -674,82 +331,3 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 export const Route = createLazyFileRoute('/$teamId/workspace/$workflowId/image-detail/')({
   component: ImageDetail,
 });
-
-// 完善 ImagesCarousel 组件并移动到文件中合适位置
-interface ImagesCarouselProps {
-  className?: string;
-}
-
-const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
-  const [carouselApi, setCarouselApi] = React.useState<any>();
-
-  return (
-    <Carousel
-      setApi={setCarouselApi}
-      opts={{
-        align: 'start',
-        containScroll: 'trimSnaps',
-        slidesToScroll: 1,
-      }}
-      orientation="horizontal"
-      className={cn(className, 'overflow-hidden')}
-    >
-      <CarouselContent className="flex justify-center">
-        <CarouselItemList carouselApi={carouselApi} />
-      </CarouselContent>
-    </Carousel>
-  );
-};
-
-function CarouselItemList({ carouselApi }: { carouselApi: any }) {
-  const position = useExecutionPosition();
-  const setPosition = useSetExecutionPosition();
-  const thumbImages = useThumbImages();
-
-  React.useEffect(() => {
-    if (carouselApi && position !== undefined) {
-      carouselApi.scrollTo(position);
-    }
-  }, [carouselApi, position]);
-
-  // 如果只有一张图片或没有图片，不显示 carousel
-  if (!thumbImages || thumbImages.length <= 1) {
-    return null;
-  }
-
-  // 处理点击缩略图
-  const handleThumbnailClick = (index: number) => {
-    if (index === position) return;
-    setPosition(index);
-  };
-
-  return thumbImages.map((image, index) => {
-    return (
-      <CarouselItem
-        key={image.render.key || index}
-        className="-mr-2 basis-auto hover:cursor-pointer"
-        onClick={() => handleThumbnailClick(index)}
-      >
-        <CarouselItemImage image={image} index={index} />
-      </CarouselItem>
-    );
-  });
-}
-
-function CarouselItemImage({ image, index }: { image: ImagesResult; index: number }) {
-  const [shouldUseThumbnail, setShouldUseThumbnail] = useState(true);
-  const images = useExecutionImages();
-  useAsyncEffect(async () => {
-    const res = await checkImageUrlAvailable(image.render.data as string);
-    setShouldUseThumbnail(res);
-  }, [image]);
-
-  return (
-    <img
-      src={shouldUseThumbnail ? (image.render.data as string) : (images[index].render.data as string)}
-      alt={`Thumbnail`}
-      className="size-16 rounded-md border border-border object-cover"
-      loading="lazy"
-    />
-  );
-}

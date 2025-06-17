@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
-import { useWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
+import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { Card } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { cn } from '@/utils';
@@ -53,6 +53,10 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
     }
     handleDragEnd();
   };
+
+  const handleWatchDrag = useCallback(() => {
+    return !isDragging;
+  }, [isDragging]);
   return (
     <div
       className={cn(
@@ -68,17 +72,17 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
       <Carousel
         opts={{
           align: 'start',
-          loop: true,
+          loop: false,
           skipSnaps: false,
           dragFree: false,
           containScroll: 'trimSnaps',
           inViewThreshold: 0.7,
-          watchDrag: !isDragging,
+          watchDrag: handleWatchDrag,
         }}
-        className="w-full px-4"
-        ref={carouselRef}
+        className="h-full w-full px-4"
+        // ref={carouselRef}
       >
-        <CarouselContent className="space-x-0 overflow-hidden">
+        <CarouselContent style={{ width: '79  svw' }} className="space-x-0 overflow-hidden">
           {loading ? (
             <div className="flex w-full items-center justify-center">
               <span>Loading...</span>
@@ -121,9 +125,30 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
 };
 
 const HistoryResultOg = () => {
-  const { data: imagesResult } = useWorkflowExecutionAllOutputs();
-  console.log('imagesResult', imagesResult);
-  // const images = convertExecutionResultToItemList(imagesResult ?? []);
+  const { data: imagesResult, size, setSize } = useInfiniteWorkflowExecutionAllOutputs({ limit: 10 });
+  // const { workflowId } = useVinesOriginWorkflow();
+  // const { data } = useWorkflowExecutionOutputs(workflowId);
+  // if (!imagesResult) return null;
+  // console.log('imagesResult', imagesResult);
+  // const res: IVinesExecutionResultItem[] =
+  //   imagesResult.flat().flatMap((e) =>
+  //     e.output.flatMap((item, index) => [
+  //       {
+  //         ...item,
+  //         render: {
+  //           data: item.data ? getThumbUrl(item.data as string) : '',
+  //           key: `${e.instanceId}-${item.data}-${index}`,
+  //           type: item.type,
+  //           alt: item.alt,
+  //           status: e.status,
+  //           isDeleted: false,
+  //         },
+  //       },
+  //     ]),
+  //   ) ?? [];
+  // // console.log('data', data);
+  // console.log('res', res);
+
   return <HistoryResultInner loading={false} images={[]} isMiniFrame={false} />;
 };
 
