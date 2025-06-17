@@ -278,7 +278,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                     onDownload={handleDownload}
                   />
                   {/* 图片缩略图轮播 - 底部 */}
-                  <div className="">
+                  <div
+                    style={{
+                      maxWidth: showFormInImageDetail ? '70vw' : '95vw',
+                    }}
+                  >
                     <ImagesCarousel />
                   </div>
                 </div>
