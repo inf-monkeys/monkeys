@@ -2,19 +2,16 @@ import React, { useEffect } from 'react';
 
 import { createLazyFileRoute } from '@tanstack/react-router';
 
-import { useSystemConfig } from '@/apis/common';
 import { getWorkflowExecutionAllOutputs } from '@/apis/workflow/execution';
 import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
 import { WorkbenchView } from '@/components/layout/workbench/view';
 import useUrlState from '@/hooks/use-url-state.ts';
-import { ImagesResult, useExecutionImageResultStore, useExecutionImages } from '@/store/useExecutionImageResultStore';
+import { ImagesResult, useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { usePageStore } from '@/store/usePageStore';
 import { convertExecutionResultToThumbnailList } from '@/utils/execution';
 
 export const Workbench: React.FC = () => {
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
-  const { data: oem } = useSystemConfig();
-  const images = useExecutionImages();
   const { setImages } = useExecutionImageResultStore();
 
   const [{ mode, showGroup: urlShowGroup }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini'; showGroup: boolean }>({

@@ -1,26 +1,21 @@
 import React, { useLayoutEffect } from 'react';
 
 import { Outlet, useRouterState } from '@tanstack/react-router';
-import { useTranslation } from 'react-i18next';
 
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
+import { SpaceHeaderTabs } from '@/components/layout-wrapper/space/header/tabs';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { VinesPanelSidebar } from '@/components/layout-wrapper/workbench/panel/sidebar.tsx';
-import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
-import { SpaceHeaderTabs } from '@/components/layout-wrapper/space/header/tabs';
 
 interface IWorkbenchPanelLayoutProps {
   layoutId: string;
 }
 
 export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ layoutId }) => {
-  const { t } = useTranslation();
-  const { teamId } = useVinesTeam();
-
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
 
   useLayoutEffect(() => {
