@@ -93,7 +93,7 @@ const ImageOperations: React.FC<ImageOperationsProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="flex w-full basis-1/5 items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
+    <div className="flex w-full items-center justify-center gap-2 bg-background dark:bg-[#111113] sm:gap-1 md:gap-2">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button icon={<FlipVertical />} variant="outline" size="small" onClick={onFlipVertical} />
@@ -541,7 +541,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           >
             {imageUrl ? (
               <>
-                <div className="flex w-full items-center justify-center p-4">
+                <div className="flex w-full flex-1 items-center justify-center p-4">
                   <div className="vines-center size-full overflow-auto">
                     <Image
                       src={imageUrl}
@@ -562,7 +562,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                   </div>
                 </div>
                 {/* 图片操作按钮 - 中间 */}
-                <div className="w-full overflow-hidden p-4">
+                <div className="flex w-full flex-col gap-4 overflow-hidden p-4">
                   <ImageOperations
                     // imageUrl={imageUrl}
                     imageRotation={imageRotation}
