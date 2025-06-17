@@ -27,9 +27,9 @@ import { cn } from '@/utils';
 
 import { OperationItem } from './item';
 
-interface IWorkbenchOperationBarProps extends React.ComponentPropsWithoutRef<'div'> { }
+interface IWorkbenchOperationBarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ }) => {
+export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({}) => {
   const { workflowId } = useFlowStore();
 
   const { data: initialData } = useWorkflowAssociationList(workflowId);
@@ -79,7 +79,7 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ }
     // onReorder?.(newData);
   };
   return localData.length > 0 ? (
-    <div className={cn('flex h-full items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm')}>
+    <div className={cn('flex h-full items-center justify-center rounded-xl border border-input bg-slate-1')}>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

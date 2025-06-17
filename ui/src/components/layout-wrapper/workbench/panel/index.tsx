@@ -1,8 +1,6 @@
 import React, { useLayoutEffect } from 'react';
 
 import { Outlet, useRouterState } from '@tanstack/react-router';
-
-import { Layers2, Package, PackagePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
@@ -11,10 +9,9 @@ import { SpaceHeader } from '@/components/layout-wrapper/space/header';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { VinesPanelSidebar } from '@/components/layout-wrapper/workbench/panel/sidebar.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
-import VinesEvent from '@/utils/events.ts';
+import { SpaceHeaderTabs } from '@/components/layout-wrapper/space/header/tabs';
 
 interface IWorkbenchPanelLayoutProps {
   layoutId: string;
@@ -42,45 +39,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   return (
     <ViewGuard className="bg-neocard">
       <SpaceHeader tail={<TeamSelector />} disableSeparator>
-        <Tabs
-          value={isWorkspaceRoute ? 'main' : isStoreRoute ? 'store' : 'workbench'}
-          onValueChange={(val) => {
-            switch (val) {
-              case 'workbench':
-                VinesEvent.emit('vines-nav', '/$teamId/', { teamId });
-                break;
-              case 'store':
-                VinesEvent.emit('vines-nav', '/$teamId/store/', { teamId });
-                break;
-              case 'main':
-                VinesEvent.emit('vines-nav', '/$teamId/agents/', { teamId });
-            }
-          }}
-        >
-          <TabsList className="!h-9 p-0">
-            <TabsTrigger
-              className="!h-9 gap-1 text-muted-foreground *:data-[state=active]:stroke-foreground"
-              value="workbench"
-            >
-              <Layers2 size={14} className="stroke-muted-foreground" />
-              {t('components.layout.main.sidebar.list.workbench.label')}
-            </TabsTrigger>
-            <TabsTrigger
-              className="!h-9 gap-1 text-muted-foreground *:data-[state=active]:stroke-foreground"
-              value="store"
-            >
-              <Package size={14} className="stroke-muted-foreground" />
-              {t('components.layout.main.sidebar.list.store.application-store.label')}
-            </TabsTrigger>
-            <TabsTrigger
-              className="!h-9 gap-1 text-muted-foreground *:data-[state=active]:stroke-foreground"
-              value="main"
-            >
-              <PackagePlus size={14} className="stroke-muted-foreground" />
-              {t('components.layout.main.sidebar.list.workspace.label')}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <SpaceHeaderTabs />
       </SpaceHeader>
       <VinesSpace
         className={cn(
