@@ -97,6 +97,7 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
           forceToAxis: true,
         }}
         slidesPerView={slidesPerView}
+        initialSlide={position || 0}
         // pagination={{
         //   clickable: true,
         //   dynamicBullets: true,
