@@ -280,7 +280,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                   {/* 图片缩略图轮播 - 底部 */}
                   <div
                     style={{
-                      maxWidth: showFormInImageDetail ? '70vw' : '95vw',
+                      maxWidth: showFormInImageDetail ? '70vw' : '93vw',
                     }}
                   >
                     <ImagesCarousel />
