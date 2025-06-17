@@ -25,18 +25,29 @@ interface ImagesCarouselProps {
 const SwiperModules = [Virtual, Pagination];
 export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
   return (
-    <Swiper
-      spaceBetween={1}
-      direction={'horizontal'}
-      modules={SwiperModules}
-      // virtual
-      slidesPerView={'auto'}
-      className={cn(className)}
-      onSlideChange={() => console.log('slide change')}
-      onSwiper={(swiper) => console.log(swiper)}
-    >
-      <CarouselItemList />
-    </Swiper>
+    <div className="h-24 w-full overflow-hidden bg-slate-3">
+      <Swiper
+        spaceBetween={12}
+        direction={'horizontal'}
+        modules={SwiperModules}
+        virtual
+        slidesPerView={'auto'}
+        freeMode={true}
+        grabCursor={true}
+        mousewheel={{
+          forceToAxis: true,
+        }}
+        // pagination={{
+        //   clickable: true,
+        //   dynamicBullets: true,
+        // }}
+        className={cn('h-full w-full', className)}
+        onSlideChange={() => console.log('slide change')}
+        onSwiper={(swiper) => console.log(swiper)}
+      >
+        <CarouselItemList />
+      </Swiper>
+    </div>
   );
 };
 
@@ -52,9 +63,9 @@ function CarouselItemList() {
   // }, [carouselApi, position]);
 
   // 如果只有一张图片或没有图片，不显示 carousel
-  if (!thumbImages || thumbImages.length <= 1) {
-    return null;
-  }
+  // if (!thumbImages || thumbImages.length <= 1) {
+  //   return null;
+  // }
 
   // 处理点击缩略图
   const handleThumbnailClick = (index: number) => {
@@ -65,9 +76,14 @@ function CarouselItemList() {
   return thumbImages.map((image, index) => {
     return (
       <SwiperSlide
+        style={{
+          width: 'auto',
+          height: '100%',
+        }}
         key={image.render.key || index}
-        // className="-mr-2 basis-auto hover:cursor-pointer"
-        // onClick={() => handleThumbnailClick(index)}
+        className="flex items-center hover:cursor-pointer"
+        onClick={() => handleThumbnailClick(index)}
+        virtualIndex={index}
       >
         <CarouselItemImage image={image} index={index} />
       </SwiperSlide>
