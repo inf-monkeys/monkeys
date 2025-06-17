@@ -64,19 +64,16 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
     };
   }, [thumbImages?.length]);
 
-  // 监听 position 变化，控制 swiper 滚动到指定位置
   useEffect(() => {
     if (swiperInstance && position !== undefined && position >= 0) {
       swiperInstance.slideTo(position);
     }
   }, [position, swiperInstance]);
 
-  // 处理点击缩略图
   const handleThumbnailClick = (index: number) => {
     setPosition(index);
   };
 
-  // 确保数据存在且有效
   if (!thumbImages || thumbImages.length === 0) {
     return (
       <div className="flex h-24 w-full items-center justify-center overflow-hidden">
@@ -97,16 +94,14 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
           forceToAxis: true,
         }}
         slidesPerView={slidesPerView}
-        initialSlide={position || 0}
-        // pagination={{
-        //   clickable: true,
-        //   dynamicBullets: true,
-        // }}
+        initialSlide={position}
         className={cn('h-full w-full', className)}
-        onSlideChange={() => console.log('slide change')}
         onSwiper={(swiper) => {
           setSwiperInstance(swiper);
-          console.log(swiper);
+          if (position !== undefined && position >= 0) {
+            setTimeout(() => swiper.slideTo(position, 0), 0); // 0ms 无动画
+            // swiper.slideTo(position);
+          }
         }}
       >
         {thumbImages.map((image, index) => (
@@ -127,46 +122,6 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
   );
 };
 
-function CarouselItemList() {
-  const position = useExecutionPosition();
-  const setPosition = useSetExecutionPosition();
-  const thumbImages = useThumbImages();
-
-  // useEffect(() => {
-  //   if (position !== undefined) {
-  //     carouselApi.scrollTo(position);
-  //   }
-  // }, [carouselApi, position]);
-
-  // 如果只有一张图片或没有图片，不显示 carousel
-  // if (!thumbImages || thumbImages.length <= 1) {
-  //   return null;
-  // }
-
-  // 处理点击缩略图
-  const handleThumbnailClick = (index: number) => {
-    if (index === position) return;
-    setPosition(index);
-  };
-
-  return thumbImages.map((image, index) => {
-    return (
-      <SwiperSlide
-        style={{
-          width: 80,
-          height: '100%',
-        }}
-        virtualIndex={index}
-        key={image.render.key || index}
-        className="flex items-center hover:cursor-pointer"
-        onClick={() => handleThumbnailClick(index)}
-      >
-        <CarouselItemImage image={image} index={index} />
-      </SwiperSlide>
-    );
-  });
-}
-
 function CarouselItemImage({ image, index }: { image: ImagesResult; index: number }) {
   const [shouldUseThumbnail, setShouldUseThumbnail] = useState(true);
   const images = useExecutionImages();
@@ -181,9 +136,9 @@ function CarouselItemImage({ image, index }: { image: ImagesResult; index: numbe
       alt={`Thumbnail`}
       className="size-[90px] flex-shrink-0 rounded-md border border-border object-cover"
       loading="lazy"
-      onError={(e) => {
+      /*       onError={(e) => {
         console.log('Image load error:', e);
-      }}
+      }} */
     />
   );
 }
