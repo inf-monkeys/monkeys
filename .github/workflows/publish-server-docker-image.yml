@@ -6,31 +6,47 @@ on:
 
 jobs:
   push_to_registry:
-    name: Publish Docker image to Docker Hub
+    name: Publish Docker image to Docker Hub and Harbor
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Log in to Harbor
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+          registry: ${{ secrets.HARBOR_REGISTRY }}
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v4
         with:
           images: infmonkeys/monkeys
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+      - name: Build and push Docker image to Docker Hub
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./docker/server/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push Docker image to Harbor
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./docker/server/Dockerfile
+          push: true
+          tags: ${{ secrets.HARBOR_REGISTRY }}/infmonkeys/monkeys:${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Save Docker image to a tar file
