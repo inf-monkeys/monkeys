@@ -24,13 +24,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Log in to Harbor
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
-          registry: ${{ secrets.HARBOR_REGISTRY }}
-
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -45,7 +38,6 @@ jobs:
           push: true
           tags: |
             ${{ steps.meta.outputs.tags }}
-            ${{ secrets.HARBOR_REGISTRY }}/infmonkeys/monkeys-multi-tenancy:${{ env.RELEASE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Save Docker image to a tar file
