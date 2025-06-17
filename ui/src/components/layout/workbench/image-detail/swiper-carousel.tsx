@@ -51,12 +51,12 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
         spaceBetween={12}
         direction={'horizontal'}
         modules={SwiperModules}
-        slidesPerView={'auto'}
         freeMode={true}
         grabCursor={true}
         mousewheel={{
           forceToAxis: true,
         }}
+        slidesPerView={14}
         // pagination={{
         //   clickable: true,
         //   dynamicBullets: true,
@@ -68,8 +68,9 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
         {thumbImages.map((image, index) => (
           <SwiperSlide
             key={`slide-${image.render.key || index}`}
+            virtualIndex={index}
             style={{
-              width: 'auto',
+              width: 80,
               height: '100%',
             }}
             className="flex items-center hover:cursor-pointer"
@@ -109,9 +110,10 @@ function CarouselItemList() {
     return (
       <SwiperSlide
         style={{
-          width: 'auto',
+          width: 80,
           height: '100%',
         }}
+        virtualIndex={index}
         key={image.render.key || index}
         className="flex items-center hover:cursor-pointer"
         onClick={() => handleThumbnailClick(index)}
