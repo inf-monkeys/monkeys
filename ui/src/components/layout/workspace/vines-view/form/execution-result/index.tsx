@@ -174,7 +174,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     }
   }, [executionResultList, shouldFilterError]);
   return (
-    <Card className={cn('relative rounded-xl bg-neocard', className)}>
+    <Card className={cn('relative rounded-xl !border-none bg-neocard !shadow-none', className)}>
       <CardContent className="p-0">
         {executionResultList && executionResultList.length > 0 && filteredData.length > 0 && !isLoading ? (
           <ExecutionResultGrid
@@ -188,7 +188,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
           />
         ) : (
           <>
-            <div className="p-2 flex gap-2 justify-between">
+            <div className="flex justify-between gap-2 p-2">
               <ErrorFilter />
               {/* <ExtraButtonFilter /> */}
               <div className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2">
@@ -206,8 +206,8 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
             <ScrollArea
               style={{ height: height - 40 }}
               className="z-20 mr-0.5 rounded-xl bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2"
-            >
-            </ScrollArea></>
+            ></ScrollArea>
+          </>
         )}
         <AnimatePresence mode="popLayout">
           {isLoading ? (

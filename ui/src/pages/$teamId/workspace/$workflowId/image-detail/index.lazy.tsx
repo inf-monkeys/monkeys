@@ -24,6 +24,7 @@ import { useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
 import { useSystemConfig } from '@/apis/common';
 import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
@@ -49,10 +50,9 @@ import {
 import { useThumbImages } from '@/store/useExecutionImageTumbStore';
 import { cn } from '@/utils';
 
-import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
 import 'rc-image/assets/index.css';
 
-interface IImageDetailProps { }
+interface IImageDetailProps {}
 
 interface TabularRenderWrapperProps {
   height?: number;
@@ -191,11 +191,11 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
 
     const newInputs = execution
       ? inputs.map((input) => {
-        return {
-          ...input,
-          default: execution.input?.[input.name] ?? input.default,
-        };
-      })
+          return {
+            ...input,
+            default: execution.input?.[input.name] ?? input.default,
+          };
+        })
       : [];
     // console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
     onProcessedInputsChange(newInputs);
@@ -236,7 +236,7 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
     <div className="relative size-full">
       {false && (
         <div className="left-0 right-0 top-0 z-10 mb-4 rounded bg-yellow-100 px-4 py-2 text-center text-sm text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-          {t('workspace.image-detail.input-diff-banner', '输入参数已修改')}
+          {t('workspace.image-detail.input-diff-banner')}
         </div>
       )}
       <TabularRender
@@ -297,19 +297,19 @@ const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedIn
   };
 
   return (
-    <div className="z-10 flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
-      <Button icon={<Copy />} variant="outline" size="small" onClick={handleCopy} className="text-base">
-        {t('workspace.pre-view.actuator.detail.form-render.actions.copy-input', '复制输入')}
+    <div className="z-10 flex h-9 items-center justify-center gap-2">
+      <Button icon={<Copy />} variant="outline" size="small" onClick={handleCopy} className="h-full text-base">
+        {t('workspace.pre-view.actuator.detail.form-render.actions.copy-input')}
       </Button>
       <Button
         icon={<Sparkles className="fill-white" />}
         variant="solid"
         size="small"
-        className="text-base"
+        className="size-full text-base"
         onClick={handleGenerate}
         loading={loading}
       >
-        {t('workspace.pre-view.actuator.execution.label', '生成')}
+        {t('workspace.pre-view.actuator.execution.label')}
       </Button>
     </div>
   );
@@ -335,36 +335,37 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="ml-4 flex h-full w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 pb-6 pt-8 shadow-sm dark:bg-[#111113]">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<X />} variant="outline" size="small" onClick={onBack} />
-        </TooltipTrigger>
-        <TooltipContent>{t('common.utils.back', '返回')}</TooltipContent>
-      </Tooltip>
-
-      <div className="flex flex-col items-center gap-4">
+    // <div className="ml-4 flex h-full w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 pb-6 pt-8 shadow-sm dark:bg-[#111113]">
+    <div className="h-full rounded-xl border border-input bg-slate-1">
+      <div className="flex h-full w-[4.8rem] flex-col items-center justify-between p-4">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button icon={<ChevronUp />} variant="outline" size="small" disabled={!hasPrev} onClick={onPrevImage} />
+            <Button icon={<X />} variant="outline" onClick={onBack} />
           </TooltipTrigger>
-          <TooltipContent>{t('workspace.image-detail.prev-image', '上一张')}</TooltipContent>
+          <TooltipContent>{t('common.utils.back')}</TooltipContent>
         </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button icon={<ChevronDown />} variant="outline" size="small" disabled={!hasNext} onClick={onNextImage} />
-          </TooltipTrigger>
-          <TooltipContent>{t('workspace.image-detail.next-image', '下一张')}</TooltipContent>
-        </Tooltip>
-      </div>
+        <div className="flex flex-col items-center gap-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button icon={<ChevronUp />} variant="outline" disabled={!hasPrev} onClick={onPrevImage} />
+            </TooltipTrigger>
+            <TooltipContent>{t('workspace.image-detail.prev-image')}</TooltipContent>
+          </Tooltip>
 
-      <div className="mb-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button icon={<ChevronDown />} variant="outline" disabled={!hasNext} onClick={onNextImage} />
+            </TooltipTrigger>
+            <TooltipContent>{t('workspace.image-detail.next-image')}</TooltipContent>
+          </Tooltip>
+        </div>
+
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button icon={<Trash />} variant="outline" size="small" onClick={onDeleteImage} />
+            <Button icon={<Trash />} variant="outline" onClick={onDeleteImage} />
           </TooltipTrigger>
-          <TooltipContent>{t('workspace.image-detail.delete', '删除')}</TooltipContent>
+          <TooltipContent>{t('workspace.image-detail.delete')}</TooltipContent>
         </Tooltip>
       </div>
     </div>
@@ -522,11 +523,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   return (
     <VinesFlowProvider workflowId={workflowId}>
-      <div className={cn('flex h-full w-full bg-neocard', isMiniFrame && 'justify-center')}>
+      <div className={cn('flex h-full w-full gap-4 bg-neocard', isMiniFrame && 'justify-center')}>
         {/* 主内容区域 */}
         <main
           className={cn(
-            'flex size-full flex-1 rounded-xl border border-input bg-background py-2 pb-6 shadow-sm dark:bg-[#111113] md:flex-row',
+            'flex size-full flex-1 rounded-xl border border-input bg-background dark:bg-[#111113] md:flex-row',
             isMiniFrame && 'justify-center',
             !isMiniFrame && !showFormInImageDetail && 'justify-center',
           )}
@@ -534,54 +535,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           {/* 左侧图片展示区 */}
           <div
             className={cn(
-              'flex h-full flex-col items-center overflow-auto bg-background dark:bg-[#111113]',
+              'flex h-full flex-col items-center justify-between overflow-auto bg-background dark:bg-[#111113]',
               isMiniFrame ? 'w-full' : !showFormInImageDetail ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
             )}
           >
             {imageUrl ? (
               <>
-                <div className="flex w-full basis-4/5 items-center justify-center p-4">
-                  {/* <Image
-                    src={imageUrl}
-                    alt="详情图片"
-                    className="rounded-lg"
-                    style={{
-                      display: 'block',
-                      margin: 'auto',
-                      maxWidth: '100%',
-                      maxHeight: 'calc(100vh - 300px)',
-                      width: 'auto',
-                      height: 'auto',
-                      objectFit: 'contain',
-                      transform: `
-                        rotate(${imageRotation}deg)
-                        scaleX(${imageFlipX ? -1 : 1})
-                        scaleY(${imageFlipY ? -1 : 1})
-                        scale(${imageScale})
-                      `,
-                      transition: 'transform 0.3s ease',
-                    }}
-                    preview={false}
-                  /> */}
-                  <div
-                    // style={{
-                    //   display: 'block',
-                    //   margin: 'auto',
-                    //   maxWidth: '100%',
-                    //   maxHeight: 'calc(100vh - 300px)',
-                    //   width: 'auto',
-                    //   height: 'auto',
-                    //   objectFit: 'contain',
-                    //   //   transform: `
-                    //   //   rotate(${imageRotation}deg)
-                    //   //   scaleX(${imageFlipX ? -1 : 1})
-                    //   //   scaleY(${imageFlipY ? -1 : 1})
-                    //   //   scale(${imageScale})
-                    //   // `,
-                    //   //   transition: 'transform 0.3s ease',
-                    // }}
-                    className="vines-center size-full overflow-auto"
-                  >
+                <div className="flex w-full items-center justify-center p-4">
+                  <div className="vines-center size-full overflow-auto">
                     <Image
                       src={imageUrl}
                       alt="详情图片"
@@ -594,20 +555,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         height: 'auto',
                         objectFit: 'contain',
                         maxHeight: 'calc(100vh - 340px)',
-                        //   transform: `
-                        //   rotate(${imageRotation}deg)
-                        //   scaleX(${imageFlipX ? -1 : 1})
-                        //   scaleY(${imageFlipY ? -1 : 1})
-                        //   scale(${imageScale})
-                        // `,
                         transition: 'transform 0.3s ease',
                       }}
-                    // preview={false}
+                      // preview={false}
                     />
                   </div>
                 </div>
                 {/* 图片操作按钮 - 中间 */}
-                <div className="basis:1/5 w-full overflow-hidden px-4">
+                <div className="w-full overflow-hidden p-4">
                   <ImageOperations
                     // imageUrl={imageUrl}
                     imageRotation={imageRotation}
@@ -635,7 +590,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
           {/* 右侧表单区域 */}
           {!isMiniFrame && showFormInImageDetail && (
-            <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
+            <div className="relative flex h-full flex-1 flex-col gap-4 rounded-r-xl rounded-tr-xl bg-background p-4 dark:bg-[#111113] md:border-l md:border-input">
               <ScrollArea disabledOverflowMask className="flex-1 overflow-hidden">
                 <TabularRenderWrapper
                   height={window.innerHeight - 120}
@@ -648,10 +603,8 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                   onOriginalInputValuesChange={setOriginalInputValues}
                 />
               </ScrollArea>
-              <div>
-                <div className="z-20 bg-background py-2 dark:bg-[#111113]">
-                  <TabularFooterButtons processedInputs={processedInputs} />
-                </div>
+              <div className="z-20 bg-background dark:bg-[#111113]">
+                <TabularFooterButtons processedInputs={processedInputs} />
               </div>
             </div>
           )}
