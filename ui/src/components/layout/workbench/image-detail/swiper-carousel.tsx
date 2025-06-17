@@ -134,7 +134,7 @@ function CarouselItemImage({ image, index }: { image: ImagesResult; index: numbe
     <img
       src={shouldUseThumbnail ? (image.render.data as string) : (images[index].render.data as string)}
       alt={`Thumbnail`}
-      className="size-16 flex-shrink-0 rounded-md border border-border object-cover"
+      className="size-20 flex-shrink-0 rounded-md border border-border object-cover"
       loading="lazy"
       onError={(e) => {
         console.log('Image load error:', e);
