@@ -25,8 +25,10 @@ const SwiperModules = [Pagination];
 export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
   const thumbImages = useThumbImages();
   const setPosition = useSetExecutionPosition();
+  const position = useExecutionPosition();
   const containerRef = useRef<HTMLDivElement>(null);
   const [slidesPerView, setSlidesPerView] = useState(1);
+  const [swiperInstance, setSwiperInstance] = useState<any>(null);
 
   // 计算 slidesPerView 的函数
   const calculateSlidesPerView = (containerWidth: number) => {
@@ -62,6 +64,13 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
     };
   }, [thumbImages?.length]);
 
+  // 监听 position 变化，控制 swiper 滚动到指定位置
+  useEffect(() => {
+    if (swiperInstance && position !== undefined && position >= 0) {
+      swiperInstance.slideTo(position);
+    }
+  }, [position, swiperInstance]);
+
   // 处理点击缩略图
   const handleThumbnailClick = (index: number) => {
     setPosition(index);
@@ -94,7 +103,10 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
         // }}
         className={cn('h-full w-full', className)}
         onSlideChange={() => console.log('slide change')}
-        onSwiper={(swiper) => console.log(swiper)}
+        onSwiper={(swiper) => {
+          setSwiperInstance(swiper);
+          console.log(swiper);
+        }}
       >
         {thumbImages.map((image, index) => (
           <SwiperSlide
