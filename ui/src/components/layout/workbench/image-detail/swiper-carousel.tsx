@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { useAsyncEffect } from 'ahooks';
-import { Pagination, Virtual } from 'swiper/modules';
+import { Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
@@ -16,21 +16,41 @@ import { cn } from '@/utils';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
-import 'swiper/css/virtual';
 
 interface ImagesCarouselProps {
   className?: string;
 }
 
-const SwiperModules = [Virtual, Pagination];
+const SwiperModules = [Pagination];
 export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
+  const thumbImages = useThumbImages();
+  const setPosition = useSetExecutionPosition();
+
+  // 如果只有一张图片或没有图片，不显示 carousel
+  // if (!thumbImages || thumbImages.length <= 1) {
+  //   return null;
+  // }
+
+  // 处理点击缩略图
+  const handleThumbnailClick = (index: number) => {
+    setPosition(index);
+  };
+
+  // 确保数据存在且有效
+  if (!thumbImages || thumbImages.length === 0) {
+    return (
+      <div className="flex h-24 w-full items-center justify-center overflow-hidden bg-slate-3">
+        <span className="text-sm text-gray-500">No images</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-24 w-full overflow-hidden bg-slate-3">
+    <div className="h-24 overflow-hidden bg-slate-3">
       <Swiper
         spaceBetween={12}
         direction={'horizontal'}
         modules={SwiperModules}
-        virtual
         slidesPerView={'auto'}
         freeMode={true}
         grabCursor={true}
@@ -45,7 +65,19 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
         onSlideChange={() => console.log('slide change')}
         onSwiper={(swiper) => console.log(swiper)}
       >
-        <CarouselItemList />
+        {thumbImages.map((image, index) => (
+          <SwiperSlide
+            key={`slide-${image.render.key || index}`}
+            style={{
+              width: 'auto',
+              height: '100%',
+            }}
+            className="flex items-center hover:cursor-pointer"
+            onClick={() => handleThumbnailClick(index)}
+          >
+            <CarouselItemImage image={image} index={index} />
+          </SwiperSlide>
+        ))}
       </Swiper>
     </div>
   );
@@ -83,7 +115,6 @@ function CarouselItemList() {
         key={image.render.key || index}
         className="flex items-center hover:cursor-pointer"
         onClick={() => handleThumbnailClick(index)}
-        virtualIndex={index}
       >
         <CarouselItemImage image={image} index={index} />
       </SwiperSlide>
@@ -103,8 +134,11 @@ function CarouselItemImage({ image, index }: { image: ImagesResult; index: numbe
     <img
       src={shouldUseThumbnail ? (image.render.data as string) : (images[index].render.data as string)}
       alt={`Thumbnail`}
-      className="size-16 rounded-md border border-border object-cover"
+      className="size-16 flex-shrink-0 rounded-md border border-border object-cover"
       loading="lazy"
+      onError={(e) => {
+        console.log('Image load error:', e);
+      }}
     />
   );
 }
