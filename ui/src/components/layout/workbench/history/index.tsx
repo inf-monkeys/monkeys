@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
+import { useInViewport } from 'ahooks';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import { useInfinitaeWorkflowExecutionOutputs } from '@/apis/workflow/execution/output';
+import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { Card } from '@/components/ui/card';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
 import { ImagesResult } from '@/store/useExecutionImageResultStore';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution';
 
-import { getThumbUrl } from '../../workspace/vines-view/form/execution-result/virtua/item/image';
 import { SwiperModules } from '../image-detail/swiper-carousel';
 
 interface HistoryResultProps {
@@ -17,13 +17,56 @@ interface HistoryResultProps {
   images: IVinesExecutionResultItem[];
   isMiniFrame?: boolean;
   className?: string;
+  setSize: Dispatch<SetStateAction<number>>;
 }
 
-const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isMiniFrame, className }) => {
+const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isMiniFrame, className, setSize }) => {
   const [draggedItem, setDraggedItem] = useState<IVinesExecutionResultItem | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const lastRef = useRef<HTMLDivElement>(null);
+  const [inViewPort] = useInViewport(lastRef, {
+    callback: () => {
+      setSize((size) => size + 1);
+    },
+  });
+  const [slidesPerView, setSlidesPerView] = useState(1);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 计算 slidesPerView 的函数
+  const calculateSlidesPerView = (containerWidth: number) => {
+    const slideWidth = 90; // 幻灯片宽度
+    const spaceBetween = 12; // 间距
+    const calculated = Math.floor((containerWidth + spaceBetween) / (slideWidth + spaceBetween));
+    return Math.max(1, Math.min(calculated, images?.length || 1));
+  };
+  // 监听容器宽度变化
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width } = entry.contentRect;
+        const newSlidesPerView = calculateSlidesPerView(width);
+        setSlidesPerView(newSlidesPerView);
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    // 初始计算
+    const initialWidth = container.offsetWidth;
+    if (initialWidth > 0) {
+      setSlidesPerView(calculateSlidesPerView(initialWidth));
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [images?.length]);
 
   const handleDragStart = (e: React.DragEvent, item: IVinesExecutionResultItem) => {
     e.dataTransfer.effectAllowed = 'move';
@@ -58,41 +101,6 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
     }
     handleDragEnd();
   };
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  // 计算 slidesPerView 的函数
-  const calculateSlidesPerView = (containerWidth: number) => {
-    const slideWidth = 90; // 幻灯片宽度
-    const spaceBetween = 12; // 间距
-    const calculated = Math.floor((containerWidth + spaceBetween) / (slideWidth + spaceBetween));
-    return Math.max(1, Math.min(calculated, images?.length || 1));
-  };
-  const [slidesPerView, setSlidesPerView] = useState(1);
-  // 监听容器宽度变化
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width } = entry.contentRect;
-        const newSlidesPerView = calculateSlidesPerView(width);
-        setSlidesPerView(newSlidesPerView);
-      }
-    });
-
-    resizeObserver.observe(container);
-
-    // 初始计算
-    const initialWidth = container.offsetWidth;
-    if (initialWidth > 0) {
-      setSlidesPerView(calculateSlidesPerView(initialWidth));
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [images?.length]);
 
   const handleWatchDrag = useCallback(() => {
     return !isDragging;
@@ -158,7 +166,9 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
         )}
         {/* <CarouselPrevious className="h-8.5 w-9.5 absolute -left-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
         <CarouselNext className="h-8.5 w-9.5 absolute -right-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" /> */}
-        <LastSlide />
+        <SwiperSlide key={'last'}>
+          <div ref={lastRef} draggable className="h-[90px] w-[90px] cursor-move overflow-hidden bg-red-800"></div>
+        </SwiperSlide>
       </Swiper>
     </div>
   );
@@ -170,11 +180,13 @@ const convertInfiniteDataToNormal = (data: VinesWorkflowExecutionOutputListItem[
     result.output.flatMap((item, index) => {
       const res = [];
       if (item.type === 'image') {
+        // @ts-ignore
         res.push({
           ...item,
           render: {
             type: 'image',
-            data: getThumbUrl(item.data as string),
+            // data: getThumbUrl(item.data as string),
+            data: item.data,
             key: result.instanceId + '-' + result.status + '-' + index,
           },
         });
@@ -185,8 +197,10 @@ const convertInfiniteDataToNormal = (data: VinesWorkflowExecutionOutputListItem[
 };
 
 const HistoryResultOg = () => {
-  // const { data: imagesResult } = useInfiniteWorkflowExecutionAllOutputs({ limit: 10 });
-  const { data: imagesResult } = useInfinitaeWorkflowExecutionOutputs('67f4e64da6376c12a3b95f9a', { limit: 10 });
+  const { data: imagesResult, setSize } = useInfiniteWorkflowExecutionAllOutputs({ limit: 10 });
+  /*   const { data: imagesResult, setSize } = useInfinitaeWorkflowExecutionOutputs('67f4e64da6376c12a3b95f9a', {
+    limit: 30,
+  }); */
   // const { dataa}
 
   if (!imagesResult) return null;
@@ -195,7 +209,7 @@ const HistoryResultOg = () => {
   // @ts-ignore
   const images = convertInfiniteDataToNormal(imagesResult);
 
-  return <HistoryResultInner loading={false} images={images} isMiniFrame={false} />;
+  return <HistoryResultInner loading={false} images={images} isMiniFrame={false} setSize={setSize} />;
 };
 
 export default function HistoryResultDefault() {
@@ -203,13 +217,3 @@ export default function HistoryResultDefault() {
 }
 
 export const HistoryResult = React.memo(HistoryResultOg);
-
-function LastSlide() {
-  return (
-    <SwiperSlide>
-      <div className="h-[90px] w-[90px] cursor-move overflow-hidden">
-        <div className="h-full w-full bg-red-1"></div>
-      </div>
-    </SwiperSlide>
-  );
-}
