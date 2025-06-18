@@ -1,11 +1,4 @@
 {
-  "dev-tools": {
-    "report": {
-      "dialog": {
-        "title": "反馈信息"
-      }
-    }
-  },
   "system": {
     "network-error": "系统维护中",
     "empty-auth-methods": "系统未启用身份验证",

@@ -40,7 +40,7 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
       {!vinesIFrameVisible && sidebar}
       <div
         className={cn(
-          'dark:bg-workspace-dark bg-workspace-light relative mt-4 overflow-hidden rounded-xl',
+          'dark:bg-workspace-dark bg-workspace-light relative mt-4 overflow-hidden rounded-xl shadow-sm',
           !vinesIFrameVisible && sidebar && 'ml-0',
           // 修改这里，当没有侧边栏时使用全宽
           sidebar ? 'w-[calc(100vw-17rem)]' : 'w-full',
