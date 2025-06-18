@@ -5,11 +5,15 @@ import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
+import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
+import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { ImagesResult } from '@/store/useExecutionImageResultStore';
 import { cn } from '@/utils';
-import { IVinesExecutionResultItem } from '@/utils/execution';
+import { IVinesExecutionResultItem, newConvertExecutionResultToItemList } from '@/utils/execution';
+
+import { getThumbUrl } from '../../workspace/vines-view/form/execution-result/virtua/item/image';
 
 import 'swiper/css';
 import 'swiper/css/mousewheel';
@@ -21,15 +25,15 @@ const SLIDE_THRESHOLD = 10;
 interface HistoryResultProps {
   loading: boolean;
   images: IVinesExecutionResultItem[];
-  isMiniFrame?: boolean;
+
   className?: string;
   setSize: Dispatch<SetStateAction<number>>;
 }
 
-const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isMiniFrame, className, setSize }) => {
+const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, className, setSize }) => {
   const [slidesPerView, setSlidesPerView] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   // 计算 slidesPerView 的函数
   const calculateSlidesPerView = (containerWidth: number) => {
     const slideWidth = 90; // slide width
@@ -71,17 +75,34 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
 
   const slideLeftRef = useRef<HTMLButtonElement>(null);
   const slideRightRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
 
+    window.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'ArrowLeft') {
+          slideLeftRef.current?.click();
+        } else if (e.key === 'ArrowRight') {
+          slideRightRef.current?.click();
+        }
+      },
+      { signal },
+    );
+    return () => abortController.abort();
+  }, []);
   return (
     <div
       className={cn(
         'relative col-span-5 mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-1 px-12 py-6 shadow-sm',
-        isMiniFrame && 'mt-2',
+
         className,
       )}
       ref={containerRef}
       style={{
-        width: window.innerWidth * 0.765,
+        width: onlyShowWorkbenchIcon ? 'calc(76.5vw + 242.4px)' : '76.5vw',
+        maxWidth: onlyShowWorkbenchIcon ? 'calc(76.5vw + 242.4px)' : '76.5vw',
         height: '140px',
       }}
     >
@@ -117,7 +138,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
           }
         }}
         className={cn('h-full w-full', className)}
-        onSwiper={(swiper) => {}}
+        // onSwiper={(swiper) => {}}
       >
         {images.length > 0 ? (
           images.map((item, index) => (
@@ -183,12 +204,30 @@ const convertInfiniteDataToNormal = (data: VinesWorkflowExecutionOutputListItem[
 };
 
 const HistoryResultOg = () => {
-  const { data: imagesResult, setSize } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
+  const { teamId } = useVinesTeam();
+  const { data: imagesResult, setSize, mutate: RefreshAll } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
   /*   const { data: imagesResult, setSize } = useInfinitaeWorkflowExecutionOutputs('67f4e64da6376c12a3b95f9a', {
     limit: 30,
   }); */
   // const { dataa}
 
+  const lastTeamId = useRef<string | null>(null);
+  useEffect(() => {
+    if (teamId !== lastTeamId.current) {
+      RefreshAll();
+      lastTeamId.current = teamId;
+    }
+  }, [teamId]);
+  // @ts-ignore
+  const executionResultList = newConvertExecutionResultToItemList(imagesResult?.flat() ?? []);
+  const allImages = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
+  // const filerMap = new Map<string, any>();
+  const thumbImages: ImagesResult[] = [];
+  for (const image of allImages) {
+    const url = image.render.data as string;
+    const thumbUrl = getThumbUrl(url);
+    thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl } } as ImagesResult);
+  }
   if (!imagesResult) return null;
   console.log('imagesResult', imagesResult);
 
@@ -196,8 +235,7 @@ const HistoryResultOg = () => {
   const images = convertInfiniteDataToNormal(imagesResult);
 
   console.log('images', images);
-
-  return <HistoryResultInner loading={false} images={images} isMiniFrame={false} setSize={setSize} />;
+  return <HistoryResultInner loading={false} images={thumbImages} isMiniFrame={false} setSize={setSize} />;
 };
 
 export default function HistoryResultDefault() {
