@@ -1083,6 +1083,9 @@
     "sidebar": {
       "add": "添加固定视图",
       "toggle": "切换工作台侧边栏"
+    },
+    "history": {
+      "empty": "暂无图片生成历史记录"
     }
   },
   "ugc-page": {

@@ -31,7 +31,7 @@ export const ImageOperations: React.FC<ImageOperationsProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="flex w-full basis-1/5 items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
+    <div className="flex w-full items-center justify-center gap-2 bg-background dark:bg-[#111113]">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button icon={<FlipVertical />} variant="outline" size="small" onClick={onFlipVertical} />

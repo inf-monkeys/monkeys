@@ -1,7 +1,9 @@
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 import { useAsyncEffect } from 'ahooks';
-import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowLeftIcon, ArrowRightIcon, ScanSearch } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -34,6 +36,7 @@ interface HistoryResultProps {
 
 const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, className, setSize }) => {
   const [slidesPerView, setSlidesPerView] = useState(1);
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   // 计算 slidesPerView 的函数
@@ -100,58 +103,67 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
     return () => abortController.abort();
   }, []);
   return (
-    <div
-      className={cn(
-        'relative col-span-5 mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-1 px-12 py-6 shadow-sm',
-
-        className,
-      )}
-      ref={containerRef}
-      style={{
-        width: onlyShowWorkbenchIcon ? 'calc(76.5vw + 242.4px)' : '76.5vw',
-        maxWidth: onlyShowWorkbenchIcon ? 'calc(76.5vw + 242.4px)' : '76.5vw',
-        height: '140px',
-      }}
-    >
-      <Swiper
-        virtual
-        allowTouchMove={false}
-        spaceBetween={12}
-        direction={'horizontal'}
-        modules={SwiperModules}
-        freeMode={false}
-        grabCursor={false}
-        slidesPerGroup={3}
-        mousewheel={{
-          forceToAxis: false,
-          releaseOnEdges: true,
-          sensitivity: 2000,
-          thresholdDelta: 0.2,
-          thresholdTime: 10,
-          enabled: true,
+    <AnimatePresence>
+      <div
+        className={cn('h-[calc(90px+2rem)] rounded-xl border border-slate-200 bg-slate-1 p-0 shadow-sm', className)}
+        ref={containerRef}
+        style={{
+          width: onlyShowWorkbenchIcon
+            ? 'calc(100vw - 2rem - 4.8rem - 4.8rem - 1rem)'
+            : 'calc(100vw - 2rem - 11rem - 14rem - 1rem)',
+          maxWidth: onlyShowWorkbenchIcon
+            ? 'calc(100vw - 2rem - 4.8rem - 4.8rem - 1rem)'
+            : 'calc(100vw - 2rem - 11rem - 14rem - 1rem)',
         }}
-        navigation={{
-          prevEl: slideLeftRef.current,
-          nextEl: slideRightRef.current,
-        }}
-        slidesPerView={slidesPerView}
-        onSlideChange={(swiper) => {
-          // 当滑动到接近最后几个slide时触发加载
-          // 提前3个slide开始加载
-          if (swiper.activeIndex + slidesPerView >= images.length - SLIDE_THRESHOLD) {
-            // console.log('requesting more');
-
-            setSize((size) => size + 1);
-          }
-        }}
-        className={cn('h-full w-full', className)}
-        // onSwiper={(swiper) => {}}
       >
         {images.length > 0 ? (
-          images.map((item, index) => (
-            <SwiperSlide key={item.render.key} className={cn('basis-auto')}>
-              <div className={cn('h-[90px] w-[90px] cursor-grab overflow-hidden rounded-md')}>
-                {/*                 {item.render.type === 'image' && (
+          <motion.div
+            key="vines-history-content"
+            className="flex size-full items-center justify-center gap-2 overflow-hidden p-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.3 } }}
+            exit={{ opacity: 0 }}
+          >
+            <Button icon={<ArrowLeftIcon />} variant="outline" size="icon" ref={slideLeftRef}></Button>
+            <Swiper
+              virtual
+              allowTouchMove={false}
+              spaceBetween={12}
+              direction={'horizontal'}
+              modules={SwiperModules}
+              freeMode={false}
+              grabCursor={false}
+              slidesPerGroup={3}
+              mousewheel={{
+                forceToAxis: false,
+                releaseOnEdges: true,
+                sensitivity: 2000,
+                thresholdDelta: 0.2,
+                thresholdTime: 10,
+                enabled: true,
+              }}
+              navigation={{
+                prevEl: slideLeftRef.current,
+                nextEl: slideRightRef.current,
+              }}
+              slidesPerView={slidesPerView}
+              onSlideChange={(swiper) => {
+                // 当滑动到接近最后几个slide时触发加载
+                // 提前3个slide开始加载
+                if (swiper.activeIndex + slidesPerView >= images.length - SLIDE_THRESHOLD) {
+                  // console.log('requesting more');
+
+                  setSize((size) => size + 1);
+                }
+              }}
+              className={cn('', className)}
+              // onSwiper={(swiper) => {}}
+            >
+              {images.length > 0
+                ? images.map((item, index) => (
+                    <SwiperSlide key={item.render.key} className={cn('basis-auto')}>
+                      <div className={cn('h-[90px] w-[90px] cursor-grab overflow-hidden rounded-md')}>
+                        {/*                 {item.render.type === 'image' && (
                   <img
                     draggable
                     onPointerDown={(e) => e.stopPropagation()}
@@ -161,35 +173,36 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
                     className="h-full w-full select-none object-cover"
                   />
                 )} */}
-                <CarouselItemImage
-                  image={item as ImagesResultWithOrigin}
-                  index={index}
-                  handleDragStart={handleDragStart}
-                />
-              </div>
-            </SwiperSlide>
-          ))
-        ) : (
-          <></>
-        )}
-        {/* <CarouselPrevious className="h-8.5 w-9.5 absolute -left-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
+                        <CarouselItemImage
+                          image={item as ImagesResultWithOrigin}
+                          index={index}
+                          handleDragStart={handleDragStart}
+                        />
+                      </div>
+                    </SwiperSlide>
+                  ))
+                : null}
+              {/* <CarouselPrevious className="h-8.5 w-9.5 absolute -left-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
         <CarouselNext className="h-8.5 w-9.5 absolute -right-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" /> */}
-      </Swiper>
-      <Button
-        icon={<ArrowLeftIcon />}
-        variant="outline"
-        size="icon"
-        className="absolute left-2 top-1/2 -translate-y-1/2"
-        ref={slideLeftRef}
-      ></Button>
-      <Button
-        icon={<ArrowRightIcon />}
-        variant="outline"
-        size="icon"
-        className="absolute right-2 top-1/2 -translate-y-1/2"
-        ref={slideRightRef}
-      ></Button>
-    </div>
+            </Swiper>
+            <Button icon={<ArrowRightIcon />} variant="outline" size="icon" ref={slideRightRef}></Button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="vines-history-empty"
+            className="vines-center size-full flex-col gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.3 } }}
+            exit={{ opacity: 0 }}
+          >
+            <ScanSearch size={48} />
+            <div className="flex flex-col text-center">
+              <h2 className="text-sm font-bold">{t('workbench.history.empty')}</h2>
+            </div>
+          </motion.div>
+        )}
+      </div>
+    </AnimatePresence>
   );
 };
 

@@ -58,15 +58,14 @@ export const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ proc
   };
 
   return (
-    <div className="z-10 flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
-      <Button icon={<CopyIcon />} variant="outline" size="small" onClick={handleCopy} className="text-base">
+    <div className="z-10 flex w-full items-center justify-center gap-2 bg-background dark:bg-[#111113]">
+      <Button icon={<CopyIcon />} variant="outline" onClick={handleCopy} className="text-base">
         {t('workspace.pre-view.actuator.detail.form-render.actions.copy-input', '复制输入')}
       </Button>
       <Button
         icon={<SparklesIcon className="fill-white" />}
         variant="solid"
-        size="small"
-        className="text-base"
+        className="w-full text-base"
         onClick={handleGenerate}
         loading={loading}
       >

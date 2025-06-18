@@ -15,10 +15,17 @@ import { ImagesCarousel } from '@/components/layout/workbench/image-detail/swipe
 import { TabularFooterButtons } from '@/components/layout/workbench/image-detail/tabular-footer-buttons';
 import { TabularRenderWrapper } from '@/components/layout/workbench/image-detail/tabular-wrapper';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { WorkbenchOperationBar } from '@/components/ui/vines-iframe/view/operation-bar';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import useUrlState from '@/hooks/use-url-state';
-import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { IVinesExecutionResultItem, VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 import { useExecutionImageResultStore, useHasNextImage, useHasPrevImage } from '@/store/useExecutionImageResultStore';
+import { createFlowStore, FlowStoreProvider, useFlowStore } from '@/store/useFlowStore';
+import {
+  createOutputSelectionStore,
+  OutputSelectionStoreProvider,
+  useOutputSelectionStore,
+} from '@/store/useOutputSelectionStore';
 import { cn } from '@/utils';
 
 // Import Swiper styles
@@ -40,9 +47,9 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { showFormInImageDetail } = useCustomConfigs();
 
   // 提升的状态管理
-  const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
-  const [showInputDiffBanner, setShowInputDiffBanner] = React.useState(false);
-  const [originalInputValues, setOriginalInputValues] = React.useState<Record<string, any>>({});
+  const [processedInputs, setProcessedInputs] = useState<any[]>([]);
+  const [showInputDiffBanner, setShowInputDiffBanner] = useState(false);
+  const [originalInputValues, setOriginalInputValues] = useState<Record<string, any>>({});
 
   const currentImage = images[position];
   const imageUrl = currentImage?.render?.data as string;
@@ -177,112 +184,143 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   return (
     <VinesFlowProvider workflowId={workflowId}>
-      <div className={cn('flex h-full w-full gap-4 bg-neocard', isMiniFrame && 'justify-center')}>
-        {/* 主内容区域 */}
-        <main
-          className={cn(
-            'flex size-full flex-1 rounded-xl border border-input bg-background dark:bg-[#111113] md:flex-row',
-            isMiniFrame && 'justify-center',
-            !isMiniFrame && !showFormInImageDetail && 'justify-center',
-          )}
-        >
-          {/* 左侧图片展示区 */}
-          <div
-            className={cn(
-              'flex h-full flex-col items-center justify-between overflow-auto bg-background dark:bg-[#111113]',
-              isMiniFrame ? 'w-full' : !showFormInImageDetail ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
-            )}
-          >
-            {imageUrl ? (
-              <>
-                <div className="flex w-full flex-1 items-center justify-center p-4">
-                  <div className="vines-center size-full overflow-auto">
-                    <Image
-                      src={imageUrl}
-                      alt="详情图片"
-                      className="rounded-lg"
-                      style={{
-                        display: 'block',
-                        margin: 'auto',
-                        maxWidth: '100%',
-                        width: 'auto',
-                        height: 'auto',
-                        objectFit: 'contain',
-                        maxHeight: 'calc(100vh - 340px)',
-                        transition: 'transform 0.3s ease',
-                      }}
-                      // preview={false}
-                      // preview={false}
+      <FlowStoreProvider createStore={createFlowStore}>
+        <OutputSelectionStoreProvider createStore={createOutputSelectionStore}>
+          <ImageDetailInitializer workflowId={workflowId} currentImage={currentImage} />
+          <div className={cn('flex h-full w-full gap-4 bg-neocard', isMiniFrame && 'justify-center')}>
+            {/* 主内容区域 */}
+            <main
+              className={cn(
+                'flex size-full flex-1 rounded-xl border border-input bg-slate-1 p-4 dark:bg-[#111113] md:flex-row',
+                isMiniFrame && 'justify-center',
+                !isMiniFrame && !showFormInImageDetail && 'justify-center',
+              )}
+            >
+              {/* 左侧图片展示区 */}
+              <div
+                className={cn(
+                  'flex h-full flex-col items-center justify-between overflow-auto pr-4 dark:bg-[#111113]',
+                  isMiniFrame ? 'w-full' : !showFormInImageDetail ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
+                )}
+              >
+                {imageUrl ? (
+                  <>
+                    <div className="flex w-full flex-1 items-center justify-center">
+                      <div className="vines-center size-full overflow-auto">
+                        <Image
+                          src={imageUrl}
+                          alt="详情图片"
+                          className="rounded-lg"
+                          style={{
+                            display: 'block',
+                            margin: 'auto',
+                            maxWidth: '100%',
+                            width: 'auto',
+                            height: 'auto',
+                            objectFit: 'contain',
+                            maxHeight: 'calc(100vh - 340px)',
+                            transition: 'transform 0.3s ease',
+                          }}
+                          // preview={false}
+                          // preview={false}
+                        />
+                      </div>
+                    </div>
+                    {/* 图片操作按钮 - 中间 */}
+                    <div className="flex w-full flex-col gap-4 overflow-hidden">
+                      <ImageOperations
+                        // imageUrl={imageUrl}
+                        imageRotation={imageRotation}
+                        imageFlipX={imageFlipX}
+                        imageFlipY={imageFlipY}
+                        imageScale={imageScale}
+                        onRotateLeft={handleRotateLeft}
+                        onRotateRight={handleRotateRight}
+                        onFlipHorizontal={handleFlipHorizontal}
+                        onFlipVertical={handleFlipVertical}
+                        onZoomIn={handleZoomIn}
+                        onZoomOut={handleZoomOut}
+                        onDownload={handleDownload}
+                      />
+                      {/* 图片缩略图轮播 - 底部 */}
+                      <div
+                        style={{
+                          maxWidth: showFormInImageDetail ? '70vw' : '93vw',
+                        }}
+                      >
+                        <ImagesCarousel />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="vines-center size-full text-center text-3xl text-muted-foreground">
+                    {t('workspace.image-detail.no-image', '无图片数据')}
+                  </div>
+                )}
+              </div>
+
+              {/* 右侧表单区域 */}
+              {!isMiniFrame && showFormInImageDetail && (
+                <div className="relative flex h-full flex-1 flex-col gap-4 rounded-r-xl rounded-tr-xl border-l border-input pl-4 dark:bg-[#111113]">
+                  <ScrollArea disabledOverflowMask className="flex-1 overflow-hidden">
+                    <TabularRenderWrapper
+                      execution={execution}
+                      processedInputs={processedInputs}
+                      showInputDiffBanner={showInputDiffBanner}
+                      originalInputValues={originalInputValues}
+                      onProcessedInputsChange={setProcessedInputs}
+                      onShowInputDiffBannerChange={setShowInputDiffBanner}
+                      onOriginalInputValuesChange={setOriginalInputValues}
                     />
+                  </ScrollArea>
+                  <div className="z-20 dark:bg-[#111113]">
+                    <TabularFooterButtons processedInputs={processedInputs} />
                   </div>
                 </div>
-                {/* 图片操作按钮 - 中间 */}
-                <div className="flex w-full flex-col gap-4 overflow-hidden p-4">
-                  <ImageOperations
-                    // imageUrl={imageUrl}
-                    imageRotation={imageRotation}
-                    imageFlipX={imageFlipX}
-                    imageFlipY={imageFlipY}
-                    imageScale={imageScale}
-                    onRotateLeft={handleRotateLeft}
-                    onRotateRight={handleRotateRight}
-                    onFlipHorizontal={handleFlipHorizontal}
-                    onFlipVertical={handleFlipVertical}
-                    onZoomIn={handleZoomIn}
-                    onZoomOut={handleZoomOut}
-                    onDownload={handleDownload}
-                  />
-                  {/* 图片缩略图轮播 - 底部 */}
-                  <div
-                    style={{
-                      maxWidth: showFormInImageDetail ? '70vw' : '93vw',
-                    }}
-                  >
-                    <ImagesCarousel />
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="vines-center size-full text-center text-3xl text-muted-foreground">
-                {t('workspace.image-detail.no-image', '无图片数据')}
-              </div>
-            )}
+              )}
+            </main>
+
+            {/* 如果关联存在，则显示关联 */}
+            <WorkbenchOperationBar />
+
+            {/* 右侧边栏 */}
+            <RightSidebar
+              onBack={() => history.back()}
+              hasPrev={!!hasPrev}
+              hasNext={!!hasNext}
+              onPrevImage={nonUrgentPrevImage}
+              onNextImage={nonUrgentNextImage}
+              onDeleteImage={handleDeleteImage}
+            />
           </div>
-
-          {/* 右侧表单区域 */}
-          {!isMiniFrame && showFormInImageDetail && (
-            <div className="relative flex h-full flex-1 flex-col gap-4 rounded-r-xl rounded-tr-xl bg-background p-4 dark:bg-[#111113] md:border-l md:border-input">
-              <ScrollArea disabledOverflowMask className="flex-1 overflow-hidden">
-                <TabularRenderWrapper
-                  height={window.innerHeight - 120}
-                  execution={execution}
-                  processedInputs={processedInputs}
-                  showInputDiffBanner={showInputDiffBanner}
-                  originalInputValues={originalInputValues}
-                  onProcessedInputsChange={setProcessedInputs}
-                  onShowInputDiffBannerChange={setShowInputDiffBanner}
-                  onOriginalInputValuesChange={setOriginalInputValues}
-                />
-              </ScrollArea>
-              <div className="z-20 bg-background dark:bg-[#111113]">
-                <TabularFooterButtons processedInputs={processedInputs} />
-              </div>
-            </div>
-          )}
-        </main>
-
-        {/* 右侧边栏 */}
-        <RightSidebar
-          onBack={() => history.back()}
-          hasPrev={!!hasPrev}
-          hasNext={!!hasNext}
-          onPrevImage={nonUrgentPrevImage}
-          onNextImage={nonUrgentNextImage}
-          onDeleteImage={handleDeleteImage}
-        />
-      </div>
+        </OutputSelectionStoreProvider>
+      </FlowStoreProvider>
     </VinesFlowProvider>
   );
+};
+
+// 创建一个新的组件来初始化 FlowStore
+const ImageDetailInitializer: React.FC<{ workflowId: string; currentImage: IVinesExecutionResultItem }> = ({
+  workflowId,
+  currentImage,
+}) => {
+  const setWorkflowId = useFlowStore((s) => s.setWorkflowId);
+  const { setOutputSelections } = useOutputSelectionStore();
+
+  useEffect(() => {
+    setWorkflowId(workflowId);
+  }, [workflowId, setWorkflowId]);
+
+  useEffect(() => {
+    setOutputSelections([
+      {
+        outputId: currentImage.render?.key ?? currentImage.instanceId,
+        item: currentImage,
+      },
+    ]);
+  }, [currentImage, setOutputSelections]);
+
+  return null;
 };
 
 export const Route = createLazyFileRoute('/$teamId/workspace/$workflowId/image-detail/')({
