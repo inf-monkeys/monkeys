@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
 import { WorkbenchPanelLayout } from 'src/components/layout-wrapper/workbench/panel';
 
+import { ReportDialog } from '@/components/devtools/report/dialog';
 import { OEM } from '@/components/layout/oem';
 import { AgentLayout } from '@/components/layout-wrapper/agent';
 import { DesignLayout } from '@/components/layout-wrapper/design';
@@ -98,6 +99,7 @@ const RootComponent: React.FC = () => {
     <>
       <ScrollRestoration />
       <TooltipProvider delayDuration={100}>
+        <ReportDialog />
         <main className="vines-ui grid size-full min-h-screen" style={{ zoom }}>
           <AnimatePresence mode="popLayout">
             {visible && (

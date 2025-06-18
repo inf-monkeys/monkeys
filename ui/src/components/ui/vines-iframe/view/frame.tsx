@@ -1,3 +1,11 @@
+import useUrlState from '@/hooks/use-url-state';
+import { cn } from '@/utils';
+
 export const VinesViewFrame = ({ children }: { children: React.ReactNode }) => {
-  return <div className="size-full overflow-hidden rounded-xl border bg-slate-1 p-0">{children}</div>;
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  return (
+    <div className={cn('size-full overflow-hidden bg-slate-1 p-1', mode === 'mini' ? '' : 'rounded-xl border')}>
+      {children}
+    </div>
+  );
 };
