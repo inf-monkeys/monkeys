@@ -13,7 +13,7 @@ import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { ImagesResult } from '@/store/useExecutionImageResultStore';
 import { cn } from '@/utils';
-import { IVinesExecutionResultItem, newConvertExecutionResultToItemList } from '@/utils/execution';
+import { newConvertExecutionResultToItemList } from '@/utils/execution';
 
 import { getThumbUrl } from '../../workspace/vines-view/form/execution-result/virtua/item/image';
 
@@ -69,10 +69,11 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
     };
   }, [images?.length]);
 
-  const handleDragStart = (e: React.DragEvent, item: IVinesExecutionResultItem) => {
+  const handleDragStart = (e: React.DragEvent, item: ImagesResultWithOrigin, src: string) => {
     e.stopPropagation();
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', item.render.key);
+    e.dataTransfer.setData('text/plain', item.render.origin);
+    e.dataTransfer.setData('text/uri-list', src);
   };
 
   const slideLeftRef = useRef<HTMLButtonElement>(null);
@@ -149,7 +150,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
         {images.length > 0 ? (
           images.map((item, index) => (
             <SwiperSlide key={item.render.key} className={cn('basis-auto')}>
-              <div className={cn('h-[90px] w-[90px] cursor-move overflow-hidden rounded-md')}>
+              <div className={cn('h-[90px] w-[90px] cursor-grab overflow-hidden rounded-md')}>
                 {/*                 {item.render.type === 'image' && (
                   <img
                     draggable
@@ -215,7 +216,9 @@ const convertInfiniteDataToNormal = (data: VinesWorkflowExecutionOutputListItem[
 };
 
 type ImagesResultWithOrigin = ImagesResult & {
-  origin: string;
+  render: {
+    origin: string;
+  };
 };
 
 const HistoryResultOg = () => {
@@ -244,11 +247,10 @@ const HistoryResultOg = () => {
     // @ts-ignore
     thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl, origin: url } } as ImagesResultWithOrigin);
   }
-  if (!imagesResult) return null;
   // console.log('imagesResult', imagesResult);
 
   // @ts-ignore
-  const images = convertInfiniteDataToNormal(imagesResult);
+  // const images = convertInfiniteDataToNormal(imagesResult);
 
   // console.log('images', images);
   return <HistoryResultInner loading={false} images={thumbImages} setSize={setSize} />;
@@ -267,11 +269,11 @@ function CarouselItemImage({
 }: {
   image: ImagesResultWithOrigin;
   index: number;
-  handleDragStart: (e: React.DragEvent, item: ImagesResultWithOrigin) => void;
+  handleDragStart: (e: React.DragEvent, item: ImagesResultWithOrigin, src: string) => void;
 }) {
   const [shouldUseThumbnail, setShouldUseThumbnail] = useState(true);
   useAsyncEffect(async () => {
-    const res = await checkImageUrlAvailable(image.render.data as string);
+    const res = await checkImageUrlAvailable(image.render.origin as string);
     setShouldUseThumbnail(res);
   }, [image]);
 
@@ -279,8 +281,8 @@ function CarouselItemImage({
     <img
       draggable
       onPointerDown={(e) => e.stopPropagation()}
-      onDragStart={(e) => handleDragStart(e, image)}
-      src={shouldUseThumbnail ? (image.render.data as string) : (image.origin as string)}
+      onDragStart={(e) => handleDragStart(e, image, image.render.origin as string)}
+      src={shouldUseThumbnail ? (image.render.data as string) : (image.render.origin as string)}
       alt={typeof image.render.alt === 'string' ? image.render.alt : `Image ${index + 1}`}
       className="h-full w-full select-none object-cover"
     />
