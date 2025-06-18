@@ -16,13 +16,12 @@ import { cn } from '@/utils';
 
 import 'swiper/css';
 import 'swiper/css/mousewheel';
-import 'swiper/css/virtual';
 
 interface ImagesCarouselProps {
   className?: string;
 }
 
-export const SwiperModules = [Virtual, Mousewheel];
+const SwiperModules = [Virtual, Mousewheel];
 export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
   const thumbImages = useThumbImages();
   const setPosition = useSetExecutionPosition();
@@ -87,12 +86,18 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
     <div ref={containerRef} className="h-24 overflow-hidden">
       <Swiper
         spaceBetween={12}
+        slidesPerGroup={3}
         direction={'horizontal'}
         modules={SwiperModules}
         freeMode={true}
         grabCursor={true}
         mousewheel={{
-          forceToAxis: true,
+          forceToAxis: false,
+          releaseOnEdges: true,
+          sensitivity: 2000,
+          thresholdDelta: 0.2,
+          thresholdTime: 10,
+          enabled: true,
         }}
         virtual
         slidesPerView={slidesPerView}
