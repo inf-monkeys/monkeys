@@ -1,17 +1,23 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
-import { useInViewport } from 'ahooks';
+import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
+import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
 import { ImagesResult } from '@/store/useExecutionImageResultStore';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution';
 
-import { SwiperModules } from '../image-detail/swiper-carousel';
+import 'swiper/css';
+import 'swiper/css/mousewheel';
+import 'swiper/css/navigation';
+import 'swiper/css/virtual';
 
+const SwiperModules = [Virtual, Mousewheel, Navigation];
+const SLIDE_THRESHOLD = 10;
 interface HistoryResultProps {
   loading: boolean;
   images: IVinesExecutionResultItem[];
@@ -21,24 +27,13 @@ interface HistoryResultProps {
 }
 
 const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isMiniFrame, className, setSize }) => {
-  const [draggedItem, setDraggedItem] = useState<IVinesExecutionResultItem | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const lastRef = useRef<HTMLDivElement>(null);
-  const [inViewPort] = useInViewport(lastRef, {
-    callback: () => {
-      setSize((size) => size + 1);
-    },
-  });
   const [slidesPerView, setSlidesPerView] = useState(1);
-
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 计算 slidesPerView 的函数
   const calculateSlidesPerView = (containerWidth: number) => {
-    const slideWidth = 90; // 幻灯片宽度
-    const spaceBetween = 12; // 间距
+    const slideWidth = 90; // slide width
+    const spaceBetween = 12; // space between
     const calculated = Math.floor((containerWidth + spaceBetween) / (slideWidth + spaceBetween));
     return Math.max(1, Math.min(calculated, images?.length || 1));
   };
@@ -69,42 +64,14 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
   }, [images?.length]);
 
   const handleDragStart = (e: React.DragEvent, item: IVinesExecutionResultItem) => {
+    e.stopPropagation();
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', item.render.key);
-    setDraggedItem(item);
-    setIsDragging(true);
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOverIndex(index);
-  };
+  const slideLeftRef = useRef<HTMLButtonElement>(null);
+  const slideRightRef = useRef<HTMLButtonElement>(null);
 
-  const handleDragEnd = () => {
-    setDraggedItem(null);
-    setDragOverIndex(null);
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
-    e.preventDefault();
-    const draggedKey = e.dataTransfer.getData('text/plain');
-    if (draggedKey && dragOverIndex !== null) {
-      const newItems = [...images];
-      const draggedIndex = newItems.findIndex((item) => item.render.key === draggedKey);
-      if (draggedIndex !== -1) {
-        const [removed] = newItems.splice(draggedIndex, 1);
-        newItems.splice(targetIndex, 0, removed);
-        // TODO: Add callback to update parent state
-      }
-    }
-    handleDragEnd();
-  };
-
-  const handleWatchDrag = useCallback(() => {
-    return !isDragging;
-  }, [isDragging]);
   return (
     <div
       className={cn(
@@ -120,56 +87,75 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
     >
       <Swiper
         virtual
+        allowTouchMove={false}
         spaceBetween={12}
         direction={'horizontal'}
         modules={SwiperModules}
-        freeMode={true}
-        grabCursor={true}
+        freeMode={false}
+        grabCursor={false}
+        slidesPerGroup={3}
         mousewheel={{
-          forceToAxis: true,
+          forceToAxis: false,
+          releaseOnEdges: true,
+          sensitivity: 2000,
+          thresholdDelta: 0.2,
+          thresholdTime: 10,
+          enabled: true,
         }}
-        slidesPerView={14}
+        navigation={{
+          prevEl: slideLeftRef.current,
+          nextEl: slideRightRef.current,
+        }}
+        slidesPerView={slidesPerView}
+        onSlideChange={(swiper) => {
+          // 当滑动到接近最后几个slide时触发加载
+          // 提前3个slide开始加载
+          if (swiper.activeIndex + slidesPerView >= images.length - SLIDE_THRESHOLD) {
+            console.log('requesting more');
+
+            setSize((size) => size + 1);
+          }
+        }}
         className={cn('h-full w-full', className)}
         onSwiper={(swiper) => {}}
       >
         {images.length > 0 ? (
           images.map((item, index) => (
-            <SwiperSlide key={item.render.key} className={cn('basis-auto', dragOverIndex === index && '')}>
-              <Card
-                className={cn(
-                  'h-[90px] w-[90px] cursor-move overflow-hidden',
-                  draggedItem?.render.key === item.render.key && 'opacity-50',
-                )}
-                draggable
-                onDragStart={(e) => handleDragStart(e, item)}
-                onDragOver={(e) => handleDragOver(e, index)}
-                onDragEnd={handleDragEnd}
-                onDrop={(e) => handleDrop(e, index)}
-              >
+            <SwiperSlide key={item.render.key} className={cn('basis-auto')}>
+              <div className={cn('h-[90px] w-[90px] cursor-move overflow-hidden rounded-md')}>
                 {item.render.type === 'image' && (
                   <img
+                    draggable
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onDragStart={(e) => handleDragStart(e, item)}
                     src={item.render.data as string}
                     alt={typeof item.render.alt === 'string' ? item.render.alt : `Image ${index + 1}`}
                     className="h-full w-full select-none object-cover"
                   />
                 )}
-              </Card>
+              </div>
             </SwiperSlide>
           ))
         ) : (
-          // <SwiperSlide className={cn('basis-auto', dragOverIndex === index && '')}>
-          //   <div className="h-[90px] w-[90px] cursor-move overflow-hidden">
-          //     <div className="h-full w-full bg-slate-100"></div>
-          //   </div>
-          // </SwiperSlide>
           <></>
         )}
         {/* <CarouselPrevious className="h-8.5 w-9.5 absolute -left-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
         <CarouselNext className="h-8.5 w-9.5 absolute -right-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" /> */}
-        <SwiperSlide key={'last'}>
-          <div ref={lastRef} draggable className="h-[90px] w-[90px] cursor-move overflow-hidden bg-red-800"></div>
-        </SwiperSlide>
       </Swiper>
+      <Button
+        icon={<ArrowLeftIcon />}
+        variant="outline"
+        size="icon"
+        className="absolute left-2 top-1/2 -translate-y-1/2"
+        ref={slideLeftRef}
+      ></Button>
+      <Button
+        icon={<ArrowRightIcon />}
+        variant="outline"
+        size="icon"
+        className="absolute right-2 top-1/2 -translate-y-1/2"
+        ref={slideRightRef}
+      ></Button>
     </div>
   );
 };
@@ -197,7 +183,7 @@ const convertInfiniteDataToNormal = (data: VinesWorkflowExecutionOutputListItem[
 };
 
 const HistoryResultOg = () => {
-  const { data: imagesResult, setSize } = useInfiniteWorkflowExecutionAllOutputs({ limit: 10 });
+  const { data: imagesResult, setSize } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
   /*   const { data: imagesResult, setSize } = useInfinitaeWorkflowExecutionOutputs('67f4e64da6376c12a3b95f9a', {
     limit: 30,
   }); */
@@ -208,6 +194,8 @@ const HistoryResultOg = () => {
 
   // @ts-ignore
   const images = convertInfiniteDataToNormal(imagesResult);
+
+  console.log('images', images);
 
   return <HistoryResultInner loading={false} images={images} isMiniFrame={false} setSize={setSize} />;
 };
