@@ -1,10 +1,14 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
+import { useInfinitaeWorkflowExecutionOutputs } from '@/apis/workflow/execution/output';
 import { Card } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
+import { ImagesResult } from '@/store/useExecutionImageResultStore';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution';
+
+import { getThumbUrl } from '../../workspace/vines-view/form/execution-result/virtua/item/image';
 
 interface HistoryResultProps {
   loading: boolean;
@@ -124,32 +128,38 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
   );
 };
 
-const HistoryResultOg = () => {
-  const { data: imagesResult, size, setSize } = useInfiniteWorkflowExecutionAllOutputs({ limit: 10 });
-  // const { workflowId } = useVinesOriginWorkflow();
-  // const { data } = useWorkflowExecutionOutputs(workflowId);
-  // if (!imagesResult) return null;
-  // console.log('imagesResult', imagesResult);
-  // const res: IVinesExecutionResultItem[] =
-  //   imagesResult.flat().flatMap((e) =>
-  //     e.output.flatMap((item, index) => [
-  //       {
-  //         ...item,
-  //         render: {
-  //           data: item.data ? getThumbUrl(item.data as string) : '',
-  //           key: `${e.instanceId}-${item.data}-${index}`,
-  //           type: item.type,
-  //           alt: item.alt,
-  //           status: e.status,
-  //           isDeleted: false,
-  //         },
-  //       },
-  //     ]),
-  //   ) ?? [];
-  // // console.log('data', data);
-  // console.log('res', res);
+const convertInfiniteDataToNormal = (data: VinesWorkflowExecutionOutputListItem[][] | undefined): ImagesResult[] => {
+  if (!data) return [];
+  return data.flat().flatMap((result) =>
+    result.output.flatMap((item, index) => {
+      const res = [];
+      if (item.type === 'image') {
+        res.push({
+          ...item,
+          render: {
+            type: 'image',
+            data: getThumbUrl(item.data as string),
+            key: result.instanceId + '-' + result.status + '-' + index,
+          },
+        });
+      }
+      return res;
+    }),
+  );
+};
 
-  return <HistoryResultInner loading={false} images={[]} isMiniFrame={false} />;
+const HistoryResultOg = () => {
+  // const { data: imagesResult } = useInfiniteWorkflowExecutionAllOutputs({ limit: 10 });
+  const { data: imagesResult } = useInfinitaeWorkflowExecutionOutputs('67f4e64da6376c12a3b95f9a', { limit: 10 });
+  // const { dataa}
+
+  if (!imagesResult) return null;
+  console.log('imagesResult', imagesResult);
+
+  // @ts-ignore
+  const images = convertInfiniteDataToNormal(imagesResult);
+
+  return <HistoryResultInner loading={false} images={images} isMiniFrame={false} />;
 };
 
 export default function HistoryResultDefault() {
