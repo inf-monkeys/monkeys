@@ -8,6 +8,20 @@ export const useWorkflowExecutionOutputs = (workflowId: string) =>
     `/api/workflow/executions/${workflowId}/outputs`,
     vinesFetcher({ method: 'GET' }),
   );
+export const useInfinitaeWorkflowExecutionOutputs = (
+  workflowId: string,
+  { limit = 10, orderBy = 'DESC' }: { limit?: number; orderBy?: string },
+): SWRInfiniteResponse<VinesWorkflowExecutionOutputListItem[] | undefined> =>
+  useSWRInfinite<VinesWorkflowExecutionOutputListItem[] | undefined>(
+    (index, previousPageData) => {
+      if (previousPageData && !previousPageData.length) return null;
+      return `/api/workflow/executions/${workflowId}/outputs?limit=${limit}&page=${index + 1}&orderBy=${orderBy}`;
+    },
+    vinesFetcher({ method: 'GET' }),
+    {
+      initialSize: 1,
+    },
+  );
 
 export const useWorkflowExecutionAllOutputs = ({ limit = 10, page = 1 }: { limit?: number; page?: number }) =>
   useSWR<VinesWorkflowExecutionOutputListItem[] | undefined>(
@@ -17,13 +31,15 @@ export const useWorkflowExecutionAllOutputs = ({ limit = 10, page = 1 }: { limit
 
 export const useInfiniteWorkflowExecutionAllOutputs = ({
   limit = 10,
+  orderBy = 'DESC',
 }: {
   limit?: number;
+  orderBy?: string;
 }): SWRInfiniteResponse<VinesWorkflowExecutionOutputListItem[] | undefined> =>
   useSWRInfinite<VinesWorkflowExecutionOutputListItem[] | undefined>(
     (index, previousPageData) => {
       if (previousPageData && !previousPageData.length) return null;
-      return `/api/workflow/executions/all/outputs?limit=${limit}&page=${index + 1}`;
+      return `/api/workflow/executions/all/outputs?limit=${limit}&page=${index + 1}&orderBy=${orderBy}`;
     },
     vinesFetcher({ method: 'GET' }),
     {
