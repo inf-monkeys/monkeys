@@ -88,6 +88,10 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
           slideLeftRef.current?.click();
         } else if (e.key === 'ArrowRight') {
           slideRightRef.current?.click();
+        } else if (e.key === 'ArrowUp') {
+          slideLeftRef.current?.click();
+        } else if (e.key === 'ArrowDown') {
+          slideRightRef.current?.click();
         }
       },
       { signal },
