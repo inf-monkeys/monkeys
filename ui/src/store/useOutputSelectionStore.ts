@@ -9,6 +9,7 @@ interface IOutputSelectionStore {
   selectedOutputItems: IVinesExecutionResultItem[];
   setSelectionMode: (mode: boolean) => void;
   toggleOutputSelection: (outputId: string, item: IVinesExecutionResultItem) => void;
+  setOutputSelections: (items: { outputId: string; item: IVinesExecutionResultItem }[]) => void;
   clearSelection: () => void;
 }
 
@@ -37,6 +38,21 @@ const createOutputSelectionStore = () =>
           newSelectedOutputs.add(outputId);
           newSelectedOutputItems.push(item);
         }
+
+        return {
+          selectedOutputs: newSelectedOutputs,
+          selectedOutputItems: newSelectedOutputItems,
+        };
+      }),
+    setOutputSelections: (items) =>
+      set((state) => {
+        const newSelectedOutputs = new Set(state.selectedOutputs);
+        const newSelectedOutputItems = [...state.selectedOutputItems];
+
+        items.forEach(({ outputId, item }) => {
+          newSelectedOutputs.add(outputId);
+          newSelectedOutputItems.push(item);
+        });
 
         return {
           selectedOutputs: newSelectedOutputs,

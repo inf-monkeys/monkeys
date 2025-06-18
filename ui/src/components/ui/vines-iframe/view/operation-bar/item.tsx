@@ -1,5 +1,7 @@
 import React, { forwardRef, startTransition } from 'react';
 
+import { useNavigate } from '@tanstack/react-router';
+
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import _ from 'lodash';
@@ -11,6 +13,7 @@ import { useWorkspacePages } from '@/apis/pages';
 import { useGetWorkflow } from '@/apis/workflow';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { useVinesTeam } from '@/components/router/guard/team';
+import { useVinesRoute } from '@/components/router/use-vines-route';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import useUrlState from '@/hooks/use-url-state';
@@ -25,6 +28,8 @@ export interface IWorkbenchOperationItemProps {
 
 export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemProps>(({ data }) => {
   const { t } = useTranslation();
+  const { isUseWorkbench } = useVinesRoute();
+  const navigate = useNavigate();
   const { teamId } = useVinesTeam();
   const setCurrentPage = useSetCurrentPage();
   const { data: workflow } = useGetWorkflow(data.targetWorkflowId);
@@ -82,6 +87,14 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
           // setUrlState({ activePageFromWorkflowDisplayName: undefined });
           setCurrentPage({ [teamId]: { ...targetPage, groupId: targetPageGroup.id } });
         });
+        if (!isUseWorkbench) {
+          void navigate({
+            to: '/$teamId',
+            params: {
+              teamId,
+            },
+          });
+        }
       } else {
         toast.error('未找到目标工作流页面');
       }

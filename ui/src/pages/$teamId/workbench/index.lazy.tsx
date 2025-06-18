@@ -32,7 +32,7 @@ export const Workbench: React.FC = () => {
   return (
     <main className="relative flex size-full">
       <WorkbenchSidebar mode={mode} showGroup={showGroup} />
-      <div className="flex size-full flex-col">
+      <div className="flex size-full flex-col gap-4">
         <WorkbenchView mode={mode} />
         <HistoryResult />
       </div>
