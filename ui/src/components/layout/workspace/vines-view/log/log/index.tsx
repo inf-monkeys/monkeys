@@ -27,6 +27,7 @@ interface IVinesLogViewLogTabProps {
   containerHeight: number;
 }
 
+const POLLING_INTERVAL = 1000;
 export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
   visible,
   workbenchVisible,
@@ -41,7 +42,7 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
 
   // 轮询相关状态
   const [lastQueryParams, setLastQueryParams] = useState<IVinesSearchWorkflowExecutionsParams | null>(null);
-  const [isPolling, setIsPolling] = useState(false);
+  const [isPolling, setIsPolling] = useState(true);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -66,7 +67,7 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
 
   // 递归轮询函数
   const startPolling = useCallback(async () => {
-    if (!isPolling || !visible || isUserInteracting || document.hidden) {
+    if (!isPolling || isUserInteracting) {
       return;
     }
 
@@ -94,18 +95,18 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
     }
 
     // 递归设置下一次轮询
-    if (isPolling && visible && !isUserInteracting && !document.hidden) {
-      pollingTimeoutRef.current = setTimeout(startPolling, 5000);
+    if (isPolling && !isUserInteracting) {
+      pollingTimeoutRef.current = setTimeout(startPolling, POLLING_INTERVAL);
     }
-  }, [isPolling, visible, isUserInteracting, lastQueryParams, vines.workflowId, trigger, workflowPageRef]);
+  }, [isPolling, isUserInteracting, lastQueryParams, vines.workflowId, trigger, workflowPageRef]);
 
   // 启动轮询
   const resumePolling = useCallback(() => {
-    if (!isPolling || !visible || isUserInteracting || document.hidden) return;
+    if (!isPolling || isUserInteracting) return;
 
     stopPolling();
-    pollingTimeoutRef.current = setTimeout(startPolling, 5000);
-  }, [isPolling, visible, isUserInteracting, startPolling, stopPolling]);
+    pollingTimeoutRef.current = setTimeout(startPolling, POLLING_INTERVAL);
+  }, [isPolling, isUserInteracting, startPolling, stopPolling]);
 
   // 用户交互控制
   const handleUserInteractionStart = useCallback(() => {
@@ -194,32 +195,14 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
     await trigger(params);
   };
 
-  // 页面可见性检测
+  // 轮询控制 - 移除对组件可见性和页面隐藏的检查
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // 页面隐藏时停止轮询
-        stopPolling();
-      } else if (visible && vines.workflowId) {
-        // 页面显示时立即查询并开始轮询
-        handleMutate().then(() => {
-          setIsPolling(true);
-        });
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [visible, vines.workflowId, handleMutate, stopPolling]);
-
-  // 轮询控制
-  useEffect(() => {
-    if (isPolling && visible && !isUserInteracting && !document.hidden) {
+    if (isPolling && !isUserInteracting) {
       resumePolling();
     } else {
       stopPolling();
     }
-  }, [isPolling, visible, isUserInteracting, resumePolling, stopPolling]);
+  }, [isPolling, isUserInteracting, resumePolling, stopPolling]);
 
   // 清理
   useEffect(() => {
@@ -235,11 +218,9 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
     if (!visible) {
       vines.executionInstanceId = '';
       setActiveTab('');
-      // 组件隐藏时停止轮询
-      setIsPolling(false);
-      stopPolling();
+      // 组件隐藏时不再停止轮询，轮询继续运行
     }
-  }, [vines.workflowId, visible, stopPolling]);
+  }, [vines.workflowId, visible]);
 
   return (
     <div className="relative flex h-full max-h-full items-center">
