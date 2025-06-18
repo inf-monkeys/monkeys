@@ -24,7 +24,9 @@ export const ReportProvider: React.FC<ReportProviderProps> = ({ children, onRepo
 
   const handleKeyDown = useCallback(
     async (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.altKey && event.key.toLowerCase() === 'r') {
+      const isMacLike = /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent); // 更稳妥的方式
+      const ctrlOrCmd = isMacLike ? event.metaKey : event.ctrlKey;
+      if (ctrlOrCmd && event.altKey && event.code === 'KeyR') {
         event.preventDefault();
         if (onReport) {
           const newContent = await onReport();
