@@ -20,7 +20,6 @@ interface HistoryResultProps {
 }
 
 const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isMiniFrame, className }) => {
-  console.log('images', images);
   const [draggedItem, setDraggedItem] = useState<IVinesExecutionResultItem | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -105,12 +104,14 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
         isMiniFrame && 'mt-2',
         className,
       )}
+      ref={containerRef}
       style={{
         width: window.innerWidth * 0.765,
         height: '140px',
       }}
     >
       <Swiper
+        virtual
         spaceBetween={12}
         direction={'horizontal'}
         modules={SwiperModules}
