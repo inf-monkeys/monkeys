@@ -1,14 +1,16 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { useInfinitaeWorkflowExecutionOutputs } from '@/apis/workflow/execution/output';
 import { Card } from '@/components/ui/card';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
 import { ImagesResult } from '@/store/useExecutionImageResultStore';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution';
 
 import { getThumbUrl } from '../../workspace/vines-view/form/execution-result/virtua/item/image';
+import { SwiperModules } from '../image-detail/swiper-carousel';
 
 interface HistoryResultProps {
   loading: boolean;
@@ -58,6 +60,41 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
     handleDragEnd();
   };
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  // 计算 slidesPerView 的函数
+  const calculateSlidesPerView = (containerWidth: number) => {
+    const slideWidth = 90; // 幻灯片宽度
+    const spaceBetween = 12; // 间距
+    const calculated = Math.floor((containerWidth + spaceBetween) / (slideWidth + spaceBetween));
+    return Math.max(1, Math.min(calculated, images?.length || 1));
+  };
+  const [slidesPerView, setSlidesPerView] = useState(1);
+  // 监听容器宽度变化
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width } = entry.contentRect;
+        const newSlidesPerView = calculateSlidesPerView(width);
+        setSlidesPerView(newSlidesPerView);
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    // 初始计算
+    const initialWidth = container.offsetWidth;
+    if (initialWidth > 0) {
+      setSlidesPerView(calculateSlidesPerView(initialWidth));
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [images?.length]);
+
   const handleWatchDrag = useCallback(() => {
     return !isDragging;
   }, [isDragging]);
@@ -73,57 +110,55 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, isM
         height: '140px',
       }}
     >
-      <Carousel
-        opts={{
-          align: 'start',
-          loop: false,
-          skipSnaps: false,
-          dragFree: false,
-          containScroll: 'trimSnaps',
-          inViewThreshold: 0.7,
-          watchDrag: handleWatchDrag,
+      <Swiper
+        spaceBetween={12}
+        direction={'horizontal'}
+        modules={SwiperModules}
+        freeMode={true}
+        grabCursor={true}
+        mousewheel={{
+          forceToAxis: true,
         }}
-        className="h-full w-full px-4"
-        // ref={carouselRef}
+        slidesPerView={14}
+        className={cn('h-full w-full', className)}
+        onSwiper={(swiper) => {}}
       >
-        <CarouselContent style={{ width: '79  svw' }} className="space-x-0 overflow-hidden">
-          {loading ? (
-            <div className="flex w-full items-center justify-center">
-              <span>Loading...</span>
-            </div>
-          ) : images.length > 0 ? (
-            images.map((item, index) => (
-              <CarouselItem key={item.render.key} className={cn('basis-auto', dragOverIndex === index && '')}>
-                <Card
-                  className={cn(
-                    'h-[90px] w-[90px] cursor-move overflow-hidden',
-                    draggedItem?.render.key === item.render.key && 'opacity-50',
-                  )}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, item)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDragEnd={handleDragEnd}
-                  onDrop={(e) => handleDrop(e, index)}
-                >
-                  {item.render.type === 'image' && (
-                    <img
-                      src={item.render.data as string}
-                      alt={typeof item.render.alt === 'string' ? item.render.alt : `Image ${index + 1}`}
-                      className="h-full w-full select-none object-cover"
-                    />
-                  )}
-                </Card>
-              </CarouselItem>
-            ))
-          ) : (
-            <div className="flex w-full items-center justify-center">
-              <span>No images available</span>
-            </div>
-          )}
-        </CarouselContent>
-        <CarouselPrevious className="h-8.5 w-9.5 absolute -left-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
-        <CarouselNext className="h-8.5 w-9.5 absolute -right-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
-      </Carousel>
+        {images.length > 0 ? (
+          images.map((item, index) => (
+            <SwiperSlide key={item.render.key} className={cn('basis-auto', dragOverIndex === index && '')}>
+              <Card
+                className={cn(
+                  'h-[90px] w-[90px] cursor-move overflow-hidden',
+                  draggedItem?.render.key === item.render.key && 'opacity-50',
+                )}
+                draggable
+                onDragStart={(e) => handleDragStart(e, item)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                onDrop={(e) => handleDrop(e, index)}
+              >
+                {item.render.type === 'image' && (
+                  <img
+                    src={item.render.data as string}
+                    alt={typeof item.render.alt === 'string' ? item.render.alt : `Image ${index + 1}`}
+                    className="h-full w-full select-none object-cover"
+                  />
+                )}
+              </Card>
+            </SwiperSlide>
+          ))
+        ) : (
+          // <SwiperSlide className={cn('basis-auto', dragOverIndex === index && '')}>
+          //   <div className="h-[90px] w-[90px] cursor-move overflow-hidden">
+          //     <div className="h-full w-full bg-slate-100"></div>
+          //   </div>
+          // </SwiperSlide>
+          <></>
+        )}
+        {/* <CarouselPrevious className="h-8.5 w-9.5 absolute -left-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
+        <CarouselNext className="h-8.5 w-9.5 absolute -right-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" /> */}
+        <LastSlide />
+      </Swiper>
     </div>
   );
 };
@@ -167,3 +202,13 @@ export default function HistoryResultDefault() {
 }
 
 export const HistoryResult = React.memo(HistoryResultOg);
+
+function LastSlide() {
+  return (
+    <SwiperSlide>
+      <div className="h-[90px] w-[90px] cursor-move overflow-hidden">
+        <div className="h-full w-full bg-red-1"></div>
+      </div>
+    </SwiperSlide>
+  );
+}

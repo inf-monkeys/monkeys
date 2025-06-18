@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAsyncEffect } from 'ahooks';
-import { Pagination } from 'swiper/modules';
+import { Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
@@ -21,15 +21,15 @@ interface ImagesCarouselProps {
   className?: string;
 }
 
-const SwiperModules = [Pagination];
+export const SwiperModules = [Virtual];
 export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
   const thumbImages = useThumbImages();
   const setPosition = useSetExecutionPosition();
   const position = useExecutionPosition();
-  const containerRef = useRef<HTMLDivElement>(null);
   const [slidesPerView, setSlidesPerView] = useState(1);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   // 计算 slidesPerView 的函数
   const calculateSlidesPerView = (containerWidth: number) => {
     const slideWidth = 90; // 幻灯片宽度
@@ -93,6 +93,7 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
         mousewheel={{
           forceToAxis: true,
         }}
+        virtual
         slidesPerView={slidesPerView}
         initialSlide={position}
         className={cn('h-full w-full', className)}
