@@ -310,7 +310,7 @@ export class WorkflowExecutionService {
           type: 'image',
           data: image,
           alt,
-          key: key, // 添加对应的 key
+          key: key,
         });
         isInserted = true;
       }
@@ -320,37 +320,28 @@ export class WorkflowExecutionService {
         finalOutput.push({
           type: 'video',
           data: video,
-          key: key, // 添加对应的 key
+          key: key,
         });
-        isInserted = true;
-      }
-
-      // 如果没有图片和视频，处理文本或 JSON
-      if (images.length === 0 && videos.length === 0) {
-        if (typeof value === 'string') {
-          finalOutput.push({
-            type: 'text',
-            data: value,
-            key: key, // 添加对应的 key
-          });
-        } else {
-          finalOutput.push({
-            type: 'json',
-            data: value,
-            key: key, // 添加对应的 key
-          });
-        }
         isInserted = true;
       }
     }
 
-    // 如果没有插入任何内容，添加原始输出
+    // 如果没有图片和视频，处理文本或 JSON
     if (!isInserted && output) {
-      finalOutput.push({
-        type: 'json',
-        data: output,
-        key: 'root', // 或者使用其他标识
-      });
+      if (typeof output === 'string') {
+        finalOutput.push({
+          type: 'text',
+          data: output,
+          key: 'root',
+        });
+      } else {
+        finalOutput.push({
+          type: 'json',
+          data: output,
+          key: 'root',
+        });
+      }
+      isInserted = true;
     }
 
     let formattedInput = null;
@@ -475,7 +466,7 @@ export class WorkflowExecutionService {
             type: 'image',
             data: image,
             alt,
-            key: key, // 添加对应的 key
+            key: key,
           });
           isInserted = true;
         }
@@ -485,37 +476,28 @@ export class WorkflowExecutionService {
           finalOutput.push({
             type: 'video',
             data: video,
-            key: key, // 添加对应的 key
+            key: key,
           });
-          isInserted = true;
-        }
-
-        // 如果没有图片和视频，处理文本或 JSON
-        if (images.length === 0 && videos.length === 0) {
-          if (typeof value === 'string') {
-            finalOutput.push({
-              type: 'text',
-              data: value,
-              key: key, // 添加对应的 key
-            });
-          } else {
-            finalOutput.push({
-              type: 'json',
-              data: value,
-              key: key, // 添加对应的 key
-            });
-          }
           isInserted = true;
         }
       }
 
-      // 如果没有插入任何内容，添加原始输出
       if (!isInserted && output) {
-        finalOutput.push({
-          type: 'json',
-          data: output,
-          key: 'root', // 或者使用其他标识
-        });
+        if (typeof output === 'string') {
+          finalOutput.push({
+            type: 'text',
+            data: output,
+            key: 'root',
+          });
+          isInserted = true;
+        } else {
+          finalOutput.push({
+            type: 'json',
+            data: output,
+            key: 'root',
+          });
+        }
+        isInserted = true;
       }
 
       let formattedInputArray = null;
@@ -634,33 +616,23 @@ export class WorkflowExecutionService {
               });
               isInserted = true;
             }
-
-            // 如果没有图片和视频，处理文本或 JSON
-            if (images.length === 0 && videos.length === 0) {
-              if (typeof value === 'string') {
-                finalOutput.push({
-                  type: 'text',
-                  data: value,
-                  key: key, // 添加对应的 key
-                });
-              } else {
-                finalOutput.push({
-                  type: 'json',
-                  data: value,
-                  key: key, // 添加对应的 key
-                });
-              }
-              isInserted = true;
-            }
           }
 
-          // 如果没有插入任何内容，添加原始输出
+          // 如果没有图片和视频，处理文本或 JSON
           if (!isInserted && output) {
-            finalOutput.push({
-              type: 'json',
-              data: output,
-              key: 'root', // 或者使用其他标识
-            });
+            if (typeof output === 'string') {
+              finalOutput.push({
+                type: 'text',
+                data: output,
+                key: 'root',
+              });
+            } else {
+              finalOutput.push({
+                type: 'json',
+                data: output,
+                key: 'root',
+              });
+            }
           }
 
           const ctx = input?.['__context'];

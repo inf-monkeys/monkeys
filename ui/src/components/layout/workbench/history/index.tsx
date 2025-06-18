@@ -105,7 +105,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
   return (
     <AnimatePresence>
       <div
-        className={cn('h-[calc(90px+2rem)] rounded-xl border border-slate-200 bg-slate-1 p-0 shadow-sm', className)}
+        className={cn('h-[calc(90px+2rem)] rounded-xl border border-input bg-slate-1 p-0 shadow-sm', className)}
         ref={containerRef}
         style={{
           width: onlyShowWorkbenchIcon

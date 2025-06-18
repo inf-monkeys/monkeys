@@ -148,18 +148,18 @@ type FlattenedObject = Record<string, any>;
 export const flattenKeys = (obj: unknown, path: string[] = [], triggerKeys?: string[], triggerCallback?: (key: string, data: any) => void): FlattenedObject =>
   isObject(obj)
     ? reduce(
-      obj,
-      (cum: FlattenedObject, next: unknown, key: string) => {
-        // 如果是触发键，保持其值的原始结构
-        if (triggerKeys?.includes(key)) {
-          triggerCallback?.(key, obj[key]);
-          return merge(cum, { [path.concat(key).join('.')]: next });
-        }
-        // 其他情况继续递归展平
-        return merge(cum, flattenKeys(next, [...path, key], triggerKeys, triggerCallback));
-      },
-      {},
-    )
+        obj,
+        (cum: FlattenedObject, next: unknown, key: string) => {
+          // 如果是触发键，保持其值的原始结构
+          if (triggerKeys?.includes(key)) {
+            triggerCallback?.(key, obj[key]);
+            return merge(cum, { [path.concat(key).join('.')]: next });
+          }
+          // 其他情况继续递归展平
+          return merge(cum, flattenKeys(next, [...path, key], triggerKeys, triggerCallback));
+        },
+        {},
+      )
     : { [path.join('.')]: obj };
 
 export const flattenObject = (obj: any, parentKey = '', result = {}) => {
