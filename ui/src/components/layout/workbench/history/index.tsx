@@ -134,7 +134,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
           // 当滑动到接近最后几个slide时触发加载
           // 提前3个slide开始加载
           if (swiper.activeIndex + slidesPerView >= images.length - SLIDE_THRESHOLD) {
-            console.log('requesting more');
+            // console.log('requesting more');
 
             setSize((size) => size + 1);
           }
@@ -241,12 +241,12 @@ const HistoryResultOg = () => {
     thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl, origin: url } } as ImagesResultWithOrigin);
   }
   if (!imagesResult) return null;
-  console.log('imagesResult', imagesResult);
+  // console.log('imagesResult', imagesResult);
 
   // @ts-ignore
   const images = convertInfiniteDataToNormal(imagesResult);
 
-  console.log('images', images);
+  // console.log('images', images);
   return <HistoryResultInner loading={false} images={thumbImages} setSize={setSize} />;
 };
 
