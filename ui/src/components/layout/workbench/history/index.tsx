@@ -1,5 +1,6 @@
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
+import { useAsyncEffect } from 'ahooks';
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
 import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -7,6 +8,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
+import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { ImagesResult } from '@/store/useExecutionImageResultStore';
@@ -24,7 +26,7 @@ const SwiperModules = [Virtual, Mousewheel, Navigation];
 const SLIDE_THRESHOLD = 10;
 interface HistoryResultProps {
   loading: boolean;
-  images: IVinesExecutionResultItem[];
+  images: ImagesResultWithOrigin[];
 
   className?: string;
   setSize: Dispatch<SetStateAction<number>>;
@@ -37,7 +39,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
   // 计算 slidesPerView 的函数
   const calculateSlidesPerView = (containerWidth: number) => {
     const slideWidth = 90; // slide width
-    const spaceBetween = 12; // space between
+    const spaceBetween = 10; // space between
     const calculated = Math.floor((containerWidth + spaceBetween) / (slideWidth + spaceBetween));
     return Math.max(1, Math.min(calculated, images?.length || 1));
   };
@@ -144,7 +146,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
           images.map((item, index) => (
             <SwiperSlide key={item.render.key} className={cn('basis-auto')}>
               <div className={cn('h-[90px] w-[90px] cursor-move overflow-hidden rounded-md')}>
-                {item.render.type === 'image' && (
+                {/*                 {item.render.type === 'image' && (
                   <img
                     draggable
                     onPointerDown={(e) => e.stopPropagation()}
@@ -153,7 +155,12 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
                     alt={typeof item.render.alt === 'string' ? item.render.alt : `Image ${index + 1}`}
                     className="h-full w-full select-none object-cover"
                   />
-                )}
+                )} */}
+                <CarouselItemImage
+                  image={item as ImagesResultWithOrigin}
+                  index={index}
+                  handleDragStart={handleDragStart}
+                />
               </div>
             </SwiperSlide>
           ))
@@ -203,6 +210,10 @@ const convertInfiniteDataToNormal = (data: VinesWorkflowExecutionOutputListItem[
   );
 };
 
+type ImagesResultWithOrigin = ImagesResult & {
+  origin: string;
+};
+
 const HistoryResultOg = () => {
   const { teamId } = useVinesTeam();
   const { data: imagesResult, setSize, mutate: RefreshAll } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
@@ -222,11 +233,12 @@ const HistoryResultOg = () => {
   const executionResultList = newConvertExecutionResultToItemList(imagesResult?.flat() ?? []);
   const allImages = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
   // const filerMap = new Map<string, any>();
-  const thumbImages: ImagesResult[] = [];
+  const thumbImages: ImagesResultWithOrigin[] = [];
   for (const image of allImages) {
     const url = image.render.data as string;
     const thumbUrl = getThumbUrl(url);
-    thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl } } as ImagesResult);
+    // @ts-ignore
+    thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl, origin: url } } as ImagesResultWithOrigin);
   }
   if (!imagesResult) return null;
   console.log('imagesResult', imagesResult);
@@ -235,7 +247,7 @@ const HistoryResultOg = () => {
   const images = convertInfiniteDataToNormal(imagesResult);
 
   console.log('images', images);
-  return <HistoryResultInner loading={false} images={thumbImages} isMiniFrame={false} setSize={setSize} />;
+  return <HistoryResultInner loading={false} images={thumbImages} setSize={setSize} />;
 };
 
 export default function HistoryResultDefault() {
@@ -243,3 +255,30 @@ export default function HistoryResultDefault() {
 }
 
 export const HistoryResult = React.memo(HistoryResultOg);
+
+function CarouselItemImage({
+  image,
+  index,
+  handleDragStart,
+}: {
+  image: ImagesResultWithOrigin;
+  index: number;
+  handleDragStart: (e: React.DragEvent, item: ImagesResultWithOrigin) => void;
+}) {
+  const [shouldUseThumbnail, setShouldUseThumbnail] = useState(true);
+  useAsyncEffect(async () => {
+    const res = await checkImageUrlAvailable(image.render.data as string);
+    setShouldUseThumbnail(res);
+  }, [image]);
+
+  return (
+    <img
+      draggable
+      onPointerDown={(e) => e.stopPropagation()}
+      onDragStart={(e) => handleDragStart(e, image)}
+      src={shouldUseThumbnail ? (image.render.data as string) : (image.origin as string)}
+      alt={typeof image.render.alt === 'string' ? image.render.alt : `Image ${index + 1}`}
+      className="h-full w-full select-none object-cover"
+    />
+  );
+}
