@@ -13,7 +13,6 @@ import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
-import useUrlState from '@/hooks/use-url-state';
 import { useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { useOutputSelectionStore } from '@/store/useOutputSelectionStore';
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
@@ -29,8 +28,6 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
   const setCurrentPage = useSetCurrentPage();
   const { data: workflow } = useGetWorkflow(data.targetWorkflowId);
   const { data: workspaceData } = useWorkspacePages();
-
-  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   const { selectedOutputItems } = useOutputSelectionStore();
 
@@ -98,23 +95,15 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
           {...listeners}
           key={data.id}
           className={cn(
-            'z-10 flex cursor-pointer items-center justify-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-            mode === 'mini' ? 'size-8' : 'size-11',
+            'z-10 flex size-11 cursor-pointer items-center justify-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
             isDragging && 'opacity-50',
           )}
           onClick={onItemClick}
         >
           {typeof data.iconUrl === 'string' ? (
-            <VinesLucideIcon
-              className={cn('shrink-0', mode === 'mini' ? 'size-[16px]' : 'size-[20px]')}
-              size={20}
-              src={data.iconUrl}
-            />
+            <VinesLucideIcon className="size-[20px] shrink-0" size={20} src={data.iconUrl} />
           ) : (
-            React.createElement(Folder, {
-              className: cn('shrink-0', mode === 'mini' ? 'size-[16px]' : 'size-[20px]'),
-              size: 20,
-            })
+            React.createElement(Folder, { className: 'size-[20px] shrink-0', size: 20 })
           )}
         </div>
       </TooltipTrigger>

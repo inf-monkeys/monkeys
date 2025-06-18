@@ -18,7 +18,6 @@ import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 import { QuotaButton } from './expand/quota-button';
-
 interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
   tail?: React.ReactNode;
   tailWithAuth?: React.ReactNode;
@@ -50,7 +49,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
   return hideSpaceHeader ? (
     <></>
   ) : (
-    <header className="flex w-full items-center justify-between rounded-xl border border-input bg-slate-1 p-3">
+    <header className="flex w-full items-center justify-between rounded-xl bg-slate-1 p-3 shadow-sm">
       <div className="z-20 flex h-full items-center gap-5">
         <Link
           to="/$teamId"

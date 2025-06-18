@@ -22,18 +22,15 @@ import { useWorkflowAssociationList } from '@/apis/workflow/association';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
-import useUrlState from '@/hooks/use-url-state';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
 import { OperationItem } from './item';
 
-interface IWorkbenchOperationBarProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkbenchOperationBarProps extends React.ComponentPropsWithoutRef<'div'> { }
 
-export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = () => {
+export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ }) => {
   const { workflowId } = useFlowStore();
-
-  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   const { data: initialData } = useWorkflowAssociationList(workflowId);
 
@@ -82,30 +79,21 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = () =
     // onReorder?.(newData);
   };
   return localData.length > 0 ? (
-    <div
-      className={cn(
-        'flex h-full items-center justify-center border bg-slate-1',
-        mode === 'mini' ? '' : 'rounded-xl rounded-bl-xl rounded-tl-xl border-input',
-      )}
-    >
+    <div className={cn('flex h-full items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm')}>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         modifiers={[restrictToVerticalAxis]}
         onDragEnd={handleDragEnd}
       >
-        <ScrollArea
-          className={cn('h-full', mode === 'mini' ? 'w-[3rem] px-2 pt-2' : 'w-[4.8rem] px-4 pt-4')}
-          ref={scrollRef}
-          disabledOverflowMask
-        >
+        <ScrollArea className={cn('h-full w-[4.8rem] px-4 pt-4')} ref={scrollRef} disabledOverflowMask>
           <SortableContext items={localData.map((item) => item.id)} strategy={verticalListSortingStrategy}>
             {localData.map((it) => (
               <OperationItem key={it.id} data={it}></OperationItem>
             ))}
           </SortableContext>
         </ScrollArea>
-        {mode != 'mini' && <Separator orientation="vertical" />}
+        <Separator orientation="vertical" />
       </DndContext>
     </div>
   ) : (

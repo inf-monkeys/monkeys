@@ -1,6 +1,8 @@
 import React from 'react';
 
 import { Outlet, useRouterState } from '@tanstack/react-router';
+
+import { Layers2, Package, PackagePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
@@ -15,7 +17,8 @@ import { SpaceTabs } from '@/components/layout-wrapper/workspace/space/sidebar/t
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { SpaceHeaderTabs } from '@/components/layout-wrapper/space/header/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import VinesEvent from '@/utils/events.ts';
 
 export const WorkspaceLayout: React.FC = () => {
   // 获取路由信息，判断是否是图片详情页
@@ -35,7 +38,36 @@ export const WorkspaceLayout: React.FC = () => {
       {isImageDetailPage ? (
         // 图片详情页使用与工作台、应用市场相同的header
         <SpaceHeader tail={<TeamSelector />} disableSeparator>
-          <SpaceHeaderTabs />
+          <Tabs
+            value="workbench"
+            onValueChange={(val) => {
+              switch (val) {
+                case 'workbench':
+                  VinesEvent.emit('vines-nav', '/$teamId/', { teamId });
+                  break;
+                case 'store':
+                  VinesEvent.emit('vines-nav', '/$teamId/store/', { teamId });
+                  break;
+                case 'main':
+                  VinesEvent.emit('vines-nav', '/$teamId/agents/', { teamId });
+              }
+            }}
+          >
+            <TabsList className="!h-9">
+              <TabsTrigger className="gap-1 py-1" value="workbench">
+                <Layers2 size={14} />
+                {t('components.layout.main.sidebar.list.workbench.label')}
+              </TabsTrigger>
+              <TabsTrigger className="gap-1 py-1" value="store">
+                <Package size={14} />
+                {t('components.layout.main.sidebar.list.store.application-store.label')}
+              </TabsTrigger>
+              <TabsTrigger className="gap-1 py-1" value="main">
+                <PackagePlus size={14} />
+                {t('components.layout.main.sidebar.list.workspace.label')}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </SpaceHeader>
       ) : (
         // 普通工作空间页面使用原来的header

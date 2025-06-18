@@ -1,7 +1,6 @@
-import { ListDto } from '@/common/dto/list.dto';
 import { TenantStatisticsAuthGuard } from '@/common/guards/tenant-statistics.guard';
-import { SuccessListResponse, SuccessResponse } from '@/common/response';
-import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common';
+import { SuccessResponse } from '@/common/response';
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { TenantService } from './tenant.service';
 
 @Controller('tenant')
@@ -23,18 +22,6 @@ export class TenantController {
     const result = await this.tenantService.findBetween(body.startTime, body.endTime);
     return new SuccessResponse({
       data: result,
-    });
-  }
-
-  @Get('/outputs')
-  async getAllExecutionOutputs(@Query() query: ListDto) {
-    const { page = 1, limit = 20 } = query;
-    const { data, total } = await this.tenantService.getAllExecutions({ page: +page, limit: +limit });
-    return new SuccessListResponse({
-      data,
-      total,
-      page: +page,
-      limit: +limit,
     });
   }
 }

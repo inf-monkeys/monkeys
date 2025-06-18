@@ -18,7 +18,7 @@ import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
-import { FindManyOptions, In, IsNull, Not } from 'typeorm';
+import { FindManyOptions, In } from 'typeorm';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
@@ -41,7 +41,7 @@ export class WorkflowExecutionService {
     @Inject(forwardRef(() => WorkflowTrackerService))
     private readonly workflowTrackerService: WorkflowTrackerService,
     private readonly workflowObservabilityService: WorkflowObservabilityService,
-  ) {}
+  ) { }
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
     const workflowInstanceIds = executions.map((x) => x.workflowId);
@@ -310,7 +310,7 @@ export class WorkflowExecutionService {
           type: 'image',
           data: image,
           alt,
-          key: key, // 添加对应的 key
+          key: key // 添加对应的 key
         });
         isInserted = true;
       }
@@ -320,7 +320,7 @@ export class WorkflowExecutionService {
         finalOutput.push({
           type: 'video',
           data: video,
-          key: key, // 添加对应的 key
+          key: key // 添加对应的 key
         });
         isInserted = true;
       }
@@ -331,13 +331,13 @@ export class WorkflowExecutionService {
           finalOutput.push({
             type: 'text',
             data: value,
-            key: key, // 添加对应的 key
+            key: key // 添加对应的 key
           });
         } else {
           finalOutput.push({
             type: 'json',
             data: value,
-            key: key, // 添加对应的 key
+            key: key // 添加对应的 key
           });
         }
         isInserted = true;
@@ -349,7 +349,7 @@ export class WorkflowExecutionService {
       finalOutput.push({
         type: 'json',
         data: output,
-        key: 'root', // 或者使用其他标识
+        key: 'root' // 或者使用其他标识
       });
     }
 
@@ -394,7 +394,6 @@ export class WorkflowExecutionService {
       page: 1,
       limit: 10,
       orderBy: 'DESC' as 'DESC' | 'ASC',
-      orderKey: 'conductorStartTime' as string,
     },
   ): Promise<{
     total: number;
@@ -403,7 +402,7 @@ export class WorkflowExecutionService {
     limit: number;
     workflows: Pick<WorkflowMetadataEntity, 'displayName' | 'description' | 'workflowId' | 'iconUrl'>[];
   }> {
-    const { page, limit: limitNum, orderBy, orderKey } = condition;
+    const { page, limit: limitNum, orderBy } = condition;
 
     const workflowDefinitions = await this.workflowRepository.getAllWorkflows(teamId);
     if (workflowDefinitions.length === 0) {
@@ -418,14 +417,13 @@ export class WorkflowExecutionService {
     const workflowIdsForTeam = workflowDefinitions.map((w) => w.workflowId);
     const workflowDefinitionMap = _.keyBy(workflowDefinitions, 'workflowId');
 
-    const orderByField = orderKey || 'conductorStartTime';
+    const orderByField = 'conductorStartTime';
     const orderDirection = orderBy === 'DESC' ? 'DESC' : 'ASC';
 
     const [executions, total] = await this.workflowRepository.findAndCountWorkflowExecutions({
       where: {
         workflowId: In(workflowIdsForTeam),
         isDeleted: false,
-        conductorStartTime: Not(IsNull()),
       },
       order: { [orderByField]: orderDirection },
       skip: (page - 1) * limitNum,
@@ -457,65 +455,30 @@ export class WorkflowExecutionService {
       });
       const outputKeys = Object.keys(flattenOutput);
       const outputValues = Object.values(flattenOutput);
+      const images = outputValues.map((it) => extractImageUrls(it)).flat();
+      const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
       const finalOutput = [];
       let isInserted = false;
 
-      // 为每个 key-value 对单独处理
-      for (let i = 0; i < outputKeys.length; i++) {
-        const key = outputKeys[i];
-        const value = outputValues[i];
-
-        // 提取图片和视频
-        const images = extractImageUrls(value);
-        const videos = extractVideoUrls(value);
-
-        // 处理图片
-        for (const image of images) {
-          finalOutput.push({
-            type: 'image',
-            data: image,
-            alt,
-            key: key, // 添加对应的 key
-          });
-          isInserted = true;
+      if (outputValues.length === 1 && !images.length && !videos.length) {
+        const currentOutput = outputValues[0];
+        if (typeof currentOutput === 'string') {
+          finalOutput.push({ type: 'text', data: currentOutput });
+        } else {
+          finalOutput.push({ type: 'json', data: currentOutput });
         }
-
-        // 处理视频
-        for (const video of videos) {
-          finalOutput.push({
-            type: 'video',
-            data: video,
-            key: key, // 添加对应的 key
-          });
-          isInserted = true;
-        }
-
-        // 如果没有图片和视频，处理文本或 JSON
-        if (images.length === 0 && videos.length === 0) {
-          if (typeof value === 'string') {
-            finalOutput.push({
-              type: 'text',
-              data: value,
-              key: key, // 添加对应的 key
-            });
-          } else {
-            finalOutput.push({
-              type: 'json',
-              data: value,
-              key: key, // 添加对应的 key
-            });
-          }
-          isInserted = true;
-        }
+        isInserted = true;
       }
-
-      // 如果没有插入任何内容，添加原始输出
+      for (const image of images) {
+        finalOutput.push({ type: 'image', data: image, alt });
+        isInserted = true;
+      }
+      for (const video of videos) {
+        finalOutput.push({ type: 'video', data: video });
+        isInserted = true;
+      }
       if (!isInserted && output) {
-        finalOutput.push({
-          type: 'json',
-          data: output,
-          key: 'root', // 或者使用其他标识
-        });
+        finalOutput.push({ type: 'json', data: output });
       }
 
       let formattedInputArray = null;
@@ -620,7 +583,7 @@ export class WorkflowExecutionService {
                 type: 'image',
                 data: image,
                 alt,
-                key: key,
+                key: key
               });
               isInserted = true;
             }
@@ -630,7 +593,7 @@ export class WorkflowExecutionService {
               finalOutput.push({
                 type: 'video',
                 data: video,
-                key: key,
+                key: key
               });
               isInserted = true;
             }
@@ -641,13 +604,13 @@ export class WorkflowExecutionService {
                 finalOutput.push({
                   type: 'text',
                   data: value,
-                  key: key, // 添加对应的 key
+                  key: key // 添加对应的 key
                 });
               } else {
                 finalOutput.push({
                   type: 'json',
                   data: value,
-                  key: key, // 添加对应的 key
+                  key: key // 添加对应的 key
                 });
               }
               isInserted = true;
@@ -659,7 +622,7 @@ export class WorkflowExecutionService {
             finalOutput.push({
               type: 'json',
               data: output,
-              key: 'root', // 或者使用其他标识
+              key: 'root' // 或者使用其他标识
             });
           }
 
