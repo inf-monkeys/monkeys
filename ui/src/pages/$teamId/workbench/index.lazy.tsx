@@ -34,7 +34,7 @@ export const Workbench: React.FC = () => {
       <WorkbenchSidebar mode={mode} showGroup={showGroup} />
       <div className="flex size-full flex-col gap-4">
         <WorkbenchView mode={mode} />
-        <HistoryResult />
+        {mode !== 'mini' && <HistoryResult />}
       </div>
     </main>
   );
