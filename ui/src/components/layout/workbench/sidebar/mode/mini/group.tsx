@@ -42,7 +42,7 @@ export const WorkbenchMiniGroupList: React.FC<IWorkbenchMiniGroupListProps> = ({
               <TooltipTrigger asChild>
                 <div
                   className={cn(
-                    'flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-transparent transition-colors hover:bg-accent hover:text-accent-foreground',
+                    'mb-1 flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-transparent transition-colors hover:bg-accent hover:text-accent-foreground',
                     groupId === id && 'border-input bg-background text-accent-foreground',
                   )}
                   onClick={() => setGroupId(id)}

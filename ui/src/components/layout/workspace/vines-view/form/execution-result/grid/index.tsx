@@ -24,6 +24,8 @@ import { ErrorFilter } from './error-filter';
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
 
+const EXECUTION_RESULT_FILTER_HEIGHT = 64;
+
 interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'> {
   workflowId: string | null;
   height: number;
@@ -137,7 +139,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     positioner,
     scrollTop,
     isScrolling,
-    height: height === Infinity ? 760 : height - 40,
+    height: height === Infinity ? 800 - EXECUTION_RESULT_FILTER_HEIGHT : height - EXECUTION_RESULT_FILTER_HEIGHT,
     containerRef,
     items: data,
     overscanBy: 3,
@@ -178,7 +180,9 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       <ScrollArea
         className={cn('z-20 mr-0.5 bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2')}
         ref={scrollRef}
-        style={{ height: height === Infinity ? 760 : height - 40 }}
+        style={{
+          height: height === Infinity ? 800 - EXECUTION_RESULT_FILTER_HEIGHT : height - EXECUTION_RESULT_FILTER_HEIGHT,
+        }}
         disabledOverflowMask
       >
         {masonryGrid}

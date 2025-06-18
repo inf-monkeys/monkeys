@@ -174,7 +174,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     }
   }, [executionResultList, shouldFilterError]);
   return (
-    <Card className={cn('relative rounded-xl bg-neocard', className)}>
+    <Card className={cn('relative rounded-xl !border-none bg-neocard !shadow-none', className)}>
       <CardContent className="p-0">
         {executionResultList && executionResultList.length > 0 && filteredData.length > 0 && !isLoading ? (
           <ExecutionResultGrid

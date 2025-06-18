@@ -3,16 +3,18 @@ import { config } from '@/common/config';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { flattenObject } from '@/common/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
+import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isBoolean } from 'lodash';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 
 @Injectable()
 export class TenantService {
   constructor(
     @InjectRepository(WorkflowExecutionEntity)
     private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
+    private readonly workflowRepository: WorkflowRepository,
   ) {}
 
   async findAll() {
@@ -30,6 +32,20 @@ export class TenantService {
         },
       },
     };
+  }
+
+  async getAllExecutions(options: { page: number; limit: number }) {
+    const { page, limit } = options;
+    const findOptions: FindManyOptions<WorkflowExecutionEntity> = {
+      skip: (page - 1) * limit,
+      take: limit,
+      order: {
+        createdTimestamp: 'DESC',
+      },
+    };
+    const [data, total] = await this.workflowRepository.findAllExecutions(findOptions);
+
+    return { data, total };
   }
 
   async findBetween(startTime: number, endTime: number) {
