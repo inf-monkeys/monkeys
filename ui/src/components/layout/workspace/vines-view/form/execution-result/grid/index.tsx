@@ -7,6 +7,7 @@ import { t } from 'i18next';
 import { Square, SquareCheck } from 'lucide-react';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
+import { useWorkflowAssociationList } from '@/apis/workflow/association';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,6 @@ import { useShouldFilterError } from '@/store/useShouldErrorFilterStore.ts';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
-import { useWorkflowAssociationList } from '@/apis/workflow/association';
 import { ErrorFilter } from './error-filter';
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
@@ -55,7 +55,6 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const { isSelectionMode, setSelectionMode, selectedOutputs, toggleOutputSelection } = useOutputSelectionStore();
   const { data: associations } = useWorkflowAssociationList(workflowId);
 
-
   useEffect(() => {
     if (onSelectionChange) {
       const selectedItemsList = data.filter((item) => selectedOutputs.has(item.instanceId));
@@ -82,7 +81,10 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const shouldFilterError = useShouldFilterError();
   const positioner = usePositioner(
     {
-      width: isUseWorkbench && (associations?.filter((it) => it.enabled).length ?? 0) > 0 ? containerWidth - 80 : containerWidth,
+      width:
+        isUseWorkbench && (associations?.filter((it) => it.enabled).length ?? 0) > 0
+          ? containerWidth - 80
+          : containerWidth,
       columnGutter: 8,
       columnWidth: 200,
       rowGutter: 8,
@@ -161,7 +163,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   });
 
   return (
-    <div className="p-2 flex flex-col gap-2">
+    <div className="flex flex-col gap-2 p-2">
       <div className="flex items-center justify-between gap-2">
         <ErrorFilter />
         <Button
@@ -180,7 +182,8 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         disabledOverflowMask
       >
         {masonryGrid}
-      </ScrollArea></div>
+      </ScrollArea>
+    </div>
   );
 };
 

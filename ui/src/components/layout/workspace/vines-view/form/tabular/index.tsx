@@ -57,7 +57,6 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
   );
 
   const [loading, setLoading] = useState(false);
-
   const handleSubmit = useMemoizedFn(async (inputData) => {
     setLoading(true);
     void (await mutate(

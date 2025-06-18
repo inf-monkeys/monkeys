@@ -44,5 +44,11 @@ export const useInfiniteWorkflowExecutionAllOutputs = ({
     vinesFetcher({ method: 'GET' }),
     {
       initialSize: 1,
+      revalidateFirstPage: true,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      revalidateIfStale: true,
+      refreshInterval: 1000 * 2,
+      revalidateAll: false,
     },
   );
