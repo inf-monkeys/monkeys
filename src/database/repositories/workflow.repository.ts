@@ -70,7 +70,7 @@ export class WorkflowRepository {
     private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
     @InjectRepository(WorkflowAssociationsEntity)
     private readonly workflowAssociationRepository: Repository<WorkflowAssociationsEntity>,
-  ) { }
+  ) {}
 
   public async findWorkflowByCondition(condition: FindWorkflowCondition) {
     return await this.workflowMetadataRepository.find({
@@ -269,6 +269,10 @@ export class WorkflowRepository {
   }
 
   public async findAndCountWorkflowExecutions(options: FindManyOptions<WorkflowExecutionEntity>): Promise<[WorkflowExecutionEntity[], number]> {
+    return this.workflowExecutionRepository.findAndCount(options);
+  }
+
+  public async findAllExecutions(options: FindManyOptions<WorkflowExecutionEntity>): Promise<[WorkflowExecutionEntity[], number]> {
     return this.workflowExecutionRepository.findAndCount(options);
   }
 

@@ -1,4 +1,11 @@
 {
+  "dev-tools": {
+    "report": {
+      "dialog": {
+        "title": "Feedback Information"
+      }
+    }
+  },
   "system": {
     "network-error": "System maintenance",
     "empty-auth-methods": "Login is not enabled",
