@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
-import { ImagesResult, useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
+import { ImagesResult, useSetExecutionImages } from '@/store/useExecutionImageResultStore';
 import { useSetThumbImages } from '@/store/useExecutionImageTumbStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
@@ -126,7 +126,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     });
   }, [firstPageExecutionList, executionResultList]);
 
-  const { setImages } = useExecutionImageResultStore();
+  const setImages = useSetExecutionImages();
   const setThumbImages = useSetThumbImages();
   // filter results for image detail route
   useEffect(() => {
@@ -174,7 +174,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     }
   }, [executionResultList, shouldFilterError]);
   return (
-    <Card className={cn('relative rounded-xl !border-none bg-neocard !shadow-none', className)}>
+    <Card className={cn('relative rounded-xl bg-neocard', className)}>
       <CardContent className="p-0">
         {executionResultList && executionResultList.length > 0 && filteredData.length > 0 && !isLoading ? (
           <ExecutionResultGrid
