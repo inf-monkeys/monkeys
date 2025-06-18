@@ -273,7 +273,7 @@ function CarouselItemImage({
 }) {
   const [shouldUseThumbnail, setShouldUseThumbnail] = useState(true);
   useAsyncEffect(async () => {
-    const res = await checkImageUrlAvailable(image.render.origin as string);
+    const res = await checkImageUrlAvailable(image.render.data as string);
     setShouldUseThumbnail(res);
   }, [image]);
 
