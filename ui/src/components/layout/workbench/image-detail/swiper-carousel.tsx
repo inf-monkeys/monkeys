@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAsyncEffect } from 'ahooks';
-import { Virtual } from 'swiper/modules';
+import { Mousewheel, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
@@ -15,13 +15,14 @@ import { useThumbImages } from '@/store/useExecutionImageTumbStore';
 import { cn } from '@/utils';
 
 import 'swiper/css';
-import 'swiper/css/pagination';
+import 'swiper/css/mousewheel';
+import 'swiper/css/virtual';
 
 interface ImagesCarouselProps {
   className?: string;
 }
 
-export const SwiperModules = [Virtual];
+export const SwiperModules = [Virtual, Mousewheel];
 export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
   const thumbImages = useThumbImages();
   const setPosition = useSetExecutionPosition();
