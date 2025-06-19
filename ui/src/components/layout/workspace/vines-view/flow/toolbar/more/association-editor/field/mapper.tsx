@@ -5,14 +5,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '@/components/ui/form.tsx';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { IWorkflowAssociationForEditor } from '@/schema/workspace/workflow-association';
 
@@ -20,11 +13,13 @@ interface IFieldMapperProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowAssociationForEditor>;
 }
 
-interface MapperItem {
+type ToWorkflowMapperItem = {
   origin: string;
   target: string;
   default?: string;
-}
+};
+
+type MapperItem = ToWorkflowMapperItem;
 
 export const FieldMapper: React.FC<IFieldMapperProps> = ({ form }) => {
   const { t } = useTranslation();
@@ -36,7 +31,7 @@ export const FieldMapper: React.FC<IFieldMapperProps> = ({ form }) => {
   useEffect(() => {
     const currentValue = form.getValues('mapper');
     if (Array.isArray(currentValue)) {
-      setMapperItems(currentValue);
+      setMapperItems(currentValue as MapperItem[]);
     } else {
       setMapperItems([]);
     }
@@ -125,11 +120,16 @@ export const FieldMapper: React.FC<IFieldMapperProps> = ({ form }) => {
                   />
                 </div>
               ))}
-              <Button icon={<Plus />} variant="outline" onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                handleAddMapper();
-              }} className="w-full">
+              <Button
+                icon={<Plus />}
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleAddMapper();
+                }}
+                className="w-full"
+              >
                 {t('workspace.flow-view.tooltip.more.association-editor.editor.field.mapper.add')}
               </Button>
             </div>

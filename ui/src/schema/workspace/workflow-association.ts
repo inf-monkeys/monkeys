@@ -1,6 +1,6 @@
 import z from 'zod';
 
-export const workflowAssociationSchema = z.object({
+const baseWorkflowAssociationSchema = z.object({
   displayName: z.union([
     z.string().min(1, 'Display name cannot be empty'),
     z
@@ -28,14 +28,25 @@ export const workflowAssociationSchema = z.object({
     .optional()
     .transform((val) => val ?? undefined),
   enabled: z.boolean(),
-  targetWorkflowId: z.string(),
-  mapper: z.array(
-    z.object({
-      origin: z.string(),
-      target: z.string(),
-      default: z.string().optional(),
-    }),
-  ),
 });
+
+const toWorkflowWorkflowAssociationMapperSchema = z.array(
+  z.object({
+    origin: z.string(),
+    target: z.string(),
+    default: z.string().optional(),
+  }),
+);
+
+export const workflowAssociationSchema = z.discriminatedUnion('type', [
+  baseWorkflowAssociationSchema.extend({
+    type: z.literal('to-workflow'),
+    targetWorkflowId: z.string(),
+    mapper: toWorkflowWorkflowAssociationMapperSchema,
+  }),
+  baseWorkflowAssociationSchema.extend({
+    type: z.literal('new-design'),
+  }),
+]);
 
 export type IWorkflowAssociationForEditor = z.infer<typeof workflowAssociationSchema>;

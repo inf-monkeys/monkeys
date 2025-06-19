@@ -10,14 +10,17 @@ import { IWorkflowRelatedAssetResult } from '@/apis/ugc/asset-typings.ts';
 import { WorkflowListQuery } from '@/apis/workflow/typings.ts';
 import { IWorkflowValidation } from '@/apis/workflow/validation/typings.ts';
 
-export const useGetWorkflow = (workflowId: string, version?: number) =>
+export const useGetWorkflow = (workflowId?: string, version?: number) =>
   useSWR<MonkeyWorkflow | undefined>(
     workflowId ? `/api/workflow/metadata/${workflowId}${version ? `?version=${version}` : ''}` : null,
     vinesFetcher(),
   );
 
 export const useWorkflowList = (query: WorkflowListQuery = {}) =>
-  useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/metadata?${qs.stringify(query)}`, vinesFetcher());
+  useSWR<(MonkeyWorkflow & { id: string })[] | undefined>(
+    `/api/workflow/metadata?${qs.stringify(query)}`,
+    vinesFetcher(),
+  );
 
 export const getWorkflowList = (query: WorkflowListQuery = {}) =>
   vinesFetcher<MonkeyWorkflow[]>({ simple: true })(`/api/workflow/metadata?${qs.stringify(query)}`);

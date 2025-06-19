@@ -3,6 +3,8 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base/base';
 import { WorkflowMetadataEntity } from './workflow-metadata';
 
+export type WorkflowAssociationType = 'to-workflow' | 'new-design';
+
 @Entity({ name: 'workflow_associations' })
 export class WorkflowAssociationsEntity extends BaseEntity {
   @Column({
@@ -44,15 +46,23 @@ export class WorkflowAssociationsEntity extends BaseEntity {
   originWorkflowId: string;
 
   @Column({
-    name: 'target_workflow_id',
+    name: 'type',
+    type: 'varchar',
   })
-  targetWorkflowId: string;
+  type: WorkflowAssociationType;
+
+  @Column({
+    name: 'target_workflow_id',
+    nullable: true,
+  })
+  targetWorkflowId?: string;
 
   @Column({
     name: 'mapper',
     type: 'jsonb',
+    nullable: true,
   })
-  mapper: Array<{
+  mapper?: Array<{
     origin: string;
     target: string;
     default?: string;
@@ -66,3 +76,5 @@ export class WorkflowAssociationsEntity extends BaseEntity {
   @JoinColumn({ name: 'target_workflow_id' })
   targetWorkflow: WorkflowMetadataEntity;
 }
+
+export type UpdateAndCreateWorkflowAssociation = Pick<WorkflowAssociationsEntity, 'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex' | 'type'>;
