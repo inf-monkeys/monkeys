@@ -12,18 +12,14 @@ import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
+import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 import { ImagesResult, useSetExecutionImages } from '@/store/useExecutionImageResultStore';
 import { useSetThumbImages } from '@/store/useExecutionImageTumbStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
-import {
-  convertExecutionResultToItemList,
-  IVinesExecutionResultItem,
-  newConvertExecutionResultToItemList,
-  removeRepeatKey,
-} from '@/utils/execution.ts';
+import { IVinesExecutionResultItem, newConvertExecutionResultToItemList, removeRepeatKey } from '@/utils/execution.ts';
 
 import { ErrorFilter } from './grid/error-filter';
 import { useVinesIframeMessage } from './iframe-message';
@@ -65,7 +61,6 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const { data: firstPageExecutionListData } = useWorkflowExecutionList(workflowId, 1, LOAD_LIMIT);
   const firstPageExecutionList = firstPageExecutionListData?.data ?? [];
-  const firstPageExecutionRenderList = newConvertExecutionResultToItemList(firstPageExecutionList);
   const hasMore =
     executionListData?.length != 0 &&
     executionListData?.[currentPage - 1]?.total != 0 &&
@@ -73,58 +68,50 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const totalCount = executionListData?.[0]?.total ?? 0;
 
+  // 统一的数据更新和转换逻辑
   useEffect(() => {
-    if (!executionListData || executionListData.length == 0 || executionListData[0]?.total == 0) return;
-    const list: IVinesExecutionResultItem[] = [];
-    for (const execution of executionListData ?? []) {
+    // 如果无限滚动数据为空，直接返回
+    if (!executionListData || executionListData.length === 0 || executionListData[0]?.total === 0) {
+      setExecutionResultList([]);
+      return;
+    }
+
+    // 获取所有现有的原始数据
+    const allExistingItems: VinesWorkflowExecutionOutputListItem[] = [];
+    for (const execution of executionListData) {
       if (execution && execution.data) {
-        list.push(...newConvertExecutionResultToItemList(execution.data));
+        allExistingItems.push(...execution.data);
       }
     }
-    // 使用去重函数防止重复数据
-    setExecutionResultList(removeRepeatKey(list));
-  }, [executionListData]);
 
-  // 第一页任务及状态变化
-  useEffect(() => {
-    // 如果没有基础数据，不处理
-    if (executionResultList.length === 0) return;
+    // 如果有第一页数据，进行原始数据层面的更新
+    let finalRawData = allExistingItems;
+    if (firstPageExecutionList.length > 0) {
+      // 创建现有数据的映射（基于 instanceId）
+      const existingMap = new Map(allExistingItems.map((item) => [item.instanceId, item]));
 
-    // 筛选状态变更的替换原 result
-    const changed = firstPageExecutionRenderList.filter(
-      (r) =>
-        executionResultList.findIndex(
-          (pr) => r.render.key === pr.render.key && r.status != pr.status && !pr.render.isDeleted,
-        ) != -1,
-    );
-
-    // 筛选不存在的拼接到头部 - 只添加真正不存在的instanceId
-    const existingInstanceIds = new Set(executionResultList.map(({ instanceId }) => instanceId));
-    const nonExist = firstPageExecutionList.filter((r) => !existingInstanceIds.has(r.instanceId));
-
-    // 没有变化返回
-    if (changed.length == 0 && nonExist.length == 0) return;
-
-    setExecutionResultList((prevList) => {
-      const newList = [...prevList];
-
-      // 处理状态变化的项目 - 直接替换，不需要重新转换
-      for (const changedItem of changed) {
-        const index = newList.findIndex((pr) => changedItem.render.key === pr.render.key);
-        if (index !== -1) {
-          newList[index] = changedItem;
+      // 处理第一页最新数据
+      const newItems: VinesWorkflowExecutionOutputListItem[] = [];
+      for (const item of firstPageExecutionList) {
+        if (existingMap.has(item.instanceId)) {
+          // 整体替换已存在的项目（状态、时间等可能都更新了）
+          existingMap.set(item.instanceId, item);
+        } else {
+          // 收集新增项目
+          newItems.push(item);
         }
       }
 
-      // 处理新增的项目 - 添加到头部
-      for (const nonExistExecution of nonExist.reverse()) {
-        newList.unshift(...convertExecutionResultToItemList(nonExistExecution));
-      }
+      // 合并：新增项目在前 + 更新后的现有项目
+      finalRawData = [...newItems, ...Array.from(existingMap.values())];
+    }
 
-      // 最终去重确保没有重复key
-      return removeRepeatKey(newList);
-    });
-  }, [firstPageExecutionList, executionResultList]);
+    // 统一转换为渲染数据
+    const renderList = newConvertExecutionResultToItemList(finalRawData);
+
+    // 去重并设置最终结果
+    setExecutionResultList(removeRepeatKey(renderList));
+  }, [executionListData, firstPageExecutionList]);
 
   const setImages = useSetExecutionImages();
   const setThumbImages = useSetThumbImages();

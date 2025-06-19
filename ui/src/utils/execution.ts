@@ -39,7 +39,7 @@ export const convertExecutionResultToItemList = (
       ...result,
       render: {
         ...item,
-        key: result.instanceId + '-' + result.status + '-' + index,
+        key: result.instanceId + '-' + index,
         status: result.status,
       },
     };
@@ -72,7 +72,11 @@ export const newConvertExecutionResultToItemList = (
     return output.output.map((item, index) => {
       return {
         ...output,
-        render: { ...item, key: output.instanceId + '-' + output.status + '-' + index, status: output.status },
+        render: {
+          ...item,
+          key: output.instanceId + '-' + index,
+          status: output.status,
+        },
       };
     });
   });
