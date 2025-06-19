@@ -680,6 +680,17 @@ export class WorkflowExecutionService {
 
   public async startWorkflow(request: StartWorkflowRequest) {
     const { teamId, userId, triggerType, chatSessionId, apiKey, group } = request;
+
+    // 解码 extraMetadata
+    let extraMetadata = (request.inputData?.extraMetadata as any) ?? {};
+    if (typeof extraMetadata === 'string') {
+      try {
+        extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
+      } catch (e) {
+        logger.warn('Failed to parse extraMetadata from base64, using it as a plain object.', e);
+      }
+    }
+
     const workflowContext: WorkflowExecutionContext = {
       userId,
       teamId: teamId,
@@ -761,6 +772,7 @@ export class WorkflowExecutionService {
       userId,
       triggerType,
       apiKey,
+      extraMetadata,
       ...(extra.chatSessionId && { chatSessionId: extra.chatSessionId }),
       ...(extra.group && { group: extra.group }),
     });

@@ -1,6 +1,7 @@
 import { DoWhileTaskDef, ForkJoinTaskDef, SimpleTaskDef, SubWorkflowTaskDef, SwitchTaskDef } from '@inf-monkeys/conductor-javascript';
 import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 import crypto from 'crypto';
+import { isObject, isString, merge, omit, reduce } from 'lodash';
 import shortid from 'shortid';
 
 export const enumToList = (enumItem: any) => {
@@ -141,8 +142,6 @@ export function getComfyuiWorkflowDataListFromWorkflow(tasks: MonkeyTaskDefTypes
   return result;
 }
 
-import { isObject, merge, reduce } from 'lodash';
-
 type FlattenedObject = Record<string, any>;
 
 export const flattenKeys = (obj: unknown, path: string[] = [], triggerKeys?: string[], triggerCallback?: (key: string, data: any) => void): FlattenedObject =>
@@ -173,6 +172,36 @@ export const flattenObject = (obj: any, parentKey = '', result = {}) => {
   }
   return result;
 };
+
+export function flattenObjectToString(obj: any): string {
+  const stringValues: string[] = [];
+
+  function recurse(current: any) {
+    if (current === null || current === undefined) {
+      return;
+    }
+
+    // 只处理 string 类型的值
+    if (isString(current)) {
+      stringValues.push(current);
+    } else if (Array.isArray(current)) {
+      // 如果是数组, 递归处理每个元素
+      for (const item of current) {
+        recurse(item);
+      }
+    } else if (isObject(current)) {
+      // 如果是对象, 递归处理其值, 同时跳过 __context
+      const valuesToRecurse = '__context' in current ? Object.values(omit(current, ['__context'])) : Object.values(current);
+      for (const value of valuesToRecurse) {
+        recurse(value);
+      }
+    }
+    // 其他类型 (number, boolean, etc.) 会被忽略
+  }
+
+  recurse(obj);
+  return stringValues.join(' ');
+}
 
 export const extractImageUrls = (text: unknown): string[] => {
   if (typeof text !== 'string') return [];

@@ -39,4 +39,12 @@ export class StartWorkflowDto {
   })
   @Joiful.boolean().optional()
   waitForWorkflowFinished: boolean;
+
+  @ApiProperty({
+    description: '执行时的额外元数据',
+    required: false,
+    type: Object,
+  })
+  @Joiful.object().optional()
+  extraMetadata?: { [x: string]: any };
 }
