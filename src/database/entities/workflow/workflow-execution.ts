@@ -125,4 +125,20 @@ export class WorkflowExecutionEntity extends BaseEntity {
     name: 'execution_variables',
   })
   executionVariables?: Record<string, any>;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'extra_metadata',
+    comment: 'External metadata from other systems',
+  })
+  extraMetadata?: Record<string, any>;
+
+  @Column({
+    type: 'text',
+    nullable: true,
+    name: 'searchable_text',
+    comment: 'Flattened string values from input and output for full-text search',
+  })
+  searchableText?: string;
 }
