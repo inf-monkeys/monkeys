@@ -82,7 +82,7 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal', te
           <Team
             className={cn(teamNameWidth === 'auto' ? 'w-32' : 'w-26')}
             logo={isDarkMode ? currentTeam?.darkmodeIconUrl : currentTeam?.iconUrl}
-            name={currentTeam?.name}
+            name={t([`components.layout.main.sidebar.teams.${currentTeam?.name ?? ''}`, currentTeam?.name ?? ''])}
           />
           <ChevronsUpDown className="h-4 w-4 opacity-50" />
         </Button>
