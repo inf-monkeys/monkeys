@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
@@ -36,8 +36,6 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
 
   const { vines } = useVinesFlow();
 
-  const submitButton = useRef<HTMLButtonElement>(null);
-
   const tabular$ = useEventEmitter<TTabularEvent>();
 
   const useOpenAIInterface = vines.usedOpenAIInterface();
@@ -57,8 +55,16 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
   );
 
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = useMemoizedFn(async (inputData) => {
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
     setLoading(true);
+
     void (await mutate(
       (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
       (data: any) => {
@@ -77,6 +83,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
       false,
     ));
     event$.emit?.();
+
     vines
       .start({ inputData, onlyStart: true })
       .then((status) => {
@@ -87,11 +94,13 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
           )
             toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
           setHistoryVisible(true);
-          setLoading(false);
           event$.emit?.();
         }
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setIsSubmitting(false);
+      });
   });
 
   const { read } = useClipboard({ showSuccess: false });
@@ -123,9 +132,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
           onSubmit={handleSubmit}
           event$={tabular$}
           workflowId={vines.workflowId}
-        >
-          <Button ref={submitButton} className="hidden" type="submit" />
-        </TabularRender>
+        ></TabularRender>
       </div>
       <div ref={inputRef} className="flex gap-2">
         {isInputNotEmpty && (
@@ -135,7 +142,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
                 <Button
                   className="!px-2.5"
                   variant="outline"
-                  onClick={() => tabular$.emit('restore-previous-param')} // 恢复上一个参数
+                  onClick={() => tabular$.emit('restore-previous-param')}
                   icon={<Undo2 />}
                   size="small"
                 />
@@ -147,7 +154,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
                 <Button
                   className="!px-2.5"
                   variant="outline"
-                  onClick={() => tabular$.emit('reset')} // 重置
+                  onClick={() => tabular$.emit('reset')}
                   icon={<RotateCcw />}
                   size="small"
                 />
@@ -161,7 +168,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
             <Button
               className="!px-2.5"
               variant="outline"
-              onClick={handlePasteInput} // 粘贴参数
+              onClick={handlePasteInput}
               icon={<Clipboard />}
               size="small"
             />
@@ -171,9 +178,9 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
         <Button
           variant="solid"
           className="size-full text-base"
-          onClick={() => submitButton.current?.click()} // 生成
+          onClick={() => tabular$.emit('submit')}
           size="small"
-          disabled={openAIInterfaceEnabled}
+          disabled={openAIInterfaceEnabled || isSubmitting}
           icon={<Sparkles className="fill-white" />}
           loading={loading}
         >
