@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
+import { useNavigate, useSearch } from '@tanstack/react-router';
+
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { createShapeId, getSnapshot, TLShapeId } from 'tldraw';
+import { AssetRecordType, createShapeId, getSnapshot, TLShapeId } from 'tldraw';
 
 import { updateDesignBoardMetadata, useDesignBoardMetadata } from '@/apis/designs';
 import { Board } from '@/components/layout/design-space/board';
@@ -14,12 +16,21 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
+import { useGetTemp, useSetTemp } from '@/store/useGlobalTempStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
+import { IVinesExecutionResultItem } from '@/utils/execution';
 import { downloadFile } from '@/utils/file.ts';
 
 const DesignBoardView: React.FC = () => {
   const { t, i18n } = useTranslation();
+
+  const { operation, tid } = useSearch({ strict: false }) as { operation?: string; tid?: string };
+
+  const navigate = useNavigate();
+
+  const getTemp = useGetTemp();
+  const setTemp = useSetTemp();
 
   const { editor, setEditor, designBoardId, setDesignBoardId } = useDesignBoardStore();
 
@@ -95,6 +106,62 @@ const DesignBoardView: React.FC = () => {
       },
     );
   };
+
+  useEffect(() => {
+    if (operation === 'insert-images' && tid && editor) {
+      const data = getTemp(tid) as IVinesExecutionResultItem[] | undefined;
+      if (!data) return;
+      setTemp(tid, null);
+
+      const processedData = data.map((item) => {
+        const imageUrl = item.render.data as string;
+        const imgElement = new Image();
+        imgElement.src = imageUrl;
+        const imgWidth = imgElement.width;
+        const imgHeight = imgElement.height;
+        return {
+          id: AssetRecordType.createId(),
+          url: imageUrl,
+          width: imgWidth,
+          height: imgHeight,
+        };
+      });
+
+      editor.createAssets(
+        processedData.map((item) => {
+          return {
+            id: item.id,
+            type: 'image',
+            typeName: 'asset',
+            props: {
+              name: item.id,
+              src: item.url,
+              mimeType: 'image/png',
+              isAnimated: false,
+              h: item.height,
+              w: item.width,
+            },
+            meta: {},
+          };
+        }),
+      );
+
+      for (const item of processedData) {
+        editor.createShape({
+          type: 'image',
+          props: {
+            assetId: item.id,
+            w: item.width,
+            h: item.height,
+          },
+        });
+      }
+
+      navigate({
+        search: {},
+      });
+    }
+  }, [operation, tid, editor]);
 
   return (
     <div className={cn('relative flex h-full max-h-full')}>

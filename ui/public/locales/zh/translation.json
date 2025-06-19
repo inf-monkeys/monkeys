@@ -2605,6 +2605,18 @@
                   "label": "描述",
                   "placeholder": "请输入描述"
                 },
+                "type": {
+                  "label": "关联类型",
+                  "placeholder": "请选择关联类型",
+                  "options": {
+                    "to-workflow": {
+                      "label": "工作流"
+                    },
+                    "new-design": {
+                      "label": "新设计画板"
+                    }
+                  }
+                },
                 "target-workflow-id": {
                   "label": "关联工作流",
                   "placeholder": "请选择关联工作流",

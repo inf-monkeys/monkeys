@@ -2,7 +2,7 @@ import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { WorkflowAssociationsEntity } from '@/database/entities/workflow/workflow-association';
+import { UpdateAndCreateWorkflowAssociation } from '@/database/entities/workflow/workflow-association';
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WorkflowAssociationService } from './workflow.association.service';
@@ -10,7 +10,7 @@ import { WorkflowAssociationService } from './workflow.association.service';
 @ApiTags('Workflows/Associations')
 @Controller('/workflow')
 export class WorkflowAssociationController {
-  constructor(private readonly associationService: WorkflowAssociationService) { }
+  constructor(private readonly associationService: WorkflowAssociationService) {}
 
   @ApiOperation({
     summary: '获取工作流下的所有关联',
@@ -30,11 +30,7 @@ export class WorkflowAssociationController {
   })
   @UseGuards(CompatibleAuthGuard)
   @Post('/:workflowId/associations')
-  async createWorkflowAssociation(
-    @Param('workflowId') workflowId: string,
-    @Req() request: IRequest,
-    @Body() body: Pick<WorkflowAssociationsEntity, 'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex'>,
-  ) {
+  async createWorkflowAssociation(@Param('workflowId') workflowId: string, @Req() request: IRequest, @Body() body: UpdateAndCreateWorkflowAssociation) {
     const { teamId } = request;
     const data = await this.associationService.createWorkflowAssociation(workflowId, teamId, body);
     return new SuccessResponse({ data });
@@ -46,14 +42,9 @@ export class WorkflowAssociationController {
   })
   @UseGuards(CompatibleAuthGuard)
   @Put('/:workflowId/associations/:associationId')
-  async updateWorkflowAssociation(
-    @Param('workflowId') workflowId: string,
-    @Param('associationId') associationId: string,
-    @Req() request: IRequest,
-    @Body() body: Pick<WorkflowAssociationsEntity, 'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex'>,
-  ) {
+  async updateWorkflowAssociation(@Param('associationId') associationId: string, @Req() request: IRequest, @Body() body: UpdateAndCreateWorkflowAssociation) {
     const { teamId } = request;
-    const data = await this.associationService.updateWorkflowAssociation(associationId, teamId, body);
+    const data = await this.associationService.updateWorkflowAssociation(associationId, teamId, { ...body });
     return new SuccessResponse({ data });
   }
 

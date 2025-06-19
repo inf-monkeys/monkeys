@@ -38,7 +38,7 @@ export const FieldWorkflow: React.FC<IFieldWorkflowProps> = ({ form }) => {
 
   const { data: workflowList, isLoading } = useWorkflowList();
   const [visible, setVisible] = useState(false);
-  const [filteredWorkflows, setFilteredWorkflows] = useState<MonkeyWorkflow[]>([]);
+  const [filteredWorkflows, setFilteredWorkflows] = useState<(MonkeyWorkflow & { id: string })[]>([]);
 
   // 过滤工作流列表，排除当前工作流
   useEffect(() => {
@@ -47,12 +47,12 @@ export const FieldWorkflow: React.FC<IFieldWorkflowProps> = ({ form }) => {
       return;
     }
 
-    const filtered = workflowList.filter((workflow) => workflow.workflowId !== currentWorkflowId);
+    const filtered = workflowList.filter((workflow) => workflow.id !== currentWorkflowId);
     setFilteredWorkflows(filtered);
   }, [workflowList, currentWorkflowId]);
 
   const selectedWorkflowId = form.watch('targetWorkflowId');
-  const selectedWorkflow = filteredWorkflows.find((w) => w.workflowId === selectedWorkflowId);
+  const selectedWorkflow = filteredWorkflows.find((w) => w.id === selectedWorkflowId);
 
   return (
     <FormField
@@ -77,8 +77,8 @@ export const FieldWorkflow: React.FC<IFieldWorkflowProps> = ({ form }) => {
                       : isLoading
                         ? t('common.load.loading')
                         : t(
-                          'workspace.flow-view.tooltip.more.association-editor.editor.field.target-workflow-id.placeholder',
-                        )}
+                            'workspace.flow-view.tooltip.more.association-editor.editor.field.target-workflow-id.placeholder',
+                          )}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </FormControl>
@@ -99,16 +99,14 @@ export const FieldWorkflow: React.FC<IFieldWorkflowProps> = ({ form }) => {
                     <CommandGroup>
                       {filteredWorkflows.map((workflow) => (
                         <CommandItem
-                          value={workflow.workflowId}
-                          key={workflow.workflowId}
+                          value={workflow.id}
+                          key={workflow.id}
                           onSelect={() => {
-                            field.onChange(workflow.workflowId);
+                            field.onChange(workflow.id);
                             setVisible(false);
                           }}
                         >
-                          <Check
-                            className={cn('mr-2 h-4 w-4', workflow.workflowId === value ? 'opacity-100' : 'opacity-0')}
-                          />
+                          <Check className={cn('mr-2 h-4 w-4', workflow.id === value ? 'opacity-100' : 'opacity-0')} />
                           <div className="flex items-center gap-2">
                             <VinesIcon src={workflow.iconUrl || DEFAULT_WORKFLOW_ICON_URL} size="xs" />
                             <div className="flex flex-col">

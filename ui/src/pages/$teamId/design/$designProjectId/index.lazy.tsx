@@ -8,7 +8,7 @@ import { vinesFetcher } from '@/apis/fetcher.ts';
 import { VinesLoading } from '@/components/ui/loading';
 
 export const DesignBoardIndex: React.FC = () => {
-  const { to } = Route.useSearch() as { to: string };
+  const { to, operation, tid } = Route.useSearch() as { to: string; operation?: string; tid?: string };
   const { designProjectId, teamId } = useParams({ from: '/$teamId/design/$designProjectId/' });
   const { data: boards } = useDesignProjectMetadataList(designProjectId);
   const navigate = useNavigate();
@@ -25,6 +25,8 @@ export const DesignBoardIndex: React.FC = () => {
         },
         search: {
           to,
+          operation,
+          tid,
         },
       });
     }

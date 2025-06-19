@@ -9,8 +9,10 @@ import { Folder } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { createDesignProject } from '@/apis/designs';
+import { IDesignProject } from '@/apis/designs/typings';
 import { useWorkspacePages } from '@/apis/pages';
-import { useGetWorkflow } from '@/apis/workflow';
+import { IAssetItem } from '@/apis/ugc/typings';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { useVinesRoute } from '@/components/router/use-vines-route';
@@ -18,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import useUrlState from '@/hooks/use-url-state';
 import { useSetCurrentPage } from '@/store/useCurrentPageStore';
+import { useSetTemp } from '@/store/useGlobalTempStore';
 import { useOutputSelectionStore } from '@/store/useOutputSelectionStore';
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cn, getI18nContent } from '@/utils';
@@ -28,11 +31,11 @@ export interface IWorkbenchOperationItemProps {
 
 export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemProps>(({ data }) => {
   const { t } = useTranslation();
-  const { isUseWorkbench } = useVinesRoute();
   const navigate = useNavigate();
   const { teamId } = useVinesTeam();
+  const { isUseWorkbench } = useVinesRoute();
   const setCurrentPage = useSetCurrentPage();
-  const { data: workflow } = useGetWorkflow(data.targetWorkflowId);
+  const setTemp = useSetTemp();
   const { data: workspaceData } = useWorkspacePages();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
@@ -55,49 +58,79 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
     }
 
     const originData = selectedOutputItems[0];
+    if (data.type === 'to-workflow') {
+      const targetInput = {};
 
-    const targetInput = {};
-
-    workflow?.variables?.forEach((variable) => {
-      _.set(targetInput, variable.name, variable.default);
-    });
-
-    for (const { origin, target, default: defaultVal } of data.mapper) {
-      if (origin === '__value') {
-        _.set(targetInput, target, originData.render.data);
-        continue;
+      for (const { origin, target, default: defaultVal } of data.mapper) {
+        if (origin === '__value') {
+          _.set(targetInput, target, originData.render.data);
+          continue;
+        }
+        _.set(targetInput, target, _.get(originData.rawOutput, origin, defaultVal ?? null));
       }
-      _.set(targetInput, target, _.get(originData.rawOutput, origin, defaultVal ?? null));
+      setWorkbenchCacheVal(data.targetWorkflowId, targetInput);
+
+      // 跳转到目标工作流页面
+      if (data.targetWorkflowId && workspaceData?.pages) {
+        // 在所有 pinned pages 中查找对应的 page
+        const targetPage = workspaceData.pages.find(
+          (page) => page.workflow?.workflowId === data.targetWorkflowId && page.type === 'preview',
+        );
+        const targetPageGroup = workspaceData.groups.find((item) => item.pageIds.includes(targetPage?.id ?? ''));
+
+        if (targetPage && targetPageGroup) {
+          // setCurrentPage({ [teamId]: targetPage });
+          startTransition(() => {
+            // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+            // setUrlState({ activePageFromWorkflowDisplayName: undefined });
+            setCurrentPage({ [teamId]: { ...targetPage, groupId: targetPageGroup.id } });
+          });
+          if (!isUseWorkbench) {
+            void navigate({
+              to: '/$teamId',
+              params: {
+                teamId,
+              },
+            });
+          }
+        } else {
+          toast.error('未找到目标工作流页面');
+        }
+      }
     }
 
-    setWorkbenchCacheVal(data.targetWorkflowId, targetInput);
-
-    // 跳转到目标工作流页面
-    if (data.targetWorkflowId && workspaceData?.pages) {
-      // 在所有 pinned pages 中查找对应的 page
-      const targetPage = workspaceData.pages.find(
-        (page) => page.workflow?.workflowId === data.targetWorkflowId && page.type === 'preview',
-      );
-      const targetPageGroup = workspaceData.groups.find((item) => item.pageIds.includes(targetPage?.id ?? ''));
-
-      if (targetPage && targetPageGroup) {
-        // setCurrentPage({ [teamId]: targetPage });
-        startTransition(() => {
-          // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
-          // setUrlState({ activePageFromWorkflowDisplayName: undefined });
-          setCurrentPage({ [teamId]: { ...targetPage, groupId: targetPageGroup.id } });
-        });
-        if (!isUseWorkbench) {
-          void navigate({
-            to: '/$teamId',
-            params: {
-              teamId,
-            },
+    if (data.type === 'new-design') {
+      toast.promise(
+        async (): Promise<IAssetItem<IDesignProject>> => {
+          const designProject = await createDesignProject({
+            displayName: '{"zh-CN":"未命名设计项目","en-US":"Untitled design project"}',
+            description: undefined,
+            iconUrl: data.iconUrl,
           });
-        }
-      } else {
-        toast.error('未找到目标工作流页面');
-      }
+          if (!designProject) throw new Error('design project created failed');
+          return designProject;
+        },
+        {
+          success: (designProject) => {
+            const tid = `insert-images-${Date.now()}`;
+            setTemp(tid, selectedOutputItems);
+            navigate({
+              to: '/$teamId/design/$designProjectId',
+              params: {
+                teamId,
+                designProjectId: designProject.id,
+              },
+              search: {
+                operation: 'insert-images',
+                tid,
+              },
+            });
+            return t('common.create.success');
+          },
+          loading: t('common.create.loading'),
+          error: t('common.create.error'),
+        },
+      );
     }
   };
 
