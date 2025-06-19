@@ -104,8 +104,6 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
         async (): Promise<IAssetItem<IDesignProject>> => {
           const designProject = await createDesignProject({
             displayName: '{"zh-CN":"未命名设计项目","en-US":"Untitled design project"}',
-            description: undefined,
-            iconUrl: data.iconUrl,
           });
           if (!designProject) throw new Error('design project created failed');
           return designProject;
