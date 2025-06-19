@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
@@ -90,6 +90,14 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
     }
   };
 
+  const handleDragStart = useCallback(
+    (e: React.DragEvent<HTMLImageElement>) => {
+      e.dataTransfer.setData('text/plain', src);
+      e.dataTransfer.setData('text/uri-list', src);
+    },
+    [src],
+  );
+
   return (
     <div className="vines-center relative overflow-hidden rounded-lg">
       <Image
@@ -102,6 +110,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
           height: '100%',
         }}
         preview={false}
+        onDragStart={handleDragStart}
+        draggable
         onClick={handleImageClick}
       />
 
