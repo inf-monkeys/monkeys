@@ -414,6 +414,7 @@ export class WorkflowRepository {
     chatSessionId,
     apiKey,
     group,
+    extraMetadata,
   }: {
     workflowId: string;
     version: number;
@@ -423,6 +424,7 @@ export class WorkflowRepository {
     chatSessionId?: string;
     apiKey: string;
     group?: string;
+    extraMetadata?: { [x: string]: any };
   }) {
     await this.workflowExecutionRepository.save({
       id: generateDbId(),
@@ -437,6 +439,7 @@ export class WorkflowRepository {
       chatSessionId,
       apikey: apiKey,
       group,
+      extraMetadata,
     });
   }
 
