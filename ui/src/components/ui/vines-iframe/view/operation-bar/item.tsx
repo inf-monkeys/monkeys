@@ -113,14 +113,20 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
             const tid = `insert-images-${Date.now()}`;
             setTemp(tid, selectedOutputItems);
             navigate({
-              to: '/$teamId/design/$designProjectId',
+              to: '/$teamId',
               params: {
                 teamId,
-                designProjectId: designProject.id,
               },
+              // to: '/$teamId/design/$designProjectId',
+              // params: {
+              //   teamId,
+              //   designProjectId: designProject.id,
+              // },
               search: {
                 operation: 'insert-images',
                 tid,
+                designProjectId: designProject.id,
+                activePageFromType: 'global-design-board',
               },
             });
             return t('common.create.success');

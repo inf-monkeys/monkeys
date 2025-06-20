@@ -1,6 +1,6 @@
 import React, { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 
 import { useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence } from 'framer-motion';
@@ -16,6 +16,7 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useOnlyShowWorkbenchIcon, useToggleOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
@@ -34,24 +35,61 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const { teamId } = useVinesTeam();
 
+  const navigate = useNavigate();
+
   const { data, isLoading, mutate } = useWorkspacePages();
 
   const { trigger: updateGroupSortTrigger } = useUpdateGroupSort();
 
-  const [{ activePageFromWorkflowDisplayName }, setUrlState] = useUrlState<{
+  const [{ activePageFromWorkflowDisplayName, activePageFromType }] = useUrlState<{
     activePageFromWorkflowDisplayName?: string;
+    activePageFromType?: string;
   }>({});
 
   const [groupId, setGroupId] = useState<string>('default');
   const [pageId, setPageId] = useState<string>('');
   // const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
-  const originalPages = data?.pages ?? [];
+  const originalPages: IPinPage[] = useMemo(() => {
+    const pages = [...(data?.pages ?? [])];
+    if (!pages.some((page) => page.id === 'global-design-board')) {
+      pages.unshift({
+        id: 'global-design-board',
+        displayName: JSON.stringify({
+          'zh-CN': '全局画板',
+          'en-US': 'Global Board',
+        }),
+        type: 'global-design-board',
+        workflowId: 'global-design-board',
+        isBuiltIn: true,
+        instance: {
+          name: 'Global Board',
+          icon: 'pencil-ruler',
+          type: 'global-design-board',
+          allowedPermissions: [],
+        },
+        designProject: {
+          id: 'global-design-board',
+          name: 'Global Board',
+          displayName: JSON.stringify({
+            'zh-CN': '全局画板',
+            'en-US': 'Global Board',
+          }),
+          iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
+          createdTimestamp: 0,
+          updatedTimestamp: 0,
+        },
+      });
+    }
+    return pages;
+  }, [data?.pages]);
   const originalGroups = useMemo(() => {
     return (
       data?.groups
         ?.map((group) => ({
           ...group,
-          pageIds: group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId)),
+          pageIds: group.isBuiltIn
+            ? ['global-design-board', ...group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId))]
+            : group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId)),
         }))
         ?.filter((group) => group.pageIds.length) ?? []
     );
@@ -60,7 +98,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const { trigger: updateGroupPageSortTrigger } = useUpdateGroupPageSort(groupId);
 
   const pagesMap = keyBy(originalPages, 'id');
-  const groupMap = new Map(originalGroups.map((item, index) => [item.id, index]));
+  // const groupMap = new Map(originalGroups.map((item, index) => [item.id, index]));
   const lists = pageGroupProcess(originalGroups, pagesMap);
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
@@ -91,6 +129,17 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
       }
     }
 
+    if (activePageFromType) {
+      const targetPage = latestOriginalPages.current.find((it) => it.type === activePageFromType);
+      if (targetPage) {
+        setPageId(targetPage.id);
+        setCurrentPage({ [teamId]: targetPage });
+        const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(targetPage?.id ?? ''));
+        groupWithPageId && setGroupId(groupWithPageId.id);
+        return;
+      }
+    }
+
     const currentTeamPage = currentPage?.[teamId] ?? {};
     const currentPageId = currentTeamPage?.id;
 
@@ -110,17 +159,23 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     const setEmptyOrFirstPage = () => {
       if (pagesLength && groupsLength) {
         const sortedGroups = cloneDeep(latestOriginalGroups.current).sort((a) => (a.isBuiltIn ? 1 : -1));
-        sortedGroups.forEach(({ id, pageIds }) => {
+        // 使用 some 来避免多次设置状态
+        sortedGroups.some(({ id, pageIds }) => {
           if (pageIds.length) {
             const firstPage = latestOriginalPages.current.find((it) => it.id === pageIds[0]);
             if (firstPage) {
-              // setCurrentPage((prev) => ({ ...prev, [teamId]: firstPage }));
               setCurrentPage({ [teamId]: firstPage });
               setGroupId(id);
-              return;
+              return true; // 找到后立即退出
             }
           }
+          return false;
         });
+        return;
+      }
+
+      // 如果当前没有选中的页面，就不要设置空对象
+      if (!currentPage?.[teamId]?.id) {
         return;
       }
 
@@ -144,7 +199,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     } else {
       setEmptyOrFirstPage();
     }
-  }, [currentPage?.[teamId], data, teamId, activePageFromWorkflowDisplayName]);
+  }, [currentPage?.[teamId], data, teamId, activePageFromWorkflowDisplayName, activePageFromType]);
 
   const { ref, height: wrapperHeight } = useElementSize();
   const [height, setHeight] = useState(500);
@@ -163,8 +218,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const onPageClick = useCallback(
     (page: IWorkbenchViewItemPage) => {
       startTransition(() => {
-        // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
-        // setUrlState({ activePageFromWorkflowDisplayName: undefined });
+        navigate({
+          search: {},
+        });
         setCurrentPage({ [teamId]: { ...page, groupId } });
       });
     },
@@ -185,14 +241,14 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const onPageGroupPageReorder = (newData: IPinPage[]) => {
     void updateGroupPageSortTrigger({
-      pageIds: newData.map((it) => it.id),
+      pageIds: newData.filter((it) => !it.type.startsWith('global-')).map((it) => it.id),
     }).then(() => {
       void mutate();
     });
   };
   return (
     <div
-      className={cn('mr-4 flex h-full items-center justify-center rounded-xl border border-input bg-neocard shadow-sm')}
+      className={cn('mr-4 flex h-full items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm')}
       ref={ref}
     >
       {isLoading ? (
@@ -204,15 +260,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           {hasGroups ? (
             showGroup ? (
               <>
-                <div
-                  style={{
-                    height: '100%',
-                    // maxWidth: !onlyShowWorkbenchIcon ? '20rem' : '0',
-                    // minWidth: !onlyShowWorkbenchIcon ? '8rem' : '8rem',
-                  }}
-                  className="flex justify-between rounded-l-xl bg-slate-1"
-                >
-                  {/* leftmost nav */}
+                <div className="flex h-full justify-between rounded-l-xl bg-slate-1">
                   <VirtuaWorkbenchViewGroupList
                     data={lists}
                     groupId={groupId}
@@ -220,21 +268,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                     onReorder={onPageGroupReorder}
                   />
                 </div>
-                {/* <Separator orientation="vertical" className="vines-center">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
-                        onClick={() => setSidebarVisible(!sidebarVisible)}
-                      >
-                        <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}
-                    </TooltipContent>
-                  </Tooltip>
-                </Separator> */}
               </>
             ) : (
               <></>
