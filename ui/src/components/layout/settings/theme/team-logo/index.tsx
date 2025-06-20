@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { VinesImageEditor } from '@/components/ui/image-editor';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { useGetDisplayTextFromPlainTextJson } from '@/utils';
 
 interface ITeamLogoProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -24,7 +25,8 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
 
   const [selected, setSelected] = useState<string>('');
 
-  const teamName = team?.name || t('common.utils.team');
+  const teamName = team?.name;
+  const teamDisplayName = useGetDisplayTextFromPlainTextJson(teamName || '');
   const enableTeamLogo = get(team, 'customTheme.enableTeamLogo', void 0);
 
   useMemo(() => {
@@ -100,8 +102,8 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
             tooltipI18nKey="settings.theme.team-logo.lightmode"
           >
             <Avatar className="size-10 rounded-md">
-              <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={teamName} />
-              <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
+              <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={teamDisplayName} />
+              <AvatarFallback className="rounded-none p-2 text-xs">{teamDisplayName?.substring(0, 2)}</AvatarFallback>
             </Avatar>
           </VinesImageEditor>
           <VinesImageEditor
@@ -110,8 +112,8 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
             tooltipI18nKey="settings.theme.team-logo.darkmode"
           >
             <Avatar className="size-10 rounded-md">
-              <AvatarImage className="aspect-auto" src={team?.darkmodeIconUrl} alt={teamName} />
-              <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
+              <AvatarImage className="aspect-auto" src={team?.darkmodeIconUrl} alt={teamDisplayName} />
+              <AvatarFallback className="rounded-none p-2 text-xs">{teamDisplayName?.substring(0, 2)}</AvatarFallback>
             </Avatar>
           </VinesImageEditor>
         </div>

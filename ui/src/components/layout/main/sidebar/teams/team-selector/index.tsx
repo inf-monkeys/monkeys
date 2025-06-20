@@ -23,7 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { cn } from '@/utils';
+import { cn, useGetDisplayTextFromPlainTextJson } from '@/utils';
 
 const NEED_FORCE_REFRESH = ['text-data', 'table-data', 'image-models'];
 
@@ -98,39 +98,19 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal', te
             <CommandGroup>
               <ScrollArea className="flex max-h-60 flex-col overflow-y-auto" disabledOverflowMask>
                 {teams?.map(({ id, iconUrl, name, description, darkmodeIconUrl }) => {
-                  const teamName = t([`components.layout.main.sidebar.teams.${name ?? ''}`, name ?? '']);
-
                   return (
-                    <Tooltip key={id}>
-                      <CommandItem
-                        value={`${teamName}-${description}-${id}`}
-                        className="p-0"
-                        onSelect={() => {
-                          void handleSwapTeam(id);
-                          setOpen(false);
-                        }}
-                      >
-                        <TooltipTrigger asChild>
-                          <div className="group flex w-full cursor-pointer select-none items-center px-2 py-1.5 text-sm">
-                            <Team
-                              logo={isDarkMode ? darkmodeIconUrl : iconUrl}
-                              name={teamName}
-                              description={description}
-                            />
-                            <CheckIcon
-                              className={cn('ml-auto', teamId === id ? 'opacity-100' : 'opacity-0')}
-                              size={18}
-                            />
-                          </div>
-                        </TooltipTrigger>
-                      </CommandItem>
-
-                      <TooltipContent side="right" sideOffset={14}>
-                        {teamName}
-                        <br />
-                        <span className="text-xxs text-muted-foreground">{id}</span>
-                      </TooltipContent>
-                    </Tooltip>
+                    <TeamListItem
+                      key={id}
+                      id={id}
+                      iconUrl={iconUrl ?? ''}
+                      name={name ?? ''}
+                      description={description ?? ''}
+                      darkmodeIconUrl={darkmodeIconUrl ?? iconUrl ?? ''}
+                      handleSwapTeam={handleSwapTeam}
+                      setOpen={setOpen}
+                      isDarkMode={isDarkMode}
+                      teamId={teamId}
+                    />
                   );
                 })}
               </ScrollArea>
@@ -141,3 +121,55 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal', te
     </Popover>
   );
 };
+
+interface ITeamListItemProps {
+  id: string;
+  iconUrl: string;
+  name: string;
+  description: string;
+  darkmodeIconUrl: string;
+  handleSwapTeam: (id: string) => void;
+  setOpen: (open: boolean) => void;
+  isDarkMode: boolean;
+  teamId: string;
+}
+
+function TeamListItem({
+  id,
+  iconUrl,
+  name,
+  description,
+  darkmodeIconUrl,
+  handleSwapTeam,
+  setOpen,
+  isDarkMode,
+  teamId,
+}: ITeamListItemProps) {
+  const teamDisplayName = useGetDisplayTextFromPlainTextJson(name || '');
+  const teamDescriptionDisplayName = useGetDisplayTextFromPlainTextJson(description || '');
+  return (
+    <Tooltip key={id}>
+      <CommandItem
+        value={`${teamDisplayName}-${teamDescriptionDisplayName}-${id}`}
+        className="p-0"
+        onSelect={() => {
+          void handleSwapTeam(id);
+          setOpen(false);
+        }}
+      >
+        <TooltipTrigger asChild>
+          <div className="group flex w-full cursor-pointer select-none items-center px-2 py-1.5 text-sm">
+            <Team logo={isDarkMode ? darkmodeIconUrl : iconUrl} name={teamDisplayName} description={description} />
+            <CheckIcon className={cn('ml-auto', teamId === id ? 'opacity-100' : 'opacity-0')} size={18} />
+          </div>
+        </TooltipTrigger>
+      </CommandItem>
+
+      <TooltipContent side="left" sideOffset={14}>
+        {teamDisplayName}
+        <br />
+        <span className="text-xxs text-muted-foreground">{id}</span>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
