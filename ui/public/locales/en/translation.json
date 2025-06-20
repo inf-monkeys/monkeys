@@ -2679,6 +2679,7 @@
           "input": {
             "def": "Default Value",
             "add": "Create Input",
+            "widgets": "Widgets",
             "delete": {
               "title": "Are you sure you want to delete this input?",
               "desc": "After deletion, this input will not be unavailable in the workflow and cannot be restored.",
