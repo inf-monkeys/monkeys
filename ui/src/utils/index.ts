@@ -93,3 +93,12 @@ export const useGetDisplayTextFromPlainTextJson = (displayName: string) => {
     return displayName;
   }
 };
+
+export const isJSONString = (str: any) => {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch {
+    return false;
+  }
+};

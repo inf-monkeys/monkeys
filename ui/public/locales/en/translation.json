@@ -2702,15 +2702,18 @@
               },
               "desc": {
                 "label": "Description",
-                "placeholder": "After filling in, the description of the configuration will be displayed below"
+                "placeholder": "After filling in, the description of the configuration will be displayed below",
+                "edit-label": "Edit Description"
               },
               "placeholder": {
                 "label": "Input placeholder",
-                "placeholder": "After filling in, a placeholder will be displayed in the form input box, such as \"Please enter...\""
+                "placeholder": "After filling in, a placeholder will be displayed in the form input box, such as \"Please enter...\"",
+                "edit-label": "Edit Placeholder"
               },
               "tips": {
                 "label": "Tips",
-                "placeholder": "After filling in, a prompt icon will be displayed, and prompt information will be displayed when the mouse hovers"
+                "placeholder": "After filling in, a prompt icon will be displayed, and prompt information will be displayed when the mouse hovers",
+                "edit-label": "Edit Tips"
               },
               "type": {
                 "label": "Data Type",
@@ -2752,6 +2755,7 @@
                   "value-placeholder": "Value",
                   "remove-tips": "Delete",
                   "add": "Add",
+                  "edit-label": "Edit Label",
                   "linkage": {
                     "tips": "Linked data",
                     "desc": "When the user selects this option, other form configurations can be updated in a linked manner",

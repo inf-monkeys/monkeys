@@ -26,7 +26,7 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
   const [selected, setSelected] = useState<string>('');
 
   const teamName = team?.name;
-  const teamDisplayName = useGetDisplayTextFromPlainTextJson(teamName || '');
+  const teamDisplayName = useGetDisplayTextFromPlainTextJson(teamName || '') || '';
   const enableTeamLogo = get(team, 'customTheme.enableTeamLogo', void 0);
 
   useMemo(() => {

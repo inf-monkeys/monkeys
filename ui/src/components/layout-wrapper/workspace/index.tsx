@@ -1,11 +1,13 @@
 import React from 'react';
 
 import { Outlet, useRouterState } from '@tanstack/react-router';
+
 import { useTranslation } from 'react-i18next';
 
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
+import { SpaceHeaderTabs } from '@/components/layout-wrapper/space/header/tabs';
 import { SpaceSidebar } from '@/components/layout-wrapper/space/sidebar';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { WorkflowInfoCard } from '@/components/layout-wrapper/workspace/header/workflow-info-card.tsx';
@@ -15,7 +17,6 @@ import { SpaceTabs } from '@/components/layout-wrapper/workspace/space/sidebar/t
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { SpaceHeaderTabs } from '@/components/layout-wrapper/space/header/tabs';
 
 export const WorkspaceLayout: React.FC = () => {
   // 获取路由信息，判断是否是图片详情页

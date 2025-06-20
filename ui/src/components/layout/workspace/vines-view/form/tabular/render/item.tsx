@@ -101,7 +101,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                     <TooltipTrigger asChild>
                       <HelpCircle size={18} className="cursor-pointer text-gray-400 dark:text-gray-500" />
                     </TooltipTrigger>
-                    <TooltipContent>{tips}</TooltipContent>
+                    <TooltipContent>{getI18nContent(tips)}</TooltipContent>
                   </Tooltip>
                 )}
               </div>
@@ -144,7 +144,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                           targetLinkage
                             ? (m) =>
                                 enableFilter
-                                  ? filterList?.includes(m.serverRelations?.[0]?.apiPath) === filterReserve
+                                  ? filterList?.includes(m.serverRelations?.[0]?.path) === filterReserve
                                   : true
                             : void 0
                         }
@@ -190,8 +190,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                 )}
               </>
             </FormControl>
-            <FormDescription className="font-bold">{getI18nContent(description)}</FormDescription>
-
+            {description && <FormDescription>{getI18nContent(description)}</FormDescription>}
             <FormMessage />
           </FormItem>
         );

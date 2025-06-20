@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { SelectDataLinkage } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value/select-list/data-linkage';
 import { TSelectList } from '@/components/layout/workspace/vines-view/form/tabular/render/field/select.tsx';
 import { Button } from '@/components/ui/button';
+import { I18nInput } from '@/components/ui/i18n-input';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
@@ -115,13 +116,14 @@ export const SelectListMode: React.FC<ISelectListModeProps> = ({
               {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.set-default')}
             </TooltipContent>
           </Tooltip>
-          <Input
+          <I18nInput
             className="flex-[40%]"
             placeholder={t(
               'workspace.flow-view.endpoint.start-tool.input.config-form.default.select.label-placeholder',
             )}
             value={label}
             onChange={(labelVal) => handleUpdateSelectList(i, 'label', labelVal)}
+            dialogTitle={t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.edit-label')}
           />
           <Input
             placeholder={t(
