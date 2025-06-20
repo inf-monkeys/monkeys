@@ -88,7 +88,9 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
   const [open, setOpen] = useState(false);
 
   // i18n data state
-  const [i18nDisplayName, setI18nDisplayName] = useState<Record<string, string>>({});
+  const [i18nDisplayName, setI18nDisplayName] = useState<Record<string, string>>(
+    typeof i18nJSON === 'string' ? JSON.parse(i18nJSON) : {},
+  );
 
   // Initialize data when dialog opens or initialValue changes
   useEffect(() => {
@@ -156,8 +158,8 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
                 <Input
                   id={`i18n-input-${languageKey}`}
                   placeholder={placeholder}
-                  // value={i18nDisplayName[languageKey] || ''}
-                  value={i18nJSON ? JSON.parse(i18nJSON)[languageKey] || '' : i18nDisplayName[languageKey] || ''}
+                  value={i18nDisplayName[languageKey] || ''}
+                  // value={i18nJSON ? JSON.parse(i18nJSON)[languageKey] || '' : i18nDisplayName[languageKey] || ''}
                   onChange={(value) => handleLanguageValueChange(languageKey, value)}
                 />
               </div>
