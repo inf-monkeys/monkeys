@@ -248,8 +248,8 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         )}
       </div>
       <Board
-        canvasHeight={1280}
-        canvasWidth={720}
+        canvasHeight={720}
+        canvasWidth={1280}
         persistenceKey={designBoardId}
         editor={editor}
         setEditor={setEditor}
