@@ -68,7 +68,7 @@ export const concatResultListReducer = (acc: IVinesExecutionResultItem[], curren
 export const newConvertExecutionResultToItemList = (
   result: VinesWorkflowExecutionOutputListItem[],
 ): IVinesExecutionResultItem[] => {
-  return result.flatMap((output, index) => {
+  return result.flatMap((output, outputIndex) => {
     return output.output.map((item, index) => {
       return {
         ...output,
