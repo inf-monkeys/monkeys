@@ -93,6 +93,7 @@ export const Team: React.FC<ITeamProps> = () => {
             placeholder={t('settings.account.team.team-name.placeholder')}
             initialValue={teamDisplayName}
             onFinished={(val) => handleUpdateTeam('name', JSON.stringify(val))}
+            i18nJSON={teamName}
           >
             <div className="group flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-75">
               <h3 className="line-clamp-1 font-semibold leading-tight">{teamDisplayName}</h3>
@@ -105,6 +106,7 @@ export const Team: React.FC<ITeamProps> = () => {
             placeholder={t('settings.account.team.team-description.placeholder')}
             initialValue={teamDescriptionDisplayName}
             onFinished={(val) => handleUpdateTeam('description', JSON.stringify(val))}
+            i18nJSON={teamDescription}
           >
             <div className="group flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-75">
               <h3 className="line-clamp-1 text-xs">{teamDescriptionDisplayName}</h3>
