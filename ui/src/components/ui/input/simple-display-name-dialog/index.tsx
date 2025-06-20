@@ -89,10 +89,9 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
 
   // i18n data state
   const i18nJSONData = typeof i18nJSON === 'string' ? JSON.parse(i18nJSON) : {};
-  console.log('i18nJSONData', i18nJSONData);
+  // console.log('i18nJSONData', i18nJSONData);
 
   const [i18nDisplayName, setI18nDisplayName] = useState<Record<string, string>>(i18nJSONData);
-  console.log('i18nDisplayName in body', i18nDisplayName);
 
   // Initialize data when dialog opens or initialValue changes
   // useEffect(() => {
@@ -153,12 +152,6 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
         <div className="space-y-4">
           {LANGUAGES_LIST.map(([key, label]) => {
             const languageKey = LANGUAGE_MAPPER[key as keyof typeof LANGUAGE_MAPPER] || key;
-            console.log('languageKey', languageKey);
-            console.log('typeof i18nDisplayName', typeof i18nDisplayName);
-            console.log('i18nDisplayName in callback', i18nDisplayName);
-            console.log('i18nDisplayName [key]', i18nDisplayName[key]);
-            // console.log('key', key);
-            console.log('languageKey', languageKey);
 
             // return (
             //   <div key={languageKey} className="flex flex-col gap-2">
