@@ -247,7 +247,14 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
           </>
         )}
       </div>
-      <Board persistenceKey={designBoardId} editor={editor} setEditor={setEditor} instance={{ frameShapeId }} />
+      <Board
+        canvasHeight={1280}
+        canvasWidth={720}
+        persistenceKey={designBoardId}
+        editor={editor}
+        setEditor={setEditor}
+        instance={{ frameShapeId }}
+      />
     </div>
   );
 };
