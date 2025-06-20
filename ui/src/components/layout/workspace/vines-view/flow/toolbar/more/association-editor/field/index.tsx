@@ -18,7 +18,7 @@ interface IAssociationEditorFieldsProps extends React.ComponentPropsWithoutRef<'
 
 export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = ({ form }) => {
   const type = form.watch('type');
-  return type === 'to-workflow' ? (
+  return (
     <div className="flex gap-4">
       <ScrollArea className="-mx-3 h-[38rem] px-3">
         <div className="flex w-96 max-w-md flex-col gap-2 px-1">
@@ -41,5 +41,5 @@ export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = 
         </div>
       </ScrollArea>
     </div>
-  ) : null;
+  );
 };

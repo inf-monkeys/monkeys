@@ -2610,6 +2610,18 @@
                   "label": "Description",
                   "placeholder": "Please enter a description"
                 },
+                "type": {
+                  "label": "Association Type",
+                  "placeholder": "Please select an association type",
+                  "options": {
+                    "to-workflow": {
+                      "label": "Workflow"
+                    },
+                    "new-design": {
+                      "label": "New Design Board"
+                    }
+                  }
+                },
                 "target-workflow-id": {
                   "label": "Association Workflow",
                   "placeholder": "Please select an association workflow",
@@ -3421,6 +3433,23 @@
       "next-image": "Next",
       "delete": "Delete",
       "form-inputs-not-found": "Form inputs not found"
+    },
+    "global-design-board": {
+      "empty": "No board selected",
+      "operation-bar": {
+        "design-project": {
+          "label": "Design Project",
+          "placeholder": "Select a design project",
+          "search-placeholder": "Search design project",
+          "search-empty": "No design project found"
+        },
+        "design-board": {
+          "label": "Design Board",
+          "placeholder": "Select a design board",
+          "search-placeholder": "Search design board",
+          "search-empty": "No design board found"
+        }
+      }
     }
   },
   "agent": {
