@@ -7,7 +7,11 @@ import { IVinesVariableTag, VinesToolDef, VinesToolDefProperties } from '@/packa
 export const BUILT_IN_TOOLS: VinesToolDef[] = [
   {
     name: 'fake_node',
-    displayName: '点击添加工具',
+    // displayName: '点击添加工具',
+    displayName: {
+      'en-US': 'Click to add tool',
+      'zh-CN': '点击添加工具',
+    },
     icon: 'emoji:⛔:#35363b',
     type: 'SIMPLE' as ToolType.SIMPLE,
     categories: ['process'],
