@@ -1,9 +1,11 @@
-import VinesEvent from '@/utils/events.ts';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import { Layers2, Package, PackagePlus } from 'lucide-react';
 import React from 'react';
+
+import { Layers2, Package, PackagePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import VinesEvent from '@/utils/events.ts';
 
 export const SpaceHeaderTabs: React.FC = () => {
   const { t } = useTranslation();

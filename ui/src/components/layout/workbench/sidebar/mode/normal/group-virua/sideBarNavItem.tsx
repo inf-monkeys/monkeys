@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { useContext } from 'react';
 
 import { useSortable } from '@dnd-kit/sortable';

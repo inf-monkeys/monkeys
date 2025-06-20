@@ -2740,6 +2740,7 @@
                   "value-placeholder": "Value",
                   "remove-tips": "Delete",
                   "add": "Add",
+                  "edit-label": "Edit Label",
                   "linkage": {
                     "tips": "Linked data",
                     "desc": "When the user selects this option, other form configurations can be updated in a linked manner",

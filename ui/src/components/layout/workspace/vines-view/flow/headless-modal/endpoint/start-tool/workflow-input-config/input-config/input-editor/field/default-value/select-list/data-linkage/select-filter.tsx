@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { getI18nContent } from '@/utils';
 
 type TSelectFilter = { list: string[]; reserve: boolean };
 
@@ -115,7 +116,7 @@ export const SelectFilter: React.FC<ISelectFilterProps> = ({ input, selectFilter
                     <SelectContent>
                       {selectList.map((it, i) => (
                         <SelectItem value={it.value?.toString()} key={i}>
-                          {it.label}
+                          {getI18nContent(it.label)}
                         </SelectItem>
                       ))}
                     </SelectContent>
