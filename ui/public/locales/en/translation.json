@@ -2610,6 +2610,18 @@
                   "label": "Description",
                   "placeholder": "Please enter a description"
                 },
+                "type": {
+                  "label": "Association Type",
+                  "placeholder": "Please select an association type",
+                  "options": {
+                    "to-workflow": {
+                      "label": "Workflow"
+                    },
+                    "new-design": {
+                      "label": "New Design Board"
+                    }
+                  }
+                },
                 "target-workflow-id": {
                   "label": "Association Workflow",
                   "placeholder": "Please select an association workflow",
