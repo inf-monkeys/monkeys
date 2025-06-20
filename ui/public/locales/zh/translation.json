@@ -2747,6 +2747,7 @@
                   "value-placeholder": "默认值",
                   "remove-tips": "删除",
                   "add": "新增",
+                  "edit-label": "编辑标签",
                   "linkage": {
                     "tips": "联动数据",
                     "desc": "当用户选择此选项时，可联动更新其他表单配置",

@@ -69,7 +69,15 @@ export const workflowInputSchema = z.object({
     .array(
       z.object({
         value: z.union([z.string(), z.number()]),
-        label: z.string(),
+        label: z.union([
+          z.string().min(1, 'Label cannot be empty'),
+          z
+            .record(z.string())
+            .refine(
+              (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+              'At least one language must have a label',
+            ),
+        ]),
         linkage: workflowInputSelectListLinkageSchema.optional(),
       }),
     )
