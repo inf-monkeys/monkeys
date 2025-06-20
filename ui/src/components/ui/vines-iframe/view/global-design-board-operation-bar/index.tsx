@@ -28,14 +28,16 @@ export const GlobalDesignBoardOperationBar = () => {
       )}
     >
       <GlobalDesignBoardOperationBarBoardSelect />
-      <div className="flex w-full flex-col gap-2">
-        <Button variant="outline" onClick={handleExport}>
-          {t('common.utils.export')}
-        </Button>
-        <Button variant="outline" onClick={handleSave}>
-          {t('common.utils.save')}
-        </Button>
-      </div>
+      {designBoardId && (
+        <div className="flex w-full flex-col gap-2">
+          <Button variant="outline" onClick={handleExport}>
+            {t('common.utils.export')}
+          </Button>
+          <Button variant="outline" onClick={handleSave}>
+            {t('common.utils.save')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
