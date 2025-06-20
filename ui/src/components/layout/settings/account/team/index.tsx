@@ -17,8 +17,8 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { VinesImageEditor } from '@/components/ui/image-editor';
-import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
-import { cn } from '@/utils';
+import { SimpleDisplayNameDialog } from '@/components/ui/input/simple-display-name-dialog';
+import { cn, useGetDisplayTextFromPlainTextJson } from '@/utils';
 
 interface ITeamProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -48,8 +48,10 @@ export const Team: React.FC<ITeamProps> = () => {
   };
 
   const isOwner = true; // user?.id === team?.ownerUserId
-  const teamName = team?.name || '团队';
-  const teamDescription = team?.description || '暂无描述';
+  const teamName = team?.name;
+  const teamDisplayName = useGetDisplayTextFromPlainTextJson(teamName || '');
+  const teamDescription = team?.description;
+  const teamDescriptionDisplayName = useGetDisplayTextFromPlainTextJson(teamDescription || '');
   const teamLogo = team?.iconUrl;
   const teamDarkmodeLogo = team?.darkmodeIconUrl;
 
@@ -70,8 +72,8 @@ export const Team: React.FC<ITeamProps> = () => {
           tooltipI18nKey="settings.theme.team-logo.lightmode"
         >
           <Avatar className="size-10 cursor-pointer">
-            <AvatarImage className="aspect-auto" src={teamLogo} alt={teamName} />
-            <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
+            <AvatarImage className="aspect-auto" src={teamLogo} alt={teamDisplayName} />
+            <AvatarFallback className="rounded-none p-2 text-xs">{teamDisplayName.substring(0, 2)}</AvatarFallback>
           </Avatar>
         </VinesImageEditor>
         <VinesImageEditor
@@ -80,35 +82,35 @@ export const Team: React.FC<ITeamProps> = () => {
           tooltipI18nKey="settings.theme.team-logo.darkmode"
         >
           <Avatar className="size-10 cursor-pointer">
-            <AvatarImage className="aspect-auto" src={teamDarkmodeLogo} alt={teamName} />
-            <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
+            <AvatarImage className="aspect-auto" src={teamDarkmodeLogo} alt={teamDisplayName} />
+            <AvatarFallback className="rounded-none p-2 text-xs">{teamDisplayName.substring(0, 2)}</AvatarFallback>
           </Avatar>
         </VinesImageEditor>
         <div className="flex flex-col justify-center">
-          <SimpleInputDialog
-            disabled={!isOwner}
+          <SimpleDisplayNameDialog
+            // disabled={!isOwner}
             title={t('settings.account.team.team-name.title')}
             placeholder={t('settings.account.team.team-name.placeholder')}
-            initialValue={teamName}
-            onFinished={(val) => handleUpdateTeam('name', val)}
+            initialValue={teamDisplayName}
+            onFinished={(val) => handleUpdateTeam('name', JSON.stringify(val))}
           >
             <div className="group flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-75">
-              <h3 className="line-clamp-1 font-semibold leading-tight">{teamName}</h3>
+              <h3 className="line-clamp-1 font-semibold leading-tight">{teamDisplayName}</h3>
               <Pencil size={16} className="-mb-0.5 opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
-          </SimpleInputDialog>
-          <SimpleInputDialog
-            disabled={!isOwner}
+          </SimpleDisplayNameDialog>
+          <SimpleDisplayNameDialog
+            // disabled={!isOwner}
             title={t('settings.account.team.team-description.title')}
             placeholder={t('settings.account.team.team-description.placeholder')}
-            initialValue={teamDescription}
-            onFinished={(val) => handleUpdateTeam('description', val)}
+            initialValue={teamDescriptionDisplayName}
+            onFinished={(val) => handleUpdateTeam('description', JSON.stringify(val))}
           >
             <div className="group flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-75">
-              <h3 className="line-clamp-1 text-xs">{teamDescription}</h3>
+              <h3 className="line-clamp-1 text-xs">{teamDescriptionDisplayName}</h3>
               <Pencil size={12} className="opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
-          </SimpleInputDialog>
+          </SimpleDisplayNameDialog>
         </div>
       </CardContent>
       <CardFooter className="justify-end gap-2">
