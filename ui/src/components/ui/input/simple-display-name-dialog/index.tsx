@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -24,7 +24,7 @@ const LANGUAGE_MAPPER = {
 };
 
 // 安全地处理初始值，确保正确解析
-const processInitialValue = (
+/* const processInitialValue = (
   value: string | Record<string, string> | null | undefined,
   currentLanguageKey: string,
 ): Record<string, string> => {
@@ -69,7 +69,7 @@ const processInitialValue = (
 
   // 其他类型都返回空对象
   return {};
-};
+}; */
 
 export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = ({
   children,
@@ -79,24 +79,27 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
   onFinished,
   i18nJSON,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   // 当前语言对应的 i18n 键
-  const currentLanguageKey = LANGUAGE_MAPPER[i18n.language as keyof typeof LANGUAGE_MAPPER] || 'en-US';
+  // const currentLanguageKey = LANGUAGE_MAPPER[i18n.language as keyof typeof LANGUAGE_MAPPER] || 'en-US';
 
   // State for dialog open/close
   const [open, setOpen] = useState(false);
 
   // i18n data state
-  const [i18nDisplayName, setI18nDisplayName] = useState<Record<string, string>>(
-    typeof i18nJSON === 'string' ? JSON.parse(i18nJSON) : {},
-  );
+  const i18nJSONData = typeof i18nJSON === 'string' ? JSON.parse(i18nJSON) : {};
+  console.log('i18nJSONData', i18nJSONData);
+
+  const [i18nDisplayName, setI18nDisplayName] = useState<Record<string, string>>(i18nJSONData);
+  console.log('i18nDisplayName in body', i18nDisplayName);
 
   // Initialize data when dialog opens or initialValue changes
-  useEffect(() => {
-    const processedData = processInitialValue(initialValue, currentLanguageKey);
-    setI18nDisplayName(processedData);
-  }, [initialValue, currentLanguageKey]);
+  // useEffect(() => {
+  //   const processedData = processInitialValue(initialValue, currentLanguageKey);
+  //   setI18nDisplayName(processedData);
+  //   console.log('i18nDisplayName in useEffect', i18nDisplayName);
+  // }, [initialValue, currentLanguageKey]);
 
   // Dialog 中特定语言的值变化处理
   const handleLanguageValueChange = (languageKey: string, value: string) => {
@@ -135,8 +138,8 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
   const handleCancel = () => {
     setOpen(false);
     // Reset to initial state
-    const processedData = processInitialValue(initialValue, currentLanguageKey);
-    setI18nDisplayName(processedData);
+    // const processedData = processInitialValue(initialValue, currentLanguageKey);
+    setI18nDisplayName(i18nDisplayName);
   };
 
   return (
@@ -150,19 +153,40 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
         <div className="space-y-4">
           {LANGUAGES_LIST.map(([key, label]) => {
             const languageKey = LANGUAGE_MAPPER[key as keyof typeof LANGUAGE_MAPPER] || key;
+            console.log('languageKey', languageKey);
+            console.log('typeof i18nDisplayName', typeof i18nDisplayName);
+            console.log('i18nDisplayName in callback', i18nDisplayName);
+            console.log('i18nDisplayName [key]', i18nDisplayName[key]);
+            // console.log('key', key);
+            console.log('languageKey', languageKey);
+
+            // return (
+            //   <div key={languageKey} className="flex flex-col gap-2">
+            //     <Label htmlFor={`i18n-input-${languageKey}`} className="text-sm font-medium">
+            //       {label}
+            //     </Label>
+            //     <Input
+            //       id={`i18n-input-${languageKey}`}
+            //       placeholder={placeholder}
+            //       value={i18nDisplayName[languageKey] || ''}
+            //       // value={i18nJSON ? JSON.parse(i18nJSON)[languageKey] || '' : i18nDisplayName[languageKey] || ''}
+            //       onChange={(value) => handleLanguageValueChange(languageKey, value)}
+            //     />
+            //   </div>
+            // );
+
             return (
-              <div key={languageKey} className="flex flex-col gap-2">
-                <Label htmlFor={`i18n-input-${languageKey}`} className="text-sm font-medium">
-                  {label}
-                </Label>
-                <Input
-                  id={`i18n-input-${languageKey}`}
-                  placeholder={placeholder}
-                  value={i18nDisplayName[languageKey] || ''}
-                  // value={i18nJSON ? JSON.parse(i18nJSON)[languageKey] || '' : i18nDisplayName[languageKey] || ''}
-                  onChange={(value) => handleLanguageValueChange(languageKey, value)}
-                />
-              </div>
+              <InputWrapper
+                key={key}
+                // initialValue={i18nDisplayName[key] || ''}
+                handleLanguageValueChange={handleLanguageValueChange}
+                languageKey={languageKey}
+                label={label}
+                placeholder={placeholder || ''}
+                // initialValue={i18nJSON ? JSON.parse(i18nJSON)[languageKey] || '' : i18nDisplayName[languageKey] || ''}
+                initialValue={i18nDisplayName[languageKey] || ''}
+                // onChange={(value) => handleLanguageValueChange(key, value)}
+              />
             );
           })}
         </div>
@@ -179,3 +203,39 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
     </Dialog>
   );
 };
+
+interface IInputWrapperProps {
+  initialValue: string;
+  // onChange: (value: string) => void;
+  languageKey: string;
+  label: string;
+  placeholder: string;
+  handleLanguageValueChange: (languageKey: string, value: string) => void;
+}
+
+function InputWrapper({
+  initialValue,
+  languageKey,
+  label,
+  placeholder,
+  handleLanguageValueChange,
+}: IInputWrapperProps) {
+  const [value, setValue] = useState(initialValue);
+  return (
+    <div key={languageKey} className="flex flex-col gap-2">
+      <Label htmlFor={`i18n-input-${languageKey}`} className="text-sm font-medium">
+        {label}
+      </Label>
+      <Input
+        id={`i18n-input-${languageKey}`}
+        placeholder={placeholder}
+        value={value}
+        // value={i18nJSON ? JSON.parse(i18nJSON)[languageKey] || '' : i18nDisplayName[languageKey] || ''}
+        onChange={(value) => {
+          setValue(value);
+          handleLanguageValueChange(languageKey, value);
+        }}
+      />
+    </div>
+  );
+}
