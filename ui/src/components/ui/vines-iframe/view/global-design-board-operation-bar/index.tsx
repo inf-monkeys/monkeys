@@ -1,6 +1,8 @@
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
@@ -29,14 +31,28 @@ export const GlobalDesignBoardOperationBar = () => {
     >
       <GlobalDesignBoardOperationBarBoardSelect />
       {designBoardId && (
-        <div className="flex w-full flex-col gap-2">
-          <Button variant="outline" onClick={handleExport}>
-            {t('common.utils.export')}
-          </Button>
-          <Button variant="outline" onClick={handleSave}>
-            {t('common.utils.save')}
-          </Button>
-        </div>
+        <motion.div
+          className="flex w-full flex-col gap-4"
+          initial={{ opacity: 0, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, filter: 'blur(10px)' }}
+        >
+          <div className="flex flex-col">
+            <p className="mb-1.5 grid grid-cols-2 justify-start text-xs font-semibold capitalize">
+              <span>{t('design.view-config.canvas-setting.width')}</span>
+              <span className="pl-2">{t('design.view-config.canvas-setting.height')}</span>
+            </p>
+            <FrameSizeInput />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" onClick={handleExport}>
+              {t('common.utils.export')}
+            </Button>
+            <Button variant="outline" onClick={handleSave}>
+              {t('common.utils.save')}
+            </Button>
+          </div>
+        </motion.div>
       )}
     </div>
   );

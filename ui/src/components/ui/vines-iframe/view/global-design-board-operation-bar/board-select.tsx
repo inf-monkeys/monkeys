@@ -85,7 +85,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex w-full flex-col gap-2">
-        <span className="text-sm">{t('common.type.design-project')}</span>
+        <span className="text-xs font-semibold">{t('common.type.design-project')}</span>
         <Popover open={designProjectVisible} onOpenChange={setDesignProjectVisible}>
           <PopoverTrigger asChild>
             <Button
@@ -147,7 +147,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
         </Popover>
       </div>
       <div className="flex w-full flex-col gap-2">
-        <span className="text-sm">{t('common.type.design-board')}</span>
+        <span className="text-xs font-semibold">{t('common.type.design-board')}</span>
         <Popover open={designBoardVisible} onOpenChange={setDesignBoardVisible}>
           <PopoverTrigger asChild>
             <Button

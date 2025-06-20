@@ -59,11 +59,6 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   const [canvasWidth, setCanvasWidth] = useState<number>(1280);
   const [canvasHeight, setCanvasHeight] = useState<number>(720);
 
-  const [boardCanvasSize, setBoardCanvasSize] = useState<{ width: number; height: number }>({
-    width: 1280,
-    height: 720,
-  });
-
   useEffect(() => {
     if (!metadata || !editor) return;
     editor.loadSnapshot(metadata.snapshot);
@@ -252,14 +247,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
           </>
         )}
       </div>
-      <Board
-        persistenceKey={designBoardId}
-        editor={editor}
-        setEditor={setEditor}
-        canvasWidth={boardCanvasSize.width}
-        canvasHeight={boardCanvasSize.height}
-        instance={{ frameShapeId }}
-      />
+      <Board persistenceKey={designBoardId} editor={editor} setEditor={setEditor} instance={{ frameShapeId }} />
     </div>
   );
 };
