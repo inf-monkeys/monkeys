@@ -145,8 +145,8 @@ function TeamListItem({
   isDarkMode,
   teamId,
 }: ITeamListItemProps) {
-  const teamDisplayName = useGetDisplayTextFromPlainTextJson(name || '');
-  const teamDescriptionDisplayName = useGetDisplayTextFromPlainTextJson(description || '');
+  const teamDisplayName = useGetDisplayTextFromPlainTextJson(name || '') || '';
+  const teamDescriptionDisplayName = useGetDisplayTextFromPlainTextJson(description || '') || '';
   return (
     <Tooltip key={id}>
       <CommandItem
