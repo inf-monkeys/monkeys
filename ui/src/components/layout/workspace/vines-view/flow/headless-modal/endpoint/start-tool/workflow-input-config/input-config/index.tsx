@@ -118,7 +118,7 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
           disabled
           onClick={() => VinesEvent.emit('flow-input-widgets', workflowId)}
         >
-          小组件
+          {t('workspace.flow-view.endpoint.start-tool.input.widgets')}
         </Button>
       </div>
       <InputEditor />
