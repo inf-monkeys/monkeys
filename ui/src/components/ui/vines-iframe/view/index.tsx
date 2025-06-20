@@ -20,6 +20,7 @@ import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
 import { VinesViewFrame } from './frame';
+import { GlobalDesignBoardOperationBar } from './global-design-board-operation-bar';
 import { WorkbenchOperationBar } from './operation-bar';
 
 interface IVinesViewProps {
@@ -69,13 +70,22 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
   const content = useCreation(() => {
     if (!id) return <Page404 />;
 
-    if (designBoardId) {
+    if (type === 'global-design-board' || type === 'design-board') {
       return (
         <DesignBoardProvider createStore={createDesignBoardStore}>
           <VinesDesignBoardViewWrapper designBoardId={designBoardId}>
-            <VinesViewFrame>
-              <View />
-            </VinesViewFrame>
+            {type === 'global-design-board' ? (
+              <div className={cn('flex size-full gap-4')}>
+                <GlobalDesignBoardOperationBar />
+                <VinesViewFrame>
+                  <View />
+                </VinesViewFrame>
+              </div>
+            ) : (
+              <VinesViewFrame>
+                <View />
+              </VinesViewFrame>
+            )}
           </VinesDesignBoardViewWrapper>
         </DesignBoardProvider>
       );

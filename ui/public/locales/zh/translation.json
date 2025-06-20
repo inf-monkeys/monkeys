@@ -3429,6 +3429,23 @@
       "next-image": "下一张",
       "delete": "删除",
       "form-inputs-not-found": "未找到表单输入"
+    },
+    "global-design-board": {
+      "empty": "未选择画板",
+      "operation-bar": {
+        "design-project": {
+          "label": "设计项目",
+          "placeholder": "请选择设计项目",
+          "search-placeholder": "搜索设计项目",
+          "search-empty": "找不到设计项目"
+        },
+        "design-board": {
+          "label": "画板",
+          "placeholder": "请选择画板",
+          "search-placeholder": "搜索画板",
+          "search-empty": "找不到画板"
+        }
+      }
     }
   },
   "agent": {

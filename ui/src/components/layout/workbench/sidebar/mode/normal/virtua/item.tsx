@@ -30,7 +30,11 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
     const viewIcon = page?.instance?.icon ?? '';
     const pageId = page?.id ?? '';
 
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pageId });
+    const isGlobalItem = page.type.startsWith('global-');
+
+    const sortableProps = isGlobalItem ? { id: pageId, disabled: true } : { id: pageId };
+
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable(sortableProps);
 
     const style = {
       transform: CSS.Transform.toString(transform),
@@ -41,8 +45,8 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
+        {...(isGlobalItem ? {} : attributes)}
+        {...(isGlobalItem ? {} : listeners)}
         key={pageId}
         className={cn(
           'z-10 flex cursor-pointer items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
@@ -67,11 +71,14 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
                 <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
                 <span className="text-xxs line-clamp-1 max-w-36 text-ellipsis">
                   {getI18nContent(info?.description) ??
-                    t([`workspace.wrapper.space.tabs.${page?.displayName ?? ''}`, page?.displayName ?? ''])}
+                    t([
+                      `workspace.wrapper.space.tabs.${page?.displayName ?? ''}`,
+                      getI18nContent(page?.displayName) ?? '',
+                    ])}
                 </span>
               </div>
             </div>
-            <ViewItemMenu page={page} groupId={currentGroupId} />
+            {!page.type.startsWith('global-') && <ViewItemMenu page={page} groupId={currentGroupId} />}
           </>
         ) : null}
       </div>
