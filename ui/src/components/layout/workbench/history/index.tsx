@@ -249,7 +249,7 @@ const HistoryResultOg = () => {
       lastTeamId.current = teamId;
     }
   }, [teamId]);
-  // @ts-ignore
+
   const executionResultList = newConvertExecutionResultToItemList(imagesResult?.flat() ?? []);
   const allImages = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
   // const filerMap = new Map<string, any>();
@@ -257,15 +257,10 @@ const HistoryResultOg = () => {
   for (const image of allImages) {
     const url = image.render.data as string;
     const thumbUrl = getThumbUrl(url);
-    // @ts-ignore
+
     thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl, origin: url } } as ImagesResultWithOrigin);
   }
-  // console.log('imagesResult', imagesResult);
 
-  // @ts-ignore
-  // const images = convertInfiniteDataToNormal(imagesResult);
-
-  // console.log('images', images);
   return <HistoryResultInner loading={false} images={thumbImages} setSize={setSize} />;
 };
 
