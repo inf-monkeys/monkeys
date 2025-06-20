@@ -2697,15 +2697,18 @@
               },
               "desc": {
                 "label": "描述",
-                "placeholder": "填写后，将在表单下方显示描述信息"
+                "placeholder": "填写后，将在表单下方显示描述信息",
+                "edit-label": "编辑描述"
               },
               "placeholder": {
                 "label": "输入框占位符",
-                "placeholder": "填写后，将在表单输入框中显示占位符，如「请输入...」"
+                "placeholder": "填写后，将在表单输入框中显示占位符，如「请输入...」",
+                "edit-label": "编辑占位符"
               },
               "tips": {
                 "label": "填写提示",
-                "placeholder": "填写后，将显示提示图标，鼠标悬浮时显示提示信息"
+                "placeholder": "填写后，将显示提示图标，鼠标悬浮时显示提示信息",
+                "edit-label": "编辑提示"
               },
               "type": {
                 "label": "数据类型",
@@ -2747,6 +2750,7 @@
                   "value-placeholder": "默认值",
                   "remove-tips": "删除",
                   "add": "新增",
+                  "edit-label": "编辑标签",
                   "linkage": {
                     "tips": "联动数据",
                     "desc": "当用户选择此选项时，可联动更新其他表单配置",

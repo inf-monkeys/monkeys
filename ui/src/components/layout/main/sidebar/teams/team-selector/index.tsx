@@ -145,8 +145,9 @@ function TeamListItem({
   isDarkMode,
   teamId,
 }: ITeamListItemProps) {
-  const teamDisplayName = useGetDisplayTextFromPlainTextJson(name || '');
-  const teamDescriptionDisplayName = useGetDisplayTextFromPlainTextJson(description || '');
+  const { t } = useTranslation();
+  const teamDisplayName = useGetDisplayTextFromPlainTextJson(name || '') || '';
+  const teamDescriptionDisplayName = useGetDisplayTextFromPlainTextJson(description || '') || '';
   return (
     <Tooltip key={id}>
       <CommandItem
@@ -159,7 +160,11 @@ function TeamListItem({
       >
         <TooltipTrigger asChild>
           <div className="group flex w-full cursor-pointer select-none items-center px-2 py-1.5 text-sm">
-            <Team logo={isDarkMode ? darkmodeIconUrl : iconUrl} name={teamDisplayName} description={description} />
+            <Team
+              logo={isDarkMode ? darkmodeIconUrl : iconUrl}
+              name={t([`components.layout.main.sidebar.teams.${teamDisplayName ?? ''}`, teamDisplayName ?? ''])}
+              description={description}
+            />
             <CheckIcon className={cn('ml-auto', teamId === id ? 'opacity-100' : 'opacity-0')} size={18} />
           </div>
         </TooltipTrigger>

@@ -49,9 +49,9 @@ export const Team: React.FC<ITeamProps> = () => {
 
   const isOwner = true; // user?.id === team?.ownerUserId
   const teamName = team?.name;
-  const teamDisplayName = useGetDisplayTextFromPlainTextJson(teamName || '');
+  const teamDisplayName = useGetDisplayTextFromPlainTextJson(teamName || '') || '';
   const teamDescription = team?.description;
-  const teamDescriptionDisplayName = useGetDisplayTextFromPlainTextJson(teamDescription || '');
+  const teamDescriptionDisplayName = useGetDisplayTextFromPlainTextJson(teamDescription || '') || '';
   const teamLogo = team?.iconUrl;
   const teamDarkmodeLogo = team?.darkmodeIconUrl;
 
