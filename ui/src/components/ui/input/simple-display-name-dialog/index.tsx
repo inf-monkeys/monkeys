@@ -14,6 +14,7 @@ interface ISimpleDisplayNameDialogProps extends React.ComponentPropsWithoutRef<'
   placeholder?: string;
   initialValue?: string | Record<string, string>;
   onFinished: (value: string | Record<string, string>) => void;
+  i18nJSON?: string;
 }
 
 // 语言映射：前端使用的语言代码 -> i18n 标准代码
@@ -76,6 +77,7 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
   placeholder,
   initialValue = '',
   onFinished,
+  i18nJSON,
 }) => {
   const { t, i18n } = useTranslation();
 
@@ -154,7 +156,8 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
                 <Input
                   id={`i18n-input-${languageKey}`}
                   placeholder={placeholder}
-                  value={i18nDisplayName[languageKey] || ''}
+                  // value={i18nDisplayName[languageKey] || ''}
+                  value={i18nJSON ? JSON.parse(i18nJSON)[languageKey] || '' : i18nDisplayName[languageKey] || ''}
                   onChange={(value) => handleLanguageValueChange(languageKey, value)}
                 />
               </div>

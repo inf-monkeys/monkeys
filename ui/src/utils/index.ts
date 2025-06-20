@@ -2,9 +2,11 @@ import { I18nValue } from '@inf-monkeys/monkeys';
 import clsx, { ClassValue } from 'clsx';
 import { isArray, isObject } from 'lodash';
 import { customAlphabet } from 'nanoid';
+import { useTranslation } from 'react-i18next';
 import rfdc from 'rfdc';
 import { twMerge } from 'tailwind-merge';
 
+import { LANGUAGE_MAPPER } from '@/components/layout/workspace/vines-view/flow/toolbar/more/association-editor/field/display-name';
 import i18n from '@/i18n';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
@@ -76,4 +78,18 @@ export const getAlt = (result: IVinesExecutionResultItem) => {
     label,
     value,
   };
+};
+
+export const useGetDisplayTextFromPlainTextJson = (displayName: string) => {
+  const { i18n } = useTranslation();
+  try {
+    const realDisplayName = JSON.parse(displayName);
+    const currentLanguageKey = LANGUAGE_MAPPER[i18n.language as keyof typeof LANGUAGE_MAPPER] || 'zh-CN';
+    const content = realDisplayName[currentLanguageKey];
+
+    // return t([`workspace.wrapper.space.tabs.${content || 'unknown'}`, content || 'Unknown Group']);
+    return content;
+  } catch {
+    return displayName;
+  }
 };
