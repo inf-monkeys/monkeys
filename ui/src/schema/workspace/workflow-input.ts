@@ -47,9 +47,39 @@ export const workflowInputSchema = z.object({
     .string()
     .min(1, 'Field cannot be less than one characters')
     .max(20, 'Field cannot be more than twenty characters'),
-  description: z.string().optional(),
-  placeholder: z.string().optional(),
-  tips: z.string().optional(),
+  description: z
+    .union([
+      z.string(),
+      z
+        .record(z.string())
+        .refine(
+          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+          'At least one language must have a description',
+        ),
+    ])
+    .optional(),
+  placeholder: z
+    .union([
+      z.string(),
+      z
+        .record(z.string())
+        .refine(
+          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+          'At least one language must have a placeholder',
+        ),
+    ])
+    .optional(),
+  tips: z
+    .union([
+      z.string(),
+      z
+        .record(z.string())
+        .refine(
+          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+          'At least one language must have tips',
+        ),
+    ])
+    .optional(),
   type: inputType,
   default: z
     .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number()), z.array(z.boolean())])
