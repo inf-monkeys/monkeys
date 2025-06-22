@@ -8,6 +8,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isBoolean } from 'lodash';
 import { FindManyOptions, Repository } from 'typeorm';
+import { SearchWorkflowExecutionsDto } from '../workflow/dto/req/search-workflow-execution.dto';
+import { WorkflowExecutionService, WorkflowWithMetadata } from '../workflow/workflow.execution.service';
 
 @Injectable()
 export class TenantService {
@@ -15,6 +17,7 @@ export class TenantService {
     @InjectRepository(WorkflowExecutionEntity)
     private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
     private readonly workflowRepository: WorkflowRepository,
+    private readonly workflowExecutionService: WorkflowExecutionService,
   ) {}
 
   async findAll() {
@@ -74,5 +77,9 @@ export class TenantService {
         },
       },
     };
+  }
+
+  public async searchWorkflowExecutionsForTeam(teamId: string, dto: SearchWorkflowExecutionsDto): Promise<{ page: number; limit: number; total: number; data: WorkflowWithMetadata[] }> {
+    return this.workflowExecutionService.searchWorkflowExecutions(teamId, dto);
   }
 }
