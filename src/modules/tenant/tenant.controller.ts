@@ -1,7 +1,8 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { TenantStatisticsAuthGuard } from '@/common/guards/tenant-statistics.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
-import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { SearchWorkflowExecutionsDto } from '../workflow/dto/req/search-workflow-execution.dto';
 import { TenantService } from './tenant.service';
 
 @Controller('tenant')
@@ -35,6 +36,15 @@ export class TenantController {
       total,
       page: +page,
       limit: +limit,
+    });
+  }
+
+  @Post('/teams/:teamId/workflow-executions/search')
+  @HttpCode(200)
+  public async searchTeamWorkflowExecutions(@Param('teamId') teamId: string, @Body() body: SearchWorkflowExecutionsDto) {
+    const result = await this.tenantService.searchWorkflowExecutionsForTeam(teamId, body);
+    return new SuccessResponse({
+      data: result,
     });
   }
 }
