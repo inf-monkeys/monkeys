@@ -12,7 +12,8 @@
     "error": {
       "title": "出现了一些问题",
       "desc": "请清理所有缓存后刷新页面重试",
-      "try-to-fix": "尝试修复"
+      "try-to-fix": "尝试修复",
+      "network-refresh": "遇到网络错误，请刷新整个页面重试"
     }
   },
   "common": {
