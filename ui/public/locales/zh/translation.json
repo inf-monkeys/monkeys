@@ -2809,7 +2809,14 @@
                 "fold": "高级配置",
                 "reset": "重置"
               },
-              "submit": "保存"
+              "submit": "保存",
+              "visibility": {
+                "label": "字段可见性",
+                "logic-label": "逻辑",
+                "field-placeholder": "选择字段",
+                "value-placeholder": "输入值",
+                "add-condition": "添加条件"
+              }
             }
           },
           "trigger": {
