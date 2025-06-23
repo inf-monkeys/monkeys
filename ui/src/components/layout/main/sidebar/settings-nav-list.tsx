@@ -4,6 +4,7 @@ import { useSearch } from '@tanstack/react-router';
 
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { Accordion, AccordionItem } from '@/components/ui/accordion.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { SETTINGS_SIDEBAR_MAP } from '@/consts/setttings/sidebar';
@@ -17,9 +18,18 @@ interface INavListProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const SettingsNavList: React.FC<INavListProps> = ({ className }) => {
   const { t } = useTranslation();
 
+  const { data: config } = useSystemConfig();
+
+  const showTeamQuota = config && (config.module === '*' || config.module.includes('payment'));
+
+  const settingsSidebarMap = SETTINGS_SIDEBAR_MAP.filter((item) => {
+    if (!showTeamQuota && item.id === 'quota') return false;
+    return true;
+  });
+
   const [activeIndex, setActiveIndex] = useLocalStorage<string[]>(
     'vines-ui-settings-sidebar',
-    SETTINGS_SIDEBAR_MAP.map(({ name }) => name),
+    settingsSidebarMap.map(({ name }) => name),
   );
 
   const currentTabVariant = useSearch({
@@ -36,7 +46,7 @@ export const SettingsNavList: React.FC<INavListProps> = ({ className }) => {
         value={activeIndex}
         onValueChange={setActiveIndex}
       >
-        {SETTINGS_SIDEBAR_MAP.map(({ name, icon, to }, i) => {
+        {settingsSidebarMap.map(({ name, icon, to }, i) => {
           const isActive = () => {
             const params = to?.split('?').at(-1);
             if (params) {
