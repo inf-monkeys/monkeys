@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { isUndefined } from 'lodash';
 import { HelpCircle } from 'lucide-react';
@@ -58,12 +58,35 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
   const forceUpdate = useForceUpdate();
 
   const { displayName, name, type, description, typeOptions } = it;
+
+  // 计算字段可见性
+  const isVisible = useMemo(() => {
+    const { visibility } = typeOptions || {};
+    if (!visibility?.conditions?.length) return true;
+
+    const formValues = form.getValues();
+    const { conditions, logic } = visibility;
+
+    const results = conditions.map(({ field, operator: _operator, value }) => {
+      const fieldValue = formValues[field];
+      // 目前只支持'is'操作符的完全匹配
+      return fieldValue === value;
+    });
+
+    return logic === 'AND' ? results.every(Boolean) : results.some(Boolean);
+  }, [typeOptions?.visibility, form.watch()]);
+
   if (type === 'notice') {
     return (
       <div className="col-span-2 w-full px-3">
         <NoticeInput key={name} def={{ displayName }} />
       </div>
     );
+  }
+
+  // 字段不可见时直接返回null
+  if (!isVisible) {
+    return null;
   }
 
   const tips = typeOptions?.tips;

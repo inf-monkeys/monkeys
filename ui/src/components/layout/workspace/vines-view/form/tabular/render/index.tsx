@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useRouterState } from '@tanstack/react-router';
 
@@ -190,10 +190,43 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     return () => subscription.unsubscribe();
   }, [form, onFormChange]);
 
+  // 计算当前隐藏的字段
+  const getHiddenFields = useCallback(() => {
+    const formValues = form.getValues();
+    return inputs
+      .filter((input) => {
+        const { visibility } = input.typeOptions || {};
+        if (!visibility?.conditions?.length) return false;
+
+        const { conditions, logic } = visibility;
+        const results = conditions.map(({ field, operator: _operator, value }) => {
+          const fieldValue = formValues[field];
+          return fieldValue === value;
+        });
+
+        const isVisible = logic === 'AND' ? results.every(Boolean) : results.some(Boolean);
+
+        return !isVisible;
+      })
+      .map((input) => input.name);
+  }, [inputs, form]);
+
   const handleSubmit = form.handleSubmit((data) => {
+    // 获取当前隐藏的字段
+    const hiddenFields = getHiddenFields();
+
+    // 处理隐藏字段的值
+    const processedData = { ...data };
+    hiddenFields.forEach((fieldName) => {
+      processedData[fieldName] = undefined;
+    });
+
     for (const inputDef of inputs) {
       const { name, required, type, displayName } = inputDef;
-      const value = data[name];
+      const value = processedData[name];
+
+      // 跳过隐藏字段的必填验证
+      if (hiddenFields.includes(name)) continue;
 
       if (required && isEmpty(value)) {
         toast.warning(t('workspace.flow-view.execution.workflow-input-is-required', { name: displayName }));
@@ -201,10 +234,12 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
       }
 
       if (type === 'boolean' && isArray(value)) {
-        data[name] = value.map((it: string | number | boolean) => BOOLEAN_VALUES.includes(it?.toString() ?? ''));
+        processedData[name] = value.map((it: string | number | boolean) =>
+          BOOLEAN_VALUES.includes(it?.toString() ?? ''),
+        );
       }
     }
-    onSubmit?.(data);
+    onSubmit?.(processedData);
   });
 
   const { trigger: triggerGetExecutions } = useMutationSearchWorkflowExecutions();
