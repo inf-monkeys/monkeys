@@ -77,8 +77,8 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
                 <Card>
                   <CardContent>
                     <div className="flex flex-col items-center gap-8">
-                      <img src="/Iframe404.webp" alt="遇到网络错误，请刷新整个页面重试" />
-                      <span>遇到网络错误，请刷新整个页面重试</span>
+                      <img src="/Iframe404.webp" alt={t('system.error.network-refresh')} />
+                      <span>{t('system.error.network-refresh')}</span>
                     </div>
                   </CardContent>
                 </Card>
