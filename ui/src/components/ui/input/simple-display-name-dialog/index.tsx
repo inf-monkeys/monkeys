@@ -88,7 +88,18 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
   const [open, setOpen] = useState(false);
 
   // i18n data state
-  const i18nJSONData = typeof i18nJSON === 'string' ? JSON.parse(i18nJSON) : {};
+  const i18nJSONData = (() => {
+    if (typeof i18nJSON === 'string') {
+      try {
+        return JSON.parse(i18nJSON);
+      } catch (error) {
+        // If JSON parsing fails, return an empty object
+        console.warn('Failed to parse i18nJSON:', i18nJSON, error);
+        return {};
+      }
+    }
+    return {};
+  })();
   // console.log('i18nJSONData', i18nJSONData);
 
   const [i18nDisplayName, setI18nDisplayName] = useState<Record<string, string>>(i18nJSONData);
