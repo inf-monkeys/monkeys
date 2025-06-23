@@ -24,13 +24,19 @@ export const executionWorkflow = (
   inputData: Record<string, unknown>,
   version = 1,
   chatSessionId?: string,
+  extraMetadata?: string,
 ) =>
   vinesFetcher<string>({
     method: 'POST',
     simple: true,
     wrapper: (it) => (it as unknown as { workflowInstanceId: string })?.workflowInstanceId ?? '',
   })(`/api/workflow/executions/${workflowId}/start`, {
-    inputData,
+    inputData: extraMetadata
+      ? {
+          ...inputData,
+          extraMetadata,
+        }
+      : inputData,
     version,
     ...(chatSessionId && { chatSessionId }),
   });

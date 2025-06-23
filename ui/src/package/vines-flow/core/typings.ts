@@ -39,6 +39,7 @@ export interface IVinesFlowRunParams {
   chatSessionId?: string;
   onlyStart?: boolean;
   tasks?: MonkeyTaskDefTypes[];
+  extraMetadata?: string;
 }
 
 export type VinesWorkflowExecutionType =
