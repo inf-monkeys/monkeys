@@ -82,5 +82,5 @@ jobs:
           build_result: ${{ needs.push_to_registry.result }}
           ci_target: Server Multi-Tenancy
           ci_target_image: infmonkeys/monkeys-multi-tenancy
-          ci_target_tag: $RELEASE_TAG
+          ci_target_tag: ${GITHUB_REF#refs/tags/}
           build_time: ${{ needs.push_to_registry.outputs.build_time }} 
