@@ -83,6 +83,8 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public executions: Map<string, VinesWorkflowExecution> = new Map();
 
+  public extraMetadata?: string;
+
   private executionTimeouts: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
   private position: IVinesNodePosition = { x: 0, y: 0 };
@@ -510,6 +512,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     chatSessionId,
     onlyStart = false,
     tasks,
+    extraMetadata = this.extraMetadata,
   }: IVinesFlowRunParams = {}): Promise<boolean | string> {
     if (this.enableOpenAIInterface) {
       toast.warning('启动运行失败！请先关闭 OpenAI 接口');
@@ -545,7 +548,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       if (tasks) {
         instanceId = await executionWorkflowWithDebug(this.workflowId, inputData, tasks.length ? tasks : this.getRaw());
       } else {
-        instanceId = await executionWorkflow(this.workflowId, inputData, version, chatSessionId);
+        instanceId = await executionWorkflow(this.workflowId, inputData, version, chatSessionId, extraMetadata);
       }
     }
 
