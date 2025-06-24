@@ -45,17 +45,20 @@ export class TenantService {
 
   async getAllExecutions(options: { page: number; limit: number; extraMetadata?: Record<string, any> }) {
     const { page, limit, extraMetadata } = options;
-    const qb = this.workflowExecutionRepository.createQueryBuilder('execution')
+    const qb = this.workflowExecutionRepository
+      .createQueryBuilder('execution')
       .skip((page - 1) * limit)
       .take(limit)
       .orderBy('execution.created_timestamp', 'DESC');
 
     if (extraMetadata && Object.keys(extraMetadata).length > 0) {
-      qb.andWhere(new Brackets(qb1 => {
-        Object.entries(extraMetadata).forEach(([key, value]) => {
-          qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
-        });
-      }));
+      qb.andWhere(
+        new Brackets((qb1) => {
+          Object.entries(extraMetadata).forEach(([key, value]) => {
+            qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
+          });
+        }),
+      );
     }
 
     const [data, total] = await qb.getManyAndCount();
