@@ -73,7 +73,9 @@
         "loading": "下载中...",
         "success": "下载成功",
         "error": "下载失败"
-      }
+      },
+      "yes": "是",
+      "no": "否"
     },
     "language": "语言",
     "display-name": "显示名称",
