@@ -13,6 +13,19 @@ export const inputType = z.enum(['string', 'number', 'boolean', 'file'], {
   },
 });
 
+// 单个可见性条件
+export const visibilityConditionSchema = z.object({
+  field: z.string(), // 关联的其他表单项字段名
+  operator: z.literal('is'), // 目前只支持完全匹配
+  value: z.union([z.string(), z.number(), z.boolean()]), // 比较值
+});
+
+// 可见性配置
+export const visibilityConfigSchema = z.object({
+  conditions: z.array(visibilityConditionSchema).min(1),
+  logic: z.enum(['AND', 'OR']).default('AND'),
+});
+
 export const workflowInputSelectListLinkageSchema = z.array(
   z.object({
     name: z.string(),
@@ -120,7 +133,12 @@ export const workflowInputSchema = z.object({
   singleColumn: z.boolean().optional(),
   comfyuiModelServerId: z.string().optional(),
   comfyuiModelTypeName: z.string().optional(),
+
+  // 字段可见性配置
+  visibility: visibilityConfigSchema.optional(),
 });
 
 export type IWorkflowInput = z.infer<typeof workflowInputSchema>;
 export type IWorkflowInputSelectListLinkage = z.infer<typeof workflowInputSelectListLinkageSchema>;
+export type IVisibilityCondition = z.infer<typeof visibilityConditionSchema>;
+export type IVisibilityConfig = z.infer<typeof visibilityConfigSchema>;

@@ -41,6 +41,48 @@ interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'>
   setLinkage?: (k: string, v: IWorkflowInputSelectListLinkage) => void;
 }
 
+const isVisible = (
+  typeOptions: VinesWorkflowVariable['typeOptions'],
+  form: UseFormReturn<IWorkflowInputForm>,
+): boolean => {
+  const { visibility } = typeOptions || {};
+  if (!visibility?.conditions?.length) return true;
+
+  const formValues = form.getValues();
+  const { conditions, logic } = visibility;
+
+  const results = conditions.map(({ field, operator: operator, value }) => {
+    const fieldValue = formValues[field];
+    if (!fieldValue) return false;
+    switch (operator) {
+      case 'is':
+        return fieldValue === value;
+      case 'isNot':
+        return fieldValue !== value;
+      case 'isIn':
+        return value.includes(fieldValue);
+      case 'isNotIn':
+        return !value.includes(fieldValue);
+      case 'isGreaterThan':
+        return fieldValue > value;
+      case 'isLessThan':
+        return fieldValue < value;
+      case 'isGreaterThanOrEqual':
+        return fieldValue >= value;
+      case 'isLessThanOrEqual':
+        return fieldValue <= value;
+    }
+    return fieldValue === value;
+  });
+  switch (logic) {
+    case 'AND':
+      return results.every(Boolean);
+    case 'OR':
+      return results.some(Boolean);
+  }
+  return true;
+};
+
 export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
   it,
   form,
@@ -58,12 +100,39 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
   const forceUpdate = useForceUpdate();
 
   const { displayName, name, type, description, typeOptions } = it;
+
+  console.log('typeOptions', typeOptions);
+  console.log('form values', form.getValues());
+  // // 计算字段可见性
+  // const isVisible = useMemo(() => {
+  //   const { visibility } = typeOptions || {};
+  //   if (!visibility?.conditions?.length) return true;
+
+  //   const formValues = form.getValues();
+  //   const { conditions, logic } = visibility;
+
+  //   const results = conditions.map(({ field, operator: _operator, value }) => {
+  //     const fieldValue = formValues[field];
+  //     // 目前只支持'is'操作符的完全匹配
+  //     return fieldValue === value;
+  //   });
+
+  //   return logic === 'AND' ? results.every(Boolean) : results.some(Boolean);
+  // }, [typeOptions?.visibility, form.watch()]);
+
+  const visibility = isVisible(typeOptions, form);
+
   if (type === 'notice') {
     return (
       <div className="col-span-2 w-full px-3">
         <NoticeInput key={name} def={{ displayName }} />
       </div>
     );
+  }
+
+  // 字段不可见时直接返回null
+  if (!visibility) {
+    return null;
   }
 
   const tips = typeOptions?.tips;
