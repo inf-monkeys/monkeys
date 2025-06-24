@@ -163,4 +163,11 @@ export class SearchWorkflowExecutionsDto {
     isArray: true,
   })
   groups?: string[];
+
+  @ApiProperty({
+    description: '额外元数据',
+    type: Object,
+    required: false,
+  })
+  extraMetadata?: Record<string, any>;
 }

@@ -11,7 +11,7 @@ import { Task } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { isBoolean } from 'lodash';
-import { FindManyOptions, Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { ConductorService } from '../workflow/conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from '../workflow/dto/req/search-workflow-execution.dto';
 import { WorkflowExecutionService, WorkflowWithMetadata } from '../workflow/workflow.execution.service';
@@ -43,17 +43,25 @@ export class TenantService {
     };
   }
 
-  async getAllExecutions(options: { page: number; limit: number }) {
-    const { page, limit } = options;
-    const findOptions: FindManyOptions<WorkflowExecutionEntity> = {
-      skip: (page - 1) * limit,
-      take: limit,
-      order: {
-        createdTimestamp: 'DESC',
-      },
-    };
-    const [data, total] = await this.workflowRepository.findAllExecutions(findOptions);
+  async getAllExecutions(options: { page: number; limit: number; extraMetadata?: Record<string, any> }) {
+    const { page, limit, extraMetadata } = options;
+    const qb = this.workflowExecutionRepository
+      .createQueryBuilder('execution')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy('execution.created_timestamp', 'DESC');
 
+    if (extraMetadata && Object.keys(extraMetadata).length > 0) {
+      qb.andWhere(
+        new Brackets((qb1) => {
+          Object.entries(extraMetadata).forEach(([key, value]) => {
+            qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
+          });
+        }),
+      );
+    }
+
+    const [data, total] = await qb.getManyAndCount();
     return { data, total };
   }
 
