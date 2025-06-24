@@ -2818,7 +2818,14 @@
                 "fold": "Advanced Configuration",
                 "reset": "Reset"
               },
-              "submit": "Save"
+              "submit": "Save",
+              "visibility": {
+                "label": "Field Visibility",
+                "logic-label": "Logic",
+                "field-placeholder": "Select field",
+                "value-placeholder": "Enter value",
+                "add-condition": "Add condition"
+              }
             }
           },
           "trigger": {
