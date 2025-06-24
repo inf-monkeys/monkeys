@@ -74,7 +74,7 @@ export const UserCard: React.FC<IUserCardProps> = () => {
             <p className="text-xs font-normal">
               {t(
                 [`components.layout.main.sidebar.teams.${isJSONString(teamName) ? '' : teamName}`],
-                getI18nContent(teamName),
+                getI18nContent(teamName) ?? '',
               )}
             </p>
           </div>
