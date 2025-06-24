@@ -3,6 +3,7 @@ import React from 'react';
 import { ChevronRightIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { NavButton } from '@/components/layout/main/sidebar/nav-button.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -15,9 +16,27 @@ interface INavListProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const NavList: React.FC<INavListProps> = ({ className }) => {
   const { t } = useTranslation();
 
+  const { data: oem } = useSystemConfig();
+
+  const sidebarList =
+    !oem?.theme?.modules?.vinesSpaceSidebar || oem?.theme?.modules?.vinesSpaceSidebar === '*'
+      ? SIDEBAR_MAP
+      : SIDEBAR_MAP.map(({ items, name, ...rest }) => {
+          if (items) {
+            const filtedItems = items.filter(({ name: subName }) =>
+              oem?.theme?.modules?.vinesSpaceSidebar?.includes(subName),
+            );
+            return { ...rest, name, items: filtedItems.length > 0 ? filtedItems : undefined };
+          }
+          return { ...rest, name, items };
+        }).filter(
+          ({ name, path, items }) =>
+            (oem?.theme?.modules?.vinesSpaceSidebar?.includes(name) && !items?.length && path) ||
+            (items?.length && !path),
+        );
   const [activeIndex, setActiveIndex] = useLocalStorage<string[]>(
     'vines-ui-sidebar',
-    SIDEBAR_MAP.map(({ name }) => name),
+    sidebarList.map(({ name }) => name),
   );
 
   return (
@@ -28,7 +47,7 @@ export const NavList: React.FC<INavListProps> = ({ className }) => {
         value={activeIndex}
         onValueChange={setActiveIndex}
       >
-        {SIDEBAR_MAP.map(({ items, name, icon, path }, i) => (
+        {sidebarList.map(({ items, name, icon, path }, i) => (
           <AccordionItem key={i} value={name}>
             {items ? (
               <>

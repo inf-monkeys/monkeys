@@ -47,6 +47,8 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
 
   const hasToken = !!getVinesToken();
 
+  const showTeamQuota = oem && (oem.module === '*' || oem.module.includes('payment'));
+
   return hideSpaceHeader ? (
     <></>
   ) : (
@@ -68,7 +70,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
         )}
       </div>
       <div className="z-20 flex items-center gap-4">
-        <QuotaButton />
+        {showTeamQuota && <QuotaButton />}
         <HeaderInvite />
         {tail}
         {hasToken ? (

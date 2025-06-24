@@ -19,6 +19,36 @@ export interface ConductorConfig {
   workerPrefix?: string;
 }
 
+export type VinesSpaceSidebarModule =
+  | 'apps'
+  | 'agents'
+  | 'workflows'
+  | 'designs'
+  | 'design-projects'
+  | 'design-assets'
+  | 'tools'
+  | 'model'
+  | 'text-models'
+  | 'image-models'
+  | 'media'
+  | 'text-data'
+  | 'table-data';
+export type VinesSpaceSidebarModules = undefined | '*' | VinesSpaceSidebarModule[];
+
+export type VinesSpaceHeadbarModule = 'workbench' | 'app-store' | 'workspace';
+export type VinesSpaceHeadbarModules = undefined | '*' | VinesSpaceHeadbarModule[];
+
+export type SettingsSidebarModule = 'account' | 'config' | 'stat' | 'apikey';
+export type SettingsSidebarModules = undefined | '*' | SettingsSidebarModule[];
+
+export type CustomizationModules =
+  | {
+      vinesSpaceSidebar?: VinesSpaceSidebarModules;
+      vinesSpaceHeadbar?: VinesSpaceHeadbarModules;
+      settingsSidebar?: SettingsSidebarModules;
+    }
+  | undefined;
+
 export interface ServerConfig {
   port: number;
   appId: string;
@@ -63,7 +93,8 @@ export interface ServerConfig {
     showSidebarPageGroup?: boolean;
     defaults?: {
       showFormInImageDetail?: boolean;
-    }
+    };
+    modules?: CustomizationModules;
   };
 }
 
@@ -331,6 +362,11 @@ export const config: Config = {
       showSidebarTeamSelector: readConfig('server.customization.showSidebarTeamSelector', false),
       defaults: {
         showFormInImageDetail: readConfig('server.customization.defaults.showFormInImageDetail', true),
+      },
+      modules: {
+        vinesSpaceSidebar: readConfig('server.customization.modules.vinesSpaceSidebar', '*'),
+        vinesSpaceHeadbar: readConfig('server.customization.modules.vinesSpaceHeadbar', '*'),
+        settingsSidebar: readConfig('server.customization.modules.settingsSidebar', '*'),
       },
     },
   },

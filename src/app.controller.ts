@@ -131,6 +131,7 @@ export class AppController {
         showSidebarTeamSelector: config.server.customization.showSidebarTeamSelector,
         showSidebarPageGroup: config.server.customization.showSidebarPageGroup,
         defaults: config.server.customization.defaults,
+        modules: config.server.customization.modules,
       },
       auth: {
         enabled: config.auth.enabled,

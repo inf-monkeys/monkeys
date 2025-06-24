@@ -4,8 +4,10 @@ import { LinkOptions } from '@tanstack/react-router';
 
 import { Bot, Calculator, Database, Package, PaletteIcon } from 'lucide-react';
 
+import { VinesSpaceSidebarModule } from '@/apis/common/typings';
+
 export interface NavItemWithoutLabel {
-  name: string;
+  name: VinesSpaceSidebarModule;
   path?: LinkOptions['to'];
   icon?: React.ReactNode;
   items?: NavItemWithoutLabel[];
@@ -14,11 +16,6 @@ export interface NavItemWithoutLabel {
 }
 
 export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
-  // {
-  //   path: '/$teamId/workbench',
-  //   name: 'workbench',
-  //   icon: <Rocket />,
-  // },
   {
     name: 'apps',
     icon: <Bot />,
@@ -38,7 +35,7 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
     icon: <PaletteIcon />,
     items: [
       {
-        name: 'designs',
+        name: 'design-projects',
         path: '/$teamId/designs',
       },
       {
@@ -80,26 +77,4 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
       },
     ],
   },
-  // {
-  //   name: 'store',
-  //   icon: <ShoppingCart />,
-  //   items: [
-  //     {
-  //       path: '/$teamId/application-store',
-  //       name: 'application-store',
-  //     },
-  //     // {
-  //     //   path: '/$teamId/text-model-store',
-  //     //   name: 'text-model-store',
-  //     // },
-  //     // {
-  //     //   path: '/$teamId/image-model-store',
-  //     //   name: 'image-model-store',
-  //     // },
-  //     {
-  //       path: '/$teamId/comfyui-store',
-  //       name: 'comfyui-store',
-  //     },
-  //   ],
-  // },
 ];
