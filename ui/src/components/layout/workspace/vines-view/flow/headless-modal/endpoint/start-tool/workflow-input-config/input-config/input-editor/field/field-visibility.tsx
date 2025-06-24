@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { useDynamicList } from 'ahooks';
-import { Eye, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -54,7 +54,7 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
       render={() => (
         <FormItem className="space-y-4">
           <FormLabel className="flex items-center gap-2">
-            <Eye size={16} />
+            {/* <Eye size={16} /> */}
             {t('workspace.flow-view.endpoint.start-tool.input.config-form.visibility.label')}
           </FormLabel>
 
@@ -82,13 +82,13 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
               </div>
 
               {/* 条件列表 */}
-              <ScrollArea className="max-h-48 rounded-md border p-2">
+              <ScrollArea className="max-h-48">
                 <div className="space-y-2">
                   {list.map((condition, i) => {
                     const selectedInput = workflowInput.find(({ name }) => name === condition.field);
 
                     return (
-                      <div key={i} className="flex items-center gap-2 rounded-md border p-2">
+                      <div key={i} className="flex items-center gap-2 p-1">
                         {/* 字段选择 */}
                         <Select
                           value={condition.field}
