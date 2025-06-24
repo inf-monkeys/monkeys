@@ -43,7 +43,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
     hideSpaceHeader: false,
   });
 
-  const hideSpaceHeader = oem?.theme.hideSpaceHeader ?? urlHideSpaceHeader;
+  const hideSpaceHeader = urlHideSpaceHeader ?? oem?.theme.hideSpaceHeader ?? false;
 
   const hasToken = !!getVinesToken();
 
@@ -51,14 +51,14 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
     <></>
   ) : (
     <header className="flex w-full items-center justify-between rounded-xl border border-input bg-slate-1 p-3">
-      <div className="z-20 flex h-full items-center gap-5">
+      <div className="z-20 flex h-8 items-center gap-6">
         <Link
           to="/$teamId"
           params={{ teamId }}
           disabled={!hasToken}
           onClick={() => Object.keys(mode).length && setMode({ mode: 'normal' })}
         >
-          <VinesLogo description="" height={32} className={cn('ml-2', hasToken && 'cursor-pointer')} />
+          <VinesLogo description="" height={'2rem'} className={cn('ml-2', hasToken && 'cursor-pointer')} />
         </Link>
         {children && (
           <>
