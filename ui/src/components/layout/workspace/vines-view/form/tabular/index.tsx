@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
 import { useDebounceFn, useEventEmitter, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isBoolean, isString } from 'lodash';
+import { isBoolean } from 'lodash';
 import { Clipboard, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -57,17 +57,6 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 超时清理假数据的引用
-  const cleanupTimeouts = useRef<Set<NodeJS.Timeout>>(new Set());
-
-  // 组件卸载时清理所有超时器
-  useEffect(() => {
-    return () => {
-      cleanupTimeouts.current.forEach((timeout) => clearTimeout(timeout));
-      cleanupTimeouts.current.clear();
-    };
-  }, []);
-
   const handleSubmit = useMemoizedFn(async (inputData) => {
     if (isSubmitting) {
       return;
@@ -76,70 +65,12 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
     setIsSubmitting(true);
     setLoading(true);
 
-    // 生成临时 instanceId 用于标识假数据
-    const tempInstanceId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    void (await mutate(
-      (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
-      (data: any) => {
-        if (data?.data) {
-          data.data.unshift({
-            status: 'RUNNING',
-            instanceId: tempInstanceId, // 添加临时 instanceId
-            workflowId: vines.workflowId,
-            startTime: Date.now(),
-            createTime: Date.now(),
-            updateTime: Date.now(),
-            endTime: 0,
-            taskId: '',
-            userId: '',
-            teamId: '',
-            input: [],
-            rawOutput: {},
-            output: [{ type: 'image', data: '', key: 'temp' }],
-          });
-          if (typeof data?.total === 'number') {
-            data.total += 1;
-          }
-        }
-        return data;
-      },
-      false,
-    ));
-
-    // 设置30秒超时清理假数据
-    const cleanupTimeout = setTimeout(() => {
-      mutate(
-        (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
-        (data: any) => {
-          if (data?.data) {
-            // 移除对应的临时数据
-            data.data = data.data.filter((item: any) => item.instanceId !== tempInstanceId);
-            if (typeof data?.total === 'number' && data.total > 0) {
-              data.total -= 1;
-            }
-          }
-          return data;
-        },
-        false,
-      );
-      // 从超时器集合中移除
-      cleanupTimeouts.current.delete(cleanupTimeout);
-    }, 30000); // 30秒超时
-
-    // 添加到超时器集合
-    cleanupTimeouts.current.add(cleanupTimeout);
-
     event$.emit?.();
 
     vines
       .start({ inputData, onlyStart: true })
       .then((status) => {
         if (status) {
-          // 成功时清理对应的超时器，因为真实数据会替换假数据
-          clearTimeout(cleanupTimeout);
-          cleanupTimeouts.current.delete(cleanupTimeout);
-
           if (
             !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
             oem?.theme?.views?.form?.toast?.afterCreate != false
@@ -150,23 +81,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
         }
       })
       .catch(() => {
-        // 失败时立即清理假数据，不等超时
-        clearTimeout(cleanupTimeout);
-        cleanupTimeouts.current.delete(cleanupTimeout);
-
-        mutate(
-          (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
-          (data: any) => {
-            if (data?.data) {
-              data.data = data.data.filter((item: any) => item.instanceId !== tempInstanceId);
-              if (typeof data?.total === 'number' && data.total > 0) {
-                data.total -= 1;
-              }
-            }
-            return data;
-          },
-          false,
-        );
+        // 执行失败时的处理
       })
       .finally(() => {
         setLoading(false);
