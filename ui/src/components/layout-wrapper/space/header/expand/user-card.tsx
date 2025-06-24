@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { LANGUAGES_LIST } from '@/components/ui/i18n-selector/consts.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { getI18nContent, isJSONString } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IUserCardProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -71,7 +72,10 @@ export const UserCard: React.FC<IUserCardProps> = () => {
           <div>
             <h1 className="font-blod text-sm">{userName}</h1>
             <p className="text-xs font-normal">
-              {t([`components.layout.main.sidebar.teams.${teamName ?? ''}`, teamName ?? ''])}
+              {t(
+                [`components.layout.main.sidebar.teams.${isJSONString(teamName) ? '' : teamName}`],
+                getI18nContent(teamName),
+              )}
             </p>
           </div>
         </DropdownMenuLabel>
