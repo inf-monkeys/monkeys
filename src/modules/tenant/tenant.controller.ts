@@ -1,7 +1,6 @@
-import { ListDto } from '@/common/dto/list.dto';
 import { TenantStatisticsAuthGuard } from '@/common/guards/tenant-statistics.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
-import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
 import { SearchWorkflowExecutionsDto } from '../workflow/dto/req/search-workflow-execution.dto';
 import { TenantService } from './tenant.service';
 
@@ -27,10 +26,10 @@ export class TenantController {
     });
   }
 
-  @Get('/outputs')
-  async getAllExecutionOutputs(@Query() query: ListDto) {
-    const { page = 1, limit = 20 } = query;
-    const { data, total } = await this.tenantService.getAllExecutions({ page: +page, limit: +limit });
+  @Post('/outputs')
+  async getAllExecutionOutputs(@Body() body: { page?: number; limit?: number; extraMetadata?: Record<string, any> }) {
+    const { page = 1, limit = 20, extraMetadata } = body;
+    const { data, total } = await this.tenantService.getAllExecutions({ page: +page, limit: +limit, extraMetadata });
     return new SuccessListResponse({
       data,
       total,
