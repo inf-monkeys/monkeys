@@ -41,9 +41,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const { trigger: updateGroupSortTrigger } = useUpdateGroupSort();
 
-  const [{ activePageFromWorkflowDisplayName, activePageFromType }] = useUrlState<{
+  const [{ activePageFromWorkflowDisplayName, activePageFromType, extraMetadata }] = useUrlState<{
     activePageFromWorkflowDisplayName?: string;
     activePageFromType?: string;
+    extraMetadata?: string;
   }>({});
 
   const [groupId, setGroupId] = useState<string>('default');
@@ -219,7 +220,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     (page: IWorkbenchViewItemPage) => {
       startTransition(() => {
         navigate({
-          search: {},
+          search: {
+            extraMetadata,
+          },
         });
         setCurrentPage({ [teamId]: { ...page, groupId } });
       });
