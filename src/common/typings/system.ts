@@ -1,4 +1,4 @@
-import { AuthMethod } from '../config';
+import { AuthMethod, CustomizationModules } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
@@ -37,6 +37,7 @@ export interface ISystemConfig {
     defaults: {
       showFormInImageDetail?: boolean;
     };
+    modules: CustomizationModules;
   };
   auth: {
     enabled: AuthMethod[];

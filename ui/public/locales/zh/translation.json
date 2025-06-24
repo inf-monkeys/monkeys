@@ -463,7 +463,7 @@
               "design-assets": {
                 "label": "设计资产"
               },
-              "designs": {
+              "design-projects": {
                 "label": "设计项目"
               }
             }
@@ -630,6 +630,13 @@
             "create-button": "添加标签",
             "placeholder": "请输入标签名称，按 Enter 新建"
           }
+        }
+      },
+      "header": {
+        "tabs": {
+          "workbench": "工作台",
+          "app-store": "应用市场",
+          "workspace": "工作空间"
         }
       }
     }
