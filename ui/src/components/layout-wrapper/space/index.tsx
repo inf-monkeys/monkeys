@@ -33,14 +33,17 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
     hideSpaceHeader: false,
   });
 
-  const hideSpaceHeader = oem?.theme.hideSpaceHeader ?? urlHideSpaceHeader;
+  const hideSpaceHeader = urlHideSpaceHeader ?? oem?.theme.hideSpaceHeader ?? false;
 
   return (
-    <div ref={ref} className={cn('flex w-full', hideSpaceHeader ? 'h-[calc(100vh-3rem)]' : 'h-[calc(100vh-5.75rem)]')}>
+    <div
+      ref={ref}
+      className={cn('flex w-full gap-4', hideSpaceHeader ? 'h-[calc(100vh-2rem)]' : 'h-[calc(100vh-3rem-3.75rem)]')}
+    >
       {!vinesIFrameVisible && sidebar}
       <div
         className={cn(
-          'dark:bg-workspace-dark bg-workspace-light relative mt-4 overflow-hidden rounded-xl',
+          'dark:bg-workspace-dark bg-workspace-light relative overflow-hidden rounded-xl',
           !vinesIFrameVisible && sidebar && 'ml-0',
           // 修改这里，当没有侧边栏时使用全宽
           sidebar ? 'w-[calc(100vw-17rem)]' : 'w-full',
