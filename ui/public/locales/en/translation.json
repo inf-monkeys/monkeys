@@ -73,7 +73,9 @@
         "loading": "Downloading...",
         "success": "Download successful",
         "error": "Download failed"
-      }
+      },
+      "yes": "Yes",
+      "no": "No"
     },
     "language": "Language",
     "display-name": "Display Name",
