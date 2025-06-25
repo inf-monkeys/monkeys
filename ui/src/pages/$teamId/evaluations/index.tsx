@@ -112,7 +112,7 @@ export const EvaluationModules: React.FC = () => {
                 e.preventDefault();
               }}
             >
-              <DropdownMenuLabel>评测模块操作</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('ugc-page.evaluation.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
@@ -127,7 +127,7 @@ export const EvaluationModules: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Pencil size={15} />
                   </DropdownMenuShortcut>
-                  编辑模块
+                  {t('ugc-page.evaluation.ugc-view.operate-area.edit')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() =>
@@ -137,7 +137,7 @@ export const EvaluationModules: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Link size={15} />
                   </DropdownMenuShortcut>
-                  复制链接
+                  {t('ugc-page.evaluation.ugc-view.operate-area.copy-link')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -159,7 +159,7 @@ export const EvaluationModules: React.FC = () => {
         onItemClick={(item) => open(`/${item.teamId}/evaluations/${item.id}/leaderboard`, '_blank')}
         subtitle={
           <Button variant="outline" size="small" icon={<Plus />} onClick={() => setCreateDialogVisible(true)}>
-            新建评测模块
+            {t('ugc-page.evaluation.ugc-view.subtitle.create-button')}
           </Button>
         }
       />
@@ -173,12 +173,12 @@ export const EvaluationModules: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {t('common.dialog.delete-confirm.title', {
-                type: '评测模块',
+                type: t('ugc-page.evaluation.ugc-view.type'),
               })}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t('common.dialog.delete-confirm.content', {
-                type: '评测模块',
+                type: t('ugc-page.evaluation.ugc-view.type'),
                 name: currentModule?.displayName ?? t('common.utils.unknown'),
               })}
             </AlertDialogDescription>

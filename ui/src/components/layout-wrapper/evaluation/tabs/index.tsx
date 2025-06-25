@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useNavigate, useParams } from '@tanstack/react-router';
+
 import { BarChart3, Settings, Swords, Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -54,7 +55,7 @@ export const EvaluationTabs: React.FC<EvaluationTabsProps> = ({ currentTab }) =>
       {EVALUATION_TABS.map((tab) => {
         const Icon = tab.icon;
         const isActive = currentTab === tab.id;
-        
+
         return (
           <button
             key={tab.id}
@@ -62,17 +63,13 @@ export const EvaluationTabs: React.FC<EvaluationTabsProps> = ({ currentTab }) =>
             className={cn(
               'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
               'hover:bg-muted/50',
-              isActive && 'bg-primary/10 text-primary hover:bg-primary/15'
+              isActive && 'bg-primary/10 text-primary hover:bg-primary/15',
             )}
           >
             <Icon className={cn('h-4 w-4', isActive ? 'text-primary' : 'text-muted-foreground')} />
             <div className="flex-1 text-left">
-              <div className={cn('font-medium', isActive ? 'text-primary' : 'text-foreground')}>
-                {t(tab.name)}
-              </div>
-              <div className="text-xs text-muted-foreground line-clamp-1">
-                {t(tab.description)}
-              </div>
+              <div className={cn('font-medium', isActive ? 'text-primary' : 'text-foreground')}>{t(tab.name)}</div>
+              <div className="line-clamp-1 text-xs text-muted-foreground">{t(tab.description)}</div>
             </div>
           </button>
         );

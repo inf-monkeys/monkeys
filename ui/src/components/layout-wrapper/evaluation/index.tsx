@@ -20,7 +20,7 @@ interface EvaluationLayoutProps {
 export const EvaluationLayout: React.FC<EvaluationLayoutProps> = ({ currentTab: propCurrentTab }) => {
   // 从路由参数中获取currentTab
   const matches = useMatches();
-  const evaluationMatch = matches.find(match => match.routeId.includes('evaluations'));
+  const evaluationMatch = matches.find((match) => match.routeId.includes('evaluations'));
   const currentTab = propCurrentTab || evaluationMatch?.params?.tab || 'leaderboard';
   return (
     <ViewGuard className="bg-neocard">
