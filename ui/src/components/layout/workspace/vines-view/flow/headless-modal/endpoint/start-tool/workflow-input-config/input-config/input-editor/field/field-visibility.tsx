@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVisibilityCondition, IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 import { getI18nContent } from '@/utils';
+import { getAvailableOperators } from '@/utils/visibility';
 
 interface IFieldFieldVisibilityProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowInput>;
@@ -120,7 +121,29 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
                         </Select>
 
                         {/* 操作符 */}
-                        <span className="text-sm text-muted-foreground">is</span>
+                        <Select
+                          value={condition.operator}
+                          onValueChange={(operator) => {
+                            const updatedCondition = {
+                              ...condition,
+                              operator: operator as IVisibilityCondition['operator'],
+                            };
+                            replace(i, updatedCondition);
+                          }}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue placeholder="操作符" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getAvailableOperators(selectedInput?.type || 'string').map((op) => (
+                              <SelectItem key={op} value={op}>
+                                {t(
+                                  `workspace.flow-view.endpoint.start-tool.input.config-form.visibility.operators.${op}`,
+                                )}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
 
                         {/* 值输入 */}
                         <div className="flex-1">

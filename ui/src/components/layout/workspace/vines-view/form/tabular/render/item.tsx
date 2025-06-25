@@ -27,6 +27,7 @@ import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.t
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 import { cn, getI18nContent } from '@/utils';
+import { evaluateVisibilityCondition } from '@/utils/visibility';
 
 interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'> {
   itemClassName?: string;
@@ -51,29 +52,11 @@ const isVisible = (
   const formValues = form.getValues();
   const { conditions, logic } = visibility;
 
-  const results = conditions.map(({ field, operator: operator, value }) => {
+  const results = conditions.map(({ field, operator, value }) => {
     const fieldValue = formValues[field];
-    if (!fieldValue) return false;
-    switch (operator) {
-      case 'is':
-        return fieldValue === value;
-      case 'isNot':
-        return fieldValue !== value;
-      case 'isIn':
-        return value.includes(fieldValue);
-      case 'isNotIn':
-        return !value.includes(fieldValue);
-      case 'isGreaterThan':
-        return fieldValue > value;
-      case 'isLessThan':
-        return fieldValue < value;
-      case 'isGreaterThanOrEqual':
-        return fieldValue >= value;
-      case 'isLessThanOrEqual':
-        return fieldValue <= value;
-    }
-    return fieldValue === value;
+    return evaluateVisibilityCondition(fieldValue, operator, value);
   });
+
   switch (logic) {
     case 'AND':
       return results.every(Boolean);
@@ -101,8 +84,8 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
 
   const { displayName, name, type, description, typeOptions } = it;
 
-  console.log('typeOptions', typeOptions);
-  console.log('form values', form.getValues());
+  // console.log('typeOptions', typeOptions);
+  // console.log('form values', form.getValues());
   // // 计算字段可见性
   // const isVisible = useMemo(() => {
   //   const { visibility } = typeOptions || {};
