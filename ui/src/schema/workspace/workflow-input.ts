@@ -16,8 +16,17 @@ export const inputType = z.enum(['string', 'number', 'boolean', 'file'], {
 // 单个可见性条件
 export const visibilityConditionSchema = z.object({
   field: z.string(), // 关联的其他表单项字段名
-  operator: z.enum(['is', 'isNot', 'isGreaterThan', 'isLessThan', 'isGreaterThanOrEqual', 'isLessThanOrEqual']), // 支持多种比较操作符
-  value: z.union([z.string(), z.number(), z.boolean()]), // 比较值
+  operator: z.enum([
+    'is',
+    'isNot',
+    'isGreaterThan',
+    'isLessThan',
+    'isGreaterThanOrEqual',
+    'isLessThanOrEqual',
+    'in',
+    'notIn',
+  ]), // 支持多种比较操作符
+  value: z.union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number(), z.boolean()]))]), // 比较值，支持数组形式
 });
 
 // 可见性配置
