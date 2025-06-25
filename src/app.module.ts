@@ -15,6 +15,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { DesignModule } from './modules/design/design.module';
+import { EvaluationModule } from './modules/evaluation/evaluation.module';
 import { ExportModule } from './modules/export/export.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { TenantModule } from './modules/tenant/tenant.module';
@@ -55,6 +56,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     }),
     DesignModule,
     TenantModule,
+    EvaluationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
