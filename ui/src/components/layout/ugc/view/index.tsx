@@ -15,6 +15,7 @@ import _, { isNull } from 'lodash';
 import { CircleSlash, MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
@@ -252,6 +253,8 @@ export const UgcView = <E extends object>({
 
   const rows = table.getRowModel().rows;
 
+  const { data: oem } = useSystemConfig();
+  const paginationPosition = oem?.theme.paginationPosition ?? 'left';
   return (
     <div className="flex size-full">
       <UgcSidebar
@@ -352,7 +355,7 @@ export const UgcView = <E extends object>({
             </ScrollArea>
             {showPagination && (
               <TablePagination
-                className="py-0"
+                className={cn('py-0', paginationPosition === 'right' ? 'justify-end gap-4' : '')}
                 pagination={table.getState().pagination}
                 onPaginationChange={table.setPagination}
                 rowCount={table.getRowCount()}
