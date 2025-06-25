@@ -7,15 +7,18 @@ import { AccountTypes } from '@/components/layout/ugc-pages/action-tools/externa
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
+import { useGetUgcViewIconOnlyMode } from '../../util';
+
 interface IVinesExternalAccountProps {}
 
 export const VinesExternalAccount: React.FC<IVinesExternalAccountProps> = () => {
   const { t } = useTranslation();
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button icon={<KeySquare />} variant="outline" size="small">
-          {t('ugc-page.action-tools.ugc-view.subtitle.external-account.button')}
+          {iconOnlyMode ? null : t('ugc-page.action-tools.ugc-view.subtitle.external-account.button')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-[50rem]">
