@@ -51,7 +51,7 @@ export const EvaluationTabs: React.FC<EvaluationTabsProps> = ({ currentTab }) =>
   };
 
   return (
-    <div className="space-y-1 p-3">
+    <div className="space-y-1">
       {EVALUATION_TABS.map((tab) => {
         const Icon = tab.icon;
         const isActive = currentTab === tab.id;

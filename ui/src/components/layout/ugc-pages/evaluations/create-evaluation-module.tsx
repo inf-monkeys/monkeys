@@ -135,7 +135,7 @@ export const CreateEvaluationModuleDialog: React.FC<CreateEvaluationModuleDialog
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
                 {t('common.utils.cancel')}
               </Button>
-              <Button type="submit" loading={loading}>
+              <Button type="submit" variant="outline" loading={loading}>
                 {t('common.utils.create')}
               </Button>
             </DialogFooter>
