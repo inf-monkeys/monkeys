@@ -2835,8 +2835,14 @@
               "submit": "Save",
               "visibility": {
                 "label": "Field Visibility",
+                "description": {
+                  "main": "Control when this form field is hidden based on other field values",
+                  "and": "When all conditions are met, this form field will be hidden",
+                  "or": "When any condition is met, this form field will be hidden"
+                },
                 "logic-label": "Logic",
                 "field-placeholder": "Select field",
+                "operator-placeholder": "Select operator",
                 "value-placeholder": "Enter value",
                 "add-condition": "Add condition",
                 "operators": {
@@ -2845,7 +2851,14 @@
                   "isGreaterThan": "greater than",
                   "isLessThan": "less than",
                   "isGreaterThanOrEqual": "greater than or equal",
-                  "isLessThanOrEqual": "less than or equal"
+                  "isLessThanOrEqual": "less than or equal",
+                  "in": "is one of",
+                  "notIn": "is not one of"
+                },
+                "pill-input": {
+                  "placeholder-string": "Type and press Enter to add values",
+                  "placeholder-number": "Type numbers and press Enter to add",
+                  "placeholder-boolean": "Type true/false and press Enter to add"
                 }
               }
             }

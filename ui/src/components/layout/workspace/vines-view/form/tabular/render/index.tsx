@@ -205,9 +205,9 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
           return evaluateVisibilityCondition(fieldValue, operator, value);
         });
 
-        const isVisible = logic === 'AND' ? results.every(Boolean) : results.some(Boolean);
-
-        return !isVisible;
+        // 反转逻辑：当条件成立时隐藏字段
+        const conditionsMet = logic === 'AND' ? results.every(Boolean) : results.some(Boolean);
+        return conditionsMet; // 条件成立时返回true（需要隐藏）
       })
       .map((input) => input.name);
   }, [inputs, form]);

@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
+import { PillInput } from '@/components/ui/pill-input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -48,38 +49,60 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
     }
   }, [list, logic, hasConditions, form]);
 
+  // 判断操作符是否支持多值
+  const isMultiValueOperator = (operator: string) => {
+    return ['in', 'notIn'].includes(operator);
+  };
+
+  // 获取动态描述
+  const getLogicDescription = (logic: 'AND' | 'OR') => {
+    if (logic === 'AND') {
+      return t('workspace.flow-view.endpoint.start-tool.input.config-form.visibility.description.and');
+    } else {
+      return t('workspace.flow-view.endpoint.start-tool.input.config-form.visibility.description.or');
+    }
+  };
+
   return (
     <FormField
       name="visibility"
       control={form.control}
       render={() => (
         <FormItem className="space-y-4">
-          <FormLabel className="flex items-center gap-2">
-            {/* <Eye size={16} /> */}
-            {t('workspace.flow-view.endpoint.start-tool.input.config-form.visibility.label')}
-          </FormLabel>
+          <div className="space-y-2">
+            <FormLabel className="flex items-center gap-2">
+              {/* <Eye size={16} /> */}
+              {t('workspace.flow-view.endpoint.start-tool.input.config-form.visibility.label')}
+            </FormLabel>
+            <p className="text-sm text-muted-foreground">
+              {t('workspace.flow-view.endpoint.start-tool.input.config-form.visibility.description.main')}
+            </p>
+          </div>
 
           {hasConditions && (
             <div className="space-y-4">
               {/* 逻辑选择器 */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {t('workspace.flow-view.endpoint.start-tool.input.config-form.visibility.logic-label')}:
-                </span>
-                <Select
-                  value={logic}
-                  onValueChange={(value: 'AND' | 'OR') => {
-                    form.setValue('visibility.logic', value);
-                  }}
-                >
-                  <SelectTrigger className="w-20">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="AND">AND</SelectItem>
-                    <SelectItem value="OR">OR</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {t('workspace.flow-view.endpoint.start-tool.input.config-form.visibility.logic-label')}:
+                  </span>
+                  <Select
+                    value={logic}
+                    onValueChange={(value: 'AND' | 'OR') => {
+                      form.setValue('visibility.logic', value);
+                    }}
+                  >
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="AND">AND</SelectItem>
+                      <SelectItem value="OR">OR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-xs text-muted-foreground">{getLogicDescription(logic)}</p>
               </div>
 
               {/* 条件列表 */}
@@ -87,6 +110,7 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
                 <div className="space-y-2">
                   {list.map((condition, i) => {
                     const selectedInput = workflowInput.find(({ name }) => name === condition.field);
+                    const isMultiValue = isMultiValueOperator(condition.operator);
 
                     return (
                       <div key={i} className="flex items-center gap-2 p-1">
@@ -127,12 +151,24 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
                             const updatedCondition = {
                               ...condition,
                               operator: operator as IVisibilityCondition['operator'],
+                              // 如果从多值操作符切换到单值操作符，需要处理 value
+                              value: isMultiValueOperator(operator)
+                                ? Array.isArray(condition.value)
+                                  ? condition.value
+                                  : [condition.value]
+                                : Array.isArray(condition.value)
+                                  ? condition.value[0]
+                                  : condition.value,
                             };
                             replace(i, updatedCondition);
                           }}
                         >
                           <SelectTrigger className="w-32">
-                            <SelectValue placeholder="操作符" />
+                            <SelectValue
+                              placeholder={t(
+                                'workspace.flow-view.endpoint.start-tool.input.config-form.visibility.operator-placeholder',
+                              )}
+                            />
                           </SelectTrigger>
                           <SelectContent>
                             {getAvailableOperators(selectedInput?.type || 'string').map((op) => (
@@ -147,7 +183,22 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
 
                         {/* 值输入 */}
                         <div className="flex-1">
-                          {selectedInput?.type === 'boolean' ? (
+                          {isMultiValue ? (
+                            <PillInput
+                              value={Array.isArray(condition.value) ? condition.value : [condition.value]}
+                              onChange={(values) => {
+                                replace(i, { ...condition, value: values });
+                              }}
+                              fieldType={
+                                ['string', 'number', 'boolean'].includes(selectedInput?.type || 'string')
+                                  ? (selectedInput?.type as 'string' | 'number' | 'boolean')
+                                  : 'string'
+                              }
+                              placeholder={t(
+                                'workspace.flow-view.endpoint.start-tool.input.config-form.visibility.value-placeholder',
+                              )}
+                            />
+                          ) : selectedInput?.type === 'boolean' ? (
                             <Select
                               value={condition.value?.toString()}
                               onValueChange={(value) => {
@@ -171,7 +222,11 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
                             <AutosizeTextarea
                               minHeight={36}
                               disabled={!condition.field}
-                              value={condition.value?.toString() || ''}
+                              value={
+                                Array.isArray(condition.value)
+                                  ? condition.value[0]?.toString() || ''
+                                  : condition.value?.toString() || ''
+                              }
                               onChange={(e) => {
                                 let value: string | number = e.target.value;
                                 // 如果字段类型是number，尝试转换
