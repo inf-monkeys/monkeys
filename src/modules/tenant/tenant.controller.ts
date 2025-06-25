@@ -27,7 +27,7 @@ export class TenantController {
   }
 
   @Post('/outputs')
-  async getAllExecutionOutputs(@Body() body: { page?: number; limit?: number; extraMetadata?: Record<string, any> }) {
+  async getAllExecutionOutputs(@Body() body: { page?: number; limit?: number; extraMetadata?: Record<string, any> | Record<string, any>[] }) {
     const { page = 1, limit = 20, extraMetadata } = body;
     const { data, total } = await this.tenantService.getAllExecutions({ page: +page, limit: +limit, extraMetadata });
     return new SuccessListResponse({
