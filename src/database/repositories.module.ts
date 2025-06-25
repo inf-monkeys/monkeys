@@ -22,6 +22,8 @@ import { ConversationAppRepository } from './repositories/conversation-app.repos
 import { CredentialsRepository } from './repositories/credential.repository';
 import { DesignMetadataRepository } from './repositories/design-metadata.repository';
 import { DesignProjectRepository } from './repositories/design-project.repository';
+import { EvaluationRepository } from './repositories/evaluation.repository';
+import { EvaluationRefactoredRepository } from './repositories/evaluation-refactored.repository';
 import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.repository';
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
 import { LlmModelRepository } from './repositories/llm-model.repository';
@@ -73,6 +75,8 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     ObservabilityRepository,
     DesignMetadataRepository,
     DesignProjectRepository,
+    EvaluationRepository,
+    EvaluationRefactoredRepository,
   ],
   exports: [
     ToolsRepository,
@@ -109,6 +113,8 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     ObservabilityRepository,
     DesignMetadataRepository,
     DesignProjectRepository,
+    EvaluationRepository,
+    EvaluationRefactoredRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })
