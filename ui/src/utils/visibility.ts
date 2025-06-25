@@ -24,9 +24,19 @@ export const evaluateVisibilityCondition = (fieldValue: any, operator: string, e
       return Number(fieldValue) >= Number(expectedValue);
     case 'isLessThanOrEqual':
       return Number(fieldValue) <= Number(expectedValue);
-    default:
-      // 默认回退到相等比较
+    case 'in':
+      if (Array.isArray(expectedValue)) {
+        return expectedValue.some((value) => fieldValue === value);
+      }
       return fieldValue === expectedValue;
+    case 'notIn':
+      if (Array.isArray(expectedValue)) {
+        return !expectedValue.some((value) => fieldValue === value);
+      }
+      return fieldValue !== expectedValue;
+    default:
+      // 默认显示表单项
+      return true;
   }
 };
 
@@ -36,7 +46,7 @@ export const evaluateVisibilityCondition = (fieldValue: any, operator: string, e
  * @returns 可用操作符数组
  */
 export const getAvailableOperators = (fieldType: string): string[] => {
-  const baseOperators = ['is', 'isNot'];
+  const baseOperators = ['is', 'isNot', 'in', 'notIn'];
   const numberOperators = ['isGreaterThan', 'isLessThan', 'isGreaterThanOrEqual', 'isLessThanOrEqual'];
 
   return fieldType === 'number' ? [...baseOperators, ...numberOperators] : baseOperators;
