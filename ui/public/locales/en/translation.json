@@ -75,7 +75,18 @@
         "error": "Download failed"
       },
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "open": "Open",
+      "share": "Share"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "time": {
+      "minutes": "minutes",
+      "hours": "hours", 
+      "days": "days"
     },
     "language": "Language",
     "display-name": "Display Name",
@@ -405,6 +416,9 @@
               },
               "agents": {
                 "label": "Agents"
+              },
+              "evaluations": {
+                "label": "Evaluations"
               }
             },
             "tools": {
@@ -3693,6 +3707,107 @@
           "update-to-internals": "Update Info to Internals",
           "update-from-internals": "Update Info from Internals"
         }
+      }
+    }
+  },
+  "evaluation": {
+    "title": "Evaluation Modules",
+    "participants": "participants",
+    "battles": "battles",
+    "win-rate": "win rate",
+    "tabs": {
+      "leaderboard": "Leaderboard",
+      "leaderboard.description": "View ELO rankings and statistics",
+      "battles": "Battle Management", 
+      "battles.description": "Create and manage evaluation battles",
+      "analytics": "Analytics",
+      "analytics.description": "View performance charts and analysis",
+      "edit": "Edit Module",
+      "edit.description": "Configure module settings"
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "description": "ELO rankings and performance statistics for all participants",
+      "rankings": "Current Rankings",
+      "view-history": "View History"
+    },
+    "battles": {
+      "title": "Battle Management",
+      "description": "Create, monitor and manage evaluation battles",
+      "list": "Battle List",
+      "create-single": "Create Battle",
+      "create-group": "Create Battle Group",
+      "tabs": {
+        "ongoing": "Ongoing",
+        "completed": "Completed"
+      },
+      "stats": {
+        "total": "Total Battles",
+        "ongoing": "Ongoing",
+        "completed": "Completed", 
+        "auto-eval": "Auto Evaluation"
+      }
+    },
+    "battle": {
+      "status": {
+        "in-progress": "In Progress",
+        "waiting": "Waiting",
+        "completed": "Completed"
+      },
+      "actions": {
+        "start": "Start",
+        "pause": "Pause", 
+        "view-details": "View Details"
+      },
+      "winner": "Winner"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "description": "Performance analysis and statistical insights",
+      "export": "Export Report",
+      "rating-trends": "Rating Trends",
+      "battle-activity": "Battle Activity",
+      "performance-distribution": "Performance Distribution", 
+      "win-rate-analysis": "Win Rate Analysis",
+      "chart-placeholder": "Chart data will be displayed here",
+      "stats": {
+        "total-evaluations": "Total Evaluations",
+        "avg-evaluation-time": "Avg Evaluation Time",
+        "top-performer": "Top Performer", 
+        "completion-rate": "Completion Rate",
+        "this-week": "this week",
+        "vs-last-week": "vs last week"
+      }
+    },
+    "edit": {
+      "title": "Edit Module",
+      "description": "Configure evaluation module settings and parameters",
+      "basic-info": "Basic Information",
+      "display-name": "Display Name",
+      "display-name-placeholder": "Enter module display name",
+      "description": "Description",
+      "description-placeholder": "Enter module description",
+      "evaluation-criteria": "Evaluation Criteria",
+      "criteria-placeholder": "Enter evaluation criteria and guidelines",
+      "status": "Status",
+      "status-description": "Enable or disable this evaluation module",
+      "participants": "Participants",
+      "participant-count": "Participant Count",
+      "manage-participants": "Manage Participants",
+      "no-participants": "No participants added yet",
+      "elo-config": "ELO Configuration",
+      "initial-rating": "Initial Rating",
+      "rating-deviation": "Rating Deviation",
+      "elo-description": "Configure ELO rating system parameters"
+    },
+    "stats": {
+      "total-participants": "Total Participants",
+      "total-battles": "Total Battles",
+      "avg-rating": "Average Rating"
+    },
+    "participant": {
+      "status": {
+        "active": "Active"
       }
     }
   }
