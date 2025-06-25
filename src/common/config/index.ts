@@ -295,6 +295,10 @@ export interface TenantStatisticsConfig {
   bearer: string;
 }
 
+export interface EvaluationConfig {
+  defaultLlmEvaluatorModel: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -312,6 +316,7 @@ export interface Config {
   oneapi: OneApiConfig;
   aws: AwsConfig;
   tenant: TenantStatisticsConfig;
+  evaluation: EvaluationConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -530,6 +535,9 @@ When answer to user:
   },
   tenant: {
     bearer: readConfig('tenant.bearer', ''),
+  },
+  evaluation: {
+    defaultLlmEvaluatorModel: readConfig('evaluation.defaultLlmEvaluatorModel', ''),
   },
 };
 
