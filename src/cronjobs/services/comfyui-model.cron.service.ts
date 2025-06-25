@@ -6,6 +6,7 @@ import { ComfyuiModelService } from '@/modules/assets/comfyui-model/comfyui-mode
 import { ComfyUIService } from '@/modules/tools/comfyui/comfyui.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+
 @Injectable()
 export class ComfyuiModelCronService {
   private readonly lockResource = `${config.server.appId}:cron:lock:comfyui-model`;
@@ -19,13 +20,13 @@ export class ComfyuiModelCronService {
   public async updateModelsGlobal() {
     const rawServerList = await this.comfyuiService.listAllServers();
 
-    rawServerList.forEach(async (server) => {
+    for (const server of rawServerList) {
       try {
         await this.modelService.updateModelsByTeamIdAndServerId(server.teamId, server.id);
       } catch (error) {
         logger.error(`Comfyui-model cronjob has some errors: ${server.id} can't connect. Raw error message: ${error}`);
       }
-    });
+    }
   }
 
   @Cron(config.comfyui.refreshCron)
