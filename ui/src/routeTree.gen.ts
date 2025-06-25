@@ -13,6 +13,8 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './pages/__root'
+import { Route as TeamIdEvaluationsIndexImport } from './pages/$teamId/evaluations/index'
+import { Route as TeamIdEvaluationsDetailImport } from './pages/$teamId/evaluations/detail'
 
 // Create Virtual Routes
 
@@ -77,6 +79,9 @@ const TeamIdTableDataDatabaseIdIndexLazyImport = createFileRoute(
 const TeamIdImageModelsImageModelIdIndexLazyImport = createFileRoute(
   '/$teamId/image-models/$imageModelId/',
 )()
+const TeamIdEvaluationsModuleIdIndexLazyImport = createFileRoute(
+  '/$teamId/evaluations/$moduleId/',
+)()
 const TeamIdDesignDesignProjectIdIndexLazyImport = createFileRoute(
   '/$teamId/design/$designProjectId/',
 )()
@@ -94,6 +99,9 @@ const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport = createFileRoute(
 )()
 const TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport = createFileRoute(
   '/$teamId/workspace/$workflowId/$pageId/',
+)()
+const TeamIdEvaluationsModuleIdTabIndexLazyImport = createFileRoute(
+  '/$teamId/evaluations/$moduleId/$tab/',
 )()
 const TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyImport = createFileRoute(
   '/$teamId/design/$designProjectId/$designBoardId/',
@@ -301,6 +309,16 @@ const TeamIdActionToolsIndexLazyRoute = TeamIdActionToolsIndexLazyImport.update(
   import('./pages/$teamId/action-tools/index.lazy').then((d) => d.Route),
 )
 
+const TeamIdEvaluationsIndexRoute = TeamIdEvaluationsIndexImport.update({
+  path: '/$teamId/evaluations/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdEvaluationsDetailRoute = TeamIdEvaluationsDetailImport.update({
+  path: '/$teamId/evaluations/detail',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TeamIdWorkspaceWorkflowIdIndexLazyRoute =
   TeamIdWorkspaceWorkflowIdIndexLazyImport.update({
     path: '/$teamId/workspace/$workflowId/',
@@ -345,6 +363,16 @@ const TeamIdImageModelsImageModelIdIndexLazyRoute =
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
     import('./pages/$teamId/image-models/$imageModelId/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const TeamIdEvaluationsModuleIdIndexLazyRoute =
+  TeamIdEvaluationsModuleIdIndexLazyImport.update({
+    path: '/$teamId/evaluations/$moduleId/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./pages/$teamId/evaluations/$moduleId/index.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -407,6 +435,16 @@ const TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute =
     ),
   )
 
+const TeamIdEvaluationsModuleIdTabIndexLazyRoute =
+  TeamIdEvaluationsModuleIdTabIndexLazyImport.update({
+    path: '/$teamId/evaluations/$moduleId/$tab/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./pages/$teamId/evaluations/$moduleId/$tab/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyRoute =
   TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyImport.update({
     path: '/$teamId/design/$designProjectId/$designBoardId/',
@@ -449,6 +487,14 @@ declare module '@tanstack/react-router' {
     }
     '/login/': {
       preLoaderRoute: typeof LoginIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/evaluations/detail': {
+      preLoaderRoute: typeof TeamIdEvaluationsDetailImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/evaluations/': {
+      preLoaderRoute: typeof TeamIdEvaluationsIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/action-tools/': {
@@ -559,6 +605,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdDesignDesignProjectIdIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/evaluations/$moduleId/': {
+      preLoaderRoute: typeof TeamIdEvaluationsModuleIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/image-models/$imageModelId/': {
       preLoaderRoute: typeof TeamIdImageModelsImageModelIdIndexLazyImport
       parentRoute: typeof rootRoute
@@ -587,6 +637,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/evaluations/$moduleId/$tab/': {
+      preLoaderRoute: typeof TeamIdEvaluationsModuleIdTabIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/workspace/$workflowId/$pageId/': {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport
       parentRoute: typeof rootRoute
@@ -606,6 +660,8 @@ export const routeTree = rootRoute.addChildren([
   LoginOauthLazyRoute,
   TeamIdIndexLazyRoute,
   LoginIndexLazyRoute,
+  TeamIdEvaluationsDetailRoute,
+  TeamIdEvaluationsIndexRoute,
   TeamIdActionToolsIndexLazyRoute,
   TeamIdAgentIndexLazyRoute,
   TeamIdAgentsIndexLazyRoute,
@@ -633,6 +689,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdAgentAgentIdIndexLazyRoute,
   TeamIdComfyuiComfyuiWorkflowIdIndexLazyRoute,
   TeamIdDesignDesignProjectIdIndexLazyRoute,
+  TeamIdEvaluationsModuleIdIndexLazyRoute,
   TeamIdImageModelsImageModelIdIndexLazyRoute,
   TeamIdTableDataDatabaseIdIndexLazyRoute,
   TeamIdTextDataTextIdIndexLazyRoute,
@@ -640,6 +697,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkspaceWorkflowIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyRoute,
   TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyRoute,
+  TeamIdEvaluationsModuleIdTabIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute,
 ])
