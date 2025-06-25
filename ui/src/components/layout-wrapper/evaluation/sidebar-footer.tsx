@@ -26,12 +26,12 @@ export const EvaluationSidebarFooter: React.FC = () => {
   return (
     <div className="border-t p-3">
       <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" size="small" onClick={handleShare} className="h-8 gap-1.5 text-xs">
+        <Button variant="outline" size="sm" onClick={handleShare} className="h-8 gap-1.5 text-xs">
           <Share2 className="h-3 w-3" />
           {t('common.utils.share')}
         </Button>
 
-        <Button variant="outline" size="small" onClick={handleOpenInNewTab} className="h-8 gap-1.5 text-xs">
+        <Button variant="outline" size="sm" onClick={handleOpenInNewTab} className="h-8 gap-1.5 text-xs">
           <ExternalLink className="h-3 w-3" />
           {t('common.utils.open')}
         </Button>

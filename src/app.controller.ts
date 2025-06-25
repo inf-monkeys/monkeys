@@ -132,6 +132,8 @@ export class AppController {
         showSidebarPageGroup: config.server.customization.showSidebarPageGroup,
         defaults: config.server.customization.defaults,
         modules: config.server.customization.modules,
+        paginationPosition: config.server.customization.paginationPosition,
+        ugcViewIconOnlyMode: config.server.customization.ugcViewIconOnlyMode,
       },
       auth: {
         enabled: config.auth.enabled,

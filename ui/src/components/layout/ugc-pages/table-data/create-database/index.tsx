@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createDatabase } from '@/apis/table-data';
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -23,6 +24,7 @@ interface ICreateDatabaseProps {}
 
 export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
   const { t } = useTranslation();
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
 
   const { mutate } = useSWRConfig();
 
@@ -113,7 +115,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Plus />}>
-          {t('ugc-page.table-data.ugc-view.subtitle.create-database.button')}
+          {iconOnlyMode ? null : t('ugc-page.table-data.ugc-view.subtitle.create-database.button')}
         </Button>
       </DialogTrigger>
       <DialogContent>

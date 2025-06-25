@@ -95,6 +95,8 @@ export interface ServerConfig {
       showFormInImageDetail?: boolean;
     };
     modules?: CustomizationModules;
+    paginationPosition?: 'left' | 'right';
+    ugcViewIconOnlyMode?: boolean;
   };
 }
 
@@ -373,6 +375,8 @@ export const config: Config = {
         vinesSpaceHeadbar: readConfig('server.customization.modules.vinesSpaceHeadbar', '*'),
         settingsSidebar: readConfig('server.customization.modules.settingsSidebar', '*'),
       },
+      paginationPosition: readConfig('server.customization.paginationPosition', 'left'),
+      ugcViewIconOnlyMode: readConfig('server.customization.ugcViewIconOnlyMode', false),
     },
   },
   conductor: {

@@ -12,16 +12,19 @@ import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent } from '@/components/ui/tabs.tsx';
 
+import { useGetUgcViewIconOnlyMode } from '../../util';
+
 interface IImportToolsProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ImportTools: React.FC<IImportToolsProps> = () => {
   const { t } = useTranslation();
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Import />}>
-          {t('ugc-page.tools.import.label')}
+          {iconOnlyMode ? null : t('ugc-page.tools.import.label')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[calc(100vh-10rem)] max-w-3xl">
