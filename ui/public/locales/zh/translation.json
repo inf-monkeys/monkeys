@@ -2839,7 +2839,15 @@
                 "logic-label": "逻辑",
                 "field-placeholder": "选择字段",
                 "value-placeholder": "输入值",
-                "add-condition": "添加条件"
+                "add-condition": "添加条件",
+                "operators": {
+                  "is": "等于",
+                  "isNot": "不等于",
+                  "isGreaterThan": "大于",
+                  "isLessThan": "小于",
+                  "isGreaterThanOrEqual": "大于等于",
+                  "isLessThanOrEqual": "小于等于"
+                }
               }
             }
           },
@@ -3750,7 +3758,7 @@
     "tabs": {
       "leaderboard": "ELO排行榜",
       "leaderboard.description": "查看ELO排名和统计数据",
-      "battles": "对战管理", 
+      "battles": "对战管理",
       "battles.description": "创建和管理评测对战",
       "analytics": "数据分析",
       "analytics.description": "查看性能图表和分析",
@@ -3776,7 +3784,7 @@
       "stats": {
         "total": "总对战数",
         "ongoing": "进行中",
-        "completed": "已完成", 
+        "completed": "已完成",
         "auto-eval": "自动评测"
       }
     },
@@ -3788,7 +3796,7 @@
       },
       "actions": {
         "start": "开始",
-        "pause": "暂停", 
+        "pause": "暂停",
         "view-details": "查看详情"
       },
       "winner": "获胜者"
@@ -3799,13 +3807,13 @@
       "export": "导出报告",
       "rating-trends": "评分趋势",
       "battle-activity": "对战活动",
-      "performance-distribution": "性能分布", 
+      "performance-distribution": "性能分布",
       "win-rate-analysis": "胜率分析",
       "chart-placeholder": "图表数据将在此显示",
       "stats": {
         "total-evaluations": "总评测数",
         "avg-evaluation-time": "平均评测时间",
-        "top-performer": "最佳表现者", 
+        "top-performer": "最佳表现者",
         "completion-rate": "完成率",
         "this-week": "本周",
         "vs-last-week": "相比上周"

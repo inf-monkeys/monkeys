@@ -97,7 +97,7 @@ const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, className, ch
   return (
     <MemoizedReactMarkdown
       className={cn(
-        'prose prose-sm break-words dark:prose-invert prose-h1:text-sm prose-h2:text-sm prose-h3:text-sm prose-h4:text-sm prose-p:leading-relaxed prose-pre:p-0',
+        'prose prose-sm dark:prose-invert prose-h1:text-sm prose-h2:text-sm prose-h3:text-sm prose-h4:text-sm prose-p:leading-relaxed prose-pre:p-0 break-words',
         className,
       )}
       components={components}
