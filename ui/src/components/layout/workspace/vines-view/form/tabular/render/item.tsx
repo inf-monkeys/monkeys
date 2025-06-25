@@ -57,13 +57,9 @@ const isVisible = (
     return evaluateVisibilityCondition(fieldValue, operator, value);
   });
 
-  switch (logic) {
-    case 'AND':
-      return results.every(Boolean);
-    case 'OR':
-      return results.some(Boolean);
-  }
-  return true;
+  // 反转逻辑：当条件成立时隐藏字段
+  const conditionsMet = logic === 'AND' ? results.every(Boolean) : results.some(Boolean);
+  return !conditionsMet; // 条件成立时返回false（隐藏），条件不成立时返回true（显示）
 };
 
 export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({

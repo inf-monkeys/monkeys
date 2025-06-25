@@ -2836,8 +2836,14 @@
               "submit": "保存",
               "visibility": {
                 "label": "字段可见性",
+                "description": {
+                  "main": "根据其他字段值控制此表单项的隐藏",
+                  "and": "当所有条件都成立时，该表单项将被隐藏",
+                  "or": "当任一条件成立时，该表单项将被隐藏"
+                },
                 "logic-label": "逻辑",
                 "field-placeholder": "选择字段",
+                "operator-placeholder": "选择操作符",
                 "value-placeholder": "输入值",
                 "add-condition": "添加条件",
                 "operators": {
@@ -2846,7 +2852,14 @@
                   "isGreaterThan": "大于",
                   "isLessThan": "小于",
                   "isGreaterThanOrEqual": "大于等于",
-                  "isLessThanOrEqual": "小于等于"
+                  "isLessThanOrEqual": "小于等于",
+                  "in": "包含于",
+                  "notIn": "不包含于"
+                },
+                "pill-input": {
+                  "placeholder-string": "输入值并按回车添加",
+                  "placeholder-number": "输入数字并按回车添加",
+                  "placeholder-boolean": "输入 true/false 并按回车添加"
                 }
               }
             }
