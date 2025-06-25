@@ -43,7 +43,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
     hideSpaceHeader: false,
   });
 
-  const hideSpaceHeader = urlHideSpaceHeader ?? oem?.theme.hideSpaceHeader ?? false;
+  const hideSpaceHeader = urlHideSpaceHeader || oem?.theme.hideSpaceHeader || false;
 
   const hasToken = !!getVinesToken();
 
