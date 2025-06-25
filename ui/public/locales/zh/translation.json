@@ -75,7 +75,18 @@
         "error": "下载失败"
       },
       "yes": "是",
-      "no": "否"
+      "no": "否",
+      "open": "打开",
+      "share": "分享"
+    },
+    "status": {
+      "active": "活跃",
+      "inactive": "非活跃"
+    },
+    "time": {
+      "minutes": "分钟",
+      "hours": "小时",
+      "days": "天"
     },
     "language": "语言",
     "display-name": "显示名称",
@@ -399,6 +410,9 @@
               },
               "agents": {
                 "label": "智能体"
+              },
+              "evaluations": {
+                "label": "评测"
               },
               "designs": {
                 "label": "设计项目"
@@ -3725,6 +3739,107 @@
           "update-to-internals": "同步到内置模型信息",
           "update-from-internals": "从内置模型信息获取"
         }
+      }
+    }
+  },
+  "evaluation": {
+    "title": "评测模块",
+    "participants": "参与者",
+    "battles": "对战",
+    "win-rate": "胜率",
+    "tabs": {
+      "leaderboard": "ELO排行榜",
+      "leaderboard.description": "查看ELO排名和统计数据",
+      "battles": "对战管理", 
+      "battles.description": "创建和管理评测对战",
+      "analytics": "数据分析",
+      "analytics.description": "查看性能图表和分析",
+      "edit": "编辑模块",
+      "edit.description": "配置模块设置"
+    },
+    "leaderboard": {
+      "title": "排行榜",
+      "description": "所有参与者的ELO排名和性能统计",
+      "rankings": "当前排名",
+      "view-history": "查看历史"
+    },
+    "battles": {
+      "title": "对战管理",
+      "description": "创建、监控和管理评测对战",
+      "list": "对战列表",
+      "create-single": "创建对战",
+      "create-group": "创建对战组",
+      "tabs": {
+        "ongoing": "进行中",
+        "completed": "已完成"
+      },
+      "stats": {
+        "total": "总对战数",
+        "ongoing": "进行中",
+        "completed": "已完成", 
+        "auto-eval": "自动评测"
+      }
+    },
+    "battle": {
+      "status": {
+        "in-progress": "进行中",
+        "waiting": "等待中",
+        "completed": "已完成"
+      },
+      "actions": {
+        "start": "开始",
+        "pause": "暂停", 
+        "view-details": "查看详情"
+      },
+      "winner": "获胜者"
+    },
+    "analytics": {
+      "title": "数据分析",
+      "description": "性能分析和统计洞察",
+      "export": "导出报告",
+      "rating-trends": "评分趋势",
+      "battle-activity": "对战活动",
+      "performance-distribution": "性能分布", 
+      "win-rate-analysis": "胜率分析",
+      "chart-placeholder": "图表数据将在此显示",
+      "stats": {
+        "total-evaluations": "总评测数",
+        "avg-evaluation-time": "平均评测时间",
+        "top-performer": "最佳表现者", 
+        "completion-rate": "完成率",
+        "this-week": "本周",
+        "vs-last-week": "相比上周"
+      }
+    },
+    "edit": {
+      "title": "编辑模块",
+      "description": "配置评测模块设置和参数",
+      "basic-info": "基本信息",
+      "display-name": "显示名称",
+      "display-name-placeholder": "输入模块显示名称",
+      "description": "描述",
+      "description-placeholder": "输入模块描述",
+      "evaluation-criteria": "评测标准",
+      "criteria-placeholder": "输入评测标准和指导原则",
+      "status": "状态",
+      "status-description": "启用或禁用此评测模块",
+      "participants": "参与者",
+      "participant-count": "参与者数量",
+      "manage-participants": "管理参与者",
+      "no-participants": "尚未添加参与者",
+      "elo-config": "ELO配置",
+      "initial-rating": "初始评分",
+      "rating-deviation": "评分偏差",
+      "elo-description": "配置ELO评分系统参数"
+    },
+    "stats": {
+      "total-participants": "总参与者",
+      "total-battles": "总对战数",
+      "avg-rating": "平均评分"
+    },
+    "participant": {
+      "status": {
+        "active": "活跃"
       }
     }
   }
