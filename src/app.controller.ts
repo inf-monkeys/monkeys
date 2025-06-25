@@ -133,6 +133,7 @@ export class AppController {
         defaults: config.server.customization.defaults,
         modules: config.server.customization.modules,
         paginationPosition: config.server.customization.paginationPosition,
+        ugcViewIconOnlyMode: config.server.customization.ugcViewIconOnlyMode,
       },
       auth: {
         enabled: config.auth.enabled,
