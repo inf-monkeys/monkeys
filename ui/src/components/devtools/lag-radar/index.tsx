@@ -41,7 +41,7 @@ export const LagRadar: React.FC<ILagRadarProps> = ({ frames, speed, size, inset,
       </HoverCard.Trigger>
       <HoverCard.Portal>
         <HoverCard.Content
-          className="animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 fixed bottom-4 right-4 z-[9999999999] size-24 cursor-pointer rounded-md bg-white bg-opacity-5 p-2 shadow-md backdrop-blur-md transition-opacity hover:opacity-25"
+          className="fixed bottom-4 right-4 z-[9999999999] size-24 cursor-pointer rounded-md bg-white bg-opacity-5 p-2 shadow-md backdrop-blur-md transition-opacity animate-in fade-in-0 zoom-in-95 hover:opacity-25 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
           onClick={() => setVisible(false)}
           ref={nodeRef}
         />

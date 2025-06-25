@@ -10,7 +10,7 @@ export const NoticeInput: React.FC<{ def: Pick<VinesToolDefProperties, 'displayN
   return (
     <div className="col-span-2 mb-3 flex max-h-96 w-full overflow-y-auto rounded bg-slate-3 p-4">
       <MemoizedReactMarkdown
-        className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 break-words"
+        className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
         remarkPlugins={[remarkGfm]}
         components={{
           a: ({ href, children }) => (

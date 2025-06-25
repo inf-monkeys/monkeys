@@ -28,6 +28,9 @@ export type IAssetItem<T = object> = T & {
   isDeleted?: boolean;
   isPreset?: boolean;
   isPublished?: boolean;
+  createdTimestamp?: number;
+  updatedTimestamp?: number;
+  isActive?: boolean;
 };
 
 export interface IAssetPublicCategory extends IBaseEntity {

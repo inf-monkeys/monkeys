@@ -11,6 +11,7 @@ export type VinesSpaceSidebarModule =
   | 'apps'
   | 'agents'
   | 'workflows'
+  | 'evaluations'
   | 'designs'
   | 'design-projects'
   | 'design-assets'
