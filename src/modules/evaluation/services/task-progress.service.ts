@@ -1,14 +1,17 @@
 import { CacheManager } from '@/common/cache';
 import { CACHE_TOKEN, MQ_TOKEN } from '@/common/common.module';
+import { config } from '@/common/config';
 import { Mq } from '@/common/mq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { TaskProgress } from '../types/task.types';
 
+const appId = config.server.appId;
+
 @Injectable()
 export class TaskProgressService {
   private readonly logger = new Logger(TaskProgressService.name);
-  private readonly PROGRESS_PREFIX = 'evaluation:progress';
-  private readonly EVENTS_PREFIX = 'evaluation:events';
+  private readonly PROGRESS_PREFIX = appId + ':evaluation:progress';
+  private readonly EVENTS_PREFIX = appId + ':evaluation:events';
 
   constructor(
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,

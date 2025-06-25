@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const AnalyticsView: React.FC = () => {
   return (
-    <div className="h-full overflow-auto p-6">
+    <div className="h-full overflow-auto rounded-xl border border-input p-6">
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="flex items-center justify-between">
           <div>

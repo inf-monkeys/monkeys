@@ -24,7 +24,7 @@ export const EvaluationSidebarFooter: React.FC = () => {
   };
 
   return (
-    <div className="border-t bg-background p-3">
+    <div className="border-t p-3">
       <div className="grid grid-cols-2 gap-2">
         <Button variant="outline" size="sm" onClick={handleShare} className="h-8 gap-1.5 text-xs">
           <Share2 className="h-3 w-3" />
