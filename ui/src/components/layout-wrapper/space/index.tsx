@@ -33,7 +33,7 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
     hideSpaceHeader: false,
   });
 
-  const hideSpaceHeader = urlHideSpaceHeader ?? oem?.theme.hideSpaceHeader ?? false;
+  const hideSpaceHeader = urlHideSpaceHeader || oem?.theme.hideSpaceHeader || false;
 
   return (
     <div
