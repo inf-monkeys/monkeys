@@ -2840,6 +2840,10 @@
                   "label": "单栏显示",
                   "desc": "启用后，将会与相邻的单栏组成双栏"
                 },
+                "flag": {
+                  "label": "标记",
+                  "desc": "用于第三方 API 调用时标记数据"
+                },
                 "textarea-mini-height": {
                   "label": "输入框行高"
                 },

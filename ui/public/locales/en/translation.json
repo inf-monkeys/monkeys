@@ -2839,6 +2839,10 @@
                   "label": "Single column display",
                   "desc": "When enabled, it will form a double column with the adjacent single column"
                 },
+                "flag": {
+                  "label": "Flag",
+                  "desc": "Used to mark data when calling third-party APIs"
+                },
                 "textarea-mini-height": {
                   "label": "Input box line height"
                 },

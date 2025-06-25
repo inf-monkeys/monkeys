@@ -145,6 +145,8 @@ export const workflowInputSchema = z.object({
 
   // 字段可见性配置
   visibility: visibilityConfigSchema.optional(),
+
+  flag: z.boolean().optional(),
 });
 
 export type IWorkflowInput = z.infer<typeof workflowInputSchema>;

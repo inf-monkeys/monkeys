@@ -65,7 +65,7 @@ export class TenantService {
       .map((inputName) => {
         const dataVal = input[inputName];
         const variableDef = workflowDef.variables.find((v: any) => v.name === inputName);
-        let displayName = variableDef?.displayName || inputName;
+        const displayName = variableDef?.displayName || inputName;
         const flag = variableDef?.flag === true;
         let finalData = dataVal;
         if (flag) {
@@ -139,43 +139,46 @@ export class TenantService {
 
   async getAllExecutions(options: { page: number; limit: number; extraMetadata?: Record<string, any> | Record<string, any>[] }) {
     const { page, limit, extraMetadata } = options;
-    const qb = this.workflowExecutionRepository.createQueryBuilder('execution')
+    const qb = this.workflowExecutionRepository
+      .createQueryBuilder('execution')
       .skip((page - 1) * limit)
       .take(limit)
       .orderBy('execution.created_timestamp', 'DESC');
 
     if (extraMetadata && Object.keys(extraMetadata).length > 0) {
-      qb.andWhere(new Brackets(qb1 => {
-        if (Array.isArray(extraMetadata)) {
-          // 支持数组查询（IN 查询）
-          Object.entries(extraMetadata[0] || {}).forEach(([key, value]) => {
-            if (Array.isArray(value)) {
-              qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
-            } else {
-              qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
-            }
-          });
-        } else {
-          // 原有的对象查询
-          Object.entries(extraMetadata).forEach(([key, value]) => {
-            if (Array.isArray(value)) {
-              qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
-            } else {
-              qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
-            }
-          });
-        }
-      }));
+      qb.andWhere(
+        new Brackets((qb1) => {
+          if (Array.isArray(extraMetadata)) {
+            // 支持数组查询（IN 查询）
+            Object.entries(extraMetadata[0] || {}).forEach(([key, value]) => {
+              if (Array.isArray(value)) {
+                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
+              } else {
+                qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
+              }
+            });
+          } else {
+            // 原有的对象查询
+            Object.entries(extraMetadata).forEach(([key, value]) => {
+              if (Array.isArray(value)) {
+                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
+              } else {
+                qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
+              }
+            });
+          }
+        }),
+      );
     }
 
     const [rawData, total] = await qb.getManyAndCount();
     // 获取 workflow 定义用于处理 input
-    const workflowIds = [...new Set(rawData.map(item => item.workflowId))];
+    const workflowIds = [...new Set(rawData.map((item) => item.workflowId))];
     const workflowDefinitions = await this.workflowRepository.findWorkflowByIds(workflowIds);
-    const workflowDefMap = new Map(workflowDefinitions.map(wf => [wf.workflowId, wf]));
+    const workflowDefMap = new Map(workflowDefinitions.map((wf) => [wf.workflowId, wf]));
 
     // 处理数据，转换为新的结构
-    const data: Execution[] = rawData.map(execution => {
+    const data: Execution[] = rawData.map((execution) => {
       const workflowDef = workflowDefMap.get(execution.workflowId);
       return {
         workflowId: execution.workflowId,
@@ -254,17 +257,18 @@ export class TenantService {
     const searchData = await conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, conductorQueryString);
     const executionsResult = searchData?.results ?? [];
     // 获取 workflow 定义用于处理 input
-    const workflowIds = [...new Set(executionsResult.map(item => item.workflowId))];
+    const workflowIds = [...new Set(executionsResult.map((item) => item.workflowName))];
     const workflowDefinitions = await this.workflowRepository.findWorkflowByIds(workflowIds);
-    const workflowDefMap = new Map(workflowDefinitions.map(wf => [wf.workflowId, wf]));
+    const workflowDefMap = new Map(workflowDefinitions.map((wf) => [wf.workflowId, wf]));
     // 处理数据，转换为新的结构
-    const data: Execution[] = executionsResult.map(execution => {
-      const workflowDef = workflowDefMap.get(execution.workflowId);
+    const data: Execution[] = executionsResult.map((execution) => {
+      const workflowDef = workflowDefMap.get(execution.workflowName);
       // 只取需要的字段，避免访问不存在的属性
-      const workflowInstanceId = execution['workflowInstanceId'] || execution['instanceId'] || '';
+      const workflowInstanceId = execution['workflowId'] || execution['instanceId'] || '';
       const extraMetadata = execution['extraMetadata'];
+
       return {
-        workflowId: execution.workflowId,
+        workflowId: execution.workflowName,
         workflowInstanceId,
         input: this.formatInput(execution.input, workflowDef),
         rawInput: execution.input,
