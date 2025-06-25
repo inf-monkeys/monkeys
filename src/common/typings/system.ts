@@ -38,6 +38,7 @@ export interface ISystemConfig {
       showFormInImageDetail?: boolean;
     };
     modules: CustomizationModules;
+    paginationPosition?: 'left' | 'right';
   };
   auth: {
     enabled: AuthMethod[];
