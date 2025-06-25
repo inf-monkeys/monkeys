@@ -28,6 +28,10 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
         name: 'workflows',
         path: '/$teamId/workflows',
       },
+      {
+        name: 'evaluations',
+        path: '/$teamId/evaluations',
+      },
     ],
   },
   {

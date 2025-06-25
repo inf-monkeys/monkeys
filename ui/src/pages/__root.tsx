@@ -11,6 +11,7 @@ import { ReportDialog } from '@/components/devtools/report/dialog';
 import { OEM } from '@/components/layout/oem';
 import { AgentLayout } from '@/components/layout-wrapper/agent';
 import { DesignLayout } from '@/components/layout-wrapper/design';
+import { EvaluationLayout } from '@/components/layout-wrapper/evaluation';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkbenchMiniModeLayout } from '@/components/layout-wrapper/workbench/mini-mode';
 import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
@@ -41,6 +42,7 @@ const RootComponent: React.FC = () => {
     isUseDesign,
     isUseWorkbench,
     isUsePanel,
+    isUseEvaluation,
   } = useVinesRoute();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
@@ -77,6 +79,7 @@ const RootComponent: React.FC = () => {
     !isUseIFrame &&
     !isUseAgent &&
     !isUseDesign &&
+    !isUseEvaluation &&
     !isUsePanel &&
     (mode !== 'mini' || !isUseWorkbench);
 
@@ -115,6 +118,7 @@ const RootComponent: React.FC = () => {
                 {isUseWorkSpace && <WorkspaceLayout />}
                 {isUseAgent && <AgentLayout />}
                 {isUseDesign && <DesignLayout />}
+                {isUseEvaluation && <EvaluationLayout />}
                 {isUsePanel && mode !== 'mini' && <WorkbenchPanelLayout layoutId={layoutId} />}
                 {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
                 {isUseDefault && <MainWrapper layoutId={layoutId} />}
