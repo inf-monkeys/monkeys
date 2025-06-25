@@ -14,6 +14,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { UgcView } from '@/components/layout/ugc/view';
 import { createEvaluationModulesColumns } from '@/components/layout/ugc-pages/evaluations/consts.tsx';
 import { CreateEvaluationModuleDialog } from '@/components/layout/ugc-pages/evaluations/create-evaluation-module.tsx';
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -68,7 +69,7 @@ export const EvaluationModules: React.FC = () => {
       error: t('common.delete.error'),
     });
   };
-
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
   return (
     <main className="size-full">
       <UgcView
@@ -159,7 +160,7 @@ export const EvaluationModules: React.FC = () => {
         onItemClick={(item) => open(`/${item.teamId}/evaluations/${item.id}/leaderboard`, '_blank')}
         subtitle={
           <Button variant="outline" size="small" icon={<Plus />} onClick={() => setCreateDialogVisible(true)}>
-            {t('ugc-page.evaluation.ugc-view.subtitle.create-button')}
+            {iconOnlyMode ? null : t('ugc-page.evaluation.ugc-view.subtitle.create-button')}
           </Button>
         }
       />
