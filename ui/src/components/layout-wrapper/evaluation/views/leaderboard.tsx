@@ -113,7 +113,7 @@ export const LeaderboardView: React.FC = () => {
     ));
 
   return (
-    <div className="h-full overflow-auto p-6">
+    <div className="h-full overflow-auto rounded-xl border border-input p-6">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

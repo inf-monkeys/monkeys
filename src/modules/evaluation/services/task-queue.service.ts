@@ -1,15 +1,18 @@
 import { CacheManager } from '@/common/cache';
 import { CACHE_TOKEN } from '@/common/common.module';
+import { config } from '@/common/config';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { EvaluationTask, TaskProgress, TaskStatus } from '../types/task.types';
 
+const appId = config.server.appId;
+
 @Injectable()
 export class TaskQueueService {
   private readonly logger = new Logger(TaskQueueService.name);
-  private readonly TASK_PREFIX = 'evaluation:task';
-  private readonly QUEUE_PREFIX = 'evaluation:queue';
-  private readonly PROGRESS_PREFIX = 'evaluation:progress';
+  private readonly TASK_PREFIX = appId + ':evaluation:task';
+  private readonly QUEUE_PREFIX = appId + ':evaluation:queue';
+  private readonly PROGRESS_PREFIX = appId + ':evaluation:progress';
 
   constructor(@Inject(CACHE_TOKEN) private readonly redis: CacheManager) {}
 

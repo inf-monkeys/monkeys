@@ -1,5 +1,6 @@
 import Redis, { Cluster } from 'ioredis';
 import { RedisConfig } from '../config';
+import { logger } from '../logger';
 import { initRedisClient } from '../redis';
 
 export interface CacheManager {
@@ -46,7 +47,7 @@ export class InMemoryCache implements CacheManager {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async brpop(_key: string, _timeout: number): Promise<[string, string] | null> {
-    console.warn('BRPOP is not supported for InMemoryCache, returning null.');
+    logger.warn('BRPOP is not supported for InMemoryCache, returning null.');
     return null;
   }
 

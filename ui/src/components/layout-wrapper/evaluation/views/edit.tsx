@@ -204,7 +204,7 @@ export const EditView: React.FC = () => {
   }
 
   return (
-    <div className="h-full overflow-auto p-6">
+    <div className="h-full overflow-auto rounded-xl border border-input p-6">
       <div className="mx-auto max-w-2xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -221,13 +221,18 @@ export const EditView: React.FC = () => {
                 <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isSaving}>
                   {t('common.utils.cancel')}
                 </Button>
-                <Button onClick={handleSave} disabled={isSaving || !(formData.displayName || '').trim()}>
+                <Button
+                  variant="outline"
+                  onClick={handleSave}
+                  disabled={isSaving || !(formData.displayName || '').trim()}
+                >
                   <Save className="mr-2 h-4 w-4" />
                   {isSaving ? t('common.save.loading', '保存中...') : t('common.utils.save')}
                 </Button>
               </>
             ) : (
               <Button
+                variant="outline"
                 onClick={() => {
                   setFormData({
                     displayName: module.displayName || '',
@@ -474,7 +479,11 @@ export const EditView: React.FC = () => {
               >
                 取消
               </Button>
-              <Button onClick={handleAddParticipants} disabled={isAddingParticipants || !newParticipantIds.trim()}>
+              <Button
+                variant="outline"
+                onClick={handleAddParticipants}
+                disabled={isAddingParticipants || !newParticipantIds.trim()}
+              >
                 {isAddingParticipants ? '添加中...' : '添加参与者'}
               </Button>
             </DialogFooter>
@@ -533,6 +542,7 @@ export const EditView: React.FC = () => {
                 取消
               </Button>
               <Button
+                variant="outline"
                 onClick={handleCreateAndAddEvaluator}
                 disabled={isAddingEvaluator || !newEvaluator.name.trim() || !newEvaluator.llmModelName?.trim()}
               >

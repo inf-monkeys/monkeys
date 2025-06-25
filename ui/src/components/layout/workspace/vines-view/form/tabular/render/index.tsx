@@ -35,6 +35,7 @@ import {
 } from '@/store/workbenchFormInputsCacheStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
+import { evaluateVisibilityCondition } from '@/utils/visibility';
 
 export const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
 
@@ -199,14 +200,14 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
         if (!visibility?.conditions?.length) return false;
 
         const { conditions, logic } = visibility;
-        const results = conditions.map(({ field, operator: _operator, value }) => {
+        const results = conditions.map(({ field, operator, value }) => {
           const fieldValue = formValues[field];
-          return fieldValue === value;
+          return evaluateVisibilityCondition(fieldValue, operator, value);
         });
 
-        const isVisible = logic === 'AND' ? results.every(Boolean) : results.some(Boolean);
-
-        return !isVisible;
+        // 反转逻辑：当条件成立时隐藏字段
+        const conditionsMet = logic === 'AND' ? results.every(Boolean) : results.some(Boolean);
+        return conditionsMet; // 条件成立时返回true（需要隐藏）
       })
       .map((input) => input.name);
   }, [inputs, form]);

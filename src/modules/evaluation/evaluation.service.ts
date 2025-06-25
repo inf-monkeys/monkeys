@@ -371,41 +371,26 @@ export class EvaluationService {
       let completedCount = 0;
       let failedCount = 0;
 
-      // 批量处理对战，减少数据库交互
-      const batchSize = 10;
-      for (let i = 0; i < pendingBattles.length; i += batchSize) {
-        const batch = pendingBattles.slice(i, i + batchSize);
-        this.logger.debug(`Processing batch ${i / batchSize + 1} of ${Math.ceil(pendingBattles.length / batchSize)} for group ${battleGroupId}. Batch size: ${batch.length}`);
-        const batchResults = await Promise.allSettled(batch.map((battle) => this.processSingleBattle(battle.id)));
-
-        // 统计批次结果
-        let batchCompleted = 0;
-        let batchFailed = 0;
-
-        batchResults.forEach((result, index) => {
-          const battle = batch[index];
-          if (result.status === 'fulfilled' && result.value.success) {
-            batchCompleted++;
+      // 将批量并发处理改为串行处理
+      for (const battle of pendingBattles) {
+        try {
+          const result = await this.processSingleBattle(battle.id);
+          if (result.success) {
+            completedCount++;
           } else {
-            batchFailed++;
-            const error = result.status === 'rejected' ? result.reason.message : result.value.error;
-            errors.push(`Battle ${battle.id}: ${error}`);
+            failedCount++;
+            errors.push(`Battle ${battle.id}: ${result.error}`);
           }
-        });
-
-        completedCount += batchCompleted;
-        failedCount += batchFailed;
-
-        // 批量更新进度
-        battleGroup.completedBattles += batchCompleted;
-        battleGroup.failedBattles += batchFailed;
-        await manager.save(BattleGroupEntity, battleGroup);
-
-        // 批次间延迟
-        if (i + batchSize < pendingBattles.length) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
+        } catch (error) {
+          failedCount++;
+          errors.push(`Battle ${battle.id}: ${error.message}`);
+          this.logger.error(`Unhandled error processing battle ${battle.id}: ${error.message}`, error.stack);
         }
       }
+
+      // 更新批量任务的最终进度
+      battleGroup.completedBattles = completedCount;
+      battleGroup.failedBattles = failedCount;
 
       // 更新最终状态
       const isAllCompleted = completedCount + failedCount === pendingBattles.length;

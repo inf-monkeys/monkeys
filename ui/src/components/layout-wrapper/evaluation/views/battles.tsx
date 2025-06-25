@@ -310,7 +310,7 @@ export const BattlesView: React.FC = () => {
     ) || [];
 
   return (
-    <div className="h-full overflow-auto p-6">
+    <div className="h-full overflow-auto rounded-xl border border-input p-6">
       <div className="mx-auto max-w-4xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -326,7 +326,7 @@ export const BattlesView: React.FC = () => {
               <Upload className="mr-2 h-4 w-4" />
               上传图片
             </Button>
-            <Button onClick={() => setCreateDialogOpen(true)}>
+            <Button variant="outline" onClick={() => setCreateDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               创建对战
             </Button>
@@ -673,7 +673,11 @@ export const BattlesView: React.FC = () => {
               <Button variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={isCreating}>
                 取消
               </Button>
-              <Button onClick={handleCreateBattleGroup} disabled={isCreating || battleForm.selectedAssets.length < 2}>
+              <Button
+                onClick={handleCreateBattleGroup}
+                variant="outline"
+                disabled={isCreating || battleForm.selectedAssets.length < 2}
+              >
                 {isCreating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
