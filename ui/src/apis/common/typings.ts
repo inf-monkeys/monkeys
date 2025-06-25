@@ -69,6 +69,7 @@ export interface ISystemConfig {
       vinesSpaceHeadbar: VinesSpaceHeadbarModules;
       settingsSidebar: SettingsSidebarModules;
     };
+    paginationPosition?: 'left' | 'right';
   };
   auth: {
     enabled: AuthMethod[];
