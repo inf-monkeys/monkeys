@@ -4,7 +4,7 @@ import { UserEntity } from '@/database/entities/identity/user';
 import { WorkflowMarketplaceData } from '@/modules/assets/assets.marketplace.data';
 import { AssetType } from '@inf-monkeys/monkeys';
 
-export const ALLOW_ASSET_TYPES: AssetType[] = ['canvas', 'llm-model', 'media-file', 'sd-model', 'workflow', 'workflow-view', 'workflow-template', 'knowledge-base'];
+export const ALLOW_ASSET_TYPES: AssetType[] = ['canvas', 'llm-model', 'media-file', 'sd-model', 'workflow', 'workflow-view', 'workflow-template', 'knowledge-base', 'leaderboard'];
 
 export type AssetWithAdditionalInfo<T extends object> = T & {
   team?: Partial<TeamEntity>;

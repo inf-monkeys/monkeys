@@ -40,6 +40,7 @@ export class BaseAssetEntity extends BaseEntity {
   @Column({
     name: 'display_name',
     type: 'varchar',
+    nullable: false,
   })
   displayName: string | I18nValue;
 
