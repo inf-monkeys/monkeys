@@ -85,7 +85,7 @@
     },
     "time": {
       "minutes": "minutes",
-      "hours": "hours", 
+      "hours": "hours",
       "days": "days"
     },
     "language": "Language",
@@ -2838,7 +2838,15 @@
                 "logic-label": "Logic",
                 "field-placeholder": "Select field",
                 "value-placeholder": "Enter value",
-                "add-condition": "Add condition"
+                "add-condition": "Add condition",
+                "operators": {
+                  "is": "equals",
+                  "isNot": "not equals",
+                  "isGreaterThan": "greater than",
+                  "isLessThan": "less than",
+                  "isGreaterThanOrEqual": "greater than or equal",
+                  "isLessThanOrEqual": "less than or equal"
+                }
               }
             }
           },
@@ -3718,7 +3726,7 @@
     "tabs": {
       "leaderboard": "Leaderboard",
       "leaderboard.description": "View ELO rankings and statistics",
-      "battles": "Battle Management", 
+      "battles": "Battle Management",
       "battles.description": "Create and manage evaluation battles",
       "analytics": "Analytics",
       "analytics.description": "View performance charts and analysis",
@@ -3744,7 +3752,7 @@
       "stats": {
         "total": "Total Battles",
         "ongoing": "Ongoing",
-        "completed": "Completed", 
+        "completed": "Completed",
         "auto-eval": "Auto Evaluation"
       }
     },
@@ -3756,7 +3764,7 @@
       },
       "actions": {
         "start": "Start",
-        "pause": "Pause", 
+        "pause": "Pause",
         "view-details": "View Details"
       },
       "winner": "Winner"
@@ -3767,13 +3775,13 @@
       "export": "Export Report",
       "rating-trends": "Rating Trends",
       "battle-activity": "Battle Activity",
-      "performance-distribution": "Performance Distribution", 
+      "performance-distribution": "Performance Distribution",
       "win-rate-analysis": "Win Rate Analysis",
       "chart-placeholder": "Chart data will be displayed here",
       "stats": {
         "total-evaluations": "Total Evaluations",
         "avg-evaluation-time": "Avg Evaluation Time",
-        "top-performer": "Top Performer", 
+        "top-performer": "Top Performer",
         "completion-rate": "Completion Rate",
         "this-week": "this week",
         "vs-last-week": "vs last week"
