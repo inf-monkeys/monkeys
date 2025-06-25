@@ -1307,6 +1307,19 @@
         }
       }
     },
+    "evaluation": {
+      "ugc-view": {
+        "operate-area": {
+          "dropdown-label": "评测模块操作",
+          "edit": "编辑模块",
+          "copy-link": "复制链接"
+        },
+        "subtitle": {
+          "create-button": "新建评测模块"
+        },
+        "type": "评测模块"
+      }
+    },
     "llm-model": {
       "ugc-view": {
         "columns": {

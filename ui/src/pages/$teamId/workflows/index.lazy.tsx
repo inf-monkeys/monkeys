@@ -14,6 +14,7 @@ import { cloneWorkflow, deleteWorkflow } from '@/apis/workflow';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
 import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { ExportWorkflowDialog } from '@/components/layout/ugc-pages/workflows/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/layout/ugc-pages/workflows/export-workflow/typings.ts';
@@ -99,7 +100,7 @@ export const Workflows: React.FC = () => {
       error: t('common.delete.error'),
     });
   };
-
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
   return (
     <main className="size-full">
       <UgcView
@@ -246,7 +247,7 @@ export const Workflows: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="small" icon={<Import />}>
-                  {t('common.utils.import')}
+                  {iconOnlyMode ? null : t('common.utils.import')}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent

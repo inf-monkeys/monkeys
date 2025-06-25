@@ -1308,6 +1308,19 @@
         }
       }
     },
+    "evaluation": {
+      "ugc-view": {
+        "operate-area": {
+          "dropdown-label": "Evaluation Module Operations",
+          "edit": "Edit Module",
+          "copy-link": "Copy Link"
+        },
+        "subtitle": {
+          "create-button": "Create Evaluation Module"
+        },
+        "type": "Evaluation Module"
+      }
+    },
     "llm-model": {
       "ugc-view": {
         "columns": {

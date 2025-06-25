@@ -10,6 +10,7 @@ import { Virtualizer } from 'virtua';
 import { ILLMChannel } from '@/apis/llm/typings.ts';
 import { useUgcTextModelStore } from '@/apis/ugc';
 import { LLMChannelImportForm } from '@/components/layout/ugc-pages/text-models/model-supplier/import-form.tsx';
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util.ts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -23,6 +24,7 @@ interface IModelSupplierProps {}
 
 export const ModelSupplier: React.FC<IModelSupplierProps> = () => {
   const { t } = useTranslation();
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
 
   const { data } = useUgcTextModelStore({ page: 1, limit: 9999 });
 
@@ -42,7 +44,7 @@ export const ModelSupplier: React.FC<IModelSupplierProps> = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button icon={<Package />} variant="outline" size="small">
-          {t('ugc-page.text-models.ugc-view.import-channel.label')}
+          {iconOnlyMode ? null : t('ugc-page.text-models.ugc-view.import-channel.label')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl">

@@ -38,6 +38,8 @@ export interface ISystemConfig {
       showFormInImageDetail?: boolean;
     };
     modules: CustomizationModules;
+    paginationPosition?: 'left' | 'right';
+    ugcViewIconOnlyMode?: boolean;
   };
   auth: {
     enabled: AuthMethod[];
