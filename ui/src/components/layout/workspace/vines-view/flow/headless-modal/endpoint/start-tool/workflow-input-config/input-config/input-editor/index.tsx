@@ -108,6 +108,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       comfyuiModelServerId: get(currentVariable, 'typeOptions.comfyuiModelServerId', undefined),
       comfyuiModelTypeName: get(currentVariable, 'typeOptions.comfyuiModelTypeName', undefined),
       visibility: get(currentVariable, 'typeOptions.visibility', undefined),
+      flag: get(currentVariable, 'flag', undefined),
     };
 
     form.reset(defaultValues);
@@ -152,6 +153,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'comfyuiModelServerId',
       'comfyuiModelTypeName',
       'visibility',
+      'flag',
     ]);
 
     const finalVariable = omit(data, [
@@ -198,7 +200,6 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOption('placeholder', placeholder);
     setOption('textareaMiniHeight', textareaMiniHeight);
     setOption('visibility', visibility);
-
     if (Default) {
       set(finalVariable, 'default', Default);
     }

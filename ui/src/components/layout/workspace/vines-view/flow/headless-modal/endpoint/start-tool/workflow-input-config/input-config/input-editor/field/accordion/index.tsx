@@ -15,6 +15,8 @@ import { FieldTips } from '@/components/layout/workspace/vines-view/flow/headles
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 
+import { FieldFlag } from './flag';
+
 interface IFieldAccordionProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowInput>;
 }
@@ -38,6 +40,7 @@ export const FieldAccordion: React.FC<IFieldAccordionProps> = ({ form }) => {
           <FieldEnableReset form={form} />
           <FieldSingleColumn form={form} />
           <FieldTextareaMinHeight form={form} />
+          <FieldFlag form={form} />
         </AccordionContent>
       </AccordionItem>
     </Accordion>
