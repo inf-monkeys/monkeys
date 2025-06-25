@@ -106,83 +106,98 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
               </div>
 
               {/* 条件列表 */}
-              <ScrollArea className="max-h-48">
+              <ScrollArea className="h-48" disabledOverflowMask>
                 <div className="space-y-2">
                   {list.map((condition, i) => {
                     const selectedInput = workflowInput.find(({ name }) => name === condition.field);
                     const isMultiValue = isMultiValueOperator(condition.operator);
 
                     return (
-                      <div key={i} className="flex items-center gap-2 p-1">
-                        {/* 字段选择 */}
-                        <Select
-                          value={condition.field}
-                          onValueChange={(field) => {
-                            const updatedCondition = { ...condition, field };
-                            replace(i, updatedCondition);
-                          }}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue
-                              placeholder={t(
-                                'workspace.flow-view.endpoint.start-tool.input.config-form.visibility.field-placeholder',
-                              )}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <ScrollArea className="flex max-h-40 flex-col overflow-y-auto">
-                              {workflowInput.map(({ name: itName, displayName }) => (
-                                <SelectItem
-                                  key={itName}
-                                  value={itName}
-                                  disabled={list.some(({ field }, j) => j !== i && field === itName)}
-                                >
-                                  {getI18nContent(displayName)}
-                                </SelectItem>
-                              ))}
-                            </ScrollArea>
-                          </SelectContent>
-                        </Select>
+                      <div key={i} className="space-y-3 rounded-md border p-3">
+                        {/* 第一行：字段选择 + 操作符 + 删除按钮 */}
+                        <div className="flex items-center gap-2">
+                          {/* 字段选择 */}
+                          <div className="min-w-0 flex-1">
+                            <Select
+                              value={condition.field}
+                              onValueChange={(field) => {
+                                const updatedCondition = { ...condition, field };
+                                replace(i, updatedCondition);
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue
+                                  placeholder={t(
+                                    'workspace.flow-view.endpoint.start-tool.input.config-form.visibility.field-placeholder',
+                                  )}
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <ScrollArea className="overflow-y-auto">
+                                  {workflowInput.map(({ name: itName, displayName }) => (
+                                    <SelectItem
+                                      key={itName}
+                                      value={itName}
+                                      disabled={list.some(({ field }, j) => j !== i && field === itName)}
+                                    >
+                                      {getI18nContent(displayName)}
+                                    </SelectItem>
+                                  ))}
+                                </ScrollArea>
+                              </SelectContent>
+                            </Select>
+                          </div>
 
-                        {/* 操作符 */}
-                        <Select
-                          value={condition.operator}
-                          onValueChange={(operator) => {
-                            const updatedCondition = {
-                              ...condition,
-                              operator: operator as IVisibilityCondition['operator'],
-                              // 如果从多值操作符切换到单值操作符，需要处理 value
-                              value: isMultiValueOperator(operator)
-                                ? Array.isArray(condition.value)
-                                  ? condition.value
-                                  : [condition.value]
-                                : Array.isArray(condition.value)
-                                  ? condition.value[0]
-                                  : condition.value,
-                            };
-                            replace(i, updatedCondition);
-                          }}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue
-                              placeholder={t(
-                                'workspace.flow-view.endpoint.start-tool.input.config-form.visibility.operator-placeholder',
-                              )}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {getAvailableOperators(selectedInput?.type || 'string').map((op) => (
-                              <SelectItem key={op} value={op}>
-                                {t(
-                                  `workspace.flow-view.endpoint.start-tool.input.config-form.visibility.operators.${op}`,
-                                )}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          {/* 操作符 */}
+                          <div className="min-w-0 flex-1">
+                            <Select
+                              value={condition.operator}
+                              onValueChange={(operator) => {
+                                const updatedCondition = {
+                                  ...condition,
+                                  operator: operator as IVisibilityCondition['operator'],
+                                  // 如果从多值操作符切换到单值操作符，需要处理 value
+                                  value: isMultiValueOperator(operator)
+                                    ? Array.isArray(condition.value)
+                                      ? condition.value
+                                      : [condition.value]
+                                    : Array.isArray(condition.value)
+                                      ? condition.value[0]
+                                      : condition.value,
+                                };
+                                replace(i, updatedCondition);
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue
+                                  placeholder={t(
+                                    'workspace.flow-view.endpoint.start-tool.input.config-form.visibility.operator-placeholder',
+                                  )}
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {getAvailableOperators(selectedInput?.type || 'string').map((op) => (
+                                  <SelectItem key={op} value={op}>
+                                    {t(
+                                      `workspace.flow-view.endpoint.start-tool.input.config-form.visibility.operators.${op}`,
+                                    )}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
 
-                        {/* 值输入 */}
-                        <div className="flex-1">
+                          {/* 删除按钮 */}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button icon={<Trash2 />} size="small" variant="outline" onClick={() => remove(i)} />
+                            </TooltipTrigger>
+                            <TooltipContent>{t('common.utils.delete')}</TooltipContent>
+                          </Tooltip>
+                        </div>
+
+                        {/* 第二行：值输入（完整宽度） */}
+                        <div className="w-full">
                           {isMultiValue ? (
                             <PillInput
                               value={Array.isArray(condition.value) ? condition.value : [condition.value]}
@@ -244,14 +259,6 @@ export const FieldFieldVisibility: React.FC<IFieldFieldVisibilityProps> = ({ for
                             />
                           )}
                         </div>
-
-                        {/* 删除按钮 */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button icon={<Trash2 />} size="small" variant="outline" onClick={() => remove(i)} />
-                          </TooltipTrigger>
-                          <TooltipContent>{t('common.utils.delete')}</TooltipContent>
-                        </Tooltip>
                       </div>
                     );
                   })}
