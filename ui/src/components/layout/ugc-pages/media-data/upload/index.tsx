@@ -5,6 +5,7 @@ import { useSWRConfig } from 'swr';
 import { Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesUploader } from '@/components/ui/vines-uploader';
@@ -13,6 +14,7 @@ interface IUploadMediaProps {}
 
 export const UploadMedia: React.FC<IUploadMediaProps> = () => {
   const { t } = useTranslation();
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
 
   const { mutate } = useSWRConfig();
 
@@ -20,7 +22,7 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Upload />}>
-          {t('ugc-page.media-data.ugc-view.subtitle.upload.button')}
+          {iconOnlyMode ? null : t('ugc-page.media-data.ugc-view.subtitle.upload.button')}
         </Button>
       </DialogTrigger>
       <DialogContent className="w-[40rem] max-w-[40rem]">

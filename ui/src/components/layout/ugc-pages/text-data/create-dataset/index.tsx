@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCreateKnowledgeBase, useVectorSupportedEmbeddingModels } from '@/apis/vector';
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -24,6 +25,7 @@ interface ICreateDatasetProps {}
 
 export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
   const { t } = useTranslation();
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
 
   const { mutate } = useSWRConfig();
 
@@ -60,7 +62,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Plus />}>
-          {t('ugc-page.text-data.ugc-view.subtitle.create-dataset.button')}
+          {iconOnlyMode ? null : t('ugc-page.text-data.ugc-view.subtitle.create-dataset.button')}
         </Button>
       </DialogTrigger>
       <DialogContent>
