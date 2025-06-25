@@ -96,6 +96,7 @@ export interface ServerConfig {
     };
     modules?: CustomizationModules;
     paginationPosition?: 'left' | 'right';
+    ugcViewIconOnlyMode?: boolean;
   };
 }
 
@@ -375,6 +376,7 @@ export const config: Config = {
         settingsSidebar: readConfig('server.customization.modules.settingsSidebar', '*'),
       },
       paginationPosition: readConfig('server.customization.paginationPosition', 'left'),
+      ugcViewIconOnlyMode: readConfig('server.customization.ugcViewIconOnlyMode', false),
     },
   },
   conductor: {

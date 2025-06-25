@@ -70,6 +70,7 @@ export interface ISystemConfig {
       settingsSidebar: SettingsSidebarModules;
     };
     paginationPosition?: 'left' | 'right';
+    ugcViewIconOnlyMode?: boolean;
   };
   auth: {
     enabled: AuthMethod[];

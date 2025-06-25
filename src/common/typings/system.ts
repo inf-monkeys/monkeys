@@ -39,6 +39,7 @@ export interface ISystemConfig {
     };
     modules: CustomizationModules;
     paginationPosition?: 'left' | 'right';
+    ugcViewIconOnlyMode?: boolean;
   };
   auth: {
     enabled: AuthMethod[];
