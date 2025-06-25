@@ -694,11 +694,11 @@ ${userQuestion}
     const { stream, systemPrompt, knowledgeBase, sqlKnowledgeBase, response_format = ResponseFormat.text } = params;
 
     // Messages passed by the user
-    let { messages } = params;
+    const { messages } = params;
     const historyMessages = this.sanitizeMessages(messages);
 
-    if (stream) {
-      // set the content type to text-stream
+    if (stream && res) {
+      // 只有在有 res 对象时才设置 header
       res.setHeader('content-type', 'text/event-stream;charset=utf-8');
       res.status(200);
     }
@@ -720,7 +720,8 @@ ${userQuestion}
 
     const logs = [];
     const sendAndCollectLogs = (level: LogLevel, type: 'retrive_knowledge_base' | 'tool_call', message: string, detailedInfo: { [x: string]: any }) => {
-      if (showLogs) {
+      if (showLogs && res) {
+        // 只有在有 res 对象时才写日志流
         const { str, obj } = this.geneLogLine('chatlog-' + randomChatCmplId, type, level, message, detailedInfo);
         res.write(str);
         logs.push(obj);
@@ -788,7 +789,12 @@ ${userQuestion}
       logger.error(`Failed to create chat completions: `, error);
       logger.error(`Failed to create chat completions: `, errorMsg);
       onFailed?.(errorMsg);
-      return this.setErrorResponse(res, randomChatCmplId, model, stream, errorMsg);
+
+      if (res) {
+        return this.setErrorResponse(res, randomChatCmplId, model, stream, errorMsg);
+      } else {
+        throw error;
+      }
     }
 
     try {
@@ -848,8 +854,10 @@ ${userQuestion}
             logger.info(`Completion Finished: ${completion}`);
           },
           onFinal() {
-            res.write('data: [DONE]\n\n');
-            res.end();
+            if (res) {
+              res.write('data: [DONE]\n\n');
+              res.end();
+            }
           },
         });
         const streamingTextResponse = new StreamingTextResponse(streamResponse, {}, data);
@@ -862,7 +870,9 @@ ${userQuestion}
           // Original String: 0:"你", contains the beginning 0: and the first and last double quotes
           chunkString = chunkString.slice(2, -1).slice(1, -1);
           const chunkLine = this.geneChunkLine('chatcmpl-' + randomChatCmplId, model, chunkString);
-          res.write(chunkLine);
+          if (res) {
+            res.write(chunkLine);
+          }
         });
       } else {
         const data = response as ChatCompletion;
@@ -933,14 +943,12 @@ ${userQuestion}
           let content = result.choices[0].message?.content ?? '';
           if (!stream && isMarkdown(content) && options?.userId) content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
           onSuccess?.(content);
-          return res.status(200).send(
-            apiResponseType === 'full'
-              ? result
-              : {
-                  messages: content,
-                  usage: result.usage,
-                },
-          );
+
+          if (res) {
+            return res.status(200).send(apiResponseType === 'full' ? result : { messages: content, usage: result.usage });
+          } else {
+            return apiResponseType === 'full' ? result : { message: content, usage: result.usage };
+          }
         } else {
           if (showLogs) {
             (response as any).logs = logs;
@@ -948,20 +956,22 @@ ${userQuestion}
           let content = (response as ChatCompletion).choices[0].message?.content;
           if (!stream && isMarkdown(content) && options?.userId) content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
           onSuccess?.(content);
-          return res.status(200).send(
-            apiResponseType === 'full'
-              ? response
-              : {
-                  message: content,
-                  usage: (response as ChatCompletion).usage,
-                },
-          );
+
+          if (res) {
+            return res.status(200).send(apiResponseType === 'full' ? response : { message: content, usage: (response as ChatCompletion).usage });
+          } else {
+            return apiResponseType === 'full' ? response : { message: content, usage: (response as ChatCompletion).usage };
+          }
         }
       }
     } catch (error) {
       logger.error(`Failed to create chat completions: `, error);
       onFailed?.(error.message);
-      return this.setErrorResponse(res, randomChatCmplId, model, stream, error.message);
+      if (res) {
+        return this.setErrorResponse(res, randomChatCmplId, model, stream, error.message);
+      } else {
+        throw error;
+      }
     }
   }
 }
