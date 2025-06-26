@@ -1,10 +1,10 @@
-import { Controller, Get, Param, Sse, UseGuards, Req } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Observable, interval, map, switchMap, takeWhile, startWith } from 'rxjs';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { IRequest } from '@/common/typings/request';
-import { TaskQueueService } from '../services/task-queue.service';
+import { Controller, Param, Req, Sse, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Observable, interval, map, startWith, switchMap, takeWhile } from 'rxjs';
 import { TaskProgressService } from '../services/task-progress.service';
+import { TaskQueueService } from '../services/task-queue.service';
 import { TaskStatus } from '../types/task.types';
 
 @Controller('evaluation/sse')
@@ -21,10 +21,7 @@ export class EvaluationSseController {
     summary: '订阅任务进度SSE流',
     description: '通过Server-Sent Events实时获取评测任务进度',
   })
-  streamTaskProgress(
-    @Param('taskId') taskId: string,
-    @Req() req: IRequest,
-  ): Observable<{ data: any }> {
+  streamTaskProgress(@Param('taskId') taskId: string, @Req() req: IRequest): Observable<{ data: any }> {
     return interval(1000).pipe(
       startWith(0),
       switchMap(async () => {
@@ -44,12 +41,7 @@ export class EvaluationSseController {
           timestamp: new Date().toISOString(),
         };
       }),
-      takeWhile(
-        (data) => 
-          data.task.status === TaskStatus.PENDING || 
-          data.task.status === TaskStatus.PROCESSING,
-        true
-      ),
+      takeWhile((data) => data.task.status === TaskStatus.PENDING || data.task.status === TaskStatus.PROCESSING, true),
       map((data) => ({ data })),
     );
   }
@@ -66,10 +58,8 @@ export class EvaluationSseController {
       startWith(0),
       switchMap(async () => {
         const tasks = await this.taskQueueService.getTasksByUser(teamId, userId);
-        const activeTasks = tasks.filter(
-          task => task.status === TaskStatus.PENDING || task.status === TaskStatus.PROCESSING
-        );
-        
+        const activeTasks = tasks.filter((task) => task.status === TaskStatus.PENDING || task.status === TaskStatus.PROCESSING);
+
         const tasksWithProgress = await Promise.all(
           activeTasks.map(async (task) => {
             const progress = await this.taskProgressService.getProgress(task.id);
@@ -77,7 +67,7 @@ export class EvaluationSseController {
               ...task,
               progress: progress || task.progress,
             };
-          })
+          }),
         );
 
         return {
