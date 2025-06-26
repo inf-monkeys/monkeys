@@ -60,10 +60,10 @@ export class EvaluationRefactoredRepository {
           'score.gamesPlayed',
           'score.createdTimestamp',
           'score.updatedTimestamp',
-          'COALESCE(battle_stats.total_battles, 0) as totalBattles',
-          'COALESCE(battle_stats.wins, 0) as wins',
-          'COALESCE(battle_stats.losses, 0) as losses',
-          'COALESCE(battle_stats.draws, 0) as draws',
+          'COALESCE(battle_stats.total_battles, 0) as "totalBattles"',
+          'COALESCE(battle_stats.wins, 0) as "wins"',
+          'COALESCE(battle_stats.losses, 0) as "losses"',
+          'COALESCE(battle_stats.draws, 0) as "draws"',
         ])
         .where('score.evaluationModuleId = :moduleId', { moduleId: evaluationModuleId });
 
@@ -144,34 +144,42 @@ export class EvaluationRefactoredRepository {
       // 获取总对战数
       const totalBattles = await this.countModuleBattles(evaluationModuleId);
 
-      // 获取评分统计
-      let ratingQuery = manager.createQueryBuilder(LeaderboardScoreEntity, 'score').where('score.evaluationModuleId = :moduleId', { moduleId: evaluationModuleId });
+      // 如果未指定 evaluatorId，则查找第一个活跃的评测员作为默认
+      if (!evaluatorId) {
+        const firstEvaluator = await manager
+          .createQueryBuilder(ModuleEvaluatorEntity, 'me')
+          .where('me.evaluationModuleId = :moduleId', { moduleId: evaluationModuleId })
+          .andWhere('me.isActive = true')
+          .orderBy('me.createdTimestamp', 'ASC')
+          .getOne();
+        if (firstEvaluator) {
+          evaluatorId = firstEvaluator.evaluatorId;
+        }
+      }
 
+      // 获取评分统计
+      let ratingStats: { avgRating: string; maxRating: string; minRating: string } | undefined;
       if (evaluatorId) {
+        let ratingQuery = manager.createQueryBuilder(LeaderboardScoreEntity, 'score').where('score.evaluationModuleId = :moduleId', { moduleId: evaluationModuleId });
         // 使用 PostgreSQL 的 -> 和 ->> 操作符来提取 jsonb 数据
         ratingQuery = ratingQuery
           .select([
-            `AVG(CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)) as avgRating`,
-            `MAX(CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)) as maxRating`,
-            `MIN(CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)) as minRating`,
+            `AVG(CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)) as "avgRating"`,
+            `MAX(CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)) as "maxRating"`,
+            `MIN(CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)) as "minRating"`,
           ])
           .andWhere('score.scoresByEvaluator -> :evaluatorId IS NOT NULL', { evaluatorId });
+        ratingStats = await ratingQuery.getRawOne();
       } else {
-        // 使用默认评分
-        ratingQuery = ratingQuery.select([
-          "AVG(CAST(score.scoresByEvaluator -> 'default' ->> 'rating' AS DECIMAL)) as avgRating",
-          "MAX(CAST(score.scoresByEvaluator -> 'default' ->> 'rating' AS DECIMAL)) as maxRating",
-          "MIN(CAST(score.scoresByEvaluator -> 'default' ->> 'rating' AS DECIMAL)) as minRating",
-        ]);
+        // 如果没有评测员，则返回默认值
+        ratingStats = { avgRating: '1500', maxRating: '1500', minRating: '1500' };
       }
-
-      const ratingStats = await ratingQuery.getRawOne();
 
       // 获取最活跃的对战者
       const battleTableName = manager.getRepository(EvaluationBattleEntity).metadata.tableName;
       const mostActiveQuery = manager
         .createQueryBuilder()
-        .select(['combined.asset_id as assetId', 'SUM(combined.battle_count) as battleCount', "CONCAT('Asset ', combined.asset_id) as assetName"])
+        .select(['combined.asset_id as "assetId"', 'SUM(combined.battle_count) as "battleCount"', 'CONCAT(\'Asset \', combined.asset_id) as "assetName"'])
         .from(
           `(
               SELECT battle.asset_a_id as asset_id, COUNT(*) as battle_count
@@ -203,9 +211,9 @@ export class EvaluationRefactoredRepository {
       return {
         totalParticipants,
         totalBattles,
-        averageRating: parseFloat(ratingStats?.avgrating || '1500'),
-        highestRating: parseFloat(ratingStats?.maxrating || '1500'),
-        lowestRating: parseFloat(ratingStats?.minrating || '1500'),
+        averageRating: parseFloat(ratingStats?.avgRating || '1500'),
+        highestRating: parseFloat(ratingStats?.maxRating || '1500'),
+        lowestRating: parseFloat(ratingStats?.minRating || '1500'),
         mostActiveBattler: mostActive
           ? {
               assetId: mostActive.assetId,
@@ -308,7 +316,7 @@ export class EvaluationRefactoredRepository {
   private createBattleStatsSubQuery(manager: EntityManager, evaluationModuleId: string): SelectQueryBuilder<any> {
     const battleTableName = manager.getRepository(EvaluationBattleEntity).metadata.tableName;
     const subQuery = `(
-        SELECT battle.asset_a_id as asset_id, COUNT(*) as total_battles,
+        SELECT battle.asset_a_id as asset_id,
                SUM(CASE WHEN battle.result = 'A_WIN' THEN 1 ELSE 0 END) as wins,
                SUM(CASE WHEN battle.result = 'B_WIN' THEN 1 ELSE 0 END) as losses,
                SUM(CASE WHEN battle.result = 'DRAW' THEN 1 ELSE 0 END) as draws
@@ -316,7 +324,7 @@ export class EvaluationRefactoredRepository {
         WHERE battle.evaluation_module_id = :moduleId AND battle.result IS NOT NULL
         GROUP BY battle.asset_a_id
         UNION ALL
-        SELECT battle.asset_b_id as asset_id, COUNT(*) as total_battles,
+        SELECT battle.asset_b_id as asset_id,
                SUM(CASE WHEN battle.result = 'B_WIN' THEN 1 ELSE 0 END) as wins,
                SUM(CASE WHEN battle.result = 'A_WIN' THEN 1 ELSE 0 END) as losses,
                SUM(CASE WHEN battle.result = 'DRAW' THEN 1 ELSE 0 END) as draws
@@ -329,10 +337,10 @@ export class EvaluationRefactoredRepository {
       .createQueryBuilder()
       .select([
         'combined_stats.asset_id as asset_id',
-        'SUM(combined_stats.total_battles) as total_battles',
-        'SUM(combined_stats.wins) as wins',
-        'SUM(combined_stats.losses) as losses',
-        'SUM(combined_stats.draws) as draws',
+        '(SUM(combined_stats.wins) + SUM(combined_stats.losses) + SUM(combined_stats.draws))::int as total_battles',
+        'SUM(combined_stats.wins)::int as wins',
+        'SUM(combined_stats.losses)::int as losses',
+        'SUM(combined_stats.draws)::int as draws',
       ])
       .from(subQuery, 'combined_stats')
       .groupBy('combined_stats.asset_id')
@@ -361,7 +369,7 @@ export class EvaluationRefactoredRepository {
           query.orderBy('COALESCE(battle_stats.wins, 0)', direction);
           break;
         case 'winRate':
-          query.orderBy('CASE WHEN COALESCE(battle_stats.total_battles, 0) > 0 THEN COALESCE(battle_stats.wins, 0) / COALESCE(battle_stats.total_battles, 0) ELSE 0 END', direction);
+          query.orderBy('CASE WHEN COALESCE(battle_stats.total_battles, 0) > 0 THEN CAST(COALESCE(battle_stats.wins, 0) AS FLOAT) / COALESCE(battle_stats.total_battles, 1) ELSE 0 END', direction);
           break;
         default:
           query.orderBy('score.createdTimestamp', 'DESC');
