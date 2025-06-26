@@ -234,7 +234,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
                         style={{ animationDuration: `${animation}s` }}
                       >
                         {IconComponent && <IconComponent className="mr-2 h-4 w-4" />}
-                        {option?.label}
+                        <span className="line-clamp-1 max-w-28 text-ellipsis">{option?.label}</span>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <XCircle
