@@ -107,4 +107,21 @@ export class MediaFileCrudController {
 
     return new SuccessResponse({ data: evaluationInfo });
   }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: '根据 Asset ID 获取媒体文件信息 (带权限校验)',
+    description: '通过媒体文件的唯一 Asset ID 获取其详细信息，会校验用户所属的 teamId。',
+  })
+  public async getMediaByIdWithAuth(@Req() request: IRequest, @Param('id') id: string) {
+    const { teamId } = request;
+
+    const data = await this.service.getMediaByIdAndTeamId(id, teamId);
+
+    if (!data) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    return new SuccessResponse({ data });
+  }
 }
