@@ -1,9 +1,7 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { useContext } from 'react';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { cva } from 'class-variance-authority';
 import { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 

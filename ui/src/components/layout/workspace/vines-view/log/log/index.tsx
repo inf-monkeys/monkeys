@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
@@ -27,6 +27,7 @@ interface IVinesLogViewLogTabProps {
   containerHeight: number;
 }
 
+const POLLING_INTERVAL = 1000;
 export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
   visible,
   workbenchVisible,
@@ -39,6 +40,12 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
   const [activeTab, setActiveTab] = useState('');
 
+  // 轮询相关状态
+  const [lastQueryParams, setLastQueryParams] = useState<IVinesSearchWorkflowExecutionsParams | null>(null);
+  const [isPolling, setIsPolling] = useState(true);
+  const [isUserInteracting, setIsUserInteracting] = useState(false);
+  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const form = useForm<IVinesSearchWorkflowExecutionsParams>({
     resolver: zodResolver(vinesSearchWorkflowExecutionsSchema),
     defaultValues: {
@@ -46,9 +53,74 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
     },
   });
 
-  const { data: searchWorkflowExecutionsData, trigger, isMutating } = useMutationSearchWorkflowExecutions();
-
+  const { data: searchWorkflowExecutionsData, trigger } = useMutationSearchWorkflowExecutions();
+  const isMutating = false;
   const workflowPageRef = useRef(1);
+
+  // 停止轮询
+  const stopPolling = useCallback(() => {
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+      pollingTimeoutRef.current = null;
+    }
+  }, []);
+
+  // 递归轮询函数
+  const startPolling = useCallback(async () => {
+    if (!isPolling || isUserInteracting) {
+      return;
+    }
+
+    // 确定查询参数
+    let queryParams: IVinesSearchWorkflowExecutionsParams | null = null;
+
+    if (lastQueryParams) {
+      // 使用最后一次用户查询的参数
+      queryParams = lastQueryParams;
+    } else if (vines.workflowId) {
+      // 使用初始参数 (等同于 handleSubmit(void 0, false) 的参数)
+      queryParams = {
+        workflowId: vines.workflowId,
+        pagination: { page: 1, limit: workflowPageRef.current * 10 },
+        workflowInstanceId: '',
+      };
+    }
+
+    if (queryParams) {
+      try {
+        await trigger(queryParams);
+      } catch (error) {
+        console.warn('轮询查询失败:', error);
+      }
+    }
+
+    // 递归设置下一次轮询
+    if (isPolling && !isUserInteracting) {
+      pollingTimeoutRef.current = setTimeout(startPolling, POLLING_INTERVAL);
+    }
+  }, [isPolling, isUserInteracting, lastQueryParams, vines.workflowId, trigger, workflowPageRef]);
+
+  // 启动轮询
+  const resumePolling = useCallback(() => {
+    if (!isPolling || isUserInteracting) return;
+
+    stopPolling();
+    pollingTimeoutRef.current = setTimeout(startPolling, POLLING_INTERVAL);
+  }, [isPolling, isUserInteracting, startPolling, stopPolling]);
+
+  // 用户交互控制
+  const handleUserInteractionStart = useCallback(() => {
+    setIsUserInteracting(true);
+    stopPolling();
+  }, [stopPolling]);
+
+  const handleUserInteractionEnd = useCallback(() => {
+    setIsUserInteracting(false);
+    // 延迟恢复轮询，避免频繁的交互触发
+    setTimeout(() => {
+      setIsUserInteracting(false);
+    }, 1000);
+  }, []);
 
   const handleSubmit = async (
     loadNextPage?: boolean,
@@ -68,17 +140,26 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
 
       const result = new Promise((resolve) => {
         form.handleSubmit((params) => {
+          // 保存查询参数
+          setLastQueryParams(params);
+
           if (useToast) {
             toast.promise(trigger(params), {
               loading: t('workspace.logs-view.loading'),
               success: (res) => {
                 resolve(res);
+                // 启动轮询
+                setIsPolling(true);
                 return t('workspace.logs-view.success');
               },
               error: t('workspace.logs-view.error'),
             });
           } else {
-            trigger(params).then((it) => resolve(it));
+            trigger(params).then((res) => {
+              resolve(res);
+              // 启动轮询
+              setIsPolling(true);
+            });
           }
         })();
       }) as Promise<VinesWorkflowExecutionLists | undefined>;
@@ -104,8 +185,31 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
     });
 
     // 使用form.handleSubmit确保获取完整的表单数据
-    await form.handleSubmit((params) => trigger(params))();
+    const params = await new Promise<IVinesSearchWorkflowExecutionsParams>((resolve) => {
+      form.handleSubmit((formParams) => {
+        resolve(formParams);
+      })();
+    });
+
+    // 不保存参数，这是内部调用
+    await trigger(params);
   };
+
+  // 轮询控制 - 移除对组件可见性和页面隐藏的检查
+  useEffect(() => {
+    if (isPolling && !isUserInteracting) {
+      resumePolling();
+    } else {
+      stopPolling();
+    }
+  }, [isPolling, isUserInteracting, resumePolling, stopPolling]);
+
+  // 清理
+  useEffect(() => {
+    return () => {
+      stopPolling();
+    };
+  }, [stopPolling]);
 
   useEffect(() => {
     if (vines.workflowId && visible) {
@@ -114,6 +218,7 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
     if (!visible) {
       vines.executionInstanceId = '';
       setActiveTab('');
+      // 组件隐藏时不再停止轮询，轮询继续运行
     }
   }, [vines.workflowId, visible]);
 
@@ -127,7 +232,13 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
         }}
       >
         <ScrollArea style={{ height: containerHeight }}>
-          <VinesLogViewLogFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
+          <VinesLogViewLogFilter
+            form={form}
+            handleSubmit={handleSubmit}
+            isMutating={isMutating}
+            onUserInteractionStart={handleUserInteractionStart}
+            onUserInteractionEnd={handleUserInteractionEnd}
+          />
         </ScrollArea>
       </motion.div>
       <Separator orientation="vertical" className="vines-center mx-4" style={{ height: containerHeight }}>

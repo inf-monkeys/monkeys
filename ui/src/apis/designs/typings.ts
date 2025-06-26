@@ -1,14 +1,18 @@
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 
 export interface IDesignProject {
-  displayName: string;
+  id: string;
+  displayName: string | Record<string, string>;
+  description?: string | Record<string, string>;
   createdTimestamp: number;
   updatedTimestamp: number;
   boardIds?: string[];
+  iconUrl?: string;
 }
 
 export interface IDesignBoardMetadata {
-  displayName: string;
+  id: string;
+  displayName: string | Record<string, string>;
   createdTimestamp: number;
   updatedTimestamp: number;
   designProjectId: string;

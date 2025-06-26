@@ -21,6 +21,8 @@ import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons.ts';
 import { createDesignProjectSchema, ICreateDesignProject } from '@/schema/workspace/create-design-project.ts';
 
+import { useGetUgcViewIconOnlyMode } from '../../util';
+
 export const CreateDesignProjectDialog: React.FC = () => {
   const { t } = useTranslation();
 
@@ -69,11 +71,12 @@ export const CreateDesignProjectDialog: React.FC = () => {
     );
   });
 
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Plus />}>
-          {t('common.utils.create')}
+          {iconOnlyMode ? null : t('common.utils.create')}
         </Button>
       </DialogTrigger>
       <DialogContent className="min-w-[1200px] overflow-hidden">

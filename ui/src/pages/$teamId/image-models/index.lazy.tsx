@@ -14,6 +14,7 @@ import { createImageModelsColumns } from '@/components/layout/ugc-pages/image-mo
 import { ImageModelManageDropdown } from '@/components/layout/ugc-pages/image-models/model-manage-dropdown';
 import { ImageModelTypeModal } from '@/components/layout/ugc-pages/image-models/model-type-modal';
 import { OperateArea } from '@/components/layout/ugc-pages/image-models/operate-area';
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
 import { Button } from '@/components/ui/button';
 import { Tag } from '@/components/ui/tag';
 import { useCopy } from '@/hooks/use-copy.ts';
@@ -23,7 +24,7 @@ export const ImageModels: React.FC = () => {
   const { t: tHook } = useTranslation();
 
   const { copy } = useCopy({ timeout: 500 });
-
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
   const navigate = useNavigate();
 
   return (
@@ -88,17 +89,17 @@ export const ImageModels: React.FC = () => {
           <>
             <ComfyUIServerListModal>
               <Button variant="outline" size="small" icon={<Server />}>
-                {tHook('comfyui.comfyui-server.title')}
+                {iconOnlyMode ? null : tHook('comfyui.comfyui-server.title')}
               </Button>
             </ComfyUIServerListModal>
             <ImageModelTypeModal>
               <Button variant="outline" size="small" icon={<LibraryBig />}>
-                {tHook('comfyui.comfyui-model-type.title')}
+                {iconOnlyMode ? null : tHook('comfyui.comfyui-model-type.title')}
               </Button>
             </ImageModelTypeModal>
             <ImageModelManageDropdown>
               <Button variant="outline" size="small" icon={<Package />}>
-                {tHook('comfyui.comfyui-model.manage-dropdown.label')}
+                {iconOnlyMode ? null : tHook('comfyui.comfyui-model.manage-dropdown.label')}
               </Button>
             </ImageModelManageDropdown>
           </>

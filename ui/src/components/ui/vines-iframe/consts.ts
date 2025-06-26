@@ -7,6 +7,7 @@ import { CanvasInteractionStoreProvider, createCanvasInteractionStore } from '@/
 import { AgentChatView } from '@/view/agent-chat';
 import { AgentConfigView } from '@/view/agent-config';
 import { DesignBoardView } from '@/view/design-board';
+import { GlobalDesignBoardView } from '@/view/global-design-board';
 import { VinesFlow } from '@/view/vines-flow';
 import { VinesForm } from '@/view/vines-form';
 
@@ -19,6 +20,7 @@ export const IFRAME_MAP = {
   'agent-config': AgentConfigView,
   'agent-logs': AgentLogsView,
   'design-board': DesignBoardView,
+  'global-design-board': GlobalDesignBoardView,
 };
 
 export const VINES_VIEW_ID_MAPPER: Record<string, string> = {

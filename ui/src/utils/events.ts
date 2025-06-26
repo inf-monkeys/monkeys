@@ -31,11 +31,19 @@ export type FlowEventType =
   | 'flow-trigger-custom'
   | 'flow-association-editor';
 
+export type DesignBoardEventType = 'design-board-export' | 'design-board-save';
+
 export type FromEventType = 'form-fill-data-by-image-url';
 
 export type ViewEventType = 'view-toggle-active-view-by-workflow-id';
 
-export type EventType = AppEventType | FlowCanvasEventType | FlowEventType | FromEventType | ViewEventType;
+export type EventType =
+  | AppEventType
+  | FlowCanvasEventType
+  | FlowEventType
+  | FromEventType
+  | ViewEventType
+  | DesignBoardEventType;
 
 const VinesEvent = new EventEmitter<EventType>();
 

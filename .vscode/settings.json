@@ -12,6 +12,7 @@
     "typescript",
     "typescriptreact"
   ],
+  "eslint.format.enable": true,
   // 保存时使用ESLint修复问题
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
@@ -22,10 +23,10 @@
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   // 保留其他非格式化相关设置
   "cSpell.words": [

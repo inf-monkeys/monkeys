@@ -1,11 +1,19 @@
 {
+  "dev-tools": {
+    "report": {
+      "dialog": {
+        "title": "反馈信息"
+      }
+    }
+  },
   "system": {
     "network-error": "系统维护中",
     "empty-auth-methods": "系统未启用身份验证",
     "error": {
       "title": "出现了一些问题",
       "desc": "请清理所有缓存后刷新页面重试",
-      "try-to-fix": "尝试修复"
+      "try-to-fix": "尝试修复",
+      "network-refresh": "遇到网络错误，请刷新整个页面重试"
     }
   },
   "common": {
@@ -65,7 +73,20 @@
         "loading": "下载中...",
         "success": "下载成功",
         "error": "下载失败"
-      }
+      },
+      "yes": "是",
+      "no": "否",
+      "open": "打开",
+      "share": "分享"
+    },
+    "status": {
+      "active": "活跃",
+      "inactive": "非活跃"
+    },
+    "time": {
+      "minutes": "分钟",
+      "hours": "小时",
+      "days": "天"
     },
     "language": "语言",
     "display-name": "显示名称",
@@ -390,6 +411,9 @@
               "agents": {
                 "label": "智能体"
               },
+              "evaluations": {
+                "label": "评测"
+              },
               "designs": {
                 "label": "设计项目"
               }
@@ -453,7 +477,7 @@
               "design-assets": {
                 "label": "设计资产"
               },
-              "designs": {
+              "design-projects": {
                 "label": "设计项目"
               }
             }
@@ -620,6 +644,13 @@
             "create-button": "添加标签",
             "placeholder": "请输入标签名称，按 Enter 新建"
           }
+        }
+      },
+      "header": {
+        "tabs": {
+          "workbench": "工作台",
+          "app-store": "应用市场",
+          "workspace": "工作空间"
         }
       }
     }
@@ -950,6 +981,16 @@
         "lightmode": "点击更换浅色图标",
         "darkmode": "点击更换深色图标"
       },
+      "team-custom-config": {
+        "title": "自定义配置",
+        "description": "自定义您的工作区设置",
+        "configs": {
+          "show-form-in-image-detail": {
+            "title": "表单配置",
+            "description": "设置是否显示表单"
+          }
+        }
+      },
       "market": {
         "title": "主题市场",
         "operate": {
@@ -1066,6 +1107,9 @@
     "sidebar": {
       "add": "添加固定视图",
       "toggle": "切换工作台侧边栏"
+    },
+    "history": {
+      "empty": "暂无图片生成历史记录"
     }
   },
   "ugc-page": {
@@ -1261,6 +1305,19 @@
             }
           }
         }
+      }
+    },
+    "evaluation": {
+      "ugc-view": {
+        "operate-area": {
+          "dropdown-label": "评测模块操作",
+          "edit": "编辑模块",
+          "copy-link": "复制链接"
+        },
+        "subtitle": {
+          "create-button": "新建评测模块"
+        },
+        "type": "评测模块"
       }
     },
     "llm-model": {
@@ -2585,6 +2642,18 @@
                   "label": "描述",
                   "placeholder": "请输入描述"
                 },
+                "type": {
+                  "label": "关联类型",
+                  "placeholder": "请选择关联类型",
+                  "options": {
+                    "to-workflow": {
+                      "label": "工作流"
+                    },
+                    "new-design": {
+                      "label": "新设计画板"
+                    }
+                  }
+                },
                 "target-workflow-id": {
                   "label": "关联工作流",
                   "placeholder": "请选择关联工作流",
@@ -2598,6 +2667,10 @@
                   "target-placeholder": "目标工作流输入字段",
                   "default-placeholder": "默认值",
                   "add": "新增映射"
+                },
+                "new-design-display-name": {
+                  "label": "新设计画板显示名称",
+                  "placeholder": "请输入新设计画板显示名称"
                 }
               }
             }
@@ -2642,6 +2715,7 @@
           "input": {
             "def": "默认值",
             "add": "新建配置",
+            "widgets": "小组件",
             "delete": {
               "title": "确定要删除此输入吗",
               "desc": "删除后，此输入将不无法在工作流中使用，且无法恢复。",
@@ -2665,15 +2739,18 @@
               },
               "desc": {
                 "label": "描述",
-                "placeholder": "填写后，将在表单下方显示描述信息"
+                "placeholder": "填写后，将在表单下方显示描述信息",
+                "edit-label": "编辑描述"
               },
               "placeholder": {
                 "label": "输入框占位符",
-                "placeholder": "填写后，将在表单输入框中显示占位符，如「请输入...」"
+                "placeholder": "填写后，将在表单输入框中显示占位符，如「请输入...」",
+                "edit-label": "编辑占位符"
               },
               "tips": {
                 "label": "填写提示",
-                "placeholder": "填写后，将显示提示图标，鼠标悬浮时显示提示信息"
+                "placeholder": "填写后，将显示提示图标，鼠标悬浮时显示提示信息",
+                "edit-label": "编辑提示"
               },
               "type": {
                 "label": "数据类型",
@@ -2715,6 +2792,7 @@
                   "value-placeholder": "默认值",
                   "remove-tips": "删除",
                   "add": "新增",
+                  "edit-label": "编辑标签",
                   "linkage": {
                     "tips": "联动数据",
                     "desc": "当用户选择此选项时，可联动更新其他表单配置",
@@ -2766,13 +2844,45 @@
                   "label": "单栏显示",
                   "desc": "启用后，将会与相邻的单栏组成双栏"
                 },
+                "flag": {
+                  "label": "标记",
+                  "desc": "用于第三方 API 调用时标记数据"
+                },
                 "textarea-mini-height": {
                   "label": "输入框行高"
                 },
                 "fold": "高级配置",
                 "reset": "重置"
               },
-              "submit": "保存"
+              "submit": "保存",
+              "visibility": {
+                "label": "字段可见性",
+                "description": {
+                  "main": "根据其他字段值控制此表单项的隐藏",
+                  "and": "当所有条件都成立时，该表单项将被隐藏",
+                  "or": "当任一条件成立时，该表单项将被隐藏"
+                },
+                "logic-label": "逻辑",
+                "field-placeholder": "选择字段",
+                "operator-placeholder": "选择操作符",
+                "value-placeholder": "输入值",
+                "add-condition": "添加条件",
+                "operators": {
+                  "is": "等于",
+                  "isNot": "不等于",
+                  "isGreaterThan": "大于",
+                  "isLessThan": "小于",
+                  "isGreaterThanOrEqual": "大于等于",
+                  "isLessThanOrEqual": "小于等于",
+                  "in": "包含于",
+                  "notIn": "不包含于"
+                },
+                "pill-input": {
+                  "placeholder-string": "输入值并按回车添加",
+                  "placeholder-number": "输入数字并按回车添加",
+                  "placeholder-boolean": "输入 true/false 并按回车添加"
+                }
+              }
             }
           },
           "trigger": {
@@ -3393,6 +3503,23 @@
       "next-image": "下一张",
       "delete": "删除",
       "form-inputs-not-found": "未找到表单输入"
+    },
+    "global-design-board": {
+      "empty": "未选择画板",
+      "operation-bar": {
+        "design-project": {
+          "label": "设计项目",
+          "placeholder": "请选择设计项目",
+          "search-placeholder": "搜索设计项目",
+          "search-empty": "找不到设计项目"
+        },
+        "design-board": {
+          "label": "画板",
+          "placeholder": "请选择画板",
+          "search-placeholder": "搜索画板",
+          "search-empty": "找不到画板"
+        }
+      }
     }
   },
   "agent": {
@@ -3654,6 +3781,107 @@
           "update-to-internals": "同步到内置模型信息",
           "update-from-internals": "从内置模型信息获取"
         }
+      }
+    }
+  },
+  "evaluation": {
+    "title": "评测模块",
+    "participants": "参与者",
+    "battles": "对战",
+    "win-rate": "胜率",
+    "tabs": {
+      "leaderboard": "ELO排行榜",
+      "leaderboard.description": "查看ELO排名和统计数据",
+      "battles": "对战管理",
+      "battles.description": "创建和管理评测对战",
+      "analytics": "数据分析",
+      "analytics.description": "查看性能图表和分析",
+      "edit": "编辑模块",
+      "edit.description": "配置模块设置"
+    },
+    "leaderboard": {
+      "title": "排行榜",
+      "description": "所有参与者的ELO排名和性能统计",
+      "rankings": "当前排名",
+      "view-history": "查看历史"
+    },
+    "battles": {
+      "title": "对战管理",
+      "description": "创建、监控和管理评测对战",
+      "list": "对战列表",
+      "create-single": "创建对战",
+      "create-group": "创建对战组",
+      "tabs": {
+        "ongoing": "进行中",
+        "completed": "已完成"
+      },
+      "stats": {
+        "total": "总对战数",
+        "ongoing": "进行中",
+        "completed": "已完成",
+        "auto-eval": "自动评测"
+      }
+    },
+    "battle": {
+      "status": {
+        "in-progress": "进行中",
+        "waiting": "等待中",
+        "completed": "已完成"
+      },
+      "actions": {
+        "start": "开始",
+        "pause": "暂停",
+        "view-details": "查看详情"
+      },
+      "winner": "获胜者"
+    },
+    "analytics": {
+      "title": "数据分析",
+      "description": "性能分析和统计洞察",
+      "export": "导出报告",
+      "rating-trends": "评分趋势",
+      "battle-activity": "对战活动",
+      "performance-distribution": "性能分布",
+      "win-rate-analysis": "胜率分析",
+      "chart-placeholder": "图表数据将在此显示",
+      "stats": {
+        "total-evaluations": "总评测数",
+        "avg-evaluation-time": "平均评测时间",
+        "top-performer": "最佳表现者",
+        "completion-rate": "完成率",
+        "this-week": "本周",
+        "vs-last-week": "相比上周"
+      }
+    },
+    "edit": {
+      "title": "编辑模块",
+      "description": "配置评测模块设置和参数",
+      "basic-info": "基本信息",
+      "display-name": "显示名称",
+      "display-name-placeholder": "输入模块显示名称",
+      "description": "描述",
+      "description-placeholder": "输入模块描述",
+      "evaluation-criteria": "评测标准",
+      "criteria-placeholder": "输入评测标准和指导原则",
+      "status": "状态",
+      "status-description": "启用或禁用此评测模块",
+      "participants": "参与者",
+      "participant-count": "参与者数量",
+      "manage-participants": "管理参与者",
+      "no-participants": "尚未添加参与者",
+      "elo-config": "ELO配置",
+      "initial-rating": "初始评分",
+      "rating-deviation": "评分偏差",
+      "elo-description": "配置ELO评分系统参数"
+    },
+    "stats": {
+      "total-participants": "总参与者",
+      "total-battles": "总对战数",
+      "avg-rating": "平均评分"
+    },
+    "participant": {
+      "status": {
+        "active": "活跃"
       }
     }
   }

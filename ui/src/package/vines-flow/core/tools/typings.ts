@@ -17,7 +17,7 @@ export type VinesToolWithCategory = [VinesToolDef[], number, string, string];
 
 export type VinesWorkflowVariable = Pick<
   ToolProperty,
-  'name' | 'type' | 'displayName' | 'typeOptions' | 'default' | 'description' | 'required'
+  'name' | 'type' | 'displayName' | 'typeOptions' | 'default' | 'description' | 'required' | 'flag'
 >;
 
 export interface IVinesVariableMap {

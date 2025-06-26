@@ -19,6 +19,37 @@ export interface ConductorConfig {
   workerPrefix?: string;
 }
 
+export type VinesSpaceSidebarModule =
+  | 'apps'
+  | 'agents'
+  | 'workflows'
+  | 'evaluations'
+  | 'designs'
+  | 'design-projects'
+  | 'design-assets'
+  | 'tools'
+  | 'model'
+  | 'text-models'
+  | 'image-models'
+  | 'media'
+  | 'text-data'
+  | 'table-data';
+export type VinesSpaceSidebarModules = undefined | '*' | VinesSpaceSidebarModule[];
+
+export type VinesSpaceHeadbarModule = 'workbench' | 'app-store' | 'workspace';
+export type VinesSpaceHeadbarModules = undefined | '*' | VinesSpaceHeadbarModule[];
+
+export type SettingsSidebarModule = 'account' | 'config' | 'stat' | 'apikey';
+export type SettingsSidebarModules = undefined | '*' | SettingsSidebarModule[];
+
+export type CustomizationModules =
+  | {
+      vinesSpaceSidebar?: VinesSpaceSidebarModules;
+      vinesSpaceHeadbar?: VinesSpaceHeadbarModules;
+      settingsSidebar?: SettingsSidebarModules;
+    }
+  | undefined;
+
 export interface ServerConfig {
   port: number;
   appId: string;
@@ -61,6 +92,12 @@ export interface ServerConfig {
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
     showSidebarPageGroup?: boolean;
+    defaults?: {
+      showFormInImageDetail?: boolean;
+    };
+    modules?: CustomizationModules;
+    paginationPosition?: 'left' | 'right';
+    ugcViewIconOnlyMode?: boolean;
   };
 }
 
@@ -267,6 +304,10 @@ export interface TenantStatisticsConfig {
   bearer: string;
 }
 
+export interface EvaluationConfig {
+  defaultLlmEvaluatorModel: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -285,6 +326,7 @@ export interface Config {
   aws: AwsConfig;
   tenant: TenantStatisticsConfig;
   admin: AdminConfig;
+  evaluation: EvaluationConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -333,6 +375,16 @@ export const config: Config = {
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
       showSidebarPageGroup: readConfig('server.customization.showSidebarPageGroup', true),
       showSidebarTeamSelector: readConfig('server.customization.showSidebarTeamSelector', false),
+      defaults: {
+        showFormInImageDetail: readConfig('server.customization.defaults.showFormInImageDetail', true),
+      },
+      modules: {
+        vinesSpaceSidebar: readConfig('server.customization.modules.vinesSpaceSidebar', '*'),
+        vinesSpaceHeadbar: readConfig('server.customization.modules.vinesSpaceHeadbar', '*'),
+        settingsSidebar: readConfig('server.customization.modules.settingsSidebar', '*'),
+      },
+      paginationPosition: readConfig('server.customization.paginationPosition', 'left'),
+      ugcViewIconOnlyMode: readConfig('server.customization.ugcViewIconOnlyMode', false),
     },
   },
   conductor: {
@@ -496,6 +548,9 @@ When answer to user:
   },
   tenant: {
     bearer: readConfig('tenant.bearer', ''),
+  },
+  evaluation: {
+    defaultLlmEvaluatorModel: readConfig('evaluation.defaultLlmEvaluatorModel', ''),
   },
 };
 

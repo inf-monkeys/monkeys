@@ -191,15 +191,15 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   return (
     <motion.div
       className={cn(
-        'relative flex h-screen min-w-24 max-w-56 gap-2 rounded-bl-xl rounded-tl-xl border border-input bg-slate-1 px-2 py-2',
+        'min-w-30 relative flex h-screen max-w-56 gap-2 rounded-bl-xl rounded-tl-xl border border-input bg-slate-1 p-2',
       )}
       ref={ref}
     >
-      <div className="flex w-8 min-w-10 flex-col">
+      <div className="flex min-w-10 flex-col">
         <WorkbenchMiniGroupList data={lists} groupId={groupId} setGroupId={setGroupId} height={height} />
       </div>
       <div className="h-full w-px bg-input" />
-      <div className="flex min-w-12 flex-col">
+      <div className="flex min-w-10 flex-col">
         <VirtuaWorkbenchMiniViewList
           data={currentGroupPages}
           height={height}

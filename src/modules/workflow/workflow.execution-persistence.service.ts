@@ -1,5 +1,6 @@
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { logger } from '@/common/logger';
+import { flattenObjectToString } from '@/common/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Workflow } from '@inf-monkeys/conductor-javascript';
@@ -24,10 +25,15 @@ export class WorkflowExecutionPersistenceService {
         return;
       }
 
+      const inputForSearch = detailedExecution.input ? omit(detailedExecution.input, ['__context']) : null;
+      const outputForSearch = detailedExecution.output || null;
+
+      const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
+
       const updateData: Partial<WorkflowExecutionEntity> = {
         status: detailedExecution.status as WorkflowStatusEnum,
         takes: detailedExecution.endTime && detailedExecution.startTime ? detailedExecution.endTime - detailedExecution.startTime : null,
-        input: detailedExecution.input ? omit(detailedExecution.input, ['__context']) : null,
+        input: detailedExecution.input || null,
         output: detailedExecution.output || null,
         tasks: detailedExecution.tasks || null,
         conductorCreateTime: detailedExecution.createTime,
@@ -37,6 +43,7 @@ export class WorkflowExecutionPersistenceService {
         executedWorkflowDefinition: detailedExecution.workflowDefinition ? omit(detailedExecution.workflowDefinition, ['tasks', 'inputTemplate', 'outputParameters']) : null,
         executionVariables: detailedExecution.variables || null,
         updatedTimestamp: Date.now(),
+        searchableText,
       };
 
       await this.workflowRepository.updateWorkflowExecutionDetailsByInstanceId(workflowInstanceId, updateData);

@@ -60,10 +60,10 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
   app.use(bodyParser.raw({ limit: '100mb' }));
   app.use(cookieParser());
-  app.enableCors({
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE'.split(','),
-    origin: '*',
-  });
+  // app.enableCors({
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE'.split(','),
+  //   origin: '*',
+  // });
   if (config.server.rateLimit.enabled) {
     app.use(
       rateLimit({

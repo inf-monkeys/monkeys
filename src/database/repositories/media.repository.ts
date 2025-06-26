@@ -111,4 +111,15 @@ export class MediaFileRepository {
     });
     return await this.getMediaById(mediaId);
   }
+
+  public async getMediaByIdAndTeamId(id: string, teamId: string) {
+    const data = await this.mediaFileRepository.findOne({
+      where: {
+        id: id,
+        teamId: teamId,
+      },
+    });
+    await this.refreshLogo([data]);
+    return data;
+  }
 }

@@ -12,7 +12,7 @@ import { IAuthWrapperOptions } from '@/components/layout/login/auth/auth-wrapper
 import { EmailAuth } from '@/components/layout/login/auth/email-auth.tsx';
 import { PhoneAuth } from '@/components/layout/login/auth/phone-auth.tsx';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator.tsx';
+import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
@@ -98,13 +98,15 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
           </AnimatePresence>
         </Tabs>
       )}
+      {areValuesUsed && (token || enableOidc || enableOAuth) && enableOtherAuthMethods && (
+        <div className="flex items-center justify-center gap-4">
+          <Separator className="flex-1" />
+          <span className="text-xs text-opacity-70">{t('auth.login.other')}</span>
+          <Separator className="flex-1" />
+        </div>
+      )}
       {(token || enableOidc || enableOAuth) && enableOtherAuthMethods ? (
         <div className="-mt-2 flex w-full flex-col gap-6">
-          <div className="flex items-center justify-center gap-4">
-            <Separator className="flex-1" />
-            <span className="text-xs text-opacity-70">{t('auth.login.other')}</span>
-            <Separator className="flex-1" />
-          </div>
           {enableOAuth && (
             <div className="-my-2 flex w-full items-center justify-center gap-4">
               {oauthProviders.map((providerName, i) => {
@@ -128,7 +130,7 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
               >
                 {oidcButtonText ?? 'OIDC'}
               </Button>
-              {!areValuesUsed && <span className="-mt-4 text-xs text-opacity-70">{t('auth.login.only-oidc')}</span>}
+              {/* {!areValuesUsed && <span className="-mt-4 text-xs text-opacity-70">{t('auth.login.only-oidc')}</span>} */}
             </>
           )}
           {token && (

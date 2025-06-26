@@ -8,6 +8,7 @@ import { AppTypeSelector } from '@/components/layout/ugc-pages/apps/create/app-t
 import { ICreateAppType } from '@/components/layout/ugc-pages/apps/create/app-type/typings.ts';
 import { AgentCreateForm } from '@/components/layout/ugc-pages/apps/create/form/agent.tsx';
 import { WorkflowCreateForm } from '@/components/layout/ugc-pages/apps/create/form/workflow.tsx';
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -17,6 +18,7 @@ export interface ICreateAppDialogProps {
 
 export const CreateAppDialog: React.FC<ICreateAppDialogProps> = ({ defaultSelect }) => {
   const { t } = useTranslation();
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
 
   const [selectedType, setSelectedType] = useState<ICreateAppType>(defaultSelect);
 
@@ -26,7 +28,7 @@ export const CreateAppDialog: React.FC<ICreateAppDialogProps> = ({ defaultSelect
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Plus />}>
-          {t('common.utils.create')}
+          {iconOnlyMode ? null : t('common.utils.create')}
         </Button>
       </DialogTrigger>
       <DialogContent className="min-w-[1200px] overflow-hidden">

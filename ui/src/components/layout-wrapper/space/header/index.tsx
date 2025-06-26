@@ -18,6 +18,7 @@ import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 import { QuotaButton } from './expand/quota-button';
+
 interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
   tail?: React.ReactNode;
   tailWithAuth?: React.ReactNode;
@@ -42,22 +43,24 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
     hideSpaceHeader: false,
   });
 
-  const hideSpaceHeader = oem?.theme.hideSpaceHeader ?? urlHideSpaceHeader;
+  const hideSpaceHeader = urlHideSpaceHeader || oem?.theme.hideSpaceHeader || false;
 
   const hasToken = !!getVinesToken();
+
+  const showTeamQuota = oem && (oem.module === '*' || oem.module.includes('payment'));
 
   return hideSpaceHeader ? (
     <></>
   ) : (
-    <header className="flex w-full items-center justify-between rounded-xl bg-slate-1 p-3 shadow-sm">
-      <div className="z-20 flex h-full items-center gap-5">
+    <header className="flex w-full items-center justify-between rounded-xl border border-input bg-slate-1 p-3">
+      <div className="z-20 flex h-8 items-center gap-6">
         <Link
           to="/$teamId"
           params={{ teamId }}
           disabled={!hasToken}
           onClick={() => Object.keys(mode).length && setMode({ mode: 'normal' })}
         >
-          <VinesLogo description="" height={32} className={cn('ml-2', hasToken && 'cursor-pointer')} />
+          <VinesLogo description="" height={'2rem'} className={cn('ml-2', hasToken && 'cursor-pointer')} />
         </Link>
         {children && (
           <>
@@ -67,7 +70,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
         )}
       </div>
       <div className="z-20 flex items-center gap-4">
-        <QuotaButton />
+        {showTeamQuota && <QuotaButton />}
         <HeaderInvite />
         {tail}
         {hasToken ? (

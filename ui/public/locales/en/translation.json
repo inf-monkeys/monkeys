@@ -1,11 +1,19 @@
 {
+  "dev-tools": {
+    "report": {
+      "dialog": {
+        "title": "Feedback Information"
+      }
+    }
+  },
   "system": {
     "network-error": "System maintenance",
     "empty-auth-methods": "Login is not enabled",
     "error": {
       "title": "Something went wrong",
       "desc": "Please clean all caches and refresh the page to try again",
-      "try-to-fix": "Try to fix"
+      "try-to-fix": "Try to fix",
+      "network-refresh": "Network error occurred, please refresh the page to try again"
     }
   },
   "common": {
@@ -65,7 +73,20 @@
         "loading": "Downloading...",
         "success": "Download successful",
         "error": "Download failed"
-      }
+      },
+      "yes": "Yes",
+      "no": "No",
+      "open": "Open",
+      "share": "Share"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "time": {
+      "minutes": "minutes",
+      "hours": "hours",
+      "days": "days"
     },
     "language": "Language",
     "display-name": "Display Name",
@@ -396,6 +417,9 @@
               "agents": {
                 "label": "Agents"
               },
+              "evaluations": {
+                "label": "Evaluations"
+              },
               "designs": {
                 "label": "Design Projects"
               }
@@ -459,7 +483,7 @@
               "design-assets": {
                 "label": "Design Assets"
               },
-              "designs": {
+              "design-projects": {
                 "label": "Design Projects"
               }
             }
@@ -626,6 +650,13 @@
             "create-button": "Create Tag",
             "placeholder": "Enter the label name and press Enter to create a new label"
           }
+        }
+      },
+      "header": {
+        "tabs": {
+          "workbench": "Workbench",
+          "app-store": "App Store",
+          "workspace": "Workspace"
         }
       }
     }
@@ -960,6 +991,16 @@
         "lightmode": "Click to change light mode logo",
         "darkmode": "Click to change dark mode logo"
       },
+      "team-custom-config": {
+        "title": "Custom configuration",
+        "description": "Customize your workspace settings",
+        "configs": {
+          "show-form-in-image-detail": {
+            "title": "Form configuration",
+            "description": "Set whether the form should be displayed"
+          }
+        }
+      },
       "market": {
         "title": "Theme Market",
         "operate": {
@@ -1073,6 +1114,9 @@
     "sidebar": {
       "add": "Star a view",
       "toggle": "Toggle Workbench Sidebar"
+    },
+    "history": {
+      "empty": "No image generation history"
     }
   },
   "ugc-page": {
@@ -1268,6 +1312,19 @@
             }
           }
         }
+      }
+    },
+    "evaluation": {
+      "ugc-view": {
+        "operate-area": {
+          "dropdown-label": "Evaluation Module Operations",
+          "edit": "Edit Module",
+          "copy-link": "Copy Link"
+        },
+        "subtitle": {
+          "create-button": "Create Evaluation Module"
+        },
+        "type": "Evaluation Module"
       }
     },
     "llm-model": {
@@ -2590,6 +2647,18 @@
                   "label": "Description",
                   "placeholder": "Please enter a description"
                 },
+                "type": {
+                  "label": "Association Type",
+                  "placeholder": "Please select an association type",
+                  "options": {
+                    "to-workflow": {
+                      "label": "Workflow"
+                    },
+                    "new-design": {
+                      "label": "New Design Board"
+                    }
+                  }
+                },
                 "target-workflow-id": {
                   "label": "Association Workflow",
                   "placeholder": "Please select an association workflow",
@@ -2603,6 +2672,10 @@
                   "target-placeholder": "Target workflow input field",
                   "default-placeholder": "Default value",
                   "add": "Add mapping"
+                },
+                "new-design-display-name": {
+                  "label": "New Design Display Name",
+                  "placeholder": "Please enter new design display name"
                 }
               }
             }
@@ -2647,6 +2720,7 @@
           "input": {
             "def": "Default Value",
             "add": "Create Input",
+            "widgets": "Widgets",
             "delete": {
               "title": "Are you sure you want to delete this input?",
               "desc": "After deletion, this input will not be unavailable in the workflow and cannot be restored.",
@@ -2670,15 +2744,18 @@
               },
               "desc": {
                 "label": "Description",
-                "placeholder": "After filling in, the description of the configuration will be displayed below"
+                "placeholder": "After filling in, the description of the configuration will be displayed below",
+                "edit-label": "Edit Description"
               },
               "placeholder": {
                 "label": "Input placeholder",
-                "placeholder": "After filling in, a placeholder will be displayed in the form input box, such as \"Please enter...\""
+                "placeholder": "After filling in, a placeholder will be displayed in the form input box, such as \"Please enter...\"",
+                "edit-label": "Edit Placeholder"
               },
               "tips": {
                 "label": "Tips",
-                "placeholder": "After filling in, a prompt icon will be displayed, and prompt information will be displayed when the mouse hovers"
+                "placeholder": "After filling in, a prompt icon will be displayed, and prompt information will be displayed when the mouse hovers",
+                "edit-label": "Edit Tips"
               },
               "type": {
                 "label": "Data Type",
@@ -2720,6 +2797,7 @@
                   "value-placeholder": "Value",
                   "remove-tips": "Delete",
                   "add": "Add",
+                  "edit-label": "Edit Label",
                   "linkage": {
                     "tips": "Linked data",
                     "desc": "When the user selects this option, other form configurations can be updated in a linked manner",
@@ -2771,13 +2849,45 @@
                   "label": "Single column display",
                   "desc": "When enabled, it will form a double column with the adjacent single column"
                 },
+                "flag": {
+                  "label": "Flag",
+                  "desc": "Used to mark data when calling third-party APIs"
+                },
                 "textarea-mini-height": {
                   "label": "Input box line height"
                 },
                 "fold": "Advanced Configuration",
                 "reset": "Reset"
               },
-              "submit": "Save"
+              "submit": "Save",
+              "visibility": {
+                "label": "Field Visibility",
+                "description": {
+                  "main": "Control when this form field is hidden based on other field values",
+                  "and": "When all conditions are met, this form field will be hidden",
+                  "or": "When any condition is met, this form field will be hidden"
+                },
+                "logic-label": "Logic",
+                "field-placeholder": "Select field",
+                "operator-placeholder": "Select operator",
+                "value-placeholder": "Enter value",
+                "add-condition": "Add condition",
+                "operators": {
+                  "is": "equals",
+                  "isNot": "not equals",
+                  "isGreaterThan": "greater than",
+                  "isLessThan": "less than",
+                  "isGreaterThanOrEqual": "greater than or equal",
+                  "isLessThanOrEqual": "less than or equal",
+                  "in": "is one of",
+                  "notIn": "is not one of"
+                },
+                "pill-input": {
+                  "placeholder-string": "Type and press Enter to add values",
+                  "placeholder-number": "Type numbers and press Enter to add",
+                  "placeholder-boolean": "Type true/false and press Enter to add"
+                }
+              }
             }
           },
           "trigger": {
@@ -3397,6 +3507,23 @@
       "next-image": "Next",
       "delete": "Delete",
       "form-inputs-not-found": "Form inputs not found"
+    },
+    "global-design-board": {
+      "empty": "No board selected",
+      "operation-bar": {
+        "design-project": {
+          "label": "Design Project",
+          "placeholder": "Select a design project",
+          "search-placeholder": "Search design project",
+          "search-empty": "No design project found"
+        },
+        "design-board": {
+          "label": "Design Board",
+          "placeholder": "Select a design board",
+          "search-placeholder": "Search design board",
+          "search-empty": "No design board found"
+        }
+      }
     }
   },
   "agent": {
@@ -3628,6 +3755,107 @@
           "update-to-internals": "Update Info to Internals",
           "update-from-internals": "Update Info from Internals"
         }
+      }
+    }
+  },
+  "evaluation": {
+    "title": "Evaluation Modules",
+    "participants": "participants",
+    "battles": "battles",
+    "win-rate": "win rate",
+    "tabs": {
+      "leaderboard": "Leaderboard",
+      "leaderboard.description": "View ELO rankings and statistics",
+      "battles": "Battle Management",
+      "battles.description": "Create and manage evaluation battles",
+      "analytics": "Analytics",
+      "analytics.description": "View performance charts and analysis",
+      "edit": "Edit Module",
+      "edit.description": "Configure module settings"
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "description": "ELO rankings and performance statistics for all participants",
+      "rankings": "Current Rankings",
+      "view-history": "View History"
+    },
+    "battles": {
+      "title": "Battle Management",
+      "description": "Create, monitor and manage evaluation battles",
+      "list": "Battle List",
+      "create-single": "Create Battle",
+      "create-group": "Create Battle Group",
+      "tabs": {
+        "ongoing": "Ongoing",
+        "completed": "Completed"
+      },
+      "stats": {
+        "total": "Total Battles",
+        "ongoing": "Ongoing",
+        "completed": "Completed",
+        "auto-eval": "Auto Evaluation"
+      }
+    },
+    "battle": {
+      "status": {
+        "in-progress": "In Progress",
+        "waiting": "Waiting",
+        "completed": "Completed"
+      },
+      "actions": {
+        "start": "Start",
+        "pause": "Pause",
+        "view-details": "View Details"
+      },
+      "winner": "Winner"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "description": "Performance analysis and statistical insights",
+      "export": "Export Report",
+      "rating-trends": "Rating Trends",
+      "battle-activity": "Battle Activity",
+      "performance-distribution": "Performance Distribution",
+      "win-rate-analysis": "Win Rate Analysis",
+      "chart-placeholder": "Chart data will be displayed here",
+      "stats": {
+        "total-evaluations": "Total Evaluations",
+        "avg-evaluation-time": "Avg Evaluation Time",
+        "top-performer": "Top Performer",
+        "completion-rate": "Completion Rate",
+        "this-week": "this week",
+        "vs-last-week": "vs last week"
+      }
+    },
+    "edit": {
+      "title": "Edit Module",
+      "description": "Configure evaluation module settings and parameters",
+      "basic-info": "Basic Information",
+      "display-name": "Display Name",
+      "display-name-placeholder": "Enter module display name",
+      "description": "Description",
+      "description-placeholder": "Enter module description",
+      "evaluation-criteria": "Evaluation Criteria",
+      "criteria-placeholder": "Enter evaluation criteria and guidelines",
+      "status": "Status",
+      "status-description": "Enable or disable this evaluation module",
+      "participants": "Participants",
+      "participant-count": "Participant Count",
+      "manage-participants": "Manage Participants",
+      "no-participants": "No participants added yet",
+      "elo-config": "ELO Configuration",
+      "initial-rating": "Initial Rating",
+      "rating-deviation": "Rating Deviation",
+      "elo-description": "Configure ELO rating system parameters"
+    },
+    "stats": {
+      "total-participants": "Total Participants",
+      "total-battles": "Total Battles",
+      "avg-rating": "Average Rating"
+    },
+    "participant": {
+      "status": {
+        "active": "Active"
       }
     }
   }

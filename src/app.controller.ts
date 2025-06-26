@@ -130,6 +130,10 @@ export class AppController {
         hideSpaceHeader: config.server.customization.hideSpaceHeader,
         showSidebarTeamSelector: config.server.customization.showSidebarTeamSelector,
         showSidebarPageGroup: config.server.customization.showSidebarPageGroup,
+        defaults: config.server.customization.defaults,
+        modules: config.server.customization.modules,
+        paginationPosition: config.server.customization.paginationPosition,
+        ugcViewIconOnlyMode: config.server.customization.ugcViewIconOnlyMode,
       },
       auth: {
         enabled: config.auth.enabled,

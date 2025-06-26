@@ -1,3 +1,4 @@
+import { getThumbUrl } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image';
 import { JSONValue } from '@/components/ui/code-editor';
 import {
   VinesWorkflowExecutionInput,
@@ -38,6 +39,22 @@ export const convertExecutionResultToItemList = (
       ...result,
       render: {
         ...item,
+        key: result.instanceId + '-' + index,
+        status: result.status,
+      },
+    };
+  });
+};
+
+export const convertExecutionResultToThumbnailList = (
+  result: VinesWorkflowExecutionOutputListItem,
+): IVinesExecutionResultItem[] => {
+  return result.output.map((item, index) => {
+    return {
+      ...result,
+      render: {
+        ...item,
+        data: getThumbUrl(item.data as string),
         key: result.instanceId + '-' + result.status + '-' + index,
         status: result.status,
       },
@@ -51,11 +68,15 @@ export const concatResultListReducer = (acc: IVinesExecutionResultItem[], curren
 export const newConvertExecutionResultToItemList = (
   result: VinesWorkflowExecutionOutputListItem[],
 ): IVinesExecutionResultItem[] => {
-  return result.flatMap((output, index) => {
+  return result.flatMap((output, outputIndex) => {
     return output.output.map((item, index) => {
       return {
         ...output,
-        render: { ...item, key: output.instanceId + '-' + output.status + '-' + index, status: output.status },
+        render: {
+          ...item,
+          key: output.instanceId + '-' + index,
+          status: output.status,
+        },
       };
     });
   });
@@ -68,4 +89,16 @@ export const removeRepeatKey = (executionResultList: IVinesExecutionResultItem[]
     }
   }
   return Array.from(map.values());
+};
+
+export const convertImageListToThumbnailList = (imageList: IVinesExecutionResultItem[]) => {
+  return imageList.map((item) => {
+    return {
+      ...item,
+      render: {
+        ...item.render,
+        data: getThumbUrl(item.render.data as string),
+      },
+    };
+  });
 };

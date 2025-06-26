@@ -4,20 +4,23 @@ import { useEffect } from 'react';
 import { useCreation } from 'ahooks';
 import { motion } from 'framer-motion';
 
+import { Page404 } from '@/components/layout/workspace/404.tsx';
 import { VinesAgentViewWrapper } from '@/components/layout-wrapper/agent/view-wrapper.tsx';
 import { VinesDesignBoardViewWrapper } from '@/components/layout-wrapper/design/view-wrapper.tsx';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper.tsx';
-import { Page404 } from '@/components/layout/workspace/404.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { IFRAME_MAP } from '@/components/ui/vines-iframe/consts.ts';
+import useUrlState from '@/hooks/use-url-state';
 import { AgentStoreProvider, createAgentStore } from '@/store/useAgentStore';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { createDesignBoardStore, DesignBoardProvider } from '@/store/useDesignBoardStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { createOutputSelectionStore, OutputSelectionStoreProvider } from '@/store/useOutputSelectionStore';
 import { useViewStore } from '@/store/useViewStore';
+import { cn } from '@/utils';
 
 import { VinesViewFrame } from './frame';
+import { GlobalDesignBoardOperationBar } from './global-design-board-operation-bar';
 import { WorkbenchOperationBar } from './operation-bar';
 
 interface IVinesViewProps {
@@ -31,6 +34,8 @@ interface IVinesViewProps {
 
 export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type }: IVinesViewProps) {
   const setVisible = useViewStore((s) => s.setVisible);
+
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   const { isUseWorkbench } = useVinesRoute();
 
@@ -65,13 +70,22 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
   const content = useCreation(() => {
     if (!id) return <Page404 />;
 
-    if (designBoardId) {
+    if (type === 'global-design-board' || type === 'design-board') {
       return (
         <DesignBoardProvider createStore={createDesignBoardStore}>
           <VinesDesignBoardViewWrapper designBoardId={designBoardId}>
-            <VinesViewFrame>
-              <View />
-            </VinesViewFrame>
+            {type === 'global-design-board' ? (
+              <div className={cn('flex size-full gap-4')}>
+                <GlobalDesignBoardOperationBar />
+                <VinesViewFrame>
+                  <View />
+                </VinesViewFrame>
+              </div>
+            ) : (
+              <VinesViewFrame>
+                <View />
+              </VinesViewFrame>
+            )}
           </VinesDesignBoardViewWrapper>
         </DesignBoardProvider>
       );
@@ -85,7 +99,7 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
               {type === 'preview' ? (
                 <OutputSelectionStoreProvider createStore={createOutputSelectionStore}>
                   {isUseWorkbench ? (
-                    <div className="flex size-full gap-4">
+                    <div className={cn('flex size-full', mode === 'mini' ? 'gap-2' : 'gap-4')}>
                       <VinesViewFrame>
                         <View />
                       </VinesViewFrame>

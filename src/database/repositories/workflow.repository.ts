@@ -15,7 +15,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _, { isEmpty, isString, keyBy, omit, pick } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { FindManyOptions, In, IsNull, Repository } from 'typeorm';
-import { WorkflowAssociationsEntity } from '../entities/workflow/workflow-association';
+import { UpdateAndCreateWorkflowAssociation, WorkflowAssociationsEntity } from '../entities/workflow/workflow-association';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
 
@@ -70,7 +70,7 @@ export class WorkflowRepository {
     private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
     @InjectRepository(WorkflowAssociationsEntity)
     private readonly workflowAssociationRepository: Repository<WorkflowAssociationsEntity>,
-  ) { }
+  ) {}
 
   public async findWorkflowByCondition(condition: FindWorkflowCondition) {
     return await this.workflowMetadataRepository.find({
@@ -272,6 +272,10 @@ export class WorkflowRepository {
     return this.workflowExecutionRepository.findAndCount(options);
   }
 
+  public async findAllExecutions(options: FindManyOptions<WorkflowExecutionEntity>): Promise<[WorkflowExecutionEntity[], number]> {
+    return this.workflowExecutionRepository.findAndCount(options);
+  }
+
   public async findExecutionsByWorkflowInstanceIds(workflowInstanceIds: string[]) {
     if (!workflowInstanceIds?.length) {
       return [];
@@ -410,6 +414,7 @@ export class WorkflowRepository {
     chatSessionId,
     apiKey,
     group,
+    extraMetadata,
   }: {
     workflowId: string;
     version: number;
@@ -419,6 +424,7 @@ export class WorkflowRepository {
     chatSessionId?: string;
     apiKey: string;
     group?: string;
+    extraMetadata?: { [x: string]: any };
   }) {
     await this.workflowExecutionRepository.save({
       id: generateDbId(),
@@ -433,6 +439,7 @@ export class WorkflowRepository {
       chatSessionId,
       apikey: apiKey,
       group,
+      extraMetadata,
     });
   }
 
@@ -1191,9 +1198,6 @@ ORDER BY
           originWorkflow: {
             teamId,
           },
-          targetWorkflow: {
-            teamId,
-          },
         },
         relations: {
           originWorkflow: true,
@@ -1203,26 +1207,25 @@ ORDER BY
       .then((data) => data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow'])));
   }
 
-  public async createWorkflowAssociation(
-    workflowId: string,
-    teamId: string,
-    createAssociation: Pick<WorkflowAssociationsEntity, 'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex'>,
-  ) {
+  public async createWorkflowAssociation(workflowId: string, teamId: string, createAssociation: UpdateAndCreateWorkflowAssociation) {
     return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
       const workflows = await transactionalEntityManager.find(WorkflowMetadataEntity, {
         where: {
-          workflowId: In([workflowId, createAssociation.targetWorkflowId]),
+          id: createAssociation.type === 'to-workflow' ? In([workflowId, createAssociation.targetWorkflowId]) : In([workflowId]),
           isDeleted: false,
           teamId,
         },
       });
 
-      if (workflows.length !== 2) {
+      if (createAssociation.type === 'to-workflow' && workflows.length !== 2) {
         throw new NotFoundException('originWorkflowId or targetWorkflowId not found');
+      }
+      if (createAssociation.type !== 'to-workflow' && workflows.length !== 1) {
+        throw new NotFoundException('originWorkflowId not found');
       }
 
       return await transactionalEntityManager.save(WorkflowAssociationsEntity, {
-        ...pick(createAssociation, ['displayName', 'description', 'enabled', 'mapper', 'targetWorkflowId', 'iconUrl', 'sortIndex']),
+        ...pick(createAssociation, ['displayName', 'description', 'enabled', 'mapper', 'targetWorkflowId', 'iconUrl', 'sortIndex', 'type', 'extraData']),
         originWorkflowId: workflowId,
         id: generateDbId(),
         isDeleted: false,
@@ -1230,11 +1233,7 @@ ORDER BY
     });
   }
 
-  public async updateWorkflowAssociation(
-    id: string,
-    teamId: string,
-    updateAssociation: Pick<WorkflowAssociationsEntity, 'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex'>,
-  ) {
+  public async updateWorkflowAssociation(id: string, teamId: string, updateAssociation: UpdateAndCreateWorkflowAssociation) {
     return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
       const association = await transactionalEntityManager.findOne(WorkflowAssociationsEntity, {
         where: { id, isDeleted: false },
@@ -1248,14 +1247,14 @@ ORDER BY
         throw new NotFoundException('workflow association not found');
       }
 
-      if (association.originWorkflow.teamId !== teamId || association.targetWorkflow.teamId !== teamId) {
+      if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
         throw new ForbiddenException('no permission to operate the workflow association');
       }
 
-      if (updateAssociation.targetWorkflowId) {
+      if (association.type === 'to-workflow' && updateAssociation.targetWorkflowId) {
         const workflow = await this.workflowMetadataRepository.findOne({
           where: {
-            workflowId: updateAssociation.targetWorkflowId,
+            id: updateAssociation.targetWorkflowId,
             isDeleted: false,
             teamId,
           },
@@ -1267,7 +1266,7 @@ ORDER BY
 
       return await transactionalEntityManager.save(WorkflowAssociationsEntity, {
         ...association,
-        ...pick(updateAssociation, ['description', 'displayName', 'mapper', 'targetWorkflowId', 'enabled', 'iconUrl', 'sortIndex']),
+        ...pick(updateAssociation, ['description', 'displayName', 'mapper', 'targetWorkflowId', 'enabled', 'iconUrl', 'sortIndex', 'type', 'extraData']),
       });
     });
   }
@@ -1286,7 +1285,7 @@ ORDER BY
         throw new NotFoundException('workflow association not found');
       }
 
-      if (association.originWorkflow.teamId !== teamId || association.targetWorkflow.teamId !== teamId) {
+      if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
         throw new ForbiddenException('no permission to operate the workflow association');
       }
 
