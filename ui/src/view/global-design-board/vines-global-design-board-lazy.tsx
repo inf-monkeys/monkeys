@@ -15,7 +15,7 @@ const GloablDesignBoardView: React.FC = () => {
   return designBoardId ? (
     <DesignBoardView embed />
   ) : (
-    <main className="vines-center size-full flex-col">
+    <main className="vines-center size-full flex-col bg-slate-1">
       <PencilOff size={64} />
       <div className="mt-4 flex flex-col text-center">
         <h2 className="font-bold">{t('workspace.global-design-board.empty')}</h2>
