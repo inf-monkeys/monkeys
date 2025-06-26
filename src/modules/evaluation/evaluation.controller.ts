@@ -458,7 +458,13 @@ export class EvaluationController {
 
     return new SuccessResponse({
       data: {
-        overview: leaderboard.stats,
+        overview: {
+          ...leaderboard.stats,
+          mostActiveBattler: {
+            ...leaderboard.stats.mostActiveBattler,
+            battleCount: leaderboard.stats.mostActiveBattler.battleCount || 0,
+          },
+        },
         ratingDistribution,
         topPerformers,
         recentChanges,
