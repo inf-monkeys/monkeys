@@ -44,6 +44,9 @@ export class MarketplaceAppEntity extends BaseEntity {
   @Column({ name: 'total_installs', type: 'int', default: 0 })
   totalInstalls: number;
 
+  @Column({ name: 'is_preset', type: 'boolean', default: false, nullable: true })
+  isPreset?: boolean;
+
   @OneToMany(() => MarketplaceAppVersionEntity, (version) => version.app)
   versions: MarketplaceAppVersionEntity[];
 }
