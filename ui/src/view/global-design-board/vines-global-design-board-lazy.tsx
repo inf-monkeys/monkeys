@@ -18,7 +18,7 @@ const GloablDesignBoardView: React.FC = () => {
     <main className="vines-center size-full flex-col bg-slate-1">
       <PencilOff size={64} />
       <div className="mt-4 flex flex-col text-center">
-        <h2 className="font-bold">{t('workspace.global-design-board.empty')}</h2>
+        <h2 className="cursor-default select-none font-bold">{t('workspace.global-design-board.empty')}</h2>
       </div>
     </main>
   );
