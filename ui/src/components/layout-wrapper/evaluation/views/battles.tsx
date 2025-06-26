@@ -26,7 +26,6 @@ import {
   getTaskDetails,
   getUserTasks,
   startAutoEvaluation,
-  subscribeToTaskProgress,
 } from '@/apis/evaluation';
 import {
   Battle,
@@ -178,7 +177,7 @@ export const BattlesView: React.FC = () => {
       // 启动自动评测
       const { taskId } = await startAutoEvaluation(battleGroupId);
 
-      // 设置当前任务并监听进度
+      // 简单的任务状态提示（不使用SSE）
       setCurrentTask({
         id: taskId,
         progress: {
@@ -189,36 +188,15 @@ export const BattlesView: React.FC = () => {
           completed: 0,
           failed: 0,
           percentage: 0,
-          current: '启动评测任务...',
+          current: '评测任务已启动，请稍后刷新查看结果...',
         },
       });
 
-      // 订阅SSE进度更新
-      const eventSource = subscribeToTaskProgress(
-        taskId,
-        (progressData) => {
-          setCurrentTask((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  progress: progressData.progress,
-                }
-              : null,
-          );
-        },
-        (error) => {
-          console.error('SSE Error:', error);
-          setCurrentTask(null);
-          toast.error('进度监听连接中断');
-        },
-      );
-
-      // 监听任务完成
-      eventSource.addEventListener('close', () => {
+      // 5秒后清除任务状态提示
+      setTimeout(() => {
         setCurrentTask(null);
         mutateTasks();
-        toast.success('对战评测任务已完成');
-      });
+      }, 5000);
 
       setCreateDialogOpen(false);
       setBattleForm({

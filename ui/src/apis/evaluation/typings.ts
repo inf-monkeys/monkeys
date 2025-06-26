@@ -227,8 +227,10 @@ export interface SSEData {
 export interface EloLeaderboardEntry {
   rank: number;
   asset: {
+    id: string;
     name: string;
     type: string;
+    url?: string;
   };
   totalBattles: number;
   wins: string;
