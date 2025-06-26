@@ -29,7 +29,7 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
     <div
       key={pageId}
       className={cn(
-        'mb-2 flex h-12 w-12 shrink-0 grow-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-transparent transition-colors hover:bg-accent hover:text-accent-foreground',
+        'mb-1 flex size-10 shrink-0 grow-0 cursor-pointer items-center justify-center rounded-md border border-transparent transition-colors hover:bg-accent hover:text-accent-foreground',
         currentPageId === pageId && 'border-input bg-neocard text-accent-foreground',
         mini && 'gap-0',
       )}

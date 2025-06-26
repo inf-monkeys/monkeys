@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { usePageGroups, useUpdateGroupPages } from '@/apis/pages';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
 import { SimpleDisplayNameDialog } from '@/components/ui/input/simple-display-name-dialog';
-import { getI18nContent } from '@/utils';
+import { getI18nContent, isJSONString } from '@/utils';
 
 interface IRenameViewProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
@@ -48,6 +48,8 @@ export const RenameGroup: React.FC<IRenameViewProps> = ({ groupId }) => {
       },
     );
   };
+  console.log('currentGroup?.displayName', currentGroup?.displayName);
+  console.log('typeof currentGroup?.displayName', typeof currentGroup?.displayName);
 
   return (
     <SimpleDisplayNameDialog
@@ -63,6 +65,11 @@ export const RenameGroup: React.FC<IRenameViewProps> = ({ groupId }) => {
           void handleRenameGroup(val);
         }
       }}
+      i18nJSON={
+        isJSONString(currentGroup?.displayName)
+          ? (currentGroup?.displayName as string)
+          : JSON.stringify(currentGroup?.displayName)
+      }
     >
       <DropdownMenuItem
         className="flex items-center gap-2"

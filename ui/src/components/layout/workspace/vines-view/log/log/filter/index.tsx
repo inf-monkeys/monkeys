@@ -25,9 +25,17 @@ interface IVinesLogViewLogFilterProps {
   form: UseFormReturn<IVinesSearchWorkflowExecutionsParams>;
   handleSubmit: (loadNextPage?: boolean) => void;
   isMutating: boolean;
+  onUserInteractionStart?: () => void;
+  onUserInteractionEnd?: () => void;
 }
 
-export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ form, handleSubmit, isMutating }) => {
+export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({
+  form,
+  handleSubmit,
+  isMutating,
+  onUserInteractionStart,
+  onUserInteractionEnd,
+}) => {
   const { t } = useTranslation();
 
   const { vines } = useVinesFlow();
@@ -79,6 +87,13 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
                     value={(field.value ?? []).map((it) => it.toString())}
                     onValueChange={(options) => field.onChange(options.map((option) => parseInt(option)))}
                     placeholder={t('workspace.logs-view.log.filter.form.versions.placeholder')}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        onUserInteractionStart?.();
+                      } else {
+                        onUserInteractionEnd?.();
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -94,7 +109,15 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
                 <FormItem>
                   <FormLabel>{t('workspace.logs-view.log.filter.form.start-time.label')}</FormLabel>
                   <FormControl>
-                    <Popover>
+                    <Popover
+                      onOpenChange={(open) => {
+                        if (open) {
+                          onUserInteractionStart?.();
+                        } else {
+                          onUserInteractionEnd?.();
+                        }
+                      }}
+                    >
                       <PopoverTrigger asChild>
                         <Button
                           id="date"
@@ -153,6 +176,13 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
                     value={field.value ?? []}
                     onValueChange={(options) => field.onChange(options)}
                     placeholder={t('workspace.logs-view.log.filter.form.status.placeholder')}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        onUserInteractionStart?.();
+                      } else {
+                        onUserInteractionEnd?.();
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -172,6 +202,13 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
                     value={field.value ?? []}
                     onValueChange={(options) => field.onChange(options)}
                     placeholder={t('workspace.logs-view.log.filter.form.trigger-types.placeholder')}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        onUserInteractionStart?.();
+                      } else {
+                        onUserInteractionEnd?.();
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -189,6 +226,8 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
                   <Input
                     placeholder={t('workspace.logs-view.log.filter.form.workflow-instance-id.placeholder')}
                     {...field}
+                    onFocus={() => onUserInteractionStart?.()}
+                    onBlur={() => onUserInteractionEnd?.()}
                   />
                 </FormControl>
                 <FormMessage />

@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { cn } from '@/utils';
 
 export interface ILogoProps extends React.ComponentPropsWithoutRef<'div'> {
-  width?: number;
-  height?: number;
+  width?: string | number;
+  height?: string | number;
   url?: string;
   alt?: string;
   description?: string;

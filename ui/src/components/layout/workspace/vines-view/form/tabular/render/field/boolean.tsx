@@ -54,7 +54,7 @@ export const FieldBoolean: React.FC<IFieldBooleanProps> = ({
                   : 'border-[#E5E5EA] bg-[#F9F9F9] text-[#D7D6D4] dark:border-[#3A3A3C] dark:bg-[#2C2C2E] dark:text-[#86868B]',
               )}
             >
-              否
+              {t('common.utils.no')}
             </button>
             <button
               type="button"
@@ -66,7 +66,7 @@ export const FieldBoolean: React.FC<IFieldBooleanProps> = ({
                   : 'border-[#E5E5EA] bg-[#F9F9F9] text-[#D7D6D4] dark:border-[#3A3A3C] dark:bg-[#2C2C2E] dark:text-[#86868B]',
               )}
             >
-              是
+              {t('common.utils.yes')}
             </button>
           </div>
         )}

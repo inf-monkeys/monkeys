@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import {
   flexRender,
@@ -10,9 +10,11 @@ import {
 } from '@tanstack/react-table';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { IRemoteDataTableProps } from '@/components/ui/data-table/remote/index.tsx';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
+import { cn } from '@/utils';
 
 function RemoteDataTable<TData, TValue>({
   columns,
@@ -45,6 +47,9 @@ function RemoteDataTable<TData, TValue>({
 
   const { rows } = table.getRowModel();
   const hastData = rows.length > 0;
+
+  const { data: oem } = useSystemConfig();
+  const paginationPosition = oem?.theme.paginationPosition ?? 'left';
 
   return (
     <div>
@@ -83,6 +88,7 @@ function RemoteDataTable<TData, TValue>({
       {showPagination && (
         <div className="w-full py-2">
           <TablePagination
+            className={cn('py-0', paginationPosition === 'right' ? 'justify-end' : '')}
             rowCount={rowCount}
             pagination={state.pagination}
             onPaginationChange={onPaginationChange}

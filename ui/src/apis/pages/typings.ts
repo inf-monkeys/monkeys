@@ -16,7 +16,8 @@ export type IPageInstanceType =
   | 'agent-chat'
   | 'agent-config'
   | 'agent-log'
-  | 'design-board';
+  | 'design-board'
+  | 'global-design-board';
 
 export interface IPageInstance {
   name: string;

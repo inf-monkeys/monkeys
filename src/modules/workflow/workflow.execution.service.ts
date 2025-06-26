@@ -18,7 +18,7 @@ import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
-import { FindManyOptions, In } from 'typeorm';
+import { FindManyOptions, In, IsNull, Not } from 'typeorm';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
@@ -290,35 +290,58 @@ export class WorkflowExecutionService {
       alt = dataVal;
     });
 
+    const outputKeys = Object.keys(flattenOutput);
     const outputValues = Object.values(flattenOutput);
-
-    const images = outputValues.map((it) => extractImageUrls(it)).flat();
-    const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
-
     const finalOutput = [];
     let isInserted = false;
 
-    if (outputValues.length === 1 && !images.length && !videos.length) {
-      const currentOutput = outputValues[0];
-      if (typeof currentOutput === 'string') {
-        finalOutput.push({ type: 'text', data: currentOutput });
+    // 为每个 key-value 对单独处理
+    for (let i = 0; i < outputKeys.length; i++) {
+      const key = outputKeys[i];
+      const value = outputValues[i];
+
+      // 提取图片和视频
+      const images = extractImageUrls(value);
+      const videos = extractVideoUrls(value);
+
+      // 处理图片
+      for (const image of images) {
+        finalOutput.push({
+          type: 'image',
+          data: image,
+          alt,
+          key: key,
+        });
+        isInserted = true;
+      }
+
+      // 处理视频
+      for (const video of videos) {
+        finalOutput.push({
+          type: 'video',
+          data: video,
+          key: key,
+        });
+        isInserted = true;
+      }
+    }
+
+    // 如果没有图片和视频，处理文本或 JSON
+    if (!isInserted && output) {
+      if (typeof output === 'string') {
+        finalOutput.push({
+          type: 'text',
+          data: output,
+          key: 'root',
+        });
       } else {
-        finalOutput.push({ type: 'json', data: currentOutput });
+        finalOutput.push({
+          type: 'json',
+          data: output,
+          key: 'root',
+        });
       }
       isInserted = true;
-    }
-
-    for (const image of images) {
-      finalOutput.push({ type: 'image', data: image, alt });
-      isInserted = true;
-    }
-
-    for (const video of videos) {
-      finalOutput.push({ type: 'video', data: video });
-      isInserted = true;
-    }
-    if (!isInserted && output) {
-      finalOutput.push({ type: 'json', data: output });
     }
 
     let formattedInput = null;
@@ -362,6 +385,7 @@ export class WorkflowExecutionService {
       page: 1,
       limit: 10,
       orderBy: 'DESC' as 'DESC' | 'ASC',
+      orderKey: 'conductorStartTime' as string,
     },
   ): Promise<{
     total: number;
@@ -370,7 +394,7 @@ export class WorkflowExecutionService {
     limit: number;
     workflows: Pick<WorkflowMetadataEntity, 'displayName' | 'description' | 'workflowId' | 'iconUrl'>[];
   }> {
-    const { page, limit: limitNum, orderBy } = condition;
+    const { page, limit: limitNum, orderBy, orderKey } = condition;
 
     const workflowDefinitions = await this.workflowRepository.getAllWorkflows(teamId);
     if (workflowDefinitions.length === 0) {
@@ -385,13 +409,14 @@ export class WorkflowExecutionService {
     const workflowIdsForTeam = workflowDefinitions.map((w) => w.workflowId);
     const workflowDefinitionMap = _.keyBy(workflowDefinitions, 'workflowId');
 
-    const orderByField = 'conductorStartTime';
+    const orderByField = orderKey || 'conductorStartTime';
     const orderDirection = orderBy === 'DESC' ? 'DESC' : 'ASC';
 
     const [executions, total] = await this.workflowRepository.findAndCountWorkflowExecutions({
       where: {
         workflowId: In(workflowIdsForTeam),
         isDeleted: false,
+        conductorStartTime: Not(IsNull()),
       },
       order: { [orderByField]: orderDirection },
       skip: (page - 1) * limitNum,
@@ -421,31 +446,58 @@ export class WorkflowExecutionService {
       const flattenOutput = flattenKeys(output, undefined, ['__display_text'], (_, dataVal) => {
         alt = dataVal;
       });
+      const outputKeys = Object.keys(flattenOutput);
       const outputValues = Object.values(flattenOutput);
-      const images = outputValues.map((it) => extractImageUrls(it)).flat();
-      const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
       const finalOutput = [];
       let isInserted = false;
 
-      if (outputValues.length === 1 && !images.length && !videos.length) {
-        const currentOutput = outputValues[0];
-        if (typeof currentOutput === 'string') {
-          finalOutput.push({ type: 'text', data: currentOutput });
+      // 为每个 key-value 对单独处理
+      for (let i = 0; i < outputKeys.length; i++) {
+        const key = outputKeys[i];
+        const value = outputValues[i];
+
+        // 提取图片和视频
+        const images = extractImageUrls(value);
+        const videos = extractVideoUrls(value);
+
+        // 处理图片
+        for (const image of images) {
+          finalOutput.push({
+            type: 'image',
+            data: image,
+            alt,
+            key: key,
+          });
+          isInserted = true;
+        }
+
+        // 处理视频
+        for (const video of videos) {
+          finalOutput.push({
+            type: 'video',
+            data: video,
+            key: key,
+          });
+          isInserted = true;
+        }
+      }
+
+      if (!isInserted && output) {
+        if (typeof output === 'string') {
+          finalOutput.push({
+            type: 'text',
+            data: output,
+            key: 'root',
+          });
+          isInserted = true;
         } else {
-          finalOutput.push({ type: 'json', data: currentOutput });
+          finalOutput.push({
+            type: 'json',
+            data: output,
+            key: 'root',
+          });
         }
         isInserted = true;
-      }
-      for (const image of images) {
-        finalOutput.push({ type: 'image', data: image, alt });
-        isInserted = true;
-      }
-      for (const video of videos) {
-        finalOutput.push({ type: 'video', data: video });
-        isInserted = true;
-      }
-      if (!isInserted && output) {
-        finalOutput.push({ type: 'json', data: output });
       }
 
       let formattedInputArray = null;
@@ -524,34 +576,63 @@ export class WorkflowExecutionService {
             alt = dataVal;
           });
 
+          const outputKeys = Object.keys(flattenOutput);
           const outputValues = Object.values(flattenOutput);
-          const images = outputValues.map((item) => extractImageUrls(item)).flat();
-          const videos = outputValues.map((item) => extractVideoUrls(item)).flat();
           const finalOutput = [];
           let isInserted = false;
 
-          if (outputValues.length === 1 && !images.length && !videos.length) {
-            const currentOutput = outputValues[0];
-            if (typeof currentOutput === 'string') {
-              finalOutput.push({ type: 'text', data: currentOutput });
-            } else {
-              finalOutput.push({ type: 'json', data: currentOutput });
+          // 为每个 key-value 对单独处理
+          for (let i = 0; i < outputKeys.length; i++) {
+            const key = outputKeys[i];
+            const currentKey = key.split('.')[key.split('.').length - 1];
+            const value = outputValues[i];
+
+            // __ 开头的 key 不处理
+            if (currentKey.startsWith('__')) {
+              continue;
             }
-            isInserted = true;
+
+            // 提取图片和视频
+            const images = extractImageUrls(value);
+            const videos = extractVideoUrls(value);
+
+            // 处理图片
+            for (const image of images) {
+              finalOutput.push({
+                type: 'image',
+                data: image,
+                alt,
+                key: key,
+              });
+              isInserted = true;
+            }
+
+            // 处理视频
+            for (const video of videos) {
+              finalOutput.push({
+                type: 'video',
+                data: video,
+                key: key,
+              });
+              isInserted = true;
+            }
           }
 
-          for (const image of images) {
-            finalOutput.push({ type: 'image', data: image, alt });
-            isInserted = true;
-          }
-
-          for (const video of videos) {
-            finalOutput.push({ type: 'video', data: video });
-            isInserted = true;
-          }
-
+          // 如果没有图片和视频，处理文本或 JSON
           if (!isInserted && output) {
-            finalOutput.push({ type: 'json', data: output });
+            if (typeof output === 'string') {
+              finalOutput.push({
+                type: 'text',
+                data: output,
+                key: 'root',
+              });
+            } else {
+              finalOutput.push({
+                type: 'json',
+                data: output,
+                key: 'root',
+              });
+            }
           }
 
           const ctx = input?.['__context'];
@@ -599,6 +680,17 @@ export class WorkflowExecutionService {
 
   public async startWorkflow(request: StartWorkflowRequest) {
     const { teamId, userId, triggerType, chatSessionId, apiKey, group } = request;
+
+    // 解码 extraMetadata
+    let extraMetadata = (request.inputData?.extraMetadata as any) ?? {};
+    if (typeof extraMetadata === 'string') {
+      try {
+        extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
+      } catch (e) {
+        logger.warn('Failed to parse extraMetadata from base64, using it as a plain object.', e);
+      }
+    }
+
     const workflowContext: WorkflowExecutionContext = {
       userId,
       teamId: teamId,
@@ -680,6 +772,7 @@ export class WorkflowExecutionService {
       userId,
       triggerType,
       apiKey,
+      extraMetadata,
       ...(extra.chatSessionId && { chatSessionId: extra.chatSessionId }),
       ...(extra.group && { group: extra.group }),
     });

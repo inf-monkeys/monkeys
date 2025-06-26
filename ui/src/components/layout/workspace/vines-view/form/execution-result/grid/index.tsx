@@ -7,6 +7,7 @@ import { t } from 'i18next';
 import { Square, SquareCheck } from 'lucide-react';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
+import { useWorkflowAssociationList } from '@/apis/workflow/association';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,8 @@ import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 import { ErrorFilter } from './error-filter';
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
+
+const EXECUTION_RESULT_FILTER_HEIGHT = 64;
 
 interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'> {
   workflowId: string | null;
@@ -50,8 +53,9 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const retryRef = useRef(0);
   const formContainerWidth = usePageStore((s) => s.containerWidth);
-  const { isUseWorkSpace } = useVinesRoute();
+  const { isUseWorkSpace, isUseWorkbench } = useVinesRoute();
   const { isSelectionMode, setSelectionMode, selectedOutputs, toggleOutputSelection } = useOutputSelectionStore();
+  const { data: associations } = useWorkflowAssociationList(workflowId);
 
   useEffect(() => {
     if (onSelectionChange) {
@@ -79,7 +83,10 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const shouldFilterError = useShouldFilterError();
   const positioner = usePositioner(
     {
-      width: containerWidth,
+      width:
+        isUseWorkbench && (associations?.filter((it) => it.enabled).length ?? 0) > 0
+          ? containerWidth - 80
+          : containerWidth,
       columnGutter: 8,
       columnWidth: 200,
       rowGutter: 8,
@@ -132,7 +139,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     positioner,
     scrollTop,
     isScrolling,
-    height: height === Infinity ? 800 : height,
+    height: height === Infinity ? 800 - EXECUTION_RESULT_FILTER_HEIGHT : height - EXECUTION_RESULT_FILTER_HEIGHT,
     containerRef,
     items: data,
     overscanBy: 3,
@@ -141,11 +148,11 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         <ExecutionResultItem
           result={item}
           event$={event$}
-          isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.instanceId)}
+          isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.render.key)}
           addDeletedInstanceId={addDeletedInstanceId}
           mutate={mutate}
           isSelectionMode={isSelectionMode}
-          isSelected={selectedOutputs.has(item.instanceId)}
+          isSelected={selectedOutputs.has(item.render.key)}
           onSelect={(id) => toggleOutputSelection(id, item)}
         />
       ),
@@ -158,13 +165,8 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   });
 
   return (
-    <ScrollArea
-      className={cn('z-20 mr-0.5 bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2')}
-      ref={scrollRef}
-      style={{ height: height === Infinity ? 800 : height }}
-      disabledOverflowMask
-    >
-      <div className="mb-2 flex items-center justify-between gap-2">
+    <div className="flex flex-col gap-2 p-2">
+      <div className="flex items-center justify-between gap-2">
         <ErrorFilter />
         <Button
           variant="borderless"
@@ -175,9 +177,17 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           {t('workspace.form-view.execution-result.select-mode.title')}
         </Button>
       </div>
-      {/* <ExtraButtonFilter /> */}
-      {masonryGrid}
-    </ScrollArea>
+      <ScrollArea
+        className={cn('z-20 mr-0.5 bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2')}
+        ref={scrollRef}
+        style={{
+          height: height === Infinity ? 800 - EXECUTION_RESULT_FILTER_HEIGHT : height - EXECUTION_RESULT_FILTER_HEIGHT,
+        }}
+        disabledOverflowMask
+      >
+        {masonryGrid}
+      </ScrollArea>
+    </div>
   );
 };
 

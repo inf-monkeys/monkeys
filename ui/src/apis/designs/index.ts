@@ -12,6 +12,9 @@ export const createDesignProject = (createDesignProjectDto: ICreateDesignProject
     simple: true,
   })('/api/design/project', createDesignProjectDto);
 
+export const useGetDesignProjectList = () =>
+  useSWR<IAssetItem<IDesignProject>[] | undefined>(`/api/design/project`, vinesFetcher());
+
 export const useGetDesignProject = (designId?: string | null) =>
   useSWR<IAssetItem<IDesignProject> | undefined>(designId ? `/api/design/project/${designId}` : null, vinesFetcher());
 
@@ -26,7 +29,7 @@ export const updateDesignProject = (designId: string, design: Partial<IAssetItem
     design,
   );
 
-export const useDesignProjectMetadataList = (designProjectId: string) =>
+export const useDesignProjectMetadataList = (designProjectId?: string | null) =>
   useSWR<IDesignBoardItem[] | undefined>(
     designProjectId ? `/api/design/project/${designProjectId}/metadata` : null,
     vinesFetcher(),
@@ -39,7 +42,7 @@ export const useDesignBoardMetadata = (designBoardId: string) =>
   );
 
 export const updateDesignBoardMetadata = (designBoardId: string, metadata: Partial<IAssetItem<IDesignBoardMetadata>>) =>
-  vinesFetcher<IAssetItem<IDesignBoardMetadata>, Partial<IAssetItem<IDesignProject>>>({ method: 'PUT', simple: true })(
-    `/api/design/metadata/${designBoardId}`,
-    metadata,
-  );
+  vinesFetcher<IAssetItem<IDesignBoardMetadata>, Partial<IAssetItem<IDesignBoardMetadata>>>({
+    method: 'PUT',
+    simple: true,
+  })(`/api/design/metadata/${designBoardId}`, metadata);

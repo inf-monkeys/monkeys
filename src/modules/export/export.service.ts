@@ -2,9 +2,9 @@ import { logger } from '@/common/logger';
 import { IRequest } from '@/common/typings/request';
 import { getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
+import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
-import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { INTERNAL_BUILT_IN_MARKET } from '../assets/consts';
 import { LlmModelJson, RichMediaJson, SdModelJson, TableCollectionsJson, TeamInfoJson, TextCollectionJson, WorkflowWithPagesJson } from '../workflow/interfaces';
 import { WorkflowCrudService } from '../workflow/workflow.curd.service';
@@ -36,16 +36,15 @@ export class ExportService {
     if (exportWorkflows) {
       const workflowList = await this.workflowRepository.getAllWorkflowsInTeam(teamId);
       const workflowIds = workflowList.map((x) => x.workflowId);
-      await Promise.all(
-        workflowIds.map(async (workflowId) => {
-          try {
-            const result = await this.workflowCrudService.exportWorkflow(workflowId);
-            workflows.push(result);
-          } catch (error) {
-            logger.warn(`导出 ${workflowId} 失败: `, error);
-          }
-        }),
-      );
+      // 将并发处理改为串行处理，避免数据库连接问题
+      for (const workflowId of workflowIds) {
+        try {
+          const result = await this.workflowCrudService.exportWorkflow(workflowId);
+          workflows.push(result);
+        } catch (error) {
+          logger.warn(`导出 ${workflowId} 失败: `, error);
+        }
+      }
     }
 
     // 导出 sql 数据库

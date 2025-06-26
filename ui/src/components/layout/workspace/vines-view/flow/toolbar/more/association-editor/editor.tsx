@@ -10,22 +10,15 @@ import { toast } from 'sonner';
 
 import { createWorkflowAssociation, updateWorkflowAssociation } from '@/apis/workflow/association';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
+import { AssociationEditorFields } from '@/components/layout/workspace/vines-view/flow/toolbar/more/association-editor/field';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form.tsx';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { IWorkflowAssociationForEditor, workflowAssociationSchema } from '@/schema/workspace/workflow-association';
 import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
 
-import { FieldDescription } from './field/description';
-import { FieldDisplayName } from './field/display-name';
-import { FieldEnabled } from './field/enabled';
-import { FieldIconUrl } from './field/icon-url';
-import { FieldMapper } from './field/mapper';
-import { FieldWorkflow } from './field/workflow';
-
-interface IWorkflowAssociationEditorProps { }
+interface IWorkflowAssociationEditorProps {}
 
 export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps> = () => {
   const { t } = useTranslation();
@@ -38,8 +31,9 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
     resolver: zodResolver(workflowAssociationSchema),
     defaultValues: {
       enabled: true,
+      type: 'to-workflow',
       displayName: '',
-      targetWorkflowId: '',
+      description: '',
       mapper: [],
     },
   });
@@ -140,23 +134,7 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
               }
             }}
           >
-            <div className="flex gap-4">
-              <ScrollArea className="-mx-3 h-[30rem] px-3">
-                <div className="flex w-96 max-w-md flex-col gap-2 px-1">
-                  <FieldIconUrl form={form} />
-                  <FieldDisplayName form={form} />
-                  <FieldDescription form={form} />
-                  <FieldWorkflow form={form} />
-                </div>
-              </ScrollArea>
-              <ScrollArea className="-mx-3 h-[30rem] px-3">
-                <div className="flex w-96 max-w-md flex-col gap-2 px-1">
-                  <FieldEnabled form={form} />
-                  <FieldMapper form={form} />
-                </div>
-              </ScrollArea>
-            </div>
-
+            <AssociationEditorFields form={form} />
             <DialogFooter>
               <div className="flex items-center gap-2">
                 <Button ref={submitButtonRef} type="submit" variant="outline">

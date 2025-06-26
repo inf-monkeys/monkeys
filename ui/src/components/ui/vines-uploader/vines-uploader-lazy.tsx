@@ -5,7 +5,7 @@ import ThumbnailGenerator from '@uppy/thumbnail-generator';
 import { useClickAway, useCreation, useDrop, useLatest, useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty } from 'lodash';
-import { ClipboardPaste, FileUp, Plus } from 'lucide-react';
+import { FileUp, Plus } from 'lucide-react';
 import Dropzone from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 
@@ -359,7 +359,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                     onClick={open}
                   >
                     <FileUp size={50} className="stroke-muted-foreground" />
-                    <div className="flex max-w-[70%] flex-col">
+                    <div className="flex max-w-[70%] flex-col gap-1">
                       <h1 className="text-xl font-bold leading-tight text-muted-foreground">
                         {isHovering
                           ? t('components.ui.updater.release-file')
@@ -374,20 +374,14 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                           : t('components.ui.updater.hint.accept.any')}
                         {t('components.ui.updater.hint.max-size', { maxSize })}
                       </p>
+                      <p className="text-sm text-muted-foreground text-opacity-85">
+                        {t('components.ui.updater.paste-hint')}
+                      </p>
                     </div>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
-            <span
-              className={cn(
-                'pointer-events-none absolute -right-2 bottom-4 z-30 flex scale-75 select-none items-center gap-1 text-sm text-muted-foreground/45 opacity-0 transition-opacity duration-100',
-                isFocused && !isClickOutside && 'opacity-100',
-              )}
-            >
-              <ClipboardPaste className="stroke-muted-foreground/45" size={18} />
-              {t('components.ui.updater.paste-hint')}
-            </span>
             <div
               className={cn(
                 'vines-center absolute bottom-0 z-20 w-full gap-2 overflow-hidden rounded-md p-2 backdrop-blur-xl dark:bg-[#111113]/80',

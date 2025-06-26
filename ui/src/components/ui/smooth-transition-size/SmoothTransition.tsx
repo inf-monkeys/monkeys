@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 interface ISmoothTransitionProps extends React.ComponentPropsWithoutRef<'div'> {
-  initialHeight?: number;
+  initialHeight?: number | string;
   onAnimationComplete?: () => void;
 }
 

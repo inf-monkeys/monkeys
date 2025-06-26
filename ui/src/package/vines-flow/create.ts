@@ -1,6 +1,7 @@
 import React, { createContext, createElement, useCallback, useContext, useEffect, useReducer } from 'react';
 
 import { useSWRConfig } from 'swr';
+import { useSearch } from '@tanstack/react-router';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import type { i18n } from 'i18next';
@@ -49,6 +50,14 @@ export const createVinesCore = (workflowId: string, t?: i18n) => {
   const VinesProvider = ({ children }: { children: React.ReactNode }) => {
     const { mutate } = useSWRConfig();
     const [_refresher, forceUpdate] = useReducer(forceUpdateReducer, 0);
+
+    const { extraMetadata } = useSearch({ strict: false }) as {
+      extraMetadata?: string;
+    };
+
+    if (extraMetadata) {
+      _vines.extraMetadata = extraMetadata;
+    }
 
     const { trigger } = useUpdateWorkflow(_vines.workflowId ?? '');
 

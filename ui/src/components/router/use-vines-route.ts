@@ -28,7 +28,10 @@ export const useVinesRoute = () => {
   const isUseWorkSpace = (routeAppId === 'workspace' && !isUseShareView && !isUseIFrame) || isImageDetailPage;
   const isUseAgent = routeAppId === 'agent';
   const isUseDesign = routeAppId === 'design';
-  const isUsePanel = (!!routeIds || !isUseWorkbench) && !isUseWorkSpace && !isUseAgent && !isUseDesign;
+  const isUseEvaluation = routeAppId === 'evaluations' && routeIds?.[2] && routeIds?.[3]; // 有moduleId和tab时使用评测布局
+  const isUsePanel =
+    (!!routeIds || !isUseWorkbench) && !isUseWorkSpace && !isUseAgent && !isUseDesign && !isUseEvaluation;
+  const isUseAppStore = routeAppId === 'store';
 
   // 对于图片详情页面，确保路由信息中包含workbench，以便高亮工作台选项
   window['vinesRoute'] = isImageDetailPage
@@ -50,5 +53,7 @@ export const useVinesRoute = () => {
     isUseWorkbench,
     isUsePanel,
     isImageDetailPage,
+    isUseAppStore,
+    isUseEvaluation,
   };
 };

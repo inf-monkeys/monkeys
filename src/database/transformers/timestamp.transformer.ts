@@ -17,7 +17,6 @@ function toValidDate(value: any): Date | null {
   return null;
 }
 
-
 export const TimestampTransformer: ValueTransformer = {
   to(value: Date | number | string): Date | null {
     const date = toValidDate(value);

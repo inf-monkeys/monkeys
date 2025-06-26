@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
+import { getI18nContent } from '@/utils';
 
 export type TSelect = {
   value: string;
-  label: string;
+  label: string | Record<string, string>;
   linkage?: IWorkflowInputSelectListLinkage;
 };
 export type TSelectList = TSelect[];
@@ -72,7 +73,7 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
         onChange(type === 'number' ? val.map(Number) : val);
       }}
       value={finalValue || []}
-      options={selectList}
+      options={selectList.map((item) => ({ ...item, label: getI18nContent(item.label) || '' }))}
       placeholder={t('workspace.pre-view.actuator.execution-form.select', { displayName })}
     />
   ) : (
@@ -89,7 +90,7 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
       <SelectContent>
         {selectList.map((it, i) => (
           <SelectItem value={it.value?.toString()} key={i}>
-            {it.label}
+            {getI18nContent(it.label)}
           </SelectItem>
         ))}
       </SelectContent>

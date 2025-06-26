@@ -43,9 +43,9 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
 
   const currentPageId = page?.id;
 
-  const { agents, workflows, designBoards } = useMemo(() => {
+  const { globalGroups, agents, workflows, designBoards } = useMemo(() => {
     const mixinGroups = groupBy(renderer, (it) => it?.type ?? '');
-    const { agentGroups, workflowGroups, designBoardGroups } = reduce(
+    const { globalGroups, agentGroups, workflowGroups, designBoardGroups } = reduce(
       mixinGroups,
       (acc, group, type) => {
         if (type.startsWith('agent')) {
@@ -54,12 +54,15 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
           acc.workflowGroups[type] = group;
         } else if (type === 'design-board') {
           acc.designBoardGroups[type] = group;
+        } else if (type.startsWith('global-')) {
+          acc.globalGroups[type] = group;
         }
         return acc;
       },
-      { agentGroups: {}, workflowGroups: {}, designBoardGroups: {} },
+      { globalGroups: {}, agentGroups: {}, workflowGroups: {}, designBoardGroups: {} },
     );
     return {
+      globalGroups: Object.entries(globalGroups) as [string, P[]][],
       agents: Object.entries(agentGroups) as [string, P[]][],
       workflows: Object.entries(workflowGroups) as [string, P[]][],
       designBoards: Object.entries(designBoardGroups) as [string, P[]][],
@@ -70,6 +73,13 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
     <AnimatePresence>
       {hasPages && (
         <>
+          {globalGroups.map(([_, pages]) => {
+            return pages.map(({ id, type }) => (
+              <ViewStoreProvider key={id} createStore={createViewStore}>
+                <VinesView id={id} pageId={currentPageId} type={type} />
+              </ViewStoreProvider>
+            ));
+          })}
           {workflows.map(([_, pages]) => (
             <VinesFlowProvider key={pages[0].workflowId} workflowId={pages[0].workflowId ?? _}>
               {pages.map(({ id, type, workflowId }) => (

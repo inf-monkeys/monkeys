@@ -13,6 +13,28 @@ export const inputType = z.enum(['string', 'number', 'boolean', 'file'], {
   },
 });
 
+// 单个可见性条件
+export const visibilityConditionSchema = z.object({
+  field: z.string(), // 关联的其他表单项字段名
+  operator: z.enum([
+    'is',
+    'isNot',
+    'isGreaterThan',
+    'isLessThan',
+    'isGreaterThanOrEqual',
+    'isLessThanOrEqual',
+    'in',
+    'notIn',
+  ]), // 支持多种比较操作符
+  value: z.union([z.string(), z.number(), z.boolean(), z.array(z.union([z.string(), z.number(), z.boolean()]))]), // 比较值，支持数组形式
+});
+
+// 可见性配置
+export const visibilityConfigSchema = z.object({
+  conditions: z.array(visibilityConditionSchema).min(1),
+  logic: z.enum(['AND', 'OR']).default('AND'),
+});
+
 export const workflowInputSelectListLinkageSchema = z.array(
   z.object({
     name: z.string(),
@@ -47,9 +69,39 @@ export const workflowInputSchema = z.object({
     .string()
     .min(1, 'Field cannot be less than one characters')
     .max(20, 'Field cannot be more than twenty characters'),
-  description: z.string().optional(),
-  placeholder: z.string().optional(),
-  tips: z.string().optional(),
+  description: z
+    .union([
+      z.string(),
+      z
+        .record(z.string())
+        .refine(
+          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+          'At least one language must have a description',
+        ),
+    ])
+    .optional(),
+  placeholder: z
+    .union([
+      z.string(),
+      z
+        .record(z.string())
+        .refine(
+          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+          'At least one language must have a placeholder',
+        ),
+    ])
+    .optional(),
+  tips: z
+    .union([
+      z.string(),
+      z
+        .record(z.string())
+        .refine(
+          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+          'At least one language must have tips',
+        ),
+    ])
+    .optional(),
   type: inputType,
   default: z
     .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number()), z.array(z.boolean())])
@@ -69,7 +121,15 @@ export const workflowInputSchema = z.object({
     .array(
       z.object({
         value: z.union([z.string(), z.number()]),
-        label: z.string(),
+        label: z.union([
+          z.string().min(1, 'Label cannot be empty'),
+          z
+            .record(z.string())
+            .refine(
+              (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+              'At least one language must have a label',
+            ),
+        ]),
         linkage: workflowInputSelectListLinkageSchema.optional(),
       }),
     )
@@ -82,7 +142,14 @@ export const workflowInputSchema = z.object({
   singleColumn: z.boolean().optional(),
   comfyuiModelServerId: z.string().optional(),
   comfyuiModelTypeName: z.string().optional(),
+
+  // 字段可见性配置
+  visibility: visibilityConfigSchema.optional(),
+
+  flag: z.boolean().optional(),
 });
 
 export type IWorkflowInput = z.infer<typeof workflowInputSchema>;
 export type IWorkflowInputSelectListLinkage = z.infer<typeof workflowInputSelectListLinkageSchema>;
+export type IVisibilityCondition = z.infer<typeof visibilityConditionSchema>;
+export type IVisibilityConfig = z.infer<typeof visibilityConfigSchema>;

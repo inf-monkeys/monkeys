@@ -11,6 +11,7 @@ import { FieldImageModelServerSelector } from '@/components/layout/workspace/vin
 import { FieldImageModelTypeSelector } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/comfyui-model/type-selector.tsx';
 import { FieldDefaultValue } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value';
 import { FieldDisplayName } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/display-name.tsx';
+import { FieldFieldVisibility } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/field-visibility.tsx';
 import { FieldFile } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/file.tsx';
 import { FieldNumber } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/number.tsx';
 import { FieldSetRequired } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/set-required.tsx';
@@ -24,7 +25,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInput, workflowInputSchema } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cloneDeep, cn, getI18nContent, nanoIdLowerCase } from '@/utils';
+import { cloneDeep, cn, nanoIdLowerCase } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IInputEditorProps {}
@@ -86,9 +87,9 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     const defaultValues = {
       displayName: currentVariable.displayName ?? t('common.utils.unknown'),
       name: currentVariable.name,
-      description: getI18nContent(currentVariable.description) ?? '',
-      placeholder: get(currentVariable, 'typeOptions.placeholder', ''),
-      tips: get(currentVariable, 'typeOptions.tips', ''),
+      description: currentVariable.description ?? '',
+      placeholder: get(currentVariable, 'typeOptions.placeholder', '') ?? '',
+      tips: get(currentVariable, 'typeOptions.tips', '') ?? '',
       type: currentVariable.type as IWorkflowInput['type'],
       default: currentVariable.default as IWorkflowInput['default'],
       required: get(currentVariable, 'required', false),
@@ -106,6 +107,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       singleColumn: get(currentVariable, 'typeOptions.singleColumn', false),
       comfyuiModelServerId: get(currentVariable, 'typeOptions.comfyuiModelServerId', undefined),
       comfyuiModelTypeName: get(currentVariable, 'typeOptions.comfyuiModelTypeName', undefined),
+      visibility: get(currentVariable, 'typeOptions.visibility', undefined),
+      flag: get(currentVariable, 'flag', undefined),
     };
 
     form.reset(defaultValues);
@@ -130,6 +133,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       singleColumn,
       comfyuiModelServerId,
       comfyuiModelTypeName,
+      visibility,
     } = pick(data, [
       'multipleValues',
       'assetType',
@@ -148,6 +152,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'singleColumn',
       'comfyuiModelServerId',
       'comfyuiModelTypeName',
+      'visibility',
+      'flag',
     ]);
 
     const finalVariable = omit(data, [
@@ -168,6 +174,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'singleColumn',
       'comfyuiModelServerId',
       'comfyuiModelTypeName',
+      'visibility',
     ]);
 
     const setOption = (key: string, value: unknown) => {
@@ -192,7 +199,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOption('comfyuiModelTypeName', comfyuiModelTypeName);
     setOption('placeholder', placeholder);
     setOption('textareaMiniHeight', textareaMiniHeight);
-
+    setOption('visibility', visibility);
     if (Default) {
       set(finalVariable, 'default', Default);
     }
@@ -284,7 +291,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                   )}
 
                   <FieldDefaultValue form={form} />
-
+                  <FieldFieldVisibility form={form} />
                   <FieldSetRequired form={form} />
 
                   <FieldAccordion form={form} />

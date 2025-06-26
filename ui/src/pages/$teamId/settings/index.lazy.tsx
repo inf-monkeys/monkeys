@@ -4,6 +4,7 @@ import { createLazyFileRoute } from '@tanstack/react-router';
 
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { Account } from '@/components/layout/settings/account';
 import { ApiKey } from '@/components/layout/settings/api-key';
 import { Stat } from '@/components/layout/settings/stat';
@@ -20,6 +21,10 @@ export const Settings: React.FC = () => {
   const [{ tab }, setSettingsTab] = useUrlState<{ tab: 'account' | 'stat' | 'apikey' }>({
     tab: 'account',
   });
+
+  const { data: config } = useSystemConfig();
+
+  const showTeamQuota = config && (config.module === '*' || config.module.includes('payment'));
 
   useLayoutEffect(() => {
     VinesEvent.emit('vines-update-site-title', t('settings.title'));
@@ -55,11 +60,13 @@ export const Settings: React.FC = () => {
             <TeamSettings />
           </ScrollArea>
         </TabsContent>
-        <TabsContent value="team-quota" asChild>
-          <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
-            <TeamCredit />
-          </ScrollArea>
-        </TabsContent>
+        {showTeamQuota && (
+          <TabsContent value="team-quota" asChild>
+            <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
+              <TeamCredit />
+            </ScrollArea>
+          </TabsContent>
+        )}
         <TabsContent value="stat" asChild>
           <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
             <Stat />

@@ -7,11 +7,14 @@ export interface IVinesTeam {
   darkmodeIconUrl?: string;
   description?: string;
   ownerUserId?: string;
-  customTheme?: {
+  customTheme: {
     enableTeamLogo?: boolean;
     primaryColor?: string;
     backgroundColor?: string;
     secondaryBackgroundColor?: string;
+    configs: {
+      showFormInImageDetail?: boolean;
+    };
   };
 }
 

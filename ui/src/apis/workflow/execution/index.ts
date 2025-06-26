@@ -24,13 +24,19 @@ export const executionWorkflow = (
   inputData: Record<string, unknown>,
   version = 1,
   chatSessionId?: string,
+  extraMetadata?: string,
 ) =>
   vinesFetcher<string>({
     method: 'POST',
     simple: true,
     wrapper: (it) => (it as unknown as { workflowInstanceId: string })?.workflowInstanceId ?? '',
   })(`/api/workflow/executions/${workflowId}/start`, {
-    inputData,
+    inputData: extraMetadata
+      ? {
+          ...inputData,
+          extraMetadata,
+        }
+      : inputData,
     version,
     ...(chatSessionId && { chatSessionId }),
   });
@@ -231,9 +237,3 @@ export const useWorkflowInstanceByImageUrl = (workflowId?: string | null) =>
     workflowId ? `/api/workflow/executions/${workflowId}/get-instance-by-image-url` : null,
     vinesFetcher({ method: 'POST' }),
   );
-
-export const getWorkflowExecutionOutputs = (workflowId: string) =>
-  vinesFetcher({method: 'GET'})(`/api/workflow/executions/${workflowId}/outputs`);
-
-export const getWorkflowExecutionAllOutputs = () =>
-  vinesFetcher({method: 'GET'})(`/api/workflow/executions/all/outputs`);

@@ -10,7 +10,6 @@ import { AssetsCommonRepository } from '@/database/repositories/assets-common.re
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import fs from 'fs';
-import _ from 'lodash';
 import os from 'os';
 import path from 'path';
 
@@ -71,18 +70,16 @@ export class ComfyfileCronService {
       // 成功获取到锁，执行需要加锁的代码
       try {
         const subdirectories = await getGithubSubdirectories(config.comfyui.comfyfileRepo);
-        const chunks = _.chunk(subdirectories, 10);
-        for (const chunk of chunks) {
-          await Promise.all(
-            chunk.map(async (subdirectory) => {
-              try {
-                await this.processSubdirectory(subdirectory);
-              } catch (error) {
-                logger.error(`Error processing comfyfile ${subdirectory}`, error);
-              }
-            }),
-          );
+
+        // 将并发处理改为串行处理，以避免数据库连接问题
+        for (const subdirectory of subdirectories) {
+          try {
+            await this.processSubdirectory(subdirectory);
+          } catch (error) {
+            logger.error(`Error processing comfyfile ${subdirectory}`, error);
+          }
         }
+
         logger.info('Comfyfile cronjob finished');
       } finally {
         // 释放锁

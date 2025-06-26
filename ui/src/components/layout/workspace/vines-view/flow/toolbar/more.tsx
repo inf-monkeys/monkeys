@@ -32,7 +32,7 @@ import { useFlowStore } from '@/store/useFlowStore';
 
 import { WorkflowAssociationEditorDialog } from './more/association-editor';
 
-interface IMoreToolbarProps extends React.ComponentPropsWithoutRef<'div'> { }
+interface IMoreToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const MoreToolbar: React.FC<IMoreToolbarProps> = () => {
   const { t } = useTranslation();

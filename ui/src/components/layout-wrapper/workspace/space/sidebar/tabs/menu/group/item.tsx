@@ -142,6 +142,7 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
               placeholder={t('workspace.wrapper.space.menu.group.rename.placeholder')}
               initialValue={displayName}
               onFinished={(val) => handleUpdateGroup({ displayName: val })}
+              i18nJSON={typeof displayName === 'string' ? displayName : JSON.stringify(displayName)}
             >
               <TooltipTrigger asChild>
                 <Button className="-m-2 scale-[0.6]" icon={<Pencil />} size="small" variant="outline" />

@@ -1,4 +1,4 @@
-import { AuthMethod } from '../config';
+import { AuthMethod, CustomizationModules } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
@@ -34,6 +34,12 @@ export interface ISystemConfig {
     hideSpaceHeader: boolean;
     showSidebarPageGroup: boolean;
     showSidebarTeamSelector: boolean;
+    defaults: {
+      showFormInImageDetail?: boolean;
+    };
+    modules: CustomizationModules;
+    paginationPosition?: 'left' | 'right';
+    ugcViewIconOnlyMode?: boolean;
   };
   auth: {
     enabled: AuthMethod[];

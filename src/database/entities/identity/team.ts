@@ -1,11 +1,16 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
+export interface CustomConfigs {
+  showFormInImageDetail?: boolean;
+}
+
 export interface CustomTheme {
   enableTeamLogo?: boolean;
   primaryColor?: string;
   neocardColor?: string;
   neocardDarkColor?: string;
+  configs?: CustomConfigs;
 }
 
 @Entity({ name: 'teams' })

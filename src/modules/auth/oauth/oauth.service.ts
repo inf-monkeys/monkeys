@@ -183,7 +183,6 @@ export class OAuthService {
     if (userInfoData.code !== 0) {
       throw new Error(userInfoData.msg);
     }
-    console.log(userInfoData.data);
     let { avatar_url, email, mobile, enterprise_email, name, user_id } = userInfoData.data;
     email = enterprise_email || email;
     if (mobile) {

@@ -1304,10 +1304,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.3.tgz#4a2868d75d6d6963e423bcf90b7fd1be343409d3"
   integrity sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==
 
-"@inf-monkeys/monkeys@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.npmmirror.com/@inf-monkeys/monkeys/-/monkeys-0.0.10.tgz#58e8c580ef9c98e49e89ad2c090a6dcfbe827bbb"
-  integrity sha512-b9RqBZ1osvSrftnjBpNb3VPHajbs28pxQUL+Ia6C5EWbbkS9TmKN18q4fYrIvletViIOWWGdC5zOkPtZipULyA==
+"@inf-monkeys/monkeys@^0.0.12":
+  version "0.0.12"
+  resolved "https://registry.npmmirror.com/@inf-monkeys/monkeys/-/monkeys-0.0.12.tgz#5443671a4e32dd8f2be4adac5a4d7902856acaa0"
+  integrity sha512-IDOdX9l0y6rNS7TmsRsmutKuBB28L6MrpQRs37fomdfG96ym364jktOLMJ01nCRaQ+faNKcqhBgXeIPic9+6Jw==
   dependencies:
     "@io-orkes/conductor-javascript" "^2.1.0"
 
@@ -10442,6 +10442,11 @@ svg-parser@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/svg-parser/-/svg-parser-2.0.4.tgz#fdc2e29e13951736140b76cb122c8ee6630eb6b5"
   integrity sha512-e4hG1hRwoOdRb37cIMSgzNsxyzKfayW6VOflrwvR+/bzrkyxY/31WkbgnQpgtrNp1SdpJvpUAGTa/ZoiPNDuRQ==
+
+swiper@^11.2.8:
+  version "11.2.8"
+  resolved "https://registry.yarnpkg.com/swiper/-/swiper-11.2.8.tgz#2b5d7da3093454c0a7bf090f1714fb4332142702"
+  integrity sha512-S5FVf6zWynPWooi7pJ7lZhSUe2snTzqLuUzbd5h5PHUOhzgvW0bLKBd2wv0ixn6/5o9vwc/IkQT74CRcLJQzeg==
 
 swr@^2.2.5:
   version "2.2.5"
