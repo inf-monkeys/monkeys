@@ -6,8 +6,8 @@ import { MarketplaceAppEntity, MarketplaceAppStatus } from '@/database/entities/
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { AssetsMapperService } from '@/modules/assets/assets.common.service';
 import { WorkflowCrudService } from '@/modules/workflow/workflow.curd.service';
-import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
-import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { AssetType, MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
@@ -30,6 +30,7 @@ export class MarketplaceService {
     private readonly toolsRepository: ToolsRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly entityManager: EntityManager,
+    @Inject(forwardRef(() => AssetsMapperService))
     private readonly assetsMapperService: AssetsMapperService,
   ) {}
 
@@ -60,6 +61,7 @@ export class MarketplaceService {
 
       const assetSnapshot: MarketplaceAssetSnapshot = {};
       const sourceAssetReferences: SourceAssetReference[] = [];
+      const versionId = generateDbId();
 
       for (const assetRef of versionDto.assets) {
         const handler = this.assetsMapperService.getAssetHandler(assetRef.assetType);
@@ -71,10 +73,16 @@ export class MarketplaceService {
         assetSnapshot[assetRef.assetType].push(snapshot);
 
         sourceAssetReferences.push(assetRef);
+
+        if (assetRef.assetType === 'workflow') {
+          this.workflowCrudService.updateWorkflowDef(teamId, assetRef.assetId, assetRef.version, {
+            forkFromId: versionId,
+          });
+        }
       }
 
       const newVersion = transactionalEntityManager.create(MarketplaceAppVersionEntity, {
-        id: generateDbId(),
+        id: versionId,
         appId: app.id,
         version: versionDto.version,
         releaseNotes: versionDto.releaseNotes,
@@ -268,7 +276,6 @@ export class MarketplaceService {
           for (const assetData of assets) {
             const handler = this.assetsMapperService.getAssetHandler(assetType as any);
             const { originalId, newId } = await handler.cloneFromSnapshot(assetData, teamId, userId);
-
             idMapping[originalId] = newId;
 
             if (!installedAssetIds[assetType]) {
@@ -308,5 +315,25 @@ export class MarketplaceService {
 
       return installation;
     });
+  }
+
+  public async getInstalledApps(teamId: string, userId: string) {
+    const installedApps = await this.installedAppRepo.find({ where: { teamId, userId } });
+    return installedApps;
+  }
+
+  public async getInstalledAppByAppVersionId(appVersionId: string, teamId: string) {
+    const installedApp = await this.installedAppRepo.findOne({ where: { marketplaceAppVersionId: appVersionId, teamId } });
+    return installedApp;
+  }
+
+  public async getAppVersionIdByAssetId(assetId: string, assetType: AssetType) {
+    const appVersionId = await this.installedAppRepo.findOne({ where: { installedAssetIds: { [assetType]: [assetId] } } });
+    return appVersionId;
+  }
+
+  public async getAppVersionById(appVersionId: string) {
+    const appVersion = await this.versionRepo.findOne({ where: { id: appVersionId }, relations: { app: true } });
+    return appVersion;
   }
 }

@@ -193,6 +193,7 @@ export class WorkflowRepository {
       exposeOpenaiCompatibleInterface?: boolean;
       openaiModelName?: string;
       shortcutsFlow?: string;
+      forkFromId?: string;
     },
   ) {
     const {
@@ -210,13 +211,28 @@ export class WorkflowRepository {
       exposeOpenaiCompatibleInterface,
       openaiModelName,
       shortcutsFlow,
+      forkFromId,
     } = updates;
 
     // 字段都为空，则跳过更新
     if (
-      [displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName, shortcutsFlow].every(
-        (item) => typeof item === 'undefined',
-      )
+      [
+        displayName,
+        description,
+        iconUrl,
+        tasks,
+        variables,
+        activated,
+        validated,
+        validationIssues,
+        output,
+        tagIds,
+        rateLimiter,
+        exposeOpenaiCompatibleInterface,
+        openaiModelName,
+        shortcutsFlow,
+        forkFromId,
+      ].every((item) => typeof item === 'undefined')
     )
       return;
     if (variables && !Array.isArray(variables)) {
@@ -249,7 +265,23 @@ export class WorkflowRepository {
     await this.workflowMetadataRepository.findOneOrFail({ where: { workflowId: workflowId, version, teamId, isDeleted: false } });
     const updateFields = {
       ..._.pickBy(
-        { displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName, shortcutsFlow },
+        {
+          displayName,
+          iconUrl,
+          description,
+          tasks,
+          variables,
+          activated,
+          validationIssues,
+          validated,
+          output,
+          tagIds,
+          rateLimiter,
+          exposeOpenaiCompatibleInterface,
+          openaiModelName,
+          shortcutsFlow,
+          forkFromId,
+        },
         (v) => typeof v !== 'undefined',
       ),
       updatedTimestamp: Date.now(),
@@ -1205,6 +1237,16 @@ ORDER BY
         },
       })
       .then((data) => data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow'])));
+  }
+
+  public async getWorkflowAssociation(workflowAssociationId: string) {
+    return await this.workflowAssociationRepository.findOne({
+      where: { id: workflowAssociationId, isDeleted: false },
+      relations: {
+        originWorkflow: true,
+        targetWorkflow: true,
+      },
+    });
   }
 
   public async createWorkflowAssociation(workflowId: string, teamId: string, createAssociation: UpdateAndCreateWorkflowAssociation) {

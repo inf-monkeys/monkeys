@@ -19,14 +19,14 @@ import fs from 'fs';
 import _, { isEmpty } from 'lodash';
 import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
 import { AssetsPublishService } from '../assets/assets.publish.service';
-import { AssetCloneResult } from '../marketplace/types';
+import { AssetCloneResult, IAssetHandler } from '../marketplace/types';
 import { ConductorService } from './conductor/conductor.service';
 import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowPageJson, WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowPageService } from './workflow.page.service';
 import { WorkflowValidateService } from './workflow.validate.service';
 
 @Injectable()
-export class WorkflowCrudService {
+export class WorkflowCrudService implements IAssetHandler {
   ASSET_TYPE_SD_MODEL: AssetType = 'sd-model';
   ASSET_TYPE_LLM_MODEL: AssetType = 'llm-model';
   ASSET_TYPE_TEXT_COLLECTION: AssetType = 'knowledge-base';
@@ -606,6 +606,7 @@ export class WorkflowCrudService {
       rateLimiter?: WorkflowRateLimiter;
       openaiModelName?: string;
       shortcutsFlow?: string;
+      forkFromId?: string;
     },
   ) {
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
