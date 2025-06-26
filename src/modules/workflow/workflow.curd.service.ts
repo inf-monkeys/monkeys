@@ -9,18 +9,20 @@ import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, Workf
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
+import { ToolsRepository } from '@/database/repositories/tools.repository';
+import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { AssetType, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monkeys/monkeys';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
 import _, { isEmpty } from 'lodash';
-import { ToolsRepository } from '@/database/repositories/tools.repository';
-import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
 import { AssetsPublishService } from '../assets/assets.publish.service';
+import { AssetCloneResult } from '../marketplace/types';
 import { ConductorService } from './conductor/conductor.service';
-import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowWithAssetsJson } from './interfaces';
+import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowPageJson, WorkflowWithAssetsJson } from './interfaces';
+import { WorkflowPageService } from './workflow.page.service';
 import { WorkflowValidateService } from './workflow.validate.service';
 
 @Injectable()
@@ -36,8 +38,72 @@ export class WorkflowCrudService {
     private readonly workflowRepository: WorkflowRepository,
     private readonly workflowValidateService: WorkflowValidateService,
     private readonly assetsCommonRepository: AssetsCommonRepository,
+    private readonly pageService: WorkflowPageService,
+
+    @Inject(forwardRef(() => AssetsPublishService))
     private readonly assetsPublishService: AssetsPublishService,
   ) {}
+
+  public async getSnapshot(workflowId: string, version: number): Promise<any> {
+    const { workflow } = await this.exportWorkflowOfVersion(workflowId, version);
+    const pages = await this.pageService.listWorkflowPagesBrief(workflowId);
+    return { workflow, pages };
+  }
+
+  public async cloneFromSnapshot(snapshot: any, teamId: string, userId: string): Promise<AssetCloneResult> {
+    const { workflow, pages } = snapshot;
+    const originalId = workflow.originalId;
+    const newWorkflowId = await this.importWorkflow(teamId, userId, { workflows: [workflow], pages });
+    return { originalId, newId: newWorkflowId };
+  }
+
+  private async importWorkflow(teamId: string, userId: string, data: { workflows: WorkflowExportJson[]; pages: WorkflowPageJson[] }): Promise<string> {
+    const workflowData = data.workflows[0];
+    const newWorkflowId = await this.createWorkflowDef(teamId, userId, workflowData);
+    await this.pageService.importWorkflowPage(newWorkflowId, teamId, userId, data.pages);
+    return newWorkflowId;
+  }
+
+  public async remapDependencies(newWorkflowId: string, idMapping: { [originalId: string]: string }): Promise<void> {
+    const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(newWorkflowId);
+    if (!workflow) return;
+
+    let needsUpdate = false;
+    const tasks = workflow.tasks;
+
+    // 遍历所有任务节点
+    for (const task of flatTasks(tasks)) {
+      // 场景1: 修复子工作流引用
+      if (task.type === ToolType.SUB_WORKFLOW) {
+        const originalSubWorkflowId = task.subWorkflowParam?.name;
+        if (originalSubWorkflowId && idMapping[originalSubWorkflowId]) {
+          task.subWorkflowParam.name = idMapping[originalSubWorkflowId];
+          needsUpdate = true;
+        }
+      }
+      // 场景2: 修复ComfyUI工作流引用
+      if (task.name === 'comfyui:run_comfyui_workflow') {
+        const originalComfyWorkflowId = task.inputParameters?.workflow;
+        if (originalComfyWorkflowId && idMapping[originalComfyWorkflowId]) {
+          task.inputParameters.workflow = idMapping[originalComfyWorkflowId];
+          needsUpdate = true;
+        }
+      }
+    }
+
+    // 场景3: 修复快捷方式引用
+    if (workflow.shortcutsFlow) {
+      const [originalTargetId, version] = workflow.shortcutsFlow.split(':');
+      if (idMapping[originalTargetId]) {
+        workflow.shortcutsFlow = `${idMapping[originalTargetId]}:${version}`;
+        needsUpdate = true;
+      }
+    }
+
+    if (needsUpdate) {
+      await this.workflowRepository.updateWorkflowDef(workflow.teamId, newWorkflowId, workflow.version, { tasks, shortcutsFlow: workflow.shortcutsFlow });
+    }
+  }
 
   public async getWorkflowDef(workflowId: string, version?: number, simple = true): Promise<WorkflowMetadataEntity> {
     if (!version) {

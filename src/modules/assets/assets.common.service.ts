@@ -11,11 +11,16 @@ import { MediaFileAssetRepositroy } from '@/database/repositories/assets-media-f
 import { SdModelAssetRepositroy } from '@/database/repositories/assets-sd-model.repository';
 import { WorkflowAssetRepositroy } from '@/database/repositories/assets-workflow.respository';
 import { AssetType } from '@inf-monkeys/monkeys';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { IAssetHandler } from '../marketplace/types';
+import { WorkflowCrudService } from '../workflow/workflow.curd.service';
 
 @Injectable()
 export class AssetsMapperService {
   constructor(
+    @Inject(forwardRef(() => WorkflowCrudService))
+    private readonly workflowCrudService: IAssetHandler,
+
     private readonly canvasAssetsRepository: CanvasAssetRepositroy,
     private readonly llmModelAssetsRepository: LlmModelAssetRepositroy,
     private readonly sdModelAssetsRepository: SdModelAssetRepositroy,
@@ -27,6 +32,15 @@ export class AssetsMapperService {
     private readonly llmChannelAssetRepository: LlmChannelAssetRepositroy,
     private readonly conversationAppAssetRepository: ConversationAppAssetRepositroy,
   ) {}
+
+  public getAssetHandler(assetType: AssetType): IAssetHandler {
+    switch (assetType) {
+      case 'workflow':
+        return this.workflowCrudService;
+      default:
+        throw new Error(`Unsupported asset type for handler: ${assetType}`);
+    }
+  }
 
   public getRepositoryByAssetType(assetType: AssetType): AbstractAssetRepository<BaseAssetEntity> {
     if (assetType === 'canvas') {
