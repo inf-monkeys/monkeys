@@ -96,4 +96,8 @@ export class MediaFileService {
       return media.url;
     }
   }
+
+  public async getMediaByIdAndTeamId(id: string, teamId: string) {
+    return await this.mediaRepository.getMediaByIdAndTeamId(id, teamId);
+  }
 }
