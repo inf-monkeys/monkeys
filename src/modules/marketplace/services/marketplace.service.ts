@@ -87,7 +87,7 @@ export class MarketplaceService {
 
       this.eventEmitter.emit('marketplace.app.submitted', { appId: app.id, versionId: newVersion.id });
 
-      return app;
+      return { ...app, version: newVersion };
     });
   }
 
@@ -220,11 +220,24 @@ export class MarketplaceService {
 
   public async getAppDetails(appId: string) {
     const app = await this.appRepo.findOne({
-      where: { id: appId, status: MarketplaceAppStatus.APPROVED },
-      relations: ['versions'],
+      where: {
+        id: appId,
+        status: MarketplaceAppStatus.APPROVED,
+      },
     });
-    if (!app) throw new NotFoundException(`Application with id ${appId} not found or is not approved.`);
-    return app;
+
+    if (!app) {
+      throw new NotFoundException(`Application with id ${appId} not found or is not approved.`);
+    }
+
+    const appWithVersions = await this.appRepo.findOne({
+      where: { id: appId },
+      relations: {
+        versions: true,
+      },
+    });
+
+    return appWithVersions;
   }
 
   public async installApp(versionId: string, teamId: string, userId: string) {

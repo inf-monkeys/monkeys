@@ -1,5 +1,6 @@
 import { InstalledAppEntity } from '@/database/entities/marketplace/installed-app.entity';
 import { MarketplaceAppVersionEntity } from '@/database/entities/marketplace/marketplace-app-version.entity';
+import { AssetsMapperService } from '@/modules/assets/assets.common.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +15,7 @@ export class MarketplaceNotificationService {
     private readonly installedAppRepo: Repository<InstalledAppEntity>,
     @InjectRepository(MarketplaceAppVersionEntity)
     private readonly versionRepo: Repository<MarketplaceAppVersionEntity>,
+    private readonly assetsMapperService: AssetsMapperService,
   ) {}
 
   @OnEvent('marketplace.app.version.approved')
@@ -25,22 +27,87 @@ export class MarketplaceNotificationService {
       const allVersionsOfApp = await this.versionRepo.find({ where: { appId }, select: ['id'] });
       const allVersionIds = allVersionsOfApp.map((v) => v.id);
 
+      // 获取需要更新的安装记录的完整信息
       const installationsToUpdate = await this.installedAppRepo.find({
         where: {
           marketplaceAppVersionId: In(allVersionIds.filter((id) => id !== newVersionId)),
           isUpdateAvailable: false,
         },
-        select: ['id'],
       });
 
       if (installationsToUpdate.length > 0) {
         const idsToUpdate = installationsToUpdate.map((install) => install.id);
-
         this.logger.log(`Found ${idsToUpdate.length} installations to notify for app ${appId}.`);
 
-        await this.installedAppRepo.createQueryBuilder().update(InstalledAppEntity).set({ isUpdateAvailable: true }).whereInIds(idsToUpdate).execute();
+        // 获取新版本的 asset_snapshot
+        const newVersion = await this.versionRepo.findOne({
+          where: { id: newVersionId },
+        });
 
-        this.logger.log(`Successfully notified ${idsToUpdate.length} installations.`);
+        if (!newVersion || !newVersion.assetSnapshot) {
+          throw new Error('New version or its asset snapshot not found');
+        }
+
+        // 为每个安装进行更新
+        for (const installation of installationsToUpdate) {
+          this.logger.log(`Updating installation ${installation.id} for team ${installation.teamId}`);
+
+          // 遍历每种资产类型
+          for (const assetType in newVersion.assetSnapshot) {
+            if (!installation.installedAssetIds[assetType]) {
+              continue;
+            }
+
+            const newAssets = newVersion.assetSnapshot[assetType];
+            const installedAssets = installation.installedAssetIds[assetType];
+
+            // 确保数组长度匹配
+            if (newAssets.length !== installedAssets.length) {
+              this.logger.warn(`Asset count mismatch for type ${assetType} in installation ${installation.id}`);
+              continue;
+            }
+
+            // 更新每个资产
+            for (let i = 0; i < installedAssets.length; i++) {
+              const installedAssetId = installedAssets[i];
+              const newAssetData = newAssets[i];
+
+              const handler = this.assetsMapperService.getAssetHandler(assetType as any);
+              const { newId } = await handler.cloneFromSnapshot(newAssetData, installation.teamId, installation.userId);
+
+              // 将新资产的内容复制到旧资产中
+              const repo = this.assetsMapperService.getRepositoryByAssetType(assetType as any);
+              const newAsset = await repo.getAssetById(newId);
+              const oldAsset = await repo.getAssetById(installedAssetId);
+              if (oldAsset && newAsset) {
+                Object.assign(oldAsset, {
+                  ...newAsset,
+                  id: installedAssetId,
+                  workflowId: assetType === 'workflow' ? installedAssetId : undefined,
+                  teamId: installation.teamId,
+                  creatorUserId: installation.userId,
+                  updatedTimestamp: Date.now(),
+                });
+                await repo.repository.save(oldAsset);
+              }
+
+              // 删除临时创建的新资产
+              const tempAsset = await repo.getAssetById(newId);
+              if (tempAsset) {
+                await repo.repository.remove(tempAsset);
+              }
+            }
+          }
+
+          // 更新安装记录的版本ID
+          installation.marketplaceAppVersionId = newVersionId;
+          installation.isUpdateAvailable = false;
+          await this.installedAppRepo.save(installation);
+
+          this.logger.log(`Successfully updated installation ${installation.id}`);
+        }
+
+        this.logger.log(`Successfully updated ${idsToUpdate.length} installations.`);
       } else {
         this.logger.log(`No active installations found needing an update notification for app ${appId}.`);
       }

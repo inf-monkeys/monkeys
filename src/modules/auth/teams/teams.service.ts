@@ -51,20 +51,6 @@ export class TeamsService {
   public async initTeam(teamId: string, userId: string) {
     // Init assets from built-in marketplace
     await this.forkAssetsFromMarketPlace(teamId, userId);
-    // // TEMP TODO: 默认新建一个画板
-    // const project = await this.designProjectService.create({
-    //   teamId,
-    //   creatorUserId: userId,
-    //   displayName: 'Design Board',
-    //   iconUrl: 'emoji:🎨:#eeeef1',
-    //   description: '',
-    // } as CreateDesignProjectDto);
-    // const board = (await this.designMetadataService.findAllByProjectId(project.id))[0];
-    // const pageGroup = await this.pageService.getPageGroups(teamId)[0];
-    // await this.pageService.updatePageGroup(teamId, pageGroup.id, {
-    //   pageId: 'design-board-' + board.id,
-    //   mode: 'add',
-    // });
     // 初始化内置图像模型类型
     await this.comfyuiModelService.updateTypesFromInternals(teamId);
     // 自动更新内置图像模型列表
