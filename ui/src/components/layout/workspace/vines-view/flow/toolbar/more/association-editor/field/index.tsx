@@ -12,6 +12,8 @@ import { FieldWorkflow } from '@/components/layout/workspace/vines-view/flow/too
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { IWorkflowAssociationForEditor } from '@/schema/workspace/workflow-association.ts';
 
+import { FieldNewDesignDisplayName } from './new-design-display-name';
+
 interface IAssociationEditorFieldsProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowAssociationForEditor>;
 }
@@ -35,9 +37,10 @@ export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = 
           {type === 'to-workflow' && (
             <>
               <FieldWorkflow form={form} />
+              <FieldMapper form={form} />
             </>
           )}
-          <FieldMapper form={form} />
+          {type === 'new-design' && <FieldNewDesignDisplayName form={form} />}
         </div>
       </ScrollArea>
     </div>

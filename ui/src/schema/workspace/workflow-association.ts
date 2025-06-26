@@ -46,6 +46,15 @@ export const workflowAssociationSchema = z.discriminatedUnion('type', [
   }),
   baseWorkflowAssociationSchema.extend({
     type: z.literal('new-design'),
+    extraData: z.object({
+      newDesignDisplayName: z
+        .record(z.string())
+        .refine(
+          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+          'At least one language must have a display name',
+        )
+        .optional(),
+    }),
   }),
 ]);
 

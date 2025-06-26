@@ -5,6 +5,10 @@ import { WorkflowMetadataEntity } from './workflow-metadata';
 
 export type WorkflowAssociationType = 'to-workflow' | 'new-design';
 
+export interface IWorkflowAssociationExtraData {
+  newDesignDisplayName?: I18nValue;
+}
+
 @Entity({ name: 'workflow_associations' })
 export class WorkflowAssociationsEntity extends BaseEntity {
   @Column({
@@ -68,6 +72,13 @@ export class WorkflowAssociationsEntity extends BaseEntity {
     default?: string;
   }>;
 
+  @Column({
+    name: 'extra_data',
+    type: 'jsonb',
+    nullable: true,
+  })
+  extraData?: IWorkflowAssociationExtraData | null;
+
   @ManyToOne(() => WorkflowMetadataEntity)
   @JoinColumn({ name: 'origin_workflow_id' })
   originWorkflow: WorkflowMetadataEntity;
@@ -77,4 +88,7 @@ export class WorkflowAssociationsEntity extends BaseEntity {
   targetWorkflow: WorkflowMetadataEntity;
 }
 
-export type UpdateAndCreateWorkflowAssociation = Pick<WorkflowAssociationsEntity, 'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex' | 'type'>;
+export type UpdateAndCreateWorkflowAssociation = Pick<
+  WorkflowAssociationsEntity,
+  'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex' | 'type' | 'extraData'
+>;

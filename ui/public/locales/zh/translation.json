@@ -2667,6 +2667,10 @@
                   "target-placeholder": "目标工作流输入字段",
                   "default-placeholder": "默认值",
                   "add": "新增映射"
+                },
+                "new-design-display-name": {
+                  "label": "新设计画板显示名称",
+                  "placeholder": "请输入新设计画板显示名称"
                 }
               }
             }
