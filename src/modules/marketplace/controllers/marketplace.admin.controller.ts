@@ -31,8 +31,8 @@ export class MarketplaceAdminController {
 
   @Put('/submissions/:appId/approve')
   @ApiOperation({ summary: 'Approve a submission' })
-  async approveSubmission(@Param('appId') appId: string) {
-    const app = await this.marketplaceService.approveSubmission(appId);
+  async approveSubmission(@Param('appId') appId: string, @Body() body: { isPreset?: boolean }) {
+    const app = await this.marketplaceService.approveSubmission(appId, body.isPreset);
     return new SuccessResponse({ data: app });
   }
 
