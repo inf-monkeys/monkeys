@@ -11,6 +11,7 @@ const appId = config.server.appId;
 export class TaskQueueService {
   private readonly logger = new Logger(TaskQueueService.name);
   private readonly TASK_PREFIX = appId + ':evaluation:task';
+  private readonly USER_TASKS_PREFIX = appId + ':evaluation:user_tasks';
   private readonly QUEUE_PREFIX = appId + ':evaluation:queue';
   private readonly PROGRESS_PREFIX = appId + ':evaluation:progress';
 
@@ -34,11 +35,11 @@ export class TaskQueueService {
       createdAt: new Date(),
     };
 
-    await this.redis.setex(
-      `${this.TASK_PREFIX}:${taskId}`,
-      3600 * 24, // 24小时过期
-      JSON.stringify(task),
-    );
+    await this.redis.setex(`${this.TASK_PREFIX}:${taskId}`, 3600 * 24, JSON.stringify(task));
+
+    const userTaskKey = `${this.USER_TASKS_PREFIX}:${userId}`;
+    await this.redis.sadd(userTaskKey, taskId);
+    await this.redis.expire(userTaskKey, 3600 * 24 * 30);
 
     await this.redis.lpush(`${this.QUEUE_PREFIX}:pending`, taskId);
 
@@ -51,6 +52,35 @@ export class TaskQueueService {
     if (!taskData) return null;
 
     return JSON.parse(taskData);
+  }
+
+  async getTasksByUser(teamId: string, userId: string): Promise<EvaluationTask[]> {
+    const userTaskKey = `${this.USER_TASKS_PREFIX}:${userId}`;
+    const taskIds = await this.redis.smembers(userTaskKey);
+
+    if (!taskIds || taskIds.length === 0) {
+      return [];
+    }
+
+    const taskKeys = taskIds.map((id) => `${this.TASK_PREFIX}:${id}`);
+
+    const allTaskData = await this.redis.mget(taskKeys);
+
+    const tasks: EvaluationTask[] = [];
+    for (const taskData of allTaskData) {
+      if (taskData) {
+        try {
+          const task = JSON.parse(taskData);
+          if (task.teamId === teamId) {
+            tasks.push(task);
+          }
+        } catch (e) {
+          this.logger.error('Failed to parse task data from Redis during getTasksByUser', e);
+        }
+      }
+    }
+
+    return tasks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   async updateTaskStatus(taskId: string, status: TaskStatus, error?: string): Promise<void> {
@@ -112,29 +142,15 @@ export class TaskQueueService {
     if (!task) return false;
 
     if (task.status === TaskStatus.PROCESSING) {
-      return false; // 不能取消正在处理的任务
+      return false;
     }
 
     await this.updateTaskStatus(taskId, TaskStatus.CANCELLED);
     await this.redis.lrem(`${this.QUEUE_PREFIX}:pending`, 1, taskId);
+    const userTaskKey = `${this.USER_TASKS_PREFIX}:${task.userId}`;
+    await (this.redis as any).srem(userTaskKey, taskId);
+
     return true;
-  }
-
-  async getTasksByUser(teamId: string, userId: string): Promise<EvaluationTask[]> {
-    const keys = await this.redis.keys(`${this.TASK_PREFIX}:*`);
-    const tasks: EvaluationTask[] = [];
-
-    for (const key of keys) {
-      const taskData = await this.redis.get(key);
-      if (taskData) {
-        const task = JSON.parse(taskData);
-        if (task.teamId === teamId && task.userId === userId) {
-          tasks.push(task);
-        }
-      }
-    }
-
-    return tasks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   async getQueueLength(): Promise<{ pending: number; processing: number }> {
@@ -163,6 +179,8 @@ export class TaskQueueService {
           // 清理7天前的任务
           await this.redis.del(key);
           await this.redis.del(`${this.PROGRESS_PREFIX}:${task.id}`);
+          const userTaskKey = `${this.USER_TASKS_PREFIX}:${task.userId}`;
+          await (this.redis as any).srem(userTaskKey, task.id);
         }
       }
     }
