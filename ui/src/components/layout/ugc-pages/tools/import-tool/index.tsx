@@ -27,7 +27,7 @@ export const ImportTools: React.FC<IImportToolsProps> = () => {
           {iconOnlyMode ? null : t('ugc-page.tools.import.label')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[calc(100vh-10rem)] max-w-3xl">
+      <DialogContent className="max-h-[calc(100vh-10rem)] max-w-3xl overflow-auto">
         <DialogHeader>
           <DialogTitle>{t('ugc-page.tools.import.label')}</DialogTitle>
         </DialogHeader>
