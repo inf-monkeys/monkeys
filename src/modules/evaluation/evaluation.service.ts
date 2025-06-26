@@ -707,26 +707,30 @@ export class EvaluationService {
 
     const stats = await this.evaluationRefactoredRepository.getLeaderboardStats(moduleId, evaluatorId);
 
-    const items = scores.map((score, index) => ({
-      rank: (page - 1) * limit + index + 1,
-      assetId: score.assetId,
-      asset: score.asset || {
-        id: score.assetId,
-        name: `Asset ${score.assetId}`,
-        type: 'unknown',
-      },
-      rating: score.rating,
-      rd: score.rd,
-      vol: score.vol,
-      totalBattles: score.totalBattles || 0,
-      wins: score.wins || 0,
-      losses: score.losses || 0,
-      draws: score.draws || 0,
-      winRate: score.totalBattles > 0 ? Math.round((score.wins / score.totalBattles) * 100) / 100 : 0,
-      lastUpdated: score.updatedAt,
-      evaluatorId: score.evaluatorId,
-      evaluator: score.evaluator,
-    }));
+    const items = scores.map((score, index) => {
+      const totalBattles = parseInt(score.totalBattles, 10) || 0;
+      const wins = parseInt(score.wins, 10) || 0;
+      return {
+        rank: (page - 1) * limit + index + 1,
+        assetId: score.assetId,
+        asset: score.asset || {
+          id: score.assetId,
+          name: `Asset ${score.assetId}`,
+          type: 'unknown',
+        },
+        rating: score.rating,
+        rd: score.rd,
+        vol: score.vol,
+        totalBattles: totalBattles,
+        wins: wins,
+        losses: parseInt(score.losses, 10) || 0,
+        draws: parseInt(score.draws, 10) || 0,
+        winRate: totalBattles > 0 ? Math.round((wins / totalBattles) * 100) / 100 : 0,
+        lastUpdated: score.updatedAt,
+        evaluatorId: score.evaluatorId,
+        evaluator: score.evaluator,
+      };
+    });
 
     return {
       items,
@@ -837,6 +841,10 @@ export class EvaluationService {
         const minRating = Math.min(...ratings);
         const ratingChange = ratings.length > 1 ? ratings[ratings.length - 1] - ratings[0] : 0;
 
+        const assetBattles = battles.filter((b) => b.assetAId === assetId || b.assetBId === assetId);
+        const wins = assetBattles.filter((b) => (b.assetAId === assetId && b.result === BattleResult.A_WIN) || (b.assetBId === assetId && b.result === BattleResult.B_WIN)).length;
+        const totalBattlesForWinRate = assetBattles.length;
+
         return {
           assetId,
           assetName: `Asset ${assetId}`,
@@ -851,7 +859,7 @@ export class EvaluationService {
           minRating: Math.round(minRating),
           ratingChange: Math.round(ratingChange),
           totalBattles: points.length,
-          winRate: 0, // 需要额外计算
+          winRate: totalBattlesForWinRate > 0 ? Math.round((wins / totalBattlesForWinRate) * 100) / 100 : 0,
           volatility: Math.round(this.calculateVolatility(ratings)),
         };
       });
