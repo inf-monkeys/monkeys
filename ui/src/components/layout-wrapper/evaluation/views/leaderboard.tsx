@@ -7,11 +7,71 @@ import { Award, BarChart2, TrendingUp, Users } from 'lucide-react';
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import { getChartData, getEloLeaderboard, getEloStats } from '@/apis/evaluation';
+import { EloLeaderboardEntry } from '@/apis/evaluation/typings.ts';
+import { getMediaAsset } from '@/apis/media-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const CHART_COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+interface ILeaderboardRowProps {
+  entry: EloLeaderboardEntry;
+  assetId?: string;
+  assetRating?: number;
+}
+
+const LeaderboardRow: React.FC<ILeaderboardRowProps> = ({ entry, assetId, assetRating }) => {
+  const {
+    data: mediaAsset,
+    isLoading: isMediaAssetLoading,
+    error: mediaAssetError,
+  } = useSWR(assetId ? ['media-asset', assetId] : null, () => getMediaAsset(assetId!));
+
+  const wins = parseInt(entry.wins, 10) || 0;
+  const losses = parseInt(entry.losses, 10) || 0;
+  const draws = parseInt(entry.draws, 10) || 0;
+  const totalBattles = wins + losses + draws;
+  const winRate = totalBattles > 0 ? (wins / totalBattles) * 100 : 0;
+
+  return (
+    <TableRow key={entry.rank}>
+      <TableCell>{entry.rank}</TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {isMediaAssetLoading ? (
+            <Skeleton className="h-10 w-10 rounded" />
+          ) : mediaAssetError ? (
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200 text-xs text-gray-500">
+              Error
+            </div>
+          ) : mediaAsset?.url ? (
+            <img
+              src={mediaAsset.url}
+              alt={assetId}
+              className="h-10 w-10 rounded object-cover"
+              onError={(e) => {
+                console.error('Image load error:', e);
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200 text-xs text-gray-500">
+              No Image
+            </div>
+          )}
+          <span>{assetId ? assetId.substring(0, 8) + '...' : 'N/A'}</span>
+        </div>
+      </TableCell>
+      <TableCell>
+        {wins}/{losses}/{draws}
+      </TableCell>
+      <TableCell>{totalBattles}</TableCell>
+      <TableCell>{winRate.toFixed(1)}%</TableCell>
+      <TableCell>{typeof assetRating === 'number' ? assetRating.toFixed(0) : 'N/A'}</TableCell>
+    </TableRow>
+  );
+};
 
 export const LeaderboardView: React.FC = () => {
   const { moduleId } = useParams({ from: '/$teamId/evaluations/$moduleId/$tab/' });
@@ -50,55 +110,73 @@ export const LeaderboardView: React.FC = () => {
       return acc;
     }, {});
 
-    const lastRatings = {};
-    // Initialize with rating before the very first match in the trend
+    // Create individual data series for each asset
+    const assetDataSeries: { [key: string]: { matchNumber: number; [key: string]: number }[] } = {};
+
     trends.forEach((trend) => {
-      if (trend.points.length > 0) {
-        const firstPointBattleId = trend.points[0].battleId;
-        if (battleOldRatings[firstPointBattleId] && battleOldRatings[firstPointBattleId][trend.assetId]) {
-          lastRatings[trend.assetId] = battleOldRatings[firstPointBattleId][trend.assetId];
-        } else {
-          lastRatings[trend.assetId] = 1500; // Fallback
+      const assetId = trend.assetId;
+      const points = trend.points.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      // Initialize with starting rating
+      let startingRating = 1500;
+      if (points.length > 0) {
+        const firstPointBattleId = points[0].battleId;
+        if (battleOldRatings[firstPointBattleId] && battleOldRatings[firstPointBattleId][assetId]) {
+          startingRating = battleOldRatings[firstPointBattleId][assetId];
         }
-      } else {
-        lastRatings[trend.assetId] = 1500; // Fallback for assets with no matches
       }
+
+      // Create data points for this asset only
+      const assetData = [{ matchNumber: 0, [assetId]: startingRating }];
+
+      points.forEach((point, index) => {
+        assetData.push({
+          matchNumber: index + 1,
+          [assetId]: point.rating,
+        });
+      });
+
+      assetDataSeries[assetId] = assetData;
     });
 
-    const chartData = [{ matchNumber: 0, ...lastRatings }];
+    // Find the maximum number of matches to create the unified dataset
+    const maxMatches = Math.max(0, ...Object.values(assetDataSeries).map((series) => series.length));
 
-    const allPoints = trends
-      .flatMap((trend) => trend.points.map((p) => ({ ...p, assetId: trend.assetId })))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Create unified chart data
+    const chartData: { matchNumber: number; [key: string]: number | undefined }[] = [];
+    for (let i = 0; i < maxMatches; i++) {
+      const dataPoint: { matchNumber: number; [key: string]: number | undefined } = { matchNumber: i };
 
-    const uniqueBattleIds = [...new Set(allPoints.map((p) => p.battleId))];
-
-    uniqueBattleIds.forEach((battleId, index) => {
-      const pointsForBattle = allPoints.filter((p) => p.battleId === battleId);
-      pointsForBattle.forEach((point) => {
-        lastRatings[point.assetId] = point.rating;
+      // Add data for each asset if it exists at this match number
+      Object.entries(assetDataSeries).forEach(([assetId, series]) => {
+        if (i < series.length) {
+          dataPoint[assetId] = series[i][assetId];
+        }
+        // Don't add the asset data if it doesn't have a match at this point
       });
-      chartData.push({
-        matchNumber: index + 1,
-        ...lastRatings,
-      });
-    });
+
+      chartData.push(dataPoint);
+    }
 
     return { data: chartData, lines };
   }, [rawChartData, statsData]);
 
-  const assetRatingsMap = useMemo(() => {
+  // 从 chart-data 中创建 assetId 到评分的映射
+  const assetRatingMap = useMemo(() => {
     if (!rawChartData?.data?.trends?.trends) {
       return new Map<string, number>();
     }
+
     const trends = rawChartData.data.trends.trends;
-    const ratingsMap = new Map<string, number>();
+    const ratingMap = new Map<string, number>();
+
     trends.forEach((trend) => {
-      if (trend.assetName && typeof trend.currentRating === 'number') {
-        ratingsMap.set(trend.assetName, trend.currentRating);
+      if (trend.assetId && typeof trend.currentRating === 'number') {
+        ratingMap.set(trend.assetId, trend.currentRating);
       }
     });
-    return ratingsMap;
+
+    return ratingMap;
   }, [rawChartData]);
 
   const renderSkeletons = (count: number, columns: number) =>
@@ -197,9 +275,23 @@ export const LeaderboardView: React.FC = () => {
                 <ResponsiveContainer>
                   <LineChart data={formattedChartData.data}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="matchNumber" allowDecimals={false} />
-                    <YAxis />
-                    <Tooltip />
+                    <XAxis
+                      dataKey="matchNumber"
+                      allowDecimals={false}
+                      label={{ value: '对战场次', position: 'insideBottom', offset: -5 }}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis label={{ value: 'ELO 评分', angle: -90, position: 'insideLeft' }} tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      labelFormatter={(value) => `第 ${value} 场对战`}
+                      formatter={(value, name) => {
+                        // 只显示有数据的asset
+                        if (value === undefined || value === null) {
+                          return [null, null];
+                        }
+                        return [`${Number(value).toFixed(0)}`, name];
+                      }}
+                    />
                     <Legend />
                     {formattedChartData.lines.map((line) => (
                       <Line
@@ -208,6 +300,9 @@ export const LeaderboardView: React.FC = () => {
                         dataKey={line.assetId}
                         name={line.name}
                         stroke={line.color}
+                        connectNulls={false}
+                        dot={{ r: 3 }}
+                        activeDot={{ r: 5 }}
                       />
                     ))}
                   </LineChart>
@@ -237,29 +332,46 @@ export const LeaderboardView: React.FC = () => {
               <TableBody>
                 {isLeaderboardLoading
                   ? renderSkeletons(5, 6)
-                  : (leaderboardData?.items || []).map((entry) => {
-                      const wins = parseInt(entry.wins, 10) || 0;
-                      const losses = parseInt(entry.losses, 10) || 0;
-                      const draws = parseInt(entry.draws, 10) || 0;
-                      const totalBattles = wins + losses + draws;
-                      const winRate = totalBattles > 0 ? (wins / totalBattles) * 100 : 0;
-                      const assetName = entry.asset?.name;
-                      const currentRating = assetName ? assetRatingsMap.get(assetName) : undefined;
-                      const displayRating = currentRating ?? entry.rating;
+                  : (leaderboardData?.items || [])
+                      .map((item, index) => {
+                        // 为每个item分配一个真实的assetId（按chart-data中的评分排序）
+                        const sortedAssets = Array.from(assetRatingMap.entries())
+                          .map(([assetId, rating]) => ({ assetId, rating }))
+                          .sort((a, b) => b.rating - a.rating);
 
-                      return (
-                        <TableRow key={entry.rank}>
-                          <TableCell>{entry.rank}</TableCell>
-                          <TableCell>{assetName ?? 'N/A'}</TableCell>
-                          <TableCell>
-                            {wins}/{losses}/{draws}
-                          </TableCell>
-                          <TableCell>{totalBattles}</TableCell>
-                          <TableCell>{winRate.toFixed(1)}%</TableCell>
-                          <TableCell>{typeof displayRating === 'number' ? displayRating.toFixed(0) : 'N/A'}</TableCell>
-                        </TableRow>
-                      );
-                    })}
+                        const assetData = sortedAssets[index];
+
+                        return {
+                          ...item,
+                          rank: index + 1, // 重新分配排名
+                          assetId: assetData?.assetId,
+                          currentRating: assetData?.rating,
+                        };
+                      })
+                      .map((item) => {
+                        const entry: EloLeaderboardEntry = {
+                          rank: item.rank,
+                          asset: {
+                            id: item.assetId || '',
+                            name: item.assetId ? item.assetId.substring(0, 8) + '...' : 'Unknown',
+                            type: 'media',
+                          },
+                          totalBattles: item.totalBattles,
+                          wins: item.wins,
+                          losses: item.losses,
+                          draws: item.draws,
+                          winRate: item.winRate,
+                        };
+
+                        return (
+                          <LeaderboardRow
+                            key={item.rank}
+                            entry={entry}
+                            assetId={item.assetId}
+                            assetRating={item.currentRating}
+                          />
+                        );
+                      })}
               </TableBody>
             </Table>
           </CardContent>
