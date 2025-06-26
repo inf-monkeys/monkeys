@@ -107,12 +107,13 @@ export class MarketplaceService {
     return this.createAppWithVersion(teamId, userId, body);
   }
 
-  public async approveSubmission(appId: string) {
+  public async approveSubmission(appId: string, isPreset?: boolean) {
     return this.entityManager.transaction(async (transactionalEntityManager) => {
       const app = await transactionalEntityManager.findOne(MarketplaceAppEntity, { where: { id: appId } });
       if (!app) throw new NotFoundException('Application for approval not found.');
 
       app.status = MarketplaceAppStatus.APPROVED;
+      app.isPreset = isPreset;
       await transactionalEntityManager.save(app);
 
       const latestVersion = await transactionalEntityManager.findOne(MarketplaceAppVersionEntity, {
