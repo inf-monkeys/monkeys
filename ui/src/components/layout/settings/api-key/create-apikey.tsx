@@ -16,6 +16,7 @@ import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label.tsx';
+import { getI18nContent } from '@/utils';
 
 interface ICreateNewApiKeyProps extends React.ComponentPropsWithoutRef<'div'> {
   mutate: KeyedMutator<IApiKey[] | undefined>;
@@ -76,7 +77,9 @@ export const CreateNewApiKey: React.FC<ICreateNewApiKeyProps> = ({ mutate }) => 
                           {(user?.name ?? t('common.utils.unknown-user')).substring(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      <span>{user?.name ?? t('common.utils.unknown-user')}</span>
+                      <span className="max-w-18 line-clamp-1 text-ellipsis">
+                        {user?.name ?? t('common.utils.unknown-user')}
+                      </span>
                     </div>
                   </div>
                   <div className="grid grid-cols-4">
@@ -92,7 +95,9 @@ export const CreateNewApiKey: React.FC<ICreateNewApiKeyProps> = ({ mutate }) => 
                           {(team?.name ?? t('common.utils.unknown-team')).substring(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      <span>{team?.name ?? t('common.utils.unknown-team')}</span>
+                      <span className="max-w-18 line-clamp-1 text-ellipsis">
+                        {getI18nContent(team?.name) ?? t('common.utils.unknown-team')}
+                      </span>
                     </div>
                   </div>
                 </div>
