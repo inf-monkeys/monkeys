@@ -2,6 +2,10 @@ import { I18nValue } from '@inf-monkeys/monkeys';
 
 import { IBaseEntity } from '@/apis/typings';
 
+export interface IWorkflowAssociationExtraData {
+  newDesignDisplayName?: I18nValue;
+}
+
 type IBaseWorkflowAssociation = {
   enabled: boolean;
   displayName?: I18nValue | string | null;
@@ -10,6 +14,7 @@ type IBaseWorkflowAssociation = {
   sortIndex?: number | null;
   originWorkflowId: string;
   type: IWorkflowAssociationType;
+  extraData?: IWorkflowAssociationExtraData | null;
 } & IBaseEntity;
 
 export type IWorkflowAssociationType = 'to-workflow' | 'new-design';

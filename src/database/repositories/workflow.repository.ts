@@ -1225,7 +1225,7 @@ ORDER BY
       }
 
       return await transactionalEntityManager.save(WorkflowAssociationsEntity, {
-        ...pick(createAssociation, ['displayName', 'description', 'enabled', 'mapper', 'targetWorkflowId', 'iconUrl', 'sortIndex', 'type']),
+        ...pick(createAssociation, ['displayName', 'description', 'enabled', 'mapper', 'targetWorkflowId', 'iconUrl', 'sortIndex', 'type', 'extraData']),
         originWorkflowId: workflowId,
         id: generateDbId(),
         isDeleted: false,
@@ -1266,7 +1266,7 @@ ORDER BY
 
       return await transactionalEntityManager.save(WorkflowAssociationsEntity, {
         ...association,
-        ...pick(updateAssociation, ['description', 'displayName', 'mapper', 'targetWorkflowId', 'enabled', 'iconUrl', 'sortIndex', 'type']),
+        ...pick(updateAssociation, ['description', 'displayName', 'mapper', 'targetWorkflowId', 'enabled', 'iconUrl', 'sortIndex', 'type', 'extraData']),
       });
     });
   }

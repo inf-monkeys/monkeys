@@ -103,7 +103,9 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
       toast.promise(
         async (): Promise<IAssetItem<IDesignProject>> => {
           const designProject = await createDesignProject({
-            displayName: '{"zh-CN":"未命名设计项目","en-US":"Untitled design project"}',
+            displayName: data.extraData?.newDesignDisplayName
+              ? JSON.stringify(data.extraData.newDesignDisplayName)
+              : '{"zh-CN":"未命名设计项目","en-US":"Untitled design project"}',
           });
           if (!designProject) throw new Error('design project created failed');
           return designProject;

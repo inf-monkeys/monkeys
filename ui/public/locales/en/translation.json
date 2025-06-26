@@ -2666,6 +2666,10 @@
                   "target-placeholder": "Target workflow input field",
                   "default-placeholder": "Default value",
                   "add": "Add mapping"
+                },
+                "new-design-display-name": {
+                  "label": "New Design Display Name",
+                  "placeholder": "Please enter new design display name"
                 }
               }
             }
