@@ -82,4 +82,11 @@ export class UserEntity extends BaseEntity {
     name: 'last_auth_method',
   })
   lastAuthMethod?: AuthMethod;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+    name: 'is_admin',
+  })
+  isAdmin?: boolean;
 }

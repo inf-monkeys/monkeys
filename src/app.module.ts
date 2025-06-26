@@ -17,6 +17,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { DesignModule } from './modules/design/design.module';
 import { EvaluationModule } from './modules/evaluation/evaluation.module';
 import { ExportModule } from './modules/export/export.module';
+import { MarketplaceModule } from './modules/marketplace/marketplace.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { LLMToolsModule } from './modules/tools/llm/llm.module';
@@ -56,6 +57,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     }),
     DesignModule,
     TenantModule,
+    MarketplaceModule,
     EvaluationModule,
   ],
   controllers: [AppController],

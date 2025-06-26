@@ -224,6 +224,12 @@ export interface AuthConfig {
   defaultOtherTeam?: boolean;
 }
 
+export interface AdminConfig {
+  username: string;
+  password?: string;
+  email: string;
+}
+
 export interface S3Config {
   proxy: boolean;
   isPrivate: boolean;
@@ -319,6 +325,7 @@ export interface Config {
   oneapi: OneApiConfig;
   aws: AwsConfig;
   tenant: TenantStatisticsConfig;
+  admin: AdminConfig;
   evaluation: EvaluationConfig;
 }
 
@@ -471,6 +478,7 @@ export const config: Config = {
     autoReload: readConfig('auth.autoReload', false),
     defaultOtherTeam: readConfig('auth.defaultOtherTeam', false),
   },
+  admin: readConfig('admin'),
   s3: {
     proxy: readConfig('s3.proxy', true),
     isPrivate: readConfig('s3.isPrivate', false),
