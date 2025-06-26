@@ -419,6 +419,9 @@
               },
               "evaluations": {
                 "label": "Evaluations"
+              },
+              "designs": {
+                "label": "Design Projects"
               }
             },
             "tools": {
@@ -452,6 +455,9 @@
               },
               "table-data": {
                 "label": "Table Data"
+              },
+              "media-data": {
+                "label": "Design Assets"
               }
             },
             "store": {
