@@ -20,6 +20,7 @@ import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
 import { VinesViewFrame } from './frame';
+import { GlobalDesignBoardAssociationBar } from './global-design-board-association-bar';
 import { GlobalDesignBoardOperationBar } from './global-design-board-operation-bar';
 import { WorkbenchOperationBar } from './operation-bar';
 
@@ -80,6 +81,7 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
                 <VinesViewFrame>
                   <View />
                 </VinesViewFrame>
+                <GlobalDesignBoardAssociationBar />
               </div>
             ) : (
               <VinesViewFrame>

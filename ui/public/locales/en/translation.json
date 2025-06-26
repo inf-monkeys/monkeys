@@ -216,6 +216,11 @@
       "loading": "Sending...",
       "success": "The code has been sent to {{phone}}, please check it.",
       "error": "Sending failed! Please try again later."
+    },
+    "export": {
+      "loading": "Exporting...",
+      "success": "Export successful!",
+      "error": "Export failed! Please try again later!"
     }
   },
   "components": {

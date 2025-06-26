@@ -210,6 +210,11 @@
       "loading": "发送中...",
       "success": "已发送短信验证码至 {{phone}} 请注意查收",
       "error": "发送失败！请稍后再重试"
+    },
+    "export": {
+      "loading": "导出中...",
+      "success": "导出成功！",
+      "error": "导出失败！请稍候重试！"
     }
   },
   "components": {
