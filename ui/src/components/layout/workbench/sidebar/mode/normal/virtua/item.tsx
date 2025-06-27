@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { IPageInstanceType, IPinPage } from '@/apis/pages/typings.ts';
 import { ViewItemMenu } from '@/components/layout/workbench/sidebar/mode/normal/virtua/menu.tsx';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { cn, getI18nContent } from '@/utils';
@@ -41,7 +42,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
       transition,
     };
 
-    return (
+    const child = (
       <div
         ref={setNodeRef}
         style={style}
@@ -82,6 +83,15 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
           </>
         ) : null}
       </div>
+    );
+
+    return onlyShowWorkbenchIcon ? (
+      <Tooltip>
+        <TooltipTrigger>{child}</TooltipTrigger>
+        <TooltipContent>{getI18nContent(info?.displayName)}</TooltipContent>
+      </Tooltip>
+    ) : (
+      child
     );
   },
 );

@@ -36,27 +36,15 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
       enabled: true,
       id: 'demo',
       displayName: {
-        'zh-CN': '下一步的工作流',
+        'zh-CN': 'To GPT-4o Image',
+        'en-US': 'To GPT-4o Image',
       },
       iconUrl: 'pencil-ruler',
       createdTimestamp: 0,
       updatedTimestamp: 0,
       type: 'team',
-      targetWorkflowId: '6837b8987e57656a260cc697',
-      targetInputId: 'file',
-    },
-    {
-      enabled: true,
-      id: 'demo',
-      displayName: {
-        'zh-CN': '下一步的工作流2',
-      },
-      iconUrl: 'pencil-ruler',
-      createdTimestamp: 0,
-      updatedTimestamp: 0,
-      type: 'team',
-      targetWorkflowId: '6837b8987e57656a260cc697',
-      targetInputId: 'h8mz9f',
+      targetWorkflowId: '685e00fb7ed22ecc6f9deceb',
+      targetInputId: 'input_image',
     },
   ];
 

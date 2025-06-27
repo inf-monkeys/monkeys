@@ -5,7 +5,7 @@ import { SWRInfiniteResponse } from 'swr/infinite';
 import { useMemoizedFn } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isBoolean } from 'lodash';
-import { Download, Ellipsis, RotateCcw, Trash } from 'lucide-react';
+import { Download, Ellipsis, Eye, RotateCcw, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -104,6 +104,13 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
     });
   });
 
+  const handleShowInput = () => {
+    event$.emit({
+      type: 'set',
+      data: data.input,
+    });
+  };
+
   return (
     <div className="group/vgi relative flex h-full flex-1 flex-col">
       {/* 图片内容区域，保持点击可以触发预览 */}
@@ -128,6 +135,22 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
             <TooltipContent>{t('common.utils.retry')}</TooltipContent>
           </Tooltip>
         )}
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+              icon={<Eye />}
+              variant="outline"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation(); // 阻止事件冒泡，防止触发预览
+                handleShowInput();
+              }}
+            />
+          </TooltipTrigger>
+          <TooltipContent>Show Input</TooltipContent>
+        </Tooltip>
 
         {src && (
           <Tooltip>
