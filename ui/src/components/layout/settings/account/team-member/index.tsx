@@ -72,8 +72,11 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
                 <AvatarFallback className="rounded-none p-2 text-xs">{name.substring(0, 2)}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col justify-center">
-                <h3 className="line-clamp-1 font-semibold leading-tight">{name}</h3>
-                <p className="line-clamp-1 text-xs"> {phone ? maskPhone(phone) : maskEmail(email ?? '')}</p>
+                <h3 className="line-clamp-1 max-w-44 text-ellipsis font-semibold leading-tight">{name}</h3>
+                <p className="line-clamp-1 max-w-44 text-ellipsis text-xs">
+                  {' '}
+                  {phone ? maskPhone(phone) : maskEmail(email ?? '')}
+                </p>
               </div>
               {id !== currentUserId && isOwner && (
                 <div className="flex h-8 flex-1 justify-end">
