@@ -52,7 +52,7 @@ function RemoteDataTable<TData, TValue>({
   const paginationPosition = oem?.theme.paginationPosition ?? 'left';
 
   return (
-    <div>
+    <div className="max-w-[calc(100vw-213px-255px-120px)] overflow-x-auto">
       <div className="rounded-md border">
         <Table>
           <TableHeader>
