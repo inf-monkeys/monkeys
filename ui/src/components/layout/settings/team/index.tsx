@@ -7,7 +7,7 @@ import { TeamPrimaryColor } from '../theme/team-primary-color';
 
 export const TeamSettings = () => {
   return (
-    <div className="grid grid-cols-1 items-start justify-center gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 items-start justify-center gap-4 lg:grid-cols-2 xl:grid-cols-3">
       <div className="grid items-start gap-4">
         {/* <User /> */}
         <Team />
