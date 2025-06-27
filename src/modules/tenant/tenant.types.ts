@@ -27,4 +27,4 @@ export type Execution = {
   rawOutput: any;
   extraMetadata: ExtraMetadata | undefined;
   searchableText: string;
-}; 
+};
