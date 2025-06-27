@@ -79,7 +79,7 @@ export const CreateDesignProjectDialog: React.FC = () => {
           {iconOnlyMode ? null : t('common.utils.create')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="min-w-[1200px] overflow-hidden">
+      <DialogContent className="overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t('ugc-page.design-project.create.dialog.title')}</DialogTitle>
         </DialogHeader>
