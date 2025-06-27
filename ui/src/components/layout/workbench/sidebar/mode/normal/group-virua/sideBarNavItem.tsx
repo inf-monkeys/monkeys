@@ -7,8 +7,9 @@ import { useTranslation } from 'react-i18next';
 
 import { WorkbenchViewItemCurrentData } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { LANGUAGE_MAPPER } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/display-name';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface ISpaceSidebarTabProps extends React.ComponentPropsWithoutRef<'div'> {
   icon: string | LucideIcon;
@@ -51,7 +52,7 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  return (
+  const child = (
     <div
       ref={setNodeRef}
       style={style}
@@ -76,5 +77,14 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
       )}
       {!onlyShowWorkbenchIcon && children}
     </div>
+  );
+
+  return onlyShowWorkbenchIcon ? (
+    <Tooltip>
+      <TooltipTrigger>{child}</TooltipTrigger>
+      <TooltipContent>{getI18nContent(displayName)}</TooltipContent>
+    </Tooltip>
+  ) : (
+    child
   );
 };
