@@ -1,0 +1,236 @@
+{
+  "info": {
+    "name": "Tenant API Tests",
+    "description": "测试 Tenant API 字段升级后的功能",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:33002",
+      "type": "string"
+    },
+    {
+      "key": "bearerToken",
+      "value": "AVGwT1NhdkvH8DnYQO4vTOU1X4VSYNJy",
+      "type": "string"
+    },
+    {
+      "key": "teamId",
+      "value": "your-team-id",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "POST /api/tenant/outputs - 基础测试",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearerToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"page\": 1,\n  \"limit\": 5\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tenant/outputs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "tenant",
+            "outputs"
+          ]
+        },
+        "description": "测试基础的 tenant outputs 接口，验证新字段结构"
+      }
+    },
+    {
+      "name": "POST /api/tenant/outputs - searchableText 搜索",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearerToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"page\": 1,\n  \"limit\": 10,\n  \"searchableText\": \"test\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tenant/outputs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "tenant",
+            "outputs"
+          ]
+        },
+        "description": "测试 searchableText 模糊搜索功能"
+      }
+    },
+    {
+      "name": "POST /api/tenant/outputs - extraMetadata 数组查询",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearerToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"page\": 1,\n  \"limit\": 10,\n  \"extraMetadata\": {\n    \"category\": [\"image\", \"text\"],\n    \"status\": \"completed\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tenant/outputs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "tenant",
+            "outputs"
+          ]
+        },
+        "description": "测试 extraMetadata 的数组查询功能（IN 查询）"
+      }
+    },
+    {
+      "name": "POST /api/tenant/outputs - 组合查询",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearerToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"page\": 1,\n  \"limit\": 5,\n  \"searchableText\": \"workflow\",\n  \"extraMetadata\": {\n    \"category\": [\"image\"]\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tenant/outputs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "tenant",
+            "outputs"
+          ]
+        },
+        "description": "测试 searchableText 和 extraMetadata 的组合查询"
+      }
+    },
+    {
+      "name": "POST /api/tenant/teams/:teamId/workflow-executions/search - 基础测试",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearerToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 5\n  },\n  \"orderBy\": {\n    \"field\": \"startTime\",\n    \"order\": \"DESC\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tenant/teams/{{teamId}}/workflow-executions/search",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "tenant",
+            "teams",
+            "{{teamId}}",
+            "workflow-executions",
+            "search"
+          ]
+        },
+        "description": "测试 team workflow executions 搜索接口，验证新字段结构"
+      }
+    },
+    {
+      "name": "POST /api/tenant/teams/:teamId/workflow-executions/search - 状态过滤",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{bearerToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 10\n  },\n  \"status\": [\"COMPLETED\"],\n  \"orderBy\": {\n    \"field\": \"startTime\",\n    \"order\": \"DESC\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/tenant/teams/{{teamId}}/workflow-executions/search",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "tenant",
+            "teams",
+            "{{teamId}}",
+            "workflow-executions",
+            "search"
+          ]
+        },
+        "description": "测试按状态过滤的 workflow executions 搜索"
+      }
+    }
+  ]
+}
