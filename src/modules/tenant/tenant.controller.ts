@@ -27,9 +27,9 @@ export class TenantController {
   }
 
   @Post('/outputs')
-  async getAllExecutionOutputs(@Body() body: { page?: number; limit?: number; extraMetadata?: Record<string, any> | Record<string, any>[] }) {
-    const { page = 1, limit = 20, extraMetadata } = body;
-    const { data, total } = await this.tenantService.getAllExecutions({ page: +page, limit: +limit, extraMetadata });
+  async getAllExecutionOutputs(@Body() body: { page?: number; limit?: number; extraMetadata?: Record<string, any> | Record<string, any>[]; workflowWithExtraMetadata?: boolean }) {
+    const { page = 1, limit = 20, extraMetadata, workflowWithExtraMetadata } = body;
+    const { data, total } = await this.tenantService.getAllExecutions({ page: +page, limit: +limit, extraMetadata, workflowWithExtraMetadata });
     return new SuccessListResponse({
       data,
       total,
