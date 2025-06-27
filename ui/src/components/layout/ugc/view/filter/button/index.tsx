@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { mutate } from 'swr';
 
@@ -61,6 +61,22 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
   });
 
   const timeFormat = i18n.language === 'zh' ? 'yyyy-MM-dd' : 'MM-dd-yyyy';
+  const [shouldUseDoubleColumn, setShouldUseDoubleColumn] = useState(false);
+  useEffect(() => {
+    const abortController = new AbortController();
+    window.addEventListener(
+      'resize',
+      () => {
+        setShouldUseDoubleColumn(window.innerHeight <= 768);
+      },
+      {
+        signal: abortController.signal,
+      },
+    );
+    return () => {
+      abortController.abort();
+    };
+  }, []);
 
   return (
     <Popover open={visible} onOpenChange={setVisible}>
@@ -71,7 +87,9 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
           </TooltipTrigger>
         </PopoverTrigger>
       </Tooltip>
-      <PopoverContent className="flex w-72 flex-col gap-2">
+      <PopoverContent
+        className={cn('flex w-72 flex-col gap-2', shouldUseDoubleColumn && 'grid w-[580px] grid-cols-2 gap-4')}
+      >
         <div className="flex flex-col gap-3">
           <Label>{t('components.layout.ugc.view.filter.button.creator.label')}</Label>
           <MultiSelect
