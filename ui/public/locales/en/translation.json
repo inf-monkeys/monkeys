@@ -485,6 +485,9 @@
             },
             "designs": {
               "label": "Designs",
+              "evaluations": {
+                "label": "Evaluations"
+              },
               "design-assets": {
                 "label": "Design Assets"
               },

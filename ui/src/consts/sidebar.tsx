@@ -28,16 +28,16 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
         name: 'workflows',
         path: '/$teamId/workflows',
       },
-      {
-        name: 'evaluations',
-        path: '/$teamId/evaluations',
-      },
     ],
   },
   {
     name: 'designs',
     icon: <PaletteIcon />,
     items: [
+      {
+        name: 'evaluations',
+        path: '/$teamId/evaluations',
+      },
       {
         name: 'design-projects',
         path: '/$teamId/designs',
