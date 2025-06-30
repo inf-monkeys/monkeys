@@ -474,6 +474,9 @@
             },
             "designs": {
               "label": "设计",
+              "evaluations": {
+                "label": "评测"
+              },
               "design-assets": {
                 "label": "设计资产"
               },
