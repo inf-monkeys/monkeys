@@ -480,14 +480,14 @@
             },
             "designs": {
               "label": "Designs",
-              "evaluations": {
-                "label": "Evaluations"
-              },
               "design-assets": {
                 "label": "Design Assets"
               },
               "design-projects": {
                 "label": "Design Projects"
+              },
+              "evaluations": {
+                "label": "Design Evaluations"
               }
             }
           },
