@@ -189,7 +189,7 @@ export class TenantService {
         rawOutput: execution.output,
         extraMetadata: execution.extraMetadata,
         searchableText: '', // 如有需要可补充
-        createdTimestamp: execution.createdTimestamp,
+        createTime: execution.createdTimestamp,
       };
     });
     return { data, total };
