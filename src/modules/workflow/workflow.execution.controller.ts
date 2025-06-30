@@ -154,12 +154,16 @@ export class WorkflowExecutionController {
   })
   public async startWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: StartWorkflowDto) {
     const { teamId, userId } = req;
-    const { inputData, version, chatSessionId, waitForWorkflowFinished = false, group } = body;
+    const { inputData, version, chatSessionId, waitForWorkflowFinished = false, group, extraMetadata } = body;
+
+    // 将 extraMetadata 合并到 inputData 中
+    const finalInputData = { ...inputData, extraMetadata };
+
     const workflowInstanceId = await this.service.startWorkflow({
       teamId,
       userId,
       workflowId,
-      inputData,
+      inputData: finalInputData,
       version,
       triggerType: WorkflowTriggerType.MANUALLY,
       chatSessionId,
