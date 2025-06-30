@@ -17,20 +17,6 @@ export interface NavItemWithoutLabel {
 
 export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
   {
-    name: 'apps',
-    icon: <Bot />,
-    items: [
-      {
-        name: 'agents',
-        path: '/$teamId/agents',
-      },
-      {
-        name: 'workflows',
-        path: '/$teamId/workflows',
-      },
-    ],
-  },
-  {
     name: 'designs',
     icon: <PaletteIcon />,
     items: [
@@ -45,6 +31,20 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
       {
         path: '/$teamId/media-data',
         name: 'design-assets',
+      },
+    ],
+  },
+  {
+    name: 'apps',
+    icon: <Bot />,
+    items: [
+      {
+        name: 'agents',
+        path: '/$teamId/agents',
+      },
+      {
+        name: 'workflows',
+        path: '/$teamId/workflows',
       },
     ],
   },
