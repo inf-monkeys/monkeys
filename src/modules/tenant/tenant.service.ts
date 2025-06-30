@@ -30,14 +30,10 @@ export class TenantService {
    * output 字段处理逻辑，完全复用 workflow.execution.service.ts
    */
   private formatOutput(rawOutput: any): Output[] {
-    let alt: string | string[] | undefined;
-    const flattenOutput = flattenKeys(rawOutput, undefined, ['__display_text'], (_, dataVal) => {
-      alt = dataVal;
-    });
+    const flattenOutput = flattenKeys(rawOutput, undefined, ['__display_text']);
     const outputKeys = Object.keys(flattenOutput);
     const outputValues = Object.values(flattenOutput);
     const finalOutput: Output[] = [];
-    let isInserted = false;
     for (let i = 0; i < outputKeys.length; i++) {
       const key = outputKeys[i];
       const value = outputValues[i];
@@ -49,7 +45,6 @@ export class TenantService {
           data: image,
           key: key,
         });
-        isInserted = true;
       }
     }
     return finalOutput;
@@ -137,8 +132,8 @@ export class TenantService {
     };
   }
 
-  async getAllExecutions(options: { page: number; limit: number; extraMetadata?: Record<string, any> | Record<string, any>[] }) {
-    const { page, limit, extraMetadata } = options;
+  async getAllExecutions(options: { page: number; limit: number; extraMetadata?: Record<string, any> | Record<string, any>[]; workflowWithExtraMetadata?: boolean }) {
+    const { page, limit, extraMetadata, workflowWithExtraMetadata } = options;
     const qb = this.workflowExecutionRepository
       .createQueryBuilder('execution')
       .skip((page - 1) * limit)
@@ -161,7 +156,7 @@ export class TenantService {
             // 原有的对象查询
             Object.entries(extraMetadata).forEach(([key, value]) => {
               if (Array.isArray(value)) {
-                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
+                qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
               }
@@ -169,6 +164,11 @@ export class TenantService {
           }
         }),
       );
+    }
+
+    // 如果指定了 workflowWithExtraMetadata，则只返回包含 extraMetadata 数据的记录
+    if (workflowWithExtraMetadata) {
+      qb.andWhere(`execution.extra_metadata IS NOT NULL AND execution.extra_metadata != '{}' AND execution.extra_metadata != 'null'`);
     }
 
     const [rawData, total] = await qb.getManyAndCount();
@@ -189,6 +189,7 @@ export class TenantService {
         rawOutput: execution.output,
         extraMetadata: execution.extraMetadata,
         searchableText: '', // 如有需要可补充
+        createdTimestamp: execution.createdTimestamp,
       };
     });
     return { data, total };
@@ -257,12 +258,12 @@ export class TenantService {
     const searchData = await conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, conductorQueryString);
     const executionsResult = searchData?.results ?? [];
     // 获取 workflow 定义用于处理 input
-    const workflowIds = [...new Set(executionsResult.map((item) => item.workflowName))];
+    const workflowIds = [...new Set(executionsResult.map((item) => item.workflowId))];
     const workflowDefinitions = await this.workflowRepository.findWorkflowByIds(workflowIds);
     const workflowDefMap = new Map(workflowDefinitions.map((wf) => [wf.workflowId, wf]));
     // 处理数据，转换为新的结构
     const data: Execution[] = executionsResult.map((execution) => {
-      const workflowDef = workflowDefMap.get(execution.workflowName);
+      const workflowDef = workflowDefMap.get(execution.workflowId);
       // 只取需要的字段，避免访问不存在的属性
       const workflowInstanceId = execution['workflowId'] || execution['instanceId'] || '';
       const extraMetadata = execution['extraMetadata'];
@@ -276,6 +277,7 @@ export class TenantService {
         rawOutput: execution.output,
         extraMetadata,
         searchableText: '', // 如有需要可补充
+        createdTimestamp: execution.startTime || execution.createTime || Date.now(),
       };
     });
     return { definitions: workflowsToSearch, data, page, limit: limitNum, total: searchData?.totalHits ?? 0 };
