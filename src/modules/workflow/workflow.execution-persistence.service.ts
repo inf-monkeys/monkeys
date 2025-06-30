@@ -44,6 +44,7 @@ export class WorkflowExecutionPersistenceService {
         executionVariables: detailedExecution.variables || null,
         updatedTimestamp: Date.now(),
         searchableText,
+        extraMetadata: detailedExecution.input?.extraMetadata,
       };
 
       await this.workflowRepository.updateWorkflowExecutionDetailsByInstanceId(workflowInstanceId, updateData);
