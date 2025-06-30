@@ -156,7 +156,7 @@ export class TenantService {
             // 原有的对象查询
             Object.entries(extraMetadata).forEach(([key, value]) => {
               if (Array.isArray(value)) {
-                qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
+                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
               }
@@ -197,12 +197,13 @@ export class TenantService {
 
   public async searchWorkflowExecutionsForTeam(
     teamId: string,
-    condition: SearchWorkflowExecutionsDto,
+    condition: SearchWorkflowExecutionsDto & { extraMetadata?: Record<string, any> | Record<string, any>[]; workflowWithExtraMetadata?: boolean },
   ): Promise<{ page: number; limit: number; total: number; data: Execution[]; definitions: WorkflowMetadataEntity[] }> {
-    const { pagination = {}, orderBy = {}, workflowId, status = [], startTimeFrom, startTimeTo, freeText = '*', startBy = [], triggerTypes = [], versions = [], workflowInstanceId } = condition;
+    const { pagination = {}, orderBy = {}, workflowId, status = [], startTimeFrom, startTimeTo, freeText = '*', startBy = [], triggerTypes = [], versions = [], workflowInstanceId, extraMetadata, workflowWithExtraMetadata } = condition;
     const { page: p = 1, limit: l = 10 } = pagination as PaginationDto;
     const [page, limitNum] = [+p, +l];
-    const start = (page - 1) * limitNum;
+    
+    // 获取团队下的 workflow 定义
     const workflowCondition: FindWorkflowCondition = { teamId };
     if (workflowId) {
       workflowCondition.workflowId = workflowId;
@@ -212,74 +213,143 @@ export class TenantService {
       return { definitions: [], data: [], page, limit: limitNum, total: 0 };
     }
     const workflowTypes = workflowsToSearch.map((x) => x.workflowId);
-    let query: string[] = [];
+    
+    // 构建数据库查询
+    const qb = this.workflowExecutionRepository
+      .createQueryBuilder('execution')
+      .skip((page - 1) * limitNum)
+      .take(limitNum);
+    
+    // 添加 workflow 类型过滤
     if (workflowTypes.length > 0) {
-      query.push(`workflowType IN (${workflowTypes.join(',')})`);
+      qb.andWhere('execution.workflow_id IN (:...workflowTypes)', { workflowTypes });
     }
-    if (status.length) {
-      query.push(`status IN (${status.join(',')})`);
+    
+    // 添加状态过滤
+    if (status.length > 0) {
+      qb.andWhere('execution.status IN (:...status)', { status });
     }
+    
+    // 添加时间范围过滤
     if (startTimeFrom) {
-      query.push(`startTime > ${startTimeFrom}`);
+      qb.andWhere('execution.created_timestamp >= :startTimeFrom', { startTimeFrom });
     }
     if (startTimeTo) {
-      query.push(`startTime < ${startTimeTo}`);
+      qb.andWhere('execution.created_timestamp <= :startTimeTo', { startTimeTo });
     }
+    
+    // 添加版本过滤
     if (versions?.length) {
-      query.push(`version IN (${versions.join(',')})`);
+      qb.andWhere('execution.version IN (:...versions)', { versions });
     }
-    const workflowInstanceIdsToFilter: string[][] = [];
+    
+    // 添加特定实例过滤
     if (workflowInstanceId) {
-      query = [`workflowId IN (${workflowInstanceId})`];
+      qb.andWhere('execution.workflow_instance_id = :workflowInstanceId', { workflowInstanceId });
     } else {
+      // 处理用户和触发器类型过滤
+      const workflowInstanceIdsToFilter: string[][] = [];
+      
       if (startBy?.length) {
         const instancesFromUser = await this.workflowRepository.findExecutionsByUserIds(startBy);
         const ids = instancesFromUser.map((x) => x.workflowInstanceId);
         if (ids.length === 0) return { definitions: [], data: [], page, limit: limitNum, total: 0 };
         workflowInstanceIdsToFilter.push(ids);
       }
+      
       if (triggerTypes?.length) {
         const instancesFromTrigger = await this.workflowRepository.findExecutionsByTriggerTypes(triggerTypes);
         const ids = instancesFromTrigger.map((x) => x.workflowInstanceId);
         if (ids.length === 0) return { definitions: [], data: [], page, limit: limitNum, total: 0 };
         workflowInstanceIdsToFilter.push(ids);
       }
+      
       if (workflowInstanceIdsToFilter.length > 0) {
         const intersection = _.intersection(...workflowInstanceIdsToFilter);
         if (intersection.length === 0) {
           return { definitions: [], data: [], page, limit: limitNum, total: 0 };
         }
-        query.push(`workflowId IN (${intersection.slice(0, 500).join(',')})`);
+        qb.andWhere('execution.workflow_instance_id IN (:...instanceIds)', { instanceIds: intersection.slice(0, 500) });
       }
     }
+    
+    // 添加自由文本搜索（如果不是默认的 '*'）
+    if (freeText !== '*' && freeText.trim()) {
+      qb.andWhere(
+        new Brackets((qb1) => {
+          qb1.orWhere('execution.searchable_text ILIKE :freeText', { freeText: `%${freeText}%` })
+             .orWhere('execution.workflow_id ILIKE :freeText', { freeText: `%${freeText}%` })
+             .orWhere('execution.workflow_instance_id ILIKE :freeText', { freeText: `%${freeText}%` });
+        })
+      );
+    }
+    
+    // 添加 extraMetadata 查询过滤
+    if (extraMetadata && Object.keys(extraMetadata).length > 0) {
+      qb.andWhere(
+        new Brackets((qb1) => {
+          if (Array.isArray(extraMetadata)) {
+            // 支持数组查询（IN 查询）
+            Object.entries(extraMetadata[0] || {}).forEach(([key, value]) => {
+              if (Array.isArray(value)) {
+                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
+              } else {
+                qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
+              }
+            });
+          } else {
+            // 原有的对象查询
+            Object.entries(extraMetadata).forEach(([key, value]) => {
+              if (Array.isArray(value)) {
+                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
+              } else {
+                qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
+              }
+            });
+          }
+        }),
+      );
+    }
+    
+    // 如果指定了 workflowWithExtraMetadata，则只返回包含 extraMetadata 数据的记录
+    if (workflowWithExtraMetadata) {
+      qb.andWhere(`execution.extra_metadata IS NOT NULL AND execution.extra_metadata != '{}' AND execution.extra_metadata != 'null'`);
+    }
+    
+    // 添加排序
     const { field = WorkflowExecutionSearchableField.startTime, order = OrderBy.DESC } = orderBy as SearchWorkflowExecutionsOrderDto;
-    const sortText = `${field}:${order}`;
-    const conductorQueryString = query.join(' AND ') || undefined;
-    const searchData = await conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, conductorQueryString);
-    const executionsResult = searchData?.results ?? [];
+    let orderByField = 'execution.created_timestamp';
+    if (field === WorkflowExecutionSearchableField.startTime) {
+      orderByField = 'execution.created_timestamp';
+    } else if (field === WorkflowExecutionSearchableField.endTime) {
+      orderByField = 'execution.updated_timestamp';
+    }
+    qb.orderBy(orderByField, order);
+    
+    // 执行查询
+    const [rawData, total] = await qb.getManyAndCount();
+    
     // 获取 workflow 定义用于处理 input
-    const workflowIds = [...new Set(executionsResult.map((item) => item.workflowId))];
+    const workflowIds = [...new Set(rawData.map((item) => item.workflowId))];
     const workflowDefinitions = await this.workflowRepository.findWorkflowByIds(workflowIds);
     const workflowDefMap = new Map(workflowDefinitions.map((wf) => [wf.workflowId, wf]));
+    
     // 处理数据，转换为新的结构
-    const data: Execution[] = executionsResult.map((execution) => {
+    const data: Execution[] = rawData.map((execution) => {
       const workflowDef = workflowDefMap.get(execution.workflowId);
-      // 只取需要的字段，避免访问不存在的属性
-      const workflowInstanceId = execution['workflowId'] || execution['instanceId'] || '';
-      const extraMetadata = execution['extraMetadata'];
-
       return {
-        workflowId: execution.workflowName,
-        workflowInstanceId,
+        workflowId: execution.workflowId,
+        workflowInstanceId: execution.workflowInstanceId,
         input: this.formatInput(execution.input, workflowDef),
         rawInput: execution.input,
         output: this.formatOutput(execution.output),
         rawOutput: execution.output,
-        extraMetadata,
-        searchableText: '', // 如有需要可补充
-        createdTimestamp: execution.startTime || execution.createTime || Date.now(),
+        extraMetadata: execution.extraMetadata,
+        searchableText: execution.searchableText || '',
+        createTime: execution.createdTimestamp,
       };
     });
-    return { definitions: workflowsToSearch, data, page, limit: limitNum, total: searchData?.totalHits ?? 0 };
+    
+    return { definitions: workflowsToSearch, data, page, limit: limitNum, total };
   }
 }
