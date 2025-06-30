@@ -64,7 +64,8 @@ export const SpaceHeaderTabs: React.FC = () => {
             VinesEvent.emit('vines-nav', '/$teamId/store/', { teamId });
             break;
           case 'workspace':
-            VinesEvent.emit('vines-nav', '/$teamId/workflows/', { teamId });
+            VinesEvent.emit('vines-nav', '/$teamId/evaluations', { teamId });
+            break;
         }
       }}
     >
