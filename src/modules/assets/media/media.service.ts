@@ -12,8 +12,8 @@ export class MediaFileService {
 
   constructor(private readonly mediaRepository: MediaFileRepository) {}
 
-  public async listRichMedias(teamId: string, dto: ListDto) {
-    return await this.mediaRepository.listRichMedias(teamId, dto);
+  public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[]) {
+    return await this.mediaRepository.listRichMedias(teamId, dto, excludeIds);
   }
 
   public async deleteMedia(teamId: string, id: string) {
@@ -22,6 +22,10 @@ export class MediaFileService {
 
   public async getMediaById(id: string) {
     return await this.mediaRepository.getMediaById(id);
+  }
+
+  public async getMediaByIds(ids: string[]) {
+    return await this.mediaRepository.getMediaByIds(ids);
   }
 
   public async getMediaByMd5(teamId: string, md5: string) {
@@ -66,8 +70,9 @@ export class MediaFileService {
       s3Key = urlObject.searchParams.get('key');
 
       // 如果没有 'key' 参数，则从路径中提取
+      // 使用 decodeURI 来确保我们处理的是解码后的路径
       if (!s3Key) {
-        s3Key = urlObject.pathname;
+        s3Key = decodeURI(urlObject.pathname);
       }
     } catch (e) {
       // 如果解析失败（例如，media.url 是一个相对路径如 '/user-files/...'），
