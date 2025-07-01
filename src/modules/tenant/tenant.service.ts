@@ -199,10 +199,24 @@ export class TenantService {
     teamId: string,
     condition: SearchWorkflowExecutionsDto & { extraMetadata?: Record<string, any> | Record<string, any>[]; workflowWithExtraMetadata?: boolean },
   ): Promise<{ page: number; limit: number; total: number; data: Execution[]; definitions: WorkflowMetadataEntity[] }> {
-    const { pagination = {}, orderBy = {}, workflowId, status = [], startTimeFrom, startTimeTo, freeText = '*', startBy = [], triggerTypes = [], versions = [], workflowInstanceId, extraMetadata, workflowWithExtraMetadata } = condition;
+    const {
+      pagination = {},
+      orderBy = {},
+      workflowId,
+      status = [],
+      startTimeFrom,
+      startTimeTo,
+      freeText = '*',
+      startBy = [],
+      triggerTypes = [],
+      versions = [],
+      workflowInstanceId,
+      extraMetadata,
+      workflowWithExtraMetadata,
+    } = condition;
     const { page: p = 1, limit: l = 10 } = pagination as PaginationDto;
     const [page, limitNum] = [+p, +l];
-    
+
     // 获取团队下的 workflow 定义
     const workflowCondition: FindWorkflowCondition = { teamId };
     if (workflowId) {
@@ -213,23 +227,23 @@ export class TenantService {
       return { definitions: [], data: [], page, limit: limitNum, total: 0 };
     }
     const workflowTypes = workflowsToSearch.map((x) => x.workflowId);
-    
+
     // 构建数据库查询
     const qb = this.workflowExecutionRepository
       .createQueryBuilder('execution')
       .skip((page - 1) * limitNum)
       .take(limitNum);
-    
+
     // 添加 workflow 类型过滤
     if (workflowTypes.length > 0) {
       qb.andWhere('execution.workflow_id IN (:...workflowTypes)', { workflowTypes });
     }
-    
+
     // 添加状态过滤
     if (status.length > 0) {
       qb.andWhere('execution.status IN (:...status)', { status });
     }
-    
+
     // 添加时间范围过滤
     if (startTimeFrom) {
       qb.andWhere('execution.created_timestamp >= :startTimeFrom', { startTimeFrom });
@@ -237,33 +251,33 @@ export class TenantService {
     if (startTimeTo) {
       qb.andWhere('execution.created_timestamp <= :startTimeTo', { startTimeTo });
     }
-    
+
     // 添加版本过滤
     if (versions?.length) {
       qb.andWhere('execution.version IN (:...versions)', { versions });
     }
-    
+
     // 添加特定实例过滤
     if (workflowInstanceId) {
       qb.andWhere('execution.workflow_instance_id = :workflowInstanceId', { workflowInstanceId });
     } else {
       // 处理用户和触发器类型过滤
       const workflowInstanceIdsToFilter: string[][] = [];
-      
+
       if (startBy?.length) {
         const instancesFromUser = await this.workflowRepository.findExecutionsByUserIds(startBy);
         const ids = instancesFromUser.map((x) => x.workflowInstanceId);
         if (ids.length === 0) return { definitions: [], data: [], page, limit: limitNum, total: 0 };
         workflowInstanceIdsToFilter.push(ids);
       }
-      
+
       if (triggerTypes?.length) {
         const instancesFromTrigger = await this.workflowRepository.findExecutionsByTriggerTypes(triggerTypes);
         const ids = instancesFromTrigger.map((x) => x.workflowInstanceId);
         if (ids.length === 0) return { definitions: [], data: [], page, limit: limitNum, total: 0 };
         workflowInstanceIdsToFilter.push(ids);
       }
-      
+
       if (workflowInstanceIdsToFilter.length > 0) {
         const intersection = _.intersection(...workflowInstanceIdsToFilter);
         if (intersection.length === 0) {
@@ -272,18 +286,19 @@ export class TenantService {
         qb.andWhere('execution.workflow_instance_id IN (:...instanceIds)', { instanceIds: intersection.slice(0, 500) });
       }
     }
-    
+
     // 添加自由文本搜索（如果不是默认的 '*'）
     if (freeText !== '*' && freeText.trim()) {
       qb.andWhere(
         new Brackets((qb1) => {
-          qb1.orWhere('execution.searchable_text ILIKE :freeText', { freeText: `%${freeText}%` })
-             .orWhere('execution.workflow_id ILIKE :freeText', { freeText: `%${freeText}%` })
-             .orWhere('execution.workflow_instance_id ILIKE :freeText', { freeText: `%${freeText}%` });
-        })
+          qb1
+            .orWhere('execution.searchable_text ILIKE :freeText', { freeText: `%${freeText}%` })
+            .orWhere('execution.workflow_id ILIKE :freeText', { freeText: `%${freeText}%` })
+            .orWhere('execution.workflow_instance_id ILIKE :freeText', { freeText: `%${freeText}%` });
+        }),
       );
     }
-    
+
     // 添加 extraMetadata 查询过滤
     if (extraMetadata && Object.keys(extraMetadata).length > 0) {
       qb.andWhere(
@@ -310,12 +325,12 @@ export class TenantService {
         }),
       );
     }
-    
+
     // 如果指定了 workflowWithExtraMetadata，则只返回包含 extraMetadata 数据的记录
     if (workflowWithExtraMetadata) {
       qb.andWhere(`execution.extra_metadata IS NOT NULL AND execution.extra_metadata != '{}' AND execution.extra_metadata != 'null'`);
     }
-    
+
     // 添加排序
     const { field = WorkflowExecutionSearchableField.startTime, order = OrderBy.DESC } = orderBy as SearchWorkflowExecutionsOrderDto;
     let orderByField = 'execution.created_timestamp';
@@ -325,15 +340,15 @@ export class TenantService {
       orderByField = 'execution.updated_timestamp';
     }
     qb.orderBy(orderByField, order);
-    
+
     // 执行查询
     const [rawData, total] = await qb.getManyAndCount();
-    
+
     // 获取 workflow 定义用于处理 input
     const workflowIds = [...new Set(rawData.map((item) => item.workflowId))];
     const workflowDefinitions = await this.workflowRepository.findWorkflowByIds(workflowIds);
     const workflowDefMap = new Map(workflowDefinitions.map((wf) => [wf.workflowId, wf]));
-    
+
     // 处理数据，转换为新的结构
     const data: Execution[] = rawData.map((execution) => {
       const workflowDef = workflowDefMap.get(execution.workflowId);
@@ -349,7 +364,7 @@ export class TenantService {
         createTime: execution.createdTimestamp,
       };
     });
-    
+
     return { definitions: workflowsToSearch, data, page, limit: limitNum, total };
   }
 }
