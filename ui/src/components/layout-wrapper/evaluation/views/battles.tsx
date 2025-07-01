@@ -3,39 +3,21 @@ import React, { useState } from 'react';
 import useSWR from 'swr';
 import { useParams } from '@tanstack/react-router';
 
-import {
-  AlertCircle,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  Eye,
-  Image as ImageIcon,
-  Loader2,
-  Plus,
-  Swords,
-  Target,
-  Upload,
-  X,
-} from 'lucide-react';
+import { AlertCircle, CheckCircle2, Image as ImageIcon, Loader2, Plus, Swords, Target, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import {
-  createBattleGroup,
+  EvaluationStatus,
+  getAssetsInModule,
+  getAvailableAssets,
+  getEvaluationStatus,
   getModuleDetails,
-  getTaskDetails,
-  getUserTasks,
-  startAutoEvaluation,
+  joinEvaluation,
+  JoinEvaluationDto,
+  RecentBattle,
 } from '@/apis/evaluation';
-import {
-  Battle,
-  BattleStrategy,
-  CreateBattleGroupDto,
-  EvaluationTask,
-  MediaAsset,
-  TaskProgress,
-} from '@/apis/evaluation/typings';
-import { vinesFetcher } from '@/apis/fetcher';
+import { getMediaAsset } from '@/apis/media-data';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,95 +30,64 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 
 export const BattlesView: React.FC = () => {
-  useTranslation();
+  const { t } = useTranslation();
   const { moduleId } = useParams({ from: '/$teamId/evaluations/$moduleId/$tab/' });
 
   const [activeTab, setActiveTab] = useState('ongoing');
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [resultsDialogOpen, setResultsDialogOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<EvaluationTask | null>(null);
-  const [taskResults, setTaskResults] = useState<Battle[] | null>(null);
-  const [isResultsLoading, setIsResultsLoading] = useState(false);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [battlesDialogOpen, setBattlesDialogOpen] = useState(false);
+  const [evaluationStatus, setEvaluationStatus] = useState<EvaluationStatus | null>(null);
+  const [recentBattles, setRecentBattles] = useState<RecentBattle[]>([]);
+  const [isStatusLoading, setIsStatusLoading] = useState(false);
+  const [isBattlesLoading, setIsBattlesLoading] = useState(false);
 
-  // 创建对战表单数据
-  const [battleForm, setBattleForm] = useState({
+  // 加入评测表单数据
+  const [joinForm, setJoinForm] = useState({
     selectedAssets: [] as string[],
-    strategy: 'RANDOM_PAIRS' as BattleStrategy,
-    battleCount: 200,
-    description: '',
   });
 
-  const maxBattles = React.useMemo(() => {
-    const n = battleForm.selectedAssets.length;
-    if (n < 2) return 0;
-    return (n * (n - 1)) / 2;
-  }, [battleForm.selectedAssets]);
+  // 排行榜图片分页
+  const [leaderboardPage, setLeaderboardPage] = useState(1);
+  const leaderboardPageSize = 16; // 每页显示16张图片
 
-  // 当选择的图片数量变化时，确保 battleCount 不会超过最大值
-  React.useEffect(() => {
-    if (battleForm.strategy === 'RANDOM_PAIRS' && battleForm.battleCount > maxBattles && maxBattles > 0) {
-      setBattleForm((prev) => ({
-        ...prev,
-        battleCount: maxBattles,
-      }));
-    }
-  }, [maxBattles, battleForm.strategy]);
-
-  // 任务进度状态
-  const [currentTask, setCurrentTask] = useState<{ id: string; progress: TaskProgress } | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  // OpenSkill evaluation state
+  const [isJoining, setIsJoining] = useState(false);
 
   // 获取模块详情
   useSWR(moduleId ? ['evaluation-module', moduleId] : null, () => getModuleDetails(moduleId!));
 
-  // 获取用户任务列表
-  const { data: tasksData, mutate: mutateTasks } = useSWR('evaluation-tasks', () => getUserTasks({ limit: 10 }));
+  // 获取可用图片资产
+  const { data: availableAssets, mutate: mutateAvailableAssets } = useSWR(
+    moduleId ? ['available-assets', moduleId] : null,
+    () => getAvailableAssets(moduleId!, { limit: 100 }),
+  );
 
-  // 获取媒体资产列表
-  const { data: mediaAssets, mutate: mutateMedia } = useSWR('media-assets', () =>
-    vinesFetcher<MediaAsset[]>({
-      simple: true,
-    })('/api/media-files?limit=100').then((result) => {
-      if (Array.isArray(result)) {
-        const processedResult = result.map((asset) => {
-          try {
-            // Check if it's a valid absolute URL
-            const url = new URL(asset.url);
-            // If the origin is the same as the app's origin, convert to relative path
-            if (url.origin === window.location.origin) {
-              return {
-                ...asset,
-                url: `${url.pathname}${url.search}`,
-              };
-            }
-            // It's an external URL (like S3), keep it as is
-            return asset;
-          } catch (e) {
-            // It's already a relative path or invalid, keep it as is
-            return asset;
-          }
-        });
-        const processedData = { data: processedResult, total: processedResult.length };
-        return processedData;
-      }
-      return { data: [], total: 0 };
-    }),
+  // 获取已在排行榜中的资产
+  const { data: assetsInModule, mutate: mutateAssetsInModule } = useSWR(
+    moduleId ? ['assets-in-module', moduleId] : null,
+    () => getAssetsInModule(moduleId!),
+  );
+
+  // 获取评测状态
+  const { data: currentEvaluationStatus, mutate: mutateEvaluationStatus } = useSWR(
+    moduleId ? ['evaluation-status', moduleId] : null,
+    () => getEvaluationStatus(moduleId!),
+    { refreshInterval: 5000 }, // 每5秒刷新一次
   );
 
   // 处理图片选择
   const handleAssetToggle = (assetId: string) => {
-    setBattleForm((prev) => ({
+    setJoinForm((prev) => ({
       ...prev,
       selectedAssets: prev.selectedAssets.includes(assetId)
         ? prev.selectedAssets.filter((id) => id !== assetId)
@@ -144,148 +95,51 @@ export const BattlesView: React.FC = () => {
     }));
   };
 
-  // 创建对战组
-  const handleCreateBattleGroup = async () => {
-    if (!moduleId || battleForm.selectedAssets.length < 2) {
-      toast.error('请至少选择2个参与者');
+  // 加入OpenSkill评测
+  const handleJoinEvaluation = async () => {
+    if (!moduleId || joinForm.selectedAssets.length === 0) {
+      toast.error(t('ugc-page.evaluation.battles.joinDialog.validation.atLeastOne'));
       return;
     }
 
     try {
-      setIsCreating(true);
+      setIsJoining(true);
 
-      const battleGroupDto: CreateBattleGroupDto = {
-        assetIds: battleForm.selectedAssets,
-        strategy: battleForm.strategy,
-        description:
-          battleForm.description || `${battleForm.strategy}策略 - ${battleForm.selectedAssets.length}个参与者`,
+      const joinDto: JoinEvaluationDto = {
+        assetIds: joinForm.selectedAssets,
       };
 
-      if (battleForm.strategy === 'RANDOM_PAIRS') {
-        battleGroupDto.battleCount = battleForm.battleCount;
-      }
+      const response = await joinEvaluation(moduleId, joinDto);
 
-      const createResponse = await createBattleGroup(moduleId, battleGroupDto);
+      toast.success(t('ugc-page.evaluation.battles.joinDialog.success', { count: response.addedCount }));
 
-      const battleGroupId = createResponse?.id;
+      // 刷新数据
+      mutateAvailableAssets();
+      mutateAssetsInModule();
+      mutateEvaluationStatus();
 
-      if (!battleGroupId) {
-        toast.error('创建对战组失败：无法从服务器响应中获取对战组ID');
-        throw new Error('Failed to get battleGroupId from create response');
-      }
-
-      // 启动自动评测
-      const { taskId } = await startAutoEvaluation(battleGroupId);
-
-      // 简单的任务状态提示（不使用SSE）
-      setCurrentTask({
-        id: taskId,
-        progress: {
-          total:
-            battleForm.strategy === 'RANDOM_PAIRS'
-              ? battleForm.battleCount
-              : (battleForm.selectedAssets.length * (battleForm.selectedAssets.length - 1)) / 2,
-          completed: 0,
-          failed: 0,
-          percentage: 0,
-          current: '评测任务已启动，请稍后刷新查看结果...',
-        },
-      });
-
-      // 5秒后清除任务状态提示
-      setTimeout(() => {
-        setCurrentTask(null);
-        mutateTasks();
-      }, 5000);
-
-      setCreateDialogOpen(false);
-      setBattleForm({
+      setJoinDialogOpen(false);
+      setJoinForm({
         selectedAssets: [],
-        strategy: 'RANDOM_PAIRS',
-        battleCount: 200,
-        description: '',
       });
-
-      toast.success('对战组创建成功，正在启动评测...');
     } catch (error) {
-      console.error('Create battle group failed:', error);
-      toast.error('创建对战组失败，请稍后重试');
+      console.error('Join evaluation failed:', error);
+      toast.error(t('ugc-page.evaluation.battles.joinDialog.error'));
     } finally {
-      setIsCreating(false);
+      setIsJoining(false);
     }
   };
 
-  // 查看结果
-  const handleViewResults = async (task: EvaluationTask) => {
-    setSelectedTask(task);
-    setResultsDialogOpen(true);
-    setIsResultsLoading(true);
-    try {
-      // 根据 API 文档，我们应该调用 getTaskDetails
-      const taskDetails = await getTaskDetails(task.id);
-      if (taskDetails && taskDetails.battles) {
-        setTaskResults(taskDetails.battles);
-      } else {
-        setTaskResults([]);
-        toast.info('该任务没有详细的对战记录。');
-      }
-    } catch (error) {
-      toast.error('获取对战结果失败');
-    } finally {
-      setIsResultsLoading(false);
-    }
-  };
+  // 查看评测状态
+
+  // 查看最近对战
 
   // 获取状态徽章
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'processing':
-        return (
-          <Badge className="bg-blue-500">
-            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-            进行中
-          </Badge>
-        );
-      case 'pending':
-        return (
-          <Badge variant="secondary">
-            <Clock className="mr-1 h-3 w-3" />
-            等待中
-          </Badge>
-        );
-      case 'completed':
-        return (
-          <Badge className="bg-green-500">
-            <CheckCircle2 className="mr-1 h-3 w-3" />
-            已完成
-          </Badge>
-        );
-      case 'failed':
-        return (
-          <Badge variant="destructive">
-            <AlertCircle className="mr-1 h-3 w-3" />
-            失败
-          </Badge>
-        );
-      case 'cancelled':
-        return (
-          <Badge variant="outline">
-            <X className="mr-1 h-3 w-3" />
-            已取消
-          </Badge>
-        );
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
 
-  const ongoingTasks =
-    tasksData?.data?.filter((task) => task.status === 'processing' || task.status === 'pending') || [];
+  // OpenSkill系统不再使用tasks概念，直接通过evaluation status获取进度
 
-  const completedTasks =
-    tasksData?.data?.filter(
-      (task) => task.status === 'completed' || task.status === 'failed' || task.status === 'cancelled',
-    ) || [];
+  const assetsInModuleCount = assetsInModule?.total || 0;
+  const availableAssetsCount = availableAssets?.total || 0;
 
   return (
     <div className="h-full overflow-auto rounded-xl border border-input p-6">
@@ -295,248 +149,243 @@ export const BattlesView: React.FC = () => {
           <div>
             <h1 className="flex items-center gap-2 text-2xl font-bold">
               <Swords className="h-6 w-6" />
-              对战管理
+              {t('ugc-page.evaluation.battles.title')}
             </h1>
-            <p className="text-muted-foreground">创建和管理图片对战评测任务</p>
+            <p className="text-muted-foreground">{t('ugc-page.evaluation.battles.description')}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setUploadDialogOpen(true)}>
               <Upload className="mr-2 h-4 w-4" />
-              上传图片
+              {t('ugc-page.evaluation.battles.upload')}
             </Button>
-            <Button variant="outline" onClick={() => setCreateDialogOpen(true)}>
+            <Button variant="outline" onClick={() => setJoinDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              创建对战
+              {t('ugc-page.evaluation.battles.join')}
             </Button>
           </div>
         </div>
-
-        {/* 当前任务进度 */}
-        {currentTask && (
-          <Card className="border-blue-200 bg-blue-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-700">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                评测进行中
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>{currentTask.progress.current}</span>
-                  <span>
-                    {currentTask.progress.completed}/{currentTask.progress.total}
-                  </span>
-                </div>
-                <Progress value={currentTask.progress.percentage} className="h-2" />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>已完成: {currentTask.progress.completed}</span>
-                  <span>失败: {currentTask.progress.failed}</span>
-                  <span>进度: {currentTask.progress.percentage.toFixed(1)}%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Battle Stats */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">总任务数</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {t('ugc-page.evaluation.battles.stats.available')}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{tasksData?.total || 0}</div>
+              <div className="text-2xl font-bold">{availableAssetsCount}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">进行中</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {t('ugc-page.evaluation.battles.stats.inLeaderboard')}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{ongoingTasks.length}</div>
+              <div className="text-2xl font-bold text-blue-600">{assetsInModuleCount}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">已完成</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {t('ugc-page.evaluation.battles.stats.stability')}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {completedTasks.filter((t) => t.status === 'completed').length}
+                {currentEvaluationStatus?.progress?.toFixed(1) || 0}%
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">可用图片</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {t('ugc-page.evaluation.battles.stats.uncertainty')}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-600">{mediaAssets?.total || 0}</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {currentEvaluationStatus?.averageSigma?.toFixed(2) || 0}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Battle List */}
+        {/* OpenSkill Evaluation Info */}
         <Card>
           <CardHeader>
-            <CardTitle>任务列表</CardTitle>
+            <CardTitle>{t('ugc-page.evaluation.battles.info.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
-                <TabsTrigger value="ongoing">进行中 ({ongoingTasks.length})</TabsTrigger>
-                <TabsTrigger value="completed">已完成 ({completedTasks.length})</TabsTrigger>
+                <TabsTrigger value="ongoing">{t('ugc-page.evaluation.battles.info.tabs.status')}</TabsTrigger>
+                <TabsTrigger value="completed">{t('ugc-page.evaluation.battles.info.tabs.recentBattles')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="ongoing" className="mt-4 space-y-4">
-                {ongoingTasks.length === 0 ? (
-                  <div className="py-8 text-center">
-                    <Swords className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="mb-2 text-lg font-medium text-muted-foreground">暂无进行中的任务</h3>
-                    <p className="text-sm text-muted-foreground">点击『创建对战』开始新的评测任务</p>
-                  </div>
-                ) : (
-                  ongoingTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50"
-                    >
+                {currentEvaluationStatus ? (
+                  <div className="space-y-4">
+                    <div className="rounded-lg border p-4">
                       <div className="flex items-center gap-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                          <Swords className="h-5 w-5 text-primary" />
+                          <Target className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <div className="font-medium">任务 {task.id.slice(-8)}</div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              <span>{new Date(task.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              <span>
-                                {task.startedAt
-                                  ? `运行 ${Math.round((Date.now() - new Date(task.startedAt).getTime()) / 60000)} 分钟`
-                                  : '等待开始'}
-                              </span>
-                            </div>
+                          <div className="font-medium">
+                            {t('ugc-page.evaluation.battles.info.status.progress', {
+                              progress: currentEvaluationStatus.progress?.toFixed(1),
+                            })}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {t('ugc-page.evaluation.battles.info.status.rounds', {
+                              stableRounds: Math.floor(((currentEvaluationStatus.progress || 0) / 100) * 2),
+                              neededRounds: 2 - Math.floor(((currentEvaluationStatus.progress || 0) / 100) * 2),
+                            })}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {t('ugc-page.evaluation.battles.info.status.avgUncertainty', {
+                              sigma: currentEvaluationStatus.averageSigma?.toFixed(2),
+                            })}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        {getStatusBadge(task.status)}
-                        <Button variant="outline" size="small">
-                          <Eye className="mr-1 h-3 w-3" />
-                          查看详情
-                        </Button>
-                      </div>
+                      {currentEvaluationStatus.isComplete ? (
+                        <div className="mt-3 flex items-center gap-2 text-green-600">
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span className="text-sm font-medium">
+                            {t('ugc-page.evaluation.battles.info.status.completed')}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="mt-3 flex items-center gap-2 text-blue-600">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="text-sm font-medium">
+                            {t('ugc-page.evaluation.battles.info.status.needsMoreBattles', {
+                              count: currentEvaluationStatus.needsMoreBattles?.length || 0,
+                            })}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  ))
+                  </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <Target className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                    <h3 className="mb-2 text-lg font-medium text-muted-foreground">
+                      {t('ugc-page.evaluation.battles.info.noInfo.title')}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {t('ugc-page.evaluation.battles.info.noInfo.description')}
+                    </p>
+                  </div>
                 )}
               </TabsContent>
 
               <TabsContent value="completed" className="mt-4 space-y-4">
-                {completedTasks.length === 0 ? (
-                  <div className="py-8 text-center">
-                    <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="mb-2 text-lg font-medium text-muted-foreground">暂无已完成的任务</h3>
-                    <p className="text-sm text-muted-foreground">完成的任务将在这里显示</p>
-                  </div>
-                ) : (
-                  completedTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                            task.status === 'completed'
-                              ? 'bg-green-100'
-                              : task.status === 'failed'
-                                ? 'bg-red-100'
-                                : 'bg-gray-100'
-                          }`}
-                        >
-                          <Swords
-                            className={`h-5 w-5 ${
-                              task.status === 'completed'
-                                ? 'text-green-600'
-                                : task.status === 'failed'
-                                  ? 'text-red-600'
-                                  : 'text-gray-600'
-                            }`}
-                          />
-                        </div>
-                        <div>
-                          <div className="font-medium">任务 {task.id.slice(-8)}</div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              <span>{new Date(task.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            {task.finishedAt && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                <span>
-                                  耗时{' '}
-                                  {Math.round(
-                                    (new Date(task.finishedAt).getTime() - new Date(task.createdAt).getTime()) / 60000,
-                                  )}{' '}
-                                  分钟
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        {getStatusBadge(task.status)}
-                        <Button variant="outline" size="small" onClick={() => handleViewResults(task)}>
-                          <Eye className="mr-1 h-3 w-3" />
-                          查看结果
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                )}
+                <div className="py-8 text-center">
+                  <Swords className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <h3 className="mb-2 text-lg font-medium text-muted-foreground">
+                    {t('ugc-page.evaluation.battles.info.recentBattles.title')}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t('ugc-page.evaluation.battles.info.recentBattles.description')}
+                  </p>
+                  <Button variant="outline" className="mt-4" onClick={() => setBattlesDialogOpen(true)}>
+                    {t('ugc-page.evaluation.battles.info.recentBattles.button')}
+                  </Button>
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
 
-        {/* 创建对战对话框 */}
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        {/* Assets in Leaderboard */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('ugc-page.evaluation.battles.assetsInLeaderboard.title')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {assetsInModuleCount > 0 ? (
+              <>
+                <div className="grid grid-cols-8 gap-4">
+                  {assetsInModule?.assetIds
+                    .slice((leaderboardPage - 1) * leaderboardPageSize, leaderboardPage * leaderboardPageSize)
+                    .map((assetId) => <AssetThumbnail key={assetId} assetId={assetId} />)}
+                </div>
+                <div className="mt-4 flex items-center justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setLeaderboardPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={leaderboardPage === 1}
+                  >
+                    {t('ugc-page.evaluation.leaderboard.pagination.previous')}
+                  </Button>
+                  <span className="text-sm">
+                    {t('ugc-page.evaluation.leaderboard.pagination.page', {
+                      page: leaderboardPage,
+                      totalPages: Math.ceil(assetsInModuleCount / leaderboardPageSize),
+                    })}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setLeaderboardPage((prev) => prev + 1)}
+                    disabled={leaderboardPage * leaderboardPageSize >= assetsInModuleCount}
+                  >
+                    {t('ugc-page.evaluation.leaderboard.pagination.next')}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="py-8 text-center">
+                <ImageIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="text-muted-foreground">
+                  {t('ugc-page.evaluation.battles.assetsInLeaderboard.empty.title')}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t('ugc-page.evaluation.battles.assetsInLeaderboard.empty.description')}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 加入评测对话框 */}
+        <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
           <DialogContent className="max-w-4xl">
             <DialogHeader>
-              <DialogTitle>创建对战</DialogTitle>
-              <DialogDescription>选择参与者并配置对战参数</DialogDescription>
+              <DialogTitle>{t('ugc-page.evaluation.battles.joinDialog.title')}</DialogTitle>
+              <DialogDescription>{t('ugc-page.evaluation.battles.joinDialog.description')}</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6">
               {/* 图片选择区域 */}
               <div>
-                <Label className="text-base font-medium">选择参与者图片</Label>
+                <Label className="text-base font-medium">
+                  {t('ugc-page.evaluation.battles.joinDialog.selectPrompt')}
+                </Label>
                 <p className="mb-4 text-sm text-muted-foreground">
-                  已选择 {battleForm.selectedAssets.length} 个图片，至少需要选择 2 个
+                  {t('ugc-page.evaluation.battles.joinDialog.selectedCount', { count: joinForm.selectedAssets.length })}
                 </p>
 
                 <div className="max-h-60 overflow-y-auto rounded-lg border p-4">
-                  {mediaAssets?.data && mediaAssets.data.length > 0 ? (
+                  {availableAssets?.data && availableAssets.data.length > 0 ? (
                     <div className="grid grid-cols-6 gap-4">
-                      {mediaAssets.data
+                      {availableAssets.data
                         .filter((asset) => asset.type.startsWith('image/'))
                         .map((asset) => (
                           <div
                             key={asset.id}
                             className={`relative cursor-pointer rounded-lg border-2 transition-all ${
-                              battleForm.selectedAssets.includes(asset.id)
+                              joinForm.selectedAssets.includes(asset.id)
                                 ? 'border-primary bg-primary/10'
                                 : 'border-gray-200 hover:border-gray-300'
                             }`}
@@ -550,7 +399,7 @@ export const BattlesView: React.FC = () => {
                               />
                             </div>
                             <div className="absolute right-1 top-1">
-                              <Checkbox checked={battleForm.selectedAssets.includes(asset.id)} onChange={() => {}} />
+                              <Checkbox checked={joinForm.selectedAssets.includes(asset.id)} onChange={() => {}} />
                             </div>
                             <div className="p-1">
                               <p className="truncate text-xs" title={asset.displayName}>
@@ -563,10 +412,13 @@ export const BattlesView: React.FC = () => {
                   ) : (
                     <div className="py-8 text-center">
                       <ImageIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                      <p className="text-muted-foreground">暂无可用图片</p>
+                      <p className="text-muted-foreground">{t('ugc-page.evaluation.battles.joinDialog.empty.title')}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t('ugc-page.evaluation.battles.joinDialog.empty.description')}
+                      </p>
                       <Button variant="outline" className="mt-2" onClick={() => setUploadDialogOpen(true)}>
                         <Upload className="mr-2 h-4 w-4" />
-                        上传图片
+                        {t('ugc-page.evaluation.battles.joinDialog.empty.uploadButton')}
                       </Button>
                     </div>
                   )}
@@ -575,96 +427,37 @@ export const BattlesView: React.FC = () => {
 
               <Separator />
 
-              {/* 对战配置 */}
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="strategy">对战策略</Label>
-                    <Select
-                      value={battleForm.strategy}
-                      onValueChange={(value: BattleStrategy) => setBattleForm((prev) => ({ ...prev, strategy: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="选择对战策略" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="RANDOM_PAIRS">随机配对</SelectItem>
-                        <SelectItem value="ROUND_ROBIN">循环赛制</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {battleForm.strategy === 'RANDOM_PAIRS'
-                        ? '随机选择参与者进行对战，可自定义对战次数'
-                        : '每个参与者与其他所有参与者都进行一次对战'}
-                    </p>
-                  </div>
-
-                  {battleForm.strategy === 'RANDOM_PAIRS' && (
-                    <div>
-                      <Label htmlFor="battleCount">对战次数</Label>
-                      <Input
-                        id="battleCount"
-                        type="number"
-                        value={battleForm.battleCount}
-                        onChange={(value) => {
-                          const count = parseInt(value);
-                          setBattleForm((prev) => ({
-                            ...prev,
-                            battleCount: isNaN(count) ? 0 : Math.min(count, maxBattles),
-                          }));
-                        }}
-                        placeholder="200"
-                        max={maxBattles}
-                        disabled={maxBattles === 0}
-                      />
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        基于当前选择的 {battleForm.selectedAssets.length} 个参与者，最多可进行 {maxBattles} 场对战。
-                      </p>
-                    </div>
-                  )}
-
-                  {battleForm.strategy === 'ROUND_ROBIN' && battleForm.selectedAssets.length > 0 && (
-                    <div className="rounded-lg bg-blue-50 p-3">
-                      <p className="text-sm text-blue-700">
-                        循环赛制将产生{' '}
-                        {Math.floor((battleForm.selectedAssets.length * (battleForm.selectedAssets.length - 1)) / 2)}{' '}
-                        场对战
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="description">描述（可选）</Label>
-                  <Textarea
-                    id="description"
-                    value={battleForm.description}
-                    onChange={(e) => setBattleForm((prev) => ({ ...prev, description: e.target.value }))}
-                    placeholder="输入对战描述..."
-                    rows={4}
-                  />
-                </div>
+              {/* OpenSkill说明 */}
+              <div className="rounded-lg bg-blue-50 p-4">
+                <h4 className="mb-2 font-medium text-blue-800">
+                  {t('ugc-page.evaluation.battles.joinDialog.systemInfo.title')}
+                </h4>
+                <ul className="space-y-1 text-sm text-blue-700">
+                  {(
+                    t('ugc-page.evaluation.battles.joinDialog.systemInfo.rules', {
+                      returnObjects: true,
+                    }) as string[]
+                  ).map((rule, i) => (
+                    <li key={i}>• {rule}</li>
+                  ))}
+                </ul>
               </div>
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateDialogOpen(false)} disabled={isCreating}>
-                取消
+              <Button variant="outline" onClick={() => setJoinDialogOpen(false)} disabled={isJoining}>
+                {t('ugc-page.evaluation.battles.joinDialog.cancel')}
               </Button>
-              <Button
-                onClick={handleCreateBattleGroup}
-                variant="outline"
-                disabled={isCreating || battleForm.selectedAssets.length < 2}
-              >
-                {isCreating ? (
+              <Button onClick={handleJoinEvaluation} disabled={isJoining || joinForm.selectedAssets.length === 0}>
+                {isJoining ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    创建中...
+                    {t('ugc-page.evaluation.battles.joinDialog.joining')}
                   </>
                 ) : (
                   <>
-                    <Target className="mr-2 h-4 w-4" />
-                    创建对战
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t('ugc-page.evaluation.battles.joinDialog.confirm', { count: joinForm.selectedAssets.length })}
                   </>
                 )}
               </Button>
@@ -676,113 +469,234 @@ export const BattlesView: React.FC = () => {
         <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
           <DialogContent className="w-[40rem] max-w-[40rem]">
             <DialogHeader>
-              <DialogTitle>上传图片</DialogTitle>
-              <DialogDescription>上传用于对战评测的图片文件</DialogDescription>
+              <DialogTitle>{t('ugc-page.evaluation.battles.uploadDialog.title')}</DialogTitle>
+              <DialogDescription>{t('ugc-page.evaluation.battles.uploadDialog.description')}</DialogDescription>
             </DialogHeader>
             <VinesUploader
               maxSize={30}
               accept={['png', 'jpeg', 'jpg']}
               onChange={() => {
-                mutateMedia();
+                mutateAvailableAssets();
                 setUploadDialogOpen(false);
-                toast.success('图片上传成功');
+                toast.success(t('ugc-page.evaluation.battles.uploadDialog.success'));
               }}
               basePath="user-files/media"
             />
           </DialogContent>
         </Dialog>
 
-        {/* 查看结果对话框 */}
-        <Dialog
-          open={resultsDialogOpen}
-          onOpenChange={(isOpen) => {
-            setResultsDialogOpen(isOpen);
-            if (!isOpen) {
-              setTaskResults(null);
-              setSelectedTask(null);
-            }
-          }}
-        >
-          <DialogContent className="max-w-3xl">
+        {/* 评测状态对话框 */}
+        <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>对战结果 - 任务 {selectedTask?.id.slice(-8)}</DialogTitle>
-              <DialogDescription>共 {taskResults?.length || 0} 场对战。这里展示了详细的对战记录。</DialogDescription>
+              <DialogTitle>{t('ugc-page.evaluation.battles.statusDialog.title')}</DialogTitle>
+              <DialogDescription>{t('ugc-page.evaluation.battles.statusDialog.description')}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {isStatusLoading ? (
+                <div className="flex h-48 items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : evaluationStatus ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        {t('ugc-page.evaluation.battles.statusDialog.status')}
+                      </label>
+                      <div
+                        className={`flex items-center gap-2 ${
+                          evaluationStatus.isComplete ? 'text-green-600' : 'text-blue-600'
+                        }`}
+                      >
+                        {evaluationStatus.isComplete ? (
+                          <CheckCircle2 className="h-5 w-5" />
+                        ) : (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        )}
+                        <span className="font-medium">
+                          {evaluationStatus.isComplete
+                            ? t('ugc-page.evaluation.leaderboard.status.completed')
+                            : t('ugc-page.evaluation.leaderboard.status.inProgress')}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        {t('ugc-page.evaluation.battles.statusDialog.progress')}
+                      </label>
+                      <div className="text-2xl font-bold text-purple-600">{evaluationStatus.progress.toFixed(1)}%</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">
+                      {t('ugc-page.evaluation.battles.statusDialog.progress')}
+                    </label>
+                    <Progress value={evaluationStatus.progress} className="mt-2 h-3" />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t('ugc-page.evaluation.battles.statusDialog.progressDetail', {
+                        stableRounds: Math.floor(((evaluationStatus.progress || 0) / 100) * 2),
+                        neededRounds: 2 - Math.floor(((evaluationStatus.progress || 0) / 100) * 2),
+                      })}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-lg bg-blue-50 p-3 text-center">
+                      <div className="text-2xl font-bold text-blue-600">{evaluationStatus.totalAssets}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {t('ugc-page.evaluation.battles.statusDialog.totalAssets')}
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-orange-50 p-3 text-center">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {evaluationStatus.averageSigma.toFixed(2)}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {t('ugc-page.evaluation.battles.statusDialog.avgUncertainty')}
+                      </div>
+                    </div>
+                  </div>
+
+                  {evaluationStatus.needsMoreBattles.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        {t('ugc-page.evaluation.battles.statusDialog.needsMoreBattles')}
+                      </label>
+                      <div className="max-h-32 overflow-y-auto">
+                        <div className="space-y-1">
+                          {evaluationStatus.needsMoreBattles.map((assetId) => (
+                            <div key={assetId} className="rounded bg-gray-50 px-2 py-1 text-sm text-muted-foreground">
+                              {assetId.substring(0, 8)}...
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  <AlertCircle className="mx-auto mb-2 h-8 w-8" />
+                  <p>{t('ugc-page.evaluation.battles.statusDialog.noStatus')}</p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setStatusDialogOpen(false)}>
+                {t('ugc-page.evaluation.battles.statusDialog.close')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* 最近对战对话框 */}
+        <Dialog open={battlesDialogOpen} onOpenChange={setBattlesDialogOpen}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>{t('ugc-page.evaluation.battles.battlesDialog.title')}</DialogTitle>
+              <DialogDescription>{t('ugc-page.evaluation.battles.battlesDialog.description')}</DialogDescription>
             </DialogHeader>
             <div className="max-h-[60vh] overflow-y-auto">
-              {isResultsLoading ? (
+              {isBattlesLoading ? (
                 <div className="flex h-48 items-center justify-center">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : (
-                <div className="space-y-4 p-1">
-                  {taskResults?.map((battle) => (
-                    <div key={battle.id} className="rounded-lg border p-4">
-                      <div className="grid grid-cols-3 items-center gap-4">
-                        {/* Asset A */}
-                        <div
-                          className={`flex flex-col items-center gap-2 rounded-md p-2 ${
-                            battle.result === 'A_WIN' ? 'bg-green-100 ring-2 ring-green-500' : ''
-                          }`}
-                        >
-                          <img
-                            src={battle.assetA?.url}
-                            alt={battle.assetA?.displayName}
-                            className="h-24 w-24 rounded-md object-cover"
-                          />
-                          <span className="text-xs font-medium">{battle.assetA?.displayName ?? '参与者 A'}</span>
+                <div className="space-y-3">
+                  {recentBattles.map((battle) => (
+                    <div key={battle.battleId} className="rounded-lg border p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm">
+                            <div className="font-medium">
+                              {battle.assetAId.substring(0, 8)}... {t('ugc-page.evaluation.battles.battlesDialog.vs')}{' '}
+                              {battle.assetBId.substring(0, 8)}...
+                            </div>
+                            <div className="text-muted-foreground">{new Date(battle.timestamp).toLocaleString()}</div>
+                          </div>
                         </div>
 
-                        {/* Result */}
-                        <div className="text-center">
-                          <div className="font-bold">VS</div>
-                          {battle.result === 'A_WIN' && <Badge className="mt-2 bg-green-500">A 获胜</Badge>}
-                          {battle.result === 'B_WIN' && <Badge className="mt-2 bg-blue-500">B 获胜</Badge>}
-                          {battle.result === 'DRAW' && (
-                            <Badge className="mt-2" variant="secondary">
-                              平局
-                            </Badge>
+                        <div className="flex items-center gap-4">
+                          {battle.oldRatingA && battle.newRatingA && (
+                            <div className="text-center text-sm">
+                              <div className="text-muted-foreground">A: {battle.oldRatingA.toFixed(0)}</div>
+                              <div
+                                className={`font-medium ${
+                                  battle.newRatingA > battle.oldRatingA ? 'text-green-600' : 'text-red-600'
+                                }`}
+                              >
+                                → {battle.newRatingA.toFixed(0)}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="text-center">
+                            {battle.winner === 'A' && (
+                              <Badge className="bg-green-500">
+                                {t('ugc-page.evaluation.battles.battlesDialog.winner.a')}
+                              </Badge>
+                            )}
+                            {battle.winner === 'B' && (
+                              <Badge className="bg-blue-500">
+                                {t('ugc-page.evaluation.battles.battlesDialog.winner.b')}
+                              </Badge>
+                            )}
+                            {battle.winner === 'DRAW' && (
+                              <Badge variant="secondary">
+                                {t('ugc-page.evaluation.battles.battlesDialog.winner.draw')}
+                              </Badge>
+                            )}
+                          </div>
+
+                          {battle.oldRatingB && battle.newRatingB && (
+                            <div className="text-center text-sm">
+                              <div className="text-muted-foreground">B: {battle.oldRatingB.toFixed(0)}</div>
+                              <div
+                                className={`font-medium ${
+                                  battle.newRatingB > battle.oldRatingB ? 'text-green-600' : 'text-red-600'
+                                }`}
+                              >
+                                → {battle.newRatingB.toFixed(0)}
+                              </div>
+                            </div>
                           )}
                         </div>
-
-                        {/* Asset B */}
-                        <div
-                          className={`flex flex-col items-center gap-2 rounded-md p-2 ${
-                            battle.result === 'B_WIN' ? 'bg-blue-100 ring-2 ring-blue-500' : ''
-                          }`}
-                        >
-                          <img
-                            src={battle.assetB?.url}
-                            alt={battle.assetB?.displayName}
-                            className="h-24 w-24 rounded-md object-cover"
-                          />
-                          <span className="text-xs font-medium">{battle.assetB?.displayName ?? '参与者 B'}</span>
-                        </div>
                       </div>
-                      {battle.reason && (
-                        <div className="mt-3 rounded-md bg-gray-50 p-3 text-sm">
-                          <p className="font-semibold">评判理由:</p>
-                          <p className="text-muted-foreground">{battle.reason}</p>
-                        </div>
-                      )}
                     </div>
                   ))}
-                  {taskResults?.length === 0 && (
+                  {recentBattles.length === 0 && (
                     <div className="py-8 text-center text-muted-foreground">
                       <Swords className="mx-auto mb-2 h-8 w-8" />
-                      <p>暂无对战结果</p>
+                      <p>{t('ugc-page.evaluation.battles.battlesDialog.noBattles')}</p>
                     </div>
                   )}
                 </div>
               )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setResultsDialogOpen(false)}>
-                关闭
+              <Button variant="outline" onClick={() => setBattlesDialogOpen(false)}>
+                {t('ugc-page.evaluation.battles.battlesDialog.close')}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
+    </div>
+  );
+};
+
+const AssetThumbnail: React.FC<{ assetId: string }> = ({ assetId }) => {
+  const { data: asset } = useSWR(['media-asset', assetId], () => getMediaAsset(assetId));
+
+  if (!asset) {
+    return <Skeleton className="aspect-square w-full" />;
+  }
+
+  return (
+    <div className="aspect-square">
+      <img src={asset.url} alt={asset.displayName} className="h-full w-full rounded-lg object-cover" />
     </div>
   );
 };

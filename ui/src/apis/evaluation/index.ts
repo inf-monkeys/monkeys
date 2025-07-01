@@ -17,6 +17,7 @@ import {
   GetChartDataDto,
   GetEloLeaderboardDto,
   ListDto,
+  MediaAsset,
   RatingHistoryEntry,
   SubmitBattleResultDto,
 } from './typings';
@@ -260,10 +261,180 @@ export const getAssetRatingHistory = (
 };
 
 export const getChartData = (moduleId: string, params: GetChartDataDto): Promise<ChartDataResponse> => {
-  const query = new URLSearchParams(params as any).toString();
+  // 确保 dataType 至少为 'trends'
+  const finalParams = {
+    dataType: 'trends',
+    ...params,
+  };
+  const query = new URLSearchParams(finalParams as any).toString();
   return vinesFetcher<ChartDataResponse>({
     simple: true,
   })(`/api/evaluation/modules/${moduleId}/chart-data?${query}`).then((result) => result as ChartDataResponse);
+};
+
+// =================================================================
+// OpenSkill 评测系统 API
+// =================================================================
+
+export interface JoinEvaluationDto {
+  assetIds: string[];
+}
+
+export interface OpenSkillLeaderboardItem {
+  rank: number;
+  assetId: string;
+  exposedRating: number;
+  mu: number;
+  sigma: number;
+  totalBattles: number;
+  lastUpdated: string;
+}
+
+export interface OpenSkillLeaderboardResponse {
+  data: OpenSkillLeaderboardItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface EvaluationStatus {
+  isComplete: boolean;
+  progress: number;
+  totalAssets: number;
+  stableAssets: number;
+  averageSigma: number;
+  needsMoreBattles: string[];
+}
+
+export interface RecentBattle {
+  winner: 'A' | 'B' | 'DRAW';
+  assetAId: string;
+  assetBId: string;
+  battleId: string;
+  timestamp: number;
+  oldRatingA?: number;
+  newRatingA?: number;
+  oldRatingB?: number;
+  newRatingB?: number;
+}
+
+export interface AvailableAssetsResponse {
+  data: MediaAsset[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface AssetsInModuleResponse {
+  assetIds: string[];
+  total: number;
+}
+
+// 加入OpenSkill评测排行榜
+export const joinEvaluation = (
+  moduleId: string,
+  payload: JoinEvaluationDto,
+): Promise<{ success: boolean; addedCount: number; message: string }> => {
+  return vinesFetcher<{ success: boolean; addedCount: number; message: string }>({
+    method: 'POST',
+    simple: true,
+  })(`/api/evaluation/modules/${moduleId}/join`, payload).then(
+    (result) => result as { success: boolean; addedCount: number; message: string },
+  );
+};
+
+// 获取排行榜中的资产列表
+export const getAssetsInModule = (moduleId: string): Promise<AssetsInModuleResponse> => {
+  return vinesFetcher<AssetsInModuleResponse>({
+    simple: true,
+  })(`/api/evaluation/modules/${moduleId}/assets`).then((result) => result as AssetsInModuleResponse);
+};
+
+// 获取可加入排行榜的图片
+export const getAvailableAssets = (moduleId: string, params: ListDto = {}): Promise<AvailableAssetsResponse> => {
+  const query = new URLSearchParams(params as any).toString();
+  return vinesFetcher<any>({
+    simple: false,
+    wrapper: (data, raw) => ({
+      data: raw.data,
+      total: raw.total,
+      page: raw.page,
+      limit: raw.limit,
+    }),
+  })(`/api/evaluation/modules/${moduleId}/available-assets?${query}`).then(
+    (result) => result as AvailableAssetsResponse,
+  );
+};
+
+// 获取OpenSkill排行榜
+export const getOpenSkillLeaderboard = (
+  moduleId: string,
+  params: ListDto = {},
+): Promise<OpenSkillLeaderboardResponse> => {
+  const query = new URLSearchParams(params as any).toString();
+  return vinesFetcher<any>({
+    // 需要完整原始响应以获得分页信息，因此不能使用 simple: true
+    simple: false,
+    // wrapper 直接返回原始响应，方便统一处理
+    wrapper: (_data, raw) => raw,
+  })(`/api/evaluation/modules/${moduleId}/leaderboard?${query}`).then((result) => {
+    /*
+     * 后端理想结构：
+     * { code: 200, data: [...], total: 123, page: 2, limit: 10 }
+     * 若后端仅返回数组，则 fallback
+     */
+    if (result && Array.isArray(result.data)) {
+      // 带分页信息的新结构
+      return {
+        data: result.data,
+        total: result.total ?? result.data.length,
+        page: result.page ?? 1,
+        limit: result.limit ?? result.data.length,
+      };
+    }
+    if (Array.isArray(result)) {
+      // 仅数组的旧结构
+      return {
+        data: result,
+        total: result.length,
+        page: 1,
+        limit: result.length,
+      };
+    }
+    // 不可预期结构，返回安全默认值
+    return { data: [], total: 0, page: 1, limit: 10 };
+  });
+};
+
+// 获取最近对战记录
+export const getRecentBattles = (moduleId: string, limit?: number): Promise<RecentBattle[]> => {
+  const params = limit ? `?limit=${limit}` : '';
+  return vinesFetcher<RecentBattle[]>({
+    simple: true,
+  })(`/api/evaluation/modules/${moduleId}/recent-battles${params}`).then((result) => result as RecentBattle[]);
+};
+
+// 获取评测完成状态
+export const getEvaluationStatus = (moduleId: string): Promise<EvaluationStatus> => {
+  return vinesFetcher<EvaluationStatus>({
+    simple: true,
+  })(`/api/evaluation/modules/${moduleId}/evaluation-status`).then((result) => result as EvaluationStatus);
+};
+
+// 获取评分趋势
+export const getRatingTrends = (
+  moduleId: string,
+  params: {
+    days?: number;
+    evaluatorId?: string;
+    limit?: number;
+    minBattles?: number;
+  } = {},
+): Promise<any> => {
+  const query = new URLSearchParams(params as any).toString();
+  return vinesFetcher<any>({
+    simple: true,
+  })(`/api/evaluation/modules/${moduleId}/rating-trends?${query}`).then((result) => result);
 };
 
 export interface UpdateEvaluationModuleDto {

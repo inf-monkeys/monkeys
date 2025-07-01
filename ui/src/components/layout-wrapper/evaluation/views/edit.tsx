@@ -119,9 +119,9 @@ export const EditView: React.FC = () => {
       await updateEvaluationModule(moduleId, updateData);
       await mutate();
       setIsEditing(false);
-      toast.success(t('common.save.success', '保存成功！'));
+      toast.success(t('common.save.success'));
     } catch (error) {
-      toast.error(t('common.save.error', '保存失败！请稍候重试！'));
+      toast.error(t('common.save.error'));
     } finally {
       setIsSaving(false);
     }
@@ -129,7 +129,7 @@ export const EditView: React.FC = () => {
 
   const handleAddParticipants = async () => {
     if (!moduleId || !newParticipantIds.trim()) {
-      toast.error('请输入参与者ID');
+      toast.error(t('ugc-page.evaluation.edit.toast.add-participant.enter-id'));
       return;
     }
 
@@ -142,7 +142,7 @@ export const EditView: React.FC = () => {
         .filter((id) => id.length > 0);
 
       if (assetIds.length === 0) {
-        toast.error('请输入有效的参与者ID');
+        toast.error(t('ugc-page.evaluation.edit.toast.add-participant.enter-valid-id'));
         return;
       }
 
@@ -150,9 +150,9 @@ export const EditView: React.FC = () => {
       await mutate();
       setParticipantDialogOpen(false);
       setNewParticipantIds('');
-      toast.success(`成功添加 ${assetIds.length} 个参与者`);
+      toast.success(t('ugc-page.evaluation.edit.toast.add-participant.success', { count: assetIds.length }));
     } catch (error) {
-      toast.error('添加参与者失败，请稍候重试');
+      toast.error(t('ugc-page.evaluation.edit.toast.add-participant.error'));
     } finally {
       setIsAddingParticipants(false);
     }
@@ -160,7 +160,7 @@ export const EditView: React.FC = () => {
 
   const handleCreateAndAddEvaluator = async () => {
     if (!moduleId || !newEvaluator.name.trim() || !newEvaluator.llmModelName?.trim()) {
-      toast.error('评测员名称和LLM模型名称不能为空');
+      toast.error(t('ugc-page.evaluation.edit.toast.add-evaluator.name-and-model-required'));
       return;
     }
 
@@ -173,17 +173,17 @@ export const EditView: React.FC = () => {
 
       // 1. 创建评测员
       const createdEvaluator: Evaluator = await createEvaluator(createData);
-      toast.success(`评测员 "${createdEvaluator.name}" 创建成功`);
+      toast.success(t('ugc-page.evaluation.edit.toast.add-evaluator.create-success', { name: createdEvaluator.name }));
 
       // 2. 添加到模块
       await addEvaluatorToModule(moduleId, { evaluatorId: createdEvaluator.id });
-      toast.success(`评测员已成功关联到当前模块`);
+      toast.success(t('ugc-page.evaluation.edit.toast.add-evaluator.associate-success'));
 
       await mutateEvaluators();
       setEvaluatorDialogOpen(false);
       setNewEvaluator({ name: '', llmModelName: '', evaluationFocus: '' });
     } catch (error) {
-      toast.error('操作失败，请稍候重试');
+      toast.error(t('ugc-page.evaluation.edit.toast.add-evaluator.error'));
     } finally {
       setIsAddingEvaluator(false);
     }
@@ -211,9 +211,9 @@ export const EditView: React.FC = () => {
           <div>
             <h1 className="flex items-center gap-2 text-2xl font-bold">
               <Settings className="h-6 w-6" />
-              {t('evaluation.edit.title')}
+              {t('ugc-page.evaluation.edit.title')}
             </h1>
-            <p className="text-muted-foreground">{t('evaluation.edit.description')}</p>
+            <p className="text-muted-foreground">{t('ugc-page.evaluation.edit.description')}</p>
           </div>
           <div className="flex gap-2">
             {isEditing ? (
@@ -227,7 +227,7 @@ export const EditView: React.FC = () => {
                   disabled={isSaving || !(formData.displayName || '').trim()}
                 >
                   <Save className="mr-2 h-4 w-4" />
-                  {isSaving ? t('common.save.loading', '保存中...') : t('common.utils.save')}
+                  {isSaving ? t('common.save.loading') : t('common.utils.save')}
                 </Button>
               </>
             ) : (
@@ -257,12 +257,12 @@ export const EditView: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
-              {t('evaluation.edit.basic-info')}
+              {t('ugc-page.evaluation.edit.basic-info.title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="displayName">{t('evaluation.edit.display-name')}</Label>
+              <Label htmlFor="displayName">{t('ugc-page.evaluation.edit.basic-info.display-name')}</Label>
               <Input
                 id="displayName"
                 value={isEditing ? formData.displayName : module.displayName || ''}
@@ -270,7 +270,7 @@ export const EditView: React.FC = () => {
                   setFormData((prev) => ({ ...prev, displayName: value }));
                 }}
                 disabled={!isEditing || isSaving}
-                placeholder={t('evaluation.edit.display-name-placeholder')}
+                placeholder={t('ugc-page.evaluation.edit.basic-info.display-name-placeholder')}
                 className={isEditing && !(formData.displayName || '').trim() ? 'border-red-500' : ''}
               />
               {isEditing && !(formData.displayName || '').trim() && (
@@ -278,7 +278,7 @@ export const EditView: React.FC = () => {
               )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">{t('evaluation.edit.description')}</Label>
+              <Label htmlFor="description">{t('ugc-page.evaluation.edit.basic-info.description-label')}</Label>
               <Textarea
                 id="description"
                 value={isEditing ? formData.description : module.description || ''}
@@ -286,12 +286,12 @@ export const EditView: React.FC = () => {
                   setFormData((prev) => ({ ...prev, description: e.target.value }));
                 }}
                 disabled={!isEditing || isSaving}
-                placeholder={t('evaluation.edit.description-placeholder')}
+                placeholder={t('ugc-page.evaluation.edit.basic-info.description-placeholder')}
                 rows={3}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="evaluationCriteria">{t('evaluation.edit.evaluation-criteria')}</Label>
+              <Label htmlFor="evaluationCriteria">{t('ugc-page.evaluation.edit.basic-info.evaluation-criteria')}</Label>
               <Textarea
                 id="evaluationCriteria"
                 value={isEditing ? formData.evaluationCriteria : module.evaluationCriteria || ''}
@@ -299,14 +299,16 @@ export const EditView: React.FC = () => {
                   setFormData((prev) => ({ ...prev, evaluationCriteria: e.target.value }));
                 }}
                 disabled={!isEditing || isSaving}
-                placeholder={t('evaluation.edit.criteria-placeholder')}
+                placeholder={t('ugc-page.evaluation.edit.basic-info.criteria-placeholder')}
                 rows={4}
               />
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>{t('evaluation.edit.status')}</Label>
-                <div className="text-sm text-muted-foreground">{t('evaluation.edit.status-description')}</div>
+                <Label>{t('ugc-page.evaluation.edit.basic-info.status')}</Label>
+                <div className="text-sm text-muted-foreground">
+                  {t('ugc-page.evaluation.edit.basic-info.status-description')}
+                </div>
               </div>
               <Switch
                 checked={isEditing ? formData.isActive : module.isActive ?? true}
@@ -324,16 +326,16 @@ export const EditView: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              {t('evaluation.edit.participants')}
+              {t('ugc-page.evaluation.edit.participants.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">{t('evaluation.edit.participant-count')}</div>
+                  <div className="font-medium">{t('ugc-page.evaluation.edit.participants.participant-count')}</div>
                   <div className="text-sm text-muted-foreground">
-                    {module.participantAssetIds?.length || 0} {t('evaluation.participants')}
+                    {t('ugc-page.evaluation.participants', { count: module.participantAssetIds?.length || 0 })}
                   </div>
                 </div>
                 <Button
@@ -341,26 +343,32 @@ export const EditView: React.FC = () => {
                   disabled={!isEditing || isSaving}
                   onClick={() => setParticipantDialogOpen(true)}
                 >
-                  {t('evaluation.edit.manage-participants')}
+                  {t('ugc-page.evaluation.edit.participants.manage-participants')}
                 </Button>
               </div>
               <Separator />
               <div className="space-y-2">
-                {module.participantAssetIds?.slice(0, 3).map((id, index) => (
-                  <div key={id} className="flex items-center gap-3 rounded-lg border p-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-medium">
-                      #{index + 1}
+                {module.participantAssetIds?.length ? (
+                  module.participantAssetIds?.slice(0, 3).map((id, index) => (
+                    <div key={id} className="flex items-center gap-3 rounded-lg border p-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-medium">
+                        #{index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium">
+                          {t('ugc-page.evaluation.edit.participant.id', { id: id.slice(-6) })}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {t('ugc-page.evaluation.edit.participant.status.active')}
+                        </div>
+                      </div>
+                      <Badge variant="outline">{t('ugc-page.evaluation.edit.participant.status.active')}</Badge>
                     </div>
-                    <div className="flex-1">
-                      <div className="font-medium">Participant {id.slice(-6)}</div>
-                      <div className="text-sm text-muted-foreground">{t('evaluation.participant.status.active')}</div>
-                    </div>
-                    <Badge variant="outline">{t('evaluation.participant.status.active')}</Badge>
-                  </div>
-                )) ?? (
+                  ))
+                ) : (
                   <div className="py-8 text-center text-muted-foreground">
                     <Users className="mx-auto mb-2 h-8 w-8" />
-                    <p>{t('evaluation.edit.no-participants')}</p>
+                    <p>{t('ugc-page.evaluation.edit.participants.no-participants')}</p>
                   </div>
                 )}
               </div>
@@ -374,10 +382,10 @@ export const EditView: React.FC = () => {
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                评测员管理
+                {t('ugc-page.evaluation.edit.evaluator-management')}
               </div>
               <Button variant="outline" disabled={!isEditing || isSaving} onClick={() => setEvaluatorDialogOpen(true)}>
-                添加评测员
+                {t('ugc-page.evaluation.edit.add-evaluator')}
               </Button>
             </CardTitle>
           </CardHeader>
@@ -389,7 +397,9 @@ export const EditView: React.FC = () => {
                     <div className="flex-1">
                       <div className="font-medium">{evaluator.name}</div>
                       <div className="text-sm text-muted-foreground">
-                        {evaluator.type === 'llm' ? `模型: ${evaluator.llmModelName}` : '人工评测员'}
+                        {evaluator.type === 'llm'
+                          ? `${t('ugc-page.evaluation.edit.model')}: ${evaluator.llmModelName}`
+                          : t('ugc-page.evaluation.edit.human-evaluator')}
                       </div>
                     </div>
                     <Badge variant={evaluator.type === 'llm' ? 'default' : 'secondary'}>{evaluator.type}</Badge>
@@ -398,7 +408,7 @@ export const EditView: React.FC = () => {
               ) : (
                 <div className="py-8 text-center text-muted-foreground">
                   <Users className="mx-auto mb-2 h-8 w-8" />
-                  <p>暂无关联的评测员</p>
+                  <p>{t('ugc-page.evaluation.edit.no-evaluators')}</p>
                 </div>
               )}
             </div>
@@ -410,14 +420,14 @@ export const EditView: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              {t('evaluation.edit.elo-config')}
+              {t('ugc-page.evaluation.edit.elo-config')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label>{t('evaluation.edit.initial-rating')}</Label>
+                  <Label>{t('ugc-page.evaluation.edit.initial-rating')}</Label>
                   <Input
                     type="number"
                     value={isEditing ? formData.initialRating : String(module.glickoConfig?.rating || 1500)}
@@ -429,7 +439,7 @@ export const EditView: React.FC = () => {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label>{t('evaluation.edit.rating-deviation')}</Label>
+                  <Label>{t('ugc-page.evaluation.edit.rating-deviation')}</Label>
                   <Input
                     type="number"
                     value={isEditing ? formData.ratingDeviation : String(module.glickoConfig?.rd || 350)}
@@ -441,7 +451,7 @@ export const EditView: React.FC = () => {
                   />
                 </div>
               </div>
-              <div className="text-sm text-muted-foreground">{t('evaluation.edit.elo-description')}</div>
+              <div className="text-sm text-muted-foreground">{t('ugc-page.evaluation.edit.elo-description')}</div>
             </div>
           </CardContent>
         </Card>
@@ -450,19 +460,21 @@ export const EditView: React.FC = () => {
         <Dialog open={participantDialogOpen} onOpenChange={setParticipantDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>添加参与者</DialogTitle>
-              <DialogDescription>请输入要添加的参与者资产ID，多个ID用逗号分隔</DialogDescription>
+              <DialogTitle>{t('ugc-page.evaluation.edit.add-participant-dialog.title')}</DialogTitle>
+              <DialogDescription>{t('ugc-page.evaluation.edit.add-participant-dialog.description')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid gap-2">
-                <Label htmlFor="participantIds">参与者资产ID</Label>
+                <Label htmlFor="participantIds">
+                  {t('ugc-page.evaluation.edit.add-participant-dialog.asset-ids-label')}
+                </Label>
                 <Textarea
                   id="participantIds"
                   value={newParticipantIds}
                   onChange={(e) => {
                     setNewParticipantIds(e.target.value);
                   }}
-                  placeholder="输入资产ID，多个ID用逗号分隔，例如：asset1, asset2, asset3"
+                  placeholder={t('ugc-page.evaluation.edit.add-participant-dialog.asset-ids-placeholder')}
                   rows={3}
                   disabled={isAddingParticipants}
                 />
@@ -477,14 +489,16 @@ export const EditView: React.FC = () => {
                 }}
                 disabled={isAddingParticipants}
               >
-                取消
+                {t('common.utils.cancel')}
               </Button>
               <Button
                 variant="outline"
                 onClick={handleAddParticipants}
                 disabled={isAddingParticipants || !newParticipantIds.trim()}
               >
-                {isAddingParticipants ? '添加中...' : '添加参与者'}
+                {isAddingParticipants
+                  ? t('ugc-page.evaluation.edit.add-participant-dialog.adding-button')
+                  : t('ugc-page.evaluation.edit.add-participant-dialog.add-button')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -494,37 +508,41 @@ export const EditView: React.FC = () => {
         <Dialog open={evaluatorDialogOpen} onOpenChange={setEvaluatorDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>添加LLM评测员</DialogTitle>
-              <DialogDescription>创建一个新的LLM评测员并将其关联到当前模块</DialogDescription>
+              <DialogTitle>{t('ugc-page.evaluation.edit.add-evaluator-dialog.title')}</DialogTitle>
+              <DialogDescription>{t('ugc-page.evaluation.edit.add-evaluator-dialog.description')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="evaluatorName">评测员名称</Label>
+                <Label htmlFor="evaluatorName">{t('ugc-page.evaluation.edit.add-evaluator-dialog.name-label')}</Label>
                 <Input
                   id="evaluatorName"
                   value={newEvaluator.name}
                   onChange={(value) => setNewEvaluator((prev) => ({ ...prev, name: value }))}
-                  placeholder="例如：GPT-4 Vision 评测员"
+                  placeholder={t('ugc-page.evaluation.edit.add-evaluator-dialog.name-placeholder')}
                   disabled={isAddingEvaluator}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="llmModelName">LLM 模型名称</Label>
+                <Label htmlFor="llmModelName">
+                  {t('ugc-page.evaluation.edit.add-evaluator-dialog.llm-model-name-label')}
+                </Label>
                 <Input
                   id="llmModelName"
                   value={newEvaluator.llmModelName}
                   onChange={(value) => setNewEvaluator((prev) => ({ ...prev, llmModelName: value }))}
-                  placeholder="例如：llm:gpt-4-vision-preview"
+                  placeholder={t('ugc-page.evaluation.edit.add-evaluator-dialog.llm-model-name-placeholder')}
                   disabled={isAddingEvaluator}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="evaluationFocus">评测焦点（可选）</Label>
+                <Label htmlFor="evaluationFocus">
+                  {t('ugc-page.evaluation.edit.add-evaluator-dialog.evaluation-focus-label')}
+                </Label>
                 <Textarea
                   id="evaluationFocus"
                   value={newEvaluator.evaluationFocus}
                   onChange={(e) => setNewEvaluator((prev) => ({ ...prev, evaluationFocus: e.target.value }))}
-                  placeholder="例如：图像质量和美学效果"
+                  placeholder={t('ugc-page.evaluation.edit.add-evaluator-dialog.evaluation-focus-placeholder')}
                   rows={3}
                   disabled={isAddingEvaluator}
                 />
@@ -539,14 +557,16 @@ export const EditView: React.FC = () => {
                 }}
                 disabled={isAddingEvaluator}
               >
-                取消
+                {t('common.utils.cancel')}
               </Button>
               <Button
                 variant="outline"
                 onClick={handleCreateAndAddEvaluator}
                 disabled={isAddingEvaluator || !newEvaluator.name.trim() || !newEvaluator.llmModelName?.trim()}
               >
-                {isAddingEvaluator ? '添加中...' : '创建并添加'}
+                {isAddingEvaluator
+                  ? t('ugc-page.evaluation.edit.add-evaluator-dialog.adding-button')
+                  : t('ugc-page.evaluation.edit.add-evaluator-dialog.add-button')}
               </Button>
             </DialogFooter>
           </DialogContent>
