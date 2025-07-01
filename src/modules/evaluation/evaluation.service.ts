@@ -2,7 +2,7 @@ import { config } from '@/common/config';
 import { generateDbId } from '@/common/utils';
 import { BattleGroupEntity, BattleGroupStatus, BattleStrategy } from '@/database/entities/evaluation/battle-group.entity';
 import { BattleResult, EvaluationBattleEntity } from '@/database/entities/evaluation/evaluation-battle.entity';
-import { DEFAULT_GLICKO_CONFIG, EvaluationModuleEntity, GlickoConfig } from '@/database/entities/evaluation/evaluation-module.entity';
+import { EvaluationModuleEntity } from '@/database/entities/evaluation/evaluation-module.entity';
 import { EvaluatorEntity, EvaluatorType } from '@/database/entities/evaluation/evaluator.entity';
 import { LeaderboardScoreEntity } from '@/database/entities/evaluation/leaderboard-score.entity';
 import { LeaderboardEntity } from '@/database/entities/evaluation/leaderboard.entity';
@@ -12,10 +12,11 @@ import { EvaluationRepository } from '@/database/repositories/evaluation.reposit
 import { MediaFileService } from '@/modules/assets/media/media.service';
 import { LlmService } from '@/modules/tools/llm/llm.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { Glicko2, Player } from 'glicko2';
 import { isObject } from 'lodash';
-import { DataSource, EntityManager } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { BattleStrategyService } from './battle-strategy.service';
+import { TaskQueueService } from './services/task-queue.service';
+import { TaskType } from './types/task.types';
 
 // 定义一个不会与数据库ID冲突的特殊字符串作为虚拟评测员的ID
 export const VIRTUAL_LLM_EVALUATOR_ID = 'default-llm-evaluator';
@@ -58,7 +59,6 @@ export interface CreateEvaluationModuleDto {
   description?: string;
   evaluationCriteria?: string;
   participantAssetIds?: string[];
-  glickoConfig?: GlickoConfig;
 }
 
 export interface CreateEvaluatorDto {
@@ -80,6 +80,7 @@ export class EvaluationService {
     private readonly llmService: LlmService,
     private readonly mediaFileService: MediaFileService,
     private readonly battleStrategyService: BattleStrategyService,
+    private readonly taskQueueService: TaskQueueService,
   ) {}
 
   private buildEvaluationPrompt(evaluationFocus: string): string {
@@ -107,11 +108,17 @@ export class EvaluationService {
    * 验证批量资产的有效性
    */
   private async validateBatchAssets(assetIds: string[], teamId: string): Promise<void> {
-    const mediaFiles = await Promise.all(assetIds.map((id) => this.mediaFileService.getMediaById(id)));
-    const invalidMedia = mediaFiles.some((media) => !media || media.teamId !== teamId);
+    // 1. 使用 In 操作符一次性获取所有资产
+    const mediaFiles = await this.mediaFileService.getMediaByIds(assetIds);
 
+    // 2. 在内存中进行校验
+    if (mediaFiles.length !== assetIds.length) {
+      throw new Error('部分资产不存在。');
+    }
+
+    const invalidMedia = mediaFiles.some((media) => media.teamId !== teamId);
     if (invalidMedia) {
-      throw new Error(ERROR_MESSAGES.INVALID_MEDIA_FILES);
+      throw new Error('部分资产不属于该团队或无权访问。');
     }
   }
 
@@ -160,7 +167,6 @@ export class EvaluationService {
         description: isObject(createDto.description) ? JSON.stringify(createDto.description) : createDto.description,
         leaderboardId: savedLeaderboard.id,
         evaluationCriteria: createDto.evaluationCriteria,
-        glickoConfig: createDto.glickoConfig || DEFAULT_GLICKO_CONFIG,
         participantAssetIds: createDto.participantAssetIds || [],
       });
 
@@ -346,71 +352,35 @@ export class EvaluationService {
     return this.evaluationRepository.findBattlesByGroupId(battleGroupId, status);
   }
 
-  public async autoEvaluateBattleGroup(battleGroupId: string): Promise<{
-    success: boolean;
-    totalBattles: number;
-    completedBattles: number;
-    failedBattles: number;
-    errors: string[];
-  }> {
-    this.logger.debug(`Starting auto-evaluation for battle group: ${battleGroupId}`);
-    return this.dataSource.transaction(async (manager) => {
-      const battleGroup = await this.evaluationRepository.findBattleGroupById(battleGroupId, manager);
-      if (!battleGroup) throw new Error(ERROR_MESSAGES.BATTLE_GROUP_NOT_FOUND);
+  public async autoEvaluateBattleGroup(battleGroupId: string, teamId: string, userId: string): Promise<any> {
+    this.logger.debug(`Creating evaluation task for battle group: ${battleGroupId}`);
 
-      this.logger.debug(`Found battle group: ${battleGroup.id}, status: ${battleGroup.status}`);
-      const pendingBattles = await this.evaluationRepository.findBattlesByGroupId(battleGroupId, 'PENDING', manager);
-      this.logger.debug(`Found ${pendingBattles.length} pending battles for group ${battleGroupId}`);
+    const battleGroup = await this.evaluationRepository.findBattleGroupById(battleGroupId);
+    if (!battleGroup) throw new Error(ERROR_MESSAGES.BATTLE_GROUP_NOT_FOUND);
 
-      // 更新开始状态
-      battleGroup.status = BattleGroupStatus.IN_PROGRESS;
-      battleGroup.startedAt = new Date();
-      await manager.save(BattleGroupEntity, battleGroup);
+    const pendingBattles = await this.evaluationRepository.findBattlesByGroupId(battleGroupId, 'PENDING');
 
-      const errors: string[] = [];
-      let completedCount = 0;
-      let failedCount = 0;
-
-      // 将批量并发处理改为串行处理
-      for (const battle of pendingBattles) {
-        try {
-          const result = await this.processSingleBattle(battle.id);
-          if (result.success) {
-            completedCount++;
-          } else {
-            failedCount++;
-            errors.push(`Battle ${battle.id}: ${result.error}`);
-          }
-        } catch (error) {
-          failedCount++;
-          errors.push(`Battle ${battle.id}: ${error.message}`);
-          this.logger.error(`Unhandled error processing battle ${battle.id}: ${error.message}`, error.stack);
-        }
-      }
-
-      // 更新批量任务的最终进度
-      battleGroup.completedBattles = completedCount;
-      battleGroup.failedBattles = failedCount;
-
-      // 更新最终状态
-      const isAllCompleted = completedCount + failedCount === pendingBattles.length;
-      battleGroup.status = failedCount === 0 ? BattleGroupStatus.COMPLETED : completedCount > 0 ? BattleGroupStatus.IN_PROGRESS : BattleGroupStatus.FAILED;
-
-      if (isAllCompleted) {
-        battleGroup.completedAt = new Date();
-      }
-
-      await manager.save(BattleGroupEntity, battleGroup);
-
-      this.logger.debug(`Finished auto-evaluation for battle group: ${battleGroupId}. Completed: ${completedCount}, Failed: ${failedCount}`);
-      return {
-        success: failedCount === 0,
-        totalBattles: pendingBattles.length,
-        completedBattles: completedCount,
-        failedBattles: failedCount,
-        errors,
-      };
+    const task = await this.taskQueueService.createTask({
+      type: TaskType.EVALUATE_BATTLE_GROUP,
+      moduleId: battleGroup.evaluationModuleId,
+      teamId,
+      userId,
+      total: pendingBattles.length,
+      payload: {
+        battleGroupId,
+      },
     });
+
+    // 更新 battleGroup 状态
+    battleGroup.status = BattleGroupStatus.IN_PROGRESS;
+    battleGroup.startedAt = new Date();
+    await this.evaluationRepository.saveBattleGroup(battleGroup);
+
+    return {
+      success: true,
+      message: 'Evaluation task created successfully',
+      taskId: task.id,
+    };
   }
 
   private async processSingleBattle(battleId: string): Promise<{ success: boolean; result?: BattleResult; error?: string }> {
@@ -457,119 +427,70 @@ export class EvaluationService {
   public async submitBattleResult(battleId: string, result: BattleResult, evaluatorId: string, reason?: string): Promise<void> {
     evaluatorId = await this.getOrCreateDefaultLlmEvaluator(battleId, evaluatorId);
     this.logger.debug(`Submitting battle result for battle: ${battleId}, result: ${result}, evaluator: ${evaluatorId}`);
+
     return this.dataSource.transaction(async (manager) => {
       const battle = await this.evaluationRepository.findBattleById(battleId, manager);
-      if (!battle) throw new Error(ERROR_MESSAGES.BATTLE_NOT_FOUND);
+      if (!battle) {
+        throw new Error(ERROR_MESSAGES.BATTLE_NOT_FOUND);
+      }
       this.logger.debug(`Found battle ${battleId} for result submission.`);
 
-      const module = await this.evaluationRepository.findEvaluationModuleById(battle.evaluationModuleId, manager);
-      if (!module) throw new Error('Evaluation module not found for this battle');
-
-      const glickoEngine = new Glicko2(module.glickoConfig);
-
-      const [scoreA, scoreB] = await this.findOrCreateScoresForAssets(battle.evaluationModuleId, [battle.assetAId, battle.assetBId], manager);
-      this.logger.debug(`Scores found/created for assets ${battle.assetAId} and ${battle.assetBId}`);
-
-      const playerA_score = scoreA.scoresByEvaluator[evaluatorId] || module.glickoConfig;
-      const playerB_score = scoreB.scoresByEvaluator[evaluatorId] || module.glickoConfig;
-
-      this.logger.debug(`[Battle ${battleId}] Before Glicko update - Asset A: ${JSON.stringify(playerA_score)}, Asset B: ${JSON.stringify(playerB_score)}`);
-
-      // 保存对战前的评分
-      battle.assetARatingBefore = playerA_score.rating;
-      battle.assetBRatingBefore = playerB_score.rating;
-
-      const playerA = glickoEngine.makePlayer(playerA_score.rating, playerA_score.rd, playerA_score.vol);
-      const playerB = glickoEngine.makePlayer(playerB_score.rating, playerB_score.rd, playerB_score.vol);
-
-      const matches: [Player, Player, number][] = [];
-      if (result === BattleResult.A_WIN) {
-        matches.push([playerA, playerB, 1]);
-        battle.winnerId = battle.assetAId;
-      } else if (result === BattleResult.B_WIN) {
-        matches.push([playerA, playerB, 0]);
-        battle.winnerId = battle.assetBId;
-      } else {
-        matches.push([playerA, playerB, 0.5]);
-        battle.winnerId = null;
-      }
-
-      glickoEngine.updateRatings(matches);
-      this.logger.debug(`Glicko ratings updated for battle ${battleId}.`);
-
-      const newRatingA = playerA.getRating();
-      const newRatingB = playerB.getRating();
-      this.logger.debug(`[Battle ${battleId}] After Glicko update - Asset A new rating: ${newRatingA}, Asset B new rating: ${newRatingB}`);
-
-      scoreA.scoresByEvaluator[evaluatorId] = {
-        rating: newRatingA,
-        rd: playerA.getRd(),
-        vol: playerA.getVol(),
-      };
-      scoreB.scoresByEvaluator[evaluatorId] = {
-        rating: newRatingB,
-        rd: playerB.getRd(),
-        vol: playerB.getVol(),
-      };
-
-      scoreA.gamesPlayed += 1;
-      scoreB.gamesPlayed += 1;
-
-      // 保存对战后的评分和完成时间
-      battle.assetARatingAfter = newRatingA;
-      battle.assetBRatingAfter = newRatingB;
-      battle.completedAt = new Date();
+      // 只更新对战结果，不进行评分计算
       battle.result = result;
       battle.evaluatorId = evaluatorId;
       battle.reason = reason;
+      battle.completedAt = new Date();
 
-      this.logger.debug(`[Battle ${battleId}] Saving updated battle and score entities to database.`);
-      await this.evaluationRefactoredRepository.saveBattleAndScores(battle, [scoreA, scoreB], manager);
-      this.logger.debug(`Successfully saved battle result and updated scores for battle ${battleId}`);
-    });
-  }
-
-  private async findOrCreateScoresForAssets(evaluationModuleId: string, assetIds: string[], manager: EntityManager): Promise<LeaderboardScoreEntity[]> {
-    // 使用数据库锁来确保并发安全
-    const existingScores = await manager
-      .createQueryBuilder(LeaderboardScoreEntity, 'score')
-      .setLock('pessimistic_write')
-      .where('score.evaluationModuleId = :evaluationModuleId', { evaluationModuleId })
-      .andWhere('score.assetId IN (:...assetIds)', { assetIds })
-      .getMany();
-
-    const existingAssetIds = new Set(existingScores.map((s) => s.assetId));
-
-    const newScores: LeaderboardScoreEntity[] = [];
-    for (const assetId of assetIds) {
-      if (!existingAssetIds.has(assetId)) {
-        // 双重检查：再次查询确保没有其他事务创建了相同的记录
-        const doubleCheckScore = await manager
-          .createQueryBuilder(LeaderboardScoreEntity, 'score')
-          .where('score.evaluationModuleId = :evaluationModuleId', { evaluationModuleId })
-          .andWhere('score.assetId = :assetId', { assetId })
-          .getOne();
-
-        if (!doubleCheckScore) {
-          const newScore = new LeaderboardScoreEntity();
-          newScore.id = generateDbId();
-          newScore.evaluationModuleId = evaluationModuleId;
-          newScore.assetId = assetId;
-          newScore.scoresByEvaluator = {};
-          newScore.gamesPlayed = 0;
-          newScores.push(newScore);
-        } else {
-          existingScores.push(doubleCheckScore);
-        }
+      if (result === BattleResult.A_WIN) {
+        battle.winnerId = battle.assetAId;
+      } else if (result === BattleResult.B_WIN) {
+        battle.winnerId = battle.assetBId;
+      } else {
+        battle.winnerId = null;
       }
-    }
 
-    // 如果有新的评分记录，批量保存
-    if (newScores.length > 0) {
-      await manager.save(LeaderboardScoreEntity, newScores);
-    }
+      await manager.save(EvaluationBattleEntity, battle);
+      this.logger.debug(`Successfully saved battle result for battle ${battleId}. Now updating leaderboard stats.`);
 
-    return [...existingScores, ...newScores];
+      // 更新统计数据
+      const { assetAId, assetBId, evaluationModuleId } = battle;
+
+      const getScore = async (assetId: string) => {
+        let score = await manager.findOne(LeaderboardScoreEntity, { where: { evaluationModuleId, assetId } });
+        if (!score) {
+          score = manager.create(LeaderboardScoreEntity, {
+            id: generateDbId(),
+            evaluationModuleId,
+            assetId,
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            totalBattles: 0,
+          });
+        }
+        return score;
+      };
+
+      const scoreA = await getScore(assetAId);
+      const scoreB = await getScore(assetBId);
+
+      scoreA.totalBattles += 1;
+      scoreB.totalBattles += 1;
+
+      if (result === BattleResult.A_WIN) {
+        scoreA.wins += 1;
+        scoreB.losses += 1;
+      } else if (result === BattleResult.B_WIN) {
+        scoreA.losses += 1;
+        scoreB.wins += 1;
+      } else {
+        scoreA.draws += 1;
+        scoreB.draws += 1;
+      }
+
+      await manager.save([scoreA, scoreB]);
+      this.logger.debug(`Successfully updated stats for assets ${assetAId} and ${assetBId}.`);
+    });
   }
 
   public async autoEvaluateBattle(battleId: string): Promise<{ success: boolean; result?: BattleResult; error?: string }> {
@@ -604,7 +525,8 @@ export class EvaluationService {
       const publicUrlB = await this.mediaFileService.getPublicUrl(mediaB);
       this.logger.debug(`[Battle ${battleId}] Generated public URLs. Asset A: ${publicUrlA}, Asset B: ${publicUrlB}`);
 
-      const fullPrompt = this.buildEvaluationPrompt(evaluator.evaluationFocus || DEFAULT_EVALUATION_FOCUS);
+      const evaluationFocus = module.evaluationCriteria || evaluator.evaluationFocus || DEFAULT_EVALUATION_FOCUS;
+      const fullPrompt = this.buildEvaluationPrompt(evaluationFocus);
 
       const messages = [
         {
@@ -762,109 +684,66 @@ export class EvaluationService {
     return this.evaluationRefactoredRepository.getRecentBattlesWithRatingChanges(moduleId, since, limit);
   }
 
-  public async getAssetRatingHistory(assetId: string, moduleId: string, evaluatorId?: string, limit: number = 50) {
-    const battles = await this.evaluationRefactoredRepository.getAssetRatingHistory(assetId, moduleId, evaluatorId, limit);
+  public async getAssetRatingHistory(assetId: string, moduleId: string, _evaluatorId?: string, limit: number = 50) {
+    const history = await this.evaluationRefactoredRepository.getRatingHistoryForAsset(assetId, moduleId, limit);
 
-    return battles.map((battle) => {
-      const isAssetA = battle.assetAId === assetId;
-      const opponent = isAssetA ? battle.assetBId : battle.assetAId;
-      const oldRating = isAssetA ? battle.assetARatingBefore : battle.assetBRatingBefore;
-      const newRating = isAssetA ? battle.assetARatingAfter : battle.assetBRatingAfter;
-      const change = (newRating || 0) - (oldRating || 0);
-
-      return {
-        battleId: battle.id,
-        date: battle.completedAt || new Date(battle.createdTimestamp),
-        opponent: {
-          id: opponent,
-          name: `Asset ${opponent}`,
-        },
-        oldRating: Math.round(oldRating || 0),
-        newRating: Math.round(newRating || 0),
-        change: Math.round(change),
-        result: battle.result,
-        won: (isAssetA && battle.result === 'A_WIN') || (!isAssetA && battle.result === 'B_WIN'),
-        evaluator: battle.evaluator?.name || 'Unknown',
-      };
-    });
+    return history.map((record) => ({
+      battleId: record.battleId,
+      date: record.date,
+      opponent: {
+        id: record.opponentId,
+        name: `Asset ${record.opponentId}`,
+      },
+      oldRating: Math.round(record.oldRating),
+      newRating: Math.round(record.newRating),
+      change: Math.round(record.change),
+      result: record.result,
+      won: (record.result === 'A_WIN' && record.opponentId !== assetId) || (record.result === 'B_WIN' && record.opponentId === assetId),
+      evaluator: record.evaluatorName || 'Unknown',
+    }));
   }
 
   public async getRatingTrends(moduleId: string, days: number = 30, _evaluatorId?: string, limit: number = 20, minBattles: number = 5) {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const battles = await this.evaluationRefactoredRepository.getRecentBattlesWithRatingChanges(
-      moduleId,
-      since,
-      5000, // 获取更多数据用于分析
-    );
+    const history = await this.evaluationRefactoredRepository.getAggregatedRatingTrends(moduleId, since);
 
-    // 按资产分组并构建评分时间序列
-    const assetTrends = new Map<string, Array<{ date: Date; rating: number; battleId: string }>>();
-
-    battles.forEach((battle) => {
-      // 处理资产A
-      if (battle.assetARatingAfter !== null && battle.assetARatingAfter !== undefined) {
-        if (!assetTrends.has(battle.assetAId)) {
-          assetTrends.set(battle.assetAId, []);
-        }
-        assetTrends.get(battle.assetAId)!.push({
-          date: battle.completedAt || new Date(battle.createdTimestamp),
-          rating: battle.assetARatingAfter,
-          battleId: battle.id,
-        });
+    const assetTrends = new Map<string, Array<{ date: Date; rating: number }>>();
+    for (const row of history) {
+      if (!assetTrends.has(row.assetId)) {
+        assetTrends.set(row.assetId, []);
       }
+      assetTrends.get(row.assetId)!.push({
+        date: new Date(row.date),
+        rating: row.rating,
+      });
+    }
 
-      // 处理资产B
-      if (battle.assetBRatingAfter !== null && battle.assetBRatingAfter !== undefined) {
-        if (!assetTrends.has(battle.assetBId)) {
-          assetTrends.set(battle.assetBId, []);
-        }
-        assetTrends.get(battle.assetBId)!.push({
-          date: battle.completedAt || new Date(battle.createdTimestamp),
-          rating: battle.assetBRatingAfter,
-          battleId: battle.id,
-        });
-      }
-    });
-
-    // 转换为前端需要的格式，并应用过滤条件
     const trends = Array.from(assetTrends.entries())
-      .filter(([, points]) => points.length >= minBattles) // 过滤掉对战次数太少的
+      .filter(([, points]) => points.length >= minBattles)
       .map(([assetId, points]) => {
-        // 按时间排序
         points.sort((a, b) => a.date.getTime() - b.date.getTime());
-
-        // 计算统计信息
         const ratings = points.map((p) => p.rating);
-        const maxRating = Math.max(...ratings);
-        const minRating = Math.min(...ratings);
-        const ratingChange = ratings.length > 1 ? ratings[ratings.length - 1] - ratings[0] : 0;
-
-        const assetBattles = battles.filter((b) => b.assetAId === assetId || b.assetBId === assetId);
-        const wins = assetBattles.filter((b) => (b.assetAId === assetId && b.result === BattleResult.A_WIN) || (b.assetBId === assetId && b.result === BattleResult.B_WIN)).length;
-        const totalBattlesForWinRate = assetBattles.length;
+        const currentRating = ratings[ratings.length - 1] || 0;
+        const startRating = ratings[0] || 0;
+        const ratingChange = currentRating - startRating;
 
         return {
           assetId,
           assetName: `Asset ${assetId}`,
-          points: points.map((point) => ({
-            date: point.date.toISOString(),
-            rating: Math.round(point.rating),
-            battleId: point.battleId,
-          })),
-          currentRating: Math.round(ratings[ratings.length - 1] || 1500),
-          startRating: Math.round(ratings[0] || 1500),
-          maxRating: Math.round(maxRating),
-          minRating: Math.round(minRating),
+          points: points.map((p) => ({ date: p.date.toISOString(), rating: Math.round(p.rating) })),
+          currentRating: Math.round(currentRating),
+          startRating: Math.round(startRating),
+          maxRating: Math.round(Math.max(...ratings)),
+          minRating: Math.round(Math.min(...ratings)),
           ratingChange: Math.round(ratingChange),
           totalBattles: points.length,
-          winRate: totalBattlesForWinRate > 0 ? Math.round((wins / totalBattlesForWinRate) * 100) / 100 : 0,
+          winRate: 0, // Placeholder, requires more complex query
           volatility: Math.round(this.calculateVolatility(ratings)),
         };
       });
 
-    // 按当前评分排序
     trends.sort((a, b) => b.currentRating - a.currentRating);
 
     return {
@@ -876,7 +755,7 @@ export class EvaluationService {
       },
       summary: {
         totalAssets: trends.length,
-        totalBattles: battles.length,
+        totalBattles: history.length / 2, // Approximation
         averageRating: trends.length > 0 ? Math.round(trends.reduce((sum, t) => sum + t.currentRating, 0) / trends.length) : 1500,
         highestRating: trends.length > 0 ? trends[0].currentRating : 1500,
         lowestRating: trends.length > 0 ? trends[trends.length - 1].currentRating : 1500,
@@ -1054,8 +933,9 @@ export class EvaluationService {
       dayStats.participants.add(battle.assetAId);
       dayStats.participants.add(battle.assetBId);
 
-      const ratingChangeA = Math.abs((battle.assetARatingAfter || 0) - (battle.assetARatingBefore || 0));
-      const ratingChangeB = Math.abs((battle.assetBRatingAfter || 0) - (battle.assetBRatingBefore || 0));
+      // FIXME: Rating change calculation needs to be adapted for OpenSkill data from Redis.
+      const ratingChangeA = 0;
+      const ratingChangeB = 0;
       dayStats.totalRatingChange += ratingChangeA + ratingChangeB;
     });
 
