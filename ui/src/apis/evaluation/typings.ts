@@ -334,12 +334,13 @@ export interface GetChartDataDto {
   evaluatorId?: string;
   days?: number;
   dataType?: string;
+  limit?: number;
+  minBattles?: number;
 }
 
 export interface ChartDataPoint {
   date: string;
   rating: number;
-  battleId: string;
 }
 
 export interface ChartDataTrend {
@@ -375,15 +376,13 @@ export interface ChartDataResponse {
   };
   type: string;
   data: {
-    trends: {
-      trends: ChartDataTrend[];
-      period: {
-        start: string;
-        end: string;
-        days: number;
-      };
-      summary: ChartDataSummary;
+    trends: ChartDataTrend[];
+    period: {
+      start: string;
+      end: string;
+      days: number;
     };
+    summary: ChartDataSummary;
   };
 }
 
