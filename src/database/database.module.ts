@@ -38,13 +38,14 @@ import { ConversationAppEntity } from './entities/conversation-app/conversation-
 import { ConversationExecutionEntity } from './entities/conversation-app/conversation-executions.entity';
 import { DesignMetadataEntity } from './entities/design/design-metatdata';
 import { DesignProjectEntity } from './entities/design/design-project';
-import { EvaluationModuleEntity } from './entities/evaluation/evaluation-module.entity';
-import { EvaluatorEntity } from './entities/evaluation/evaluator.entity';
-import { ModuleEvaluatorEntity } from './entities/evaluation/module-evaluator.entity';
+import { BattleGroupEntity } from './entities/evaluation/battle-group.entity';
 import { EvaluationBattleEntity } from './entities/evaluation/evaluation-battle.entity';
+import { EvaluationModuleEntity } from './entities/evaluation/evaluation-module.entity';
+import { EvaluationRatingHistoryEntity } from './entities/evaluation/evaluation-rating-history.entity';
+import { EvaluatorEntity } from './entities/evaluation/evaluator.entity';
 import { LeaderboardScoreEntity } from './entities/evaluation/leaderboard-score.entity';
 import { LeaderboardEntity } from './entities/evaluation/leaderboard.entity';
-import { BattleGroupEntity } from './entities/evaluation/battle-group.entity';
+import { ModuleEvaluatorEntity } from './entities/evaluation/module-evaluator.entity';
 import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
@@ -114,6 +115,7 @@ export const entities: EntityClassOrSchema[] = [
   LeaderboardScoreEntity,
   EvaluationBattleEntity,
   BattleGroupEntity,
+  EvaluationRatingHistoryEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

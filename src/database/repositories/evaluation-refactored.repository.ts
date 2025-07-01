@@ -4,6 +4,7 @@ import { DataSource, EntityManager, Repository, SelectQueryBuilder } from 'typeo
 import { BattleGroupEntity } from '../entities/evaluation/battle-group.entity';
 import { EvaluationBattleEntity } from '../entities/evaluation/evaluation-battle.entity';
 import { EvaluationModuleEntity } from '../entities/evaluation/evaluation-module.entity';
+import { EvaluationRatingHistoryEntity } from '../entities/evaluation/evaluation-rating-history.entity';
 import { EvaluatorEntity } from '../entities/evaluation/evaluator.entity';
 import { LeaderboardScoreEntity } from '../entities/evaluation/leaderboard-score.entity';
 import { LeaderboardEntity } from '../entities/evaluation/leaderboard.entity';
@@ -27,6 +28,8 @@ export class EvaluationRefactoredRepository {
     private readonly battleRepository: Repository<EvaluationBattleEntity>,
     @InjectRepository(BattleGroupEntity)
     private readonly battleGroupRepository: Repository<BattleGroupEntity>,
+    @InjectRepository(EvaluationRatingHistoryEntity)
+    private readonly ratingHistoryRepository: Repository<EvaluationRatingHistoryEntity>,
   ) {}
 
   // ============ 使用 TypeORM QueryBuilder 重构的方法 ============
@@ -53,13 +56,12 @@ export class EvaluationRefactoredRepository {
         .createQueryBuilder(LeaderboardScoreEntity, 'score')
         .leftJoin(`(${battleStatsSubQuery.getQuery()})`, 'battle_stats', 'score.assetId = battle_stats.asset_id')
         .select([
-          'score.id',
-          'score.assetId',
-          'score.evaluationModuleId',
-          'score.scoresByEvaluator',
-          'score.gamesPlayed',
-          'score.createdTimestamp',
-          'score.updatedTimestamp',
+          'score.id as "id"',
+          'score.assetId as "assetId"',
+          'score.evaluationModuleId as "evaluationModuleId"',
+          'score.gamesPlayed as "gamesPlayed"',
+          'score.createdTimestamp as "createdTimestamp"',
+          'score.updatedTimestamp as "updatedTimestamp"',
           'COALESCE(battle_stats.total_battles, 0) as "totalBattles"',
           'COALESCE(battle_stats.wins, 0) as "wins"',
           'COALESCE(battle_stats.losses, 0) as "losses"',
@@ -68,11 +70,6 @@ export class EvaluationRefactoredRepository {
         .where('score.evaluationModuleId = :moduleId', { moduleId: evaluationModuleId });
 
       // 动态添加条件
-      if (evaluatorId) {
-        // 使用 PostgreSQL 的 -> 操作符检查 jsonb 字段中是否存在指定的 key
-        mainQuery = mainQuery.andWhere('score.scoresByEvaluator -> :evaluatorId IS NOT NULL', { evaluatorId });
-      }
-
       if (minBattles && minBattles > 0) {
         mainQuery = mainQuery.andWhere('COALESCE(battle_stats.total_battles, 0) >= :minBattles', {
           minBattles,
@@ -84,7 +81,7 @@ export class EvaluationRefactoredRepository {
       }
 
       // 动态排序
-      this.applySorting(mainQuery, sortBy, sortOrder, evaluatorId);
+      this.applySorting(mainQuery, sortBy, sortOrder);
 
       // 设置参数并执行
       return mainQuery
@@ -101,10 +98,6 @@ export class EvaluationRefactoredRepository {
   public async countLeaderboardScores(evaluationModuleId: string, evaluatorId?: string, minBattles?: number, search?: string): Promise<number> {
     return this.dataSource.transaction(async (manager) => {
       let query = manager.createQueryBuilder(LeaderboardScoreEntity, 'score').where('score.evaluationModuleId = :moduleId', { moduleId: evaluationModuleId });
-
-      if (evaluatorId) {
-        query = query.andWhere('score.scoresByEvaluator -> :evaluatorId IS NOT NULL', { evaluatorId });
-      }
 
       if (search) {
         query = query.andWhere('score.assetId LIKE :search', { search: `%${search}%` });
@@ -145,35 +138,9 @@ export class EvaluationRefactoredRepository {
       const totalBattles = await this.countModuleBattles(evaluationModuleId);
 
       // 如果未指定 evaluatorId，则查找第一个活跃的评测员作为默认
-      if (!evaluatorId) {
-        const firstEvaluator = await manager
-          .createQueryBuilder(ModuleEvaluatorEntity, 'me')
-          .where('me.evaluationModuleId = :moduleId', { moduleId: evaluationModuleId })
-          .andWhere('me.isActive = true')
-          .orderBy('me.createdTimestamp', 'ASC')
-          .getOne();
-        if (firstEvaluator) {
-          evaluatorId = firstEvaluator.evaluatorId;
-        }
-      }
-
       // 获取评分统计
-      let ratingStats: { avgRating: string; maxRating: string; minRating: string } | undefined;
-      if (evaluatorId) {
-        let ratingQuery = manager.createQueryBuilder(LeaderboardScoreEntity, 'score').where('score.evaluationModuleId = :moduleId', { moduleId: evaluationModuleId });
-        // 使用 PostgreSQL 的 -> 和 ->> 操作符来提取 jsonb 数据
-        ratingQuery = ratingQuery
-          .select([
-            `AVG(CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)) as "avgRating"`,
-            `MAX(CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)) as "maxRating"`,
-            `MIN(CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)) as "minRating"`,
-          ])
-          .andWhere('score.scoresByEvaluator -> :evaluatorId IS NOT NULL', { evaluatorId });
-        ratingStats = await ratingQuery.getRawOne();
-      } else {
-        // 如果没有评测员，则返回默认值
-        ratingStats = { avgRating: '1500', maxRating: '1500', minRating: '1500' };
-      }
+      // TODO: 评分统计现在由 OpenSkillService 处理，这里暂时返回默认值
+      const ratingStats: { avgRating: string; maxRating: string; minRating: string } = { avgRating: '1500', maxRating: '1500', minRating: '1500' };
 
       // 获取最活跃的对战者
       const battleTableName = manager.getRepository(EvaluationBattleEntity).metadata.tableName;
@@ -350,17 +317,14 @@ export class EvaluationRefactoredRepository {
   /**
    * 应用排序逻辑
    */
-  private applySorting(query: SelectQueryBuilder<any>, sortBy?: string, sortOrder?: 'ASC' | 'DESC', evaluatorId?: string): void {
+  private applySorting(query: SelectQueryBuilder<any>, sortBy?: string, sortOrder?: 'ASC' | 'DESC'): void {
     const direction = sortOrder || 'DESC';
 
     if (sortBy) {
       switch (sortBy) {
         case 'rating':
-          if (evaluatorId) {
-            query.orderBy(`CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)`, direction);
-          } else {
-            query.orderBy('score.createdTimestamp', direction);
-          }
+          // TODO: 默认排序改为按胜场排序
+          query.orderBy('COALESCE(battle_stats.wins, 0)', direction);
           break;
         case 'battles':
           query.orderBy('COALESCE(battle_stats.total_battles, 0)', direction);
@@ -374,9 +338,8 @@ export class EvaluationRefactoredRepository {
         default:
           query.orderBy('score.createdTimestamp', 'DESC');
       }
-    } else if (evaluatorId) {
-      query.orderBy(`CAST(score.scoresByEvaluator -> '${evaluatorId}' ->> 'rating' AS DECIMAL)`, 'DESC');
     } else {
+      // 默认排序
       query.orderBy('score.createdTimestamp', 'DESC');
     }
   }
@@ -403,5 +366,38 @@ export class EvaluationRefactoredRepository {
         throw new Error(`Invalid games played count for asset ${score.assetId}`);
       }
     }
+  }
+
+  public async getAggregatedRatingTrends(moduleId: string, since: Date): Promise<any[]> {
+    return this.ratingHistoryRepository
+      .createQueryBuilder('history')
+      .select(['history.assetId as "assetId"', 'history.ratingAfter as "rating"', 'battle.completedAt as "date"'])
+      .innerJoin(EvaluationBattleEntity, 'battle', 'battle.id = history.battleId')
+      .where('history.evaluationModuleId = :moduleId', { moduleId })
+      .andWhere('battle.completedAt >= :since', { since })
+      .orderBy('battle.completedAt', 'ASC')
+      .getRawMany();
+  }
+
+  public async getRatingHistoryForAsset(assetId: string, moduleId: string, limit: number = 50): Promise<any[]> {
+    return this.ratingHistoryRepository
+      .createQueryBuilder('history')
+      .select([
+        'history.battleId as "battleId"',
+        'history.ratingBefore as "oldRating"',
+        'history.ratingAfter as "newRating"',
+        'history.ratingChange as "change"',
+        'battle.completedAt as "date"',
+        'battle.result as "result"',
+        'evaluator.name as "evaluatorName"',
+        'CASE WHEN battle.assetAId = :assetId THEN battle.assetBId ELSE battle.assetAId END as "opponentId"',
+      ])
+      .innerJoin(EvaluationBattleEntity, 'battle', 'battle.id = history.battleId')
+      .leftJoin(EvaluatorEntity, 'evaluator', 'evaluator.id = battle.evaluatorId')
+      .where('history.evaluationModuleId = :moduleId', { moduleId })
+      .andWhere('history.assetId = :assetId', { assetId })
+      .orderBy('battle.completedAt', 'DESC')
+      .limit(limit)
+      .getRawMany();
   }
 }

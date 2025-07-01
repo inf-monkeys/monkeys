@@ -193,6 +193,17 @@ export class EvaluationRepository {
     return { list, totalCount };
   }
 
+  public async findBattlesByModuleSince(moduleId: string, since: Date): Promise<EvaluationBattleEntity[]> {
+    return this.battleRepository
+      .createQueryBuilder('battle')
+      .leftJoinAndSelect('battle.evaluator', 'evaluator')
+      .where('battle.evaluationModuleId = :moduleId', { moduleId })
+      .andWhere('battle.completedAt >= :since', { since })
+      .andWhere('battle.result IS NOT NULL')
+      .orderBy('battle.completedAt', 'ASC')
+      .getMany();
+  }
+
   // 此方法已迁移到 EvaluationRefactoredRepository
   public async countModuleBattles(): Promise<number> {
     throw new Error('This method has been migrated to EvaluationRefactoredRepository. Please use evaluationRefactoredRepository.countModuleBattles() instead.');
