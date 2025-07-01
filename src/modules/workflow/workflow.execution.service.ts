@@ -200,15 +200,36 @@ export class WorkflowExecutionService {
     const { field = WorkflowExecutionSearchableField.startTime, order = OrderBy.DESC } = orderBy as SearchWorkflowExecutionsOrderDto;
     const sortText = `${field}:${order}`;
 
-    const conductorQueryString = query.join(' AND ') || undefined;
-    logger.info(`Conductor search query: ${conductorQueryString}, freeText: ${freeText}, sort: ${sortText}`);
-
-    const searchData = await retry(() => conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, conductorQueryString), {
-      max: 3,
-    });
+    let allResults: any[] = [];
+    let totalHits = 0;
+    const batchSize = 10;
+    let needBatch = false;
+    if (workflowTypes.length > batchSize) {
+      needBatch = true;
+    }
+    if (needBatch) {
+      // 分批查
+      for (let i = 0; i < workflowTypes.length; i += batchSize) {
+        const batch = workflowTypes.slice(i, i + batchSize);
+        const batchQueryArr = query.filter((q) => !q.startsWith('workflowType IN'));
+        batchQueryArr.push(`workflowType IN (${batch.join(',')})`);
+        const batchQuery = batchQueryArr.join(' AND ');
+        logger.info(`Conductor batch search query: ${batchQuery}, freeText: ${freeText}, sort: ${sortText}`);
+        const searchData = await retry(() => conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, batchQuery), { max: 3 });
+        allResults = allResults.concat(searchData.results ?? []);
+        totalHits += searchData.totalHits ?? 0;
+      }
+    } else {
+      // 原有逻辑
+      const conductorQueryString = query.join(' AND ') || undefined;
+      logger.info(`Conductor search query: ${conductorQueryString}, freeText: ${freeText}, sort: ${sortText}`);
+      const searchData = await retry(() => conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, conductorQueryString), { max: 3 });
+      allResults = searchData.results ?? [];
+      totalHits = searchData.totalHits ?? 0;
+    }
 
     let resultDefinitions: WorkflowMetadataEntity[] = [];
-    const resultWorkflowDefIds = _.uniq(searchData.results.map((r) => r.workflowName));
+    const resultWorkflowDefIds = _.uniq(allResults.map((r) => r.workflowName));
     if (resultWorkflowDefIds.length > 0) {
       resultDefinitions = await this.workflowRepository.findWorkflowByIds(resultWorkflowDefIds);
     } else if (workflowId && !workflowInstanceId) {
@@ -216,12 +237,11 @@ export class WorkflowExecutionService {
       if (flow) resultDefinitions = [flow];
     }
 
-    const executionsResult = searchData?.results ?? [];
-    for (const executionItem of executionsResult) {
+    for (const executionItem of allResults) {
       this.conductorService.convertConductorTasksToVinesTasks(teamId, (executionItem.tasks || []) as Task[], executionItem.workflowDefinition);
     }
 
-    const executionsWithMetadata = await this.populateMetadataByForExecutions(executionsResult);
+    const executionsWithMetadata = await this.populateMetadataByForExecutions(allResults);
 
     let filterCount = 0;
     const finalData = executionsWithMetadata.filter((it) => {
@@ -233,6 +253,9 @@ export class WorkflowExecutionService {
       }
       return true;
     });
+
+    // 分页处理
+    const pagedData = finalData.slice(0, limitNum);
 
     return {
       definitions: resultDefinitions.map((it) => {
@@ -265,8 +288,8 @@ export class WorkflowExecutionService {
       }),
       page,
       limit: limitNum,
-      data: finalData,
-      total: (searchData?.totalHits ?? 0) - filterCount,
+      data: pagedData,
+      total: (totalHits ?? 0) - filterCount,
     };
   }
 
@@ -748,6 +771,7 @@ export class WorkflowExecutionService {
       version: version,
       input: inputData,
     });
+    console.log('workflowInstanceId', workflowInstanceId);
 
     // 注册回调
     await this.workflowTrackerService.registerWorkflowTracking({
@@ -818,8 +842,9 @@ export class WorkflowExecutionService {
     const start = +new Date();
     let status;
     let takes = 0;
+    let workflowExecutionDetails;
     while (!finished) {
-      const workflowExecutionDetails = await this.getWorkflowExecutionDetail(teamId, workflowInstanceId);
+      workflowExecutionDetails = await this.getWorkflowExecutionDetail(teamId, workflowInstanceId);
       status = workflowExecutionDetails.status;
       finished = status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT';
       output = workflowExecutionDetails.output;
@@ -830,6 +855,15 @@ export class WorkflowExecutionService {
       }
     }
     await this.workflowRepository.updateWorkflowExecutionStatus(workflowInstanceId, status, takes);
+
+    if (status === 'COMPLETED') {
+      this.eventEmitter.emit(`workflow.completed.${workflowInstanceId}`, {
+        workflowInstanceId,
+        result: workflowExecutionDetails,
+        timestamp: Date.now(),
+      });
+    }
+
     return output;
   }
 
