@@ -10,6 +10,8 @@ void i18n
   .init({
     fallbackLng: 'en',
     debug: false,
+    ns: ['translation'],
+    defaultNS: 'translation',
     detection: {
       order: ['querystring', 'localStorage', 'navigator'],
     },
