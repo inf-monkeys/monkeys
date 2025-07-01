@@ -98,7 +98,7 @@ const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
         <span className="text-sm text-muted-foreground">{t('workspace.wrapper.integration-center.desc')}</span>
       </div>
       <ScrollArea style={{ height: containerHeight - 107 }}>
-        <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 max-w-full px-3">
+        <div className="prose max-w-full px-3 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
           {enabledOpenAIInterface ? (
             <>
               {workflow?.variables?.find((variable) => variable.name === 'messages') ? (
