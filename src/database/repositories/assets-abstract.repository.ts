@@ -2,7 +2,7 @@ import { AssetFilter, ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { AssetType } from '@inf-monkeys/monkeys';
 import _ from 'lodash';
-import { Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { And, Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { AssetPublishConfig, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
 
@@ -72,6 +72,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     options?: AssetsFillAdditionalInfoOptions,
     findOptions?: FindManyOptions<E>,
     extraWhere?: FindOptionsWhere<E>,
+    excludeIds?: string[],
   ): Promise<{
     list: E[];
     totalCount: number;
@@ -90,22 +91,43 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       }
     }
 
+    const baseWhere: FindOptionsWhere<E> = {
+      isDeleted: false,
+      isPublished: false,
+      ...extraWhere,
+    };
+
+    const idWhere = (baseIdFilter: any) => {
+      const conditions = [];
+      if (baseIdFilter) {
+        conditions.push(baseIdFilter);
+      }
+      if (excludeIds && excludeIds.length > 0) {
+        conditions.push(Not(In(excludeIds)));
+      }
+      if (conditions.length > 1) {
+        return And(...conditions);
+      }
+      if (conditions.length === 1) {
+        return conditions[0];
+      }
+      return undefined;
+    };
+
+    const whereClauses: FindOptionsWhere<E>[] = [
+      {
+        ...baseWhere,
+        teamId,
+        id: idWhere(idsConstraints.length ? In(idsConstraints) : undefined),
+      },
+      {
+        ...baseWhere,
+        id: idWhere(In(authorizedIds)),
+      },
+    ];
+
     let list = await this.repository.find({
-      where: [
-        {
-          teamId,
-          isDeleted: false,
-          isPublished: false,
-          id: idsConstraints.length ? In(idsConstraints) : undefined,
-          ...extraWhere,
-        },
-        {
-          id: In(authorizedIds),
-          isDeleted: false,
-          isPublished: false,
-          ...extraWhere,
-        },
-      ] as FindOptionsWhere<E>[],
+      where: whereClauses,
       order: {
         [orderColumn]: orderBy,
       } as FindOptionsOrder<E>,
@@ -113,24 +135,21 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       skip: (+page - 1) * +limit,
       ...findOptions,
     });
+
+    const totalCountWhereClauses: FindOptionsWhere<E>[] = [
+      {
+        ...baseWhere,
+        teamId,
+        id: idWhere(idsConstraints.length ? In(idsConstraints) : undefined),
+      },
+      {
+        ...baseWhere,
+        id: idWhere(In(authorizedIds)),
+      },
+    ];
+
     const totalCount = await this.repository.count({
-      where: [
-        {
-          teamId,
-          isDeleted: false,
-          isPublished: false,
-        },
-        {
-          id: In(authorizedIds),
-          isDeleted: false,
-          isPublished: false,
-        },
-      ] as FindOptionsWhere<E>[],
-      order: {
-        createdTimestamp: -1,
-      } as FindOptionsOrder<E>,
-      take: +limit,
-      skip: (+page - 1) * +limit,
+      where: totalCountWhereClauses,
     });
 
     list = await this.assetCommonRepository.fillAdditionalInfoList(list, options);
