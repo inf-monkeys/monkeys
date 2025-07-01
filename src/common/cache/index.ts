@@ -11,13 +11,25 @@ export interface CacheManager {
   lpush(key: string, value: string | Buffer | number): Promise<number>;
   sadd(key: string, member: string): Promise<number>;
   smembers(key: string): Promise<string[]>;
-  del(key: string): Promise<number>;
+  sismember(key: string, member: string): Promise<number>;
+  del(...keys: string[]): Promise<number>;
   brpop(key: string, timeout: number): Promise<[string, string] | null>;
   lrem(key: string, count: number, value: string): Promise<number>;
   setex(key: string, seconds: number, value: string): Promise<'OK'>;
   expire(key: string, seconds: number): Promise<number>;
   keys(pattern: string): Promise<string[]>;
   llen(key: string): Promise<number>;
+  zcard?(key: string): Promise<number>;
+  zrange(key: string, start: number, stop: number, options?: string): Promise<string[]>;
+  zrevrange(key: string, start: number, stop: number, options?: string): Promise<string[]>;
+  zadd(key: string, score: number, member: string): Promise<number>;
+  ltrim(key: string, start: number, stop: number): Promise<'OK'>;
+  lrange(key: string, start: number, stop: number): Promise<string[]>;
+  hincrby(key: string, field: string, increment: number): Promise<number>;
+  hgetall(key: string): Promise<Record<string, string>>;
+  hmset(key: string, object: Record<string, string>): Promise<'OK'>;
+  hset(key: string, object: Record<string, string>): Promise<number>;
+  pipeline?(): any;
 }
 
 export class InMemoryCache implements CacheManager {
@@ -71,9 +83,22 @@ export class InMemoryCache implements CacheManager {
     return Array.from(this.storage[key]);
   }
 
-  public async del(key: string): Promise<number> {
-    delete this.storage[key];
-    return new Promise((resolve) => resolve(1));
+  public async sismember(key: string, member: string): Promise<number> {
+    if (!this.storage[key] || !(this.storage[key] instanceof Set)) {
+      return 0;
+    }
+    return this.storage[key].has(member) ? 1 : 0;
+  }
+
+  public async del(...keys: string[]): Promise<number> {
+    let deletedCount = 0;
+    for (const key of keys) {
+      if (this.storage[key] !== undefined) {
+        delete this.storage[key];
+        deletedCount++;
+      }
+    }
+    return deletedCount;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -112,6 +137,149 @@ export class InMemoryCache implements CacheManager {
     }
     return this.storage[key].length;
   }
+
+  public async zcard(key: string): Promise<number> {
+    if (!this.storage[key] || !(this.storage[key] instanceof Map)) {
+      return 0;
+    }
+    return this.storage[key].size;
+  }
+
+  public async zrange(key: string, start: number, stop: number, options?: string): Promise<string[]> {
+    if (!this.storage[key] || !(this.storage[key] instanceof Map)) {
+      return [];
+    }
+    const sortedEntries = Array.from(this.storage[key].entries()).sort((a, b) => a[1] - b[1]);
+    const members = sortedEntries.map(([member]) => member);
+    const result = members.slice(start, stop === -1 ? undefined : stop + 1);
+
+    if (options === 'WITHSCORES') {
+      const withScores = [];
+      for (let i = 0; i < result.length; i++) {
+        withScores.push(result[i]);
+        withScores.push(this.storage[key].get(result[i]).toString());
+      }
+      return withScores;
+    }
+    return result;
+  }
+
+  public async zrevrange(key: string, start: number, stop: number, options?: string): Promise<string[]> {
+    if (!this.storage[key] || !(this.storage[key] instanceof Map)) {
+      return [];
+    }
+    const sortedEntries = Array.from(this.storage[key].entries()).sort((a, b) => b[1] - a[1]);
+    const members = sortedEntries.map(([member]) => member);
+    const result = members.slice(start, stop === -1 ? undefined : stop + 1);
+
+    if (options === 'WITHSCORES') {
+      const withScores = [];
+      for (let i = 0; i < result.length; i++) {
+        withScores.push(result[i]);
+        withScores.push(this.storage[key].get(result[i]).toString());
+      }
+      return withScores;
+    }
+    return result;
+  }
+
+  public async zadd(key: string, score: number, member: string): Promise<number> {
+    if (!this.storage[key]) {
+      this.storage[key] = new Map();
+    }
+    if (!(this.storage[key] instanceof Map)) {
+      this.storage[key] = new Map();
+    }
+    const wasNew = !this.storage[key].has(member);
+    this.storage[key].set(member, score);
+    return wasNew ? 1 : 0;
+  }
+
+  public async ltrim(key: string, start: number, stop: number): Promise<'OK'> {
+    if (this.storage[key] && Array.isArray(this.storage[key])) {
+      this.storage[key] = this.storage[key].slice(start, stop + 1);
+    }
+    return 'OK';
+  }
+
+  public async lrange(key: string, start: number, stop: number): Promise<string[]> {
+    if (!this.storage[key] || !Array.isArray(this.storage[key])) {
+      return [];
+    }
+    return this.storage[key].slice(start, stop === -1 ? undefined : stop + 1);
+  }
+
+  public async hincrby(key: string, field: string, increment: number): Promise<number> {
+    if (!this.storage[key]) {
+      this.storage[key] = {};
+    }
+    if (typeof this.storage[key] !== 'object' || Array.isArray(this.storage[key])) {
+      this.storage[key] = {};
+    }
+    const currentValue = parseInt(this.storage[key][field] || '0');
+    const newValue = currentValue + increment;
+    this.storage[key][field] = newValue.toString();
+    return newValue;
+  }
+
+  public async hgetall(key: string): Promise<Record<string, string>> {
+    if (!this.storage[key] || typeof this.storage[key] !== 'object' || Array.isArray(this.storage[key])) {
+      return {};
+    }
+    return { ...this.storage[key] };
+  }
+
+  public async hmset(key: string, object: Record<string, string>): Promise<'OK'> {
+    if (!this.storage[key]) {
+      this.storage[key] = {};
+    }
+    Object.assign(this.storage[key], object);
+    return 'OK';
+  }
+
+  public async hset(key: string, object: Record<string, string>): Promise<number> {
+    if (!this.storage[key]) {
+      this.storage[key] = {};
+    }
+    let fieldsSet = 0;
+    for (const field in object) {
+      if (!this.storage[key].hasOwnProperty(field)) {
+        fieldsSet++;
+      }
+      this.storage[key][field] = object[field];
+    }
+    return fieldsSet;
+  }
+
+  public pipeline(): any {
+    // Simple mock pipeline for in-memory cache
+    const commands: Array<() => Promise<any>> = [];
+    return {
+      hmset: (key: string, object: Record<string, string>) => {
+        commands.push(() => this.hmset(key, object));
+        return this;
+      },
+      zadd: (key: string, score: number, member: string) => {
+        commands.push(() => this.zadd(key, score, member));
+        return this;
+      },
+      sadd: (key: string, member: string) => {
+        commands.push(() => this.sadd(key, member));
+        return this;
+      },
+      expire: (key: string, seconds: number) => {
+        commands.push(() => this.expire(key, seconds));
+        return this;
+      },
+      exec: async () => {
+        const results = [];
+        for (const command of commands) {
+          results.push(await command());
+        }
+        return results.map((result) => [null, result]);
+      },
+    };
+  }
 }
 
 export class RedisCache implements CacheManager {
@@ -148,8 +316,12 @@ export class RedisCache implements CacheManager {
     return await this.redis.smembers(key);
   }
 
-  public async del(key: string) {
-    return await this.redis.del(key);
+  public async sismember(key: string, member: string): Promise<number> {
+    return await this.redis.sismember(key, member);
+  }
+
+  public async del(...keys: string[]) {
+    return await this.redis.del(...keys);
   }
 
   public async brpop(key: string, timeout: number): Promise<[string, string] | null> {
@@ -174,5 +346,55 @@ export class RedisCache implements CacheManager {
 
   public async llen(key: string): Promise<number> {
     return await this.redis.llen(key);
+  }
+
+  public async zcard(key: string): Promise<number> {
+    return await this.redis.zcard(key);
+  }
+
+  public async zrange(key: string, start: number, stop: number, options?: string): Promise<string[]> {
+    if (options === 'WITHSCORES') {
+      return await this.redis.zrange(key, start, stop, 'WITHSCORES');
+    }
+    return await this.redis.zrange(key, start, stop);
+  }
+
+  public async zrevrange(key: string, start: number, stop: number, options?: string): Promise<string[]> {
+    if (options === 'WITHSCORES') {
+      return await this.redis.zrevrange(key, start, stop, 'WITHSCORES');
+    }
+    return await this.redis.zrevrange(key, start, stop);
+  }
+
+  public async zadd(key: string, score: number, member: string): Promise<number> {
+    return await this.redis.zadd(key, score, member);
+  }
+
+  public async ltrim(key: string, start: number, stop: number): Promise<'OK'> {
+    return await this.redis.ltrim(key, start, stop);
+  }
+
+  public async lrange(key: string, start: number, stop: number): Promise<string[]> {
+    return await this.redis.lrange(key, start, stop);
+  }
+
+  public async hincrby(key: string, field: string, increment: number): Promise<number> {
+    return await this.redis.hincrby(key, field, increment);
+  }
+
+  public async hgetall(key: string): Promise<Record<string, string>> {
+    return await this.redis.hgetall(key);
+  }
+
+  public async hmset(key: string, object: Record<string, string>): Promise<'OK'> {
+    return await this.redis.hmset(key, object);
+  }
+
+  public async hset(key: string, object: Record<string, string>): Promise<number> {
+    return await this.redis.hset(key, object);
+  }
+
+  public pipeline() {
+    return this.redis.pipeline();
   }
 }

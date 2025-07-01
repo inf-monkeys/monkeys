@@ -83,11 +83,6 @@
       "active": "活跃",
       "inactive": "非活跃"
     },
-    "time": {
-      "minutes": "分钟",
-      "hours": "小时",
-      "days": "天"
-    },
     "language": "语言",
     "display-name": "显示名称",
     "input": {
@@ -1316,16 +1311,265 @@
       }
     },
     "evaluation": {
-      "ugc-view": {
-        "operate-area": {
-          "dropdown-label": "评测模块操作",
-          "edit": "编辑模块",
-          "copy-link": "复制链接"
+      "title": "评测",
+      "leaderboard": {
+        "title": "排行榜",
+        "description": "基于智能评分和排名系统",
+        "totalParticipants": "参与者总数",
+        "totalBattles": "总对战场次",
+        "progress": "评测进度",
+        "status": {
+          "title": "评测状态",
+          "completed": "已完成",
+          "inProgress": "进行中"
         },
-        "subtitle": {
-          "create-button": "新建评测模块"
+        "detailedRanking": {
+          "title": "详细排名",
+          "rank": "排名",
+          "participant": "参与者",
+          "rating": "评分",
+          "mu": "Mu (μ)",
+          "sigma": "Sigma (σ)",
+          "battles": "对战数"
         },
-        "type": "评测模块"
+        "pagination": {
+          "previous": "上一页",
+          "next": "下一页",
+          "page": "第 {{page}} 页 / {{totalPages}}"
+        }
+      },
+      "battles": {
+        "title": "对战管理",
+        "description": "创建和管理图片对战评测任务",
+        "upload": "上传图片",
+        "join": "加入排行榜",
+        "stats": {
+          "available": "可用图片",
+          "inLeaderboard": "排行榜中",
+          "stability": "稳定性进度",
+          "uncertainty": "平均不确定性"
+        },
+        "info": {
+          "title": "评测信息",
+          "tabs": {
+            "status": "评测状态",
+            "recentBattles": "最近对战"
+          },
+          "status": {
+            "progress": "稳定性进度: {{progress}}%",
+            "rounds": "排行榜已连续稳定 {{stableRounds}} 轮，还需 {{neededRounds}} 轮即可完成",
+            "avgUncertainty": "平均不确定性 (Sigma): {{sigma}}",
+            "completed": "评测已完成！",
+            "needsMoreBattles": "还需要更多对战 ({{count}} 个图片)"
+          },
+          "noInfo": {
+            "title": "暂无评测信息",
+            "description": "请先加入图片到排行榜开始评测"
+          },
+          "recentBattles": {
+            "title": "最近对战记录",
+            "description": "对战记录功能开发中...",
+            "button": "查看对战记录"
+          }
+        },
+        "assetsInLeaderboard": {
+          "title": "排行榜中的图片",
+          "empty": {
+            "title": "排行榜中暂无图片",
+            "description": "请先加入图片到排行榜开始评测"
+          }
+        },
+        "joinDialog": {
+          "title": "加入评测",
+          "description": "选择图片加入排行榜，系统将自动进行智能匹配和评测",
+          "selectPrompt": "选择要加入排行榜的图片",
+          "selectedCount": "已选择 {{count}} 个图片，可以同时选择多个",
+          "empty": {
+            "title": "暂无可加入的图片",
+            "description": "所有图片已在排行榜中或没有上传图片",
+            "uploadButton": "上传新图片"
+          },
+          "systemInfo": {
+            "title": "智能评测系统",
+            "rules": [
+              "系统将自动为新加入的图片创建初始评分",
+              "基于算法智能匹配最佳对手进行对战",
+              "每次对战后实时更新评分和排名"
+            ]
+          },
+          "cancel": "取消",
+          "confirm": "加入评测 ({{count}})",
+          "joining": "加入中..."
+        },
+        "uploadDialog": {
+          "title": "上传图片",
+          "description": "上传用于对战评测的图片文件"
+        },
+        "statusDialog": {
+          "title": "评测状态",
+          "description": "查看当前评测模块的详细状态信息",
+          "status": "评测完成状态",
+          "progress": "稳定性进度",
+          "progressDetail": "排行榜已连续稳定 {{stableRounds}} 轮，还需 {{neededRounds}} 轮即可完成",
+          "totalAssets": "总资产数",
+          "avgUncertainty": "平均不确定性",
+          "needsMoreBattles": "需要更多对战的资产",
+          "noStatus": "无法获取评测状态",
+          "close": "关闭"
+        },
+        "battlesDialog": {
+          "title": "最近对战记录",
+          "description": "显示最近 20 场自动对战的结果",
+          "vs": "vs",
+          "winner": {
+            "a": "A 获胜",
+            "b": "B 获胜",
+            "draw": "平局"
+          },
+          "noBattles": "暂无对战记录",
+          "close": "关闭"
+        }
+      },
+      "ratingTrendChart": {
+        "title": "评分趋势",
+        "yAxisName": "评分",
+        "xAxisName": "对战时间线",
+        "noData": "暂无趋势数据可供显示"
+      },
+      "edit": {
+        "title": "编辑评测",
+        "description": "编辑评测模块的详细信息和设置。",
+        "basic-info": {
+          "title": "基本信息",
+          "name": "名称",
+          "description": "描述",
+          "display-name": "显示名称",
+          "display-name-placeholder": "例如：头像评测",
+          "description-label": "描述",
+          "description-placeholder": "请输入评测模块的详细描述",
+          "evaluation-criteria": "评测标准",
+          "criteria-placeholder": "例如：美观性、友好度",
+          "status": "状态",
+          "status-description": "启用或禁用此评测模块"
+        },
+        "participants": {
+          "title": "参与者",
+          "description": "添加、移除和管理此评测的所有参与者。",
+          "add-participant": "添加参与者",
+          "participant-count": "参与者总数",
+          "manage-participants": "管理参与者",
+          "no-participants": "暂无参与者",
+          "table": {
+            "rank": "排名",
+            "participant": "参与者",
+            "rating": "评分",
+            "battles": "对战数",
+            "actions": "操作",
+            "no-participants": "暂无参与者"
+          },
+          "remove-dialog": {
+            "title": "确认移除",
+            "description": "确定要移除参与者 {{name}} 吗？此操作不可撤销。"
+          }
+        },
+        "participant": {
+          "id": "参与者 ID: ...{{id}}",
+          "status": {
+            "active": "活跃"
+          }
+        },
+        "evaluator-management": "评测员管理",
+        "add-evaluator": "添加评测员",
+        "no-evaluators": "暂无评测员",
+        "model": "模型",
+        "human-evaluator": "人类评测员",
+        "elo-config": "ELO 配置",
+        "initial-rating": "初始评分",
+        "rating-deviation": "评分偏差",
+        "elo-description": "Glicko-2 评分系统参数。较高的偏差值意味着评分不确定性更大。",
+        "add-participant-dialog": {
+          "title": "添加参与者",
+          "description": "从可用资产中选择一个或多个参与者添加到评测中。",
+          "select-prompt": "选择要加入的参与者",
+          "selected-count": "已选择 {{count}} 个",
+          "asset-ids-label": "资产ID（多个用逗号分隔）",
+          "asset-ids-placeholder": "请输入资产ID",
+          "adding-button": "添加中...",
+          "add-button": "添加",
+          "empty": {
+            "title": "暂无可用的参与者",
+            "description": "所有可用资产都已加入评测。"
+          },
+          "confirm": "确认添加 ({{count}})"
+        },
+        "add-evaluator-dialog": {
+          "title": "添加评测员",
+          "description": "创建一个新的评测员并将其添加到此模块。",
+          "name-label": "名称",
+          "name-placeholder": "请输入评测员名称",
+          "llm-model-name-label": "LLM 模型名称",
+          "llm-model-name-placeholder": "例如 gpt-4-turbo",
+          "evaluation-focus-label": "评测重点",
+          "evaluation-focus-placeholder": "例如 “专注于评估图像的美学和创造力”",
+          "adding-button": "添加中...",
+          "add-button": "创建并添加"
+        },
+        "danger-zone": {
+          "title": "危险区域",
+          "reset-leaderboard": {
+            "button": "重置排行榜",
+            "description": "此操作将清除所有对战记录和评分，但会保留参与者列表。",
+            "dialog": {
+              "title": "确认重置",
+              "description": "确定要重置排行榜吗？所有对战和评分数据将被永久删除。"
+            }
+          },
+          "delete-module": {
+            "button": "删除评测模块",
+            "description": "此操作将永久删除整个评测模块，包括所有设置和数据。",
+            "dialog": {
+              "title": "确认删除",
+              "description": "确定要删除此评测模块吗？此操作不可恢复。"
+            }
+          }
+        },
+        "save-changes": "保存更改",
+        "toast": {
+          "save": {
+            "loading": "正在保存更改...",
+            "success": "更改已保存",
+            "error": "保存失败"
+          },
+          "add-participant": {
+            "loading": "正在添加参与者...",
+            "success": "参与者已添加",
+            "error": "添加参与者失败",
+            "enter-id": "请输入参与者ID"
+          },
+          "remove-participant": {
+            "loading": "正在移除参与者...",
+            "success": "参与者已移除",
+            "error": "移除参与者失败"
+          },
+          "reset-leaderboard": {
+            "loading": "正在重置排行榜...",
+            "success": "排行榜已重置",
+            "error": "重置排行榜失败"
+          },
+          "delete-module": {
+            "loading": "正在删除模块...",
+            "success": "模块已删除",
+            "error": "删除模块失败"
+          }
+        }
+      },
+      "analytics": {
+        "title": "数据分析",
+        "description": "此功能正在开发中",
+        "coming-soon": {
+          "title": "即将推出",
+          "description": "数据分析功能即将上线，敬请期待。"
+        }
       }
     },
     "llm-model": {
@@ -3789,107 +4033,6 @@
           "update-to-internals": "同步到内置模型信息",
           "update-from-internals": "从内置模型信息获取"
         }
-      }
-    }
-  },
-  "evaluation": {
-    "title": "评测模块",
-    "participants": "参与者",
-    "battles": "对战",
-    "win-rate": "胜率",
-    "tabs": {
-      "leaderboard": "ELO排行榜",
-      "leaderboard.description": "查看ELO排名和统计数据",
-      "battles": "对战管理",
-      "battles.description": "创建和管理评测对战",
-      "analytics": "数据分析",
-      "analytics.description": "查看性能图表和分析",
-      "edit": "编辑模块",
-      "edit.description": "配置模块设置"
-    },
-    "leaderboard": {
-      "title": "排行榜",
-      "description": "所有参与者的ELO排名和性能统计",
-      "rankings": "当前排名",
-      "view-history": "查看历史"
-    },
-    "battles": {
-      "title": "对战管理",
-      "description": "创建、监控和管理评测对战",
-      "list": "对战列表",
-      "create-single": "创建对战",
-      "create-group": "创建对战组",
-      "tabs": {
-        "ongoing": "进行中",
-        "completed": "已完成"
-      },
-      "stats": {
-        "total": "总对战数",
-        "ongoing": "进行中",
-        "completed": "已完成",
-        "auto-eval": "自动评测"
-      }
-    },
-    "battle": {
-      "status": {
-        "in-progress": "进行中",
-        "waiting": "等待中",
-        "completed": "已完成"
-      },
-      "actions": {
-        "start": "开始",
-        "pause": "暂停",
-        "view-details": "查看详情"
-      },
-      "winner": "获胜者"
-    },
-    "analytics": {
-      "title": "数据分析",
-      "description": "性能分析和统计洞察",
-      "export": "导出报告",
-      "rating-trends": "评分趋势",
-      "battle-activity": "对战活动",
-      "performance-distribution": "性能分布",
-      "win-rate-analysis": "胜率分析",
-      "chart-placeholder": "图表数据将在此显示",
-      "stats": {
-        "total-evaluations": "总评测数",
-        "avg-evaluation-time": "平均评测时间",
-        "top-performer": "最佳表现者",
-        "completion-rate": "完成率",
-        "this-week": "本周",
-        "vs-last-week": "相比上周"
-      }
-    },
-    "edit": {
-      "title": "编辑模块",
-      "description": "配置评测模块设置和参数",
-      "basic-info": "基本信息",
-      "display-name": "显示名称",
-      "display-name-placeholder": "输入模块显示名称",
-      "description": "描述",
-      "description-placeholder": "输入模块描述",
-      "evaluation-criteria": "评测标准",
-      "criteria-placeholder": "输入评测标准和指导原则",
-      "status": "状态",
-      "status-description": "启用或禁用此评测模块",
-      "participants": "参与者",
-      "participant-count": "参与者数量",
-      "manage-participants": "管理参与者",
-      "no-participants": "尚未添加参与者",
-      "elo-config": "ELO配置",
-      "initial-rating": "初始评分",
-      "rating-deviation": "评分偏差",
-      "elo-description": "配置ELO评分系统参数"
-    },
-    "stats": {
-      "total-participants": "总参与者",
-      "total-battles": "总对战数",
-      "avg-rating": "平均评分"
-    },
-    "participant": {
-      "status": {
-        "active": "活跃"
       }
     }
   }
