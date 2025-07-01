@@ -6,9 +6,14 @@ export enum TaskStatus {
   CANCELLED = 'cancelled',
 }
 
+export enum TaskType {
+  EVALUATE_BATTLE_GROUP = 'evaluate_battle_group',
+  ADD_ASSETS_TO_MODULE = 'add_assets_to_module',
+}
+
 export interface EvaluationTask {
   id: string;
-  battleGroupId: string;
+  type: TaskType;
   moduleId: string;
   teamId: string;
   userId: string;
@@ -18,6 +23,13 @@ export interface EvaluationTask {
   startedAt?: Date;
   completedAt?: Date;
   error?: string;
+
+  // Different task types will have different payloads
+  payload: {
+    battleGroupId?: string;
+    assetIds?: string[];
+    [key: string]: any;
+  };
 }
 
 export interface TaskProgress {

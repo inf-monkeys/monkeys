@@ -2,21 +2,18 @@ import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { MediaFileService } from '@/modules/assets/media/media.service';
+import { Body, Controller, Delete, ForbiddenException, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AddEvaluatorToModuleDto } from './dto/add-evaluator-to-module.dto';
 import { CreateEvaluationModuleDto } from './dto/create-evaluation-module.dto';
-import { CreateEvaluatorDto } from './dto/create-evaluator.dto';
-import { AddParticipantsDto } from './dto/req/add-participants.dto';
-import { CreateBattleGroupDto } from './dto/req/create-battle-group.dto';
-import { CreateBattleDto } from './dto/req/create-battle.dto';
-import { GetEloLeaderboardDto } from './dto/req/get-elo-leaderboard.dto';
-import { GetLeaderboardScoresDto } from './dto/req/get-leaderboard-scores.dto';
-import { SubmitBattleResultDto } from './dto/req/submit-battle-result.dto';
+import { GetLeaderboardDto } from './dto/req/get-leaderboard.dto';
+import { JoinEvaluationDto } from './dto/req/join-evaluation.dto';
 import { EvaluationService } from './evaluation.service';
+import { AutoEvaluationService } from './services/auto-evaluation.service';
+import { OpenSkillService } from './services/openskill.service';
 import { TaskProcessorService } from './services/task-processor.service';
-import { TaskProgressService } from './services/task-progress.service';
 import { TaskQueueService } from './services/task-queue.service';
+import { TaskType } from './types/task.types';
 
 @Controller('evaluation')
 @ApiTags('Evaluation')
@@ -24,12 +21,14 @@ import { TaskQueueService } from './services/task-queue.service';
 export class EvaluationController {
   constructor(
     private readonly evaluationService: EvaluationService,
-    private readonly taskQueueService: TaskQueueService,
-    private readonly taskProgressService: TaskProgressService,
+    private readonly openskillService: OpenSkillService,
     private readonly taskProcessorService: TaskProcessorService,
+    private readonly taskQueueService: TaskQueueService,
+    private readonly autoEvaluationService: AutoEvaluationService,
+    private readonly mediaFileService: MediaFileService,
   ) {}
 
-  // ============ 评测模块管理 (新架构) ============
+  // ============ 评测模块管理 ============
 
   @Post('/modules')
   @ApiOperation({
@@ -66,11 +65,12 @@ export class EvaluationController {
     summary: '获取评测模块详情',
     description: '获取指定评测模块的详细信息',
   })
-  public async getEvaluationModule(@Req() _req: IRequest, @Param('moduleId') moduleId: string) {
+  public async getEvaluationModule(@Req() req: IRequest, @Param('moduleId') moduleId: string) {
+    const { teamId } = req;
     const module = await this.evaluationService.getEvaluationModule(moduleId);
 
-    if (!module) {
-      throw new Error('Evaluation module not found');
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Evaluation module not found or access denied');
     }
 
     return new SuccessResponse({ data: module });
@@ -81,151 +81,119 @@ export class EvaluationController {
     summary: '删除评测模块',
     description: '删除指定的评测模块及其相关数据',
   })
-  public async deleteEvaluationModule(@Req() _req: IRequest, @Param('moduleId') moduleId: string) {
-    await this.evaluationService.deleteEvaluationModule(moduleId);
-    return new SuccessResponse({ data: { success: true } });
-  }
+  public async deleteEvaluationModule(@Req() req: IRequest, @Param('moduleId') moduleId: string) {
+    const { teamId } = req;
 
-  @Post('/modules/:moduleId/participants')
-  @ApiOperation({
-    summary: '添加参与者到评测模块',
-    description: '向评测模块添加参与评测的资产',
-  })
-  public async addParticipantsToModule(@Req() _req: IRequest, @Param('moduleId') moduleId: string, @Body() addParticipantsDto: AddParticipantsDto) {
-    await this.evaluationService.addParticipants(moduleId, addParticipantsDto.assetIds);
-    return new SuccessResponse({ data: { success: true } });
-  }
-
-  // ============ 评测员管理 (新架构) ============
-
-  @Post('/evaluators')
-  @ApiOperation({
-    summary: '创建评测员',
-    description: '创建一个新的评测员（LLM或人工）',
-  })
-  public async createEvaluator(@Req() _req: IRequest, @Body() createDto: CreateEvaluatorDto) {
-    const evaluator = await this.evaluationService.createEvaluator(createDto);
-    return new SuccessResponse({ data: evaluator });
-  }
-
-  @Get('/evaluators')
-  @ApiOperation({
-    summary: '获取评测员列表（管理员用）',
-    description: '获取所有评测员的列表，主要用于管理员查看和复用已有评测员配置',
-  })
-  public async listEvaluators(@Req() _req: IRequest, @Query() query: ListDto) {
-    const { page, limit, search } = query;
-
-    const { list, totalCount } = await this.evaluationService.listEvaluators(+page, +limit, search);
-
-    return new SuccessListResponse({
-      data: list,
-      total: totalCount,
-      page: +page,
-      limit: +limit,
-    });
-  }
-
-  @Get('/evaluators/:evaluatorId')
-  @ApiOperation({
-    summary: '获取评测员详情',
-    description: '获取指定评测员的详细信息',
-  })
-  public async getEvaluator(@Req() _req: IRequest, @Param('evaluatorId') evaluatorId: string) {
-    const evaluator = await this.evaluationService.getEvaluator(evaluatorId);
-
-    if (!evaluator) {
-      throw new Error('Evaluator not found');
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
     }
 
-    return new SuccessResponse({ data: evaluator });
+    await this.evaluationService.deleteEvaluationModule(moduleId);
+    // 清理Redis数据
+    // 清理OpenSkill数据
+    await this.openskillService.cleanupModule(teamId, moduleId);
+
+    return new SuccessResponse({ data: { success: true } });
   }
 
-  @Get('/modules/:moduleId/evaluators')
+  // ============ OpenSkill评测系统 ============
+
+  @Post('/modules/:moduleId/join')
   @ApiOperation({
-    summary: '获取模块的评测员列表',
-    description: '获取指定评测模块关联的所有评测员',
+    summary: '加入评测排行榜',
+    description: '将图片资产加入评测模块的排行榜中，开始参与智能匹配',
   })
-  public async getModuleEvaluators(@Req() _req: IRequest, @Param('moduleId') moduleId: string, @Query() query: ListDto) {
-    const { page, limit } = query;
+  public async joinEvaluation(@Req() req: IRequest, @Param('moduleId') moduleId: string, @Body() joinDto: JoinEvaluationDto) {
+    const { teamId } = req;
 
-    const { list, totalCount } = await this.evaluationService.getEvaluatorsByModule(moduleId, +page, +limit);
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
+    }
 
-    return new SuccessListResponse({
-      data: list,
-      total: totalCount,
-      page: +page,
-      limit: +limit,
-    });
-  }
+    // 验证所有资产权限
+    for (const assetId of joinDto.assetIds) {
+      const asset = await this.mediaFileService.getMediaByIdAndTeamId(assetId, teamId);
+      if (!asset) {
+        throw new ForbiddenException(`Asset ${assetId} not accessible`);
+      }
+    }
 
-  @Post('/modules/:moduleId/evaluators')
-  @ApiOperation({
-    summary: '添加评测员到模块',
-    description: '将评测员添加到指定的评测模块',
-  })
-  public async addEvaluatorToModule(@Req() _req: IRequest, @Param('moduleId') moduleId: string, @Body() addEvaluatorDto: AddEvaluatorToModuleDto) {
-    const moduleEvaluator = await this.evaluationService.addEvaluatorToModule(moduleId, addEvaluatorDto.evaluatorId, addEvaluatorDto.weight);
-    return new SuccessResponse({ data: moduleEvaluator });
-  }
-
-  // ============ 对战管理 (新架构) ============
-
-  @Post('/modules/:moduleId/battles')
-  @ApiOperation({
-    summary: '创建对战',
-    description: '在指定评测模块中创建一场新的对战',
-  })
-  public async createBattleInModule(@Req() _req: IRequest, @Param('moduleId') moduleId: string, @Body() createBattleDto: CreateBattleDto) {
-    const battle = await this.evaluationService.createBattle(moduleId, createBattleDto.assetAId, createBattleDto.assetBId);
-    return new SuccessResponse({ data: battle });
-  }
-
-  @Get('/modules/:moduleId/battles')
-  @ApiOperation({
-    summary: '获取评测模块对战记录',
-    description: '获取指定评测模块的对战历史记录',
-  })
-  public async getEvaluationModuleBattles(@Req() _req: IRequest, @Param('moduleId') moduleId: string, @Query() query: ListDto) {
-    const { page, limit } = query;
-
-    const { list, totalCount } = await this.evaluationService.getEvaluationModuleBattles(moduleId, +page, +limit);
-
-    return new SuccessListResponse({
-      data: list,
-      total: totalCount,
-      page: +page,
-      limit: +limit,
-    });
-  }
-
-  @Post('/modules/:moduleId/battle-groups')
-  @ApiOperation({
-    summary: '创建批量对战组',
-    description: '在指定评测模块中根据选择的资产和策略创建批量对战',
-  })
-  public async createBattleGroupInModule(@Req() _req: IRequest, @Param('moduleId') moduleId: string, @Body() createBattleGroupDto: CreateBattleGroupDto) {
-    const battleGroup = await this.evaluationService.createBattleGroup(
+    // 将任务添加到后台队列
+    await this.taskQueueService.createTask({
+      type: TaskType.ADD_ASSETS_TO_MODULE,
       moduleId,
-      createBattleGroupDto.assetIds,
-      createBattleGroupDto.strategy,
-      createBattleGroupDto.battleCount,
-      createBattleGroupDto.description,
+      teamId,
+      userId: req.userId,
+      total: joinDto.assetIds.length,
+      payload: {
+        assetIds: joinDto.assetIds,
+      },
+    });
+
+    return new SuccessResponse({
+      data: {
+        success: true,
+        message: `Accepted ${joinDto.assetIds.length} assets for evaluation. Processing in background.`,
+      },
+    });
+  }
+
+  @Get('/modules/:moduleId/assets')
+  @ApiOperation({
+    summary: '获取排行榜中的资产列表',
+    description: '获取当前评测模块排行榜中已有的所有资产ID',
+  })
+  public async getAssetsInModule(@Req() req: IRequest, @Param('moduleId') moduleId: string) {
+    const { teamId } = req;
+
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const assetIds = await this.openskillService.getAssetsInModule(teamId, moduleId);
+
+    return new SuccessResponse({
+      data: {
+        assetIds,
+        total: assetIds.length,
+      },
+    });
+  }
+
+  @Get('/modules/:moduleId/available-assets')
+  @ApiOperation({
+    summary: '获取可加入排行榜的图片',
+    description: '获取用户media中未加入当前排行榜的图片列表',
+  })
+  public async getAvailableAssets(@Req() req: IRequest, @Param('moduleId') moduleId: string, @Query() query: ListDto) {
+    const { teamId } = req;
+    const { page = 1, limit = 100 } = query;
+
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    // 1. 获取已在排行榜中的资产ID
+    const assetsInModule = await this.openskillService.getAssetsInModule(teamId, moduleId);
+
+    // 2. 直接调用优化后的服务，将过滤和分页下推到数据库
+    const { list, totalCount } = await this.mediaFileService.listRichMedias(
+      teamId,
+      {
+        page: +page,
+        limit: +limit,
+      },
+      assetsInModule, // 传入需要排除的 ID 列表
     );
 
-    return new SuccessResponse({ data: battleGroup });
-  }
-
-  @Get('/modules/:moduleId/battle-groups')
-  @ApiOperation({
-    summary: '获取评测模块的批量对战组列表',
-    description: '获取指定评测模块的所有批量对战组',
-  })
-  public async getEvaluationModuleBattleGroups(@Req() _req: IRequest, @Param('moduleId') moduleId: string, @Query() query: ListDto) {
-    const { page, limit } = query;
-
-    const { list, totalCount } = await this.evaluationService.getBattleGroupsByEvaluationModule(moduleId, +page, +limit);
-
     return new SuccessListResponse({
       data: list,
       total: totalCount,
@@ -234,193 +202,226 @@ export class EvaluationController {
     });
   }
 
-  @Get('/modules/:moduleId/scores')
+  @Get('/modules/:moduleId/leaderboard')
   @ApiOperation({
-    summary: '获取评测模块评分',
-    description: '获取评测模块当前的评分排名',
+    summary: '获取OpenSkill排行榜',
+    description: '获取基于OpenSkill算法的实时排行榜',
   })
-  public async getEvaluationModuleScores(@Req() _req: IRequest, @Param('moduleId') moduleId: string, @Query() query: GetLeaderboardScoresDto) {
-    const { page, limit, evaluatorId } = query;
+  public async getLeaderboard(@Req() req: IRequest, @Param('moduleId') moduleId: string, @Query() query: GetLeaderboardDto) {
+    const { teamId } = req;
+    const { page = 1, limit = 20 } = query;
 
-    const { list, totalCount } = await this.evaluationService.getLeaderboardScores(moduleId, evaluatorId, +page, +limit);
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const leaderboard = await this.openskillService.getLeaderboard(teamId, moduleId, +page, +limit);
 
     return new SuccessListResponse({
-      data: list,
-      total: totalCount,
-      page: +page,
-      limit: +limit,
+      data: leaderboard.items,
+      total: leaderboard.total,
+      page: leaderboard.page,
+      limit: leaderboard.limit,
     });
   }
 
-  // ============ 通用对战管理 ============
-
-  @Get('/battles/:battleId')
+  @Get('/modules/:moduleId/recent-battles')
   @ApiOperation({
-    summary: '获取对战详情',
-    description: '获取指定对战的详细信息',
+    summary: '获取最近对战记录',
+    description: '获取最近完成的对战结果',
   })
-  public async getBattle(@Req() _req: IRequest, @Param('battleId') battleId: string) {
-    const battle = await this.evaluationService.getBattle(battleId);
+  public async getRecentBattles(@Req() req: IRequest, @Param('moduleId') moduleId: string, @Query('limit') limit?: number) {
+    const { teamId } = req;
 
-    if (!battle) {
-      throw new Error('Battle not found');
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
     }
 
-    return new SuccessResponse({ data: battle });
+    const battles = await this.openskillService.getRecentBattles(teamId, moduleId, limit ? +limit : 50);
+
+    return new SuccessResponse({ data: battles });
   }
 
-  @Put('/battles/:battleId/result')
+  @Get('/modules/:moduleId/evaluation-status')
   @ApiOperation({
-    summary: '提交对战结果',
-    description: '提交对战结果并更新相关评分',
+    summary: '获取评测完成状态',
+    description: '基于OpenSkill sigma值判断评测是否完成',
   })
-  public async submitBattleResult(@Req() _req: IRequest, @Param('battleId') battleId: string, @Body() submitResultDto: SubmitBattleResultDto) {
-    const { result, evaluatorId, reason } = submitResultDto;
-    await this.evaluationService.submitBattleResult(battleId, result, evaluatorId, reason);
+  public async getEvaluationStatus(@Req() req: IRequest, @Param('moduleId') moduleId: string) {
+    const { teamId } = req;
 
-    return new SuccessResponse({ data: { success: true } });
-  }
-
-  @Post('/battles/:battleId/auto-evaluate')
-  @ApiOperation({
-    summary: 'LLM自动评测',
-    description: '使用配置的LLM评测员自动评测对战结果',
-  })
-  public async autoEvaluateBattle(@Req() _req: IRequest, @Param('battleId') battleId: string) {
-    const result = await this.evaluationService.autoEvaluateBattle(battleId);
-    return new SuccessResponse({ data: result });
-  }
-
-  // ============ 批量对战组管理 ============
-
-  @Get('/battle-groups/:battleGroupId')
-  @ApiOperation({
-    summary: '获取批量对战组详情',
-    description: '获取批量对战组的详细信息和进度',
-  })
-  public async getBattleGroup(@Req() _req: IRequest, @Param('battleGroupId') battleGroupId: string) {
-    const battleGroup = await this.evaluationService.getBattleGroup(battleGroupId);
-
-    if (!battleGroup) {
-      throw new Error('Battle group not found');
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
     }
 
-    return new SuccessResponse({ data: battleGroup });
-  }
-
-  @Post('/battle-groups/:battleGroupId/auto-evaluate')
-  @ApiOperation({
-    summary: '批量自动评测（异步）',
-    description: '创建异步评测任务，对批量对战组的所有对战进行LLM自动评测',
-  })
-  public async autoEvaluateBattleGroup(@Req() req: IRequest, @Param('battleGroupId') battleGroupId: string) {
-    const { teamId, userId } = req;
-
-    const battleGroup = await this.evaluationService.getBattleGroup(battleGroupId);
-    if (!battleGroup) {
-      throw new Error('Battle group not found');
-    }
-
-    const pendingBattles = await this.evaluationService.getBattlesByGroup(battleGroupId, 'PENDING');
-
-    if (pendingBattles.length === 0) {
+    // 检查任务是否已被标记为完成
+    if (this.autoEvaluationService.isEvaluationComplete(moduleId)) {
+      // 如果已完成，返回一个最终的、静态的状态，避免不必要的计算
+      const finalStatus = await this.openskillService.getEvaluationStatus(teamId, moduleId);
       return new SuccessResponse({
         data: {
-          message: 'No pending battles to evaluate',
-          task: null,
+          ...finalStatus,
+          isComplete: true, // 确保最终状态始终为 isComplete: true
+          progress: 100,
+          message: 'Evaluation is complete.',
         },
       });
     }
 
-    const task = await this.taskQueueService.createTask(battleGroupId, battleGroup.evaluationModuleId, teamId, userId, pendingBattles.length);
+    // 如果任务仍在进行中，则获取实时状态
+    const status = await this.openskillService.getEvaluationStatus(teamId, moduleId);
 
-    return new SuccessResponse({
-      data: {
-        task,
-        message: `Evaluation task created with ${pendingBattles.length} battles to process`,
-      },
-    });
+    return new SuccessResponse({ data: status });
   }
 
-  // ============ 异步任务管理 ============
-
-  @Get('/tasks')
+  @Get('/modules/:moduleId/chart-data')
   @ApiOperation({
-    summary: '获取用户的评测任务列表',
-    description: '获取当前用户的所有评测任务及其状态',
+    summary: '获取图表数据',
+    description: '获取ELO评分图表数据，支持多种数据类型',
   })
-  public async getUserTasks(@Req() req: IRequest) {
-    const { teamId, userId } = req;
-    const tasks = await this.taskQueueService.getTasksByUser(teamId, userId);
-    return new SuccessResponse({ data: tasks });
-  }
+  public async getChartData(@Req() req: IRequest, @Param('moduleId') moduleId: string, @Query('dataType') dataType?: string, @Query('evaluatorId') evaluatorId?: string, @Query('days') days?: number) {
+    const { teamId } = req;
 
-  @Get('/tasks/:taskId')
-  @ApiOperation({
-    summary: '获取任务详情',
-    description: '获取指定评测任务的详细信息和进度',
-  })
-  public async getTask(@Req() _req: IRequest, @Param('taskId') taskId: string) {
-    const task = await this.taskQueueService.getTask(taskId);
-    if (!task) {
-      throw new Error('Task not found');
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
     }
 
-    const progress = await this.taskProgressService.getProgress(taskId);
+    const chartData = await this.evaluationService.getChartData(moduleId, evaluatorId, days, dataType);
 
-    return new SuccessResponse({
-      data: {
-        ...task,
-        progress: progress || task.progress,
-      },
-    });
+    return new SuccessResponse({ data: chartData });
   }
 
-  @Get('/tasks/:taskId/progress')
+  @Get('/modules/:moduleId/elo-leaderboard')
   @ApiOperation({
-    summary: '获取任务进度',
-    description: '实时获取评测任务的执行进度',
+    summary: '获取ELO排行榜',
+    description: '获取增强版ELO排行榜，包含完整统计信息',
   })
-  public async getTaskProgress(@Req() _req: IRequest, @Param('taskId') taskId: string) {
-    const progress = await this.taskProgressService.getProgress(taskId);
-    if (!progress) {
-      throw new Error('Task progress not found');
+  public async getEloLeaderboard(@Req() req: IRequest, @Param('moduleId') moduleId: string, @Query() query: GetLeaderboardDto) {
+    const { teamId } = req;
+
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
     }
 
-    return new SuccessResponse({ data: progress });
+    const options = {
+      page: query.page,
+      limit: query.limit,
+    };
+
+    const leaderboard = await this.evaluationService.getEloLeaderboard(moduleId, options);
+
+    return new SuccessResponse({ data: leaderboard });
   }
 
-  @Post('/tasks/:taskId/cancel')
+  @Get('/modules/:moduleId/elo-stats')
   @ApiOperation({
-    summary: '取消评测任务',
-    description: '取消指定的评测任务（仅支持未开始的任务）',
+    summary: '获取ELO统计数据',
+    description: '获取ELO评分统计信息，包含参与者数量、平均分等',
   })
-  public async cancelTask(@Req() _req: IRequest, @Param('taskId') taskId: string) {
-    const success = await this.taskQueueService.cancelTask(taskId);
+  public async getEloStats(@Req() req: IRequest, @Param('moduleId') moduleId: string) {
+    const { teamId } = req;
 
-    return new SuccessResponse({
-      data: {
-        success,
-        message: success ? 'Task cancelled successfully' : 'Cannot cancel task - it may be already processing',
-      },
-    });
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    // 获取排行榜数据用于统计
+    const leaderboard = await this.evaluationService.getEloLeaderboard(moduleId, { limit: 1000 });
+    const recentBattles = await this.openskillService.getRecentBattles(teamId, moduleId, 100);
+
+    const stats = {
+      totalParticipants: leaderboard.items?.length || 0,
+      totalBattles: leaderboard.module?.totalBattles || 0,
+      averageRating: leaderboard.items?.length > 0 ? leaderboard.items.reduce((sum, item) => sum + (item.rating || 1500), 0) / leaderboard.items.length : 1500,
+      recentChanges: recentBattles.map((battle) => ({
+        battleId: battle.battleId,
+        timestamp: battle.timestamp,
+        assetA: {
+          id: battle.assetAId,
+          oldRating: battle.oldRatingA || 1500,
+          newRating: battle.newRatingA || 1500,
+        },
+        assetB: {
+          id: battle.assetBId,
+          oldRating: battle.oldRatingB || 1500,
+          newRating: battle.newRatingB || 1500,
+        },
+      })),
+    };
+
+    return new SuccessResponse({ data: stats });
   }
 
-  @Post('/tasks/:taskId/retry')
+  @Get('/modules/:moduleId/rating-trends')
   @ApiOperation({
-    summary: '重试失败的评测任务',
-    description: '重新执行失败的评测任务',
+    summary: '获取评分趋势',
+    description: '获取资产评分随时间变化的趋势数据',
   })
-  public async retryTask(@Req() _req: IRequest, @Param('taskId') taskId: string) {
-    const success = await this.taskProcessorService.retryFailedTask(taskId);
+  public async getRatingTrends(
+    @Req() req: IRequest,
+    @Param('moduleId') moduleId: string,
+    @Query('days') days?: number,
+    @Query('evaluatorId') evaluatorId?: string,
+    @Query('limit') limit?: number,
+    @Query('minBattles') minBattles?: number,
+  ) {
+    const { teamId } = req;
 
-    return new SuccessResponse({
-      data: {
-        success,
-        message: success ? 'Task queued for retry' : 'Cannot retry task - it may not be in failed status',
-      },
-    });
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    const trends = await this.evaluationService.getRatingTrends(moduleId, days || 30, evaluatorId, limit, minBattles);
+
+    return new SuccessResponse({ data: trends });
   }
+
+  @Get('/modules/:moduleId/assets/:assetId/rating-history')
+  @ApiOperation({
+    summary: '获取资产评分历史',
+    description: '获取单个资产的评分变化历史',
+  })
+  public async getAssetRatingHistory(
+    @Req() req: IRequest,
+    @Param('moduleId') moduleId: string,
+    @Param('assetId') assetId: string,
+    @Query('evaluatorId') evaluatorId?: string,
+    @Query('limit') limit?: number,
+  ) {
+    const { teamId } = req;
+
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    // 验证资产权限
+    const asset = await this.mediaFileService.getMediaByIdAndTeamId(assetId, teamId);
+    if (!asset) {
+      throw new ForbiddenException(`Asset ${assetId} not accessible`);
+    }
+
+    const history = await this.evaluationService.getAssetRatingHistory(assetId, moduleId, evaluatorId, limit);
+
+    return new SuccessResponse({ data: history });
+  }
+
+  // ============ 系统管理 ============
 
   @Get('/queue/status')
   @ApiOperation({
@@ -430,154 +431,5 @@ export class EvaluationController {
   public async getQueueStatus() {
     const status = await this.taskProcessorService.getProcessorStatus();
     return new SuccessResponse({ data: status });
-  }
-
-  // ============ ELO排行榜 ============
-
-  @Get('/modules/:moduleId/elo-leaderboard')
-  @ApiOperation({
-    summary: '获取ELO排行榜',
-    description: '获取指定评测模块的ELO评分排行榜，支持多种排序和筛选选项',
-  })
-  public async getEloLeaderboard(@Req() _req: IRequest, @Param('moduleId') moduleId: string, @Query() query: GetEloLeaderboardDto) {
-    const leaderboard = await this.evaluationService.getEloLeaderboard(moduleId, query);
-    return new SuccessResponse({ data: leaderboard });
-  }
-
-  @Get('/modules/:moduleId/elo-stats')
-  @ApiOperation({
-    summary: '获取ELO统计信息',
-    description: '获取评测模块的ELO评分统计信息和图表数据',
-  })
-  public async getEloStats(@Req() _req: IRequest, @Param('moduleId') moduleId: string) {
-    const leaderboard = await this.evaluationService.getEloLeaderboard(moduleId, { limit: 1000 });
-
-    const ratingDistribution = this.calculateRatingDistribution(leaderboard.items);
-    const topPerformers = leaderboard.items.slice(0, 10);
-    const recentChanges = await this.getRecentRatingChanges(moduleId);
-
-    return new SuccessResponse({
-      data: {
-        overview: {
-          ...leaderboard.stats,
-          mostActiveBattler: {
-            ...leaderboard.stats.mostActiveBattler,
-            battleCount: leaderboard.stats.mostActiveBattler.battleCount || 0,
-          },
-        },
-        ratingDistribution,
-        topPerformers,
-        recentChanges,
-        totalParticipants: leaderboard.total,
-      },
-    });
-  }
-
-  private calculateRatingDistribution(items: any[]) {
-    const ranges = [
-      { min: 0, max: 1200, label: '新手 (0-1200)' },
-      { min: 1200, max: 1400, label: '初级 (1200-1400)' },
-      { min: 1400, max: 1600, label: '中级 (1400-1600)' },
-      { min: 1600, max: 1800, label: '高级 (1600-1800)' },
-      { min: 1800, max: 2000, label: '专家 (1800-2000)' },
-      { min: 2000, max: Infinity, label: '大师 (2000+)' },
-    ];
-
-    return ranges.map((range) => ({
-      ...range,
-      count: items.filter((item) => item.rating >= range.min && item.rating < range.max).length,
-    }));
-  }
-
-  private async getRecentRatingChanges(moduleId: string) {
-    // 获取最近30天的评分变化
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const recentBattles = await this.evaluationService.getRecentBattlesWithRatingChanges(
-      moduleId,
-      thirtyDaysAgo,
-      20, // 最多返回20条记录
-    );
-
-    return recentBattles.map((battle) => ({
-      battleId: battle.id,
-      date: battle.completedAt || new Date(battle.createdTimestamp),
-      assetA: {
-        id: battle.assetAId,
-        name: `Asset ${battle.assetAId}`,
-        oldRating: Math.round(battle.assetARatingBefore || 0),
-        newRating: Math.round(battle.assetARatingAfter || 0),
-        change: Math.round((battle.assetARatingAfter || 0) - (battle.assetARatingBefore || 0)),
-      },
-      assetB: {
-        id: battle.assetBId,
-        name: `Asset ${battle.assetBId}`,
-        oldRating: Math.round(battle.assetBRatingBefore || 0),
-        newRating: Math.round(battle.assetBRatingAfter || 0),
-        change: Math.round((battle.assetBRatingAfter || 0) - (battle.assetBRatingBefore || 0)),
-      },
-      result: battle.result,
-      winner: battle.result === 'A_WIN' ? battle.assetAId : battle.result === 'B_WIN' ? battle.assetBId : null,
-      evaluator: battle.evaluator?.name || 'Unknown',
-    }));
-  }
-
-  @Get('/assets/:assetId/rating-history')
-  @ApiOperation({
-    summary: '获取资产评分历史',
-    description: '获取指定资产在指定评测模块中的评分变化历史',
-  })
-  public async getAssetRatingHistory(
-    @Req() _req: IRequest,
-    @Param('assetId') assetId: string,
-    @Query('moduleId') moduleId: string,
-    @Query('evaluatorId') evaluatorId?: string,
-    @Query('limit') limit?: number,
-  ) {
-    const history = await this.evaluationService.getAssetRatingHistory(assetId, moduleId, evaluatorId, limit ? parseInt(limit.toString()) : 50);
-
-    return new SuccessResponse({ data: history });
-  }
-
-  @Get('/modules/:moduleId/rating-trends')
-  @ApiOperation({
-    summary: '获取评分趋势数据',
-    description: '获取评测模块中所有资产的评分趋势，用于绘制图表',
-  })
-  public async getRatingTrends(
-    @Req() _req: IRequest,
-    @Param('moduleId') moduleId: string,
-    @Query('days') days?: number,
-    @Query('evaluatorId') evaluatorId?: string,
-    @Query('limit') limit?: number,
-    @Query('minBattles') minBattles?: number,
-  ) {
-    const trends = await this.evaluationService.getRatingTrends(
-      moduleId,
-      days ? parseInt(days.toString()) : 30,
-      evaluatorId,
-      limit ? parseInt(limit.toString()) : 20,
-      minBattles ? parseInt(minBattles.toString()) : 5,
-    );
-
-    return new SuccessResponse({ data: trends });
-  }
-
-  @Get('/modules/:moduleId/chart-data')
-  @ApiOperation({
-    summary: '获取完整图表数据',
-    description: '获取用于ELO图表展示的完整数据，包括评分分布、时间序列、对战矩阵等',
-  })
-  public async getChartData(
-    @Req() _req: IRequest,
-    @Param('moduleId') moduleId: string,
-    @Query('evaluatorId') evaluatorId?: string,
-    @Query('days') days?: number,
-    @Query('dataType') dataType?: string,
-  ) {
-    const chartData = await this.evaluationService.getChartData(moduleId, evaluatorId, days ? parseInt(days.toString()) : 30, dataType);
-
-    return new SuccessResponse({ data: chartData });
   }
 }

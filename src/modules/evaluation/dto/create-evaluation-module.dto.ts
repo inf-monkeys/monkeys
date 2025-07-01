@@ -1,4 +1,3 @@
-import { GlickoConfig } from '@/database/entities/evaluation/evaluation-module.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import * as Joiful from 'joiful';
 
@@ -41,13 +40,4 @@ export class CreateEvaluationModuleDto {
   })
   @IsParticipantIdArray
   participantAssetIds?: string[];
-
-  @ApiProperty({
-    description: 'Glicko-2 算法配置',
-    name: 'glickoConfig',
-    type: Object,
-    required: false,
-  })
-  @Joiful.object()
-  glickoConfig?: GlickoConfig;
 }
