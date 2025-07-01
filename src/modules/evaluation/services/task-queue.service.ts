@@ -3,9 +3,22 @@ import { CACHE_TOKEN } from '@/common/common.module';
 import { config } from '@/common/config';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { EvaluationTask, TaskProgress, TaskStatus } from '../types/task.types';
+import { EvaluationTask, TaskProgress, TaskStatus, TaskType } from '../types/task.types';
 
 const appId = config.server.appId;
+
+export interface CreateTaskPayload {
+  type: TaskType;
+  moduleId: string;
+  teamId: string;
+  userId: string;
+  total: number;
+  payload: {
+    battleGroupId?: string;
+    assetIds?: string[];
+    [key: string]: any;
+  };
+}
 
 @Injectable()
 export class TaskQueueService {
@@ -17,33 +30,34 @@ export class TaskQueueService {
 
   constructor(@Inject(CACHE_TOKEN) private readonly redis: CacheManager) {}
 
-  async createTask(battleGroupId: string, moduleId: string, teamId: string, userId: string, totalBattles: number): Promise<EvaluationTask> {
+  async createTask(data: CreateTaskPayload): Promise<EvaluationTask> {
     const taskId = uuidv4();
     const task: EvaluationTask = {
       id: taskId,
-      battleGroupId,
-      moduleId,
-      teamId,
-      userId,
+      type: data.type,
+      moduleId: data.moduleId,
+      teamId: data.teamId,
+      userId: data.userId,
       status: TaskStatus.PENDING,
       progress: {
-        total: totalBattles,
+        total: data.total,
         completed: 0,
         failed: 0,
         percentage: 0,
       },
+      payload: data.payload,
       createdAt: new Date(),
     };
 
     await this.redis.setex(`${this.TASK_PREFIX}:${taskId}`, 3600 * 24, JSON.stringify(task));
 
-    const userTaskKey = `${this.USER_TASKS_PREFIX}:${userId}`;
+    const userTaskKey = `${this.USER_TASKS_PREFIX}:${data.userId}`;
     await this.redis.sadd(userTaskKey, taskId);
     await this.redis.expire(userTaskKey, 3600 * 24 * 30);
 
     await this.redis.lpush(`${this.QUEUE_PREFIX}:pending`, taskId);
 
-    this.logger.log(`Created evaluation task ${taskId} for battle group ${battleGroupId}`);
+    this.logger.log(`Created task ${taskId} of type ${data.type}`);
     return task;
   }
 
