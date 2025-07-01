@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
+import { LineChart } from 'echarts/charts';
+import { GridComponent, MarkLineComponent, TooltipComponent, VisualMapComponent } from 'echarts/components';
+import * as echarts from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import ReactECharts from 'echarts-for-react';
 
 import { VinesWorkflowExecutionStatData } from '@/apis/workflow/execution/typings.ts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart.tsx';
 import { cn } from '@/utils';
 
-export type IVinesLogViewStatChartConfig = ChartConfig & {
+// 注册 ECharts 必要组件
+echarts.use([TooltipComponent, GridComponent, VisualMapComponent, LineChart, CanvasRenderer, MarkLineComponent]);
+
+export type IVinesLogViewStatChartConfig = Record<string, any> & {
   unit?: string;
 };
 
@@ -33,6 +39,73 @@ export const VinesLogViewStatChartCard: React.FC<IVinesLogViewStatChartCardProps
           .map((d) => d[Object.keys(chartConfig)[0]])
           .reduce((accumulator, currentValue) => accumulator + currentValue, 0)) || 0;
 
+  const chartOption = useMemo(() => {
+    const seriesKeys = Object.keys(chartConfig).filter((key) => key !== 'unit');
+
+    const option = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'line',
+        },
+      },
+      grid: {
+        left: '0%',
+        right: '2%',
+        bottom: '0%',
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: searchWorkflowExecutionStatData.map((d) => d.date),
+        show: true,
+        axisLine: { show: false },
+        axisTick: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        splitLine: {
+          lineStyle: {
+            type: 'dashed',
+            color: '#ccc',
+          },
+        },
+        axisLabel: { show: false },
+      },
+      series: seriesKeys.map((key) => {
+        const seriesConfig = chartConfig[key];
+        return {
+          name: seriesConfig.label,
+          type: 'line',
+          smooth: true,
+          showSymbol: false,
+          stack: 'total',
+          data: searchWorkflowExecutionStatData.map((d) => d[key]),
+          itemStyle: {
+            color: seriesConfig.color,
+          },
+
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: seriesConfig.color,
+              },
+              {
+                offset: 1,
+                color: 'rgba(255, 255, 255, 0)',
+              },
+            ]),
+            opacity: 0.5,
+          },
+        };
+      }),
+    };
+
+    return option;
+  }, [searchWorkflowExecutionStatData, chartConfig]);
+
   return (
     <Card>
       <CardHeader>
@@ -46,35 +119,12 @@ export const VinesLogViewStatChartCard: React.FC<IVinesLogViewStatChartCardProps
         </span>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[180px] w-full">
-          <AreaChart accessibilityLayer data={searchWorkflowExecutionStatData}>
-            <CartesianGrid vertical={false} />
-            <defs>
-              {Object.keys(chartConfig).map((key) => {
-                const { color } = chartConfig[key];
-                return (
-                  <linearGradient id={key} x1="0" y1="0" x2="0" y2="1" key={key}>
-                    <stop offset="5%" stopColor={color} stopOpacity={0.8} />
-                    <stop offset="95%" stopColor={color} stopOpacity={0} />
-                  </linearGradient>
-                );
-              })}
-            </defs>
-            {Object.keys(chartConfig).map((key) => (
-              <Area
-                type="monotone"
-                dataKey={key}
-                stroke={chartConfig[key].color}
-                fillOpacity={1}
-                fill={`url(#${key})`}
-                key={key}
-              />
-            ))}
-            <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-            <XAxis dataKey="date" />
-            <ChartTooltip content={<ChartTooltipContent />} />
-          </AreaChart>
-        </ChartContainer>
+        <ReactECharts
+          option={chartOption}
+          style={{ height: '180px', width: '100%' }}
+          notMerge={true}
+          lazyUpdate={true}
+        />
       </CardContent>
     </Card>
   );
