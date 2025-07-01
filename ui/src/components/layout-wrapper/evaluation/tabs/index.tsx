@@ -10,27 +10,27 @@ import { cn } from '@/utils';
 const EVALUATION_TABS = [
   {
     id: 'leaderboard',
-    name: 'evaluation.tabs.leaderboard',
+    name: 'ugc-page.evaluation.leaderboard.title',
     icon: Trophy,
-    description: 'evaluation.tabs.leaderboard.description',
+    description: 'ugc-page.evaluation.leaderboard.description',
   },
   {
     id: 'battles',
-    name: 'evaluation.tabs.battles',
+    name: 'ugc-page.evaluation.battles.title',
     icon: Swords,
-    description: 'evaluation.tabs.battles.description',
+    description: 'ugc-page.evaluation.battles.description',
   },
   {
     id: 'analytics',
-    name: 'evaluation.tabs.analytics',
+    name: 'ugc-page.evaluation.analytics.title',
     icon: BarChart3,
-    description: 'evaluation.tabs.analytics.description',
+    description: 'ugc-page.evaluation.analytics.description',
   },
   {
     id: 'edit',
-    name: 'evaluation.tabs.edit',
+    name: 'ugc-page.evaluation.edit.title',
     icon: Settings,
-    description: 'evaluation.tabs.edit.description',
+    description: 'ugc-page.evaluation.edit.description',
   },
 ] as const;
 
