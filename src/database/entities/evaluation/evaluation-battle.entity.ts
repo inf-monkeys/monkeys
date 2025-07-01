@@ -1,8 +1,8 @@
-import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base/base';
+import { BattleGroupEntity } from './battle-group.entity';
 import { EvaluationModuleEntity } from './evaluation-module.entity';
 import { EvaluatorEntity } from './evaluator.entity';
-import { BattleGroupEntity } from './battle-group.entity';
 
 export enum BattleResult {
   A_WIN = 'A_WIN',
@@ -35,18 +35,6 @@ export class EvaluationBattleEntity extends BaseEntity {
 
   @Column({ type: 'text', nullable: true })
   reason?: string;
-
-  @Column({ name: 'asset_a_rating_before', type: 'float', nullable: true })
-  assetARatingBefore?: number;
-
-  @Column({ name: 'asset_a_rating_after', type: 'float', nullable: true })
-  assetARatingAfter?: number;
-
-  @Column({ name: 'asset_b_rating_before', type: 'float', nullable: true })
-  assetBRatingBefore?: number;
-
-  @Column({ name: 'asset_b_rating_after', type: 'float', nullable: true })
-  assetBRatingAfter?: number;
 
   @Column({ name: 'completed_at', type: 'timestamp', nullable: true })
   completedAt?: Date;
