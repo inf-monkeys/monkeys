@@ -153,12 +153,17 @@ export class WorkflowExecutionController {
     description: '运行 workflow',
   })
   public async startWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: StartWorkflowDto) {
+    logger.info('收到的 body:', body);
     const { teamId, userId } = req;
     const { inputData, version, chatSessionId, waitForWorkflowFinished = false, group, extraMetadata } = body;
 
-    // 将 extraMetadata 合并到 inputData 中
-    const finalInputData = { ...inputData, extraMetadata };
+    // 修复：只在 extraMetadata 不为 undefined 时才合并覆盖，否则保留 inputData 里的
+    const finalInputData = {
+      ...inputData,
+      ...(extraMetadata !== undefined ? { extraMetadata } : {}),
+    };
 
+    // 兼容：如果 body.extraMetadata 存在，则单独传递给 service，否则只用 inputData.extraMetadata
     const workflowInstanceId = await this.service.startWorkflow({
       teamId,
       userId,
@@ -168,6 +173,7 @@ export class WorkflowExecutionController {
       triggerType: WorkflowTriggerType.MANUALLY,
       chatSessionId,
       group,
+      extraMetadata, // 新增：显式传递 body.extraMetadata
     });
 
     if (waitForWorkflowFinished) {

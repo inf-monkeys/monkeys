@@ -217,6 +217,7 @@ export interface StartWorkflowRequest {
   triggerType: WorkflowTriggerType;
   chatSessionId?: string;
   group?: string;
+  extraMetadata?: any;
 }
 
 export interface DebugWorkflowRequest {
