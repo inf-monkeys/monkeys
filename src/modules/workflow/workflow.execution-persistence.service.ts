@@ -15,7 +15,7 @@ export class WorkflowExecutionPersistenceService {
   @OnEvent('workflow.completed.*')
   async handleWorkflowCompletion(payload: { workflowInstanceId: string; result: Workflow; timestamp: number }): Promise<void> {
     const { workflowInstanceId, result: conductorWorkflowExecution } = payload;
-    logger.info(`Received workflow.completed event for instance: ${workflowInstanceId}. Persisting details.`);
+    logger.info(`[EVENT] workflow.completed.* received for ${workflowInstanceId}, output: ${JSON.stringify(conductorWorkflowExecution?.output)}`);
 
     try {
       const detailedExecution = conductorWorkflowExecution;
@@ -47,7 +47,9 @@ export class WorkflowExecutionPersistenceService {
         extraMetadata: detailedExecution.input?.extraMetadata,
       };
 
+      logger.info(`[DB] updateWorkflowExecutionDetailsByInstanceId start for ${workflowInstanceId}`);
       await this.workflowRepository.updateWorkflowExecutionDetailsByInstanceId(workflowInstanceId, updateData);
+      logger.info(`[DB] updateWorkflowExecutionDetailsByInstanceId end for ${workflowInstanceId}`);
     } catch (error) {
       logger.error(`Error processing workflow completion for persistence of ${workflowInstanceId}:`, error);
     }

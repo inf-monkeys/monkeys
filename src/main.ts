@@ -34,7 +34,7 @@ process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('/api/', {
+  app.setGlobalPrefix('api/', {
     exclude: [
       {
         path: '/v1/chat/completions',
