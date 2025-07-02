@@ -1,6 +1,6 @@
 export type Output = {
   data: string;
-  type: 'image';
+  type: 'image' | 'text' | 'json';
   key: string;
 };
 
