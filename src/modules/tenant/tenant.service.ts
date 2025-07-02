@@ -30,15 +30,23 @@ export class TenantService {
    * output 字段处理逻辑，完全复用 workflow.execution.service.ts
    */
   private formatOutput(rawOutput: any): Output[] {
+    if (!rawOutput) return [];
+
     const flattenOutput = flattenKeys(rawOutput, undefined, ['__display_text']);
     const outputKeys = Object.keys(flattenOutput);
     const outputValues = Object.values(flattenOutput);
     const finalOutput: Output[] = [];
+
     for (let i = 0; i < outputKeys.length; i++) {
       const key = outputKeys[i];
       const value = outputValues[i];
+
+      // 跳过 __ 开头的内部字段
+      if (key.startsWith('__')) continue;
+
       const images = extractImageUrls(value);
-      // 只保留图片类型
+
+      // 处理图片类型
       for (const image of images) {
         finalOutput.push({
           type: 'image',
@@ -46,7 +54,25 @@ export class TenantService {
           key: key,
         });
       }
+
+      // 如果没有图片，处理其他类型
+      if (images.length === 0 && value !== null && value !== undefined) {
+        if (typeof value === 'string') {
+          finalOutput.push({
+            type: 'text',
+            data: value,
+            key: key,
+          });
+        } else {
+          finalOutput.push({
+            type: 'json',
+            data: JSON.stringify(value),
+            key: key,
+          });
+        }
+      }
     }
+
     return finalOutput;
   }
 
