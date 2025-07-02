@@ -19,8 +19,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
-import { useOnlyShowWorkbenchIcon, useToggleOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
+import {
+  useOnlyShowWorkbenchIcon,
+  useSetOnlyShowWorkbenchIcon,
+  useToggleOnlyShowWorkbenchIcon,
+} from '@/store/showWorkbenchIcon';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
+import { useGlobalViewSize } from '@/store/useGlobalViewStore';
 import { cloneDeep, cn, getI18nContent } from '@/utils';
 
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
@@ -28,9 +33,13 @@ import { IWorkbenchViewItemPage, WorkbenchViewItemCurrentData } from './virtua/i
 
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   showGroup?: boolean;
+  collapsed?: boolean;
 }
 
-export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarProps> = ({ showGroup = true }) => {
+export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarProps> = ({
+  showGroup = true,
+  collapsed = false,
+}) => {
   const { t } = useTranslation();
 
   const { teamId } = useVinesTeam();
@@ -202,17 +211,21 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     }
   }, [currentPage?.[teamId], data, teamId, activePageFromWorkflowDisplayName, activePageFromType]);
 
-  const { ref, height: wrapperHeight } = useElementSize();
-  const [height, setHeight] = useState(500);
+  const { ref: wrapperRef, height: wrapperHeight } = useElementSize();
+  const [height, setHeight] = useState<number | string>(500);
+  const globalViewSize = useGlobalViewSize();
+
   useThrottleEffect(
     () => {
       if (!wrapperHeight) return;
-      setHeight(wrapperHeight - 74);
+      setHeight(globalViewSize != 'sm' ? wrapperHeight - 74 : `calc(${wrapperHeight}px - 1.5rem - 2px)`);
     },
-    [wrapperHeight],
+    [wrapperHeight, globalViewSize],
     { wait: 64 },
   );
+
   const toggleOnlyShowWorkbenchIcon = useToggleOnlyShowWorkbenchIcon();
+  const setOnlyShowWorkbenchIcon = useSetOnlyShowWorkbenchIcon();
 
   const hasGroups = lists.length && !isLoading;
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
@@ -229,6 +242,12 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     },
     [teamId, groupId, setCurrentPage],
   );
+
+  useEffect(() => {
+    if (globalViewSize === 'sm') {
+      setOnlyShowWorkbenchIcon(true);
+    }
+  }, [globalViewSize]);
 
   const onPageGroupReorder = (
     newData: (Omit<IPageGroup, 'pageIds'> & {
@@ -252,7 +271,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   return (
     <div
       className={cn('mr-4 flex h-full items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm')}
-      ref={ref}
+      ref={wrapperRef}
     >
       {isLoading ? (
         <AnimatePresence>
@@ -299,18 +318,20 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                 onlyShowWorkbenchIcon && 'justify-center',
               )}
             >
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    onClick={() => toggleOnlyShowWorkbenchIcon()}
-                    icon={onlyShowWorkbenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
-                    size={'icon'}
-                    className={cn('shrink-0', onlyShowWorkbenchIcon && '')}
-                    variant="outline"
-                  />
-                </TooltipTrigger>
-                <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
-              </Tooltip>
+              {globalViewSize !== 'sm' && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button
+                      onClick={() => toggleOnlyShowWorkbenchIcon()}
+                      icon={onlyShowWorkbenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
+                      size={'icon'}
+                      className={cn('shrink-0', onlyShowWorkbenchIcon && '')}
+                      variant="outline"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
+                </Tooltip>
+              )}
               {!onlyShowWorkbenchIcon && (
                 <Tooltip>
                   <TooltipTrigger asChild>

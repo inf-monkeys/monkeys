@@ -30,7 +30,7 @@ import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { cn } from '@/utils';
 
 interface IVirtuaWorkbenchViewListProps {
-  height: number;
+  height: number | string;
   data: IPinPage[];
   currentPageId?: string;
   currentGroupId?: string;
