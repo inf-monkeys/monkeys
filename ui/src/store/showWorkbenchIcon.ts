@@ -20,7 +20,7 @@ export const useOnlyShowWorkbenchIconStore = create<IOnlyShowWorkbenchIconStore>
   ),
 );
 export const useOnlyShowWorkbenchIcon = () => useOnlyShowWorkbenchIconStore((state) => state.onlyShowWorkbenchIcon);
-export const useShouldOnlyShowWorkbenchIcon = () =>
-  useOnlyShowWorkbenchIconStore((state) => state.onlyShowWorkbenchIcon);
+export const useSetOnlyShowWorkbenchIcon = () =>
+  useOnlyShowWorkbenchIconStore((state) => state.setOnlyShowWorkbenchIcon);
 export const useToggleOnlyShowWorkbenchIcon = () =>
   useOnlyShowWorkbenchIconStore((state) => state.toggleOnlyShowWorkbenchIcon);
