@@ -26,6 +26,7 @@ import { IconGuard } from '@/components/ui/vines-icon/lucide/guard.tsx';
 import { VinesImageOptimizeManage } from '@/components/ui/vines-image';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { initializeGlobalViewStore } from '@/store/useGlobalViewStore';
 import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {
@@ -97,6 +98,11 @@ const RootComponent: React.FC = () => {
   }, [teamId]);
 
   const layoutId = 'vines-outlet-main-' + routeIds?.join('-');
+
+  useEffect(() => {
+    const cleanup = initializeGlobalViewStore();
+    return cleanup;
+  }, []);
 
   return (
     <>
