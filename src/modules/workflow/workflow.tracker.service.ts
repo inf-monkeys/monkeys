@@ -18,7 +18,7 @@ interface WorkflowTrackInfo {
 @Injectable()
 export class WorkflowTrackerService {
   private readonly TRACKING_PREFIX = 'workflow_tracking:';
-  private readonly POLLING_INTERVAL = 10 * 1000; // 10秒
+  private readonly POLLING_INTERVAL = 5 * 1000; // 5秒（从10秒优化到5秒）
   private readonly MAX_EXECUTION_TIME = 24 * 60 * 60; // 24小时（单位：秒）
 
   constructor(
