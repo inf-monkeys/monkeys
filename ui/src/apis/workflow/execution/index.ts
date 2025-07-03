@@ -31,13 +31,9 @@ export const executionWorkflow = (
     simple: true,
     wrapper: (it) => (it as unknown as { workflowInstanceId: string })?.workflowInstanceId ?? '',
   })(`/api/workflow/executions/${workflowId}/start`, {
-    inputData: extraMetadata
-      ? {
-          ...inputData,
-          extraMetadata,
-        }
-      : inputData,
+    inputData,
     version,
+    extraMetadata,
     ...(chatSessionId && { chatSessionId }),
   });
 
