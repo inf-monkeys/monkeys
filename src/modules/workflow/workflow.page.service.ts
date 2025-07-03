@@ -148,10 +148,10 @@ export class WorkflowPageService {
     };
   }
 
-  splitPageIds(pageIds: string[]) {
-    const agentPageIds = pageIds.filter((id) => id.startsWith('agent-'));
-    const designBoardPageIds = pageIds.filter((id) => id.startsWith('design-board-'));
-    const normalPageIds = pageIds.filter((id) => !designBoardPageIds.includes(id) && !agentPageIds.includes(id));
+  splitPageIds(pageIds: (string | null)[]) {
+    const agentPageIds = pageIds.filter((id) => id && id.startsWith('agent-'));
+    const designBoardPageIds = pageIds.filter((id) => id && id.startsWith('design-board-'));
+    const normalPageIds = pageIds.filter((id) => id && !designBoardPageIds.includes(id) && !agentPageIds.includes(id));
     return { agentPageIds, designBoardPageIds, normalPageIds };
   }
 
