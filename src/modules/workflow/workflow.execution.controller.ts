@@ -275,6 +275,48 @@ export class WorkflowExecutionController {
     });
   }
 
+  @Post('/test-extra-metadata')
+  @ApiOperation({
+    summary: '测试 extraMetadata 解码功能',
+    description: '用于验证 extraMetadata 的 Base64 解码是否正常工作',
+  })
+  public async testExtraMetadata(@Body() body: { extraMetadata: string }) {
+    const { extraMetadata } = body;
+
+    // 测试解码逻辑
+    let decodedMetadata: any = {};
+    const originalType = typeof extraMetadata;
+    let decodedString = '';
+    let parseSuccess = false;
+    let error = null;
+
+    try {
+      if (typeof extraMetadata === 'string') {
+        decodedString = Buffer.from(extraMetadata, 'base64').toString('utf-8');
+        decodedMetadata = JSON.parse(decodedString);
+        parseSuccess = true;
+      } else {
+        decodedMetadata = extraMetadata;
+        parseSuccess = true;
+      }
+    } catch (e) {
+      error = e.message;
+    }
+
+    return new SuccessResponse({
+      data: {
+        original: extraMetadata,
+        originalType,
+        decodedString,
+        decodedMetadata,
+        parseSuccess,
+        error,
+        // 验证解码是否正确
+        isValid: parseSuccess && typeof decodedMetadata === 'object' && decodedMetadata !== null,
+      },
+    });
+  }
+
   /**
    * 处理工作流结果中的图片，转存到S3并创建媒体记录
    */
