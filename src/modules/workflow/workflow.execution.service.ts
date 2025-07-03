@@ -389,6 +389,17 @@ export class WorkflowExecutionService {
       }
     }
 
+    // 从输入数据中提取 extraMetadata
+    let extraMetadata = input?.extraMetadata;
+    if (typeof extraMetadata === 'string') {
+      try {
+        extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
+      } catch (e) {
+        // 如果解析失败，保持原始值
+        logger.warn('Failed to parse extraMetadata from base64', e);
+      }
+    }
+
     return {
       ..._.pick(executionData, ['status', 'createTime', 'startTime', 'updateTime', 'endTime']),
       input: formattedInput,
@@ -399,6 +410,7 @@ export class WorkflowExecutionService {
       instanceId: executionData.workflowId,
       userId: startByUserId,
       teamId: ctx?.teamId || teamId,
+      extraMetadata,
     } as WorkflowExecutionOutput;
   }
 
@@ -460,7 +472,19 @@ export class WorkflowExecutionService {
         userId: entityUserId,
         createdTimestamp,
         updatedTimestamp,
+        extraMetadata: rawExtraMetadata,
       } = entity;
+
+      // 解码 extraMetadata
+      let extraMetadata = rawExtraMetadata;
+      if (typeof extraMetadata === 'string') {
+        try {
+          extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
+        } catch (e) {
+          // 如果解析失败，保持原始值
+          logger.warn('Failed to parse extraMetadata from base64', e);
+        }
+      }
 
       const workflowDef = workflowDefinitionMap[entityWorkflowId];
       const contextTeamId = input?.['__context']?.teamId || teamId;
@@ -554,6 +578,7 @@ export class WorkflowExecutionService {
         instanceId: workflowInstanceId,
         userId: entityUserId,
         teamId: contextTeamId,
+        extraMetadata,
       } as WorkflowExecutionOutput;
     });
 
@@ -679,6 +704,17 @@ export class WorkflowExecutionService {
               });
           }
 
+          // 从输入数据中提取 extraMetadata
+          let extraMetadata = input?.extraMetadata;
+          if (typeof extraMetadata === 'string') {
+            try {
+              extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
+            } catch (e) {
+              // 如果解析失败，保持原始值
+              logger.warn('Failed to parse extraMetadata from base64', e);
+            }
+          }
+
           return {
             ...rest,
             input: formattedInput,
@@ -689,6 +725,7 @@ export class WorkflowExecutionService {
             instanceId: execWorkflowId,
             userId: ctx?.userId ?? '',
             teamId: ctx?.teamId ?? '',
+            extraMetadata,
           } as WorkflowExecutionOutput;
         }),
       page,
@@ -706,9 +743,14 @@ export class WorkflowExecutionService {
 
     // 解码 extraMetadata
     let extraMetadata = (request.inputData?.extraMetadata as any) ?? {};
+    logger.info('原始 extraMetadata:', extraMetadata, '类型:', typeof extraMetadata);
+
     if (typeof extraMetadata === 'string') {
       try {
-        extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
+        const decodedString = Buffer.from(extraMetadata, 'base64').toString('utf-8');
+        logger.info('Base64 解码后的字符串:', decodedString);
+        extraMetadata = JSON.parse(decodedString);
+        logger.info('JSON 解析后的 extraMetadata:', extraMetadata);
       } catch (e) {
         logger.warn('Failed to parse extraMetadata from base64, using it as a plain object.', e);
       }
