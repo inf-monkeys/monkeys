@@ -1,4 +1,5 @@
 import { vinesFetcher } from '@/apis/fetcher';
+import { vinesHeader } from '@/apis/utils';
 
 import {
   AddEvaluatorToModuleDto,
@@ -283,7 +284,7 @@ export interface JoinEvaluationDto {
 export interface OpenSkillLeaderboardItem {
   rank: number;
   assetId: string;
-  exposedRating: number;
+  rating: number; // 后端实际返回的字段名
   mu: number;
   sigma: number;
   totalBattles: number;
@@ -458,4 +459,103 @@ export const updateEvaluationModule = (
     method: 'PUT',
     simple: true,
   })(`/api/evaluation/modules/${moduleId}`, payload).then((result) => result as EvaluationModule);
+};
+
+// =================================================================
+// 导出功能 API
+// =================================================================
+
+export interface ExportHtmlOptions {
+  minRating?: number;
+  maxRating?: number;
+  limit?: number;
+  minBattles?: number;
+}
+
+export interface ExportCsvOptions {
+  includeImageUrls?: boolean;
+}
+
+// 导出排行榜HTML（仅评测完成后可用）
+export const exportLeaderboardHtml = (moduleId: string, options: ExportHtmlOptions = {}): Promise<void> => {
+  const query = new URLSearchParams(options as any).toString();
+  const url = `/api/evaluation/modules/${moduleId}/export/html?${query}`;
+
+  // 获取认证头信息
+  const headers = vinesHeader({});
+
+  return fetch(url, {
+    method: 'GET',
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok) {
+      return response.text().then((text) => {
+        throw new Error(text || `HTTP ${response.status}: ${response.statusText}`);
+      });
+    }
+
+    // 获取文件名（从Content-Disposition头或生成默认名称）
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const filename =
+      contentDisposition?.match(/filename="(.+)"/)?.[1] ||
+      (() => {
+        const timestamp = new Date().toISOString().split('T')[0];
+        const ratingRange =
+          options.minRating || options.maxRating ? `_${options.minRating || 'min'}-${options.maxRating || 'max'}` : '';
+        return `leaderboard-${moduleId}${ratingRange}_${timestamp}.html`;
+      })();
+
+    // 下载文件
+    return response.blob().then((blob) => {
+      const url_obj = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url_obj;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url_obj);
+      document.body.removeChild(a);
+    });
+  });
+};
+
+// 导出排行榜CSV（仅评测完成后可用）
+export const exportLeaderboardCsv = (moduleId: string, options: ExportCsvOptions = {}): Promise<void> => {
+  const query = new URLSearchParams(options as any).toString();
+  const url = `/api/evaluation/modules/${moduleId}/export/csv?${query}`;
+
+  // 获取认证头信息
+  const headers = vinesHeader({});
+
+  return fetch(url, {
+    method: 'GET',
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok) {
+      return response.text().then((text) => {
+        throw new Error(text || `HTTP ${response.status}: ${response.statusText}`);
+      });
+    }
+
+    // 获取文件名（从Content-Disposition头或生成默认名称）
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const filename =
+      contentDisposition?.match(/filename="(.+)"/)?.[1] ||
+      (() => {
+        const timestamp = new Date().toISOString().split('T')[0];
+        return `leaderboard-complete-${moduleId}_${timestamp}.csv`;
+      })();
+
+    // 下载文件
+    return response.blob().then((blob) => {
+      const url_obj = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url_obj;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url_obj);
+      document.body.removeChild(a);
+    });
+  });
 };
