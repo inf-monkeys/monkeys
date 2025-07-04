@@ -47,9 +47,9 @@ export class WorkflowExecutionPersistenceService {
         extraMetadata: detailedExecution.input?.extraMetadata,
       };
 
-      logger.info(`[DB] updateWorkflowExecutionDetailsByInstanceId start for ${workflowInstanceId}`);
+      logger.debug(`[DB] updateWorkflowExecutionDetailsByInstanceId start for ${workflowInstanceId}`);
       await this.workflowRepository.updateWorkflowExecutionDetailsByInstanceId(workflowInstanceId, updateData);
-      logger.info(`[DB] updateWorkflowExecutionDetailsByInstanceId end for ${workflowInstanceId}`);
+      logger.debug(`[DB] updateWorkflowExecutionDetailsByInstanceId end for ${workflowInstanceId}`);
     } catch (error) {
       logger.error(`Error processing workflow completion for persistence of ${workflowInstanceId}:`, error);
     }

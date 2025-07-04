@@ -4,12 +4,12 @@ import { KeyedMutator } from 'swr/_internal';
 import { SWRInfiniteResponse } from 'swr/infinite';
 
 import { useMemoizedFn } from 'ahooks';
-import { isString, omit } from 'lodash';
+import { isString } from 'lodash';
 
 import { IPaginationListData } from '@/apis/typings.ts';
 import {
-  VinesWorkflowExecutionOutput,
   VinesWorkflowExecutionOutputListItem,
+  VinesWorkflowExecutionOutputListItemForIframe,
 } from '@/package/vines-flow/core/typings.ts';
 import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
@@ -26,28 +26,49 @@ interface IVinesIframeMessage {
 export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVinesIframeMessage) => {
   useEffect(() => {
     if (enable && outputs) {
-      const msg: (VinesWorkflowExecutionOutput & {
-        instance: Omit<VinesWorkflowExecutionOutputListItem, 'output'>;
-      })[] = [];
-      for (const it of outputs) {
-        if (msg.length > 4) break;
-        if (it.status !== 'COMPLETED') continue;
+      // const msg: (VinesWorkflowExecutionOutput & {
+      //   instance: Omit<VinesWorkflowExecutionOutputListItem, 'output'>;
+      // })[] = [];
+      // for (const it of outputs) {
+      //   if (msg.length > 4) break;
+      //   if (it.status !== 'COMPLETED') continue;
 
-        for (const result of it.output) {
-          if (result.type !== 'image') continue;
-          msg.push({
-            ...result,
-            instance: omit(it, 'output'),
-          });
-        }
+      //   for (const result of it.output) {
+      //     if (result.type !== 'image') continue;
+      //     msg.push({
+      //       ...result,
+      //       instance: omit(it, 'output'),
+      //     });
+      //   }
 
-        break;
-      }
+      //   break;
+      // }
+      if (!outputs || outputs.length === 0) return;
+      const data: VinesWorkflowExecutionOutputListItemForIframe[] = outputs
+        .filter((it) => it.status === 'COMPLETED')
+        .slice(0, 4)
+        .map(
+          ({
+            instanceId,
+            render: _render,
+            startTime: _startTime,
+            endTime: _endTime,
+            teamId: _teamId,
+            updateTime: _updateTime,
+            userId: _userId,
+            ...it
+          }) => ({
+            workflowInstanceId: instanceId,
+            ...it,
+          }),
+        );
+      if (data.length === 0) return;
 
       window.parent.postMessage(
         stringify({
           'v-event': 'vines-execution-image-outputs',
-          'v-data': msg.slice(0, 4),
+          // 'v-data': msg.slice(0, 4),
+          'v-data': data.slice(0, 4),
         }),
         '*',
       );
