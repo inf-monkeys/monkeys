@@ -1312,16 +1312,62 @@
     },
     "evaluation": {
       "title": "评测",
+      "participants": "{{count}} 位参与者",
       "leaderboard": {
         "title": "排行榜",
         "description": "基于智能评分和排名系统",
-        "totalParticipants": "参与者总数",
+        "totalParticipants": "已进行对战的参与者总数",
         "totalBattles": "总对战场次",
-        "progress": "评测进度",
+        "progress": "排行榜稳定度",
         "status": {
           "title": "评测状态",
           "completed": "已完成",
           "inProgress": "进行中"
+        },
+        "autoRefresh": {
+          "active": "自动刷新",
+          "paused": "已暂停刷新"
+        },
+        "export": {
+          "button": "导出排行榜",
+          "title": "导出排行榜",
+          "description": "选择导出格式和参数。HTML格式包含图片预览，CSV格式适合数据分析。",
+          "format": {
+            "label": "导出格式",
+            "html": "HTML (包含图片)",
+            "csv": "CSV (数据分析)"
+          },
+          "options": {
+            "minRating": "最低评分",
+            "maxRating": "最高评分",
+            "limit": "最大条数",
+            "placeholder": {
+              "noLimit": "不限",
+              "maxLimit": "1000"
+            }
+          },
+          "success": {
+            "title": "导出成功",
+            "html": "HTML排行榜已开始下载",
+            "csv": "CSV数据已开始下载"
+          },
+          "error": {
+            "title": "导出失败",
+            "description": "请稍后重试"
+          },
+          "disabled": {
+            "tooltip": "评测尚未完成，请等待评测完成后再导出排行榜"
+          },
+          "actions": {
+            "cancel": "取消",
+            "confirm": "开始导出",
+            "exporting": "导出中..."
+          }
+        },
+        "table": {
+          "itemsPerPage": "每页显示:",
+          "totalRecords": "共 {{total}} 条记录",
+          "pageInfo": "第 {{page}} 页 / 共 {{totalPages}} 页"
         },
         "detailedRanking": {
           "title": "详细排名",
@@ -1356,7 +1402,7 @@
             "recentBattles": "最近对战"
           },
           "status": {
-            "progress": "稳定性进度: {{progress}}%",
+            "progress": "排行榜稳定度: {{progress}}%",
             "rounds": "排行榜已连续稳定 {{stableRounds}} 轮，还需 {{neededRounds}} 轮即可完成",
             "avgUncertainty": "平均不确定性 (Sigma): {{sigma}}",
             "completed": "评测已完成！",
@@ -1378,6 +1424,11 @@
             "title": "排行榜中暂无图片",
             "description": "请先加入图片到排行榜开始评测"
           }
+        },
+        "pagination": {
+          "previous": "上一页",
+          "next": "下一页",
+          "page": "第 {{page}} 页 / {{totalPages}}"
         },
         "joinDialog": {
           "title": "加入评测",
@@ -1403,13 +1454,20 @@
         },
         "uploadDialog": {
           "title": "上传图片",
-          "description": "上传用于对战评测的图片文件"
+          "description": "支持上传单个文件或整个文件夹，自动筛选图片文件",
+          "autoJoin": {
+            "label": "自动加入排行榜",
+            "description": "上传完成后自动将所有图片加入到评测排行榜中，无需手动选择"
+          },
+          "uploadSuccess": "成功上传 {{count}} 张图片",
+          "autoJoinSuccess": "成功上传图片到排行榜",
+          "autoJoinError": "自动加入排行榜失败，请手动添加"
         },
         "statusDialog": {
           "title": "评测状态",
           "description": "查看当前评测模块的详细状态信息",
           "status": "评测完成状态",
-          "progress": "稳定性进度",
+          "progress": "排行榜稳定度",
           "progressDetail": "排行榜已连续稳定 {{stableRounds}} 轮，还需 {{neededRounds}} 轮即可完成",
           "totalAssets": "总资产数",
           "avgUncertainty": "平均不确定性",
@@ -4035,5 +4093,27 @@
         }
       }
     }
+  },
+  "enhancedUploader": {
+    "selectFiles": "选择图片文件",
+    "selectFolder": "选择图片文件夹",
+    "supportedFormats": "支持 {{formats}} 格式",
+    "autoFilter": "自动筛选图片文件",
+    "uploadProgress": "上传进度: {{completed}}/{{total}}",
+    "fileCount": "{{count}} 个文件",
+    "completed": "{{count}} 已完成",
+    "failed": "{{count}} 失败",
+    "success": "成功",
+    "error": "失败",
+    "maxFilesError": "最多只能上传 {{maxFiles}} 个文件",
+    "fileSizeError": "文件 {{fileName}} 超过最大大小限制 {{maxSize}}MB",
+    "noImagesInFolder": "文件夹中没有找到支持的图片文件",
+    "foundImagesInFolder": "从文件夹中找到 {{count}} 张图片",
+    "uploadComplete": {
+      "mixed": "上传完成！{{normalCount}} 张新上传，{{rapidCount}} 张秒传",
+      "rapidOnly": "{{rapidCount}} 张图片秒传成功！",
+      "normalOnly": "成功上传 {{count}} 张图片"
+    },
+    "uploadErrors": "{{count}} 个文件上传失败"
   }
 }

@@ -1323,6 +1323,7 @@
       }
     },
     "evaluation": {
+      "participants": "{{count}} participants",
       "ugc-view": {
         "operate-area": {
           "dropdown-label": "Evaluation Module Operations",
@@ -1333,6 +1334,283 @@
           "create-button": "Create Evaluation Module"
         },
         "type": "Evaluation Module"
+      },
+      "leaderboard": {
+        "title": "Leaderboard",
+        "description": "ELO rankings and performance statistics for all participants",
+        "totalParticipants": "Total Participants",
+        "totalBattles": "Total Battles",
+        "progress": "Leaderboard Stability",
+        "status": {
+          "title": "Evaluation Status",
+          "completed": "Completed",
+          "inProgress": "In Progress"
+        },
+        "autoRefresh": {
+          "active": "Auto Refresh",
+          "paused": "Refresh Paused"
+        },
+        "export": {
+          "button": "Export Leaderboard",
+          "title": "Export Leaderboard",
+          "description": "Choose export format and parameters. HTML format includes image previews, CSV format is suitable for data analysis.",
+          "format": {
+            "label": "Export Format",
+            "html": "HTML (with images)",
+            "csv": "CSV (for analysis)"
+          },
+          "options": {
+            "minRating": "Min Rating",
+            "maxRating": "Max Rating",
+            "limit": "Max Records",
+            "placeholder": {
+              "noLimit": "No limit",
+              "maxLimit": "1000"
+            }
+          },
+          "success": {
+            "title": "Export Successful",
+            "html": "HTML leaderboard download started",
+            "csv": "CSV data download started"
+          },
+          "error": {
+            "title": "Export Failed",
+            "description": "Please try again later"
+          },
+          "disabled": {
+            "tooltip": "Evaluation not completed yet, please wait for evaluation to complete before exporting leaderboard"
+          },
+          "actions": {
+            "cancel": "Cancel",
+            "confirm": "Start Export",
+            "exporting": "Exporting..."
+          }
+        },
+        "table": {
+          "itemsPerPage": "Items per page:",
+          "totalRecords": "Total {{total}} records",
+          "pageInfo": "Page {{page}} of {{totalPages}}"
+        },
+        "detailedRanking": {
+          "title": "Detailed Ranking",
+          "rank": "Rank",
+          "participant": "Participant",
+          "rating": "Rating",
+          "mu": "Mu (μ)",
+          "sigma": "Sigma (σ)",
+          "battles": "Battles",
+          "error": "Error",
+          "noImage": "No Image"
+        },
+        "pagination": {
+          "previous": "Previous",
+          "next": "Next"
+        }
+      },
+      "battles": {
+        "title": "Battle Management",
+        "description": "Create and manage image battle evaluation tasks",
+        "upload": "Upload Images",
+        "join": "Join Leaderboard",
+        "stats": {
+          "available": "Available Images",
+          "inLeaderboard": "In Leaderboard",
+          "stability": "Stability Progress",
+          "uncertainty": "Average Uncertainty"
+        },
+        "info": {
+          "title": "Evaluation Info",
+          "tabs": {
+            "status": "Evaluation Status",
+            "recentBattles": "Recent Battles"
+          },
+          "status": {
+            "progress": "Leaderboard Stability: {{progress}}%",
+            "rounds": "Leaderboard has been stable for {{stableRounds}} rounds, {{neededRounds}} more rounds needed to complete",
+            "avgUncertainty": "Average Uncertainty (Sigma): {{sigma}}",
+            "completed": "Evaluation completed!",
+            "needsMoreBattles": "Need more battles ({{count}} images)"
+          },
+          "noInfo": {
+            "title": "No evaluation info",
+            "description": "Please add images to leaderboard first to start evaluation"
+          },
+          "recentBattles": {
+            "title": "Recent Battle Records",
+            "description": "Battle record feature is under development...",
+            "button": "View Battle Records"
+          }
+        },
+        "assetsInLeaderboard": {
+          "title": "Images in Leaderboard",
+          "empty": {
+            "title": "No images in leaderboard",
+            "description": "Please add images to leaderboard first to start evaluation"
+          }
+        },
+        "pagination": {
+          "previous": "Previous",
+          "next": "Next", 
+          "page": "Page {{page}} of {{totalPages}}"
+        },
+        "joinDialog": {
+          "title": "Join Evaluation",
+          "description": "Select images to join leaderboard, the system will automatically perform intelligent matching and evaluation",
+          "selectPrompt": "Select images to add to leaderboard",
+          "selectedCount": "Selected {{count}} images, you can select multiple at once",
+          "empty": {
+            "title": "No images available to join",
+            "description": "All images are already in leaderboard or no images uploaded",
+            "uploadButton": "Upload New Images"
+          },
+          "systemInfo": {
+            "title": "Intelligent Evaluation System",
+            "rules": [
+              "System will automatically create initial ratings for newly added images",
+              "Intelligently match optimal opponents for battles using algorithms",
+              "Real-time update of ratings and rankings after each battle"
+            ]
+          },
+          "cancel": "Cancel",
+          "confirm": "Join Evaluation ({{count}})",
+          "joining": "Joining...",
+          "validation": {
+            "atLeastOne": "Please select at least one image"
+          },
+          "success": "Successfully added {{count}} participants",
+          "error": "Failed to join evaluation"
+        },
+        "uploadDialog": {
+          "title": "Upload Images",
+          "description": "Support uploading individual files or entire folders, automatically filter image files",
+          "autoJoin": {
+            "label": "Auto Join Leaderboard",
+            "description": "Automatically add all images to the evaluation leaderboard after upload completion, no manual selection required"
+          },
+          "uploadSuccess": "Successfully uploaded {{count}} images",
+          "autoJoinSuccess": "Successfully uploaded images to leaderboard",
+          "autoJoinError": "Failed to auto-join leaderboard, please add manually"
+        },
+        "statusDialog": {
+          "title": "Evaluation Status",
+          "description": "View detailed status information for current evaluation module",
+          "status": "Evaluation completion status",
+          "progress": "Leaderboard Stability",
+          "progressDetail": "Leaderboard has been stable for {{stableRounds}} rounds, {{neededRounds}} more rounds needed to complete",
+          "totalAssets": "Total Assets",
+          "avgUncertainty": "Average Uncertainty",
+          "needsMoreBattles": "Assets needing more battles",
+          "noStatus": "Unable to get evaluation status",
+          "close": "Close"
+        },
+        "battlesDialog": {
+          "title": "Recent Battle Records",
+          "description": "Display results of the most recent 20 automatic battles",
+          "vs": "vs",
+          "winner": {
+            "a": "A Wins",
+            "b": "B Wins",
+            "draw": "Draw"
+          },
+          "noBattles": "No battle records",
+          "close": "Close"
+        }
+      },
+      "statusDialog": {
+        "title": "Evaluation Status",
+        "description": "View detailed status information for current evaluation module",
+        "status": "Evaluation completion status",
+        "progress": "Leaderboard Stability",
+        "progressDetail": "Leaderboard has been stable for {{stableRounds}} rounds, {{neededRounds}} more rounds needed to complete",
+        "totalAssets": "Total Assets",
+        "avgUncertainty": "Average Uncertainty",
+        "needsMoreBattles": "Assets needing more battles",
+        "noStatus": "Unable to get evaluation status",
+        "close": "Close"
+      },
+      "edit": {
+        "title": "Edit Module",
+        "description": "Configure module settings and parameters",
+        "basic-info": {
+          "title": "Basic Information",
+          "display-name": "Display Name",
+          "display-name-placeholder": "Enter module display name",
+          "description-label": "Description",
+          "description-placeholder": "Enter module description",
+          "evaluation-criteria": "Evaluation Criteria",
+          "criteria-placeholder": "Enter evaluation criteria and guidelines",
+          "status": "Status",
+          "status-description": "Enable or disable this evaluation module"
+        },
+        "participants": {
+          "title": "Participants",
+          "participant-count": "Participant Count",
+          "manage-participants": "Manage Participants",
+          "no-participants": "No participants added yet"
+        },
+        "evaluator-management": "Evaluator Management",
+        "add-evaluator": "Add Evaluator",
+        "model": "Model",
+        "human-evaluator": "Human Evaluator",
+        "no-evaluators": "No evaluators added yet",
+        "elo-config": "ELO Configuration",
+        "initial-rating": "Initial Rating",
+        "rating-deviation": "Rating Deviation",
+        "elo-description": "Configure ELO rating system parameters",
+        "participant": {
+          "id": "Participant ID: {id}",
+          "status": {
+            "active": "Active"
+          }
+        },
+        "toast": {
+          "add-participant": {
+            "enter-id": "Please enter participant ID",
+            "enter-valid-id": "Please enter valid participant ID",
+            "success": "Successfully added {{count}} participants",
+            "error": "Failed to add participants"
+          },
+          "add-evaluator": {
+            "name-and-model-required": "Name and model are required",
+            "create-success": "Successfully created evaluator: {{name}}",
+            "associate-success": "Successfully associated evaluator",
+            "error": "Failed to add evaluator"
+          }
+        },
+        "add-participant-dialog": {
+          "title": "Add Participants",
+          "description": "Add new participants to the evaluation module",
+          "asset-ids-label": "Asset IDs",
+          "asset-ids-placeholder": "Enter asset IDs separated by commas",
+          "adding-button": "Adding...",
+          "add-button": "Add"
+        },
+        "add-evaluator-dialog": {
+          "title": "Add Evaluator",
+          "description": "Create and add a new evaluator to the module",
+          "name-label": "Name",
+          "name-placeholder": "Enter evaluator name",
+          "llm-model-name-label": "LLM Model Name",
+          "llm-model-name-placeholder": "Enter LLM model name",
+          "evaluation-focus-label": "Evaluation Focus",
+          "evaluation-focus-placeholder": "Enter evaluation focus",
+          "adding-button": "Adding...",
+          "add-button": "Add"
+        }
+      },
+      "ratingTrendChart": {
+        "title": "Rating Trends",
+        "yAxisName": "Rating",
+        "xAxisName": "Battle Timeline",
+        "noData": "No trend data available to display"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "This feature is under development",
+        "coming-soon": {
+          "title": "Coming Soon",
+          "description": "Analytics feature will be available soon, please stay tuned."
+        }
       }
     },
     "llm-model": {
@@ -3866,5 +4144,27 @@
         "active": "Active"
       }
     }
+  },
+  "enhancedUploader": {
+    "selectFiles": "Select Image Files",
+    "selectFolder": "Select Image Folder",
+    "supportedFormats": "Supports {{formats}} formats",
+    "autoFilter": "Automatically filter image files",
+    "uploadProgress": "Upload Progress: {{completed}}/{{total}}",
+    "fileCount": "{{count}} files",
+    "completed": "{{count}} completed",
+    "failed": "{{count}} failed",
+    "success": "Success",
+    "error": "Failed",
+    "maxFilesError": "Maximum {{maxFiles}} files can be uploaded",
+    "fileSizeError": "File {{fileName}} exceeds maximum size limit {{maxSize}}MB",
+    "noImagesInFolder": "No supported image files found in folder",
+    "foundImagesInFolder": "Found {{count}} images in folder",
+    "uploadComplete": {
+      "mixed": "Upload complete! {{normalCount}} newly uploaded, {{rapidCount}} rapid uploads",
+      "rapidOnly": "{{rapidCount}} images rapid uploaded successfully!",
+      "normalOnly": "Successfully uploaded {{count}} images"
+    },
+    "uploadErrors": "{{count}} files failed to upload"
   }
 }
