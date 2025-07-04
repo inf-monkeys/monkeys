@@ -3,6 +3,8 @@ import { BaseEntity } from '../base/base';
 
 @Entity({ name: 'evaluation_rating_history' })
 @Index(['evaluationModuleId', 'assetId', 'battleId'], { unique: true })
+@Index(['assetId', 'evaluationModuleId']) // 优化资产评分历史查询
+@Index(['evaluationModuleId', 'createdTimestamp']) // 优化按时间排序的评分记录查询
 export class EvaluationRatingHistoryEntity extends BaseEntity {
   @Column({ name: 'evaluation_module_id' })
   evaluationModuleId: string;

@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base/base';
 import { BattleGroupEntity } from './battle-group.entity';
 import { EvaluationModuleEntity } from './evaluation-module.entity';
@@ -11,6 +11,11 @@ export enum BattleResult {
 }
 
 @Entity({ name: 'evaluation_battles' })
+@Index(['evaluationModuleId']) // 为模块ID添加索引
+@Index(['evaluationModuleId', 'completedAt']) // 优化按完成时间排序的查询
+@Index(['assetAId', 'evaluationModuleId']) // 优化资产A的对战查询
+@Index(['assetBId', 'evaluationModuleId']) // 优化资产B的对战查询
+@Index(['evaluatorId', 'evaluationModuleId']) // 优化评测员的对战查询
 export class EvaluationBattleEntity extends BaseEntity {
   @Column({ name: 'evaluation_module_id' })
   evaluationModuleId: string;
