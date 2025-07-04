@@ -6,7 +6,7 @@ import { PaginationDto } from '@/common/dto/pagination.dto';
 import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-requests';
 import { logger } from '@/common/logger';
-import { extractImageUrls, extractVideoUrls, flattenKeys, getDataType } from '@/common/utils';
+import { extractImageUrls, extractVideoUrls, flattenKeys, flattenObjectToString, getDataType } from '@/common/utils';
 import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
@@ -214,7 +214,7 @@ export class WorkflowExecutionService {
         const batchQueryArr = query.filter((q) => !q.startsWith('workflowType IN'));
         batchQueryArr.push(`workflowType IN (${batch.join(',')})`);
         const batchQuery = batchQueryArr.join(' AND ');
-        logger.info(`Conductor batch search query: ${batchQuery}, freeText: ${freeText}, sort: ${sortText}`);
+        logger.debug(`Conductor batch search query: ${batchQuery}, freeText: ${freeText}, sort: ${sortText}`);
         const searchData = await retry(() => conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, batchQuery), { max: 3 });
         allResults = allResults.concat(searchData.results ?? []);
         totalHits += searchData.totalHits ?? 0;
@@ -222,7 +222,7 @@ export class WorkflowExecutionService {
     } else {
       // 原有逻辑
       const conductorQueryString = query.join(' AND ') || undefined;
-      logger.info(`Conductor search query: ${conductorQueryString}, freeText: ${freeText}, sort: ${sortText}`);
+      logger.debug(`Conductor search query: ${conductorQueryString}, freeText: ${freeText}, sort: ${sortText}`);
       const searchData = await retry(() => conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, conductorQueryString), { max: 3 });
       allResults = searchData.results ?? [];
       totalHits = searchData.totalHits ?? 0;
@@ -391,7 +391,7 @@ export class WorkflowExecutionService {
 
     // 从输入数据中提取 extraMetadata
     let extraMetadata = input?.extraMetadata;
-    if (typeof extraMetadata === 'string') {
+    if (typeof extraMetadata === 'string' && extraMetadata !== '') {
       try {
         extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
       } catch (e) {
@@ -472,19 +472,9 @@ export class WorkflowExecutionService {
         userId: entityUserId,
         createdTimestamp,
         updatedTimestamp,
-        extraMetadata: rawExtraMetadata,
+        extraMetadata,
+        searchableText,
       } = entity;
-
-      // 解码 extraMetadata
-      let extraMetadata = rawExtraMetadata;
-      if (typeof extraMetadata === 'string') {
-        try {
-          extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
-        } catch (e) {
-          // 如果解析失败，保持原始值
-          logger.warn('Failed to parse extraMetadata from base64', e);
-        }
-      }
 
       const workflowDef = workflowDefinitionMap[entityWorkflowId];
       const contextTeamId = input?.['__context']?.teamId || teamId;
@@ -579,6 +569,7 @@ export class WorkflowExecutionService {
         userId: entityUserId,
         teamId: contextTeamId,
         extraMetadata,
+        searchableText,
       } as WorkflowExecutionOutput;
     });
 
@@ -618,6 +609,11 @@ export class WorkflowExecutionService {
         .filter((it) => (!isShortcutFlow ? !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('shortcut') : true))
         .map((it) => {
           const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
+
+          const inputForSearch = input ? _.omit(input, ['__context']) : null;
+          const outputForSearch = output || null;
+
+          const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
 
           let alt: string | string[] | undefined;
           const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, dataVal) => {
@@ -706,7 +702,7 @@ export class WorkflowExecutionService {
 
           // 从输入数据中提取 extraMetadata
           let extraMetadata = input?.extraMetadata;
-          if (typeof extraMetadata === 'string') {
+          if (typeof extraMetadata === 'string' && extraMetadata !== '') {
             try {
               extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
             } catch (e) {
@@ -726,6 +722,7 @@ export class WorkflowExecutionService {
             userId: ctx?.userId ?? '',
             teamId: ctx?.teamId ?? '',
             extraMetadata,
+            searchableText,
           } as WorkflowExecutionOutput;
         }),
       page,
@@ -745,12 +742,12 @@ export class WorkflowExecutionService {
     let extraMetadata = (request.inputData?.extraMetadata as any) ?? {};
     logger.info('原始 extraMetadata:', extraMetadata, '类型:', typeof extraMetadata);
 
-    if (typeof extraMetadata === 'string') {
+    if (typeof extraMetadata === 'string' && extraMetadata !== '') {
       try {
         const decodedString = Buffer.from(extraMetadata, 'base64').toString('utf-8');
-        logger.info('Base64 解码后的字符串:', decodedString);
+        logger.debug('Base64 解码后的字符串:', decodedString);
         extraMetadata = JSON.parse(decodedString);
-        logger.info('JSON 解析后的 extraMetadata:', extraMetadata);
+        logger.debug('JSON 解析后的 extraMetadata:', extraMetadata);
       } catch (e) {
         logger.warn('Failed to parse extraMetadata from base64, using it as a plain object.', e);
       }
