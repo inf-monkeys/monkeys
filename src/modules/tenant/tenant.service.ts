@@ -207,6 +207,7 @@ export class TenantService {
     const data: Execution[] = rawData.map((execution) => {
       const workflowDef = workflowDefMap.get(execution.workflowId);
       return {
+        status: execution.status,
         workflowId: execution.workflowId,
         workflowInstanceId: execution.workflowInstanceId,
         input: this.formatInput(execution.input, workflowDef),
@@ -379,6 +380,7 @@ export class TenantService {
     const data: Execution[] = rawData.map((execution) => {
       const workflowDef = workflowDefMap.get(execution.workflowId);
       return {
+        status: execution.status,
         workflowId: execution.workflowId,
         workflowInstanceId: execution.workflowInstanceId,
         input: this.formatInput(execution.input, workflowDef),
