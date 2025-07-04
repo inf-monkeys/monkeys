@@ -11,8 +11,7 @@ import { JoinEvaluationDto } from './dto/req/join-evaluation.dto';
 import { EvaluationService } from './evaluation.service';
 import { AutoEvaluationService } from './services/auto-evaluation.service';
 import { OpenSkillService } from './services/openskill.service';
-import { TaskProcessorService } from './services/task-processor.service';
-import { TaskQueueService } from './services/task-queue.service';
+import { PgTaskQueueService } from './services/pg-task-queue.service';
 import { TaskType } from './types/task.types';
 
 @Controller('evaluation')
@@ -22,8 +21,7 @@ export class EvaluationController {
   constructor(
     private readonly evaluationService: EvaluationService,
     private readonly openskillService: OpenSkillService,
-    private readonly taskProcessorService: TaskProcessorService,
-    private readonly taskQueueService: TaskQueueService,
+    private readonly pgTaskQueueService: PgTaskQueueService,
     private readonly autoEvaluationService: AutoEvaluationService,
     private readonly mediaFileService: MediaFileService,
   ) {}
@@ -114,16 +112,21 @@ export class EvaluationController {
       throw new ForbiddenException('Access denied');
     }
 
-    // 验证所有资产权限
-    for (const assetId of joinDto.assetIds) {
-      const asset = await this.mediaFileService.getMediaByIdAndTeamId(assetId, teamId);
-      if (!asset) {
-        throw new ForbiddenException(`Asset ${assetId} not accessible`);
-      }
+    // 并行验证所有资产权限
+    const assetValidations = await Promise.all(joinDto.assetIds.map((assetId) => this.mediaFileService.getMediaByIdAndTeamId(assetId, teamId)));
+
+    // 检查是否有无效资产
+    const invalidAssets = assetValidations
+      .map((asset, index) => ({ asset, assetId: joinDto.assetIds[index] }))
+      .filter(({ asset }) => !asset)
+      .map(({ assetId }) => assetId);
+
+    if (invalidAssets.length > 0) {
+      throw new ForbiddenException(`Assets not accessible: ${invalidAssets.join(', ')}`);
     }
 
     // 将任务添加到后台队列
-    await this.taskQueueService.createTask({
+    await this.pgTaskQueueService.createTask({
       type: TaskType.ADD_ASSETS_TO_MODULE,
       moduleId,
       teamId,
@@ -181,22 +184,17 @@ export class EvaluationController {
       throw new ForbiddenException('Access denied');
     }
 
-    // 1. 获取已在排行榜中的资产ID
-    const assetsInModule = await this.openskillService.getAssetsInModule(teamId, moduleId);
+    // 并行执行获取已在排行榜中的资产和媒体文件列表
+    const [assetsInModule, mediaResult] = await Promise.all([this.openskillService.getAssetsInModule(teamId, moduleId), this.mediaFileService.listRichMedias(teamId, { page: +page, limit: +limit })]);
 
-    // 2. 直接调用优化后的服务，将过滤和分页下推到数据库
-    const { list, totalCount } = await this.mediaFileService.listRichMedias(
-      teamId,
-      {
-        page: +page,
-        limit: +limit,
-      },
-      assetsInModule, // 传入需要排除的 ID 列表
-    );
+    // 在内存中过滤，避免数据库二次查询
+    const excludeSet = new Set(assetsInModule);
+    const filteredList = mediaResult.list.filter((media) => !excludeSet.has(media.id));
+    const filteredTotal = Math.max(0, mediaResult.totalCount - assetsInModule.length); // 粗略估计
 
     return new SuccessListResponse({
-      data: list,
-      total: totalCount,
+      data: filteredList,
+      total: filteredTotal,
       page: +page,
       limit: +limit,
     });
@@ -421,6 +419,96 @@ export class EvaluationController {
     return new SuccessResponse({ data: history });
   }
 
+  @Get('/modules/:moduleId/export/html')
+  @ApiOperation({
+    summary: '导出排行榜HTML',
+    description: '导出指定评分区间的排行榜HTML文件，仅在评测稳定后可用',
+  })
+  public async exportLeaderboardHtml(
+    @Req() req: IRequest,
+    @Param('moduleId') moduleId: string,
+    @Query('minRating') minRating?: string,
+    @Query('maxRating') maxRating?: string,
+    @Query('limit') limit?: string,
+    @Query('minBattles') minBattles?: string,
+  ) {
+    const { teamId } = req;
+
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    // 检查评测是否已稳定（双重检查确保稳定性）
+    const isTaskComplete = this.autoEvaluationService.isEvaluationComplete(moduleId);
+    const status = await this.openskillService.getEvaluationStatus(teamId, moduleId);
+
+    if (!isTaskComplete || !status.isComplete) {
+      throw new ForbiddenException('Export is only available after evaluation is complete and stable');
+    }
+
+    // 解析参数
+    const exportOptions = {
+      minRating: minRating ? parseFloat(minRating) : undefined,
+      maxRating: maxRating ? parseFloat(maxRating) : undefined,
+      limit: limit ? Math.min(parseInt(limit), 5000) : 1000, // 最大5000条保护性能
+      minBattles: minBattles ? parseInt(minBattles) : 0,
+    };
+
+    // 生成HTML
+    const html = await this.evaluationService.generateLeaderboardHtml(teamId, moduleId, module, exportOptions);
+
+    // 设置下载响应头
+    const timestamp = new Date().toISOString().split('T')[0];
+    const ratingRange = exportOptions.minRating || exportOptions.maxRating ? `_${exportOptions.minRating || 'min'}-${exportOptions.maxRating || 'max'}` : '';
+    const filename = `leaderboard-${moduleId}${ratingRange}_${timestamp}.html`;
+
+    req.res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    req.res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    req.res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // 不缓存，确保数据实时性
+
+    return html;
+  }
+
+  @Get('/modules/:moduleId/export/csv')
+  @ApiOperation({
+    summary: '导出完整排行榜CSV',
+    description: '导出包含所有参与资产的完整排行榜数据（CSV格式），仅在评测稳定后可用',
+  })
+  public async exportLeaderboardCsv(@Req() req: IRequest, @Param('moduleId') moduleId: string, @Query('includeImageUrls') includeImageUrls?: string) {
+    const { teamId } = req;
+
+    // 验证模块权限
+    const module = await this.evaluationService.getEvaluationModule(moduleId);
+    if (!module || module.teamId !== teamId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    // 检查评测是否已稳定（双重检查确保稳定性）
+    const isTaskComplete = this.autoEvaluationService.isEvaluationComplete(moduleId);
+    const status = await this.openskillService.getEvaluationStatus(teamId, moduleId);
+
+    if (!isTaskComplete || !status.isComplete) {
+      throw new ForbiddenException('Export is only available after evaluation is complete and stable');
+    }
+
+    const includeImages = includeImageUrls === 'true';
+
+    // 生成CSV
+    const csv = await this.evaluationService.generateLeaderboardCsv(teamId, moduleId, module, { includeImageUrls: includeImages });
+
+    // 设置下载响应头
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `leaderboard-complete-${moduleId}_${timestamp}.csv`;
+
+    req.res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    req.res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    req.res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); // 不缓存，确保数据实时性
+
+    return csv;
+  }
+
   // ============ 系统管理 ============
 
   @Get('/queue/status')
@@ -428,8 +516,9 @@ export class EvaluationController {
     summary: '获取任务队列状态',
     description: '获取当前任务队列的状态信息',
   })
-  public async getQueueStatus() {
-    const status = await this.taskProcessorService.getProcessorStatus();
+  public async getQueueStatus(@Req() req: IRequest) {
+    const { teamId } = req;
+    const status = await this.pgTaskQueueService.getTeamQueueStats(teamId);
     return new SuccessResponse({ data: status });
   }
 }
