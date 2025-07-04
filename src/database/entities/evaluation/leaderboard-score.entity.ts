@@ -4,6 +4,8 @@ import { EvaluationModuleEntity } from './evaluation-module.entity';
 
 @Entity({ name: 'leaderboard_scores' })
 @Index(['evaluationModuleId', 'assetId'], { unique: true })
+@Index(['evaluationModuleId', 'totalBattles']) // 优化按对战数量排序
+@Index(['evaluationModuleId', 'wins']) // 优化按胜利数排序
 export class LeaderboardScoreEntity extends BaseEntity {
   @Column({ name: 'evaluation_module_id' })
   evaluationModuleId: string;

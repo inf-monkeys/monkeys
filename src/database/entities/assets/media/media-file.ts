@@ -1,5 +1,5 @@
 import { AssetType } from '@inf-monkeys/monkeys';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { BaseAssetEntity } from '../base-asset';
 
 export enum MediaSource {
@@ -17,6 +17,9 @@ export type MediaImageParams = {
 } & Record<string, unknown>;
 
 @Entity({ name: 'media_files' })
+@Index(['teamId']) // 为teamId添加索引，优化按团队查询媒体文件
+@Index(['teamId', 'createdTimestamp']) // 优化分页查询时的排序
+@Index(['teamId', 'type']) // 优化按媒体类型过滤
 export class MediaFileEntity extends BaseAssetEntity {
   assetType: AssetType = 'media-file';
 
