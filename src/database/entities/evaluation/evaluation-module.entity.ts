@@ -1,11 +1,13 @@
 import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AssetType } from '@inf-monkeys/monkeys';
-import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { EvaluationBattleEntity } from './evaluation-battle.entity';
 import { LeaderboardEntity } from './leaderboard.entity';
 import { ModuleEvaluatorEntity } from './module-evaluator.entity';
 
 @Entity('evaluation_modules')
+@Index(['teamId']) // 为team_id添加索引，优化按团队查询
+@Index(['teamId', 'isActive']) // 复合索引，优化活跃模块查询
 export class EvaluationModuleEntity extends BaseAssetEntity {
   assetType: AssetType = 'leaderboard';
 
