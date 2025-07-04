@@ -42,6 +42,7 @@ import { BattleGroupEntity } from './entities/evaluation/battle-group.entity';
 import { EvaluationBattleEntity } from './entities/evaluation/evaluation-battle.entity';
 import { EvaluationModuleEntity } from './entities/evaluation/evaluation-module.entity';
 import { EvaluationRatingHistoryEntity } from './entities/evaluation/evaluation-rating-history.entity';
+import { EvaluationTaskEntity } from './entities/evaluation/evaluation-task.entity';
 import { EvaluatorEntity } from './entities/evaluation/evaluator.entity';
 import { LeaderboardScoreEntity } from './entities/evaluation/leaderboard-score.entity';
 import { LeaderboardEntity } from './entities/evaluation/leaderboard.entity';
@@ -110,6 +111,7 @@ export const entities: EntityClassOrSchema[] = [
   EvaluationBattleEntity,
   BattleGroupEntity,
   EvaluationRatingHistoryEntity,
+  EvaluationTaskEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

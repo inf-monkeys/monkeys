@@ -8,23 +8,18 @@ export interface CacheManager {
   get(key: string): Promise<string | null>;
   mget(keys: string[]): Promise<(string | null)[]>;
   set(key: string, value: string | Buffer | number, secondsToken?: 'EX', seconds?: number | string): Promise<'OK'>;
-  lpush(key: string, value: string | Buffer | number): Promise<number>;
   sadd(key: string, member: string): Promise<number>;
   smembers(key: string): Promise<string[]>;
   sismember(key: string, member: string): Promise<number>;
+  scard(key: string): Promise<number>;
   del(...keys: string[]): Promise<number>;
-  brpop(key: string, timeout: number): Promise<[string, string] | null>;
-  lrem(key: string, count: number, value: string): Promise<number>;
   setex(key: string, seconds: number, value: string): Promise<'OK'>;
   expire(key: string, seconds: number): Promise<number>;
   keys(pattern: string): Promise<string[]>;
-  llen(key: string): Promise<number>;
   zcard?(key: string): Promise<number>;
   zrange(key: string, start: number, stop: number, options?: string): Promise<string[]>;
   zrevrange(key: string, start: number, stop: number, options?: string): Promise<string[]>;
   zadd(key: string, score: number, member: string): Promise<number>;
-  ltrim(key: string, start: number, stop: number): Promise<'OK'>;
-  lrange(key: string, start: number, stop: number): Promise<string[]>;
   hincrby(key: string, field: string, increment: number): Promise<number>;
   hgetall(key: string): Promise<Record<string, string>>;
   hmset(key: string, object: Record<string, string>): Promise<'OK'>;
@@ -52,14 +47,6 @@ export class InMemoryCache implements CacheManager {
   public async set(key: string, value: string | number | Buffer): Promise<'OK'> {
     this.storage[key] = value;
     return new Promise((resolve) => resolve('OK'));
-  }
-
-  public async lpush(key: string, value: string | Buffer | number): Promise<number> {
-    if (!this.storage[key]) {
-      this.storage[key] = [];
-    }
-    this.storage[key].push(value);
-    return new Promise((resolve) => resolve(this.storage[key].length));
   }
 
   public async sadd(key: string, member: string): Promise<number> {
@@ -90,6 +77,13 @@ export class InMemoryCache implements CacheManager {
     return this.storage[key].has(member) ? 1 : 0;
   }
 
+  public async scard(key: string): Promise<number> {
+    if (!this.storage[key] || !(this.storage[key] instanceof Set)) {
+      return 0;
+    }
+    return this.storage[key].size;
+  }
+
   public async del(...keys: string[]): Promise<number> {
     let deletedCount = 0;
     for (const key of keys) {
@@ -99,21 +93,6 @@ export class InMemoryCache implements CacheManager {
       }
     }
     return deletedCount;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async brpop(_key: string, _timeout: number): Promise<[string, string] | null> {
-    logger.warn('BRPOP is not supported for InMemoryCache, returning null.');
-    return null;
-  }
-
-  public async lrem(key: string, count: number, value: string): Promise<number> {
-    if (!this.storage[key] || !Array.isArray(this.storage[key])) {
-      return 0;
-    }
-    const originalLength = this.storage[key].length;
-    this.storage[key] = this.storage[key].filter((item: string) => item !== value);
-    return originalLength - this.storage[key].length;
   }
 
   public async setex(key: string, seconds: number, value: string): Promise<'OK'> {
@@ -129,13 +108,6 @@ export class InMemoryCache implements CacheManager {
   public async keys(pattern: string): Promise<string[]> {
     const regex = new RegExp(pattern.replace('*', '.*'));
     return Object.keys(this.storage).filter((key) => regex.test(key));
-  }
-
-  public async llen(key: string): Promise<number> {
-    if (!this.storage[key] || !Array.isArray(this.storage[key])) {
-      return 0;
-    }
-    return this.storage[key].length;
   }
 
   public async zcard(key: string): Promise<number> {
@@ -193,20 +165,6 @@ export class InMemoryCache implements CacheManager {
     const wasNew = !this.storage[key].has(member);
     this.storage[key].set(member, score);
     return wasNew ? 1 : 0;
-  }
-
-  public async ltrim(key: string, start: number, stop: number): Promise<'OK'> {
-    if (this.storage[key] && Array.isArray(this.storage[key])) {
-      this.storage[key] = this.storage[key].slice(start, stop + 1);
-    }
-    return 'OK';
-  }
-
-  public async lrange(key: string, start: number, stop: number): Promise<string[]> {
-    if (!this.storage[key] || !Array.isArray(this.storage[key])) {
-      return [];
-    }
-    return this.storage[key].slice(start, stop === -1 ? undefined : stop + 1);
   }
 
   public async hincrby(key: string, field: string, increment: number): Promise<number> {
@@ -304,10 +262,6 @@ export class RedisCache implements CacheManager {
     return await this.redis.set(key, value, secondsToken, seconds);
   }
 
-  public async lpush(key: string, value: string | Buffer | number) {
-    return await this.redis.lpush(key, value);
-  }
-
   public async sadd(key: string, member: string): Promise<number> {
     return await this.redis.sadd(key, member);
   }
@@ -320,16 +274,12 @@ export class RedisCache implements CacheManager {
     return await this.redis.sismember(key, member);
   }
 
+  public async scard(key: string): Promise<number> {
+    return await this.redis.scard(key);
+  }
+
   public async del(...keys: string[]) {
     return await this.redis.del(...keys);
-  }
-
-  public async brpop(key: string, timeout: number): Promise<[string, string] | null> {
-    return await this.redis.brpop(key, timeout);
-  }
-
-  public async lrem(key: string, count: number, value: string): Promise<number> {
-    return await this.redis.lrem(key, count, value);
   }
 
   public async setex(key: string, seconds: number, value: string): Promise<'OK'> {
@@ -342,10 +292,6 @@ export class RedisCache implements CacheManager {
 
   public async keys(pattern: string): Promise<string[]> {
     return await this.redis.keys(pattern);
-  }
-
-  public async llen(key: string): Promise<number> {
-    return await this.redis.llen(key);
   }
 
   public async zcard(key: string): Promise<number> {
@@ -368,14 +314,6 @@ export class RedisCache implements CacheManager {
 
   public async zadd(key: string, score: number, member: string): Promise<number> {
     return await this.redis.zadd(key, score, member);
-  }
-
-  public async ltrim(key: string, start: number, stop: number): Promise<'OK'> {
-    return await this.redis.ltrim(key, start, stop);
-  }
-
-  public async lrange(key: string, start: number, stop: number): Promise<string[]> {
-    return await this.redis.lrange(key, start, stop);
   }
 
   public async hincrby(key: string, field: string, increment: number): Promise<number> {
