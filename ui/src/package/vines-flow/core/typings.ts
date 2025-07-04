@@ -87,4 +87,12 @@ export type VinesWorkflowExecutionOutputListItem = {
   taskId: string;
   userId: string;
   teamId: string;
+  render?: any;
+};
+
+export type VinesWorkflowExecutionOutputListItemForIframe = Omit<
+  VinesWorkflowExecutionOutputListItem,
+  'instanceId' | 'render' | 'startTime' | 'endTime' | 'teamId' | 'updateTime' | 'userId'
+> & {
+  workflowInstanceId: string;
 };

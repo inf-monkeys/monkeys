@@ -238,4 +238,5 @@ export type WorkflowExecutionOutput = Pick<Workflow, 'status' | 'startTime' | 'c
   instanceId: string;
   userId: string;
   teamId: string;
+  searchableText?: string;
 };
