@@ -50,6 +50,9 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const workflowId = storeWorkflowId && visible ? storeWorkflowId : null;
 
   const [executionResultList, setExecutionResultList] = useState<IVinesExecutionResultItem[]>([]);
+  const [updateExecutionResultList, setUpdateExecutionResultList] = useState<VinesWorkflowExecutionOutputListItem[]>(
+    [],
+  );
 
   const {
     data: executionListData,
@@ -63,15 +66,15 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const firstPageExecutionList = firstPageExecutionListData?.data ?? [];
   const hasMore =
     executionListData?.length != 0 &&
-    executionListData?.[currentPage - 1]?.total != 0 &&
+    firstPageExecutionListData?.total != 0 &&
     executionListData?.[currentPage - 1]?.data.length == LOAD_LIMIT;
 
-  const totalCount = executionListData?.[0]?.total ?? 0;
+  const totalCount = firstPageExecutionListData?.total ?? 0;
 
   // 统一的数据更新和转换逻辑
   useEffect(() => {
     // 如果无限滚动数据为空，直接返回
-    if (!executionListData || executionListData.length === 0 || executionListData[0]?.total === 0) {
+    if (!executionListData || executionListData.length === 0 || firstPageExecutionListData?.total === 0) {
       setExecutionResultList([]);
       return;
     }
@@ -82,6 +85,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       if (execution && execution.data) {
         allExistingItems.push(...execution.data);
       }
+      allExistingItems.unshift(...updateExecutionResultList);
     }
 
     // 如果有第一页数据，进行原始数据层面的更新
@@ -92,10 +96,14 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
       // 处理第一页最新数据
       const newItems: VinesWorkflowExecutionOutputListItem[] = [];
+      const updateItems: VinesWorkflowExecutionOutputListItem[] = [];
       for (const item of firstPageExecutionList) {
         if (existingMap.has(item.instanceId)) {
-          // 整体替换已存在的项目（状态、时间等可能都更新了）
-          existingMap.set(item.instanceId, item);
+          if (item.status !== existingMap.get(item.instanceId)?.status) {
+            // 当项目存在且状态变化时，整体替换已存在的项目（状态、时间等可能都更新了）
+            existingMap.set(item.instanceId, item);
+            updateItems.push(item);
+          }
         } else {
           // 收集新增项目
           newItems.push(item);
@@ -104,6 +112,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
       // 合并：新增项目在前 + 更新后的现有项目
       finalRawData = [...newItems, ...Array.from(existingMap.values())];
+      setUpdateExecutionResultList([...updateItems, ...newItems]);
     }
 
     // 统一转换为渲染数据
@@ -130,7 +139,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   }, [executionResultList, setImages, setThumbImages]);
 
   useVinesIframeMessage({
-    outputs: executionResultList,
+    outputs: updateExecutionResultList,
     mutate: mutateExecutionList,
     enable: enablePostMessage,
   });

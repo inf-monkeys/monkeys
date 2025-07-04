@@ -37,7 +37,7 @@ export class ToolsRegistryCronService {
               manifestUrl: registry.manifestUrl,
             });
           } catch (error) {
-            logger.info(`Refresh tools ${registry.namespace} failed`, error.message);
+            logger.warn(`Refresh tools ${registry.namespace} failed`, error.message);
           }
         }
 
