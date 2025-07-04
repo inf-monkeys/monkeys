@@ -30,12 +30,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { EnhancedUploader } from '@/components/ui/enhanced-uploader';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { VinesUploader } from '@/components/ui/vines-uploader';
 
 export const BattlesView: React.FC = () => {
   const { t } = useTranslation();
@@ -46,10 +46,10 @@ export const BattlesView: React.FC = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [battlesDialogOpen, setBattlesDialogOpen] = useState(false);
-  const [evaluationStatus, setEvaluationStatus] = useState<EvaluationStatus | null>(null);
-  const [recentBattles, setRecentBattles] = useState<RecentBattle[]>([]);
-  const [isStatusLoading, setIsStatusLoading] = useState(false);
-  const [isBattlesLoading, setIsBattlesLoading] = useState(false);
+  const [evaluationStatus] = useState<EvaluationStatus | null>(null);
+  const [recentBattles] = useState<RecentBattle[]>([]);
+  const [isStatusLoading] = useState(false);
+  const [isBattlesLoading] = useState(false);
 
   // 加入评测表单数据
   const [joinForm, setJoinForm] = useState({
@@ -62,6 +62,9 @@ export const BattlesView: React.FC = () => {
 
   // OpenSkill evaluation state
   const [isJoining, setIsJoining] = useState(false);
+
+  // 自动加入排行榜选项
+  const [autoJoinToLeaderboard, setAutoJoinToLeaderboard] = useState(true);
 
   // 获取模块详情
   useSWR(moduleId ? ['evaluation-module', moduleId] : null, () => getModuleDetails(moduleId!));
@@ -127,6 +130,31 @@ export const BattlesView: React.FC = () => {
       toast.error(t('ugc-page.evaluation.battles.joinDialog.error'));
     } finally {
       setIsJoining(false);
+    }
+  };
+
+  // 自动加入排行榜
+  const handleAutoJoinToLeaderboard = async (uploadedAssetIds: string[]) => {
+    if (!moduleId || uploadedAssetIds.length === 0) {
+      return;
+    }
+
+    try {
+      const joinDto: JoinEvaluationDto = {
+        assetIds: uploadedAssetIds,
+      };
+
+      await joinEvaluation(moduleId, joinDto);
+
+      toast.success(t('ugc-page.evaluation.battles.uploadDialog.autoJoinSuccess'));
+
+      // 刷新数据
+      mutateAvailableAssets();
+      mutateAssetsInModule();
+      mutateEvaluationStatus();
+    } catch (error) {
+      console.error('Auto join evaluation failed:', error);
+      toast.error(t('ugc-page.evaluation.battles.uploadDialog.autoJoinError'));
     }
   };
 
@@ -326,10 +354,10 @@ export const BattlesView: React.FC = () => {
                     onClick={() => setLeaderboardPage((prev) => Math.max(prev - 1, 1))}
                     disabled={leaderboardPage === 1}
                   >
-                    {t('ugc-page.evaluation.leaderboard.pagination.previous')}
+                    {t('ugc-page.evaluation.battles.pagination.previous')}
                   </Button>
                   <span className="text-sm">
-                    {t('ugc-page.evaluation.leaderboard.pagination.page', {
+                    {t('ugc-page.evaluation.battles.pagination.page', {
                       page: leaderboardPage,
                       totalPages: Math.ceil(assetsInModuleCount / leaderboardPageSize),
                     })}
@@ -340,7 +368,7 @@ export const BattlesView: React.FC = () => {
                     onClick={() => setLeaderboardPage((prev) => prev + 1)}
                     disabled={leaderboardPage * leaderboardPageSize >= assetsInModuleCount}
                   >
-                    {t('ugc-page.evaluation.leaderboard.pagination.next')}
+                    {t('ugc-page.evaluation.battles.pagination.next')}
                   </Button>
                 </div>
               </>
@@ -467,18 +495,52 @@ export const BattlesView: React.FC = () => {
 
         {/* 上传图片对话框 */}
         <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-          <DialogContent className="w-[40rem] max-w-[40rem]">
+          <DialogContent className="w-[50rem] max-w-[50rem]">
             <DialogHeader>
               <DialogTitle>{t('ugc-page.evaluation.battles.uploadDialog.title')}</DialogTitle>
               <DialogDescription>{t('ugc-page.evaluation.battles.uploadDialog.description')}</DialogDescription>
             </DialogHeader>
-            <VinesUploader
+
+            {/* 自动加入排行榜选项 */}
+            <div className="flex items-center space-x-2 rounded-lg border bg-blue-50 p-4">
+              <Checkbox
+                id="auto-join-leaderboard"
+                checked={autoJoinToLeaderboard}
+                onCheckedChange={(checked) => setAutoJoinToLeaderboard(checked === true)}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <Label
+                  htmlFor="auto-join-leaderboard"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {t('ugc-page.evaluation.battles.uploadDialog.autoJoin.label')}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {t('ugc-page.evaluation.battles.uploadDialog.autoJoin.description')}
+                </p>
+              </div>
+            </div>
+
+            <EnhancedUploader
               maxSize={30}
-              accept={['png', 'jpeg', 'jpg']}
-              onChange={() => {
-                mutateAvailableAssets();
-                setUploadDialogOpen(false);
-                toast.success(t('ugc-page.evaluation.battles.uploadDialog.success'));
+              maxFiles={1000}
+              accept={['png', 'jpeg', 'jpg', 'webp']}
+              onChange={(urls) => {
+                if (urls.length > 0) {
+                  mutateAvailableAssets();
+                  setUploadDialogOpen(false);
+                  toast.success(t('ugc-page.evaluation.battles.uploadDialog.uploadSuccess', { count: urls.length }));
+                }
+              }}
+              onAssetsCreated={(assetIds) => {
+                if (autoJoinToLeaderboard && assetIds.length > 0) {
+                  handleAutoJoinToLeaderboard(assetIds);
+                }
+              }}
+              onProgress={(progress, completed, total) => {
+                if (total > 0) {
+                  // 可以在这里显示进度或做其他处理
+                }
               }}
               basePath="user-files/media"
             />
