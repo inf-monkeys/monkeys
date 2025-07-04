@@ -15,7 +15,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { isObject } from 'lodash';
 import { DataSource } from 'typeorm';
 import { BattleStrategyService } from './battle-strategy.service';
-import { TaskQueueService } from './services/task-queue.service';
+import { PgTaskQueueService } from './services/pg-task-queue.service';
+import { OpenSkillService } from './services/openskill.service';
 import { TaskType } from './types/task.types';
 
 // 定义一个不会与数据库ID冲突的特殊字符串作为虚拟评测员的ID
@@ -35,20 +36,20 @@ export const ERROR_MESSAGES = {
   NO_LLM_EVALUATORS: 'No active LLM evaluators found for this module',
 } as const;
 
-export const BASE_EVALUATION_TEMPLATE = `Compare these two images and determine which one is better based on the specific criteria provided.
+export const BASE_EVALUATION_TEMPLATE = `Compare these two images and determine which one is better based SOLELY on the following criteria:
 
-Evaluation Focus: {EVALUATION_FOCUS}
+EVALUATION CRITERIA: {EVALUATION_FOCUS}
 
-Consider:
-- Technical quality (clarity, lighting, colors)
-- Composition and aesthetics  
-- Visual appeal
-- The specific evaluation focus mentioned above
+You must judge the images ONLY based on this specific criteria. Ignore all other factors such as technical quality, composition, aesthetics, or visual appeal unless they are explicitly part of the evaluation criteria.
+
+Focus exclusively on: {EVALUATION_FOCUS}
 
 Rules:
 1. Output ONLY a JSON object
 2. Use "A" for first image, "B" for second image, "draw" for equal quality
-3. No explanations or additional text
+3. Judge ONLY based on: {EVALUATION_FOCUS}
+4. Ignore all other image qualities
+5. No explanations or additional text
 
 Format: {"winner": "A"}`;
 
@@ -80,11 +81,12 @@ export class EvaluationService {
     private readonly llmService: LlmService,
     private readonly mediaFileService: MediaFileService,
     private readonly battleStrategyService: BattleStrategyService,
-    private readonly taskQueueService: TaskQueueService,
+    private readonly pgTaskQueueService: PgTaskQueueService,
+    private readonly openskillService: OpenSkillService,
   ) {}
 
   private buildEvaluationPrompt(evaluationFocus: string): string {
-    return BASE_EVALUATION_TEMPLATE.replace('{EVALUATION_FOCUS}', evaluationFocus.trim());
+    return BASE_EVALUATION_TEMPLATE.replace(/{EVALUATION_FOCUS}/g, evaluationFocus.trim());
   }
 
   /**
@@ -353,14 +355,12 @@ export class EvaluationService {
   }
 
   public async autoEvaluateBattleGroup(battleGroupId: string, teamId: string, userId: string): Promise<any> {
-    this.logger.debug(`Creating evaluation task for battle group: ${battleGroupId}`);
-
     const battleGroup = await this.evaluationRepository.findBattleGroupById(battleGroupId);
     if (!battleGroup) throw new Error(ERROR_MESSAGES.BATTLE_GROUP_NOT_FOUND);
 
     const pendingBattles = await this.evaluationRepository.findBattlesByGroupId(battleGroupId, 'PENDING');
 
-    const task = await this.taskQueueService.createTask({
+    const task = await this.pgTaskQueueService.createTask({
       type: TaskType.EVALUATE_BATTLE_GROUP,
       moduleId: battleGroup.evaluationModuleId,
       teamId,
@@ -384,10 +384,8 @@ export class EvaluationService {
   }
 
   private async processSingleBattle(battleId: string): Promise<{ success: boolean; result?: BattleResult; error?: string }> {
-    this.logger.debug(`Processing single battle: ${battleId}`);
     try {
       const result = await this.autoEvaluateBattle(battleId);
-      this.logger.debug(`Successfully processed battle ${battleId}, result: ${result.result}`);
       return result;
     } catch (error) {
       this.logger.error(`Error processing battle ${battleId}: ${error.message}`, error.stack);
@@ -415,6 +413,12 @@ export class EvaluationService {
     if (!module) throw new Error(ERROR_MESSAGES.EVALUATION_MODULE_NOT_FOUND);
 
     return this.dataSource.transaction(async (manager) => {
+      // Delete dependent records first to avoid foreign key constraint violations
+      await manager.delete(EvaluationBattleEntity, { evaluationModuleId });
+      await manager.delete(ModuleEvaluatorEntity, { evaluationModuleId });
+      await manager.delete(LeaderboardScoreEntity, { evaluationModuleId });
+
+      // Delete the module and its leaderboard
       await manager.delete(EvaluationModuleEntity, { id: evaluationModuleId });
       await manager.delete(LeaderboardEntity, { id: module.leaderboardId });
     });
@@ -426,14 +430,12 @@ export class EvaluationService {
 
   public async submitBattleResult(battleId: string, result: BattleResult, evaluatorId: string, reason?: string): Promise<void> {
     evaluatorId = await this.getOrCreateDefaultLlmEvaluator(battleId, evaluatorId);
-    this.logger.debug(`Submitting battle result for battle: ${battleId}, result: ${result}, evaluator: ${evaluatorId}`);
 
     return this.dataSource.transaction(async (manager) => {
       const battle = await this.evaluationRepository.findBattleById(battleId, manager);
       if (!battle) {
         throw new Error(ERROR_MESSAGES.BATTLE_NOT_FOUND);
       }
-      this.logger.debug(`Found battle ${battleId} for result submission.`);
 
       // 只更新对战结果，不进行评分计算
       battle.result = result;
@@ -450,7 +452,6 @@ export class EvaluationService {
       }
 
       await manager.save(EvaluationBattleEntity, battle);
-      this.logger.debug(`Successfully saved battle result for battle ${battleId}. Now updating leaderboard stats.`);
 
       // 更新统计数据
       const { assetAId, assetBId, evaluationModuleId } = battle;
@@ -489,16 +490,13 @@ export class EvaluationService {
       }
 
       await manager.save([scoreA, scoreB]);
-      this.logger.debug(`Successfully updated stats for assets ${assetAId} and ${assetBId}.`);
     });
   }
 
   public async autoEvaluateBattle(battleId: string): Promise<{ success: boolean; result?: BattleResult; error?: string }> {
-    this.logger.debug(`Starting auto-evaluation for battle: ${battleId}`);
     try {
       const battle = await this.evaluationRepository.findBattleById(battleId);
       if (!battle) throw new Error(ERROR_MESSAGES.BATTLE_NOT_FOUND);
-      this.logger.debug(`Found battle ${battleId}, assets: ${battle.assetAId} vs ${battle.assetBId}`);
 
       const module = await this.evaluationRepository.findEvaluationModuleById(battle.evaluationModuleId);
       if (!module) throw new Error(ERROR_MESSAGES.EVALUATION_MODULE_NOT_FOUND);
@@ -506,7 +504,6 @@ export class EvaluationService {
       let llmEvaluators = await this.evaluationRepository.getActiveEvaluatorsByModule(battle.evaluationModuleId, EvaluatorType.LLM);
 
       if (llmEvaluators.length === 0) {
-        this.logger.debug(`[Battle ${battleId}] No LLM evaluators found, creating default one.`);
         const newEvaluatorId = await this.getOrCreateDefaultLlmEvaluator(module.id, VIRTUAL_LLM_EVALUATOR_ID);
         const newEvaluator = await this.getEvaluator(newEvaluatorId);
         if (!newEvaluator) {
@@ -516,14 +513,12 @@ export class EvaluationService {
       }
 
       const evaluator = llmEvaluators[0];
-      this.logger.debug(`[Battle ${battleId}] Using evaluator ${evaluator.id} with model ${evaluator.llmModelName}`);
 
       const { mediaA, mediaB } = await this.validateBattleAssets(battle.assetAId, battle.assetBId, module.teamId);
 
       // 为两张图片生成公网可访问的 URL
       const publicUrlA = await this.mediaFileService.getPublicUrl(mediaA);
       const publicUrlB = await this.mediaFileService.getPublicUrl(mediaB);
-      this.logger.debug(`[Battle ${battleId}] Generated public URLs. Asset A: ${publicUrlA}, Asset B: ${publicUrlB}`);
 
       const evaluationFocus = module.evaluationCriteria || evaluator.evaluationFocus || DEFAULT_EVALUATION_FOCUS;
       const fullPrompt = this.buildEvaluationPrompt(evaluationFocus);
@@ -540,7 +535,6 @@ export class EvaluationService {
         },
       ];
 
-      this.logger.debug(`Calling LLM for battle ${battleId} with model ${evaluator.llmModelName}`);
       const response = await this.llmService.createChatCompelitions(
         null,
         module.teamId,
@@ -555,13 +549,10 @@ export class EvaluationService {
       );
 
       const llmRawResponse = (response as any).message;
-      this.logger.debug(`[Battle ${battleId}] Received raw response from LLM: ${llmRawResponse}`);
 
       const llmResult = this.parseLlmEvaluationResult(llmRawResponse);
-      this.logger.debug(`[Battle ${battleId}] Parsed LLM result: ${JSON.stringify(llmResult)}`);
 
       await this.submitBattleResult(battleId, llmResult.result, evaluator.id);
-      this.logger.debug(`Submitted battle result for ${battleId} after LLM evaluation.`);
 
       return {
         success: true,
@@ -616,18 +607,21 @@ export class EvaluationService {
       search?: string;
     } = {},
   ) {
+    const startTime = Date.now();
     const { page = 1, limit = 20, evaluatorId, sortBy = 'rating', sortOrder = 'DESC', minBattles = 0, search } = options;
+    this.logger.log(`Starting getEloLeaderboard for module ${moduleId}, page ${page}, limit ${limit}`);
 
     const module = await this.getEvaluationModule(moduleId);
     if (!module) {
       throw new Error(ERROR_MESSAGES.EVALUATION_MODULE_NOT_FOUND);
     }
 
-    const scores = await this.evaluationRefactoredRepository.getLeaderboardScoresWithBattleStats(moduleId, evaluatorId, page, limit, sortBy, sortOrder, minBattles, search);
-
-    const total = await this.evaluationRefactoredRepository.countLeaderboardScores(moduleId, evaluatorId, minBattles, search);
-
-    const stats = await this.evaluationRefactoredRepository.getLeaderboardStats(moduleId, evaluatorId);
+    // 并行执行三个数据库查询以提高性能
+    const [scores, total, stats] = await Promise.all([
+      this.evaluationRefactoredRepository.getLeaderboardScoresWithBattleStats(moduleId, evaluatorId, page, limit, sortBy, sortOrder, minBattles, search),
+      this.evaluationRefactoredRepository.countLeaderboardScores(moduleId, evaluatorId, minBattles, search),
+      this.evaluationRefactoredRepository.getLeaderboardStats(moduleId, evaluatorId),
+    ]);
 
     const items = scores.map((score, index) => {
       const totalBattles = parseInt(score.totalBattles, 10) || 0;
@@ -653,6 +647,9 @@ export class EvaluationService {
         evaluator: score.evaluator,
       };
     });
+
+    const totalDuration = Date.now() - startTime;
+    this.logger.log(`getEloLeaderboard completed in ${totalDuration}ms for module ${moduleId}, returned ${items.length}/${total} items`);
 
     return {
       items,
@@ -766,6 +763,9 @@ export class EvaluationService {
   }
 
   public async getChartData(moduleId: string, evaluatorId?: string, days: number = 30, dataType?: string) {
+    const startTime = Date.now();
+    this.logger.log(`Starting getChartData for module ${moduleId}, dataType: ${dataType}, days: ${days}`);
+
     const baseData = {
       moduleId,
       evaluatorId,
@@ -812,6 +812,9 @@ export class EvaluationService {
           this.getRatingDistribution(moduleId, evaluatorId),
           this.getTimelineData(moduleId, evaluatorId, days),
         ]);
+
+        const totalDuration = Date.now() - startTime;
+        this.logger.log(`getChartData(complete) completed in ${totalDuration}ms for module ${moduleId}`);
 
         return {
           ...baseData,
@@ -955,5 +958,405 @@ export class EvaluationService {
     const sorted = [...numbers].sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
     return sorted.length % 2 !== 0 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+  }
+
+  /**
+   * 获取最近活跃的评估模块（用于恢复）
+   */
+  public async getRecentActiveModules(hoursBack: number = 24): Promise<Array<{ teamId: string; moduleId: string }>> {
+    try {
+      const cutoffTime = new Date();
+      cutoffTime.setHours(cutoffTime.getHours() - hoursBack);
+
+      const modules = await this.dataSource
+        .createQueryBuilder(EvaluationBattleEntity, 'battle')
+        .select('battle.evaluationModuleId', 'moduleId')
+        .addSelect('module.teamId', 'teamId')
+        .innerJoin(EvaluationModuleEntity, 'module', 'module.id = battle.evaluationModuleId')
+        .where('battle.completedAt >= :cutoffTime', { cutoffTime })
+        .distinct(true)
+        .getRawMany();
+
+      return modules;
+    } catch (error) {
+      this.logger.error('Error getting recent active modules:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 获取有资产的评估模块（备用恢复策略）
+   */
+  public async getModulesWithAssets(): Promise<Array<{ teamId: string; moduleId: string }>> {
+    try {
+      const modules = await this.dataSource
+        .createQueryBuilder(EvaluationModuleEntity, 'module')
+        .select('module.id', 'moduleId')
+        .addSelect('module.teamId', 'teamId')
+        .where('module.participantAssetIds IS NOT NULL')
+        .andWhere('JSONB_ARRAY_LENGTH(module.participantAssetIds) > 1') // PostgreSQL JSONB数组长度函数
+        .getRawMany();
+
+      return modules;
+    } catch (error) {
+      this.logger.error('Error getting modules with assets:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 生成排行榜HTML文件
+   */
+  async generateLeaderboardHtml(
+    teamId: string,
+    moduleId: string,
+    module: EvaluationModuleEntity,
+    options: {
+      minRating?: number;
+      maxRating?: number;
+      limit?: number;
+      minBattles?: number;
+    },
+  ): Promise<string> {
+    try {
+      // 使用OpenSkill服务获取排行榜数据
+      const leaderboardResponse = await this.openskillService.getLeaderboard(teamId, moduleId, 1, options.limit || 1000);
+      let leaderboardData = leaderboardResponse.items;
+
+      // 应用评分过滤
+      if (options.minRating !== undefined || options.maxRating !== undefined) {
+        leaderboardData = leaderboardData.filter((item) => {
+          if (options.minRating !== undefined && item.rating < options.minRating) return false;
+          if (options.maxRating !== undefined && item.rating > options.maxRating) return false;
+          return true;
+        });
+      }
+
+      // 应用最少对战数过滤
+      if (options.minBattles !== undefined) {
+        leaderboardData = leaderboardData.filter((item) => item.totalBattles >= options.minBattles);
+      }
+
+      // 重新计算排名（因为过滤后排名可能不连续）
+      leaderboardData = leaderboardData.map((item, index) => ({
+        ...item,
+        rank: index + 1,
+      }));
+
+      // 批量获取图片信息
+      const assetIds = leaderboardData.map((item) => item.assetId);
+      const mediaFiles = await this.mediaFileService.getMediaByIds(assetIds);
+      const mediaMap = new Map(mediaFiles.map((media) => [media.id, media]));
+
+      // 生成HTML内容
+      const html = this.buildHtmlTemplate(module, leaderboardData, mediaMap, options);
+
+      return html;
+    } catch (error) {
+      this.logger.error(`Error generating leaderboard HTML for module ${moduleId}:`, error);
+      throw new Error('Failed to generate HTML export');
+    }
+  }
+
+  /**
+   * 生成排行榜CSV文件
+   */
+  async generateLeaderboardCsv(teamId: string, moduleId: string, module: EvaluationModuleEntity, options: { includeImageUrls?: boolean }): Promise<string> {
+    try {
+      // 使用OpenSkill服务获取排行榜数据
+      const leaderboardResponse = await this.openskillService.getLeaderboard(teamId, moduleId, 1, 1000);
+      const leaderboardData = leaderboardResponse.items;
+
+      // 批量获取图片信息（如果需要）
+      const assetIds = leaderboardData.map((item) => item.assetId);
+      const mediaFiles = options.includeImageUrls ? await this.mediaFileService.getMediaByIds(assetIds) : [];
+      const mediaMap = new Map(mediaFiles.map((media) => [media.id, media]));
+
+      // 生成CSV内容
+      const csv = this.buildCsvContent(leaderboardData, mediaMap, options.includeImageUrls);
+
+      return csv;
+    } catch (error) {
+      this.logger.error(`Error generating leaderboard CSV for module ${moduleId}:`, error);
+      throw new Error('Failed to generate CSV export');
+    }
+  }
+
+  /**
+   * 构建HTML模板
+   */
+  private buildHtmlTemplate(module: EvaluationModuleEntity, items: any[], mediaMap: Map<string, any>, options: any): string {
+    const timestamp = new Date().toLocaleString('zh-CN');
+    const ratingFilter = options.minRating || options.maxRating ? ` (评分区间: ${options.minRating || '不限'} - ${options.maxRating || '不限'})` : '';
+
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>评测排行榜 - ${module.displayName}</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0; padding: 20px; background-color: #f5f5f5;
+        }
+        .header { 
+            background: white; padding: 20px; margin-bottom: 20px; 
+            border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 { margin: 0 0 10px 0; color: #333; }
+        .header .meta { color: #666; font-size: 14px; }
+        
+        .table-container { 
+            background: white; border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden;
+        }
+        table { 
+            width: 100%; border-collapse: collapse; 
+        }
+        thead { background-color: #f8f9fa; }
+        th, td { 
+            padding: 12px; text-align: center; 
+            border-bottom: 1px solid #dee2e6;
+        }
+        th { font-weight: 600; color: #495057; }
+        
+        .rank-cell { font-weight: bold; color: #007bff; }
+        .rank-1 { background-color: #ffd700; color: #000; }
+        .rank-2 { background-color: #c0c0c0; color: #000; }
+        .rank-3 { background-color: #cd7f32; color: #fff; }
+        
+        .image-cell img { 
+            width: 120px; height: 120px; 
+            object-fit: cover; border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .image-cell .placeholder {
+            width: 120px; height: 120px; 
+            background: #e9ecef; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            color: #6c757d; font-size: 12px;
+        }
+        
+        .rating-cell { font-weight: bold; font-size: 16px; }
+        .mu-cell { color: #6c757d; font-family: monospace; }
+        .sigma-cell { color: #6c757d; font-family: monospace; }
+        .battles-cell { color: #28a745; }
+        
+        tbody tr:hover { background-color: #f8f9fa; }
+        
+        .footer {
+            margin-top: 20px; text-align: center; 
+            color: #6c757d; font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>${module.displayName}</h1>
+        <div class="meta">
+            <div>评测描述: ${module.description || '无'}</div>
+            <div>导出时间: ${timestamp}</div>
+            <div>数据范围: 共 ${items.length} 条记录${ratingFilter}</div>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>参与者（图片）</th>
+                    <th>评分</th>
+                    <th>Mu (μ)</th>
+                    <th>Sigma (σ)</th>
+                    <th>对战数</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${items
+                  .map((item) => {
+                    const media = mediaMap.get(item.assetId);
+                    const rankClass = item.rank <= 3 ? `rank-${item.rank}` : '';
+
+                    return `
+                    <tr>
+                        <td class="rank-cell ${rankClass}">#${item.rank}</td>
+                        <td class="image-cell">
+                            ${media ? `<img src="${media.publicUrl || media.url}" alt="${media.displayName || item.assetId}" loading="lazy">` : `<div class="placeholder">图片不可用</div>`}
+                            <div style="margin-top: 8px; font-size: 12px; text-align: center; word-break: break-all;">
+                                ${media?.displayName || item.assetId}
+                            </div>
+                        </td>
+                        <td class="rating-cell">${Math.round(item.rating)}</td>
+                        <td class="mu-cell">${item.mu ? item.mu.toFixed(2) : 'N/A'}</td>
+                        <td class="sigma-cell">${item.sigma ? item.sigma.toFixed(2) : 'N/A'}</td>
+                        <td class="battles-cell">${item.totalBattles}</td>
+                    </tr>
+                  `;
+                  })
+                  .join('')}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="footer">
+        Generated by Evaluation System - ${timestamp}
+    </div>
+</body>
+</html>`;
+  }
+
+  /**
+   * 优化的排行榜数据获取方法（一次性获取所有需要的数据）
+   */
+  private async getOptimizedLeaderboardData(
+    teamId: string,
+    moduleId: string,
+    options: {
+      minRating?: number;
+      maxRating?: number;
+      limit?: number;
+      minBattles?: number;
+      includeImageUrls?: boolean;
+    } = {},
+  ): Promise<any[]> {
+    try {
+      const appId = config.server.appId;
+
+      // 构建过滤条件
+      const conditions: string[] = [];
+      const parameters: any[] = [moduleId];
+      let paramIndex = 2;
+
+      if (options.minRating !== undefined) {
+        conditions.push(`lr.rating_after >= $${paramIndex}`);
+        parameters.push(options.minRating);
+        paramIndex++;
+      }
+
+      if (options.maxRating !== undefined) {
+        conditions.push(`lr.rating_after <= $${paramIndex}`);
+        parameters.push(options.maxRating);
+        paramIndex++;
+      }
+
+      if (options.minBattles !== undefined && options.minBattles > 0) {
+        conditions.push(`COALESCE(bs.total_battles, 0) >= $${paramIndex}`);
+        parameters.push(options.minBattles);
+        paramIndex++;
+      }
+
+      const whereClause = conditions.length > 0 ? `AND ${conditions.join(' AND ')}` : '';
+      const limitClause = options.limit ? `LIMIT $${paramIndex}` : '';
+      if (options.limit) {
+        parameters.push(options.limit);
+      }
+
+      // 使用原生SQL一次性获取所有数据（正确处理多租户表名）
+      const query = `
+        WITH latest_ratings AS (
+          SELECT DISTINCT ON (asset_id) 
+            asset_id, 
+            mu_after, 
+            sigma_after, 
+            rating_after, 
+            created_timestamp
+          FROM "${appId}_evaluation_rating_history" 
+          WHERE evaluation_module_id = $1 
+          ORDER BY asset_id, created_timestamp DESC
+        ),
+        battle_stats AS (
+          SELECT 
+            asset_id,
+            SUM(wins) as wins,
+            SUM(losses) as losses, 
+            SUM(draws) as draws,
+            SUM(wins + losses + draws) as total_battles
+          FROM (
+            SELECT 
+              asset_a_id as asset_id,
+              CASE WHEN result = 'A_WIN' THEN 1 ELSE 0 END as wins,
+              CASE WHEN result = 'B_WIN' THEN 1 ELSE 0 END as losses,
+              CASE WHEN result = 'DRAW' THEN 1 ELSE 0 END as draws
+            FROM "${appId}_evaluation_battles" 
+            WHERE evaluation_module_id = $1 AND result IS NOT NULL
+            UNION ALL 
+            SELECT 
+              asset_b_id as asset_id,
+              CASE WHEN result = 'B_WIN' THEN 1 ELSE 0 END as wins,
+              CASE WHEN result = 'A_WIN' THEN 1 ELSE 0 END as losses,
+              CASE WHEN result = 'DRAW' THEN 1 ELSE 0 END as draws
+            FROM "${appId}_evaluation_battles" 
+            WHERE evaluation_module_id = $1 AND result IS NOT NULL
+          ) battle_results 
+          GROUP BY asset_id
+        )
+        SELECT 
+          lr.asset_id,
+          lr.rating_after as rating,
+          lr.sigma_after as sigma,
+          lr.mu_after as mu,
+          COALESCE(bs.total_battles, 0) as total_battles,
+          COALESCE(bs.wins, 0) as wins,
+          COALESCE(bs.losses, 0) as losses,
+          COALESCE(bs.draws, 0) as draws,
+          lr.created_timestamp as last_updated,
+          ROW_NUMBER() OVER (ORDER BY lr.rating_after DESC) as rank
+        FROM latest_ratings lr 
+        LEFT JOIN battle_stats bs ON lr.asset_id = bs.asset_id
+        WHERE 1=1 ${whereClause}
+        ORDER BY lr.rating_after DESC
+        ${limitClause}
+      `;
+
+      const rawResults = await this.dataSource.query(query, parameters);
+
+      // 转换为标准格式
+      return rawResults.map((row: any) => ({
+        rank: parseInt(row.rank),
+        assetId: row.asset_id,
+        rating: Math.round(parseFloat(row.rating) * 100) / 100,
+        sigma: Math.round(parseFloat(row.sigma) * 100) / 100,
+        mu: Math.round(parseFloat(row.mu) * 100) / 100,
+        totalBattles: parseInt(row.total_battles) || 0,
+        wins: parseInt(row.wins) || 0,
+        losses: parseInt(row.losses) || 0,
+        draws: parseInt(row.draws) || 0,
+        lastUpdated: new Date(row.last_updated),
+      }));
+    } catch (error) {
+      this.logger.error(`Error getting optimized leaderboard data for module ${moduleId}:`, error);
+      throw new Error('Failed to get leaderboard data');
+    }
+  }
+
+  /**
+   * 构建CSV内容
+   */
+  private buildCsvContent(items: any[], mediaMap: Map<string, any>, includeImageUrls: boolean): string {
+    // CSV头部
+    const headers = ['排名', '参与者', '评分', 'Mu (μ)', 'Sigma (σ)', '对战数'];
+    if (includeImageUrls) {
+      headers.push('图片URL');
+    }
+
+    const csvLines = [headers.join(',')];
+
+    // CSV数据行
+    items.forEach((item) => {
+      const media = mediaMap.get(item.assetId);
+      const participantName = media?.displayName || item.assetId;
+
+      const row = [item.rank, `"${participantName}"`, Math.round(item.rating), item.mu ? item.mu.toFixed(2) : 'N/A', item.sigma ? item.sigma.toFixed(2) : 'N/A', item.totalBattles];
+
+      if (includeImageUrls) {
+        row.push(`"${media ? media.publicUrl || media.url : ''}"`);
+      }
+
+      csvLines.push(row.join(','));
+    });
+
+    return csvLines.join('\n');
   }
 }

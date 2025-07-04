@@ -22,8 +22,17 @@ export class AutoEvaluationService implements OnApplicationBootstrap, OnApplicat
     private readonly evaluationService: EvaluationService,
   ) {}
 
-  onApplicationBootstrap() {
+  async onApplicationBootstrap() {
     this.logger.log('Auto Evaluation Service started');
+
+    // 延迟启动恢复逻辑，确保所有服务都已初始化
+    setTimeout(async () => {
+      try {
+        await this.recoverActiveEvaluations();
+      } catch (error) {
+        this.logger.error('Failed to recover active evaluations:', error);
+      }
+    }, 5000); // 5秒延迟
   }
 
   onApplicationShutdown() {
@@ -121,11 +130,8 @@ export class AutoEvaluationService implements OnApplicationBootstrap, OnApplicat
       const battle = await this.openskillService.getNextOptimalBattle(teamId, moduleId);
 
       if (!battle) {
-        this.logger.debug(`No optimal battle found for module ${moduleId}`);
         return;
       }
-
-      this.logger.log(`Processing battle: ${battle.assetAId} vs ${battle.assetBId} (quality: ${battle.quality.toFixed(3)})`);
 
       // 创建数据库中的battle记录
       const battleEntity = await this.evaluationService.createBattle(moduleId, battle.assetAId, battle.assetBId);
@@ -140,7 +146,7 @@ export class AutoEvaluationService implements OnApplicationBootstrap, OnApplicat
         await this.openskillService.updateBattleResult(teamId, moduleId, {
           assetAId: battle.assetAId,
           assetBId: battle.assetBId,
-          winner: result.result === 'A_WIN' ? 'A' : result.result === 'B_WIN' ? 'B' : 'DRAW',
+          winner: result.result,
           battleId: battleEntity.id,
         });
       } else {
@@ -169,5 +175,69 @@ export class AutoEvaluationService implements OnApplicationBootstrap, OnApplicat
    */
   isEvaluationComplete(moduleId: string): boolean {
     return this.completedModules.has(moduleId);
+  }
+
+  /**
+   * 恢复应用重启前正在进行的评估任务
+   */
+  private async recoverActiveEvaluations(): Promise<void> {
+    try {
+      this.logger.log('Starting evaluation recovery process...');
+
+      // 查找最近有活动的评估模块
+      const activeModules = await this.findActiveEvaluationModules();
+
+      this.logger.log(`Found ${activeModules.length} potentially active evaluation modules`);
+
+      let recoveredCount = 0;
+      for (const module of activeModules) {
+        try {
+          // 检查评估状态
+          const status = await this.openskillService.getEvaluationStatus(module.teamId, module.moduleId);
+
+          if (!status.isComplete && status.totalAssets >= 2) {
+            this.logger.log(`Recovering evaluation for module ${module.moduleId} ` + `(${status.totalAssets} assets, ${status.progress}% complete, reason: ${status.convergenceReason})`);
+
+            await this.startEvaluation(module.teamId, module.moduleId);
+            recoveredCount++;
+          } else if (status.isComplete) {
+            this.logger.debug(`Module ${module.moduleId} is already complete`);
+            this.completedModules.add(module.moduleId);
+          } else {
+            this.logger.debug(`Module ${module.moduleId} has insufficient assets (${status.totalAssets})`);
+          }
+        } catch (error) {
+          this.logger.error(`Failed to recover module ${module.moduleId}:`, error);
+        }
+      }
+
+      this.logger.log(`Evaluation recovery completed. Recovered ${recoveredCount} active evaluations.`);
+    } catch (error) {
+      this.logger.error('Error in recoverActiveEvaluations:', error);
+    }
+  }
+
+  /**
+   * 查找最近活跃的评估模块
+   */
+  private async findActiveEvaluationModules(): Promise<Array<{ teamId: string; moduleId: string }>> {
+    try {
+      // 策略1: 查找最近24小时内有对战记录的模块
+      const recentModules = await this.evaluationService.getRecentActiveModules(24);
+
+      if (recentModules.length > 0) {
+        this.logger.debug(`Found ${recentModules.length} modules with recent battles`);
+        return recentModules;
+      }
+
+      // 策略2: 如果没有最近活动，查找有资产但未完成的模块
+      this.logger.debug('No recent battles found, checking for modules with assets');
+      const modulesWithAssets = await this.evaluationService.getModulesWithAssets();
+
+      return modulesWithAssets;
+    } catch (error) {
+      this.logger.error('Error finding active modules:', error);
+      return [];
+    }
   }
 }
