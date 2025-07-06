@@ -1,5 +1,6 @@
 import { DesignAssociationEntity } from '@/database/entities/design/design-association';
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import _ from 'lodash';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { AssetCloneResult, AssetUpdateResult, IAssetHandler } from '../marketplace/types';
 import { WorkflowCrudService } from '../workflow/workflow.curd.service';
@@ -18,14 +19,15 @@ export class DesignAssociationCrudService implements IAssetHandler {
   ) {}
 
   async processSnapshot(snapshot: DesignAssociationEntity, teamId: string): Promise<DesignAssociationEntity> {
-    const association = await this.designAssociationService.findById(snapshot.id);
+    const clonedSnapshot = _.cloneDeep(snapshot);
+    const association = await this.designAssociationService.findById(clonedSnapshot.id);
     if (!association) {
       throw new NotFoundException('关联不存在');
     }
 
-    if (snapshot.targetWorkflowId) {
+    if (clonedSnapshot.targetWorkflowId) {
       // 1. 通过 app id 找到所有版本
-      const app = await this.marketplaceService.getAppDetails(snapshot.targetWorkflowId);
+      const app = await this.marketplaceService.getAppDetails(clonedSnapshot.targetWorkflowId);
 
       if (app) {
         // 2. 获取最新版本
@@ -36,12 +38,16 @@ export class DesignAssociationCrudService implements IAssetHandler {
 
         // 4. 获取实际的工作流 ID
         if (installedApp?.installedAssetIds?.workflow?.[0]) {
-          snapshot['targetWorkflowId'] = installedApp.installedAssetIds.workflow[0];
+          clonedSnapshot['targetWorkflowId'] = installedApp.installedAssetIds.workflow[0];
+        } else {
+          throw new NotFoundException(`工作流 ${clonedSnapshot.targetWorkflowId} 未安装`);
         }
+      } else {
+        throw new NotFoundException(`工作流 ${clonedSnapshot.targetWorkflowId} 未安装`);
       }
     }
 
-    return snapshot;
+    return clonedSnapshot;
   }
 
   /**

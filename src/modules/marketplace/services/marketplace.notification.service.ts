@@ -71,7 +71,11 @@ export class MarketplaceNotificationService {
             for (let i = 0; i < installedAssets.length; i++) {
               const installedAssetId = installedAssets[i];
               const handler = this.assetsMapperService.getAssetHandler(assetType as any);
-              await handler.updateFromSnapshot(newAssets[i], installation.teamId, installation.userId, installedAssetId);
+              try {
+                await handler.updateFromSnapshot(newAssets[i], installation.teamId, installation.userId, installedAssetId);
+              } catch (error) {
+                this.logger.error(`Failed to update asset ${installedAssetId} for type ${assetType} in installation ${installation.id}`, error.stack);
+              }
             }
           }
 

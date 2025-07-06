@@ -357,9 +357,31 @@ export class MarketplaceService {
     return installedApp;
   }
 
-  public async getAppVersionIdByAssetId(assetId: string, assetType: AssetType) {
+  public async getInstalledAppVersionIdByAssetId(assetId: string, assetType: AssetType) {
     const appVersionId = await this.installedAppRepo.findOne({ where: { installedAssetIds: { [assetType]: [assetId] } } });
     return appVersionId;
+  }
+
+  public async getAppVersionByAssetId(assetId: string, assetType: AssetType) {
+    const appVersion = await this.versionRepo
+      .createQueryBuilder('version')
+      .leftJoinAndSelect('version.app', 'app')
+      .where(
+        `
+      EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(version.sourceAssetReferences) AS elem
+        WHERE elem->>'assetId' = :assetId
+          AND elem->>'assetType' = :assetType
+      )
+    `,
+        {
+          assetId,
+          assetType,
+        },
+      )
+      .getOne();
+    return appVersion;
   }
 
   public async getAppVersionById(appVersionId: string) {

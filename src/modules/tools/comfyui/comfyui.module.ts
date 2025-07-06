@@ -5,11 +5,12 @@ import { ComfyuiExecutionController } from './comfyui.execution.controller';
 import { ComfyuiServerController } from './comfyui.server.controller';
 import { ComfyUIService } from './comfyui.service';
 import { ComfyuiWorkflowController } from './comfyui.workflow.controller';
+import { ComfyuiWorkflowCrudService } from './comfyui.workflow.crud.service';
 
 @Module({
   // imports: [ConductorModule],
-  providers: [ComfyUIService],
+  providers: [ComfyUIService, ComfyuiWorkflowCrudService],
   controllers: [ComfyuiWorkflowController, ComfyuiServerController, ComfyuiExecutionController, ComfyuiDependencyController],
-  exports: [ComfyUIService],
+  exports: [ComfyUIService, ComfyuiWorkflowCrudService],
 })
 export class ComfyUIModule {}

@@ -1,5 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { DesignModule } from '../design/design.module';
+import { ComfyUIModule } from '../tools/comfyui/comfyui.module';
 import { WorkflowModule } from '../workflow/workflow.module';
 import { AssetsMapperService } from './assets.common.service';
 import { AssetsFiltersController } from './assets.filter.controller';
@@ -35,6 +36,7 @@ import { SqlKnowledgeBaseModule } from './sql-knowledge-base/sql-knowledge-base.
     ComfyuiModelModule,
     forwardRef(() => DesignModule),
     forwardRef(() => WorkflowModule),
+    forwardRef(() => ComfyUIModule),
   ],
   exports: [AssetsMarketplaceService, AssetsPublishService, MediaModule, AssetsMapperService],
 })

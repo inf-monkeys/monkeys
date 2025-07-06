@@ -142,6 +142,51 @@ export function getComfyuiWorkflowDataListFromWorkflow(tasks: MonkeyTaskDefTypes
   return result;
 }
 
+export const getSubWorkflowDataList = (tasks: MonkeyTaskDefTypes[]) => {
+  const result = [];
+  for (const [index, task] of tasks.entries()) {
+    if (task.type === 'SUB_WORKFLOW') {
+      result.push({
+        path: `[${index}]`,
+        subWorkflowId: task.subWorkflowParam.name,
+      });
+    } else if (task.type === 'FORK_JOIN') {
+      for (const [forkIndex, forkTask] of task.forkTasks.entries()) {
+        result.push(
+          ...getSubWorkflowDataList(forkTask).map((c) => {
+            return {
+              ...c,
+              path: `[${index}].forkTasks[${forkIndex}]${c.path}`,
+            };
+          }),
+        );
+      }
+    } else if (task.type === 'DO_WHILE') {
+      result.push(
+        ...getSubWorkflowDataList(task.loopOver).map((c) => {
+          return {
+            ...c,
+            path: `[${index}].loopOver${c.path}`,
+          };
+        }),
+      );
+    } else if (task.type === 'SWITCH') {
+      Object.keys(task.decisionCases).map((key) => {
+        const value = task.decisionCases[key];
+        result.push(
+          ...getSubWorkflowDataList(value).map((c) => {
+            return {
+              ...c,
+              path: `[${index}].decisionCases["${key}"].${c.path}`,
+            };
+          }),
+        );
+      });
+    }
+  }
+  return result;
+};
+
 type FlattenedObject = Record<string, any>;
 
 export const flattenKeys = (obj: unknown, path: string[] = [], triggerKeys?: string[], triggerCallback?: (key: string, data: any) => void): FlattenedObject =>
