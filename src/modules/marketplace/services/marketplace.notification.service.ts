@@ -70,32 +70,8 @@ export class MarketplaceNotificationService {
             // 更新每个资产
             for (let i = 0; i < installedAssets.length; i++) {
               const installedAssetId = installedAssets[i];
-              const newAssetData = newAssets[i];
-
               const handler = this.assetsMapperService.getAssetHandler(assetType as any);
-              const { newId } = await handler.cloneFromSnapshot(newAssetData, installation.teamId, installation.userId);
-
-              // 将新资产的内容复制到旧资产中
-              const repo = this.assetsMapperService.getRepositoryByAssetType(assetType as any);
-              const newAsset = await repo.getAssetById(newId);
-              const oldAsset = await repo.getAssetById(installedAssetId);
-              if (oldAsset && newAsset) {
-                Object.assign(oldAsset, {
-                  ...newAsset,
-                  id: installedAssetId,
-                  workflowId: assetType === 'workflow' ? installedAssetId : undefined,
-                  teamId: installation.teamId,
-                  creatorUserId: installation.userId,
-                  updatedTimestamp: Date.now(),
-                });
-                await repo.repository.save(oldAsset);
-              }
-
-              // 删除临时创建的新资产
-              const tempAsset = await repo.getAssetById(newId);
-              if (tempAsset) {
-                await repo.repository.remove(tempAsset);
-              }
+              await handler.updateFromSnapshot(newAssets[i], installation.teamId, installation.userId, installedAssetId);
             }
           }
 

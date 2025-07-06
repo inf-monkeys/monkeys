@@ -2,7 +2,7 @@ import { WorkflowAssociationsEntity } from '@/database/entities/workflow/workflo
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
-import { AssetCloneResult, IAssetHandler } from '../marketplace/types';
+import { AssetCloneResult, AssetUpdateResult, IAssetHandler } from '../marketplace/types';
 import { WorkflowAssociationService } from './workflow.association.service';
 import { WorkflowCrudService } from './workflow.curd.service';
 
@@ -16,6 +16,45 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
     private readonly marketplaceService: MarketplaceService,
   ) {}
 
+  public async processSnapshot(snapshot: WorkflowAssociationsEntity, teamId: string): Promise<WorkflowAssociationsEntity> {
+    const associationData = _.pick(snapshot, ['displayName', 'description', 'enabled', 'mapper', 'iconUrl', 'sortIndex', 'type', 'extraData']);
+
+    // 处理 originWorkflowId
+    if (snapshot.originWorkflowId) {
+      // 1. 通过 app id 找到所有版本
+      const app = await this.marketplaceService.getAppDetails(snapshot.originWorkflowId);
+
+      if (app) {
+        // 2. 获取最新版本
+        const latestVersion = app.versions.sort((a, b) => b.createdTimestamp - a.createdTimestamp)[0];
+
+        // 3. 查找团队内安装的这个版本的应用
+        const installedApp = await this.marketplaceService.getInstalledAppByAppVersionId(latestVersion.id, teamId);
+
+        // 4. 获取实际的工作流 ID
+        if (installedApp?.installedAssetIds?.workflow?.[0]) {
+          associationData['originWorkflowId'] = installedApp.installedAssetIds.workflow[0];
+        }
+      }
+    }
+
+    // 处理 targetWorkflowId (如果是 to-workflow 类型)
+    if (snapshot.type === 'to-workflow' && snapshot.targetWorkflowId) {
+      const app = await this.marketplaceService.getAppDetails(snapshot.targetWorkflowId);
+
+      if (app) {
+        const latestVersion = app.versions.sort((a, b) => b.createdTimestamp - a.createdTimestamp)[0];
+
+        const installedApp = await this.marketplaceService.getInstalledAppByAppVersionId(latestVersion.id, teamId);
+
+        if (installedApp?.installedAssetIds?.workflow?.[0]) {
+          associationData['targetWorkflowId'] = installedApp.installedAssetIds.workflow[0];
+        }
+      }
+    }
+
+    return { ...snapshot, ...associationData };
+  }
   /**
    * 获取工作流关联的快照
    */
@@ -67,48 +106,21 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
    * 需要将市场中的 app id 映射为团队内的实际工作流 id
    */
   public async cloneFromSnapshot(snapshot: WorkflowAssociationsEntity, teamId: string): Promise<AssetCloneResult> {
-    const associationData = _.pick(snapshot, ['displayName', 'description', 'enabled', 'mapper', 'iconUrl', 'sortIndex', 'type', 'extraData']);
+    const processedSnapshot = await this.processSnapshot(snapshot, teamId);
 
-    // 处理 originWorkflowId
-    if (snapshot.originWorkflowId) {
-      // 1. 通过 app id 找到所有版本
-      const app = await this.marketplaceService.getAppDetails(snapshot.originWorkflowId);
-
-      if (app) {
-        // 2. 获取最新版本
-        const latestVersion = app.versions.sort((a, b) => b.createdTimestamp - a.createdTimestamp)[0];
-
-        // 3. 查找团队内安装的这个版本的应用
-        const installedApp = await this.marketplaceService.getInstalledAppByAppVersionId(latestVersion.id, teamId);
-
-        // 4. 获取实际的工作流 ID
-        if (installedApp?.installedAssetIds?.workflow?.[0]) {
-          associationData['originWorkflowId'] = installedApp.installedAssetIds.workflow[0];
-        }
-      }
-    }
-
-    // 处理 targetWorkflowId (如果是 to-workflow 类型)
-    if (snapshot.type === 'to-workflow' && snapshot.targetWorkflowId) {
-      const app = await this.marketplaceService.getAppDetails(snapshot.targetWorkflowId);
-
-      if (app) {
-        const latestVersion = app.versions.sort((a, b) => b.createdTimestamp - a.createdTimestamp)[0];
-
-        const installedApp = await this.marketplaceService.getInstalledAppByAppVersionId(latestVersion.id, teamId);
-
-        if (installedApp?.installedAssetIds?.workflow?.[0]) {
-          associationData['targetWorkflowId'] = installedApp.installedAssetIds.workflow[0];
-        }
-      }
-    }
-    const newAssociation = await this.workflowAssociationService.createWorkflowAssociation(associationData['originWorkflowId'], teamId, associationData);
+    const newAssociation = await this.workflowAssociationService.createWorkflowAssociation(processedSnapshot['originWorkflowId'], teamId, processedSnapshot);
 
     // 返回第一个关联的ID作为主要ID
     return {
       originalId: snapshot.id,
       newId: newAssociation.id,
     };
+  }
+
+  public async updateFromSnapshot(snapshot: WorkflowAssociationsEntity, teamId: string, userId: string, assetId: string): Promise<AssetUpdateResult> {
+    const processedSnapshot = await this.processSnapshot(snapshot, teamId);
+    await this.workflowAssociationService.updateWorkflowAssociation(assetId, teamId, processedSnapshot);
+    return { originalId: assetId };
   }
 
   /**

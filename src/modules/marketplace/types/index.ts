@@ -19,10 +19,16 @@ export interface AssetCloneResult {
   newId: string;
 }
 
+export interface AssetUpdateResult {
+  originalId: string;
+}
+
 export interface IAssetHandler {
   getSnapshot(assetId: string, version: number): Promise<any>;
 
   cloneFromSnapshot(snapshot: any, teamId: string, userId: string): Promise<AssetCloneResult>;
+
+  updateFromSnapshot(snapshot: any, teamId: string, userId: string, assetId: string): Promise<AssetUpdateResult>;
 
   remapDependencies(assetId: string, idMapping: { [originalId: string]: string }): Promise<void>;
 }

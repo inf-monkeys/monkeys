@@ -1,7 +1,7 @@
 import { DesignAssociationEntity } from '@/database/entities/design/design-association';
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
-import { AssetCloneResult, IAssetHandler } from '../marketplace/types';
+import { AssetCloneResult, AssetUpdateResult, IAssetHandler } from '../marketplace/types';
 import { WorkflowCrudService } from '../workflow/workflow.curd.service';
 import { DesignAssociationService } from './design.association.service';
 
@@ -16,6 +16,33 @@ export class DesignAssociationCrudService implements IAssetHandler {
     @Inject(forwardRef(() => MarketplaceService))
     private readonly marketplaceService: MarketplaceService,
   ) {}
+
+  async processSnapshot(snapshot: DesignAssociationEntity, teamId: string): Promise<DesignAssociationEntity> {
+    const association = await this.designAssociationService.findById(snapshot.id);
+    if (!association) {
+      throw new NotFoundException('关联不存在');
+    }
+
+    if (snapshot.targetWorkflowId) {
+      // 1. 通过 app id 找到所有版本
+      const app = await this.marketplaceService.getAppDetails(snapshot.targetWorkflowId);
+
+      if (app) {
+        // 2. 获取最新版本
+        const latestVersion = app.versions.sort((a, b) => b.createdTimestamp - a.createdTimestamp)[0];
+
+        // 3. 查找团队内安装的这个版本的应用
+        const installedApp = await this.marketplaceService.getInstalledAppByAppVersionId(latestVersion.id, teamId);
+
+        // 4. 获取实际的工作流 ID
+        if (installedApp?.installedAssetIds?.workflow?.[0]) {
+          snapshot['targetWorkflowId'] = installedApp.installedAssetIds.workflow[0];
+        }
+      }
+    }
+
+    return snapshot;
+  }
 
   /**
    * 获取设计关联的快照
@@ -59,31 +86,24 @@ export class DesignAssociationCrudService implements IAssetHandler {
    * 需要将市场中的 app id 映射为团队内的实际设计 id
    */
   public async cloneFromSnapshot(snapshot: DesignAssociationEntity, teamId: string): Promise<AssetCloneResult> {
-    // 处理 targetWorkflowId
-    if (snapshot.targetWorkflowId) {
-      // 1. 通过 app id 找到所有版本
-      const app = await this.marketplaceService.getAppDetails(snapshot.targetWorkflowId);
+    const processedSnapshot = await this.processSnapshot(snapshot, teamId);
 
-      if (app) {
-        // 2. 获取最新版本
-        const latestVersion = app.versions.sort((a, b) => b.createdTimestamp - a.createdTimestamp)[0];
-
-        // 3. 查找团队内安装的这个版本的应用
-        const installedApp = await this.marketplaceService.getInstalledAppByAppVersionId(latestVersion.id, teamId);
-
-        // 4. 获取实际的工作流 ID
-        if (installedApp?.installedAssetIds?.workflow?.[0]) {
-          snapshot['targetWorkflowId'] = installedApp.installedAssetIds.workflow[0];
-        }
-      }
-    }
-
-    const newAssociation = await this.designAssociationService.create({ ...snapshot, teamId });
+    const newAssociation = await this.designAssociationService.create({ ...processedSnapshot, teamId });
 
     // 返回第一个关联的ID作为主要ID
     return {
       originalId: snapshot.id,
       newId: newAssociation.id,
+    };
+  }
+
+  public async updateFromSnapshot(snapshot: DesignAssociationEntity, teamId: string, userId: string, assetId: string): Promise<AssetUpdateResult> {
+    const processedSnapshot = await this.processSnapshot(snapshot, teamId);
+
+    await this.designAssociationService.update(assetId, { ...processedSnapshot, teamId });
+
+    return {
+      originalId: assetId,
     };
   }
 
