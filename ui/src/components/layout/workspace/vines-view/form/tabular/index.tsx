@@ -91,6 +91,14 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
 
   const { read } = useClipboard({ showSuccess: false });
 
+  event$.useSubscription((event: any) => {
+    if (event.type === 'set') {
+      console.log(event);
+
+      tabular$.emit({ type: 'paste-param', data: event.data });
+    }
+  });
+
   const handlePasteInput = useMemoizedFn(async () => {
     const text = await read();
     if (text) {

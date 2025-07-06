@@ -14,7 +14,8 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { isEmpty, isString, keyBy, omit, pick } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
-import { FindManyOptions, In, IsNull, Repository } from 'typeorm';
+import { DataSource, FindManyOptions, In, IsNull, Repository } from 'typeorm';
+import { InstalledAppEntity } from '../entities/marketplace/installed-app.entity';
 import { UpdateAndCreateWorkflowAssociation, WorkflowAssociationsEntity } from '../entities/workflow/workflow-association';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
@@ -70,6 +71,7 @@ export class WorkflowRepository {
     private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
     @InjectRepository(WorkflowAssociationsEntity)
     private readonly workflowAssociationRepository: Repository<WorkflowAssociationsEntity>,
+    private readonly dataSource: DataSource,
   ) {}
 
   public async findWorkflowByCondition(condition: FindWorkflowCondition) {
@@ -179,8 +181,8 @@ export class WorkflowRepository {
     workflowId: string,
     version: number,
     updates: {
-      displayName?: string;
-      description?: string;
+      displayName?: string | I18nValue;
+      description?: string | I18nValue;
       iconUrl?: string;
       tasks?: MonkeyTaskDefTypes[];
       variables?: ToolProperty[];
@@ -193,6 +195,7 @@ export class WorkflowRepository {
       exposeOpenaiCompatibleInterface?: boolean;
       openaiModelName?: string;
       shortcutsFlow?: string;
+      forkFromId?: string;
     },
   ) {
     const {
@@ -210,13 +213,28 @@ export class WorkflowRepository {
       exposeOpenaiCompatibleInterface,
       openaiModelName,
       shortcutsFlow,
+      forkFromId,
     } = updates;
 
     // 字段都为空，则跳过更新
     if (
-      [displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName, shortcutsFlow].every(
-        (item) => typeof item === 'undefined',
-      )
+      [
+        displayName,
+        description,
+        iconUrl,
+        tasks,
+        variables,
+        activated,
+        validated,
+        validationIssues,
+        output,
+        tagIds,
+        rateLimiter,
+        exposeOpenaiCompatibleInterface,
+        openaiModelName,
+        shortcutsFlow,
+        forkFromId,
+      ].every((item) => typeof item === 'undefined')
     )
       return;
     if (variables && !Array.isArray(variables)) {
@@ -249,7 +267,23 @@ export class WorkflowRepository {
     await this.workflowMetadataRepository.findOneOrFail({ where: { workflowId: workflowId, version, teamId, isDeleted: false } });
     const updateFields = {
       ..._.pickBy(
-        { displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName, shortcutsFlow },
+        {
+          displayName,
+          iconUrl,
+          description,
+          tasks,
+          variables,
+          activated,
+          validationIssues,
+          validated,
+          output,
+          tagIds,
+          rateLimiter,
+          exposeOpenaiCompatibleInterface,
+          openaiModelName,
+          shortcutsFlow,
+          forkFromId,
+        },
         (v) => typeof v !== 'undefined',
       ),
       updatedTimestamp: Date.now(),
@@ -348,31 +382,75 @@ export class WorkflowRepository {
   }
 
   public async deleteWorkflow(teamId: string, workflowId: string) {
-    await this.workflowMetadataRepository.update(
-      {
-        teamId,
-        workflowId,
-      },
-      {
-        isDeleted: true,
-      },
-    );
-    await this.workflowTriggerRepository.update(
-      {
-        workflowId,
-      },
-      {
-        isDeleted: true,
-      },
-    );
-    await this.pageRepository.update(
-      {
-        workflowId,
-      },
-      {
-        isDeleted: true,
-      },
-    );
+    // 开启事务
+    await this.dataSource.transaction(async (transactionalEntityManager) => {
+      // 标记 workflow 为已删除
+      await transactionalEntityManager.update(
+        WorkflowMetadataEntity,
+        {
+          teamId,
+          workflowId,
+        },
+        {
+          isDeleted: true,
+        },
+      );
+
+      // 标记相关的 trigger 为已删除
+      await transactionalEntityManager.update(
+        WorkflowTriggersEntity,
+        {
+          workflowId,
+        },
+        {
+          isDeleted: true,
+        },
+      );
+
+      // 获取所有相关的 pages
+      const pages = await transactionalEntityManager.find(WorkflowPageEntity, {
+        where: {
+          workflowId,
+        },
+        select: ['id'],
+      });
+
+      if (pages.length > 0) {
+        // 获取所有 page groups
+        const pageGroups = await transactionalEntityManager.find(WorkflowPageGroupEntity, {
+          where: {
+            teamId,
+          },
+        });
+
+        // 从每个 page group 中移除被删除的 page ids
+        const pageIdsToRemove = pages.map((page) => page.id);
+        for (const group of pageGroups) {
+          if (group.pageIds?.length) {
+            group.pageIds = group.pageIds.filter((id) => !pageIdsToRemove.includes(id));
+            await transactionalEntityManager.save(WorkflowPageGroupEntity, group);
+          }
+        }
+      }
+
+      // 标记相关的 pages 为已删除
+      await transactionalEntityManager.update(
+        WorkflowPageEntity,
+        {
+          workflowId,
+        },
+        {
+          isDeleted: true,
+        },
+      );
+
+      // 删除 installed apps 中的记录
+      await transactionalEntityManager.delete(InstalledAppEntity, {
+        installedAssetIds: {
+          workflow: [workflowId],
+        },
+      });
+    });
   }
 
   public async getWorkflowVersions(workflowId: string) {
@@ -1207,6 +1285,18 @@ ORDER BY
       .then((data) => data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow'])));
   }
 
+  public async getWorkflowAssociation(workflowAssociationId: string, relation = true) {
+    return await this.workflowAssociationRepository.findOne({
+      where: { id: workflowAssociationId, isDeleted: false },
+      relations: relation
+        ? {
+            originWorkflow: true,
+            targetWorkflow: true,
+          }
+        : undefined,
+    });
+  }
+
   public async createWorkflowAssociation(workflowId: string, teamId: string, createAssociation: UpdateAndCreateWorkflowAssociation) {
     return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
       const workflows = await transactionalEntityManager.find(WorkflowMetadataEntity, {
@@ -1218,10 +1308,10 @@ ORDER BY
       });
 
       if (createAssociation.type === 'to-workflow' && workflows.length !== 2) {
-        throw new NotFoundException('originWorkflowId or targetWorkflowId not found');
+        throw new NotFoundException('originWorkflowId or targetWorkflowId not found, originWorkflowId: ' + workflowId + ', targetWorkflowId: ' + createAssociation.targetWorkflowId);
       }
       if (createAssociation.type !== 'to-workflow' && workflows.length !== 1) {
-        throw new NotFoundException('originWorkflowId not found');
+        throw new NotFoundException('originWorkflowId not found, originWorkflowId: ' + workflowId);
       }
 
       return await transactionalEntityManager.save(WorkflowAssociationsEntity, {
@@ -1244,11 +1334,11 @@ ORDER BY
       });
 
       if (!association) {
-        throw new NotFoundException('workflow association not found');
+        throw new NotFoundException(`workflow association not found: ${id}`);
       }
 
       if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
-        throw new ForbiddenException('no permission to operate the workflow association');
+        throw new ForbiddenException(`no permission to operate the workflow association: ${id}`);
       }
 
       if (association.type === 'to-workflow' && updateAssociation.targetWorkflowId) {
@@ -1260,7 +1350,7 @@ ORDER BY
           },
         });
         if (!workflow) {
-          throw new NotFoundException('targetWorkflowId not found');
+          throw new NotFoundException(`targetWorkflowId not found: ${updateAssociation.targetWorkflowId}`);
         }
       }
 
@@ -1282,12 +1372,19 @@ ORDER BY
       });
 
       if (!association) {
-        throw new NotFoundException('workflow association not found');
+        throw new NotFoundException(`workflow association not found: ${id}`);
       }
 
       if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
-        throw new ForbiddenException('no permission to operate the workflow association');
+        throw new ForbiddenException(`no permission to operate the workflow association: ${id}`);
       }
+
+      // 删除 installed apps 中的记录
+      await transactionalEntityManager.delete(InstalledAppEntity, {
+        installedAssetIds: {
+          'workflow-association': [association.id],
+        },
+      });
 
       return await transactionalEntityManager.update(WorkflowAssociationsEntity, { id }, { isDeleted: true });
     });

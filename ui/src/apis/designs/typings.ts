@@ -1,3 +1,5 @@
+import { I18nValue } from '@inf-monkeys/monkeys';
+
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 
 export interface IDesignProject {
@@ -21,3 +23,16 @@ export interface IDesignBoardMetadata {
 }
 
 export type IDesignBoardItem = IAssetItem<Omit<IDesignBoardMetadata, 'snapshot'>>;
+
+export interface IDesignAssociation {
+  enabled: boolean;
+  id: string;
+  sortIndex?: number;
+  displayName: I18nValue | string | null;
+  description?: I18nValue | string | null;
+  iconUrl: string;
+  createdTimestamp: number;
+  updatedTimestamp: number;
+  targetWorkflowId: string;
+  targetInputId: string;
+}

@@ -11,11 +11,28 @@ import { MediaFileAssetRepositroy } from '@/database/repositories/assets-media-f
 import { SdModelAssetRepositroy } from '@/database/repositories/assets-sd-model.repository';
 import { WorkflowAssetRepositroy } from '@/database/repositories/assets-workflow.respository';
 import { AssetType } from '@inf-monkeys/monkeys';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { DesignAssociationCrudService } from '../design/design.association.crud.service';
+import { IAssetHandler } from '../marketplace/types';
+import { ComfyuiWorkflowCrudService } from '../tools/comfyui/comfyui.workflow.crud.service';
+import { WorkflowAssociationCrudService } from '../workflow/workflow.association.crud.service';
+import { WorkflowCrudService } from '../workflow/workflow.curd.service';
 
 @Injectable()
 export class AssetsMapperService {
   constructor(
+    @Inject(forwardRef(() => ComfyuiWorkflowCrudService))
+    private readonly comfyuiWorkflowCrudService: IAssetHandler,
+
+    @Inject(forwardRef(() => WorkflowCrudService))
+    private readonly workflowCrudService: IAssetHandler,
+
+    @Inject(forwardRef(() => WorkflowAssociationCrudService))
+    private readonly workflowAssociationCrudService: IAssetHandler,
+
+    @Inject(forwardRef(() => DesignAssociationCrudService))
+    private readonly designAssociationCrudService: IAssetHandler,
+
     private readonly canvasAssetsRepository: CanvasAssetRepositroy,
     private readonly llmModelAssetsRepository: LlmModelAssetRepositroy,
     private readonly sdModelAssetsRepository: SdModelAssetRepositroy,
@@ -27,6 +44,21 @@ export class AssetsMapperService {
     private readonly llmChannelAssetRepository: LlmChannelAssetRepositroy,
     private readonly conversationAppAssetRepository: ConversationAppAssetRepositroy,
   ) {}
+
+  public getAssetHandler(assetType: AssetType): IAssetHandler {
+    switch (assetType) {
+      case 'comfyui-workflow':
+        return this.comfyuiWorkflowCrudService;
+      case 'workflow':
+        return this.workflowCrudService;
+      case 'workflow-association':
+        return this.workflowAssociationCrudService;
+      case 'design-association':
+        return this.designAssociationCrudService;
+      default:
+        throw new Error(`Unsupported asset type for handler: ${assetType}`);
+    }
+  }
 
   public getRepositoryByAssetType(assetType: AssetType): AbstractAssetRepository<BaseAssetEntity> {
     if (assetType === 'canvas') {

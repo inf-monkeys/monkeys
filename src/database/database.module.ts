@@ -36,6 +36,7 @@ import { ComfyuiServerEntity } from './entities/comfyui/comfyui-server.entity';
 import { ComfyuiWorkflowEntity } from './entities/comfyui/comfyui-workflow.entity';
 import { ConversationAppEntity } from './entities/conversation-app/conversation-app.entity';
 import { ConversationExecutionEntity } from './entities/conversation-app/conversation-executions.entity';
+import { DesignAssociationEntity } from './entities/design/design-association';
 import { DesignMetadataEntity } from './entities/design/design-metatdata';
 import { DesignProjectEntity } from './entities/design/design-project';
 import { BattleGroupEntity } from './entities/evaluation/battle-group.entity';
@@ -51,6 +52,9 @@ import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
 import { TeamMembersEntity } from './entities/identity/user-team-relationship';
+import { InstalledAppEntity } from './entities/marketplace/installed-app.entity';
+import { MarketplaceAppVersionEntity } from './entities/marketplace/marketplace-app-version.entity';
+import { MarketplaceAppEntity } from './entities/marketplace/marketplace-app.entity';
 import { WorkflowObservabilityEntity } from './entities/observability/workflow-observability';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
@@ -103,6 +107,10 @@ export const entities: EntityClassOrSchema[] = [
   WorkflowObservabilityEntity,
   DesignMetadataEntity,
   DesignProjectEntity,
+  DesignAssociationEntity,
+  MarketplaceAppEntity,
+  MarketplaceAppVersionEntity,
+  InstalledAppEntity,
   EvaluationModuleEntity,
   EvaluatorEntity,
   ModuleEvaluatorEntity,

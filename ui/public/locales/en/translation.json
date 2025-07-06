@@ -216,6 +216,11 @@
       "loading": "Sending...",
       "success": "The code has been sent to {{phone}}, please check it.",
       "error": "Sending failed! Please try again later."
+    },
+    "export": {
+      "loading": "Exporting...",
+      "success": "Export successful!",
+      "error": "Export failed! Please try again later!"
     }
   },
   "components": {
@@ -1270,6 +1275,51 @@
           }
         }
       },
+      "association-editor": {
+        "button": "Association Editor",
+        "title": "Association Editor",
+        "add": "New Association",
+        "delete": {
+          "title": "Are you sure you want to delete this association?",
+          "desc": "This action cannot be undone. Please confirm if you want to delete this association."
+        },
+        "enabled": {
+          "t": "Enabled",
+          "f": "Disabled"
+        },
+        "editor": {
+          "title": "Association Configuration",
+          "field": {
+            "enabled": {
+              "label": "Enabled",
+              "description": "After enabling, the association will be displayed on the right side of the \"Global Board\""
+            },
+            "display-name": {
+              "label": "Display Name",
+              "placeholder": "Enter display name"
+            },
+            "icon-url": {
+              "label": "Icon",
+              "select-icon": "Select Icon",
+              "dialog-title": "Select Icon"
+            },
+            "description": {
+              "label": "Description",
+              "placeholder": "Enter description"
+            },
+            "target-workflow-id": {
+              "label": "Associated Workflow",
+              "placeholder": "Select associated workflow",
+              "search-placeholder": "Search workflow",
+              "search-empty": "No workflow found"
+            },
+            "target-input-id": {
+              "label": "Target Workflow Input Field",
+              "placeholder": "Enter target workflow input field"
+            }
+          }
+        }
+      },
       "ugc-view": {
         "columns": {
           "logo": {
@@ -1445,7 +1495,7 @@
         },
         "pagination": {
           "previous": "Previous",
-          "next": "Next", 
+          "next": "Next",
           "page": "Page {{page}} of {{totalPages}}"
         },
         "joinDialog": {

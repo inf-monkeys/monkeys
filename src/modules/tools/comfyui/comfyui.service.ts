@@ -6,7 +6,7 @@ import { logger } from '@/common/logger';
 import { ComfyuiNode, ComfyuiPrompt, ComfyuiWorkflow, ComfyuiWorkflowWithPrompt } from '@/common/typings/comfyui';
 import { readComfyuiWorkflowFromImage, readComfyuiWorkflowFromJsonFile, readComfyuiWorkflowPromptFromJsonFile } from '@/common/utils/comfyui';
 import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-workflow.entity';
-import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
+import { ComfyuiRepository, CreateComfyuiWorkflowParams } from '@/database/repositories/comfyui.repository';
 import { ToolProperty, ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
@@ -281,6 +281,10 @@ export class ComfyUIService {
     });
 
     return inputs;
+  }
+
+  public async createComfyuiWorkflow(teamId: string, userId: string, params: CreateComfyuiWorkflowParams) {
+    return await this.comfyuiWorkflowRepository.createComfyuiWorkflow(teamId, userId, params);
   }
 
   public async importComfyuiWorkflow(teamId: string, userId: string, params: ImportComfyuiWorkflowParams) {

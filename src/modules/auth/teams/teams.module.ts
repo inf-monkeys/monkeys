@@ -3,6 +3,7 @@ import { ComfyuiModelService } from '@/modules/assets/comfyui-model/comfyui-mode
 import { DesignMetadataService } from '@/modules/design/design.metadata.service';
 import { DesignModule } from '@/modules/design/design.module';
 import { DesignProjectService } from '@/modules/design/design.project.service';
+import { MarketplaceModule } from '@/modules/marketplace/marketplace.module';
 import { ComfyUIModule } from '@/modules/tools/comfyui/comfyui.module';
 import { ConductorModule } from '@/modules/workflow/conductor/conductor.module';
 import { WorkflowModule } from '@/modules/workflow/workflow.module';
@@ -14,7 +15,7 @@ import { TeamsService } from './teams.service';
 @Module({
   controllers: [TeamsController],
   providers: [TeamsService, ComfyuiModelService, DesignProjectService, DesignMetadataService, WorkflowPageService],
-  imports: [ConductorModule, ComfyuiModelModule, ComfyUIModule, DesignModule, WorkflowModule],
+  imports: [ConductorModule, ComfyuiModelModule, ComfyUIModule, DesignModule, WorkflowModule, MarketplaceModule],
   exports: [TeamsService],
 })
 export class TeamsModule {}

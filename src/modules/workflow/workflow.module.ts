@@ -4,14 +4,16 @@ import { DesignMetadataEntity } from '@/database/entities/design/design-metatdat
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssetsModule } from '../assets/assets.module';
+import { MarketplaceModule } from '../marketplace/marketplace.module';
 import { ToolsModule } from '../tools/tools.module';
 import { ConductorModule } from './conductor/conductor.module';
 import { WorkflowAssetsController } from './workflow.assets.controller';
 import { WorkflowAssetsService } from './workflow.assets.service';
 import { WorkflowAssociationController } from './workflow.association.controller';
+import { WorkflowAssociationCrudService } from './workflow.association.crud.service';
 import { WorkflowAssociationService } from './workflow.association.service';
 import { WorkflowChatSessionController } from './workflow.chat-sessions.controller';
 import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
@@ -57,6 +59,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
   ],
   providers: [
     WorkflowCrudService,
+    WorkflowAssociationCrudService,
     WorkflowValidateService,
     WorkflowExecutionService,
     WorkflowWebhookService,
@@ -75,11 +78,12 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
   ],
   imports: [
     ConductorModule,
-    AssetsModule,
+    forwardRef(() => AssetsModule),
     TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity, DesignMetadataEntity, DesignProjectEntity]),
     ToolsModule,
     CommonModule,
+    MarketplaceModule,
   ],
-  exports: [WorkflowCrudService, WorkflowExecutionService, WorkflowTrackerService, WorkflowExecutionPersistenceService, WorkflowPageService, TypeOrmModule],
+  exports: [WorkflowCrudService, WorkflowAssociationCrudService, WorkflowExecutionService, WorkflowTrackerService, WorkflowExecutionPersistenceService, WorkflowPageService, TypeOrmModule],
 })
 export class WorkflowModule {}
