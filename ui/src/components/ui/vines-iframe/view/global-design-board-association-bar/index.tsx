@@ -18,6 +18,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
+import { useGetDesignAssociationList } from '@/apis/designs/index.ts';
 import { IDesignAssociation } from '@/apis/designs/typings';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -31,22 +32,7 @@ interface IGlobalDesignBoardAssociationBarProps extends React.ComponentPropsWith
 export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssociationBarProps> = () => {
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
-  const initialData: IDesignAssociation[] = [
-    {
-      enabled: true,
-      id: 'demo',
-      displayName: {
-        'zh-CN': 'To GPT-4o Image',
-        'en-US': 'To GPT-4o Image',
-      },
-      iconUrl: 'pencil-ruler',
-      createdTimestamp: 0,
-      updatedTimestamp: 0,
-      type: 'team',
-      targetWorkflowId: '685e00fb7ed22ecc6f9deceb',
-      targetInputId: 'input_image',
-    },
-  ];
+  const { data: initialData } = useGetDesignAssociationList();
 
   // 添加本地状态
   const [localData, setLocalData] = useState<IDesignAssociation[]>(initialData?.filter((it) => it.enabled) ?? []);

@@ -1263,6 +1263,51 @@
           }
         }
       },
+      "association-editor": {
+        "button": "关联编辑器",
+        "title": "关联编辑器",
+        "add": "新建关联",
+        "delete": {
+          "title": "确定要删除此关联吗",
+          "desc": "删除后将无法恢复，请确认是否删除此关联"
+        },
+        "enabled": {
+          "t": "已启用",
+          "f": "已禁用"
+        },
+        "editor": {
+          "title": "关联配置",
+          "field": {
+            "enabled": {
+              "label": "启用",
+              "description": "启用后，关联将展示在「全局画板」的右侧"
+            },
+            "display-name": {
+              "label": "显示名称",
+              "placeholder": "请输入显示名称"
+            },
+            "icon-url": {
+              "label": "图标",
+              "select-icon": "选择图标",
+              "dialog-title": "选择图标"
+            },
+            "description": {
+              "label": "描述",
+              "placeholder": "请输入描述"
+            },
+            "target-workflow-id": {
+              "label": "关联工作流",
+              "placeholder": "请选择关联工作流",
+              "search-placeholder": "搜索工作流",
+              "search-empty": "找不到工作流"
+            },
+            "target-input-id": {
+              "label": "目标工作流输入字段",
+              "placeholder": "请输入目标工作流输入字段"
+            }
+          }
+        }
+      },
       "ugc-view": {
         "columns": {
           "logo": {
@@ -3932,6 +3977,31 @@
         "title": "画布设置",
         "width": "宽度",
         "height": "高度"
+      }
+    },
+    "association": {
+      "create": {
+        "dialog": {
+          "title": "创建设计关联"
+        }
+      },
+      "edit": {
+        "dialog": {
+          "title": "编辑设计关联"
+        }
+      },
+      "dialog": {
+        "info": {
+          "label": "基本信息",
+          "placeholder": "请输入关联名称"
+        },
+        "description": {
+          "label": "描述",
+          "placeholder": "请输入关联描述"
+        },
+        "enabled": {
+          "label": "启用"
+        }
       }
     }
   },

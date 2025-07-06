@@ -1149,10 +1149,10 @@
   resolved "https://registry.npmjs.org/@inf-monkeys/conductor-javascript/-/conductor-javascript-1.0.2.tgz"
   integrity sha512-zMM20A5R5Gsy915uYboJa7j7XYx+Z8M1cQNlT2A1Q2XXRC2gfVFNo+74TtpoizTxQsUJsS7vU0q0uqd/VIciXA==
 
-"@inf-monkeys/monkeys@^0.0.12":
-  version "0.0.12"
-  resolved "https://registry.npmjs.org/@inf-monkeys/monkeys/-/monkeys-0.0.12.tgz"
-  integrity sha512-IDOdX9l0y6rNS7TmsRsmutKuBB28L6MrpQRs37fomdfG96ym364jktOLMJ01nCRaQ+faNKcqhBgXeIPic9+6Jw==
+"@inf-monkeys/monkeys@^0.0.13":
+  version "0.0.13"
+  resolved "https://registry.npmmirror.com/@inf-monkeys/monkeys/-/monkeys-0.0.13.tgz#683cd0d1f62f7a2df4b9f91ec8084735dc16d34d"
+  integrity sha512-aUeIGgAKwGN0zftidZx0tBhNOUubbgiDsspJq5go0miO8K/Sy5VfmDHvXyTIgJ9Viv02lmlKy5yY/e16yHwNXg==
   dependencies:
     "@io-orkes/conductor-javascript" "^2.1.0"
 

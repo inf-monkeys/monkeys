@@ -20,10 +20,11 @@ import { ComfyuiModelRepository } from './repositories/comfyui-model.repository'
 import { ComfyuiRepository } from './repositories/comfyui.repository';
 import { ConversationAppRepository } from './repositories/conversation-app.repository';
 import { CredentialsRepository } from './repositories/credential.repository';
+import { DesignAssociationRepository } from './repositories/design-association.repository';
 import { DesignMetadataRepository } from './repositories/design-metadata.repository';
 import { DesignProjectRepository } from './repositories/design-project.repository';
-import { EvaluationRepository } from './repositories/evaluation.repository';
 import { EvaluationRefactoredRepository } from './repositories/evaluation-refactored.repository';
+import { EvaluationRepository } from './repositories/evaluation.repository';
 import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.repository';
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
 import { LlmModelRepository } from './repositories/llm-model.repository';
@@ -76,6 +77,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     ObservabilityRepository,
     DesignMetadataRepository,
     DesignProjectRepository,
+    DesignAssociationRepository,
     MarketplaceRepository,
     EvaluationRepository,
     EvaluationRefactoredRepository,
@@ -115,6 +117,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     ObservabilityRepository,
     DesignMetadataRepository,
     DesignProjectRepository,
+    DesignAssociationRepository,
     MarketplaceRepository,
     EvaluationRepository,
     EvaluationRefactoredRepository,
