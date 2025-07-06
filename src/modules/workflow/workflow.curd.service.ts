@@ -53,7 +53,14 @@ export class WorkflowCrudService implements IAssetHandler {
   public async cloneFromSnapshot(snapshot: any, teamId: string, userId: string): Promise<AssetCloneResult> {
     const { workflow, pages } = snapshot;
     const originalId = workflow.originalId;
-    const newWorkflowId = await this.importWorkflow(teamId, userId, { workflows: [workflow], pages });
+    const newWorkflowId = await this.importWorkflow(teamId, userId, {
+      workflows: [workflow],
+      // TODO
+      pages: pages.map((it: WorkflowPageJson) => ({
+        ...it,
+        pinned: it.type === 'preview' ? true : it.pinned,
+      })),
+    });
     return { originalId, newId: newWorkflowId };
   }
 
