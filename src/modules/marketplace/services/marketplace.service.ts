@@ -249,6 +249,28 @@ export class MarketplaceService {
     return appWithVersions;
   }
 
+  public async getPresetApps() {
+    return this.appRepo.find({
+      where: { isPreset: true, status: MarketplaceAppStatus.APPROVED, isDeleted: false },
+      relations: { versions: true },
+      order: {
+        versions: {
+          createdTimestamp: 'DESC',
+        },
+      },
+    });
+  }
+
+  public async installPresetApps(teamId: string, userId: string) {
+    const assetTypeInstallSort: AssetType[] = ['comfyui-workflow', 'workflow', 'design-association', 'workflow-association'];
+
+    const presetApps = await this.getPresetApps();
+    if (!presetApps) throw new NotFoundException('Preset app not found.');
+    for (const app of presetApps.sort((a, b) => assetTypeInstallSort.indexOf(a.assetType) - assetTypeInstallSort.indexOf(b.assetType))) {
+      await this.installApp(app.versions[0].id, teamId, userId);
+    }
+  }
+
   public async installApp(versionId: string, teamId: string, userId: string) {
     return this.entityManager.transaction(async (transactionalEntityManager) => {
       const version = await transactionalEntityManager.findOne(MarketplaceAppVersionEntity, {
@@ -257,7 +279,7 @@ export class MarketplaceService {
       });
 
       if (!version || version.app.status !== MarketplaceAppStatus.APPROVED) {
-        throw new NotFoundException('App version not found or the app is not approved for installation.');
+        throw new NotFoundException(`App version ${versionId} not found or the app is not approved for installation.`);
       }
 
       if (!version.assetSnapshot || Object.keys(version.assetSnapshot).length === 0) {
@@ -335,5 +357,12 @@ export class MarketplaceService {
   public async getAppVersionById(appVersionId: string) {
     const appVersion = await this.versionRepo.findOne({ where: { id: appVersionId }, relations: { app: true } });
     return appVersion;
+  }
+
+  public async setPreset(appId: string, isPreset: boolean) {
+    const app = await this.appRepo.findOne({ where: { id: appId } });
+    if (!app) throw new NotFoundException('Application not found.');
+    app.isPreset = isPreset;
+    return this.appRepo.save(app);
   }
 }
