@@ -1239,13 +1239,15 @@ ORDER BY
       .then((data) => data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow'])));
   }
 
-  public async getWorkflowAssociation(workflowAssociationId: string) {
+  public async getWorkflowAssociation(workflowAssociationId: string, relation = true) {
     return await this.workflowAssociationRepository.findOne({
       where: { id: workflowAssociationId, isDeleted: false },
-      relations: {
-        originWorkflow: true,
-        targetWorkflow: true,
-      },
+      relations: relation
+        ? {
+            originWorkflow: true,
+            targetWorkflow: true,
+          }
+        : undefined,
     });
   }
 

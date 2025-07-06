@@ -4,8 +4,8 @@ import { Type } from 'class-transformer';
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 class AssetReferenceDto {
-  @ApiProperty({ description: 'Type of the asset', enum: ['workflow'] })
-  @IsEnum(['workflow'])
+  @ApiProperty({ description: 'Type of the asset', enum: ['workflow', 'workflow-association', 'design-association'] })
+  @IsEnum(['workflow', 'workflow-association', 'design-association'])
   assetType: AssetType;
 
   @ApiProperty({ description: 'Original ID of the asset' })
@@ -34,8 +34,8 @@ export class AppMetadataDto {
   @IsOptional()
   iconUrl?: string;
 
-  @ApiProperty({ description: 'Primary asset type of the application', enum: ['workflow'] })
-  @IsEnum(['workflow'])
+  @ApiProperty({ description: 'Primary asset type of the application', enum: ['workflow', 'workflow-association', 'design-association'] })
+  @IsEnum(['workflow', 'workflow-association', 'design-association'])
   assetType: AssetType;
 
   @ApiProperty({ description: 'Categories for the application', required: false, isArray: true })

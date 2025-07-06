@@ -1,5 +1,5 @@
 import { WorkflowAssociationsEntity } from '@/database/entities/workflow/workflow-association';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { AssetCloneResult, IAssetHandler } from '../marketplace/types';
@@ -11,6 +11,8 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
   constructor(
     private readonly workflowCrudService: WorkflowCrudService,
     private readonly workflowAssociationService: WorkflowAssociationService,
+
+    @Inject(forwardRef(() => MarketplaceService))
     private readonly marketplaceService: MarketplaceService,
   ) {}
 
@@ -18,7 +20,7 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
    * 获取工作流关联的快照
    */
   public async getSnapshot(workflowAssociationId: string): Promise<any> {
-    const association = await this.workflowAssociationService.getWorkflowAssociation(workflowAssociationId);
+    const association = await this.workflowAssociationService.getWorkflowAssociation(workflowAssociationId, false);
 
     if (!association) {
       throw new NotFoundException('关联不存在');
@@ -55,7 +57,7 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
 
     return {
       ...association,
-      targetWorkflowId: type === 'to-workflow' ? tagetWorkflowAppVersionId : undefined,
+      targetWorkflowId: type === 'to-workflow' ? tagetWorkflowAppVersionId.appId : undefined,
       originWorkflowId: appVersion.appId,
     };
   }

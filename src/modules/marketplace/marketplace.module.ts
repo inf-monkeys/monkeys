@@ -4,6 +4,7 @@ import { MarketplaceAppEntity } from '@/database/entities/marketplace/marketplac
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssetsModule } from '../assets/assets.module';
+import { DesignModule } from '../design/design.module';
 import { WorkflowModule } from '../workflow/workflow.module';
 import { MarketplaceAdminController } from './controllers/marketplace.admin.controller';
 import { MarketplacePublicController } from './controllers/marketplace.public.controller';
@@ -12,7 +13,12 @@ import { MarketplaceNotificationService } from './services/marketplace.notificat
 import { MarketplaceService } from './services/marketplace.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([MarketplaceAppEntity, MarketplaceAppVersionEntity, InstalledAppEntity]), forwardRef(() => WorkflowModule), forwardRef(() => AssetsModule)],
+  imports: [
+    TypeOrmModule.forFeature([MarketplaceAppEntity, MarketplaceAppVersionEntity, InstalledAppEntity]),
+    forwardRef(() => WorkflowModule),
+    forwardRef(() => AssetsModule),
+    forwardRef(() => DesignModule),
+  ],
   controllers: [MarketplaceAdminController, MarketplacePublicController, MarketplaceSubmissionController],
   providers: [MarketplaceService, MarketplaceNotificationService],
   exports: [MarketplaceService],

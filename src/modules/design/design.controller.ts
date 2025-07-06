@@ -1,3 +1,4 @@
+import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
@@ -167,11 +168,10 @@ export class DesignController {
     description: '创建设计关联',
   })
   async createDesignAssociation(@Req() req: IRequest, @Body() createDesignAssociationDto: CreateDesignAssociationDto) {
-    const { teamId, userId } = req;
+    const { teamId } = req;
     const result = await this.designAssociationService.create({
       ...createDesignAssociationDto,
       teamId,
-      creatorUserId: userId,
     });
     return new SuccessResponse({ data: result });
   }
