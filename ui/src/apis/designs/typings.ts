@@ -28,11 +28,11 @@ export interface IDesignAssociation {
   enabled: boolean;
   id: string;
   sortIndex?: number;
-  displayName: I18nValue;
+  displayName: I18nValue | string | null;
+  description?: I18nValue | string | null;
   iconUrl: string;
   createdTimestamp: number;
   updatedTimestamp: number;
-  type: 'team' | 'tenant';
   targetWorkflowId: string;
   targetInputId: string;
 }

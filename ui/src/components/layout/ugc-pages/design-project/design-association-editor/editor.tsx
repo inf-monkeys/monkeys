@@ -8,20 +8,20 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { createWorkflowAssociation, updateWorkflowAssociation } from '@/apis/workflow/association';
-import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
-import { AssociationEditorFields } from '@/components/layout/workspace/vines-view/flow/toolbar/more/association-editor/field';
+import { createDesignAssociation, updateDesignAssociation } from '@/apis/designs';
+import { IDesignAssociation } from '@/apis/designs/typings';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form.tsx';
-import { DEFAULT_WORKFLOW_ASSOCIATION_LUCIDE_ICON_URL } from '@/consts/icons';
-import { IWorkflowAssociationForEditor, workflowAssociationSchema } from '@/schema/workspace/workflow-association';
-import { useFlowStore } from '@/store/useFlowStore';
+import { DEFAULT_DESIGN_ASSOCIATION_LUCIDE_ICON_URL } from '@/consts/icons';
+import { designAssociationSchema, IDesignAssociationForEditor } from '@/schema/workspace/design-association';
 import VinesEvent from '@/utils/events.ts';
 
-interface IWorkflowAssociationEditorProps {}
+import { DesignAssociationEditorFields } from './field';
 
-export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps> = () => {
+interface IDesignAssociationEditorProps {}
+
+export const DesignAssociationEditor: React.FC<IDesignAssociationEditorProps> = () => {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
@@ -30,55 +30,53 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
 
   const defaultValues = {
     enabled: true,
-    type: 'to-workflow',
     displayName: '',
     description: '',
-    mapper: [],
-    iconUrl: DEFAULT_WORKFLOW_ASSOCIATION_LUCIDE_ICON_URL,
-  } as unknown as IWorkflowAssociationForEditor;
+    iconUrl: DEFAULT_DESIGN_ASSOCIATION_LUCIDE_ICON_URL,
+  };
 
-  const form = useForm<IWorkflowAssociationForEditor>({
-    resolver: zodResolver(workflowAssociationSchema),
+  const form = useForm<IDesignAssociationForEditor>({
+    resolver: zodResolver(designAssociationSchema),
     defaultValues,
   });
-
-  const { workflowId } = useFlowStore();
 
   const [aid, setAid] = useState<string | undefined>();
 
   const [mode, setMode] = useState<'create' | 'update'>('create');
 
   useEffect(() => {
-    const handleOpen = (association: IWorkflowAssociation, mode: 'create' | 'update' = 'create') => {
+    const handleOpen = (association: IDesignAssociation, mode: 'create' | 'update' = 'create') => {
+      console.log('handleOpen', association, mode);
       setMode(mode);
       if (mode === 'update') {
-        form.reset(association as IWorkflowAssociationForEditor);
+        form.reset(association as IDesignAssociationForEditor);
         setAid(association.id);
       }
       if (mode === 'create') {
         form.reset(defaultValues);
         setAid(undefined);
+        console.log('handleOpen', form.getValues());
       }
       setOpen(true);
     };
-    VinesEvent.on('flow-association-editor', handleOpen);
+    VinesEvent.on('design-association-editor', handleOpen);
     return () => {
-      VinesEvent.off('flow-association-editor', handleOpen);
+      VinesEvent.off('design-association-editor', handleOpen);
     };
   }, []);
 
   const handleSubmit = form.handleSubmit(
     (data) => {
       if (mode === 'update') {
-        if (!workflowId || !aid) {
+        if (!aid) {
           toast.warning(t('common.toast.loading'));
           return;
         }
-        toast.promise(updateWorkflowAssociation(workflowId, aid, data), {
+        toast.promise(updateDesignAssociation(aid, data), {
           loading: t('common.update.loading'),
           error: t('common.update.error'),
           success: () => {
-            void mutate((key) => typeof key === 'string' && key.startsWith(`/api/workflow/${workflowId}/associations`));
+            void mutate((key) => typeof key === 'string' && key.startsWith(`/api/design/association`));
             setAid(undefined);
             setMode('create');
             setOpen(false);
@@ -88,11 +86,11 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
         });
       }
       if (mode === 'create') {
-        toast.promise(createWorkflowAssociation(workflowId, data), {
+        toast.promise(createDesignAssociation(data), {
           loading: t('common.create.loading'),
           error: t('common.create.error'),
           success: () => {
-            void mutate((key) => typeof key === 'string' && key.startsWith(`/api/workflow/${workflowId}/associations`));
+            void mutate((key) => typeof key === 'string' && key.startsWith(`/api/design/association`));
             setAid(undefined);
             setMode('create');
             setOpen(false);
@@ -127,7 +125,7 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
           }
         }}
       >
-        <DialogTitle>{t('workspace.flow-view.tooltip.more.association-editor.editor.title')}</DialogTitle>
+        <DialogTitle>{t('ugc-page.design-project.association-editor.editor.title')}</DialogTitle>
         <Form {...form}>
           <form
             onSubmit={handleSubmit}
@@ -138,7 +136,7 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
               }
             }}
           >
-            <AssociationEditorFields form={form} />
+            <DesignAssociationEditorFields form={form} />
             <DialogFooter>
               <div className="flex items-center gap-2">
                 <Button ref={submitButtonRef} type="submit" variant="outline">

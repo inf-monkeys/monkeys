@@ -29,7 +29,8 @@ export type FlowEventType =
   | 'flow-trigger-schedule'
   | 'flow-trigger-webhook'
   | 'flow-trigger-custom'
-  | 'flow-association-editor';
+  | 'flow-association-editor'
+  | 'design-association-editor';
 
 export type DesignBoardEventType = 'design-board-export' | 'design-board-save';
 

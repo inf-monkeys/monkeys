@@ -2,10 +2,15 @@ import { I18nValue } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
-export type DesignAssociationType = 'team' | 'tenant';
-
 @Entity({ name: 'design_associations' })
-export class DesignAssociationsEntity extends BaseEntity {
+export class DesignAssociationEntity extends BaseEntity {
+  @Column({
+    name: 'team_id',
+    type: 'varchar',
+    length: 128,
+  })
+  teamId: string;
+
   @Column({
     name: 'enabled',
     type: 'boolean',
@@ -40,25 +45,14 @@ export class DesignAssociationsEntity extends BaseEntity {
   sortIndex?: number | null;
 
   @Column({
-    name: 'type',
-    type: 'varchar',
-  })
-  type: DesignAssociationType;
-
-  @Column({
     name: 'target_workflow_id',
     nullable: true,
   })
   targetWorkflowId?: string;
 
   @Column({
-    name: 'mapper',
-    type: 'jsonb',
-    nullable: true,
+    name: 'target_input_id',
+    type: 'text',
   })
-  mapper?: Array<{
-    origin: string;
-    target: string;
-    default?: string;
-  }>;
+  targetInputId: string;
 }

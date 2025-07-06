@@ -3,8 +3,9 @@ import useSWR from 'swr';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { ICreateDesignProject } from '@/schema/workspace/create-design-project.ts';
+import { ICreateDesignAssociation } from '@/schema/workspace/design-association';
 
-import { IDesignBoardItem, IDesignBoardMetadata, IDesignProject } from './typings';
+import { IDesignAssociation, IDesignBoardItem, IDesignBoardMetadata, IDesignProject } from './typings';
 
 export const createDesignProject = (createDesignProjectDto: ICreateDesignProject) =>
   vinesFetcher<IAssetItem<IDesignProject>>({
@@ -46,3 +47,23 @@ export const updateDesignBoardMetadata = (designBoardId: string, metadata: Parti
     method: 'PUT',
     simple: true,
   })(`/api/design/metadata/${designBoardId}`, metadata);
+
+export const createDesignAssociation = (createDesignAssociationDto: ICreateDesignAssociation) =>
+  vinesFetcher<IDesignAssociation>({
+    method: 'POST',
+    simple: true,
+  })('/api/design/association', createDesignAssociationDto);
+
+export const updateDesignAssociation = (associationId: string, association: Partial<IDesignAssociation>) =>
+  vinesFetcher<IDesignAssociation, Partial<IDesignAssociation>>({
+    method: 'PUT',
+    simple: true,
+  })(`/api/design/association/${associationId}`, association);
+
+export const deleteDesignAssociation = (associationId: string) =>
+  vinesFetcher({
+    method: 'DELETE',
+  })(`/api/design/association/${associationId}`);
+
+export const useGetDesignAssociationList = () =>
+  useSWR<IDesignAssociation[] | undefined>(`/api/design/association`, vinesFetcher());

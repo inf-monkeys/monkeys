@@ -16,6 +16,7 @@ import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createDesignProjectsColumns } from '@/components/layout/ugc-pages/design-project/consts.tsx';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
+import { DesignAssociationEditorDialog } from '@/components/layout/ugc-pages/design-project/design-association-editor';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -244,6 +245,7 @@ export const Designs: React.FC = () => {
             {/*    </DropdownMenuGroup>*/}
             {/*  </DropdownMenuContent>*/}
             {/*</DropdownMenu>*/}
+            <DesignAssociationEditorDialog />
             <CreateDesignProjectDialog />
           </>
         }

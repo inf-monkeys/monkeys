@@ -36,6 +36,7 @@ import { ComfyuiServerEntity } from './entities/comfyui/comfyui-server.entity';
 import { ComfyuiWorkflowEntity } from './entities/comfyui/comfyui-workflow.entity';
 import { ConversationAppEntity } from './entities/conversation-app/conversation-app.entity';
 import { ConversationExecutionEntity } from './entities/conversation-app/conversation-executions.entity';
+import { DesignAssociationEntity } from './entities/design/design-association';
 import { DesignMetadataEntity } from './entities/design/design-metatdata';
 import { DesignProjectEntity } from './entities/design/design-project';
 import { BattleGroupEntity } from './entities/evaluation/battle-group.entity';
@@ -106,6 +107,7 @@ export const entities: EntityClassOrSchema[] = [
   WorkflowObservabilityEntity,
   DesignMetadataEntity,
   DesignProjectEntity,
+  DesignAssociationEntity,
   MarketplaceAppEntity,
   MarketplaceAppVersionEntity,
   InstalledAppEntity,
