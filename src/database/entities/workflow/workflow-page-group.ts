@@ -28,8 +28,8 @@ export class WorkflowPageGroupEntity extends BaseEntity {
 
   @Column({
     name: 'page_ids',
-    type: 'simple-json',
-    nullable: true,
+    type: 'jsonb',
+    nullable: false,
   })
   pageIds: string[];
 
