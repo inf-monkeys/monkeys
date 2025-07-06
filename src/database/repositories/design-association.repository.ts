@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DesignAssociationEntity } from '../entities/design/design-association';
+import { InstalledAppEntity } from '../entities/marketplace/installed-app.entity';
 
 @Injectable()
 export class DesignAssociationRepository {
@@ -41,6 +42,13 @@ export class DesignAssociationRepository {
   }
 
   public async delete(id: string) {
-    await this.designAssociationRepository.update(id, { isDeleted: true });
+    return this.designAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.delete(InstalledAppEntity, {
+        installedAssetIds: {
+          'design-association': [id],
+        },
+      });
+      return await transactionalEntityManager.update(DesignAssociationEntity, { id }, { isDeleted: true });
+    });
   }
 }

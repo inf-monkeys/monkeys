@@ -15,6 +15,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _, { isEmpty, isString, keyBy, omit, pick } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { DataSource, FindManyOptions, In, IsNull, Repository } from 'typeorm';
+import { InstalledAppEntity } from '../entities/marketplace/installed-app.entity';
 import { UpdateAndCreateWorkflowAssociation, WorkflowAssociationsEntity } from '../entities/workflow/workflow-association';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
@@ -442,6 +443,13 @@ export class WorkflowRepository {
           isDeleted: true,
         },
       );
+
+      // 删除 installed apps 中的记录
+      await transactionalEntityManager.delete(InstalledAppEntity, {
+        installedAssetIds: {
+          workflow: [workflowId],
+        },
+      });
     });
   }
 
@@ -1370,6 +1378,13 @@ ORDER BY
       if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
         throw new ForbiddenException(`no permission to operate the workflow association: ${id}`);
       }
+
+      // 删除 installed apps 中的记录
+      await transactionalEntityManager.delete(InstalledAppEntity, {
+        installedAssetIds: {
+          'workflow-association': [association.id],
+        },
+      });
 
       return await transactionalEntityManager.update(WorkflowAssociationsEntity, { id }, { isDeleted: true });
     });
