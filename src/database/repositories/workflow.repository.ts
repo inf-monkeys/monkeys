@@ -14,7 +14,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { isEmpty, isString, keyBy, omit, pick } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
-import { FindManyOptions, In, IsNull, Repository } from 'typeorm';
+import { DataSource, FindManyOptions, In, IsNull, Repository } from 'typeorm';
 import { UpdateAndCreateWorkflowAssociation, WorkflowAssociationsEntity } from '../entities/workflow/workflow-association';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
@@ -70,6 +70,7 @@ export class WorkflowRepository {
     private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
     @InjectRepository(WorkflowAssociationsEntity)
     private readonly workflowAssociationRepository: Repository<WorkflowAssociationsEntity>,
+    private readonly dataSource: DataSource,
   ) {}
 
   public async findWorkflowByCondition(condition: FindWorkflowCondition) {
@@ -380,65 +381,68 @@ export class WorkflowRepository {
   }
 
   public async deleteWorkflow(teamId: string, workflowId: string) {
-    // 标记 workflow 为已删除
-    await this.workflowMetadataRepository.update(
-      {
-        teamId,
-        workflowId,
-      },
-      {
-        isDeleted: true,
-      },
-    );
+    // 开启事务
+    await this.dataSource.transaction(async (transactionalEntityManager) => {
+      // 标记 workflow 为已删除
+      await transactionalEntityManager.update(
+        WorkflowMetadataEntity,
+        {
+          teamId,
+          workflowId,
+        },
+        {
+          isDeleted: true,
+        },
+      );
 
-    // 标记相关的 trigger 为已删除
-    await this.workflowTriggerRepository.update(
-      {
-        workflowId,
-      },
-      {
-        isDeleted: true,
-      },
-    );
+      // 标记相关的 trigger 为已删除
+      await transactionalEntityManager.update(
+        WorkflowTriggersEntity,
+        {
+          workflowId,
+        },
+        {
+          isDeleted: true,
+        },
+      );
 
-    // 获取所有相关的 pages 的 id
-    const pages = await this.pageRepository.find({
-      where: {
-        workflowId,
-      },
-      select: ['id'],
+      // 获取所有相关的 pages
+      const pages = await transactionalEntityManager.find(WorkflowPageEntity, {
+        where: {
+          workflowId,
+        },
+        select: ['id'],
+      });
+
+      if (pages.length > 0) {
+        // 获取所有 page groups
+        const pageGroups = await transactionalEntityManager.find(WorkflowPageGroupEntity, {
+          where: {
+            teamId,
+          },
+        });
+
+        // 从每个 page group 中移除被删除的 page ids
+        const pageIdsToRemove = pages.map((page) => page.id);
+        for (const group of pageGroups) {
+          if (group.pageIds?.length) {
+            group.pageIds = group.pageIds.filter((id) => !pageIdsToRemove.includes(id));
+            await transactionalEntityManager.save(WorkflowPageGroupEntity, group);
+          }
+        }
+      }
+
+      // 标记相关的 pages 为已删除
+      await transactionalEntityManager.update(
+        WorkflowPageEntity,
+        {
+          workflowId,
+        },
+        {
+          isDeleted: true,
+        },
+      );
     });
-    const pageIds = pages.map((page) => page.id);
-
-    if (pageIds.length > 0) {
-      // 使用 PostgreSQL 的 JSONB 操作直接更新 page_ids
-      await this.pageGroupRepository
-        .createQueryBuilder()
-        .update()
-        .set({
-          pageIds: () => `page_ids - ALL(ARRAY[${pageIds.map((id) => `'${id}'`).join(',')}]::text[])`,
-        })
-        .where('team_id = :teamId', { teamId })
-        .execute();
-    }
-
-    // 标记相关的 pages 为已删除
-    await this.pageRepository.update(
-      {
-        workflowId,
-      },
-      {
-        isDeleted: true,
-      },
-    );
-
-    // workflow association
-    await this.workflowAssociationRepository.update(
-      {
-        originWorkflowId: workflowId,
-      },
-      { isDeleted: true },
-    );
   }
 
   public async getWorkflowVersions(workflowId: string) {
@@ -1296,10 +1300,10 @@ ORDER BY
       });
 
       if (createAssociation.type === 'to-workflow' && workflows.length !== 2) {
-        throw new NotFoundException('originWorkflowId or targetWorkflowId not found');
+        throw new NotFoundException('originWorkflowId or targetWorkflowId not found, originWorkflowId: ' + workflowId + ', targetWorkflowId: ' + createAssociation.targetWorkflowId);
       }
       if (createAssociation.type !== 'to-workflow' && workflows.length !== 1) {
-        throw new NotFoundException('originWorkflowId not found');
+        throw new NotFoundException('originWorkflowId not found, originWorkflowId: ' + workflowId);
       }
 
       return await transactionalEntityManager.save(WorkflowAssociationsEntity, {
