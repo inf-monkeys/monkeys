@@ -1,13 +1,12 @@
 import { DesignAssociationRepository } from '@/database/repositories/design-association.repository';
 import { Injectable } from '@nestjs/common';
 import { DesignAssociationEntity } from '../../database/entities/design/design-association';
-import { CreateDesignAssociationDto } from './dto/create-design-association.dto';
 
 @Injectable()
 export class DesignAssociationService {
   constructor(private readonly designAssociationRepository: DesignAssociationRepository) {}
 
-  async create(createDesignAssociationDto: CreateDesignAssociationDto) {
+  async create(createDesignAssociationDto: Omit<DesignAssociationEntity, 'id' | 'createdTimestamp' | 'updatedTimestamp' | 'isDeleted'>) {
     const associationEntity = new DesignAssociationEntity();
 
     Object.assign(associationEntity, createDesignAssociationDto);

@@ -10,8 +10,8 @@ export class WorkflowAssociationService {
     return await this.workflowRepository.listWorkflowAssociations(workflowId, teamId);
   }
 
-  async getWorkflowAssociation(workflowAssociationId: string) {
-    return await this.workflowRepository.getWorkflowAssociation(workflowAssociationId);
+  async getWorkflowAssociation(workflowAssociationId: string, relation = true) {
+    return await this.workflowRepository.getWorkflowAssociation(workflowAssociationId, relation);
   }
 
   async createWorkflowAssociation(workflowId: string, teamId: string, createAssociation: UpdateAndCreateWorkflowAssociation) {

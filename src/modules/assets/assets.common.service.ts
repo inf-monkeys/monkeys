@@ -12,6 +12,7 @@ import { SdModelAssetRepositroy } from '@/database/repositories/assets-sd-model.
 import { WorkflowAssetRepositroy } from '@/database/repositories/assets-workflow.respository';
 import { AssetType } from '@inf-monkeys/monkeys';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { DesignAssociationCrudService } from '../design/design.association.crud.service';
 import { IAssetHandler } from '../marketplace/types';
 import { WorkflowAssociationCrudService } from '../workflow/workflow.association.crud.service';
 import { WorkflowCrudService } from '../workflow/workflow.curd.service';
@@ -24,6 +25,9 @@ export class AssetsMapperService {
 
     @Inject(forwardRef(() => WorkflowAssociationCrudService))
     private readonly workflowAssociationCrudService: IAssetHandler,
+
+    @Inject(forwardRef(() => DesignAssociationCrudService))
+    private readonly designAssociationCrudService: IAssetHandler,
 
     private readonly canvasAssetsRepository: CanvasAssetRepositroy,
     private readonly llmModelAssetsRepository: LlmModelAssetRepositroy,
@@ -43,6 +47,8 @@ export class AssetsMapperService {
         return this.workflowCrudService;
       case 'workflow-association':
         return this.workflowAssociationCrudService;
+      case 'design-association':
+        return this.designAssociationCrudService;
       default:
         throw new Error(`Unsupported asset type for handler: ${assetType}`);
     }

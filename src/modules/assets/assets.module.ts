@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { DesignModule } from '../design/design.module';
 import { WorkflowModule } from '../workflow/workflow.module';
 import { AssetsMapperService } from './assets.common.service';
 import { AssetsFiltersController } from './assets.filter.controller';
@@ -23,7 +24,18 @@ import { SqlKnowledgeBaseModule } from './sql-knowledge-base/sql-knowledge-base.
 @Module({
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController, AssetsReferenceController, AssetsMarketplaceController],
   providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsMapperService, AssetsReferenceService, AssetsMarketplaceService],
-  imports: [CanvasModule, MediaModule, KnowledgeBaseModule, SqlKnowledgeBaseModule, LlmModelModule, SdModelModule, ConversationAppModule, ComfyuiModelModule, forwardRef(() => WorkflowModule)],
+  imports: [
+    CanvasModule,
+    MediaModule,
+    KnowledgeBaseModule,
+    SqlKnowledgeBaseModule,
+    LlmModelModule,
+    SdModelModule,
+    ConversationAppModule,
+    ComfyuiModelModule,
+    forwardRef(() => DesignModule),
+    forwardRef(() => WorkflowModule),
+  ],
   exports: [AssetsMarketplaceService, AssetsPublishService, MediaModule, AssetsMapperService],
 })
 export class AssetsModule {}
