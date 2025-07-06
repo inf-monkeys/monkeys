@@ -42,4 +42,11 @@ export class MarketplaceAdminController {
     const app = await this.marketplaceService.rejectSubmission(appId);
     return new SuccessResponse({ data: app });
   }
+
+  @Put('/apps/:appId/setPreset')
+  @ApiOperation({ summary: 'Set an app as preset' })
+  async setPreset(@Param('appId') appId: string, @Body() body: { isPreset: boolean }) {
+    const app = await this.marketplaceService.setPreset(appId, body.isPreset);
+    return new SuccessResponse({ data: app });
+  }
 }
