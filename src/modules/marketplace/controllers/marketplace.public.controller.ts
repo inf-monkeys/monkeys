@@ -55,10 +55,10 @@ export class MarketplacePublicController {
     return new SuccessResponse({ data: installedApps });
   }
 
-  @Get('/installed/getAppVersionIdByAsset')
+  @Get('/installed/getInstalledAppVersionIdByAsset')
   @ApiOperation({ summary: 'Get app version id by asset id and type' })
-  async getAppVersionIdByAssetId(@Query('assetId') assetId: string, @Query('assetType') assetType: AssetType) {
-    const appVersionId = await this.marketplaceService.getAppVersionIdByAssetId(assetId, assetType);
+  async getInsatalledAppVersionIdByAssetId(@Query('assetId') assetId: string, @Query('assetType') assetType: AssetType) {
+    const appVersionId = await this.marketplaceService.getInstalledAppVersionIdByAssetId(assetId, assetType);
     return new SuccessResponse({ data: appVersionId });
   }
 }

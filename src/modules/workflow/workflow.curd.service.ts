@@ -1,7 +1,7 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { logger } from '@/common/logger';
-import { generateDbId, getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
+import { generateDbId, getComfyuiWorkflowDataListFromWorkflow, getSubWorkflowDataList } from '@/common/utils';
 import { flatTasks } from '@/common/utils/conductor';
 import { getI18NValue } from '@/common/utils/i18n';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
@@ -19,6 +19,7 @@ import fs from 'fs';
 import _, { isEmpty } from 'lodash';
 import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
 import { AssetsPublishService } from '../assets/assets.publish.service';
+import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { AssetCloneResult, AssetUpdateResult, IAssetHandler } from '../marketplace/types';
 import { ConductorService } from './conductor/conductor.service';
 import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowPageJson, WorkflowPageUpdateJson, WorkflowWithAssetsJson } from './interfaces';
@@ -42,19 +43,94 @@ export class WorkflowCrudService implements IAssetHandler {
 
     @Inject(forwardRef(() => AssetsPublishService))
     private readonly assetsPublishService: AssetsPublishService,
+
+    @Inject(forwardRef(() => MarketplaceService))
+    private readonly marketplaceService: MarketplaceService,
   ) {}
 
   public async getSnapshot(workflowId: string, version: number): Promise<any> {
     const { workflow } = await this.exportWorkflowOfVersion(workflowId, version);
     const pages = await this.pageService.listWorkflowPagesBrief(workflowId);
+
+    const tasks = workflow.tasks;
+
+    // 子工作流
+    const subWorkflows = getSubWorkflowDataList(tasks);
+    for (const subWorkflow of subWorkflows) {
+      const appVersion = await this.marketplaceService.getAppVersionByAssetId(subWorkflow.subWorkflowId, 'workflow');
+      if (!appVersion) {
+        throw new NotFoundException(`找不到子工作流 ${subWorkflow.subWorkflowId} 对应的应用市场应用`);
+      }
+      _.set(workflow, `tasks.${subWorkflow.path}`, appVersion.appId);
+    }
+
+    // comfyui
+    const comfyuiWorkflows = getComfyuiWorkflowDataListFromWorkflow(tasks);
+    for (const comfyuiWorkflow of comfyuiWorkflows) {
+      const appVersion = await this.marketplaceService.getAppVersionByAssetId(comfyuiWorkflow.comfyuiWorkflowId, 'comfyui-workflow');
+      if (!appVersion) {
+        throw new NotFoundException(`找不到 comfyui 工作流 ${comfyuiWorkflow.comfyuiWorkflowId} 对应的应用市场应用`);
+      }
+      _.set(workflow, `tasks.${comfyuiWorkflow.path}.workflow`, appVersion.appId);
+
+      // server
+      _.set(workflow, `tasks.${comfyuiWorkflow.path}.server`, 'system');
+    }
+
     return { workflow, pages };
+  }
+
+  private async processWorkflowSnapshot(snapshot: WorkflowExportJson, teamId: string): Promise<WorkflowExportJson> {
+    const clonedSnapshot = _.cloneDeep(snapshot);
+
+    const tasks = clonedSnapshot.tasks;
+
+    // 子工作流
+    const subWorkflows = getSubWorkflowDataList(tasks);
+    for (const { subWorkflowId: subWorkflowAppId, path } of subWorkflows) {
+      const subWorkflow = await this.marketplaceService.getAppDetails(subWorkflowAppId);
+      if (subWorkflow) {
+        const latestVersion = subWorkflow.versions.sort((a, b) => b.createdTimestamp - a.createdTimestamp)[0];
+        const installedApp = await this.marketplaceService.getInstalledAppByAppVersionId(latestVersion.id, teamId);
+        if (installedApp?.installedAssetIds?.workflow?.[0]) {
+          _.set(clonedSnapshot, `tasks.${path}`, installedApp.installedAssetIds.workflow[0]);
+        } else {
+          throw new NotFoundException(`子工作流应用 ${subWorkflowAppId} 未安装`);
+        }
+      } else {
+        throw new NotFoundException(`子工作流应用 ${subWorkflowAppId} 未安装`);
+      }
+    }
+
+    // comfyui
+    const comfyuiWorkflows = getComfyuiWorkflowDataListFromWorkflow(tasks);
+    console.log('comfyuiWorkflows', comfyuiWorkflows);
+    for (const { comfyuiWorkflowId: comfyuiWorkflowAppId, path } of comfyuiWorkflows) {
+      const comfyuiWorkflow = await this.marketplaceService.getAppDetails(comfyuiWorkflowAppId);
+      if (comfyuiWorkflow) {
+        const latestVersion = comfyuiWorkflow.versions.sort((a, b) => b.createdTimestamp - a.createdTimestamp)[0];
+        const installedApp = await this.marketplaceService.getInstalledAppByAppVersionId(latestVersion.id, teamId);
+        if (installedApp?.installedAssetIds?.['comfyui-workflow']?.[0]) {
+          _.set(clonedSnapshot, `tasks.${path}.workflow`, installedApp?.installedAssetIds?.['comfyui-workflow']?.[0]);
+        } else {
+          throw new NotFoundException(`comfyui 工作流应用 ${comfyuiWorkflowAppId} 未安装`);
+        }
+      } else {
+        throw new NotFoundException(`comfyui 工作流应用 ${comfyuiWorkflowAppId} 未安装`);
+      }
+    }
+
+    return clonedSnapshot;
   }
 
   public async cloneFromSnapshot(snapshot: any, teamId: string, userId: string): Promise<AssetCloneResult> {
     const { workflow, pages } = snapshot;
     const originalId = workflow.originalId;
+
+    const processedWorkflow = await this.processWorkflowSnapshot(workflow, teamId);
+
     const newWorkflowId = await this.importWorkflow(teamId, userId, {
-      workflows: [workflow],
+      workflows: [processedWorkflow],
       // TODO
       pages: pages.map((it: WorkflowPageJson) => ({
         ...it,
@@ -66,7 +142,8 @@ export class WorkflowCrudService implements IAssetHandler {
 
   public async updateFromSnapshot(snapshot: any, teamId: string, userId: string, workflowId: string): Promise<AssetUpdateResult> {
     const { workflow, pages } = snapshot;
-    await this.updateWorkflow(teamId, userId, workflowId, { workflows: [workflow], pages });
+    const processedWorkflow = await this.processWorkflowSnapshot(workflow, teamId);
+    await this.updateWorkflow(teamId, userId, workflowId, { workflows: [processedWorkflow], pages });
     return { originalId: workflowId };
   }
 
@@ -91,44 +168,7 @@ export class WorkflowCrudService implements IAssetHandler {
   }
 
   public async remapDependencies(newWorkflowId: string, idMapping: { [originalId: string]: string }): Promise<void> {
-    const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(newWorkflowId);
-    if (!workflow) return;
-
-    let needsUpdate = false;
-    const tasks = workflow.tasks;
-
-    // 遍历所有任务节点
-    for (const task of flatTasks(tasks)) {
-      // 场景1: 修复子工作流引用
-      if (task.type === ToolType.SUB_WORKFLOW) {
-        const originalSubWorkflowId = task.subWorkflowParam?.name;
-        if (originalSubWorkflowId && idMapping[originalSubWorkflowId]) {
-          task.subWorkflowParam.name = idMapping[originalSubWorkflowId];
-          needsUpdate = true;
-        }
-      }
-      // 场景2: 修复ComfyUI工作流引用
-      if (task.name === 'comfyui:run_comfyui_workflow') {
-        const originalComfyWorkflowId = task.inputParameters?.workflow;
-        if (originalComfyWorkflowId && idMapping[originalComfyWorkflowId]) {
-          task.inputParameters.workflow = idMapping[originalComfyWorkflowId];
-          needsUpdate = true;
-        }
-      }
-    }
-
-    // 场景3: 修复快捷方式引用
-    if (workflow.shortcutsFlow) {
-      const [originalTargetId, version] = workflow.shortcutsFlow.split(':');
-      if (idMapping[originalTargetId]) {
-        workflow.shortcutsFlow = `${idMapping[originalTargetId]}:${version}`;
-        needsUpdate = true;
-      }
-    }
-
-    if (needsUpdate) {
-      await this.workflowRepository.updateWorkflowDef(workflow.teamId, newWorkflowId, workflow.version, { tasks, shortcutsFlow: workflow.shortcutsFlow });
-    }
+    return;
   }
 
   public async getWorkflowDef(workflowId: string, version?: number, simple = true): Promise<WorkflowMetadataEntity> {

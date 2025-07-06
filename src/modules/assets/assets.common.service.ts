@@ -14,12 +14,16 @@ import { AssetType } from '@inf-monkeys/monkeys';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { DesignAssociationCrudService } from '../design/design.association.crud.service';
 import { IAssetHandler } from '../marketplace/types';
+import { ComfyuiWorkflowCrudService } from '../tools/comfyui/comfyui.workflow.crud.service';
 import { WorkflowAssociationCrudService } from '../workflow/workflow.association.crud.service';
 import { WorkflowCrudService } from '../workflow/workflow.curd.service';
 
 @Injectable()
 export class AssetsMapperService {
   constructor(
+    @Inject(forwardRef(() => ComfyuiWorkflowCrudService))
+    private readonly comfyuiWorkflowCrudService: IAssetHandler,
+
     @Inject(forwardRef(() => WorkflowCrudService))
     private readonly workflowCrudService: IAssetHandler,
 
@@ -43,6 +47,8 @@ export class AssetsMapperService {
 
   public getAssetHandler(assetType: AssetType): IAssetHandler {
     switch (assetType) {
+      case 'comfyui-workflow':
+        return this.comfyuiWorkflowCrudService;
       case 'workflow':
         return this.workflowCrudService;
       case 'workflow-association':

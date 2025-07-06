@@ -34,7 +34,11 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
         // 4. 获取实际的工作流 ID
         if (installedApp?.installedAssetIds?.workflow?.[0]) {
           associationData['originWorkflowId'] = installedApp.installedAssetIds.workflow[0];
+        } else {
+          throw new NotFoundException(`工作流 ${snapshot.originWorkflowId} 未安装`);
         }
+      } else {
+        throw new NotFoundException(`工作流 ${snapshot.originWorkflowId} 未安装`);
       }
     }
 
@@ -49,7 +53,11 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
 
         if (installedApp?.installedAssetIds?.workflow?.[0]) {
           associationData['targetWorkflowId'] = installedApp.installedAssetIds.workflow[0];
+        } else {
+          throw new NotFoundException(`工作流 ${snapshot.targetWorkflowId} 未安装`);
         }
+      } else {
+        throw new NotFoundException(`工作流 ${snapshot.targetWorkflowId} 未安装`);
       }
     }
 
