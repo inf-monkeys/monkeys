@@ -179,8 +179,8 @@ export class WorkflowRepository {
     workflowId: string,
     version: number,
     updates: {
-      displayName?: string;
-      description?: string;
+      displayName?: string | I18nValue;
+      description?: string | I18nValue;
       iconUrl?: string;
       tasks?: MonkeyTaskDefTypes[];
       variables?: ToolProperty[];
@@ -1288,11 +1288,11 @@ ORDER BY
       });
 
       if (!association) {
-        throw new NotFoundException('workflow association not found');
+        throw new NotFoundException(`workflow association not found: ${id}`);
       }
 
       if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
-        throw new ForbiddenException('no permission to operate the workflow association');
+        throw new ForbiddenException(`no permission to operate the workflow association: ${id}`);
       }
 
       if (association.type === 'to-workflow' && updateAssociation.targetWorkflowId) {
@@ -1304,7 +1304,7 @@ ORDER BY
           },
         });
         if (!workflow) {
-          throw new NotFoundException('targetWorkflowId not found');
+          throw new NotFoundException(`targetWorkflowId not found: ${updateAssociation.targetWorkflowId}`);
         }
       }
 
@@ -1326,11 +1326,11 @@ ORDER BY
       });
 
       if (!association) {
-        throw new NotFoundException('workflow association not found');
+        throw new NotFoundException(`workflow association not found: ${id}`);
       }
 
       if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
-        throw new ForbiddenException('no permission to operate the workflow association');
+        throw new ForbiddenException(`no permission to operate the workflow association: ${id}`);
       }
 
       return await transactionalEntityManager.update(WorkflowAssociationsEntity, { id }, { isDeleted: true });

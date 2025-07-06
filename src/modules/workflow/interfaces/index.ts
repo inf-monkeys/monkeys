@@ -124,6 +124,10 @@ export interface WorkflowPageJson {
   permissions: PagePermission[];
 }
 
+export interface WorkflowPageUpdateJson extends WorkflowPageJson {
+  id: string;
+}
+
 export interface WorkflowExportJson extends BaseAsset {
   displayName: string | I18nValue;
   iconUrl: string;

@@ -11,7 +11,7 @@ import { isEmpty, keyBy, pick, pickBy, set, uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
-import { WorkflowPageJson } from './interfaces';
+import { WorkflowPageJson, WorkflowPageUpdateJson } from './interfaces';
 
 @Injectable()
 export class WorkflowPageService {
@@ -45,7 +45,7 @@ export class WorkflowPageService {
     }));
   }
 
-  async importWorkflowPage(workflowId: string, teamId: string, userId: string, pages: WorkflowPageJson[]) {
+  async importWorkflowPage(workflowId: string, teamId: string, pages: WorkflowPageJson[]) {
     for (const { displayName, sortIndex, pinned, type, isBuiltIn, permissions } of pages) {
       const pageId = generateDbId();
       const page: WorkflowPageEntity = {
@@ -64,6 +64,22 @@ export class WorkflowPageService {
         pinned: pinned,
       };
       await this.pageRepository.save(page);
+    }
+  }
+
+  async updateWorkflowPage(workflowId: string, pages: WorkflowPageUpdateJson[]) {
+    const oldPages = await this.listWorkflowPages(workflowId);
+    for (const { id, displayName, sortIndex, pinned, type, isBuiltIn, permissions } of pages) {
+      const oldPage = oldPages.find((page) => page.id === id);
+      if (!oldPage) continue;
+      oldPage.displayName = displayName;
+      oldPage.sortIndex = sortIndex;
+      oldPage.pinned = pinned;
+      oldPage.type = type;
+      oldPage.isBuiltIn = isBuiltIn;
+      oldPage.permissions = permissions;
+      oldPage.updatedTimestamp = Date.now();
+      await this.pageRepository.save(oldPage);
     }
   }
 

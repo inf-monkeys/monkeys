@@ -13,15 +13,15 @@ import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
-import { AssetType, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monkeys/monkeys';
+import { AssetType, I18nValue, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monkeys/monkeys';
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
 import _, { isEmpty } from 'lodash';
 import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
 import { AssetsPublishService } from '../assets/assets.publish.service';
-import { AssetCloneResult, IAssetHandler } from '../marketplace/types';
+import { AssetCloneResult, AssetUpdateResult, IAssetHandler } from '../marketplace/types';
 import { ConductorService } from './conductor/conductor.service';
-import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowPageJson, WorkflowWithAssetsJson } from './interfaces';
+import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowPageJson, WorkflowPageUpdateJson, WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowPageService } from './workflow.page.service';
 import { WorkflowValidateService } from './workflow.validate.service';
 
@@ -57,11 +57,30 @@ export class WorkflowCrudService implements IAssetHandler {
     return { originalId, newId: newWorkflowId };
   }
 
+  public async updateFromSnapshot(snapshot: any, teamId: string, userId: string, workflowId: string): Promise<AssetUpdateResult> {
+    const { workflow, pages } = snapshot;
+    await this.updateWorkflow(teamId, userId, workflowId, { workflows: [workflow], pages });
+    return { originalId: workflowId };
+  }
+
   private async importWorkflow(teamId: string, userId: string, data: { workflows: WorkflowExportJson[]; pages: WorkflowPageJson[] }): Promise<string> {
     const workflowData = data.workflows[0];
     const newWorkflowId = await this.createWorkflowDef(teamId, userId, workflowData);
-    await this.pageService.importWorkflowPage(newWorkflowId, teamId, userId, data.pages);
+    await this.pageService.importWorkflowPage(newWorkflowId, teamId, data.pages);
     return newWorkflowId;
+  }
+
+  private async updateWorkflow(teamId: string, userId: string, workflowId: string, data: { workflows: WorkflowExportJson[]; pages: WorkflowPageUpdateJson[] }): Promise<AssetUpdateResult> {
+    const workflowData = data.workflows[0];
+    await this.updateWorkflowDef(teamId, workflowId, workflowData.version, {
+      displayName: workflowData.displayName,
+      description: workflowData.description,
+      iconUrl: workflowData.iconUrl,
+      tasks: workflowData.tasks,
+      variables: workflowData.variables,
+    });
+    await this.pageService.updateWorkflowPage(workflowId, data.pages);
+    return { originalId: workflowId };
   }
 
   public async remapDependencies(newWorkflowId: string, idMapping: { [originalId: string]: string }): Promise<void> {
@@ -595,8 +614,8 @@ export class WorkflowCrudService implements IAssetHandler {
     workflowId: string,
     version: number,
     updates: {
-      displayName?: string;
-      description?: string;
+      displayName?: string | I18nValue;
+      description?: string | I18nValue;
       iconUrl?: string;
       tasks?: MonkeyTaskDefTypes[];
       variables?: ToolProperty[];
