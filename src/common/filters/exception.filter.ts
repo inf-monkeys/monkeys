@@ -30,9 +30,9 @@ export class ExceptionsFilter implements ExceptionFilter {
     } else if (exception instanceof AxiosError) {
       status = exception.response?.status || HttpStatus.INTERNAL_SERVER_ERROR;
     }
-    let message = '';
+    let message = exception.message || '';
     if (status === HttpStatus.NOT_FOUND) {
-      message = 'Not Found';
+      if (message == '') message = 'Not Found';
     } else {
       logger.error('Request Exception: ', exception);
       message = this.formatMessage(exception);

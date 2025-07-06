@@ -1,3 +1,4 @@
+import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { ComfyuiModelServerRelationEntity } from '@/database/entities/assets/model/comfyui-model/comfyui-model-server-relation.entity';
@@ -8,7 +9,6 @@ import { ComfyUIService } from '@/modules/tools/comfyui/comfyui.service';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { basename } from 'path';
-import { config } from '@/common/config';
 
 @Injectable()
 export class ComfyuiModelService {
@@ -193,5 +193,12 @@ export class ComfyuiModelService {
 
   public async updateModelsToInternals(teamId: string) {
     return await this.repository.updateModelsFromTeamIdToTeamId(teamId, 'internals');
+  }
+
+  public async isDefaultServerCanConnect() {
+    const server = await this.comfyuiService.getComfyuiServerById(null, 'default');
+    if (!server) return false;
+    const { success } = await this.comfyuiService.testComfyuiServerConnection(server.address);
+    return success;
   }
 }

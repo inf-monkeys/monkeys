@@ -2,13 +2,17 @@ import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
+import { DesignAssociationEntity } from '@/database/entities/design/design-association';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { DesignAssociationService } from './design.association.service';
 import { DesignMetadataService } from './design.metadata.service';
 import { DesignProjectService } from './design.project.service';
+import { CreateDesignAssociationDto } from './dto/create-design-association.dto';
 import { CreateDesignMetadataDto } from './dto/create-design-metadata.dto';
 import { CreateDesignProjectDto } from './dto/create-design-project.dto';
+import { UpdateDesignAssociationDto } from './dto/update-design-association.dto';
 import { UpdateDesignMetadataDto } from './dto/update-design-metadata.dto';
 import { UpdateDesignProjectDto } from './dto/update-design-project.dto';
 
@@ -19,6 +23,7 @@ export class DesignController {
   constructor(
     private readonly designMetadataService: DesignMetadataService,
     private readonly designProjectService: DesignProjectService,
+    private readonly designAssociationService: DesignAssociationService,
   ) {}
 
   @Post('project')
@@ -154,6 +159,70 @@ export class DesignController {
   })
   async deleteDesignMetadata(@Param('metadataId') metadataId: string) {
     const result = await this.designMetadataService.remove(metadataId);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Post('association')
+  @ApiOperation({
+    summary: '创建设计关联',
+    description: '创建设计关联',
+  })
+  async createDesignAssociation(@Req() req: IRequest, @Body() createDesignAssociationDto: CreateDesignAssociationDto) {
+    const { teamId } = req;
+    const result = await this.designAssociationService.create({
+      ...createDesignAssociationDto,
+      teamId,
+    });
+    return new SuccessResponse({ data: result });
+  }
+
+  @Get('association')
+  @ApiOperation({
+    summary: '获取设计关联列表',
+    description: '获取设计关联列表',
+  })
+  async findAllDesignAssociations(@Req() req: IRequest) {
+    const { teamId } = req;
+    const list = await this.designAssociationService.findByTeamId(teamId);
+    return new SuccessResponse({ data: list });
+  }
+
+  @Put('association/:associationId')
+  @ApiOperation({
+    summary: '更新设计关联',
+    description: '更新设计关联',
+  })
+  async updateDesignAssociation(@Param('associationId') associationId: string, @Body() updateDesignAssociationDto: UpdateDesignAssociationDto) {
+    const association = await this.designAssociationService.findById(associationId);
+    if (!association) {
+      throw new NotFoundException('设计关联不存在');
+    }
+    const updatedAssociation = new DesignAssociationEntity();
+    Object.assign(updatedAssociation, {
+      ...association,
+      ...updateDesignAssociationDto,
+    });
+    const result = await this.designAssociationService.update(associationId, updatedAssociation);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Delete('association/:associationId')
+  @ApiOperation({
+    summary: '删除设计关联',
+    description: '删除设计关联',
+  })
+  async deleteDesignAssociation(@Param('associationId') associationId: string) {
+    const result = await this.designAssociationService.delete(associationId);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Get('association/:associationId')
+  @ApiOperation({
+    summary: '获取设计关联',
+    description: '获取设计关联',
+  })
+  async getDesignAssociation(@Param('associationId') associationId: string) {
+    const result = await this.designAssociationService.findById(associationId);
     return new SuccessResponse({ data: result });
   }
 }

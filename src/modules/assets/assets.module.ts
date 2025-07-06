@@ -1,4 +1,7 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { DesignModule } from '../design/design.module';
+import { ComfyUIModule } from '../tools/comfyui/comfyui.module';
+import { WorkflowModule } from '../workflow/workflow.module';
 import { AssetsMapperService } from './assets.common.service';
 import { AssetsFiltersController } from './assets.filter.controller';
 import { AssetsFilterService } from './assets.filter.service';
@@ -22,7 +25,19 @@ import { SqlKnowledgeBaseModule } from './sql-knowledge-base/sql-knowledge-base.
 @Module({
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController, AssetsReferenceController, AssetsMarketplaceController],
   providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsMapperService, AssetsReferenceService, AssetsMarketplaceService],
-  imports: [CanvasModule, MediaModule, KnowledgeBaseModule, SqlKnowledgeBaseModule, LlmModelModule, SdModelModule, ConversationAppModule, ComfyuiModelModule],
-  exports: [AssetsMarketplaceService, AssetsPublishService, MediaModule],
+  imports: [
+    CanvasModule,
+    MediaModule,
+    KnowledgeBaseModule,
+    SqlKnowledgeBaseModule,
+    LlmModelModule,
+    SdModelModule,
+    ConversationAppModule,
+    ComfyuiModelModule,
+    forwardRef(() => DesignModule),
+    forwardRef(() => WorkflowModule),
+    forwardRef(() => ComfyUIModule),
+  ],
+  exports: [AssetsMarketplaceService, AssetsPublishService, MediaModule, AssetsMapperService],
 })
 export class AssetsModule {}

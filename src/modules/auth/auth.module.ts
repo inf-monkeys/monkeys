@@ -27,5 +27,6 @@ if (config.auth.enabled.some((method) => method.startsWith('oauth-'))) {
   controllers: [],
   providers: [],
   imports,
+  exports: imports,
 })
 export class AuthModule {}

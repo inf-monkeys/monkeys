@@ -11,7 +11,7 @@ import { isEmpty, keyBy, pick, pickBy, set, uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
-import { WorkflowPageJson } from './interfaces';
+import { WorkflowPageJson, WorkflowPageUpdateJson } from './interfaces';
 
 @Injectable()
 export class WorkflowPageService {
@@ -45,25 +45,65 @@ export class WorkflowPageService {
     }));
   }
 
-  async importWorkflowPage(workflowId: string, teamId: string, userId: string, pages: WorkflowPageJson[]) {
+  async importWorkflowPage(workflowId: string, teamId: string, pages: WorkflowPageJson[]) {
+    // 创建一个数组来收集需要 pin 的页面 ID
+    const pinnedPageIds: string[] = [];
+
+    // 首先创建所有页面
     for (const { displayName, sortIndex, pinned, type, isBuiltIn, permissions } of pages) {
       const pageId = generateDbId();
       const page: WorkflowPageEntity = {
         id: pageId,
-        type: type,
+        type,
         displayName,
         workflowId,
-        isBuiltIn: isBuiltIn,
+        isBuiltIn,
         teamId,
         permissions,
         customOptions: {},
-        sortIndex: sortIndex,
+        sortIndex,
         createdTimestamp: Date.now(),
         updatedTimestamp: Date.now(),
         isDeleted: false,
-        pinned: pinned,
+        pinned,
       };
       await this.pageRepository.save(page);
+
+      // 如果页面需要被 pin，将其 ID 添加到收集数组中
+      if (pinned) {
+        pinnedPageIds.push(pageId);
+      }
+    }
+
+    // 如果有需要 pin 的页面，处理分组
+    if (pinnedPageIds.length > 0) {
+      // 获取或创建 default 分组
+      const [defaultGroup] = await this.workflowRepository.getPageGroupsAndCreateIfNotExists(teamId, ['default']);
+
+      // 更新分组中的页面列表
+      const existingPageIds = defaultGroup.pageIds || [];
+      const updatedPageIds = uniq([...existingPageIds, ...pinnedPageIds]);
+
+      // 保存更新后的分组
+      await this.workflowRepository.updatePageGroup(defaultGroup.id, {
+        pageIds: updatedPageIds,
+      });
+    }
+  }
+
+  async updateWorkflowPage(workflowId: string, pages: WorkflowPageUpdateJson[]) {
+    const oldPages = await this.listWorkflowPages(workflowId);
+    for (const { id, displayName, sortIndex, pinned, type, isBuiltIn, permissions } of pages) {
+      const oldPage = oldPages.find((page) => page.id === id);
+      if (!oldPage) continue;
+      oldPage.displayName = displayName;
+      oldPage.sortIndex = sortIndex;
+      oldPage.pinned = pinned;
+      oldPage.type = type;
+      oldPage.isBuiltIn = isBuiltIn;
+      oldPage.permissions = permissions;
+      oldPage.updatedTimestamp = Date.now();
+      await this.pageRepository.save(oldPage);
     }
   }
 

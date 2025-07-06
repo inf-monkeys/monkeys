@@ -14,6 +14,7 @@ import { AssociationEditorFields } from '@/components/layout/workspace/vines-vie
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form.tsx';
+import { DEFAULT_WORKFLOW_ASSOCIATION_LUCIDE_ICON_URL } from '@/consts/icons';
 import { IWorkflowAssociationForEditor, workflowAssociationSchema } from '@/schema/workspace/workflow-association';
 import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
@@ -27,15 +28,18 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
 
   const { mutate } = useSWRConfig();
 
+  const defaultValues = {
+    enabled: true,
+    type: 'to-workflow',
+    displayName: '',
+    description: '',
+    mapper: [],
+    iconUrl: DEFAULT_WORKFLOW_ASSOCIATION_LUCIDE_ICON_URL,
+  } as unknown as IWorkflowAssociationForEditor;
+
   const form = useForm<IWorkflowAssociationForEditor>({
     resolver: zodResolver(workflowAssociationSchema),
-    defaultValues: {
-      enabled: true,
-      type: 'to-workflow',
-      displayName: '',
-      description: '',
-      mapper: [],
-    },
+    defaultValues,
   });
 
   const { workflowId } = useFlowStore();
@@ -52,7 +56,7 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
         setAid(association.id);
       }
       if (mode === 'create') {
-        form.reset();
+        form.reset(defaultValues);
         setAid(undefined);
       }
       setOpen(true);
@@ -78,7 +82,7 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
             setAid(undefined);
             setMode('create');
             setOpen(false);
-            form.reset();
+            form.reset(defaultValues);
             return t('common.update.success');
           },
         });
@@ -92,7 +96,7 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
             setAid(undefined);
             setMode('create');
             setOpen(false);
-            form.reset();
+            form.reset(defaultValues);
             return t('common.create.success');
           },
         });

@@ -6,6 +6,7 @@ import { TeamRepository } from '@/database/repositories/team.repository';
 import { ComfyuiModelService } from '@/modules/assets/comfyui-model/comfyui-model.service';
 import { DesignMetadataService } from '@/modules/design/design.metadata.service';
 import { DesignProjectService } from '@/modules/design/design.project.service';
+import { MarketplaceService } from '@/modules/marketplace/services/marketplace.service';
 import { ConductorService } from '@/modules/workflow/conductor/conductor.service';
 import { WorkflowPageService } from '@/modules/workflow/workflow.page.service';
 import { Injectable } from '@nestjs/common';
@@ -24,6 +25,7 @@ export class TeamsService {
     private readonly designProjectService: DesignProjectService,
     private readonly designMetadataService: DesignMetadataService,
     private readonly pageService: WorkflowPageService,
+    private readonly marketplaceService: MarketplaceService,
   ) {}
 
   public async forkAssetsFromMarketPlace(teamId: string, userId: string) {
@@ -50,27 +52,19 @@ export class TeamsService {
 
   public async initTeam(teamId: string, userId: string) {
     // Init assets from built-in marketplace
-    await this.forkAssetsFromMarketPlace(teamId, userId);
-    // // TEMP TODO: 默认新建一个画板
-    // const project = await this.designProjectService.create({
-    //   teamId,
-    //   creatorUserId: userId,
-    //   displayName: 'Design Board',
-    //   iconUrl: 'emoji:🎨:#eeeef1',
-    //   description: '',
-    // } as CreateDesignProjectDto);
-    // const board = (await this.designMetadataService.findAllByProjectId(project.id))[0];
-    // const pageGroup = await this.pageService.getPageGroups(teamId)[0];
-    // await this.pageService.updatePageGroup(teamId, pageGroup.id, {
-    //   pageId: 'design-board-' + board.id,
-    //   mode: 'add',
-    // });
-    // 初始化内置图像模型类型
-    await this.comfyuiModelService.updateTypesFromInternals(teamId);
-    // 自动更新内置图像模型列表
-    await this.comfyuiModelService.updateModelsByTeamIdAndServerId(teamId, 'default');
-    // 自动更新图像模型列表类型
-    await this.comfyuiModelService.updateModelsFromInternals(teamId);
+    // await this.forkAssetsFromMarketPlace(teamId, userId);
+    await this.marketplaceService.installPresetApps(teamId, userId);
+
+    // Check if the default server can connect
+    const isDefaultServerCanConnect = await this.comfyuiModelService.isDefaultServerCanConnect();
+    if (isDefaultServerCanConnect) {
+      // 初始化内置图像模型类型
+      await this.comfyuiModelService.updateTypesFromInternals(teamId);
+      // 自动更新内置图像模型列表
+      await this.comfyuiModelService.updateModelsByTeamIdAndServerId(teamId, 'default');
+      // 自动更新图像模型列表类型
+      await this.comfyuiModelService.updateModelsFromInternals(teamId);
+    }
     return;
   }
 
