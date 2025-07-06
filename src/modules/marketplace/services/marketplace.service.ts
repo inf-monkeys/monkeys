@@ -292,7 +292,7 @@ export class MarketplaceService {
       // 阶段一：克隆所有资产并建立ID映射表
       for (const assetType in version.assetSnapshot) {
         if (Object.prototype.hasOwnProperty.call(version.assetSnapshot, assetType)) {
-          this.logger.log(`Phase 1: Cloning assets of type: ${assetType}`);
+          this.logger.debug(`Phase 1: Cloning assets of type: ${assetType}`);
           const assets = version.assetSnapshot[assetType];
 
           for (const assetData of assets) {
@@ -309,7 +309,7 @@ export class MarketplaceService {
       }
 
       // 阶段二：依赖重映射
-      this.logger.log(`Phase 2: Remapping dependencies with mapping table: ${JSON.stringify(idMapping)}`);
+      this.logger.debug(`Phase 2: Remapping dependencies with mapping table: ${JSON.stringify(idMapping)}`);
       for (const assetType in installedAssetIds) {
         const handler = this.assetsMapperService.getAssetHandler(assetType as any);
         if (handler.remapDependencies) {
@@ -345,7 +345,15 @@ export class MarketplaceService {
   }
 
   public async getInstalledAppByAppVersionId(appVersionId: string, teamId: string) {
-    const installedApp = await this.installedAppRepo.findOne({ where: { marketplaceAppVersionId: appVersionId, teamId } });
+    const installedApp = await this.installedAppRepo.findOne({
+      where: {
+        marketplaceAppVersionId: appVersionId,
+        teamId,
+      },
+      order: {
+        createdTimestamp: 'DESC', // 按创建时间倒序排列，获取最新的
+      },
+    });
     return installedApp;
   }
 
