@@ -104,7 +104,6 @@ export class WorkflowCrudService implements IAssetHandler {
 
     // comfyui
     const comfyuiWorkflows = getComfyuiWorkflowDataListFromWorkflow(tasks);
-    console.log('comfyuiWorkflows', comfyuiWorkflows);
     for (const { comfyuiWorkflowId: comfyuiWorkflowAppId, path } of comfyuiWorkflows) {
       const comfyuiWorkflow = await this.marketplaceService.getAppDetails(comfyuiWorkflowAppId);
       if (comfyuiWorkflow) {
