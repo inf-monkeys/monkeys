@@ -380,6 +380,7 @@ export class WorkflowRepository {
   }
 
   public async deleteWorkflow(teamId: string, workflowId: string) {
+    // 标记 workflow 为已删除
     await this.workflowMetadataRepository.update(
       {
         teamId,
@@ -389,6 +390,8 @@ export class WorkflowRepository {
         isDeleted: true,
       },
     );
+
+    // 标记相关的 trigger 为已删除
     await this.workflowTriggerRepository.update(
       {
         workflowId,
@@ -397,6 +400,29 @@ export class WorkflowRepository {
         isDeleted: true,
       },
     );
+
+    // 获取所有相关的 pages 的 id
+    const pages = await this.pageRepository.find({
+      where: {
+        workflowId,
+      },
+      select: ['id'],
+    });
+    const pageIds = pages.map((page) => page.id);
+
+    if (pageIds.length > 0) {
+      // 使用 PostgreSQL 的 JSONB 操作直接更新 page_ids
+      await this.pageGroupRepository
+        .createQueryBuilder()
+        .update()
+        .set({
+          pageIds: () => `page_ids - ALL(ARRAY[${pageIds.map((id) => `'${id}'`).join(',')}]::text[])`,
+        })
+        .where('team_id = :teamId', { teamId })
+        .execute();
+    }
+
+    // 标记相关的 pages 为已删除
     await this.pageRepository.update(
       {
         workflowId,
@@ -404,6 +430,14 @@ export class WorkflowRepository {
       {
         isDeleted: true,
       },
+    );
+
+    // workflow association
+    await this.workflowAssociationRepository.update(
+      {
+        originWorkflowId: workflowId,
+      },
+      { isDeleted: true },
     );
   }
 
