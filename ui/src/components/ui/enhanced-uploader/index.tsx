@@ -516,18 +516,22 @@ export const EnhancedUploader: React.FC<EnhancedUploaderProps> = ({
         onChange?.(successUrls);
         onAssetsCreated?.(successAssetIds);
 
-        // 根据上传方式显示不同的提示
-        if (rapidUploadCount > 0 && normalUploadCount > 0) {
-          toast.success(
-            t('enhancedUploader.uploadComplete.mixed', {
-              normalCount: normalUploadCount,
-              rapidCount: rapidUploadCount,
-            }),
-          );
-        } else if (rapidUploadCount > 0) {
-          toast.success(t('enhancedUploader.uploadComplete.rapidOnly', { rapidCount: rapidUploadCount }));
-        } else {
-          toast.success(t('enhancedUploader.uploadComplete.normalOnly', { count: successUrls.length }));
+        // 只有当没有 onAssetsCreated 回调时才显示上传完成提示
+        // 避免与外部组件的提示重复
+        if (!onAssetsCreated) {
+          // 根据上传方式显示不同的提示
+          if (rapidUploadCount > 0 && normalUploadCount > 0) {
+            toast.success(
+              t('enhancedUploader.uploadComplete.mixed', {
+                normalCount: normalUploadCount,
+                rapidCount: rapidUploadCount,
+              }),
+            );
+          } else if (rapidUploadCount > 0) {
+            toast.success(t('enhancedUploader.uploadComplete.rapidOnly', { rapidCount: rapidUploadCount }));
+          } else {
+            toast.success(t('enhancedUploader.uploadComplete.normalOnly', { count: successUrls.length }));
+          }
         }
       }
 

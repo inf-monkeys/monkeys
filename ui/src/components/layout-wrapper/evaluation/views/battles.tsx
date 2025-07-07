@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import useSWR from 'swr';
 import { useParams } from '@tanstack/react-router';
@@ -88,6 +88,9 @@ export const BattlesView: React.FC = () => {
     { refreshInterval: 5000 }, // 每5秒刷新一次
   );
 
+  // 在组件函数体内添加 ref
+  const lastAssetIdsRef = useRef<string | null>(null);
+
   // 处理图片选择
   const handleAssetToggle = (assetId: string) => {
     setJoinForm((prev) => ({
@@ -135,6 +138,15 @@ export const BattlesView: React.FC = () => {
 
   // 自动加入排行榜
   const handleAutoJoinToLeaderboard = async (uploadedAssetIds: string[]) => {
+    // 用字符串做唯一性判断，防止重复处理
+    // 如果本次 key 和上次一样，说明已经处理过了，直接 return，不再执行后续逻辑。
+    // console.log('uploadedAssetIds', uploadedAssetIds);
+    const key = uploadedAssetIds.slice().sort().join(',');
+    // console.log('key', key);
+    // console.log('lastAssetIdsRef.current', lastAssetIdsRef.current);
+    if (lastAssetIdsRef.current === key) return;
+    lastAssetIdsRef.current = key;
+
     if (!moduleId || uploadedAssetIds.length === 0) {
       return;
     }
@@ -146,6 +158,7 @@ export const BattlesView: React.FC = () => {
 
       await joinEvaluation(moduleId, joinDto);
 
+      // 显示合并的提示：上传成功并加入排行榜
       toast.success(t('ugc-page.evaluation.battles.uploadDialog.autoJoinSuccess'));
 
       // 刷新数据
@@ -529,10 +542,14 @@ export const BattlesView: React.FC = () => {
                 if (urls.length > 0) {
                   mutateAvailableAssets();
                   setUploadDialogOpen(false);
-                  toast.success(t('ugc-page.evaluation.battles.uploadDialog.uploadSuccess', { count: urls.length }));
+                  // 只有在不自动加入排行榜时才显示上传成功提示
+                  if (!autoJoinToLeaderboard) {
+                    toast.success(t('ugc-page.evaluation.battles.uploadDialog.uploadSuccess', { count: urls.length }));
+                  }
                 }
               }}
               onAssetsCreated={(assetIds) => {
+                // console.log('onAssetsCreated', assetIds);
                 if (autoJoinToLeaderboard && assetIds.length > 0) {
                   handleAutoJoinToLeaderboard(assetIds);
                 }
