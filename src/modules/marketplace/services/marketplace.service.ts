@@ -262,7 +262,7 @@ export class MarketplaceService {
   }
 
   public async installPresetApps(teamId: string, userId: string) {
-    const assetTypeInstallSort: AssetType[] = ['comfyui-workflow', 'workflow', 'design-association', 'workflow-association'];
+    const assetTypeInstallSort: (AssetType | 'design-association' | 'workflow-association')[] = ['comfyui-workflow', 'workflow', 'design-association', 'workflow-association'];
 
     const presetApps = await this.getPresetApps();
     if (!presetApps) throw new NotFoundException('Preset app not found.');

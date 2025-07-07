@@ -45,7 +45,7 @@ export class AssetsMapperService {
     private readonly conversationAppAssetRepository: ConversationAppAssetRepositroy,
   ) {}
 
-  public getAssetHandler(assetType: AssetType): IAssetHandler {
+  public getAssetHandler(assetType: AssetType | 'workflow-association' | 'design-association'): IAssetHandler {
     switch (assetType) {
       case 'comfyui-workflow':
         return this.comfyuiWorkflowCrudService;
