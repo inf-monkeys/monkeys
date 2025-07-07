@@ -67,6 +67,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
 
     event$.emit?.();
 
+    console.log('inputData', inputData);
+
     vines
       .start({ inputData, onlyStart: true })
       .then((status) => {
@@ -92,9 +94,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
   const { read } = useClipboard({ showSuccess: false });
 
   event$.useSubscription((event: any) => {
-    if (event.type === 'set') {
-      console.log(event);
-
+    if (event && event.type && event.type === 'set') {
       tabular$.emit({ type: 'paste-param', data: event.data });
     }
   });
