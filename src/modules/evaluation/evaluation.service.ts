@@ -3,6 +3,8 @@ import { generateDbId } from '@/common/utils';
 import { BattleGroupEntity, BattleGroupStatus, BattleStrategy } from '@/database/entities/evaluation/battle-group.entity';
 import { BattleResult, EvaluationBattleEntity } from '@/database/entities/evaluation/evaluation-battle.entity';
 import { EvaluationModuleEntity } from '@/database/entities/evaluation/evaluation-module.entity';
+import { EvaluationRatingHistoryEntity } from '@/database/entities/evaluation/evaluation-rating-history.entity';
+import { EvaluationTaskEntity } from '@/database/entities/evaluation/evaluation-task.entity';
 import { EvaluatorEntity, EvaluatorType } from '@/database/entities/evaluation/evaluator.entity';
 import { LeaderboardScoreEntity } from '@/database/entities/evaluation/leaderboard-score.entity';
 import { LeaderboardEntity } from '@/database/entities/evaluation/leaderboard.entity';
@@ -15,8 +17,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { isObject } from 'lodash';
 import { DataSource } from 'typeorm';
 import { BattleStrategyService } from './battle-strategy.service';
-import { PgTaskQueueService } from './services/pg-task-queue.service';
 import { OpenSkillService } from './services/openskill.service';
+import { PgTaskQueueService } from './services/pg-task-queue.service';
 import { TaskType } from './types/task.types';
 
 // 定义一个不会与数据库ID冲突的特殊字符串作为虚拟评测员的ID
@@ -411,15 +413,23 @@ export class EvaluationService {
   public async deleteEvaluationModule(evaluationModuleId: string): Promise<void> {
     const module = await this.evaluationRepository.findEvaluationModuleById(evaluationModuleId);
     if (!module) throw new Error(ERROR_MESSAGES.EVALUATION_MODULE_NOT_FOUND);
-
     return this.dataSource.transaction(async (manager) => {
-      // Delete dependent records first to avoid foreign key constraint violations
+      // 1. 先删除对战记录，避免外键约束
       await manager.delete(EvaluationBattleEntity, { evaluationModuleId });
+      // 2. 再删除对战组
+      await manager.delete(BattleGroupEntity, { evaluationModuleId });
+      // 3. 删除模块评测员关联
       await manager.delete(ModuleEvaluatorEntity, { evaluationModuleId });
+      // 4. 删除排行榜分数记录
       await manager.delete(LeaderboardScoreEntity, { evaluationModuleId });
+      // 5. 删除评分历史记录
+      await manager.delete(EvaluationRatingHistoryEntity, { evaluationModuleId }); // 将所有字符串表名改为使用实体类，让 TypeORM 自动处理表名前缀
+      // 6. 删除任务队列中的相关任务
+      await manager.delete(EvaluationTaskEntity, { moduleId: evaluationModuleId });
 
-      // Delete the module and its leaderboard
+      // 7. 删除评测模块本身
       await manager.delete(EvaluationModuleEntity, { id: evaluationModuleId });
+      // 8. 删除排行榜
       await manager.delete(LeaderboardEntity, { id: module.leaderboardId });
     });
   }
@@ -540,7 +550,7 @@ export class EvaluationService {
         module.teamId,
         {
           messages,
-          model: (evaluator.llmModelName || config.evaluation.defaultLlmEvaluatorModel).replace('llm:', ''),
+          model: evaluator.llmModelName || config.evaluation.defaultLlmEvaluatorModel,
           temperature: 0.1,
           max_tokens: 500,
           stream: false,

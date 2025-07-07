@@ -5,8 +5,8 @@ import { EvaluationRatingHistoryEntity } from '@/database/entities/evaluation/ev
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ordinal, rate, rating, Rating } from 'openskill';
-import { Repository, Not, IsNull } from 'typeorm';
-import { SmartConvergenceService, ConvergenceResult } from './smart-convergence.service';
+import { IsNull, Not, Repository } from 'typeorm';
+import { ConvergenceResult, SmartConvergenceService } from './smart-convergence.service';
 
 export interface OpenSkillRating {
   mu: number;
