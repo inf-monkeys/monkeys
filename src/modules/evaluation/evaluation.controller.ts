@@ -251,31 +251,41 @@ export class EvaluationController {
   })
   public async getEvaluationStatus(@Req() req: IRequest, @Param('moduleId') moduleId: string) {
     const { teamId } = req;
+    // console.log('req全部信息:', req);
+    const start = Date.now(); // 记录开始时间
 
-    // 验证模块权限
     const module = await this.evaluationService.getEvaluationModule(moduleId);
+
+    // 打印关键调试信息
+    // console.log('[DEBUG evaluation-status]', 'req.user.id:', req.user?.id, 'req.teamId:', teamId, 'module.teamId:', module?.teamId, 'moduleId:', moduleId);
+
     if (!module || module.teamId !== teamId) {
+      console.log('[DEBUG evaluation-status] Access denied!');
       throw new ForbiddenException('Access denied');
     }
 
     // 检查任务是否已被标记为完成
     if (this.autoEvaluationService.isEvaluationComplete(moduleId)) {
-      // 如果已完成，返回一个最终的、静态的状态，避免不必要的计算
-      const finalStatus = await this.openskillService.getEvaluationStatus(teamId, moduleId);
+      const end = Date.now();
+      console.log('[DEBUG evaluation-status] Done (已完成), 耗时', end - start, 'ms');
       return new SuccessResponse({
         data: {
-          ...finalStatus,
-          isComplete: true, // 确保最终状态始终为 isComplete: true
+          isComplete: true,
           progress: 100,
-          message: 'Evaluation is complete.',
         },
       });
     }
 
     // 如果任务仍在进行中，则获取实时状态
     const status = await this.openskillService.getEvaluationStatus(teamId, moduleId);
-
-    return new SuccessResponse({ data: status });
+    const end = Date.now();
+    console.log('[DEBUG evaluation-status] Done (进行中), 耗时', end - start, 'ms');
+    return new SuccessResponse({
+      data: {
+        isComplete: status.isComplete,
+        progress: status.progress,
+      },
+    });
   }
 
   @Get('/modules/:moduleId/chart-data')
