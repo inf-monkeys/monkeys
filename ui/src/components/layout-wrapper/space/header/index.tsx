@@ -52,7 +52,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
   return hideSpaceHeader ? (
     <></>
   ) : (
-    <header className="flex w-full items-center justify-between rounded-xl border border-input bg-slate-1 p-3">
+    <header className="p-global flex w-full items-center justify-between rounded-xl border border-input bg-slate-1">
       <div className="z-20 flex h-8 items-center gap-6">
         <Link
           to="/$teamId"
@@ -69,7 +69,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
           </>
         )}
       </div>
-      <div className="z-20 flex items-center gap-4">
+      <div className="gap-global z-20 flex items-center">
         {showTeamQuota && <QuotaButton />}
         <HeaderInvite />
         {tail}

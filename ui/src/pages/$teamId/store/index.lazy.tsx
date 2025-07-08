@@ -53,7 +53,7 @@ const StorePage: React.FC = () => {
         }}
       >
         {list.map((row, i) => (
-          <div key={i} className="mb-4 grid w-full grid-cols-6 gap-4">
+          <div key={i} className="gap-global mb-4 grid w-full grid-cols-6">
             {row.map((it) => (
               <StoreApp key={it.id} mutate={mutate} {...it} />
             ))}

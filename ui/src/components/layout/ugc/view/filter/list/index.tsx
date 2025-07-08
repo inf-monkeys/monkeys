@@ -147,7 +147,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
         )}
         onClick={() => setCurrentRuleId('all')}
       >
-        <div className="flex w-full items-center justify-between px-4 text-sm">
+        <div className="px-global flex w-full items-center justify-between text-sm">
           <div className="flex items-center gap-2">
             <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">
               <LayoutGrid />
@@ -182,7 +182,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                     <>
                       <AccordionTrigger>
                         <div className="group flex h-10 w-full cursor-pointer items-center rounded-md p-[1px] transition-colors hover:bg-accent hover:text-accent-foreground">
-                          <div className="flex w-full items-center justify-between px-4 text-sm">
+                          <div className="px-global flex w-full items-center justify-between text-sm">
                             <div className="flex items-center gap-2">
                               <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{rootIcon}</div>
 
@@ -211,7 +211,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                               onClick={() => setCurrentRuleId(cateName)}
                               key={cateName}
                             >
-                              <span className="pl-[calc(1rem+20px+0.5rem)] pr-4 text-sm !font-normal">
+                              <span className="pr-global pl-[calc(1rem+20px+0.5rem)] text-sm !font-normal">
                                 {cateLabel +
                                   t('common.utils.counter', {
                                     count: toolsData?.[rootName][cateName],

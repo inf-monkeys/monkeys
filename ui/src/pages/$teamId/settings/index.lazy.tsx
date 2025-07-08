@@ -31,7 +31,7 @@ export const Settings: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="gap-global flex flex-col">
       {/* <h1 className="text-2xl font-bold">{t('settings.title')}</h1> */}
       <Tabs
         defaultValue="account"

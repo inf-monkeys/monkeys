@@ -289,7 +289,10 @@ export const UgcView = <E extends object>({
           </AnimatePresence>
           <div className="flex size-full flex-col">
             <ScrollArea
-              className={cn('relative w-full p-4', showPagination ? 'h-[calc(100%-4.9rem)]' : 'h-[calc(100%-1.7rem)]')}
+              className={cn(
+                'p-global relative w-full',
+                showPagination ? 'h-[calc(100%-4.9rem)]' : 'h-[calc(100%-1.7rem)]',
+              )}
               disabledOverflowMask
             >
               {rows.length === 0 ? (
@@ -336,7 +339,7 @@ export const UgcView = <E extends object>({
                     />
                   )}
                   {displayMode === 'gallery' && (
-                    <div className="flex flex-wrap gap-4">
+                    <div className="gap-global flex flex-wrap">
                       {rows.map((row, index) => (
                         <UgcViewGalleryItem
                           row={row}
@@ -355,7 +358,7 @@ export const UgcView = <E extends object>({
             </ScrollArea>
             {showPagination && (
               <TablePagination
-                className={cn('py-0', paginationPosition === 'right' ? 'justify-end gap-4' : '')}
+                className={cn('py-0', paginationPosition === 'right' ? 'gap-global justify-end' : '')}
                 pagination={table.getState().pagination}
                 onPaginationChange={table.setPagination}
                 rowCount={table.getRowCount()}

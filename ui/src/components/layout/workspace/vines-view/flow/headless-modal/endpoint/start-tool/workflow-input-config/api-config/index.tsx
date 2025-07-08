@@ -85,7 +85,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
   return (
     <div className="relative flex h-[30rem] w-full flex-col py-2">
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="flex flex-col justify-between gap-4">
+        <form onSubmit={handleSubmit} className="gap-global flex flex-col justify-between">
           <ScrollArea className="h-[26rem] [&>div]:px-2">
             <FormField
               name="exposeOpenaiCompatibleInterface"

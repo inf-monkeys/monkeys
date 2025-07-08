@@ -28,7 +28,7 @@ const buttonVariants = cva(
         danger: 'button-theme-danger',
       },
       size: {
-        default: 'h-9 px-4 py-2',
+        default: 'h-9 px-global py-2',
         icon: 'size-9',
         small: 'h-8 rounded-md px-3 text-xs',
         xs: 'h-6 rounded-md px-2 text-xs',

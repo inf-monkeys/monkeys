@@ -125,7 +125,7 @@ export const I18nTextarea: React.FC<II18nTextareaProps> = ({
             {LANGUAGES_LIST.map(([key, label]) => {
               const languageKey = LANGUAGE_MAPPER[key as keyof typeof LANGUAGE_MAPPER] || key;
               return (
-                <div key={languageKey} className="flex flex-col gap-4">
+                <div key={languageKey} className="gap-global flex flex-col">
                   <label className="text-xs font-medium text-gray-11" htmlFor={`i18n-textarea-${languageKey}`}>
                     {label}
                   </label>

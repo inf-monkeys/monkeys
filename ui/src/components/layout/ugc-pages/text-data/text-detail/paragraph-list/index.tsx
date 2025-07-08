@@ -159,7 +159,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
         tfoot={
           <tfoot className="relative">
             <tr>
-              <td className="absolute w-full py-4 text-center">
+              <td className="py-global absolute w-full text-center">
                 {searchMode === 'fulltext' ? (
                   hits.length < size ? (
                     <span>{t('common.utils.all-loaded')}</span>
@@ -181,7 +181,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
           </tfoot>
         }
       />
-      <div className="mt-2 flex w-full items-center gap-4">
+      <div className="gap-global mt-2 flex w-full items-center">
         <div className="flex items-center gap-2">
           <Waypoints className="stroke-muted-foreground" size={14} />
           <span className="text-xs text-muted-foreground">

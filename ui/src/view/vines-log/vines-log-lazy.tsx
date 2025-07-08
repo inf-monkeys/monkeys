@@ -27,7 +27,7 @@ const VinesLogView: React.FC = () => {
   const [{ tab }, setTab] = useUrlState({ tab: 'log' });
 
   return (
-    <main className={cn('relative h-full max-h-full p-6', workbenchVisible && 'p-4')}>
+    <main className={cn('relative h-full max-h-full p-6', workbenchVisible && 'p-global')}>
       <Tabs
         value={tab}
         onValueChange={(val) => setTab({ tab: val })}

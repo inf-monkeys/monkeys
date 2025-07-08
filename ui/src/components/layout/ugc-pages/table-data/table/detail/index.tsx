@@ -141,7 +141,7 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
         tfoot={
           <tfoot className="relative">
             <tr>
-              <td className="absolute w-full py-4 text-center">
+              <td className="py-global absolute w-full text-center">
                 {hits.length < size ? (
                   <span className="text-sm">{t('common.utils.all-loaded')}</span>
                 ) : (

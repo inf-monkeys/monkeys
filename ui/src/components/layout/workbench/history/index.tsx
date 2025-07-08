@@ -102,24 +102,23 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
     );
     return () => abortController.abort();
   }, []);
+
   return (
     <AnimatePresence>
       <div
-        className={cn('h-[calc(90px+2rem)] rounded-xl border border-input bg-slate-1 p-0 shadow-sm', className)}
+        className={cn(
+          'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] rounded-xl border border-input bg-slate-1 p-0 shadow-sm',
+          className,
+          onlyShowWorkbenchIcon
+            ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*6.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*3))]'
+            : 'w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))] max-w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))]',
+        )}
         ref={containerRef}
-        style={{
-          width: onlyShowWorkbenchIcon
-            ? 'calc(100vw - 2rem - 4.8rem - 4.8rem - 1rem)'
-            : 'calc(100vw - 2rem - 11rem - 14rem - 1rem)',
-          maxWidth: onlyShowWorkbenchIcon
-            ? 'calc(100vw - 2rem - 4.8rem - 4.8rem - 1rem)'
-            : 'calc(100vw - 2rem - 11rem - 14rem - 1rem)',
-        }}
       >
         {images.length > 0 ? (
           <motion.div
             key="vines-history-content"
-            className="flex size-full items-center justify-center gap-2 overflow-hidden p-4"
+            className="p-global flex size-full items-center justify-center gap-2 overflow-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.3 } }}
             exit={{ opacity: 0 }}
@@ -162,7 +161,11 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
               {images.length > 0
                 ? images.map((item, index) => (
                     <SwiperSlide key={item.render.key} className={cn('basis-auto')}>
-                      <div className={cn('h-[90px] w-[90px] cursor-grab overflow-hidden rounded-md')}>
+                      <div
+                        className={cn(
+                          'h-[var(--history-result-image-size)] w-[var(--history-result-image-size)] cursor-grab overflow-hidden rounded-md',
+                        )}
+                      >
                         {/*                 {item.render.type === 'image' && (
                   <img
                     draggable
@@ -237,10 +240,6 @@ type ImagesResultWithOrigin = ImagesResult & {
 const HistoryResultOg = () => {
   const { teamId } = useVinesTeam();
   const { data: imagesResult, setSize, mutate: RefreshAll } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
-  /*   const { data: imagesResult, setSize } = useInfinitaeWorkflowExecutionOutputs('67f4e64da6376c12a3b95f9a', {
-    limit: 30,
-  }); */
-  // const { dataa}
 
   const lastTeamId = useRef<string | null>(null);
   useEffect(() => {

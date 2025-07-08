@@ -79,7 +79,7 @@ export const UgcPublishDialog: React.FC<IUgcPublishDialogProps> = ({ children, u
         <DialogHeader>
           <DialogTitle>{t('components.layout.ugc.publish-dialog.title')}</DialogTitle>
         </DialogHeader>
-        <div className="gap-4 py-4">
+        <div className="gap-global py-global">
           <Input
             placeholder={t('components.layout.ugc.publish-dialog.name.placeholder')}
             maxLength={50}

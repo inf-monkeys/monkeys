@@ -62,7 +62,7 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({
   });
 
   return (
-    <div className="flex flex-col gap-4 px-2">
+    <div className="gap-global flex flex-col px-2">
       <Form {...form}>
         <form
           onSubmit={(e) => {

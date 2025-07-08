@@ -26,7 +26,7 @@ export const VirtuaToolListItem: React.FC<IVirtuaToolListItemProps> = ({ tool, c
   return (
     <div key={tool.name} className="w-64 px-1 pt-2">
       <Card
-        className="flex size-full cursor-pointer items-center gap-4 overflow-hidden p-4 hover:bg-gray-2 dark:hover:bg-gray-3"
+        className="p-global gap-global flex size-full cursor-pointer items-center overflow-hidden hover:bg-gray-2 dark:hover:bg-gray-3"
         onClick={() => onClick?.(tool)}
         onDoubleClick={() => onClick?.(tool)}
       >

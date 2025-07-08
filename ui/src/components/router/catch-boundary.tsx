@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { motion } from 'framer-motion';
 import { Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +21,7 @@ export function ErrorComponent({ error }: ErrorBoundaryProps) {
   return (
     <motion.div
       key="vines-catch-boundary"
-      className="m-6 flex max-w-full flex-col gap-4 rounded-md border border-solid border-white border-opacity-20 bg-slate-1 p-4 shadow backdrop-blur-sm"
+      className="p-global gap-global m-6 flex max-w-full flex-col rounded-md border border-solid border-white border-opacity-20 bg-slate-1 shadow backdrop-blur-sm"
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.92 }}

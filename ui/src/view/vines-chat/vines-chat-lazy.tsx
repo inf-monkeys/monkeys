@@ -50,12 +50,12 @@ const VinesChatView: React.FC = () => {
   const height = containerHeight - (vinesIFrameVisible ? 70 : workbenchVisible ? 36 : 64);
 
   return (
-    <div className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>
+    <div className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'pl-global p-0')}>
       <motion.div
         key="vines-view-chat"
         className={cn(
           'flex flex-1 flex-col overflow-hidden',
-          workbenchVisible ? 'p-4 pl-0' : 'pr-4',
+          workbenchVisible ? 'p-global pl-0' : 'pr-global',
           hasMoreThanOneInput && !openAIInterfaceEnabled && 'flex-row',
         )}
         initial={{ opacity: 0 }}
@@ -95,7 +95,7 @@ const VinesChatView: React.FC = () => {
           </Tooltip>
         </Separator>
       </div>
-      <ChatSidebar className="py-4" id={workflowId} isWorkflowMode sidebarVisible={sidebarVisible} side="right" />
+      <ChatSidebar className="py-global" id={workflowId} isWorkflowMode sidebarVisible={sidebarVisible} side="right" />
     </div>
   );
 };

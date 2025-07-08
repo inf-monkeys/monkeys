@@ -23,7 +23,7 @@ export const EvaluationLayout: React.FC<EvaluationLayoutProps> = ({ currentTab: 
   const evaluationMatch = matches.find((match) => match.routeId.includes('evaluations'));
   const currentTab = propCurrentTab || evaluationMatch?.params?.tab || 'leaderboard';
   return (
-    <ViewGuard className="flex flex-col gap-4 bg-neocard">
+    <ViewGuard className="gap-global flex flex-col bg-neocard">
       <SpaceHeader>
         <EvaluationModuleInfoCard />
       </SpaceHeader>

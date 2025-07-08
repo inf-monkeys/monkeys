@@ -16,15 +16,15 @@ export const Account: React.FC<IAccountProps> = () => {
   const hasPayment = (oem?.module || []).includes('payment');
 
   return (
-    <div className="grid grid-cols-[1fr_2fr] items-start justify-center gap-4">
-      <div className="grid items-start gap-4">
+    <div className="gap-global grid grid-cols-[1fr_2fr] items-start justify-center">
+      <div className="gap-global grid items-start">
         <User />
         <Team />
         {/* <TeamMember /> */}
       </div>
 
-      {/* <div className="grid items-start gap-4">
-        <div className="grid grid-cols-2 items-start gap-4">
+      {/* <div className="grid items-start gap-global">
+        <div className="grid grid-cols-2 items-start gap-global">
           <TeamPrimaryColor />
           <TeamLogo />
         </div>

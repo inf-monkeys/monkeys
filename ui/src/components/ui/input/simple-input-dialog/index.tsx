@@ -51,7 +51,7 @@ export const SimpleInputDialog: React.FC<ISimpleInputDialogProps> = ({
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        <div className="gap-4 py-4">
+        <div className="gap-global py-global">
           <Input placeholder={placeholder} maxLength={16} value={value} onChange={setValue} />
         </div>
         <DialogFooter>

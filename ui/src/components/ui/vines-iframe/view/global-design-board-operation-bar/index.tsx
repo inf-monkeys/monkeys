@@ -26,13 +26,13 @@ export const GlobalDesignBoardOperationBar = () => {
   return (
     <div
       className={cn(
-        'flex h-full w-72 flex-col items-center justify-between gap-4 rounded-xl rounded-bl-xl rounded-tl-xl border border-input bg-slate-1 p-4 text-base',
+        'p-global gap-global flex h-full w-72 flex-col items-center justify-between rounded-xl rounded-bl-xl rounded-tl-xl border border-input bg-slate-1 text-base',
       )}
     >
       <GlobalDesignBoardOperationBarBoardSelect />
       {designBoardId && (
         <motion.div
-          className="flex w-full flex-col gap-4"
+          className="gap-global flex w-full flex-col"
           initial={{ opacity: 0, filter: 'blur(10px)' }}
           animate={{ opacity: 1, filter: 'blur(0px)' }}
           exit={{ opacity: 0, filter: 'blur(10px)' }}

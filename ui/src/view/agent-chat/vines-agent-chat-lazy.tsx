@@ -26,7 +26,7 @@ const AgentChatView: React.FC = () => {
 
   return (
     <div className={cn('relative flex h-full max-h-full', workbenchVisible ? 'p-0' : 'p-6 pr-2')}>
-      <div className={cn('flex flex-1 flex-col overflow-hidden', workbenchVisible ? 'p-4' : 'pr-4')}>
+      <div className={cn('flex flex-1 flex-col overflow-hidden', workbenchVisible ? 'p-global' : 'pr-global')}>
         <VinesChatMode
           multipleChat
           id={agentId}
@@ -55,7 +55,7 @@ const AgentChatView: React.FC = () => {
         </Separator>
       </div>
 
-      <ChatSidebar className="py-4" id={agentId} sidebarVisible={sidebarVisible} side="right" />
+      <ChatSidebar className="py-global" id={agentId} sidebarVisible={sidebarVisible} side="right" />
     </div>
   );
 };

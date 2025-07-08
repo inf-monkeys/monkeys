@@ -197,7 +197,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         {!embed && (
           <>
             <motion.div
-              className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
+              className="gap-global flex flex-col overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
               initial={workbenchVisible ? { width: 0, padding: '1rem 0' } : { width: 220, padding: '1rem 1rem' }}
               animate={{
                 width: sidebarVisible ? 220 : 0,

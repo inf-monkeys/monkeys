@@ -56,9 +56,9 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
   const extra = data.extra;
 
   return (
-    <div className="flex flex-col gap-6 py-4">
+    <div className="py-global flex flex-col gap-6">
       {isUser ? (
-        <div className="group flex w-full max-w-full flex-row-reverse gap-4">
+        <div className="gap-global group flex w-full max-w-full flex-row-reverse">
           <Avatar className="size-8 cursor-pointer">
             <AvatarImage className="aspect-auto" src={userPhoto} alt={isUser ? 'user' : 'assistant'} />
             <AvatarFallback className="rounded-none p-2 text-xs">{isUser ? 'user' : 'assistant'}</AvatarFallback>
@@ -71,16 +71,16 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
               content={textContent}
               messageIndex={index}
             />
-            <Card className="p-4 text-sm">
+            <Card className="p-global text-sm">
               <VinesMarkdown className="max-w-full">{textContent}</VinesMarkdown>
             </Card>
           </div>
         </div>
       ) : (
-        <div className="group flex flex-row items-start gap-4">
+        <div className="gap-global group flex flex-row items-start">
           <VinesIcon size="sm">{botPhoto}</VinesIcon>
           <div className="flex w-full max-w-[calc(100%-5rem)] items-end">
-            <Card className="relative p-4 text-sm">
+            <Card className="p-global relative text-sm">
               <ToolDisplay data={extra} />
               <VinesMarkdown
                 className={cn('max-w-full', isLoading && LastItemIndex === index ? 'vines-result-streaming' : '')}

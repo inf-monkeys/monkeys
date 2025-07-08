@@ -109,7 +109,7 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
                 )}
               </div>
               {!isEmpty && (
-                <div className="flex max-h-[25rem] w-full shrink-0 grow-0 flex-wrap items-center justify-center gap-4 overflow-x-clip rounded-md border border-input bg-muted py-2">
+                <div className="gap-global flex max-h-[25rem] w-full shrink-0 grow-0 flex-wrap items-center justify-center overflow-x-clip rounded-md border border-input bg-muted py-2">
                   {imageInteracts.map((url, index) => (
                     <div className="relative" key={index}>
                       <img
@@ -143,7 +143,7 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
               <div
                 className={cn(
                   'flex flex-1 items-end justify-end gap-2',
-                  isEmpty && 'h-[calc(100%-44px)] scale-110 justify-center gap-4',
+                  isEmpty && 'gap-global h-[calc(100%-44px)] scale-110 justify-center',
                 )}
               >
                 <Button

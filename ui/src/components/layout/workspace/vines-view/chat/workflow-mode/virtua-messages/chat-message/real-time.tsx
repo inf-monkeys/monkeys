@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 import { VinesActuatorDetailData } from '@/components/layout/workspace/vines-view/_common/actuator/detail/content/data.tsx';
 import { ExecutionStatusIcon } from '@/components/layout/workspace/vines-view/_common/status-icon';
@@ -64,13 +64,13 @@ export const VinesRealTimeChatMessage = memo(({ onActive }: IVinesRealTimeChatMe
 
   return (
     <VinesBotChatMessage
-      className={cn('visible pt-4', !['RUNNING', 'PAUSED'].includes(workflowStatus) && 'hidden')}
+      className={cn('pt-global visible', !['RUNNING', 'PAUSED'].includes(workflowStatus) && 'hidden')}
       status={workflowStatus as VinesWorkflowExecution['status']}
       botPhoto={botPhoto}
       instanceId={instanceId}
     >
       <SmoothTransition className="overflow-hidden" onAnimationComplete={onActive}>
-        <div className="flex flex-col gap-4">
+        <div className="gap-global flex flex-col">
           {outputs.map(({ icon, name, customName, description, execution }, i) => (
             <Card className="flex flex-col gap-2 p-2" key={i}>
               <CardHeader className="flex flex-row items-center justify-between p-0">

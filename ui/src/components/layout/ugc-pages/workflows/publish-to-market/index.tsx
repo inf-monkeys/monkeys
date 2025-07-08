@@ -156,7 +156,7 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
                         />
                         {hasThumbnails && (
                           <ScrollArea orientation="horizontal" className="[&>div>div[style]]:!block">
-                            <div className="flex h-40 w-full flex-nowrap gap-4 [&>div]:flex-shrink-0">
+                            <div className="gap-global flex h-40 w-full flex-nowrap [&>div]:flex-shrink-0">
                               {thumbnails.map((it, i) => (
                                 <VinesImage
                                   className="!w-auto rounded-md shadow"

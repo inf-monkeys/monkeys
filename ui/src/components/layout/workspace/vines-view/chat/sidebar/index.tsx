@@ -60,12 +60,12 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({
         }),
       }}
     >
-      <div className="flex w-full items-center justify-between pr-4">
+      <div className="pr-global flex w-full items-center justify-between">
         <h1 className="text-sm font-bold">{t('workspace.chat-view.sidebar.title')}</h1>
         {isWorkflowMode && <WorkflowChatViewOptions />}
       </div>
       <ScrollArea className="h-full">
-        <div className="grid gap-2 py-1 pr-4">
+        <div className="pr-global grid gap-2 py-1">
           {isWorkflowMode && !hasDefaultSessions && (
             <ChatSession
               active={isEmpty(activeSessionId)}

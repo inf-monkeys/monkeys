@@ -79,7 +79,7 @@ export const ToolCustomDataEditor: React.FC<IToolCustomDataEditorProps> = ({
   };
 
   return (
-    <div className="grid gap-4">
+    <div className="gap-global grid">
       <div className="space-y-2">
         <h4 className="font-medium leading-none">
           {t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.title')}
@@ -89,7 +89,7 @@ export const ToolCustomDataEditor: React.FC<IToolCustomDataEditorProps> = ({
         </p>
       </div>
       <div className="grid gap-2">
-        <div className="grid grid-cols-3 items-center gap-4">
+        <div className="gap-global grid grid-cols-3 items-center">
           <Label htmlFor="width">
             {t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.form.name')}
           </Label>
@@ -101,7 +101,7 @@ export const ToolCustomDataEditor: React.FC<IToolCustomDataEditorProps> = ({
             disabled={disabled}
           />
         </div>
-        <div className="grid grid-cols-3 items-center gap-4">
+        <div className="gap-global grid grid-cols-3 items-center">
           <Label htmlFor="width">
             {t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.form.desc')}
           </Label>
@@ -113,7 +113,7 @@ export const ToolCustomDataEditor: React.FC<IToolCustomDataEditorProps> = ({
             disabled={disabled}
           />
         </div>
-        <div className={cn('grid grid-cols-3 items-center gap-4', disabled && 'hidden')}>
+        <div className={cn('gap-global grid grid-cols-3 items-center', disabled && 'hidden')}>
           <Label htmlFor="width">
             {t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.form.icon')}
           </Label>

@@ -30,7 +30,7 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
     const { copy } = useCopy({ timeout: 500 });
 
     return (
-      <div className={cn('group relative flex flex-row items-start gap-4', className)}>
+      <div className={cn('gap-global group relative flex flex-row items-start', className)}>
         <VinesIcon size="sm">{botPhoto}</VinesIcon>
 
         <div className="flex max-w-[calc(100%-6rem)] flex-col gap-1">
@@ -39,12 +39,12 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
               {endTime}
             </span>
           )}
-          <Card className="w-full p-4">
+          <Card className="p-global w-full">
             {children}
             {!useSimple && (
               <>
                 <Separator className="mb-2 mt-4" />
-                <div className="group/footer flex items-center justify-between gap-4">
+                <div className="group/footer gap-global flex items-center justify-between">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="-mb-2 flex items-center gap-2">

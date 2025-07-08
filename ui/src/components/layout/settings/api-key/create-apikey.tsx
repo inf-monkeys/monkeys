@@ -58,8 +58,8 @@ export const CreateNewApiKey: React.FC<ICreateNewApiKeyProps> = ({ mutate }) => 
         <DialogHeader>
           <DialogTitle>{t('settings.api-key.header.create.title')}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4">
-          <div className="grid grid-cols-4 gap-4">
+        <div className="gap-global grid">
+          <div className="gap-global grid grid-cols-4">
             <Label className="mt-4">{t('settings.api-key.header.create.belong.label')}</Label>
             <Card className="col-span-3">
               <CardContent className="p-3">
@@ -104,7 +104,7 @@ export const CreateNewApiKey: React.FC<ICreateNewApiKeyProps> = ({ mutate }) => 
               </CardContent>
             </Card>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="gap-global grid grid-cols-4 items-center">
             <Label>{t('settings.api-key.header.create.description.label')}</Label>
             <Input
               placeholder={t('settings.api-key.header.create.description.placeholder')}

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 
 import { isEmpty } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -40,8 +40,8 @@ export const ChatMessage = memo<IVinesChatMessageProps>(({ data, isLast = false,
   const isRUNNING = ['RUNNING', 'PAUSED'].includes(status ?? '');
 
   return (
-    <div className="flex flex-col gap-6 py-4">
-      <div className="group flex w-full max-w-full flex-row-reverse gap-4">
+    <div className="py-global flex flex-col gap-6">
+      <div className="gap-global group flex w-full max-w-full flex-row-reverse">
         <Avatar className="size-8 cursor-pointer">
           <AvatarImage className="aspect-auto" src={userPhoto} alt={userName} />
           <AvatarFallback className="rounded-none p-2 text-xs">{userName.substring(0, 2)}</AvatarFallback>
@@ -50,7 +50,7 @@ export const ChatMessage = memo<IVinesChatMessageProps>(({ data, isLast = false,
           <span className="text-end text-xs text-gray-400 opacity-0 transition-opacity group-hover:opacity-100">
             {startTime}
           </span>
-          <Card className="p-4 text-sm">
+          <Card className="p-global text-sm">
             {hasInput ? (
               <WorkflowInputList
                 inputs={inputs}

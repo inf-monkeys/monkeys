@@ -56,7 +56,7 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
         return (
           <Card
             className={cn(
-              'mb-0.5 flex flex-col gap-2 p-4',
+              'p-global mb-0.5 flex flex-col gap-2',
               inputLength > 1 && index !== inputLastIndex && 'mb-2',
               cardClassName,
             )}

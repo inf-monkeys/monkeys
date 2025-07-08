@@ -141,7 +141,7 @@ function CarouselItemImage({ image, index }: { image: ImagesResult; index: numbe
     <img
       src={shouldUseThumbnail ? (image.render.data as string) : (images[index].render.data as string)}
       alt={`Thumbnail`}
-      className="size-[90px] flex-shrink-0 rounded-md border border-border object-cover"
+      className="size-[var(--history-result-image-size)] flex-shrink-0 rounded-md border border-border object-cover"
       loading="lazy"
     />
   );

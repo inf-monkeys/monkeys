@@ -85,7 +85,7 @@ export const CreateDesignProjectDialog: React.FC = () => {
         </DialogHeader>
         <div className="m-1">
           <Form {...form}>
-            <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="gap-global mt-2 flex flex-col">
               <div className="flex flex-col gap-2">
                 <FormLabel>{t('ugc-page.design-project.create.dialog.info.label')}</FormLabel>
 

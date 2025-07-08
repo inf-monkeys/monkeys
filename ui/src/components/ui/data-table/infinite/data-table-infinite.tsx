@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import { CircleSlash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -72,7 +70,7 @@ function InfiniteScrollingDataTable<TData, TValue>({
           }
         />
       ) : (
-        <div className="vines-center size-full flex-col gap-4">
+        <div className="vines-center gap-global size-full flex-col">
           {loading ? (
             <>
               <VinesLoading />

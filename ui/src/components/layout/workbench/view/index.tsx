@@ -86,7 +86,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
         ) : (
           <motion.div
             key="vines-workbench-view-empty"
-            className="vines-center absolute top-0 size-full flex-col gap-4"
+            className="vines-center gap-global absolute top-0 size-full flex-col"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 1 } }}
             exit={{ opacity: 0 }}

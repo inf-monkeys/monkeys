@@ -27,7 +27,7 @@ export const ComplicateFakeNode: React.FC<IComplicateFakeNodeProps> = ({ insertF
 
   return (
     <div
-      className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-4"
+      className="gap-global flex h-full w-full cursor-pointer flex-col items-center justify-center"
       onClick={handleOnClick}
     >
       <VinesIcon src="emoji:⛔:#35363b" size="xl" disabledPreview />

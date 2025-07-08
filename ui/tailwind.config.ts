@@ -103,6 +103,13 @@ const config = {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'spinner-ease-spin': 'spinner-spin .8s ease infinite'
       },
+      spacing: {
+        'global-1/2': 'calc(var(--global-spacing)/2)',
+        global: 'var(--global-spacing)',
+        'global-2': 'calc(var(--global-spacing)*2)',
+        icon: 'var(--global-icon-size)',
+        'icon-sm': 'calc(var(--global-icon-size)-var(--global-spacing))',
+      },
     },
   },
   plugins: [tailwindcss_typography, tailwindcss_animate, createPlugin({ opacitySupport: true }).plugin],

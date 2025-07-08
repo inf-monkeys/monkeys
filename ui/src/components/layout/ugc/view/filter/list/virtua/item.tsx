@@ -46,7 +46,7 @@ export const VirtuaUgcFilterListItem: React.FC<IVirtuaUgcFilterListItemProps> = 
       )}
       onClick={() => onClick?.(ruleId)}
     >
-      <div className="flex w-full items-center justify-between px-4 text-sm">
+      <div className="px-global flex w-full items-center justify-between text-sm">
         <span>{ruleName}</span>
         {onClickDelete && (
           <AlertDialog>

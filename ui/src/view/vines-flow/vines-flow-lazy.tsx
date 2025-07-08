@@ -75,7 +75,7 @@ const VinesFlow: React.FC<IVinesFlowProps> = () => {
   });
 
   return (
-    <main className={cn('vines-center relative size-full', workbenchVisible && 'px-4')}>
+    <main className={cn('vines-center relative size-full', workbenchVisible && 'px-global')}>
       <VinesFlowWrapper>
         <AnimatePresence>
           {visible && (

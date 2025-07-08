@@ -143,7 +143,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
             </motion.div>
           ) : initial ? (
             <motion.div
-              className={cn('flex h-full w-full flex-col gap-4 overflow-y-auto p-4', contentClassName)}
+              className={cn('p-global gap-global flex h-full w-full flex-col overflow-y-auto', contentClassName)}
               key="vines-workflow-output-config"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

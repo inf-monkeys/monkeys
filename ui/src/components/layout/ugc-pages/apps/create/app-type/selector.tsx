@@ -8,7 +8,7 @@ export const AppTypeSelector: React.FC<{
   onChange: (selected: ICreateAppType) => void | Promise<void>;
 }> = ({ selectedType, onChange }) => {
   return (
-    <div className="flex justify-between gap-4">
+    <div className="gap-global flex justify-between">
       <AppTypeItem type="agent" selected={selectedType === 'agent'} onSelect={onChange} />
       <AppTypeItem type="workflow" selected={selectedType === 'workflow'} onSelect={onChange} />
     </div>

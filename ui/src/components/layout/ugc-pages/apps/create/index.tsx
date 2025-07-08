@@ -42,7 +42,7 @@ export const CreateAppDialog: React.FC<ICreateAppDialogProps> = ({ defaultSelect
           </div>
           <AnimatePresence mode="wait">
             <motion.div
-              className="flex flex-col gap-4"
+              className="gap-global flex flex-col"
               key={selectedType}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

@@ -41,11 +41,11 @@ export const ThemeMarket: React.FC<IThemeMarketProps> = () => {
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-56">
-          <div className="flex flex-col gap-4">
+          <div className="gap-global flex flex-col">
             {data
               ?.filter((theme, i, arr) => arr.findIndex((t) => t.primaryColor === theme.primaryColor) === i)
               ?.map(({ primaryColor, name, updatedTimestamp }, i) => (
-                <div key={i} className="flex items-center gap-4 border-b border-b-input p-4 pt-0">
+                <div key={i} className="p-global gap-global flex items-center border-b border-b-input pt-0">
                   <div style={{ backgroundColor: primaryColor }} className="size-8 rounded-full" />
                   <div className="flex flex-col">
                     <p className="font-bold leading-tight">{name}</p>

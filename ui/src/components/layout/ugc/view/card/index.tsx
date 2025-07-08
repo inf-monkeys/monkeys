@@ -47,7 +47,7 @@ export const UgcViewCard = <E extends object>({
           : undefined
       }
     >
-      <CardHeader className="p-4">
+      <CardHeader className="p-global">
         <CardTitle className={cn('flex gap-3 font-medium', operateAreaNode && 'justify-between')}>
           <div>{logo}</div>
           <div className={cn('flex flex-col', operateAreaNode && 'max-w-[55%]')}>
@@ -67,7 +67,7 @@ export const UgcViewCard = <E extends object>({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2 p-4 pt-0">
+      <CardContent className="p-global flex flex-col gap-2 pt-0">
         {assetTags}
         <div className="flex flex-col gap-1 text-xs text-opacity-70">
           {description || t('components.layout.ugc.utils.no-description')}

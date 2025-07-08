@@ -50,16 +50,16 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         {...(isGlobalItem ? {} : listeners)}
         key={pageId}
         className={cn(
-          'z-10 flex cursor-pointer items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+          'gap-global-1/2 p-global-1/2 z-10 flex cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
           currentPageId === pageId
             ? 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]'
-            : 'p-2',
-          onlyShowWorkbenchIcon ? 'mb-1 size-11 justify-center' : 'mb-2',
+            : 'p-global-1/2',
+          onlyShowWorkbenchIcon ? 'mb-1 size-[var(--operation-bar-width)]' : 'mb-global-1/2',
           isDragging && 'opacity-50',
         )}
         onClick={() => onClick?.(page)}
       >
-        <VinesIcon className="shrink-0 grow-0" size="sm" disabledPreview>
+        <VinesIcon className="!size-[calc(var(--global-icon-size)+var(--global-spacing)/2)]" size="sm" disabledPreview>
           {info?.iconUrl}
         </VinesIcon>
         {!onlyShowWorkbenchIcon ? (

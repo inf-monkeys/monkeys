@@ -59,18 +59,18 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
       {...attributes}
       {...listeners}
       className={cn(
-        'z-10 mb-1 flex h-11 cursor-pointer select-none items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+        'p-global-1/2 gap-global-1/2 z-10 flex cursor-pointer select-none items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
         onlyShowWorkbenchIcon
-          ? 'flex size-11 items-center justify-center'
-          : 'flex w-full shrink-0 items-center justify-start gap-2 px-2',
+          ? 'flex size-[var(--operation-bar-width)] items-center justify-center'
+          : 'px-global-1/2 gap-global-1/2 mb-global-1/2 flex w-full shrink-0 items-center justify-start',
         groupId === currentGroupId && 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]',
       )}
       {...attr}
     >
       {typeof icon === 'string' ? (
-        <VinesLucideIcon className="size-[20px] shrink-0" size={20} src={icon} />
+        <VinesLucideIcon className="size-icon shrink-0" size={20} src={icon} />
       ) : (
-        React.createElement(icon, { className: 'size-[20px] shrink-0', size: 20 })
+        React.createElement(icon, { className: 'size-icon shrink-0', size: 20 })
       )}
       {!onlyShowWorkbenchIcon && (
         <h1 className="line-clamp-1 max-w-20 text-ellipsis whitespace-nowrap text-sm">{displayText}</h1>
