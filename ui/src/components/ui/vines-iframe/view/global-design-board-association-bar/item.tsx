@@ -84,7 +84,9 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
         if (data.targetWorkflowId && workspaceData?.pages) {
           // 在所有 pinned pages 中查找对应的 page
           const targetPage = workspaceData.pages.find(
-            (page) => page.workflow?.workflowId === data.targetWorkflowId && page.type === 'preview',
+            (page) =>
+              (page.workflow?.workflowId === data.targetWorkflowId || page.workflow?.id === data.targetWorkflowId) &&
+              page.type === 'preview',
           );
           const targetPageGroup = workspaceData.groups.find((item) => item.pageIds.includes(targetPage?.id ?? ''));
 
