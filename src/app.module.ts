@@ -10,6 +10,7 @@ import { ToolsMiddleware } from './common/middlewares/tools.middleware';
 import { CronJobModule } from './cronjobs/cron.module';
 import { DatabaseModule } from './database/database.module';
 import { RepositoryMoule } from './database/repositories.module';
+import { AiChatbotModule } from './modules/ai-chatbot/ai-chatbot.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
@@ -43,6 +44,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     ExportModule,
     BootstrapModule,
     AuthModule,
+    AiChatbotModule,
     AssetsModule,
     LLMToolsModule,
     TranslateToolsModule,

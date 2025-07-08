@@ -27,6 +27,7 @@
     "migration:generate": "yarn build && yarn ts-typeorm migration:generate ./src/database/migrations/migration -d ormconfig.js"
   },
   "dependencies": {
+    "@ai-sdk/openai": "2.0.0-beta.2",
     "@alicloud/dysmsapi20170525": "^2.0.24",
     "@alicloud/openapi-client": "^0.4.8",
     "@alicloud/tea-util": "^1.4.7",
@@ -45,7 +46,7 @@
     "@nestjs/swagger": "^7.3.0",
     "@nestjs/typeorm": "^10.0.2",
     "@types/aws-sdk": "^2.7.4",
-    "ai": "^3.0.24",
+    "ai": "5.0.0-beta.6",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.7.4",
     "class-transformer": "^0.5.1",
@@ -67,7 +68,7 @@
     "lodash": "^4.17.21",
     "log4js": "^6.9.1",
     "nestjs-wechat-work": "^9.0.0",
-    "openai": "^4.38.2",
+    "openai": "^5.8.2",
     "openapi-merge": "^1.3.2",
     "openid-client": "^5.6.5",
     "openskill": "^4.1.0",
@@ -84,7 +85,7 @@
     "totp-generator": "^1.0.0",
     "typeorm": "^0.3.20",
     "yaml": "^2.4.0",
-    "zod": "^3.23.0"
+    "zod": "^3.25.68"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

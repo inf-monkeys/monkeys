@@ -181,40 +181,34 @@ export class AutoEvaluationService implements OnApplicationBootstrap, OnApplicat
    * 恢复应用重启前正在进行的评估任务
    */
   private async recoverActiveEvaluations(): Promise<void> {
-    try {
-      this.logger.log('Starting evaluation recovery process...');
-
-      // 查找最近有活动的评估模块
-      const activeModules = await this.findActiveEvaluationModules();
-
-      this.logger.log(`Found ${activeModules.length} potentially active evaluation modules`);
-
-      let recoveredCount = 0;
-      for (const module of activeModules) {
-        try {
-          // 检查评估状态
-          const status = await this.openskillService.getEvaluationStatus(module.teamId, module.moduleId);
-
-          if (!status.isComplete && status.totalAssets >= 2) {
-            this.logger.log(`Recovering evaluation for module ${module.moduleId} ` + `(${status.totalAssets} assets, ${status.progress}% complete, reason: ${status.convergenceReason})`);
-
-            await this.startEvaluation(module.teamId, module.moduleId);
-            recoveredCount++;
-          } else if (status.isComplete) {
-            this.logger.debug(`Module ${module.moduleId} is already complete`);
-            this.completedModules.add(module.moduleId);
-          } else {
-            this.logger.debug(`Module ${module.moduleId} has insufficient assets (${status.totalAssets})`);
-          }
-        } catch (error) {
-          this.logger.error(`Failed to recover module ${module.moduleId}:`, error);
-        }
-      }
-
-      this.logger.log(`Evaluation recovery completed. Recovered ${recoveredCount} active evaluations.`);
-    } catch (error) {
-      this.logger.error('Error in recoverActiveEvaluations:', error);
-    }
+    // try {
+    //   this.logger.log('Starting evaluation recovery process...');
+    //   // 查找最近有活动的评估模块
+    //   const activeModules = await this.findActiveEvaluationModules();
+    //   this.logger.log(`Found ${activeModules.length} potentially active evaluation modules`);
+    //   let recoveredCount = 0;
+    //   for (const module of activeModules) {
+    //     try {
+    //       // 检查评估状态
+    //       const status = await this.openskillService.getEvaluationStatus(module.teamId, module.moduleId);
+    //       if (!status.isComplete && status.totalAssets >= 2) {
+    //         this.logger.log(`Recovering evaluation for module ${module.moduleId} ` + `(${status.totalAssets} assets, ${status.progress}% complete, reason: ${status.convergenceReason})`);
+    //         await this.startEvaluation(module.teamId, module.moduleId);
+    //         recoveredCount++;
+    //       } else if (status.isComplete) {
+    //         this.logger.debug(`Module ${module.moduleId} is already complete`);
+    //         this.completedModules.add(module.moduleId);
+    //       } else {
+    //         this.logger.debug(`Module ${module.moduleId} has insufficient assets (${status.totalAssets})`);
+    //       }
+    //     } catch (error) {
+    //       this.logger.error(`Failed to recover module ${module.moduleId}:`, error);
+    //     }
+    //   }
+    //   this.logger.log(`Evaluation recovery completed. Recovered ${recoveredCount} active evaluations.`);
+    // } catch (error) {
+    //   this.logger.error('Error in recoverActiveEvaluations:', error);
+    // }
   }
 
   /**

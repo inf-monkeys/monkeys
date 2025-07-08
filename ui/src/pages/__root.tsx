@@ -13,6 +13,7 @@ import { AgentLayout } from '@/components/layout-wrapper/agent';
 import { DesignLayout } from '@/components/layout-wrapper/design';
 import { EvaluationLayout } from '@/components/layout-wrapper/evaluation';
 import { MainWrapper } from '@/components/layout-wrapper/main';
+import { VercelAiWrapper } from '@/components/layout-wrapper/vercel-ai';
 import { WorkbenchMiniModeLayout } from '@/components/layout-wrapper/workbench/mini-mode';
 import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
 import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-view';
@@ -44,6 +45,7 @@ const RootComponent: React.FC = () => {
     isUseWorkbench,
     isUsePanel,
     isUseEvaluation,
+    isUseVercelAi,
   } = useVinesRoute();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
@@ -82,6 +84,7 @@ const RootComponent: React.FC = () => {
     !isUseDesign &&
     !isUseEvaluation &&
     !isUsePanel &&
+    !isUseVercelAi &&
     (mode !== 'mini' || !isUseWorkbench);
 
   const { teamId } = useVinesTeam();
@@ -127,6 +130,7 @@ const RootComponent: React.FC = () => {
                 {isUseEvaluation && <EvaluationLayout />}
                 {isUsePanel && mode !== 'mini' && <WorkbenchPanelLayout layoutId={layoutId} />}
                 {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
+                {isUseVercelAi && <VercelAiWrapper layoutId={layoutId} />}
                 {isUseDefault && <MainWrapper layoutId={layoutId} />}
               </motion.div>
             )}

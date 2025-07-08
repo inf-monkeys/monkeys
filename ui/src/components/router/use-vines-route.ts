@@ -19,6 +19,9 @@ export const useVinesRoute = () => {
   // 检查是否是图片详情页面
   const isImageDetailPage = routeIds?.[3] === 'image-detail';
 
+  // demo
+  const isUseVercelAi = routeAppId === 'vercel-ai';
+
   // 之后再考虑是否改为开头匹配 vines-
   const isUseOutside = !routeIds;
   const isUseShareView = VINES_IFRAME_PAGE_IDS.includes(params?.['pageId']);
@@ -30,7 +33,12 @@ export const useVinesRoute = () => {
   const isUseDesign = routeAppId === 'design';
   const isUseEvaluation = routeAppId === 'evaluations' && routeIds?.[2] && routeIds?.[3]; // 有moduleId和tab时使用评测布局
   const isUsePanel =
-    (!!routeIds || !isUseWorkbench) && !isUseWorkSpace && !isUseAgent && !isUseDesign && !isUseEvaluation;
+    (!!routeIds || !isUseWorkbench) &&
+    !isUseWorkSpace &&
+    !isUseAgent &&
+    !isUseDesign &&
+    !isUseEvaluation &&
+    !isUseVercelAi;
   const isUseAppStore = routeAppId === 'store';
 
   // 对于图片详情页面，确保路由信息中包含workbench，以便高亮工作台选项
@@ -55,5 +63,6 @@ export const useVinesRoute = () => {
     isImageDetailPage,
     isUseAppStore,
     isUseEvaluation,
+    isUseVercelAi,
   };
 };

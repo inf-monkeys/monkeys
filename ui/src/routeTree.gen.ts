@@ -26,6 +26,7 @@ const LoginCallbackLazyImport = createFileRoute('/login/callback')()
 const TeamIdWorkspaceIndexLazyImport = createFileRoute('/$teamId/workspace/')()
 const TeamIdWorkflowsIndexLazyImport = createFileRoute('/$teamId/workflows/')()
 const TeamIdWorkbenchIndexLazyImport = createFileRoute('/$teamId/workbench/')()
+const TeamIdVercelAiIndexLazyImport = createFileRoute('/$teamId/vercel-ai/')()
 const TeamIdToolsIndexLazyImport = createFileRoute('/$teamId/tools/')()
 const TeamIdTextModelsIndexLazyImport = createFileRoute(
   '/$teamId/text-models/',
@@ -156,6 +157,13 @@ const TeamIdWorkbenchIndexLazyRoute = TeamIdWorkbenchIndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() =>
   import('./pages/$teamId/workbench/index.lazy').then((d) => d.Route),
+)
+
+const TeamIdVercelAiIndexLazyRoute = TeamIdVercelAiIndexLazyImport.update({
+  path: '/$teamId/vercel-ai/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./pages/$teamId/vercel-ai/index.lazy').then((d) => d.Route),
 )
 
 const TeamIdToolsIndexLazyRoute = TeamIdToolsIndexLazyImport.update({
@@ -577,6 +585,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdToolsIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/vercel-ai/': {
+      preLoaderRoute: typeof TeamIdVercelAiIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/workbench/': {
       preLoaderRoute: typeof TeamIdWorkbenchIndexLazyImport
       parentRoute: typeof rootRoute
@@ -682,6 +694,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdTextModelStoreIndexLazyRoute,
   TeamIdTextModelsIndexLazyRoute,
   TeamIdToolsIndexLazyRoute,
+  TeamIdVercelAiIndexLazyRoute,
   TeamIdWorkbenchIndexLazyRoute,
   TeamIdWorkflowsIndexLazyRoute,
   TeamIdWorkspaceIndexLazyRoute,

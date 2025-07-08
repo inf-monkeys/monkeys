@@ -11,14 +11,12 @@ import { SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL } from '@/modules/assets/consts';
 import { SqlKnowledgeBaseService } from '@/modules/assets/sql-knowledge-base/sql-knowledge-base.service';
 import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
-import { OpenAIStream, StreamData, StreamingTextResponse, ToolCallPayload } from 'ai';
 import axios from 'axios';
 import { Response } from 'express';
 import OpenAI from 'openai';
 import { ChatCompletion, ChatCompletionChunk, ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources';
 import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
 import { Stream } from 'openai/streaming';
-import { Readable } from 'stream';
 import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base.service';
 import { ToolsForwardService } from '../tools.forward.service';
 import { ResponseFormat } from './dto/req/create-chat-compltion.dto';
@@ -799,81 +797,74 @@ ${userQuestion}
 
     try {
       if (stream) {
-        const data = new StreamData();
-        const streamResponse = OpenAIStream(response as Stream<ChatCompletionChunk>, {
-          experimental_onToolCall: async (call: ToolCallPayload, appendToolCallMessage) => {
-            for (const toolCall of call.tools) {
-              let toolResult: any;
-              try {
-                sendAndCollectLogs('info', 'tool_call', `Start to execute tool call ${toolCall.func.name} with arguments: ${JSON.stringify(toolCall.func.arguments)}`, {
-                  toolCallId: toolCall.id,
-                  toolName: toolCall.func.name.replace('__', ':'),
-                  arguments: toolCall.func.arguments,
-                  status: 'inprogress',
-                });
-                toolResult = await this.executeTool(toolCall.func.name, toolCall.func.arguments, sqlKnowledgeBase);
-                sendAndCollectLogs('info', 'tool_call', `Tool call ${toolCall.func.name} result: ${JSON.stringify(toolResult)}`, {
-                  toolCallId: toolCall.id,
-                  toolName: toolCall.func.name.replace('__', ':'),
-                  arguments: toolCall.func.arguments,
-                  result: toolResult,
-                  status: 'success',
-                });
-              } catch (error) {
-                sendAndCollectLogs('error', 'tool_call', `Failed to execute tool call: ${toolCall.func.name}, error: ${error.message}`, {
-                  toolCallId: toolCall.id,
-                  toolName: toolCall.func.name.replace('__', ':'),
-                  arguments: toolCall.func.arguments,
-                  error: error.message,
-                  status: 'failed',
-                });
-                logger.error(`Failed to execute tool call: ${toolCall.func.name}`, error);
-                toolResult = `Can't find anything related`;
-              }
-              const toolMessages = appendToolCallMessage({
-                tool_call_id: toolCall.id,
-                function_name: toolCall.func.name,
-                tool_call_result: toolResult,
-              });
-              for (const toolMessage of toolMessages) {
-                if (toolMessage.content?.length > config.llm.toolResultMaxLength) {
-                  toolMessage.content = toolMessage.content.slice(0, config.llm.toolResultMaxLength) + '...';
-                }
-              }
-              return openai.chat.completions.create({
-                messages: [...openAIMessages, ...toolMessages] as Array<ChatCompletionMessageParam>,
-                model,
-                stream: true,
-                tools,
-                tool_choice: 'auto',
-              });
-            }
-          },
-          onCompletion(completion) {
-            onSuccess?.(completion);
-            logger.info(`Completion Finished: ${completion}`);
-          },
-          onFinal() {
-            if (res) {
-              res.write('data: [DONE]\n\n');
-              res.end();
-            }
-          },
-        });
-        const streamingTextResponse = new StreamingTextResponse(streamResponse, {}, data);
-
-        const body = streamingTextResponse.body;
-        const readableStream = Readable.from(body as any);
-        readableStream.on('data', (chunk) => {
-          const decoder = new TextDecoder();
-          let chunkString = decoder.decode(chunk);
-          // Original String: 0:"你", contains the beginning 0: and the first and last double quotes
-          chunkString = chunkString.slice(2, -1).slice(1, -1);
-          const chunkLine = this.geneChunkLine('chatcmpl-' + randomChatCmplId, model, chunkString);
-          if (res) {
-            res.write(chunkLine);
-          }
-        });
+        // const data = new StreamData();
+        // const streamResponse = createDataStreamResponse(response as Stream<ChatCompletionChunk>, {
+        //   async onFunctionCall(functionCall, createFunctionCallMessages) {
+        //     let toolResult: any;
+        //     try {
+        //       sendAndCollectLogs('info', 'tool_call', `Start to execute tool call ${functionCall.name} with arguments: ${JSON.stringify(functionCall.arguments)}`, {
+        //         toolCallId: functionCall.id,
+        //         toolName: functionCall.name.replace('__', ':'),
+        //         arguments: functionCall.arguments,
+        //         status: 'inprogress',
+        //       });
+        //       toolResult = await this.executeTool(functionCall.name, functionCall.arguments, sqlKnowledgeBase);
+        //       sendAndCollectLogs('info', 'tool_call', `Tool call ${functionCall.name} result: ${JSON.stringify(toolResult)}`, {
+        //         toolCallId: functionCall.id,
+        //         toolName: functionCall.name.replace('__', ':'),
+        //         arguments: functionCall.arguments,
+        //         result: toolResult,
+        //         status: 'success',
+        //       });
+        //     } catch (error) {
+        //       sendAndCollectLogs('error', 'tool_call', `Failed to execute tool call: ${functionCall.name}, error: ${error.message}`, {
+        //         toolCallId: functionCall.id,
+        //         toolName: functionCall.name.replace('__', ':'),
+        //         arguments: functionCall.arguments,
+        //         error: error.message,
+        //         status: 'failed',
+        //       });
+        //       logger.error(`Failed to execute tool call: ${functionCall.name}`, error);
+        //       toolResult = `Can't find anything related`;
+        //     }
+        //     const functionMessages = createFunctionCallMessages(toolResult);
+        //     for (const message of functionMessages) {
+        //       if (message.content?.length > config.llm.toolResultMaxLength) {
+        //         message.content = message.content.slice(0, config.llm.toolResultMaxLength) + '...';
+        //       }
+        //     }
+        //     return openai.chat.completions.create({
+        //       messages: [...openAIMessages, ...functionMessages] as Array<ChatCompletionMessageParam>,
+        //       model,
+        //       stream: true,
+        //       tools,
+        //       tool_choice: 'auto',
+        //     });
+        //   },
+        //   onCompletion(completion) {
+        //     onSuccess?.(completion);
+        //     logger.info(`Completion Finished: ${completion}`);
+        //   },
+        //   onFinal() {
+        //     if (res) {
+        //       res.write('data: [DONE]\n\n');
+        //       res.end();
+        //     }
+        //   },
+        // });
+        // const streamingTextResponse = new StreamingTextResponse(streamResponse, {}, data);
+        // const body = streamingTextResponse.body;
+        // const readableStream = Readable.from(body as any);
+        // readableStream.on('data', (chunk) => {
+        //   const decoder = new TextDecoder();
+        //   let chunkString = decoder.decode(chunk);
+        //   // Original String: 0:"你", contains the beginning 0: and the first and last double quotes
+        //   chunkString = chunkString.slice(2, -1).slice(1, -1);
+        //   const chunkLine = this.geneChunkLine('chatcmpl-' + randomChatCmplId, model, chunkString);
+        //   if (res) {
+        //     res.write(chunkLine);
+        //   }
+        // });
       } else {
         const data = response as ChatCompletion;
         if (data.choices[0].message.tool_calls?.length) {
