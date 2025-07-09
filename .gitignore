@@ -37,4 +37,4 @@ lerna-debug.log*
 /data
 config.yaml
 config.*.yaml
-builtInMarket.json
+builtInMarket.jsondocker/server/config/server-config.yaml
