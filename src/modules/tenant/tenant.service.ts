@@ -224,10 +224,13 @@ export class TenantService {
       qb.andWhere(
         new Brackets((qb1) => {
           if (Array.isArray(extraMetadata)) {
-            // 支持数组查询（IN 查询）
+            // 支持数组查询（使用 JSONB @> 包含查询）
             Object.entries(extraMetadata[0] || {}).forEach(([key, value]) => {
               if (Array.isArray(value)) {
-                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
+                // 用 JSONB 的 @> 操作符判断 cate 包含 value 中任一项
+                value.forEach((v) => {
+                  qb1.andWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) });
+                });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
               }
@@ -236,7 +239,9 @@ export class TenantService {
             // 原有的对象查询
             Object.entries(extraMetadata).forEach(([key, value]) => {
               if (Array.isArray(value)) {
-                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
+                value.forEach((v) => {
+                  qb1.andWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) });
+                });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
               }
@@ -385,10 +390,13 @@ export class TenantService {
       qb.andWhere(
         new Brackets((qb1) => {
           if (Array.isArray(extraMetadata)) {
-            // 支持数组查询（IN 查询）
+            // 支持数组查询（使用 JSONB @> 包含查询）
             Object.entries(extraMetadata[0] || {}).forEach(([key, value]) => {
               if (Array.isArray(value)) {
-                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
+                // 用 JSONB 的 @> 操作符判断 cate 包含 value 中任一项
+                value.forEach((v) => {
+                  qb1.andWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) });
+                });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
               }
@@ -397,7 +405,9 @@ export class TenantService {
             // 原有的对象查询
             Object.entries(extraMetadata).forEach(([key, value]) => {
               if (Array.isArray(value)) {
-                qb1.andWhere(`execution.extra_metadata->>:key IN (:...values)`, { key, values: value });
+                value.forEach((v) => {
+                  qb1.andWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) });
+                });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
               }
