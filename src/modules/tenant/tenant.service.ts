@@ -224,12 +224,15 @@ export class TenantService {
       qb.andWhere(
         new Brackets((qb1) => {
           if (Array.isArray(extraMetadata)) {
-            // 支持数组查询（使用 JSONB @> 包含查询）
+            // 支持数组查询（使用 JSONB @> 包含查询，并兼容字符串存储）
             Object.entries(extraMetadata[0] || {}).forEach(([key, value]) => {
               if (Array.isArray(value)) {
-                // 用 JSONB 的 @> 操作符判断 cate 包含 value 中任一项
                 value.forEach((v) => {
-                  qb1.andWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) });
+                  qb1.andWhere(
+                    new Brackets((qb2) => {
+                      qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
+                    }),
+                  );
                 });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
@@ -240,7 +243,11 @@ export class TenantService {
             Object.entries(extraMetadata).forEach(([key, value]) => {
               if (Array.isArray(value)) {
                 value.forEach((v) => {
-                  qb1.andWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) });
+                  qb1.andWhere(
+                    new Brackets((qb2) => {
+                      qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
+                    }),
+                  );
                 });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
@@ -390,12 +397,15 @@ export class TenantService {
       qb.andWhere(
         new Brackets((qb1) => {
           if (Array.isArray(extraMetadata)) {
-            // 支持数组查询（使用 JSONB @> 包含查询）
+            // 支持数组查询（使用 JSONB @> 包含查询，并兼容字符串存储）
             Object.entries(extraMetadata[0] || {}).forEach(([key, value]) => {
               if (Array.isArray(value)) {
-                // 用 JSONB 的 @> 操作符判断 cate 包含 value 中任一项
                 value.forEach((v) => {
-                  qb1.andWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) });
+                  qb1.andWhere(
+                    new Brackets((qb2) => {
+                      qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
+                    }),
+                  );
                 });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
@@ -406,7 +416,11 @@ export class TenantService {
             Object.entries(extraMetadata).forEach(([key, value]) => {
               if (Array.isArray(value)) {
                 value.forEach((v) => {
-                  qb1.andWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) });
+                  qb1.andWhere(
+                    new Brackets((qb2) => {
+                      qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
+                    }),
+                  );
                 });
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
