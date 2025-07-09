@@ -885,7 +885,7 @@ export class WorkflowExecutionService {
     while (!finished) {
       workflowExecutionDetails = await this.getWorkflowExecutionDetail(teamId, workflowInstanceId);
       status = workflowExecutionDetails.status;
-      finished = status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT';
+      finished = status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT' || status === 'CANCELED' || status === 'PAUSED';
       output = workflowExecutionDetails.output;
       takes = workflowExecutionDetails.endTime ? workflowExecutionDetails.endTime - (workflowExecutionDetails.startTime || 0) : 0;
       await sleep(interval);
@@ -896,7 +896,7 @@ export class WorkflowExecutionService {
     await this.workflowRepository.updateWorkflowExecutionStatus(workflowInstanceId, status, takes);
 
     // 修改：为所有完成状态（包括失败状态）触发事件
-    if (status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT') {
+    if (status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT' || status === 'CANCELED' || status === 'PAUSED') {
       this.eventEmitter.emit(`workflow.completed.${workflowInstanceId}`, {
         workflowInstanceId,
         result: workflowExecutionDetails,
