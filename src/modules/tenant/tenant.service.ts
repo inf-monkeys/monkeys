@@ -158,14 +158,68 @@ export class TenantService {
     };
   }
 
-  async getAllExecutions(options: { page: number; limit: number; extraMetadata?: Record<string, any> | Record<string, any>[]; workflowWithExtraMetadata?: boolean }) {
-    const { page, limit, extraMetadata, workflowWithExtraMetadata } = options;
+  async getAllExecutions(options: {
+    page: number;
+    limit: number;
+    extraMetadata?: Record<string, any> | Record<string, any>[];
+    workflowWithExtraMetadata?: boolean;
+    freeText?: string;
+    status?: string[];
+    startTimeFrom?: number;
+    startTimeTo?: number;
+    workflowId?: string;
+    workflowInstanceId?: string;
+    versions?: number[];
+  }) {
+    const { page, limit, extraMetadata, workflowWithExtraMetadata, freeText = '*', status = [], startTimeFrom, startTimeTo, workflowId, workflowInstanceId, versions } = options;
+
     const qb = this.workflowExecutionRepository
       .createQueryBuilder('execution')
       .skip((page - 1) * limit)
       .take(limit)
       .orderBy('execution.created_timestamp', 'DESC');
 
+    // 添加 workflow ID 过滤
+    if (workflowId) {
+      qb.andWhere('execution.workflow_id = :workflowId', { workflowId });
+    }
+
+    // 添加状态过滤
+    if (status.length > 0) {
+      qb.andWhere('execution.status IN (:...status)', { status });
+    }
+
+    // 添加时间范围过滤
+    if (startTimeFrom) {
+      qb.andWhere('execution.created_timestamp >= :startTimeFrom', { startTimeFrom });
+    }
+    if (startTimeTo) {
+      qb.andWhere('execution.created_timestamp <= :startTimeTo', { startTimeTo });
+    }
+
+    // 添加版本过滤
+    if (versions?.length) {
+      qb.andWhere('execution.version IN (:...versions)', { versions });
+    }
+
+    // 添加特定实例过滤
+    if (workflowInstanceId) {
+      qb.andWhere('execution.workflow_instance_id = :workflowInstanceId', { workflowInstanceId });
+    }
+
+    // 添加自由文本搜索（如果不是默认的 '*'）
+    if (freeText !== '*' && freeText.trim()) {
+      qb.andWhere(
+        new Brackets((qb1) => {
+          qb1
+            .orWhere('execution.searchable_text ILIKE :freeText', { freeText: `%${freeText}%` })
+            .orWhere('execution.workflow_id ILIKE :freeText', { freeText: `%${freeText}%` })
+            .orWhere('execution.workflow_instance_id ILIKE :freeText', { freeText: `%${freeText}%` });
+        }),
+      );
+    }
+
+    // 添加 extraMetadata 查询过滤
     if (extraMetadata && Object.keys(extraMetadata).length > 0) {
       qb.andWhere(
         new Brackets((qb1) => {
@@ -215,7 +269,7 @@ export class TenantService {
         output: this.formatOutput(execution.output),
         rawOutput: execution.output,
         extraMetadata: execution.extraMetadata,
-        searchableText: '', // 如有需要可补充
+        searchableText: execution.searchableText || '',
         createTime: execution.createdTimestamp,
       };
     });
