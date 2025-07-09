@@ -54,7 +54,7 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
   }, [nodeId]);
 
   return (
-    <main className="flex size-full flex-col gap-4 overflow-hidden px-4">
+    <main className="gap-global px-global flex size-full flex-col overflow-hidden">
       <Label>{t('workspace.flow-view.headless-modal.tool-editor.advanced-config.timeout.label')}</Label>
       <Input
         placeholder={t('workspace.flow-view.headless-modal.tool-editor.advanced-config.timeout.placeholder')}

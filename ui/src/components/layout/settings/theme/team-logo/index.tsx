@@ -95,7 +95,7 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
         <CardDescription>{t('settings.theme.team-logo.description')}</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="gap-global flex items-center">
           <VinesImageEditor
             value={teamLogo}
             onChange={handleUpdateTeamLogo}

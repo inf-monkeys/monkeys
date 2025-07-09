@@ -425,7 +425,7 @@ export const EditView: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="gap-global grid grid-cols-2">
                 <div className="grid gap-2">
                   <Label>{t('ugc-page.evaluation.edit.initial-rating')}</Label>
                   <Input
@@ -511,7 +511,7 @@ export const EditView: React.FC = () => {
               <DialogTitle>{t('ugc-page.evaluation.edit.add-evaluator-dialog.title')}</DialogTitle>
               <DialogDescription>{t('ugc-page.evaluation.edit.add-evaluator-dialog.description')}</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="py-global space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="evaluatorName">{t('ugc-page.evaluation.edit.add-evaluator-dialog.name-label')}</Label>
                 <Input

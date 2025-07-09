@@ -23,7 +23,7 @@ export const VinesActuatorDetail: React.FC<IVinesActuatorDetailProps> = memo(({ 
       {executionTask ? (
         <motion.div
           key="vines-actuator-detail-main"
-          className="flex h-full flex-1 flex-col gap-4"
+          className="gap-global flex h-full flex-1 flex-col"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

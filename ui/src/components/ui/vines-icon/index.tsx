@@ -75,6 +75,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
                 size === 'md' && 'size-4',
                 size === 'sm' && 'size-3',
                 size === 'xs' && 'size-2',
+                className,
               )}
             />
           )}

@@ -113,7 +113,7 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
         <DialogHeader>
           <DialogTitle>{t('settings.payment.pay.title')}</DialogTitle>
         </DialogHeader>
-        <div className="vines-center flex flex-col gap-4 pt-4">
+        <div className="vines-center gap-global pt-global flex flex-col">
           {order ? (
             <>
               <QRCode

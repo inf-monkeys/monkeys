@@ -84,7 +84,9 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
         if (data.targetWorkflowId && workspaceData?.pages) {
           // 在所有 pinned pages 中查找对应的 page
           const targetPage = workspaceData.pages.find(
-            (page) => page.workflow?.workflowId === data.targetWorkflowId && page.type === 'preview',
+            (page) =>
+              (page.workflow?.workflowId === data.targetWorkflowId || page.workflow?.id === data.targetWorkflowId) &&
+              page.type === 'preview',
           );
           const targetPageGroup = workspaceData.groups.find((item) => item.pageIds.includes(targetPage?.id ?? ''));
 
@@ -126,21 +128,21 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
           {...listeners}
           key={data.id}
           className={cn(
-            'z-10 flex cursor-pointer items-center justify-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-            mode === 'mini' ? 'size-8' : 'size-11',
+            'p-global-1/2 gap-global-1/2 z-10 flex cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+            mode === 'mini' ? 'size-[calc(var(--global-icon-size)+8px)]' : 'size-[var(--operation-bar-width)]',
             isDragging && 'opacity-50',
           )}
           onClick={onItemClick}
         >
           {typeof data.iconUrl === 'string' ? (
             <VinesLucideIcon
-              className={cn('shrink-0', mode === 'mini' ? 'size-[16px]' : 'size-[20px]')}
+              className={cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon')}
               size={20}
               src={data.iconUrl}
             />
           ) : (
             React.createElement(Folder, {
-              className: cn('shrink-0', mode === 'mini' ? 'size-[16px]' : 'size-[20px]'),
+              className: cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon'),
               size: 20,
             })
           )}

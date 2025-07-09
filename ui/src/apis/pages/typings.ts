@@ -50,7 +50,9 @@ export interface IPageType {
 export type IPinPage = IPageType & {
   workflowId?: string;
   designMetadataId?: string;
-  workflow?: MonkeyWorkflow;
+  workflow?: MonkeyWorkflow & {
+    id?: string;
+  };
   agent?: IAssetItem<IAgent>;
   designProject?: IAssetItem<IDesignProject>;
 };

@@ -15,7 +15,7 @@ export const AppTypeItem: React.FC<{
   return (
     <div
       className={cn(
-        'flex-1 cursor-pointer rounded-md p-4 outline transition-all [&_*]:transition-all',
+        'p-global flex-1 cursor-pointer rounded-md outline transition-all [&_*]:transition-all',
         selected
           ? 'outline-[3px] outline-[--tw-ring-color] ring-vines-500'
           : 'outline-[2px] outline-[hsl(var(--border))]',

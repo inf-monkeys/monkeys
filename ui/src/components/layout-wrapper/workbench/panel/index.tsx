@@ -32,15 +32,15 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   });
   const isSettingRoute = pathName.split('/').at(-1) === 'settings';
   return (
-    <ViewGuard className="flex flex-col gap-4 bg-neocard">
+    <ViewGuard className="gap-global flex flex-col bg-neocard">
       <SpaceHeader tail={<TeamSelector />} disableSeparator>
         <SpaceHeaderTabs />
       </SpaceHeader>
       <VinesSpace
         className={cn(
           isWorkbenchRoute && 'overflow-auto bg-transparent p-0 shadow-none transition-colors',
-          isWorkspaceRoute && !isSettingRoute && 'w-full border border-input p-4',
-          isSettingRoute && 'w-full border border-input px-4 py-1',
+          isWorkspaceRoute && !isSettingRoute && 'p-global w-full border border-input',
+          isSettingRoute && 'px-global w-full border border-input py-1',
         )}
         sidebar={isWorkspaceRoute && <VinesPanelSidebar />}
       >

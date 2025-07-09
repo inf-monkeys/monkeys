@@ -38,7 +38,12 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
   return (
     <div
       ref={ref}
-      className={cn('flex w-full gap-4', hideSpaceHeader ? 'h-[calc(100vh-2rem)]' : 'h-[calc(100vh-3rem-3.75rem)]')}
+      className={cn(
+        'gap-global flex w-full',
+        hideSpaceHeader
+          ? 'h-[calc(100vh-var(--global-spacing)*2)]'
+          : 'h-[calc(100vh-(var(--global-spacing)*5.5)-2rem)]',
+      )}
     >
       {!vinesIFrameVisible && sidebar}
       <div

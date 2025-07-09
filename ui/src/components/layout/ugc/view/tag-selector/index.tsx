@@ -132,7 +132,7 @@ export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTa
         </div>
       </PopoverTrigger>
       <PopoverContent
-        className="flex w-64 flex-col gap-4"
+        className="gap-global flex w-64 flex-col"
         onClick={(e) => {
           e.stopPropagation();
         }}

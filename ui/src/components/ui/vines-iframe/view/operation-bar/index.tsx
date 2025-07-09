@@ -95,7 +95,7 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = () =
         onDragEnd={handleDragEnd}
       >
         <ScrollArea
-          className={cn('h-full', mode === 'mini' ? 'w-[3rem] px-2 pt-2' : 'w-[4.8rem] px-4 pt-4')}
+          className={cn('h-full', mode === 'mini' ? 'px-global-1/2 pt-global-1/2' : 'px-global pt-global')}
           ref={scrollRef}
           disabledOverflowMask
         >

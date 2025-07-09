@@ -57,9 +57,9 @@ export const InputWidgets: React.FC<IInputWidgetsProps> = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-8xl w-[60rem] gap-2 pt-10">
-        <div className="grid h-[30rem] w-full grid-cols-3 gap-4">
+        <div className="gap-global grid h-[30rem] w-full grid-cols-3">
           <div className="space-y-4">
-            <div className="border-b border-input pb-4">
+            <div className="pb-global border-b border-input">
               <div className="flex items-center justify-between">
                 <Label>图层</Label>
                 <Button className="!p-1.5" icon={<Plus />} variant="outline" size="small" />
@@ -72,7 +72,7 @@ export const InputWidgets: React.FC<IInputWidgetsProps> = () => {
               </div>
             </div>
           </div>
-          <div className="col-span-2 border-l border-input pl-4">
+          <div className="pl-global col-span-2 border-l border-input">
             <Label>实时画布</Label>
           </div>
         </div>

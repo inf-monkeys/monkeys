@@ -93,7 +93,7 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
         onDragEnd={handleDragEnd}
       >
         <ScrollArea
-          className={cn('h-full', mode === 'mini' ? 'w-[3rem] px-2 pt-2' : 'w-[4.8rem] px-4 pt-4')}
+          className={cn('h-full', mode === 'mini' ? 'px-2 pt-2' : 'px-global pt-global')}
           ref={scrollRef}
           disabledOverflowMask
         >

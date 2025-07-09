@@ -65,7 +65,7 @@ export const Team: React.FC<ITeamProps> = () => {
           <JoinPublicTeam />
         </div>
       </CardHeader>
-      <CardContent className={cn('flex gap-4', !isOwner && 'pointer-events-none')}>
+      <CardContent className={cn('gap-global flex', !isOwner && 'pointer-events-none')}>
         <VinesImageEditor
           value={teamLogo}
           onChange={(val) => handleUpdateTeam('iconUrl', val)}

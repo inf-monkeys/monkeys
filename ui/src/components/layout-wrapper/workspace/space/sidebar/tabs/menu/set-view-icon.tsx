@@ -46,7 +46,7 @@ export const SetViewIcon: React.FC<ISetViewIconProps> = ({ pageId, pages, setPag
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <DropdownMenuItem
-          className="flex items-center justify-between gap-4"
+          className="gap-global flex items-center justify-between"
           onSelect={(e) => {
             e.stopPropagation();
             e.preventDefault();

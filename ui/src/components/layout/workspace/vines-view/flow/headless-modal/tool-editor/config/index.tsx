@@ -36,7 +36,11 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ nodeId, task }) => {
         </div>
       ) : (
         <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel minSize={50} maxSize={85} className="flex flex-1 flex-col gap-2 overflow-y-auto pl-4 pr-2">
+          <ResizablePanel
+            minSize={50}
+            maxSize={85}
+            className="pl-global flex flex-1 flex-col gap-2 overflow-y-auto pr-2"
+          >
             <h1 className="text-base font-bold">{t('workspace.flow-view.headless-modal.tool-editor.input.title')}</h1>
             <ScrollArea className="h-[calc(100%-1.5rem)] pr-2" disabledOverflowMask>
               <ToolInput
@@ -51,7 +55,7 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ nodeId, task }) => {
           {isEmptyOutput ? null : (
             <>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={40} className="flex flex-1 flex-col overflow-y-auto px-4">
+              <ResizablePanel defaultSize={40} className="px-global flex flex-1 flex-col overflow-y-auto">
                 <h1 className="line-clamp-1 text-base font-bold">
                   {t('workspace.flow-view.headless-modal.tool-editor.output.title')}
                 </h1>

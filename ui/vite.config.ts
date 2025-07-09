@@ -39,6 +39,7 @@ export default defineConfig({
   },
   server: {
     port: process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : 2048,
+    host: '0.0.0.0',
     proxy: {
       '/api': {
         target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',

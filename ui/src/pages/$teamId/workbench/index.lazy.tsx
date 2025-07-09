@@ -34,9 +34,9 @@ export const Workbench: React.FC = () => {
   const globalViewSize = useGlobalViewSize();
 
   return (
-    <main className="relative flex size-full">
+    <main className="gap-global relative flex size-full">
       <WorkbenchSidebar mode={mode} showGroup={showGroup} collapsed={sidebarCollapsed} />
-      <div className={`flex size-full flex-col gap-4 ${sidebarCollapsed ? 'flex-1' : ''}`}>
+      <div className={`gap-global flex size-full flex-col ${sidebarCollapsed ? 'flex-1' : ''}`}>
         <WorkbenchView mode={mode} />
         {mode !== 'mini' && globalViewSize !== 'sm' && <HistoryResult />}
       </div>

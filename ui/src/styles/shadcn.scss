@@ -32,6 +32,24 @@
 
     --card-light: #F1F5F9;
     --neocard: #f1fafd;
+
+    --global-spacing: 0.5rem;
+    --global-icon-size: 14px;
+    --history-result-image-size: 64px;
+
+    @media (min-width: 1024px) {
+      --global-spacing: 0.75rem;
+      --global-icon-size: 16px;
+      --history-result-image-size: 72px;
+    }
+
+    @media (min-width: 1280px) {
+      --global-spacing: 1rem;
+      --global-icon-size: 20px;
+      --history-result-image-size: 96px;
+    }
+
+    --operation-bar-width: calc(var(--global-icon-size) + 8px + var(--global-spacing))
   }
 
   .dark {

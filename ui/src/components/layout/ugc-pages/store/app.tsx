@@ -63,7 +63,7 @@ export const StoreApp: React.FC<IStoreAppProps> = (props) => {
             </div>
           ))}
         </div>
-        <div className="flex flex-col justify-between gap-4 rounded-b-md bg-slate-1/35 p-4 backdrop-blur-md">
+        <div className="p-global gap-global flex flex-col justify-between rounded-b-md bg-slate-1/35 backdrop-blur-md">
           <h1 className="text-base font-bold">{title}</h1>
           {desc && (
             <ScrollArea disabledOverflowMask className="-my-2 h-8">

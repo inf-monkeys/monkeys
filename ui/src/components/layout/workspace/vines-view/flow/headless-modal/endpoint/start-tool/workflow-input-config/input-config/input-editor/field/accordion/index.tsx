@@ -31,7 +31,7 @@ export const FieldAccordion: React.FC<IFieldAccordionProps> = ({ form }) => {
           {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.fold')}
           <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
         </AccordionTrigger>
-        <AccordionContent className="pt-4">
+        <AccordionContent className="pt-global">
           <FieldDesc form={form} />
           <FieldPlaceholder form={form} />
           <FieldTips form={form} />

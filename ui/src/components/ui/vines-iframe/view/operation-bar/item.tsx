@@ -150,21 +150,21 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
           {...listeners}
           key={data.id}
           className={cn(
-            'z-10 flex cursor-pointer items-center justify-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-            mode === 'mini' ? 'size-8' : 'size-11',
+            'gap-global-1/2 p-global-1/2 z-10 flex cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+            mode === 'mini' ? 'size-[calc(var(--global-icon-size)+8px)]' : 'size-[var(--operation-bar-width)]',
             isDragging && 'opacity-50',
           )}
           onClick={onItemClick}
         >
           {typeof data.iconUrl === 'string' ? (
             <VinesLucideIcon
-              className={cn('shrink-0', mode === 'mini' ? 'size-[16px]' : 'size-[20px]')}
+              className={cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon')}
               size={20}
               src={data.iconUrl}
             />
           ) : (
             React.createElement(Folder, {
-              className: cn('shrink-0', mode === 'mini' ? 'size-[16px]' : 'size-[20px]'),
+              className: cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon'),
               size: 20,
             })
           )}

@@ -76,7 +76,7 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
         <DesignBoardProvider createStore={createDesignBoardStore}>
           <VinesDesignBoardViewWrapper designBoardId={designBoardId}>
             {type === 'global-design-board' ? (
-              <div className={cn('flex size-full gap-4')}>
+              <div className={cn('gap-global flex size-full')}>
                 <GlobalDesignBoardOperationBar />
                 <VinesViewFrame>
                   <View />
@@ -101,7 +101,7 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
               {type === 'preview' ? (
                 <OutputSelectionStoreProvider createStore={createOutputSelectionStore}>
                   {isUseWorkbench ? (
-                    <div className={cn('flex size-full', mode === 'mini' ? 'gap-2' : 'gap-4')}>
+                    <div className={cn('flex size-full', mode === 'mini' ? 'gap-2' : 'gap-global')}>
                       <VinesViewFrame>
                         <View />
                       </VinesViewFrame>

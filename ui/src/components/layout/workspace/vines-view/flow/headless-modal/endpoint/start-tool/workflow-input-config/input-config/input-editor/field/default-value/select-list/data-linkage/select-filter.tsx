@@ -58,7 +58,7 @@ export const SelectFilter: React.FC<ISelectFilterProps> = ({ input, selectFilter
           </TooltipContent>
         </Tooltip>
         <PopoverContent className="w-auto">
-          <div className="grid gap-4">
+          <div className="gap-global grid">
             <div className="flex items-center justify-between gap-2">
               <div className="space-y-2">
                 <h4 className="text-sm font-medium leading-none">

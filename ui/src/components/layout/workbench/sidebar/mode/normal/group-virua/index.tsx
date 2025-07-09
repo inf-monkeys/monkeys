@@ -98,7 +98,10 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
         onDragEnd={handleDragEnd}
       >
         <ScrollArea
-          className={cn('px-4 pt-4', onlyShowWorkbenchIcon ? 'w-[4.8rem]' : 'min-w-44')}
+          className={cn(
+            'px-global pt-global h-full',
+            onlyShowWorkbenchIcon ? '[&>*]:w-[calc(var(--global-icon-size)+8px+var(--global-spacing))]' : 'min-w-44',
+          )}
           ref={scrollRef}
           disabledOverflowMask
         >

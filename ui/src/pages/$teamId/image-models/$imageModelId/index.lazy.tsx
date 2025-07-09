@@ -26,8 +26,8 @@ export const ImageModelDetail: React.FC<IImageModelDetailProps> = () => {
   const { data: imageModel } = useComfyuiModel(imageModelId);
 
   return (
-    <main className="flex size-full flex-col gap-4">
-      <header className="flex items-center gap-4">
+    <main className="gap-global flex size-full flex-col">
+      <header className="gap-global flex items-center">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
