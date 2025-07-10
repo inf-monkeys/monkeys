@@ -171,121 +171,115 @@ export class TenantService {
     workflowInstanceId?: string;
     versions?: number[];
   }) {
-    const { page, limit, extraMetadata, workflowWithExtraMetadata, freeText = '*', status = [], startTimeFrom, startTimeTo, workflowId, workflowInstanceId, versions } = options;
+    const { page, limit, extraMetadata, workflowWithExtraMetadata, freeText = '*', status = [], startTimeFrom, startTimeTo, workflowId, workflowInstanceId } = options;
 
-    const qb = this.workflowExecutionRepository
-      .createQueryBuilder('execution')
-      .skip((page - 1) * limit)
-      .take(limit)
-      .orderBy('execution.created_timestamp', 'DESC');
+    const qb = this.workflowExecutionRepository.createQueryBuilder('execution');
 
-    // 添加 workflow ID 过滤
-    if (workflowId) {
-      qb.andWhere('execution.workflow_id = :workflowId', { workflowId });
+    // 添加分页
+    qb.skip((page - 1) * limit).take(limit);
+
+    // 添加排序
+    qb.orderBy('execution.created_timestamp', 'DESC');
+
+    // 添加 extraMetadata 查询过滤
+    if (extraMetadata && Object.keys(extraMetadata).length > 0) {
+      if (Array.isArray(extraMetadata)) {
+        // 多组条件"或"查询
+        qb.andWhere(
+          new Brackets((qbOr) => {
+            extraMetadata.forEach((group, groupIdx) => {
+              qbOr.orWhere(
+                new Brackets((qbAnd) => {
+                  let paramIdx = 0;
+                  Object.entries(group).forEach(([key, value]) => {
+                    paramIdx++;
+                    if (Array.isArray(value)) {
+                      value.forEach((v, vIdx) => {
+                        const keyParam = `key_${groupIdx}_${paramIdx}_${vIdx}`;
+                        const valParam = `val_${groupIdx}_${paramIdx}_${vIdx}`;
+                        const valStrParam = `valStr_${groupIdx}_${paramIdx}_${vIdx}`;
+                        qbAnd.andWhere(
+                          new Brackets((qb2) => {
+                            qb2
+                              .orWhere(`execution.extra_metadata->:${keyParam} @> :${valParam}`, { [keyParam]: key, [valParam]: JSON.stringify([v]) })
+                              .orWhere(`execution.extra_metadata->>:${keyParam} = :${valStrParam}`, { [keyParam]: key, [valStrParam]: v });
+                          }),
+                        );
+                      });
+                    } else {
+                      const keyParam = `key_${groupIdx}_${paramIdx}`;
+                      const valueParam = `value_${groupIdx}_${paramIdx}`;
+                      qbAnd.andWhere(`execution.extra_metadata->>:${keyParam} = :${valueParam}`, { [keyParam]: key, [valueParam]: value });
+                    }
+                  });
+                }),
+              );
+            });
+          }),
+        );
+      } else {
+        // 原有的对象查询
+        let paramIdx = 0;
+        Object.entries(extraMetadata).forEach(([key, value]) => {
+          paramIdx++;
+          if (Array.isArray(value)) {
+            value.forEach((v, vIdx) => {
+              const keyParam = `key_obj_${paramIdx}_${vIdx}`;
+              const valParam = `val_obj_${paramIdx}_${vIdx}`;
+              const valStrParam = `valStr_obj_${paramIdx}_${vIdx}`;
+              qb.andWhere(
+                new Brackets((qb2) => {
+                  qb2
+                    .orWhere(`execution.extra_metadata->:${keyParam} @> :${valParam}`, { [keyParam]: key, [valParam]: JSON.stringify([v]) })
+                    .orWhere(`execution.extra_metadata->>:${keyParam} = :${valStrParam}`, { [keyParam]: key, [valStrParam]: v });
+                }),
+              );
+            });
+          } else {
+            const keyParam = `key_obj_${paramIdx}`;
+            const valueParam = `value_obj_${paramIdx}`;
+            qb.andWhere(`execution.extra_metadata->>:${keyParam} = :${valueParam}`, { [keyParam]: key, [valueParam]: value });
+          }
+        });
+      }
     }
 
-    // 添加状态过滤
-    if (status.length > 0) {
+    // 添加其他查询条件
+    if (workflowWithExtraMetadata) {
+      qb.andWhere('execution.extra_metadata IS NOT NULL');
+      qb.andWhere("execution.extra_metadata != '{}'");
+    }
+
+    if (freeText && freeText !== '*') {
+      qb.andWhere('execution.searchable_text ILIKE :freeText', { freeText: `%${freeText}%` });
+    }
+
+    if (status && status.length > 0) {
       qb.andWhere('execution.status IN (:...status)', { status });
     }
 
-    // 添加时间范围过滤
     if (startTimeFrom) {
       qb.andWhere('execution.created_timestamp >= :startTimeFrom', { startTimeFrom });
     }
+
     if (startTimeTo) {
       qb.andWhere('execution.created_timestamp <= :startTimeTo', { startTimeTo });
     }
 
-    // 添加版本过滤
-    if (versions?.length) {
-      qb.andWhere('execution.version IN (:...versions)', { versions });
+    if (workflowId) {
+      qb.andWhere('execution.workflow_id = :workflowId', { workflowId });
     }
 
-    // 添加特定实例过滤
     if (workflowInstanceId) {
       qb.andWhere('execution.workflow_instance_id = :workflowInstanceId', { workflowInstanceId });
     }
 
-    // 添加自由文本搜索（如果不是默认的 '*'）
-    if (freeText !== '*' && freeText.trim()) {
-      qb.andWhere(
-        new Brackets((qb1) => {
-          qb1
-            .orWhere('execution.searchable_text ILIKE :freeText', { freeText: `%${freeText}%` })
-            .orWhere('execution.workflow_id ILIKE :freeText', { freeText: `%${freeText}%` })
-            .orWhere('execution.workflow_instance_id ILIKE :freeText', { freeText: `%${freeText}%` });
-        }),
-      );
-    }
-
-    // 添加 extraMetadata 查询过滤
-    if (extraMetadata && Object.keys(extraMetadata).length > 0) {
-      qb.andWhere(
-        new Brackets((qb1) => {
-          if (Array.isArray(extraMetadata)) {
-            // 支持数组查询（使用 JSONB @> 包含查询，并兼容字符串存储）
-            Object.entries(extraMetadata[0] || {}).forEach(([key, value]) => {
-              if (Array.isArray(value)) {
-                value.forEach((v) => {
-                  qb1.andWhere(
-                    new Brackets((qb2) => {
-                      qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
-                    }),
-                  );
-                });
-              } else {
-                qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
-              }
-            });
-          } else {
-            // 原有的对象查询
-            Object.entries(extraMetadata).forEach(([key, value]) => {
-              if (Array.isArray(value)) {
-                value.forEach((v) => {
-                  qb1.andWhere(
-                    new Brackets((qb2) => {
-                      qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
-                    }),
-                  );
-                });
-              } else {
-                qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
-              }
-            });
-          }
-        }),
-      );
-    }
-
-    // 如果指定了 workflowWithExtraMetadata，则只返回包含 extraMetadata 数据的记录
-    if (workflowWithExtraMetadata) {
-      qb.andWhere(`execution.extra_metadata IS NOT NULL AND execution.extra_metadata != '{}' AND execution.extra_metadata != 'null'`);
-    }
-
     const [rawData, total] = await qb.getManyAndCount();
-    // 获取 workflow 定义用于处理 input
-    const workflowIds = [...new Set(rawData.map((item) => item.workflowId))];
-    const workflowDefinitions = await this.workflowRepository.findWorkflowByIds(workflowIds);
-    const workflowDefMap = new Map(workflowDefinitions.map((wf) => [wf.workflowId, wf]));
 
-    // 处理数据，转换为新的结构
-    const data: Execution[] = rawData.map((execution) => {
-      const workflowDef = workflowDefMap.get(execution.workflowId);
-      return {
-        status: execution.status,
-        workflowId: execution.workflowId,
-        workflowInstanceId: execution.workflowInstanceId,
-        input: this.formatInput(execution.input, workflowDef),
-        rawInput: execution.input,
-        output: this.formatOutput(execution.output),
-        rawOutput: execution.output,
-        extraMetadata: execution.extraMetadata,
-        searchableText: execution.searchableText || '',
-        createTime: execution.createdTimestamp,
-      };
-    });
-    return { data, total };
+    return {
+      data: rawData,
+      total,
+    };
   }
 
   public async searchWorkflowExecutionsForTeam(
@@ -394,25 +388,35 @@ export class TenantService {
 
     // 添加 extraMetadata 查询过滤
     if (extraMetadata && Object.keys(extraMetadata).length > 0) {
-      qb.andWhere(
-        new Brackets((qb1) => {
-          if (Array.isArray(extraMetadata)) {
-            // 支持数组查询（使用 JSONB @> 包含查询，并兼容字符串存储）
-            Object.entries(extraMetadata[0] || {}).forEach(([key, value]) => {
-              if (Array.isArray(value)) {
-                value.forEach((v) => {
-                  qb1.andWhere(
-                    new Brackets((qb2) => {
-                      qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
-                    }),
-                  );
-                });
-              } else {
-                qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
-              }
+      if (Array.isArray(extraMetadata)) {
+        // 多组条件“或”查询
+        qb.andWhere(
+          new Brackets((qbOr) => {
+            extraMetadata.forEach((group) => {
+              qbOr.orWhere(
+                new Brackets((qbAnd) => {
+                  Object.entries(group).forEach(([key, value]) => {
+                    if (Array.isArray(value)) {
+                      value.forEach((v) => {
+                        qbAnd.andWhere(
+                          new Brackets((qb2) => {
+                            qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
+                          }),
+                        );
+                      });
+                    } else {
+                      qbAnd.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
+                    }
+                  });
+                }),
+              );
             });
-          } else {
-            // 原有的对象查询
+          }),
+        );
+      } else {
+        // 原有的对象查询
+        qb.andWhere(
+          new Brackets((qb1) => {
             Object.entries(extraMetadata).forEach(([key, value]) => {
               if (Array.isArray(value)) {
                 value.forEach((v) => {
@@ -426,9 +430,9 @@ export class TenantService {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
               }
             });
-          }
-        }),
-      );
+          }),
+        );
+      }
     }
 
     // 如果指定了 workflowWithExtraMetadata，则只返回包含 extraMetadata 数据的记录
@@ -445,8 +449,6 @@ export class TenantService {
       orderByField = 'execution.updated_timestamp';
     }
     qb.orderBy(orderByField, order);
-
-    // 执行查询
     const [rawData, total] = await qb.getManyAndCount();
 
     // 获取 workflow 定义用于处理 input
