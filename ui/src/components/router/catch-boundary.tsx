@@ -21,7 +21,7 @@ export function ErrorComponent({ error }: ErrorBoundaryProps) {
   return (
     <motion.div
       key="vines-catch-boundary"
-      className="p-global gap-global m-6 flex max-w-full flex-col rounded-md border border-solid border-white border-opacity-20 bg-slate-1 shadow backdrop-blur-sm"
+      className="m-6 flex max-w-full flex-col gap-global rounded-md border border-solid border-white border-opacity-20 bg-slate-1 p-global shadow backdrop-blur-sm"
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.92 }}

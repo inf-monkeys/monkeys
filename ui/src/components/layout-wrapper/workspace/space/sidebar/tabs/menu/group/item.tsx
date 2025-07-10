@@ -97,7 +97,7 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
   })();
 
   return (
-    <DropdownMenuItem className="gap-global flex items-center justify-between" onClick={handleTogglePin}>
+    <DropdownMenuItem className="flex items-center justify-between gap-global" onClick={handleTogglePin}>
       <div className="flex max-w-48 items-center gap-1 break-words">
         {isPinning && <Check strokeWidth={1.5} size={16} />}
         {/* {t([

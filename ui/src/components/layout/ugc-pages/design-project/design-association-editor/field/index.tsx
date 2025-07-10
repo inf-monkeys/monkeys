@@ -18,7 +18,7 @@ interface IDesignAssociationEditorFieldsProps extends React.ComponentPropsWithou
 
 export const DesignAssociationEditorFields: React.FC<IDesignAssociationEditorFieldsProps> = ({ form }) => {
   return (
-    <div className="gap-global flex">
+    <div className="flex gap-global">
       <ScrollArea className="-mx-3 h-[38rem] px-3">
         <div className="flex w-96 max-w-md flex-col gap-2 px-1">
           <FieldEnabled form={form} />

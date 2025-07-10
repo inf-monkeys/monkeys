@@ -51,7 +51,7 @@ const VinesForm: React.FC = () => {
       <div
         ref={ref}
         className={cn(
-          'p-global relative grid size-full grid-cols-5',
+          'relative grid size-full grid-cols-5 p-global',
           workbenchVisible && 'p-global',
           isMiniFrame && 'h-[calc(100%-3rem)] grid-cols-1 p-2',
           vinesIFrameVisible && 'p-global',
@@ -60,7 +60,7 @@ const VinesForm: React.FC = () => {
         <VinesTabular
           className={cn(
             'col-span-2',
-            isMiniFrame && 'p-global absolute z-20 size-full bg-slate-1 px-2 transition-opacity',
+            isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-global px-2 transition-opacity',
             isMiniFrame && historyVisible && 'pointer-events-none opacity-0',
             vinesIFrameVisible && !isMiniFrame && 'pr-global',
           )}
@@ -81,7 +81,7 @@ const VinesForm: React.FC = () => {
         />
       </div>
       {openAIInterfaceEnabled && (
-        <div className="vines-center gap-global absolute inset-1 z-50 size-full flex-col backdrop-blur">
+        <div className="vines-center absolute inset-1 z-50 size-full flex-col gap-global backdrop-blur">
           <ShieldBan size={64} />
           <span className="text-sm font-medium">{t('workspace.form-view.not-support')}</span>
         </div>

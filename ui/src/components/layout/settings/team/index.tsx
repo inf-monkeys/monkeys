@@ -7,16 +7,16 @@ import { TeamPrimaryColor } from '../theme/team-primary-color';
 
 export const TeamSettings = () => {
   return (
-    <div className="gap-global grid grid-cols-1 items-start justify-center lg:grid-cols-2 xl:grid-cols-3">
-      <div className="gap-global grid items-start">
+    <div className="grid grid-cols-1 items-start justify-center gap-global lg:grid-cols-2 xl:grid-cols-3">
+      <div className="grid items-start gap-global">
         {/* <User /> */}
         <Team />
         <TeamMember />
         <TeamLogo />
         <TeamCustomConfig />
       </div>
-      <div className="gap-global grid items-start">
-        <div className="gap-global grid items-start">
+      <div className="grid items-start gap-global">
+        <div className="grid items-start gap-global">
           <TeamPrimaryColor />
           <TeamNeocardColor />
         </div>

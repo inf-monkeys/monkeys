@@ -61,7 +61,7 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
     const hideLogin = get(oem, 'auth.hideAuthToast', false);
 
     return (
-      <main ref={ref} className={cn('p-global size-full bg-slate-1', className)} {...props}>
+      <main ref={ref} className={cn('size-full bg-slate-1 p-global', className)} {...props}>
         {children}
         <AnimatePresence>
           {visible && (

@@ -59,10 +59,10 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
       {...attributes}
       {...listeners}
       className={cn(
-        'p-global-1/2 gap-global-1/2 z-10 flex cursor-pointer select-none items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+        'z-10 flex cursor-pointer select-none items-center gap-global-1/2 rounded-md p-global-1/2 transition-colors hover:bg-accent hover:text-accent-foreground',
         onlyShowWorkbenchIcon
           ? 'flex size-[var(--operation-bar-width)] items-center justify-center'
-          : 'px-global-1/2 gap-global-1/2 mb-global-1/2 flex w-full shrink-0 items-center justify-start',
+          : 'mb-global-1/2 flex w-full shrink-0 items-center justify-start gap-global-1/2 px-global-1/2',
         groupId === currentGroupId && 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]',
       )}
       {...attr}

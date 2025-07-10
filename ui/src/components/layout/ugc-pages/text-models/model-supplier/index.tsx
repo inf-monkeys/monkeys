@@ -64,11 +64,11 @@ export const ModelSupplier: React.FC<IModelSupplierProps> = () => {
                       )}
                       onClick={() => setChannel(it)}
                     >
-                      <CardHeader className="p-global !flex-row items-center gap-2">
+                      <CardHeader className="!flex-row items-center gap-2 p-global">
                         <VinesImage src={it.iconUrl} className="!size-8" />
                         <CardTitle className="!mt-0 select-none text-base">{getI18nContent(it.displayName)}</CardTitle>
                       </CardHeader>
-                      <CardContent className="p-global select-none pt-0 text-xs">
+                      <CardContent className="select-none p-global pt-0 text-xs">
                         {getI18nContent(it.description)}
                       </CardContent>
                     </Card>

@@ -75,7 +75,7 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children, h
         {isLoading && !molstarInstance && (
           <motion.div
             key="vines-molstar-loader"
-            className="vines-center gap-global absolute left-0 top-0 size-full flex-col"
+            className="vines-center absolute left-0 top-0 size-full flex-col gap-global"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

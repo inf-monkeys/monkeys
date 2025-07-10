@@ -88,7 +88,7 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
         </PopoverTrigger>
       </Tooltip>
       <PopoverContent
-        className={cn('flex w-72 flex-col gap-2', shouldUseDoubleColumn && 'gap-global grid w-[580px] grid-cols-2')}
+        className={cn('flex w-72 flex-col gap-2', shouldUseDoubleColumn && 'grid w-[580px] grid-cols-2 gap-global')}
       >
         <div className="flex flex-col gap-3">
           <Label>{t('components.layout.ugc.view.filter.button.creator.label')}</Label>

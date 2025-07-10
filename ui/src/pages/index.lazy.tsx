@@ -48,7 +48,7 @@ const TeamsIdPage: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { delay: 3 } }}
       >
-        <div className="gap-global flex items-center">
+        <div className="flex items-center gap-global">
           <Button
             className="mb-2 mt-9"
             size="small"

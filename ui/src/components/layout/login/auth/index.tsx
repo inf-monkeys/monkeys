@@ -99,7 +99,7 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
         </Tabs>
       )}
       {areValuesUsed && (token || enableOidc || enableOAuth) && enableOtherAuthMethods && (
-        <div className="gap-global flex items-center justify-center">
+        <div className="flex items-center justify-center gap-global">
           <Separator className="flex-1" />
           <span className="text-xs text-opacity-70">{t('auth.login.other')}</span>
           <Separator className="flex-1" />
@@ -108,7 +108,7 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
       {(token || enableOidc || enableOAuth) && enableOtherAuthMethods ? (
         <div className="-mt-2 flex w-full flex-col gap-6">
           {enableOAuth && (
-            <div className="gap-global -my-2 flex w-full items-center justify-center">
+            <div className="-my-2 flex w-full items-center justify-center gap-global">
               {oauthProviders.map((providerName, i) => {
                 const OAProvider = OAuthProvider[providerName];
                 return (

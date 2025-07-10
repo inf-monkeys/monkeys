@@ -118,7 +118,7 @@ export const FieldDescription: React.FC<IFieldDescriptionProps> = ({ form }) => 
                     {LANGUAGES_LIST.map(([key, label]) => {
                       const languageKey = LANGUAGE_MAPPER[key as keyof typeof LANGUAGE_MAPPER] || key;
                       return (
-                        <div key={languageKey} className="gap-global flex flex-col">
+                        <div key={languageKey} className="flex flex-col gap-global">
                           <label className="text-xs font-medium text-gray-11" htmlFor={`i18n-input-${languageKey}`}>
                             {label}
                           </label>

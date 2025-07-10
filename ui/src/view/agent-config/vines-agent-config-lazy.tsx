@@ -113,7 +113,7 @@ const AgentConfigView: React.FC = () => {
                         {t('agent.view-config.form.advanced-configuration')}
                         <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                       </AccordionTrigger>
-                      <AccordionContent className="pt-global px-1">
+                      <AccordionContent className="px-1 pt-global">
                         <AgentConfigFormFieldCustomModelName form={form} />
                       </AccordionContent>
                     </AccordionItem>

@@ -31,7 +31,7 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
         <Separator orientation="vertical" className="mx-2" />
         <div className="space-y-2">
           {enableImageMask ? (
-            <div className="gap-global flex w-[30rem] flex-col">
+            <div className="flex w-[30rem] flex-col gap-global">
               <Label>{t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', { extra: '' })}</Label>
               <FormField
                 name="default"

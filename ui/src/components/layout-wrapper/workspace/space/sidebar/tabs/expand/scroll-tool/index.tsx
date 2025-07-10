@@ -17,7 +17,7 @@ export const ScrollTool: React.FC<IScrollToolProps> = ({ tabsNode }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="pr-global absolute right-0 z-50 flex h-full items-center bg-slate-3 pl-2"
+      className="absolute right-0 z-50 flex h-full items-center bg-slate-3 pl-2 pr-global"
     >
       <div className="pointer-events-none absolute -left-4 h-full w-10 bg-gradient-to-l from-slate-3 from-60%" />
       <Button

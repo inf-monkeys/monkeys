@@ -24,8 +24,8 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
   const modelMetadata = llmModel?.metadata;
 
   return (
-    <main className="gap-global flex size-full flex-col">
-      <header className="gap-global flex items-center">
+    <main className="flex size-full flex-col gap-global">
+      <header className="flex items-center gap-global">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -42,7 +42,7 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
         </Tooltip>
         <h1 className="line-clamp-1 text-2xl font-bold">{getI18nContent(llmModel?.displayName)}</h1>
       </header>
-      <div className="gap-global grid grid-cols-5">
+      <div className="grid grid-cols-5 gap-global">
         <UgcDetailInfo
           className="col-span-3"
           columns={createTextModelsColumns()}

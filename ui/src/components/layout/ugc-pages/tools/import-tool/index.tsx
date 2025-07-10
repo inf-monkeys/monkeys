@@ -32,10 +32,10 @@ export const ImportTools: React.FC<IImportToolsProps> = () => {
           <DialogTitle>{t('ugc-page.tools.import.label')}</DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="comfyui">
-          <TabsPrimitive.List className="gap-global flex items-center">
+          <TabsPrimitive.List className="flex items-center gap-global">
             <TabsPrimitive.Trigger value="comfyui" asChild>
               <Card className="w-full cursor-pointer outline outline-transparent data-[state=active]:outline-vines-500">
-                <CardContent className="p-global gap-global flex items-center text-left">
+                <CardContent className="flex items-center gap-global p-global text-left">
                   <div className="vines-center size-10 rounded-md bg-[#dec5c2]">
                     <Palette size={18} />
                   </div>
@@ -50,7 +50,7 @@ export const ImportTools: React.FC<IImportToolsProps> = () => {
             </TabsPrimitive.Trigger>
             <TabsPrimitive.Trigger value="restful-api" asChild>
               <Card className="w-full cursor-pointer outline outline-transparent data-[state=active]:outline-vines-500">
-                <CardContent className="p-global gap-global flex items-center text-left">
+                <CardContent className="flex items-center gap-global p-global text-left">
                   <div className="vines-center size-10 rounded-md bg-[#dec5c2]">
                     <Palette size={18} />
                   </div>
@@ -65,7 +65,7 @@ export const ImportTools: React.FC<IImportToolsProps> = () => {
             </TabsPrimitive.Trigger>
             <TabsPrimitive.Trigger value="monkeys-tool" asChild>
               <Card className="w-full cursor-pointer outline outline-transparent data-[state=active]:outline-vines-500">
-                <CardContent className="p-global gap-global flex items-center text-left">
+                <CardContent className="flex items-center gap-global p-global text-left">
                   <div className="vines-center size-10 rounded-md bg-[#dec5c2]">
                     <Palette size={18} />
                   </div>

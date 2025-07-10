@@ -26,7 +26,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({
   }
 
   return (
-    <div className={`gap-global relative flex h-full flex-col transition-all duration-300 ${collapsed ? 'w-12' : ''}`}>
+    <div className={`relative flex h-full flex-col gap-global transition-all duration-300 ${collapsed ? 'w-12' : ''}`}>
       {!isLoading && showSidebarTeamSelector && (
         <div className={`flex flex-col ${collapsed ? 'hidden' : ''}`}>
           <TeamSelector size="large" teamNameWidth="small" />

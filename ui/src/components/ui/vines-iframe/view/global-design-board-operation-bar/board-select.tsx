@@ -83,7 +83,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
   }, [designProjectIdFromSearch, designBoardIdFromSearch]);
 
   return (
-    <div className="gap-global flex w-full flex-col">
+    <div className="flex w-full flex-col gap-global">
       <div className="flex w-full flex-col gap-2">
         <span className="text-xs font-semibold">{t('common.type.design-project')}</span>
         <Popover open={designProjectVisible} onOpenChange={setDesignProjectVisible}>

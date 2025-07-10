@@ -77,12 +77,12 @@ export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
         <DialogContent>
           <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.trigger.create.title')}</DialogTitle>
           <DialogDescription>{t('workspace.flow-view.endpoint.start-tool.trigger.create.desc')}</DialogDescription>
-          <div className="gap-global grid w-full grid-cols-2">
+          <div className="grid w-full grid-cols-2 gap-global">
             {triggerTypes?.map((triggerType, i) => {
               const { displayName, description, icon } = triggerType;
               return (
                 <Card
-                  className="p-global gap-global flex cursor-pointer items-center hover:bg-gray-2 dark:hover:bg-gray-4"
+                  className="flex cursor-pointer items-center gap-global p-global hover:bg-gray-2 dark:hover:bg-gray-4"
                   onClick={() => handleCreateTrigger(triggerType)}
                   key={i}
                 >

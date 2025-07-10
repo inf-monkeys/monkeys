@@ -187,11 +187,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       <FlowStoreProvider createStore={createFlowStore}>
         <OutputSelectionStoreProvider createStore={createOutputSelectionStore}>
           <ImageDetailInitializer workflowId={workflowId} currentImage={currentImage} />
-          <div className={cn('gap-global flex h-full w-full bg-neocard', isMiniFrame && 'justify-center')}>
+          <div className={cn('flex h-full w-full gap-global bg-neocard', isMiniFrame && 'justify-center')}>
             {/* 主内容区域 */}
             <main
               className={cn(
-                'p-global flex size-full flex-1 rounded-xl border border-input bg-slate-1 dark:bg-[#111113] md:flex-row',
+                'flex size-full flex-1 rounded-xl border border-input bg-slate-1 p-global dark:bg-[#111113] md:flex-row',
                 isMiniFrame && 'justify-center',
                 !isMiniFrame && !showFormInImageDetail && 'justify-center',
               )}
@@ -199,7 +199,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
               {/* 左侧图片展示区 */}
               <div
                 className={cn(
-                  'pr-global flex h-full flex-col items-center justify-between overflow-auto dark:bg-[#111113]',
+                  'flex h-full flex-col items-center justify-between overflow-auto pr-global dark:bg-[#111113]',
                   isMiniFrame ? 'w-full' : !showFormInImageDetail ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
                 )}
               >
@@ -227,7 +227,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                       </div>
                     </div>
                     {/* 图片操作按钮 - 中间 */}
-                    <div className="gap-global flex w-full flex-col overflow-hidden">
+                    <div className="flex w-full flex-col gap-global overflow-hidden">
                       <ImageOperations
                         // imageUrl={imageUrl}
                         imageRotation={imageRotation}
@@ -261,7 +261,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
               {/* 右侧表单区域 */}
               {!isMiniFrame && showFormInImageDetail && (
-                <div className="gap-global pl-global relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl border-l border-input dark:bg-[#111113]">
+                <div className="relative flex h-full flex-1 flex-col gap-global rounded-r-xl rounded-tr-xl border-l border-input pl-global dark:bg-[#111113]">
                   <ScrollArea disabledOverflowMask className="flex-1 overflow-hidden">
                     <TabularRenderWrapper
                       execution={execution}

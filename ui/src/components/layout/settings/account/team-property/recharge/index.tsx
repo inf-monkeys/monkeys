@@ -60,7 +60,7 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
           <DialogHeader>
             <DialogTitle>{t('settings.payment.recharge.title')}</DialogTitle>
           </DialogHeader>
-          <div className="gap-global py-global flex flex-col">
+          <div className="flex flex-col gap-global py-global">
             <NumberField
               value={inputAmount}
               onChange={(v) => {

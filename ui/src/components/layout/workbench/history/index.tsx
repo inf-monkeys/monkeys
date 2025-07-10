@@ -118,7 +118,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
         {images.length > 0 ? (
           <motion.div
             key="vines-history-content"
-            className="p-global flex size-full items-center justify-center gap-2 overflow-hidden"
+            className="flex size-full items-center justify-center gap-2 overflow-hidden p-global"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.3 } }}
             exit={{ opacity: 0 }}

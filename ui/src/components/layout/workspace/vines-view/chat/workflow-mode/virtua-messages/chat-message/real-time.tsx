@@ -64,13 +64,13 @@ export const VinesRealTimeChatMessage = memo(({ onActive }: IVinesRealTimeChatMe
 
   return (
     <VinesBotChatMessage
-      className={cn('pt-global visible', !['RUNNING', 'PAUSED'].includes(workflowStatus) && 'hidden')}
+      className={cn('visible pt-global', !['RUNNING', 'PAUSED'].includes(workflowStatus) && 'hidden')}
       status={workflowStatus as VinesWorkflowExecution['status']}
       botPhoto={botPhoto}
       instanceId={instanceId}
     >
       <SmoothTransition className="overflow-hidden" onAnimationComplete={onActive}>
-        <div className="gap-global flex flex-col">
+        <div className="flex flex-col gap-global">
           {outputs.map(({ icon, name, customName, description, execution }, i) => (
             <Card className="flex flex-col gap-2 p-2" key={i}>
               <CardHeader className="flex flex-row items-center justify-between p-0">

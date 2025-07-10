@@ -19,7 +19,7 @@ export const FieldEnabled: React.FC<IFieldEnabledProps> = ({ form }) => {
       name="enabled"
       control={form.control}
       render={({ field }) => (
-        <FormItem className="p-global mb-2 flex flex-row items-center justify-between gap-2 rounded-lg border">
+        <FormItem className="mb-2 flex flex-row items-center justify-between gap-2 rounded-lg border p-global">
           <div className="space-y-0.5">
             <FormLabel className="text-base">
               {t('ugc-page.design-project.association-editor.editor.field.enabled.label')}

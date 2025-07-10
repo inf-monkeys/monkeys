@@ -76,7 +76,7 @@ export const SelectDataLinkage: React.FC<ISelectDataLinkageProps> = ({
         </TooltipContent>
       </Tooltip>
       <PopoverContent className="w-auto" onWheel={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
-        <div className="gap-global grid min-w-96">
+        <div className="grid min-w-96 gap-global">
           <div className="space-y-2">
             <h4 className="text-sm font-medium leading-none">
               {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.linkage.tips')}
@@ -87,7 +87,7 @@ export const SelectDataLinkage: React.FC<ISelectDataLinkageProps> = ({
           </div>
           <ScrollArea
             className={cn(
-              '[&>div>div]:gap-global -mr-3 flex max-h-60 flex-col overflow-y-auto pr-3 [&>div>div]:grid [&>div>div]:p-1',
+              '-mr-3 flex max-h-60 flex-col overflow-y-auto pr-3 [&>div>div]:grid [&>div>div]:gap-global [&>div>div]:p-1',
               !list.length && '-my-4',
             )}
           >

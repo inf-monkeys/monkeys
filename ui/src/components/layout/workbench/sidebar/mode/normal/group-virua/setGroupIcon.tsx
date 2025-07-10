@@ -59,7 +59,7 @@ export const SetGroupIcon: React.FC<ISetViewIconProps> = ({ groupId }) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <DropdownMenuItem
-          className="gap-global flex items-center justify-between"
+          className="flex items-center justify-between gap-global"
           onSelect={(e) => {
             e.stopPropagation();
             e.preventDefault();

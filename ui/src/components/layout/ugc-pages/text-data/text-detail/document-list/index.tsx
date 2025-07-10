@@ -88,7 +88,7 @@ export const DocumentsList: React.FC<IParagraphListProps> = ({ knowledgeBaseId }
         data={list}
         loading={isLoading}
       />
-      <div className="gap-global mt-2 flex w-full items-center">
+      <div className="mt-2 flex w-full items-center gap-global">
         <div className="flex items-center gap-2">
           <Waypoints className="stroke-muted-foreground" size={14} />
           <span className="text-xs text-muted-foreground">

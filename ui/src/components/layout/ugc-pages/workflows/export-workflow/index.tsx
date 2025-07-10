@@ -191,7 +191,7 @@ export const ExportWorkflowDialog: React.FC<IExportWorkflowDialogProps> = ({ vis
           <DialogTitle>{context?.version ? '导出当前版本' : '导出全部版本'}</DialogTitle>
         </DialogHeader>
         {loading ? (
-          <div className="gap-global my-8 flex w-full select-none items-center justify-center text-xs">
+          <div className="my-8 flex w-full select-none items-center justify-center gap-global text-xs">
             <VinesLoading />
             <div className="opacity-70">加载此工作流关联的资产中</div>
           </div>

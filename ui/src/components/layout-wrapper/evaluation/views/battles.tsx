@@ -207,7 +207,7 @@ export const BattlesView: React.FC = () => {
         </div>
 
         {/* Battle Stats */}
-        <div className="gap-global grid grid-cols-1 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-global md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -272,8 +272,8 @@ export const BattlesView: React.FC = () => {
               <TabsContent value="ongoing" className="mt-4 space-y-4">
                 {currentEvaluationStatus ? (
                   <div className="space-y-4">
-                    <div className="p-global rounded-lg border">
-                      <div className="gap-global flex items-center">
+                    <div className="rounded-lg border p-global">
+                      <div className="flex items-center gap-global">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                           <Target className="h-5 w-5 text-primary" />
                         </div>
@@ -355,7 +355,7 @@ export const BattlesView: React.FC = () => {
           <CardContent>
             {assetsInModuleCount > 0 ? (
               <>
-                <div className="gap-global grid grid-cols-8">
+                <div className="grid grid-cols-8 gap-global">
                   {assetsInModule?.assetIds
                     .slice((leaderboardPage - 1) * leaderboardPageSize, leaderboardPage * leaderboardPageSize)
                     .map((assetId) => <AssetThumbnail key={assetId} assetId={assetId} />)}
@@ -417,9 +417,9 @@ export const BattlesView: React.FC = () => {
                   {t('ugc-page.evaluation.battles.joinDialog.selectedCount', { count: joinForm.selectedAssets.length })}
                 </p>
 
-                <div className="p-global max-h-60 overflow-y-auto rounded-lg border">
+                <div className="max-h-60 overflow-y-auto rounded-lg border p-global">
                   {availableAssets?.data && availableAssets.data.length > 0 ? (
-                    <div className="gap-global grid grid-cols-6">
+                    <div className="grid grid-cols-6 gap-global">
                       {availableAssets.data
                         .filter((asset) => asset.type.startsWith('image/'))
                         .map((asset) => (
@@ -469,7 +469,7 @@ export const BattlesView: React.FC = () => {
               <Separator />
 
               {/* OpenSkill说明 */}
-              <div className="p-global rounded-lg bg-blue-50">
+              <div className="rounded-lg bg-blue-50 p-global">
                 <h4 className="mb-2 font-medium text-blue-800">
                   {t('ugc-page.evaluation.battles.joinDialog.systemInfo.title')}
                 </h4>
@@ -515,7 +515,7 @@ export const BattlesView: React.FC = () => {
             </DialogHeader>
 
             {/* 自动加入排行榜选项 */}
-            <div className="p-global flex items-center space-x-2 rounded-lg border bg-blue-50">
+            <div className="flex items-center space-x-2 rounded-lg border bg-blue-50 p-global">
               <Checkbox
                 id="auto-join-leaderboard"
                 checked={autoJoinToLeaderboard}
@@ -578,7 +578,7 @@ export const BattlesView: React.FC = () => {
                 </div>
               ) : evaluationStatus ? (
                 <div className="space-y-4">
-                  <div className="gap-global grid grid-cols-2">
+                  <div className="grid grid-cols-2 gap-global">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">
                         {t('ugc-page.evaluation.battles.statusDialog.status')}
@@ -621,7 +621,7 @@ export const BattlesView: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="gap-global grid grid-cols-2">
+                  <div className="grid grid-cols-2 gap-global">
                     <div className="rounded-lg bg-blue-50 p-3 text-center">
                       <div className="text-2xl font-bold text-blue-600">{evaluationStatus.totalAssets}</div>
                       <div className="text-sm text-muted-foreground">
@@ -685,9 +685,9 @@ export const BattlesView: React.FC = () => {
               ) : (
                 <div className="space-y-3">
                   {recentBattles.map((battle) => (
-                    <div key={battle.battleId} className="p-global rounded-lg border">
+                    <div key={battle.battleId} className="rounded-lg border p-global">
                       <div className="flex items-center justify-between">
-                        <div className="gap-global flex items-center">
+                        <div className="flex items-center gap-global">
                           <div className="text-sm">
                             <div className="font-medium">
                               {battle.assetAId.substring(0, 8)}... {t('ugc-page.evaluation.battles.battlesDialog.vs')}{' '}
@@ -697,7 +697,7 @@ export const BattlesView: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="gap-global flex items-center">
+                        <div className="flex items-center gap-global">
                           {battle.oldRatingA && battle.newRatingA && (
                             <div className="text-center text-sm">
                               <div className="text-muted-foreground">A: {battle.oldRatingA.toFixed(0)}</div>

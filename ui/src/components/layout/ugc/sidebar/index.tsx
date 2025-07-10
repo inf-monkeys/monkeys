@@ -24,7 +24,7 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, is
   return (
     <div className="flex h-full max-w-64">
       <motion.div
-        className="gap-global flex flex-col overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
+        className="flex flex-col gap-global overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
         initial={{ width: 256, paddingRight: 16 }}
         animate={{
           width: visible ? 256 : 0,

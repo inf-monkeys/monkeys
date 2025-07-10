@@ -39,7 +39,7 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
     <div
       ref={ref}
       className={cn(
-        'gap-global flex w-full',
+        'flex w-full gap-global',
         hideSpaceHeader
           ? 'h-[calc(100vh-var(--global-spacing)*2)]'
           : 'h-[calc(100vh-(var(--global-spacing)*5.5)-2rem)]',

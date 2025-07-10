@@ -60,7 +60,7 @@ export const MetadataFilter: React.FC<IMetadataFilterProps> = ({ metadata, onFil
           </TooltipTrigger>
         </PopoverTrigger>
         <PopoverContent className="w-[30rem]">
-          <div className="gap-global grid">
+          <div className="grid gap-global">
             <div className="space-y-2">
               <h4 className="font-medium leading-none">筛选数据</h4>
               <p className="text-sm text-muted-foreground">根据段落 Metadata 进行筛选</p>
@@ -76,7 +76,7 @@ export const MetadataFilter: React.FC<IMetadataFilterProps> = ({ metadata, onFil
                       key={field.id}
                       render={() => (
                         <FormItem>
-                          <div className="gap-global flex items-center">
+                          <div className="flex items-center gap-global">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Label className="line-clamp-1 min-w-14 max-w-36">{field.key}</Label>
@@ -124,7 +124,7 @@ export const MetadataFilter: React.FC<IMetadataFilterProps> = ({ metadata, onFil
                 })}
 
                 <div className="flex justify-between">
-                  <div className="gap-global flex">
+                  <div className="flex gap-global">
                     <Button
                       variant="outline"
                       icon={<Plus />}

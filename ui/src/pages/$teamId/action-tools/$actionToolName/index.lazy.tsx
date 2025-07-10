@@ -28,8 +28,8 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
   const { data: blockWorkflowRefData } = useSearchReferenceWorkflows('tools', actionToolName);
 
   return (
-    <main className="gap-global flex size-full flex-col">
-      <header className="gap-global flex items-center">
+    <main className="flex size-full flex-col gap-global">
+      <header className="flex items-center gap-global">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

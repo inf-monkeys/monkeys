@@ -64,9 +64,9 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
         </div>
       </CardHeader>
       <ScrollArea className="h-64">
-        <CardContent className="gap-global grid">
+        <CardContent className="grid gap-global">
           {finalMember.map(({ id, name, photo, phone, email }) => (
-            <div className="gap-global flex items-center" key={id}>
+            <div className="flex items-center gap-global" key={id}>
               <Avatar className="size-10">
                 <AvatarImage className="aspect-auto" src={photo} alt={name} />
                 <AvatarFallback className="rounded-none p-2 text-xs">{name.substring(0, 2)}</AvatarFallback>

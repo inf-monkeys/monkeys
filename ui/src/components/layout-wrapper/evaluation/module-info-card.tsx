@@ -18,7 +18,7 @@ export const EvaluationModuleInfoCard: React.FC = () => {
 
   if (!module) {
     return (
-      <div className="px-global flex h-16 items-center gap-3">
+      <div className="flex h-16 items-center gap-3 px-global">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white">
           E
         </div>
@@ -31,7 +31,7 @@ export const EvaluationModuleInfoCard: React.FC = () => {
   }
 
   return (
-    <div className="px-global flex items-center gap-3 py-3">
+    <div className="flex items-center gap-3 px-global py-3">
       <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white">
         E
         {module.isActive && (
@@ -47,7 +47,7 @@ export const EvaluationModuleInfoCard: React.FC = () => {
           </Badge>
         </div>
 
-        <div className="gap-global flex items-center text-xs text-muted-foreground">
+        <div className="flex items-center gap-global text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             <span>{formatTimeDiffPrevious(module.createdTimestamp || 0)}</span>

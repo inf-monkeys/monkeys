@@ -132,7 +132,7 @@ export const ToolDebugHistory: React.FC<IToolDebugHistoryProps> = ({
                   >
                     <Card
                       className={cn(
-                        'p-global mb-2 flex w-full cursor-pointer items-center justify-between gap-2',
+                        'mb-2 flex w-full cursor-pointer items-center justify-between gap-2 p-global',
                         instanceId === activeExecutionId && 'bg-muted',
                       )}
                     >

@@ -107,7 +107,7 @@ export const AgentCreateForm: React.FC<{
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="gap-global mt-2 flex flex-col">
+      <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-global">
         <div className="flex flex-col gap-2">
           <FormLabel>{t('ugc-page.app.create.dialog.info.label')}</FormLabel>
 
@@ -215,7 +215,7 @@ export const AgentCreateForm: React.FC<{
               {t('ugc-page.app.create.dialog.options-label')}
               <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
             </AccordionTrigger>
-            <AccordionContent className="pt-global px-1">
+            <AccordionContent className="px-1 pt-global">
               <FormField
                 name="customModelName"
                 control={form.control}

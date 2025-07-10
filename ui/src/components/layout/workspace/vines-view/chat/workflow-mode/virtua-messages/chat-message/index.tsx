@@ -40,8 +40,8 @@ export const ChatMessage = memo<IVinesChatMessageProps>(({ data, isLast = false,
   const isRUNNING = ['RUNNING', 'PAUSED'].includes(status ?? '');
 
   return (
-    <div className="py-global flex flex-col gap-6">
-      <div className="gap-global group flex w-full max-w-full flex-row-reverse">
+    <div className="flex flex-col gap-6 py-global">
+      <div className="group flex w-full max-w-full flex-row-reverse gap-global">
         <Avatar className="size-8 cursor-pointer">
           <AvatarImage className="aspect-auto" src={userPhoto} alt={userName} />
           <AvatarFallback className="rounded-none p-2 text-xs">{userName.substring(0, 2)}</AvatarFallback>

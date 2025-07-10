@@ -99,7 +99,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
       >
         <ScrollArea
           className={cn(
-            'px-global pt-global h-full',
+            'h-full px-global pt-global',
             onlyShowWorkbenchIcon ? '[&>*]:w-[calc(var(--global-icon-size)+8px+var(--global-spacing))]' : 'min-w-44',
           )}
           ref={scrollRef}

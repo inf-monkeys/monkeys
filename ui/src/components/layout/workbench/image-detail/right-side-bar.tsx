@@ -24,7 +24,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="p-global gap-global flex h-full w-[calc(28px+1rem+2rem)] flex-col items-center justify-between rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-slate-1 shadow-sm dark:bg-[#111113]">
+    <div className="flex h-full w-[calc(28px+1rem+2rem)] flex-col items-center justify-between gap-global rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-slate-1 p-global shadow-sm dark:bg-[#111113]">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button icon={<X />} variant="outline" onClick={onBack} />
@@ -32,7 +32,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         <TooltipContent>{t('common.utils.back')}</TooltipContent>
       </Tooltip>
 
-      <div className="gap-global flex flex-col items-center">
+      <div className="flex flex-col items-center gap-global">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button icon={<ChevronUpIcon />} variant="outline" disabled={!hasPrev} onClick={onPrevImage} />

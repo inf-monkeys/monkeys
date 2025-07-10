@@ -27,7 +27,7 @@ export const VinesPanelSidebar: React.FC<IVinesPanelSidebarProps> = () => {
   });
   const isSettingRoute = pathName.split('/').at(-1) === 'settings';
   return (
-    <div className="p-global gap-global flex h-full w-64 flex-col rounded-xl border border-input bg-slate-1">
+    <div className="flex h-full w-64 flex-col gap-global rounded-xl border border-input bg-slate-1 p-global">
       {isSettingRoute ? (
         <SettingsNavList />
       ) : (

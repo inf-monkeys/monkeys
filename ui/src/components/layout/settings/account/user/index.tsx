@@ -46,7 +46,7 @@ export const User: React.FC<IUserProps> = () => {
         <CardTitle>{t('settings.account.user.title')}</CardTitle>
         <CardDescription>{t('settings.account.user.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="gap-global flex">
+      <CardContent className="flex gap-global">
         <VinesImageEditor value={userPhoto} onChange={(val) => handleUpdateUser('photo', val)}>
           <Avatar className="size-10 cursor-pointer">
             <AvatarImage className="aspect-auto" src={userPhoto} alt={userName} />

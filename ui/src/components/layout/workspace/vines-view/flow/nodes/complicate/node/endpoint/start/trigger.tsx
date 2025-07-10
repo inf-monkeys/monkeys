@@ -49,7 +49,7 @@ export const ComplicateTriggerNode: React.FC = () => {
         <AnimatePresence>
           {canvasMode === CanvasStatus.WAIT_TO_RUNNING ? (
             <motion.div
-              className="gap-global absolute top-0 flex w-[calc(100%-2.5rem)] flex-col"
+              className="absolute top-0 flex w-[calc(100%-2.5rem)] flex-col gap-global"
               key="complicate-input-form"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

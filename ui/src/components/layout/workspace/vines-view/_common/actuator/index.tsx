@@ -59,7 +59,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="gap-global absolute left-0 top-0 flex size-full flex-col"
+      className="absolute left-0 top-0 flex size-full flex-col gap-global"
     >
       <ActuatorHeader
         workflowStatus={workflowStatus}

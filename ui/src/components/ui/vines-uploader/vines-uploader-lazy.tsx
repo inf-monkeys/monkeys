@@ -353,7 +353,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                 >
                   <div
                     className={cn(
-                      'vines-center gap-global h-full cursor-pointer rounded border-2 border-dashed border-input bg-muted/75 dark:bg-[#111113]',
+                      'vines-center h-full cursor-pointer gap-global rounded border-2 border-dashed border-input bg-muted/75 dark:bg-[#111113]',
                       isHovering && '!border-solid !bg-muted/75 dark:!bg-[#111113]',
                     )}
                     onClick={open}

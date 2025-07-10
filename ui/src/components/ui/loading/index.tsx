@@ -131,7 +131,7 @@ export const VinesFullLoading: React.FC<ILoadingProps> = ({ motionKey, disableCa
         <VinesLoading immediately />
       ) : (
         <Card className="shadow-md">
-          <CardContent className="vines-center p-global flex-col gap-2">
+          <CardContent className="vines-center flex-col gap-2 p-global">
             <VinesLoading immediately />
             {tips && <span className="text-sm font-bold">{tips}</span>}
           </CardContent>

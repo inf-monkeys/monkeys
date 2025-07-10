@@ -81,7 +81,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
               onChange(newValue);
             }
           }}
-          className="pr-global flex h-[180px] w-full resize-none rounded-md border border-input bg-[#FFFFFF] px-3 py-2 text-sm text-gray-500 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#111113]"
+          className="flex h-[180px] w-full resize-none rounded-md border border-input bg-[#FFFFFF] px-3 py-2 pr-global text-sm text-gray-500 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#111113]"
           style={{ height: '180px' }}
           {...field}
         />

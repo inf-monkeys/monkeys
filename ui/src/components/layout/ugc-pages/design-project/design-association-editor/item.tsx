@@ -50,7 +50,7 @@ export const DesignAssociationEditorItem: React.FC<IDesignAssociationEditorItemP
   };
 
   return (
-    <Card className={cn('p-global mb-0.5 flex flex-col gap-2', classNames)}>
+    <Card className={cn('mb-0.5 flex flex-col gap-2 p-global', classNames)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <VinesLucideIcon src={data.iconUrl ?? 'tools'} />

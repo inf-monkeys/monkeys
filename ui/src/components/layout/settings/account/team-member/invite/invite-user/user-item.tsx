@@ -56,8 +56,8 @@ export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }
 
   return (
     <Card>
-      <CardContent className="gap-global flex items-center justify-between p-3">
-        <div className="gap-global flex items-center">
+      <CardContent className="flex items-center justify-between gap-global p-3">
+        <div className="flex items-center gap-global">
           <Avatar className="size-10">
             <AvatarImage className="aspect-auto" src={user?.photo} alt={user?.name} />
             <AvatarFallback className="rounded-none p-2 text-xs">{user?.name.substring(0, 2)}</AvatarFallback>

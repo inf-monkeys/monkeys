@@ -70,7 +70,7 @@ function InfiniteScrollingDataTable<TData, TValue>({
           }
         />
       ) : (
-        <div className="vines-center gap-global size-full flex-col">
+        <div className="vines-center size-full flex-col gap-global">
           {loading ? (
             <>
               <VinesLoading />

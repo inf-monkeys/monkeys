@@ -50,7 +50,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         {...(isGlobalItem ? {} : listeners)}
         key={pageId}
         className={cn(
-          'gap-global-1/2 p-global-1/2 z-10 flex cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+          'z-10 flex cursor-pointer items-center gap-global-1/2 rounded-md p-global-1/2 transition-colors hover:bg-accent hover:text-accent-foreground',
           currentPageId === pageId
             ? 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]'
             : 'p-global-1/2',

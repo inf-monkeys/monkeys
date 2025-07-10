@@ -128,7 +128,7 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
           {...listeners}
           key={data.id}
           className={cn(
-            'p-global-1/2 gap-global-1/2 z-10 flex cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+            'z-10 flex cursor-pointer items-center justify-center gap-global-1/2 rounded-md p-global-1/2 transition-colors hover:bg-accent hover:text-accent-foreground',
             mode === 'mini' ? 'size-[calc(var(--global-icon-size)+8px)]' : 'size-[var(--operation-bar-width)]',
             isDragging && 'opacity-50',
           )}

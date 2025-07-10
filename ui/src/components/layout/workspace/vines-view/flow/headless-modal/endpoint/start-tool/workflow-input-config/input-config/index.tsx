@@ -55,7 +55,7 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
   const disabled = !isLatestWorkflowVersion || isWorkflowReadOnly;
 
   return (
-    <div className={cn('gap-global relative flex h-[30rem] w-full flex-col py-2', className)}>
+    <div className={cn('relative flex h-[30rem] w-full flex-col gap-global py-2', className)}>
       <WorkflowInputList
         inputs={inputs}
         className="px-2"

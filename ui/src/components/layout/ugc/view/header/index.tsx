@@ -21,7 +21,7 @@ export const UgcViewHeader: React.FC<IUgcViewHeaderProps> = ({
   const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType) && !isMarket;
 
   return (
-    <header className="px-global flex w-full items-center justify-end pb-2">
+    <header className="flex w-full items-center justify-end px-global pb-2">
       <div className="flex gap-2">
         <UgcHeaderDisplayModeButton assetKey={assetKey} />
         {filterAreaVisible && <UgcHeaderSortButton assetKey={assetKey} assetType={assetType} />}

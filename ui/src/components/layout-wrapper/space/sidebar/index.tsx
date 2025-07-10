@@ -4,7 +4,7 @@ interface ISpaceSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const SpaceSidebar: React.FC<ISpaceSidebarProps> = ({ children }) => {
   return (
-    <nav className="p-global gap-global flex w-56 flex-col justify-between overflow-y-hidden rounded-xl border border-input bg-slate-1">
+    <nav className="flex w-56 flex-col justify-between gap-global overflow-y-hidden rounded-xl border border-input bg-slate-1 p-global">
       {children}
     </nav>
   );

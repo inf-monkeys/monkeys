@@ -84,7 +84,7 @@ const DataTable = <TData, TValue>({
         </Table>
       </div>
       {enablePagination && (
-        <div className="py-global flex items-center justify-between">
+        <div className="flex items-center justify-between py-global">
           <div className="flex items-center gap-2 text-nowrap">
             {`${t('components.ui.pagination.table-pagination.hint.count', { count: data.length })}    ${t('components.ui.pagination.table-pagination.hint.page-index', { pageIndex: (table.options.state.pagination?.pageIndex ?? 0) + 1 })}    ${t('components.ui.pagination.table-pagination.hint.page-size')}`}
             <Select defaultValue={defaultPageSize.toString()} onValueChange={(v) => table.setPageSize(parseInt(v))}>

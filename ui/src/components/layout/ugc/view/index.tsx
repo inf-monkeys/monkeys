@@ -290,7 +290,7 @@ export const UgcView = <E extends object>({
           <div className="flex size-full flex-col">
             <ScrollArea
               className={cn(
-                'p-global relative w-full',
+                'relative w-full p-global',
                 showPagination ? 'h-[calc(100%-4.9rem)]' : 'h-[calc(100%-1.7rem)]',
               )}
               disabledOverflowMask
@@ -339,7 +339,7 @@ export const UgcView = <E extends object>({
                     />
                   )}
                   {displayMode === 'gallery' && (
-                    <div className="gap-global flex flex-wrap">
+                    <div className="flex flex-wrap gap-global">
                       {rows.map((row, index) => (
                         <UgcViewGalleryItem
                           row={row}
@@ -358,7 +358,7 @@ export const UgcView = <E extends object>({
             </ScrollArea>
             {showPagination && (
               <TablePagination
-                className={cn('py-0', paginationPosition === 'right' ? 'gap-global justify-end' : '')}
+                className={cn('py-0', paginationPosition === 'right' ? 'justify-end gap-global' : '')}
                 pagination={table.getState().pagination}
                 onPaginationChange={table.setPagination}
                 rowCount={table.getRowCount()}

@@ -46,7 +46,7 @@ export const VinesLogViewStatChart: React.FC<IVinesLogViewStatChartProps> = ({ s
   };
   return (
     searchWorkflowExecutionStatData && (
-      <div className="gap-global grid grid-cols-[1fr_1fr]">
+      <div className="grid grid-cols-[1fr_1fr] gap-global">
         <VinesLogViewStatChartCard
           chartConfig={{ totalCount: statChartConfig['totalCount'] }}
           searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}

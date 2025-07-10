@@ -50,7 +50,7 @@ const VinesChatView: React.FC = () => {
   const height = containerHeight - (vinesIFrameVisible ? 70 : workbenchVisible ? 36 : 64);
 
   return (
-    <div className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'pl-global p-0')}>
+    <div className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-global')}>
       <motion.div
         key="vines-view-chat"
         className={cn(

@@ -32,12 +32,12 @@ export const AccountTypes: React.FC<IAccountTypesProps> = () => {
             <VinesLoading />
           </div>
         ) : (
-          <div className="gap-global grid w-full grid-cols-3">
+          <div className="grid w-full grid-cols-3 gap-global">
             {data?.map((it, i) => {
               const length = credentials?.filter((c) => c.type === it.name)?.length ?? 0;
               return (
                 <Card
-                  className="p-global gap-global flex size-full cursor-pointer items-center hover:bg-gray-2 dark:hover:bg-gray-3"
+                  className="flex size-full cursor-pointer items-center gap-global p-global hover:bg-gray-2 dark:hover:bg-gray-3"
                   key={i}
                   onClick={() => setActive(it)}
                 >

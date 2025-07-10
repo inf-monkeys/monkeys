@@ -295,7 +295,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               <></>
             )
           ) : (
-            <div className="vines-center gap-global absolute flex-col">
+            <div className="vines-center absolute flex-col gap-global">
               <CircleSlash size={64} />
               <div className="flex flex-col text-center">
                 <h2 className="font-bold">{t('workbench.view.no-starred-view')}</h2>
@@ -314,7 +314,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             />
             <div
               className={cn(
-                'gap-global px-global pb-global flex items-center justify-between pt-2',
+                'flex items-center justify-between gap-global px-global pb-global pt-2',
                 onlyShowWorkbenchIcon && 'justify-center',
               )}
             >

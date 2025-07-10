@@ -100,10 +100,10 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({
           <AccordionPrimitive.Trigger asChild>
             <TooltipTrigger asChild disabled={disabled}>
               <CardContent
-                className="p-global flex cursor-pointer items-center text-xs hover:bg-gray-10/5 active:bg-gray-10/10"
+                className="flex cursor-pointer items-center p-global text-xs hover:bg-gray-10/5 active:bg-gray-10/10"
                 onClick={() => vines.swapExecutionInstance(workflowExecution, true)}
               >
-                <div className="gap-global flex flex-1 items-center">
+                <div className="flex flex-1 items-center gap-global">
                   <div className="flex-shrink-0">
                     <VinesIcon src={workflowDefinition?.iconUrl} size="sm" />
                   </div>
@@ -163,7 +163,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({
 
           <TooltipContent>{t('workspace.logs-view.log.list.item.tips')}</TooltipContent>
         </Tooltip>
-        <AccordionContent className="p-global space-y-1 pt-0">
+        <AccordionContent className="space-y-1 p-global pt-0">
           <Separator className="mb-4" />
           <div className="relative h-[32rem] w-full">
             <VinesActuator height={512} instanceId={instanceId} onRestart={onRestart} mutate={mutate} />

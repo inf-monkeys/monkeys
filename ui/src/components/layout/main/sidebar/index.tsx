@@ -16,7 +16,7 @@ export const Sidebar: React.FC<ISidebarProps> = () => {
   const { teamId } = useVinesTeam();
 
   return (
-    <div className="gap-global flex h-screen w-56 flex-col justify-between overflow-y-hidden p-5">
+    <div className="flex h-screen w-56 flex-col justify-between gap-global overflow-y-hidden p-5">
       <VinesLogo
         className="h-auto max-h-20 cursor-pointer [&>img]:w-[11.5rem]"
         disableInitialHeight

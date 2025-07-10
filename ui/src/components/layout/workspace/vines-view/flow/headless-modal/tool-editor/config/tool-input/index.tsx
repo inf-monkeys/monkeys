@@ -115,7 +115,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
     const credentials = get(tool, 'credentials', []) as ToolCredentialItem[];
 
     return (
-      <div className={cn('gap-global flex flex-col px-1 py-2', className)}>
+      <div className={cn('flex flex-col gap-global px-1 py-2', className)}>
         {credentials?.length ? (
           <VinesInputCredentials
             credentials={credentials}

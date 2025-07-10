@@ -146,7 +146,7 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <div className="gap-global flex w-full items-center">
+                  <div className="flex w-full items-center gap-global">
                     <FormControl>
                       <Input
                         placeholder={t('settings.account.user.user-account.old-phone-code-placeholder')}
@@ -188,7 +188,7 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <div className="gap-global flex w-full items-center">
+                  <div className="flex w-full items-center gap-global">
                     <FormControl>
                       <Input
                         placeholder={t('settings.account.user.user-account.new-phone-code-placeholder')}

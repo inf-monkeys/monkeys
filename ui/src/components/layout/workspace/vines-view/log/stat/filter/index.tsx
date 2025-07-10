@@ -23,7 +23,7 @@ export const VinesLogViewStatFilter: React.FC<IVinesLogViewStatFilterProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="gap-global flex flex-col px-2">
+    <div className="flex flex-col gap-global px-2">
       <Form {...form}>
         <form
           onSubmit={(e) => {

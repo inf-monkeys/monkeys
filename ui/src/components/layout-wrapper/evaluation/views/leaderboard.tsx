@@ -294,8 +294,8 @@ export const LeaderboardView: React.FC = () => {
                   <DialogTitle>{t('ugc-page.evaluation.leaderboard.export.title')}</DialogTitle>
                   <DialogDescription>{t('ugc-page.evaluation.leaderboard.export.description')}</DialogDescription>
                 </DialogHeader>
-                <div className="gap-global py-global grid">
-                  <div className="gap-global grid grid-cols-4 items-center">
+                <div className="grid gap-global py-global">
+                  <div className="grid grid-cols-4 items-center gap-global">
                     <Label htmlFor="exportType" className="text-right">
                       {t('ugc-page.evaluation.leaderboard.export.format.label')}
                     </Label>
@@ -322,7 +322,7 @@ export const LeaderboardView: React.FC = () => {
 
                   {exportType === 'html' && (
                     <>
-                      <div className="gap-global grid grid-cols-4 items-center">
+                      <div className="grid grid-cols-4 items-center gap-global">
                         <Label htmlFor="minRating" className="text-right">
                           {t('ugc-page.evaluation.leaderboard.export.options.minRating')}
                         </Label>
@@ -340,7 +340,7 @@ export const LeaderboardView: React.FC = () => {
                           }
                         />
                       </div>
-                      <div className="gap-global grid grid-cols-4 items-center">
+                      <div className="grid grid-cols-4 items-center gap-global">
                         <Label htmlFor="maxRating" className="text-right">
                           {t('ugc-page.evaluation.leaderboard.export.options.maxRating')}
                         </Label>
@@ -358,7 +358,7 @@ export const LeaderboardView: React.FC = () => {
                           }
                         />
                       </div>
-                      <div className="gap-global grid grid-cols-4 items-center">
+                      <div className="grid grid-cols-4 items-center gap-global">
                         <Label htmlFor="limit" className="text-right">
                           {t('ugc-page.evaluation.leaderboard.export.options.limit')}
                         </Label>
@@ -405,7 +405,7 @@ export const LeaderboardView: React.FC = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="gap-global grid grid-cols-1 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-global md:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">

@@ -546,7 +546,7 @@ export const EnhancedUploader: React.FC<EnhancedUploaderProps> = ({
   return (
     <div className={cn('space-y-4', className)}>
       {/* 上传按钮区域 */}
-      <div className="gap-global grid grid-cols-2">
+      <div className="grid grid-cols-2 gap-global">
         <Button
           variant="outline"
           className="h-32 flex-col gap-2"

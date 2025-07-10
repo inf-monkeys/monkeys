@@ -11,7 +11,7 @@ export const Page404: React.FC<IPage404Props> = ({ title }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="vines-center gap-global pointer-events-none size-full select-none flex-col">
+    <div className="vines-center pointer-events-none size-full select-none flex-col gap-global">
       <Drill size={64} />
       <div className="flex flex-col text-center">
         {title && <h1 className="text-lg font-bold">{title}</h1>}

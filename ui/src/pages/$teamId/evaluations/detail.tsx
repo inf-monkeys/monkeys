@@ -91,7 +91,7 @@ export const EvaluationDetail: React.FC = () => {
           <CardDescription>配置并启动自动评测任务</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="gap-global flex">
+          <div className="flex gap-global">
             <Button
               onClick={() => {
                 // TODO: 实现选择参与者和启动评测的逻辑

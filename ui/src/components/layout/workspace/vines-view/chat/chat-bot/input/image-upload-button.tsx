@@ -54,7 +54,7 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ onImagesSe
             <DialogTitle>{t('common.utils.upload')}</DialogTitle>
           </DialogHeader>
 
-          <div className="py-global space-y-4">
+          <div className="space-y-4 py-global">
             <VinesUploader
               max={1}
               accept={['jpg', 'jpeg', 'png', 'gif', 'webp']}

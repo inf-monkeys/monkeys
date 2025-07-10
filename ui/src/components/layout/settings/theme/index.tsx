@@ -10,13 +10,13 @@ interface IVinesThemeProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesTheme: React.FC<IVinesThemeProps> = () => {
   return (
-    <div className="gap-global grid grid-cols-[1fr_2fr] items-start justify-center">
-      <div className="gap-global grid items-start">
+    <div className="grid grid-cols-[1fr_2fr] items-start justify-center gap-global">
+      <div className="grid items-start gap-global">
         <TeamPrimaryColor />
         <TeamNeocardColor />
         <TeamLogo />
       </div>
-      <div className="gap-global grid items-start">
+      <div className="grid items-start gap-global">
         <ThemeColorList />
         <ThemeMarket />
       </div>

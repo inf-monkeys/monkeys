@@ -4,8 +4,8 @@ import { TeamProperty } from '../account/team-property';
 
 export const TeamCredit = () => {
   return (
-    <div className="= gap-global grid grid-cols-1 items-start justify-center md:grid-cols-2">
-      <div className="gap-global flex flex-col">
+    <div className="= grid grid-cols-1 items-start justify-center gap-global md:grid-cols-2">
+      <div className="flex flex-col gap-global">
         <TeamProperty />
         <RechargeDetails />
         <ConsumerDetails />

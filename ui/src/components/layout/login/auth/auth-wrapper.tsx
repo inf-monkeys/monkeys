@@ -137,7 +137,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="gap-global mt-4 flex flex-col">
+      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-global">
         {children}
 
         <div className="my-1 flex justify-between text-xs">

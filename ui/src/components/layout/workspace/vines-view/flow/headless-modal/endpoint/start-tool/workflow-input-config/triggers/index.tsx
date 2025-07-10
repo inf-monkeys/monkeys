@@ -30,9 +30,9 @@ export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = ({ className }) 
   const { data: triggers } = useTriggers(workflowId, workflowVersion);
 
   return (
-    <div className={cn('gap-global relative flex h-[30rem] w-full flex-col py-2', className)}>
+    <div className={cn('relative flex h-[30rem] w-full flex-col gap-global py-2', className)}>
       <ScrollArea className="px-2">
-        <div className="gap-global flex flex-col">
+        <div className="flex flex-col gap-global">
           {triggers?.map((it, i) => (
             <Trigger trigger={it} workflowId={workflowId} workflowVersion={workflowVersion} key={i} />
           ))}
