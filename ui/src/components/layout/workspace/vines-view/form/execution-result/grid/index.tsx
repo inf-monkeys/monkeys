@@ -7,6 +7,7 @@ import { t } from 'i18next';
 import { Square, SquareCheck } from 'lucide-react';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
+import { useSystemConfig } from '@/apis/common';
 import { useWorkflowAssociationList } from '@/apis/workflow/association';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
@@ -56,6 +57,15 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const { isUseWorkSpace, isUseWorkbench } = useVinesRoute();
   const { isSelectionMode, setSelectionMode, selectedOutputs, toggleOutputSelection } = useOutputSelectionStore();
   const { data: associations } = useWorkflowAssociationList(workflowId);
+  const { data: oem } = useSystemConfig();
+
+  const selectionModeDisplayType =
+    oem?.theme?.workflowPreviewExecutionGrid?.selectionModeDisplayType || 'dropdown-menu';
+  const clickBehavior = oem?.theme?.workflowPreviewExecutionGrid?.clickBehavior || 'preview';
+  const showErrorFilter = oem?.theme?.workflowPreviewExecutionGrid?.showErrorFilter ?? true;
+
+  const executionResultFilterHeight =
+    showErrorFilter || selectionModeDisplayType === 'dropdown-menu' ? EXECUTION_RESULT_FILTER_HEIGHT : 0;
 
   useEffect(() => {
     if (onSelectionChange) {
@@ -139,7 +149,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     positioner,
     scrollTop,
     isScrolling,
-    height: height === Infinity ? 800 - EXECUTION_RESULT_FILTER_HEIGHT : height - EXECUTION_RESULT_FILTER_HEIGHT,
+    height: height === Infinity ? 800 - executionResultFilterHeight : height - executionResultFilterHeight,
     containerRef,
     items: data,
     overscanBy: 3,
@@ -151,9 +161,11 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.render.key)}
           addDeletedInstanceId={addDeletedInstanceId}
           mutate={mutate}
-          isSelectionMode={isSelectionMode}
+          isSelectionMode={isSelectionMode || clickBehavior === 'select'}
           isSelected={selectedOutputs.has(item.render.key)}
           onSelect={(id) => toggleOutputSelection(id, item)}
+          clickBehavior={clickBehavior}
+          selectionModeDisplayType={selectionModeDisplayType}
         />
       ),
       [data, deletedInstanceIdList, isSelectionMode, selectedOutputs, toggleOutputSelection],
@@ -167,21 +179,23 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   return (
     <div className="flex flex-col gap-2 p-2">
       <div className="flex items-center justify-between gap-2">
-        <ErrorFilter />
-        <Button
-          variant="borderless"
-          className="hover:bg-slate-1 active:bg-slate-1"
-          icon={isSelectionMode ? <SquareCheck /> : <Square />}
-          onClick={() => setSelectionMode(!isSelectionMode)}
-        >
-          {t('workspace.form-view.execution-result.select-mode.title')}
-        </Button>
+        {showErrorFilter && <ErrorFilter />}
+        {selectionModeDisplayType === 'dropdown-menu' && (
+          <Button
+            variant="borderless"
+            className="hover:bg-slate-1 active:bg-slate-1"
+            icon={isSelectionMode ? <SquareCheck /> : <Square />}
+            onClick={() => setSelectionMode(!isSelectionMode)}
+          >
+            {t('workspace.form-view.execution-result.select-mode.title')}
+          </Button>
+        )}
       </div>
       <ScrollArea
         className={cn('z-20 mr-0.5 bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2')}
         ref={scrollRef}
         style={{
-          height: height === Infinity ? 800 - EXECUTION_RESULT_FILTER_HEIGHT : height - EXECUTION_RESULT_FILTER_HEIGHT,
+          height: height === Infinity ? 800 - executionResultFilterHeight : height - executionResultFilterHeight,
         }}
         disabledOverflowMask
       >

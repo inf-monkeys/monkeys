@@ -5,7 +5,7 @@ import { SWRInfiniteResponse } from 'swr/infinite';
 import { useMemoizedFn } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isBoolean } from 'lodash';
-import { Download, Ellipsis, Eye, RotateCcw, Trash } from 'lucide-react';
+import { Download, Ellipsis, Eye, RotateCcw, Square, SquareCheck, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -18,6 +18,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
+import { ISelectionModeDisplayType } from '../../../grid/item';
+
+const OPERATION_ICON_BUTTON_CLASSNAME =
+  'dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3';
+
 interface IVirtuaExecutionResultGridWrapperProps {
   data: IVinesExecutionResultItem;
   children: React.ReactNode;
@@ -25,6 +30,9 @@ interface IVirtuaExecutionResultGridWrapperProps {
   event$: EventEmitter<void>;
   addDeletedInstanceId?: IAddDeletedInstanceId;
   mutate?: SWRInfiniteResponse['mutate'];
+  onSelect?: (renderKey: string) => void;
+  isSelected?: boolean;
+  selectionModeDisplayType?: ISelectionModeDisplayType;
 }
 
 export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGridWrapperProps> = ({
@@ -34,6 +42,9 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   event$,
   addDeletedInstanceId,
   mutate,
+  onSelect,
+  isSelected,
+  selectionModeDisplayType = 'dropdown-menu',
 }) => {
   // const { mutate } = useSWRConfig();
 
@@ -122,7 +133,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+                className={OPERATION_ICON_BUTTON_CLASSNAME}
                 icon={<RotateCcw />}
                 variant="outline"
                 size="small"
@@ -139,7 +150,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+              className={OPERATION_ICON_BUTTON_CLASSNAME}
               icon={<Eye />}
               variant="outline"
               size="small"
@@ -156,7 +167,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+                className={OPERATION_ICON_BUTTON_CLASSNAME}
                 icon={<Download />}
                 variant="outline"
                 size="small"
@@ -173,7 +184,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+              className={OPERATION_ICON_BUTTON_CLASSNAME}
               icon={<Trash />}
               variant="outline"
               size="small"
@@ -188,13 +199,31 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 
         <VirtuaExecutionResultRawDataDialog data={data}>
           <Button
-            className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+            className={OPERATION_ICON_BUTTON_CLASSNAME}
             icon={<Ellipsis />}
             variant="outline"
             size="small"
             onClick={(e) => e.stopPropagation()} // 阻止事件冒泡
           />
         </VirtuaExecutionResultRawDataDialog>
+
+        {selectionModeDisplayType === 'operation-button' && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className={OPERATION_ICON_BUTTON_CLASSNAME}
+                icon={isSelected ? <SquareCheck /> : <Square />}
+                variant="outline"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation(); // 阻止事件冒泡，防止触发预览
+                  onSelect?.(data.render.key);
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{isSelected ? t('common.utils.unselect') : t('common.utils.select')}</TooltipContent>
+          </Tooltip>
+        )}
       </div>
 
       {/* hover遮罩 - 半透明，只在hover时显示，z-index设置为20，低于按钮但高于其他元素 */}

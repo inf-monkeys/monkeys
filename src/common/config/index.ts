@@ -56,6 +56,15 @@ export type CustomizationHeadbar = {
   profile?: VinesSpaceHeadbarProfile[] | '*';
 };
 
+export type SelectionModeDisplayType = 'operation-button' | 'dropdown-menu';
+export type ClickBehavior = 'preview' | 'select' | 'fill-form';
+
+export type WorkflowPreviewExecutionGrid = {
+  selectionModeDisplayType?: SelectionModeDisplayType;
+  clickBehavior?: ClickBehavior;
+  showErrorFilter?: boolean;
+};
+
 export interface ServerConfig {
   port: number;
   appId: string;
@@ -105,6 +114,7 @@ export interface ServerConfig {
     headbar?: CustomizationHeadbar;
     paginationPosition?: 'left' | 'right';
     ugcViewIconOnlyMode?: boolean;
+    workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
   };
 }
 
@@ -396,6 +406,11 @@ export const config: Config = {
       },
       paginationPosition: readConfig('server.customization.paginationPosition', 'left'),
       ugcViewIconOnlyMode: readConfig('server.customization.ugcViewIconOnlyMode', false),
+      workflowPreviewExecutionGrid: {
+        selectionModeDisplayType: readConfig('server.customization.workflowPreviewExecutionGrid.selectionModeDisplayType', 'dropdown-menu'),
+        clickBehavior: readConfig('server.customization.workflowPreviewExecutionGrid.clickBehavior', 'preview'),
+        showErrorFilter: readConfig('server.customization.workflowPreviewExecutionGrid.showErrorFilter', true),
+      },
     },
   },
   conductor: {

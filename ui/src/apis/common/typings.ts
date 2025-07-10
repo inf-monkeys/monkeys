@@ -48,6 +48,15 @@ export type CustomizationHeadbar =
     }
   | undefined;
 
+export type SelectionModeDisplayType = 'operation-button' | 'dropdown-menu';
+export type ClickBehavior = 'preview' | 'select' | 'fill-form';
+
+export type WorkflowPreviewExecutionGrid = {
+  selectionModeDisplayType?: SelectionModeDisplayType;
+  clickBehavior?: ClickBehavior;
+  showErrorFilter?: boolean;
+};
+
 export interface ISystemConfig {
   theme: {
     name: string;
@@ -86,6 +95,7 @@ export interface ISystemConfig {
     headbar: CustomizationHeadbar;
     paginationPosition?: 'left' | 'right';
     ugcViewIconOnlyMode?: boolean;
+    workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
   };
   auth: {
     enabled: AuthMethod[];

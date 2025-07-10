@@ -135,6 +135,7 @@ export class AppController {
         headbar: config.server.customization.headbar,
         paginationPosition: config.server.customization.paginationPosition,
         ugcViewIconOnlyMode: config.server.customization.ugcViewIconOnlyMode,
+        workflowPreviewExecutionGrid: config.server.customization.workflowPreviewExecutionGrid,
       },
       auth: {
         enabled: config.auth.enabled,

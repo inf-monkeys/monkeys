@@ -1,4 +1,4 @@
-import { AuthMethod, CustomizationHeadbar, CustomizationModules } from '../config';
+import { AuthMethod, CustomizationHeadbar, CustomizationModules, WorkflowPreviewExecutionGrid } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
@@ -41,6 +41,7 @@ export interface ISystemConfig {
     headbar: CustomizationHeadbar;
     paginationPosition?: 'left' | 'right';
     ugcViewIconOnlyMode?: boolean;
+    workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
   };
   auth: {
     enabled: AuthMethod[];

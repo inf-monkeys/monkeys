@@ -31,6 +31,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   instanceId?: string;
   outputIndex?: number;
   renderKey: string;
+  isSelectionMode?: boolean;
 }
 
 export function getThumbUrl(url: string) {
@@ -45,6 +46,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   instanceId,
   outputIndex = 0,
   renderKey,
+  isSelectionMode = false,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -71,23 +73,23 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   // 处理图片点击，跳转到详情页面
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // if (workflowId && src) {
-    //   const position = images?.findIndex((image) => image.render.key === renderKey);
-    //   setPosition(position);
-    //   navigate({
-    //     to: '/$teamId/workspace/$workflowId/image-detail/',
-    //     params: {
-    //       // teamId: window['vinesTeamId'],
-    //       workflowId,
-    //     } as any,
-    //     search: {
-    //       // imageUrl: src,
-    //       // instanceId: instanceId || '',
-    //       outputIndex,
-    //       mode: isMiniFrame ? 'mini' : '',
-    //     },
-    //   });
-    // }
+    if (workflowId && src && !isSelectionMode) {
+      const position = images?.findIndex((image) => image.render.key === renderKey);
+      setPosition(position);
+      navigate({
+        to: '/$teamId/workspace/$workflowId/image-detail/',
+        params: {
+          // teamId: window['vinesTeamId'],
+          workflowId,
+        } as any,
+        search: {
+          // imageUrl: src,
+          // instanceId: instanceId || '',
+          outputIndex,
+          mode: isMiniFrame ? 'mini' : '',
+        },
+      });
+    }
   };
 
   const handleDragStart = useCallback(

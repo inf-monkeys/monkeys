@@ -77,7 +77,9 @@
       "yes": "Yes",
       "no": "No",
       "open": "Open",
-      "share": "Share"
+      "share": "Share",
+      "select": "Select",
+      "unselect": "Unselect"
     },
     "status": {
       "active": "Active",

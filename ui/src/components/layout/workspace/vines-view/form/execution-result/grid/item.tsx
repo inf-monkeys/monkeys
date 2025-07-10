@@ -10,7 +10,7 @@ import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-vi
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid/index.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesLoading } from '@/components/ui/loading';
-import { cn, getAlt } from '@/utils';
+import { getAlt } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 import { VirtuaExecutionResultGridImageItem } from '../virtua/item/image';
@@ -25,7 +25,12 @@ interface IExecutionResultItemProps {
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onSelect?: (renderKey: string) => void;
+  clickBehavior?: IClickBehavior;
+  selectionModeDisplayType?: ISelectionModeDisplayType;
 }
+
+export type IClickBehavior = 'preview' | 'select' | 'fill-form';
+export type ISelectionModeDisplayType = 'operation-button' | 'dropdown-menu';
 
 export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   result,
@@ -36,6 +41,8 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   isSelectionMode = false,
   isSelected = false,
   onSelect,
+  clickBehavior = 'preview',
+  selectionModeDisplayType = 'dropdown-menu',
 }) => {
   const { render } = result;
   const { type, data, status } = render;
@@ -43,22 +50,20 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   const alt = getAlt(result);
 
   const handleClick = (e: React.MouseEvent) => {
-    if (isSelectionMode && onSelect) {
+    if ((clickBehavior === 'select' || isSelectionMode) && onSelect) {
       e.stopPropagation();
       onSelect(render.key);
     }
   };
 
   const renderSelectionOverlay = () => {
-    if (!isSelectionMode) return null;
+    if (clickBehavior !== 'select' && !isSelectionMode && !isSelected) return null;
     return (
-      <div
-        className={cn(
-          'absolute inset-0 z-10 flex cursor-pointer items-end justify-end bg-transparent p-2 transition-opacity',
-        )}
-      >
-        {isSelected && <Button variant="outline" icon={<Check />} />}
-      </div>
+      <Button
+        variant="outline"
+        icon={<Check />}
+        className="absolute bottom-global-1/2 right-global-1/2 z-50 !size-global-2"
+      />
     );
   };
 
@@ -103,6 +108,9 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
             event$={event$}
             addDeletedInstanceId={addDeletedInstanceId}
             mutate={mutate}
+            onSelect={onSelect}
+            isSelected={isSelected}
+            selectionModeDisplayType={selectionModeDisplayType}
           >
             <div className="h-full w-full">
               <VirtuaExecutionResultGridImageItem
@@ -110,6 +118,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
                 alt={alt}
                 instanceId={result.instanceId}
                 renderKey={render.key}
+                isSelectionMode={isSelectionMode}
               />
               {renderSelectionOverlay()}
             </div>
@@ -124,6 +133,9 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
             event$={event$}
             addDeletedInstanceId={addDeletedInstanceId}
             mutate={mutate}
+            onSelect={onSelect}
+            isSelected={isSelected}
+            selectionModeDisplayType={selectionModeDisplayType}
           >
             <div className="max-h-96 min-h-40 overflow-auto p-2">
               {renderSelectionOverlay()}

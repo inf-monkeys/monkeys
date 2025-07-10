@@ -77,7 +77,9 @@
       "yes": "是",
       "no": "否",
       "open": "打开",
-      "share": "分享"
+      "share": "分享",
+      "select": "选择",
+      "unselect": "取消选择"
     },
     "status": {
       "active": "活跃",
