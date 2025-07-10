@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
 import { WorkbenchPanelLayout } from 'src/components/layout-wrapper/workbench/panel';
 
+import { useSystemConfig } from '@/apis/common';
 import { ReportDialog } from '@/components/devtools/report/dialog';
 import { OEM } from '@/components/layout/oem';
 import { AgentLayout } from '@/components/layout-wrapper/agent';
@@ -26,6 +27,7 @@ import { IconGuard } from '@/components/ui/vines-icon/lucide/guard.tsx';
 import { VinesImageOptimizeManage } from '@/components/ui/vines-image';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
+import i18n from '@/i18n';
 import { initializeGlobalViewStore } from '@/store/useGlobalViewStore';
 import VinesEvent from '@/utils/events.ts';
 
@@ -103,6 +105,23 @@ const RootComponent: React.FC = () => {
     const cleanup = initializeGlobalViewStore();
     return cleanup;
   }, []);
+
+  const { data: oem } = useSystemConfig();
+
+  useEffect(() => {
+    if (oem?.theme.extraLanguageURL) {
+      const extraLanguage = oem.theme.extraLanguageURL[i18n.language];
+      try {
+        fetch(extraLanguage)
+          .then((res) => res.json())
+          .then((data) => {
+            i18n.addResourceBundle(i18n.language, 'translation', data, true, true);
+          });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }, [oem, i18n.language]);
 
   return (
     <>

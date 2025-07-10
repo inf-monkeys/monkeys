@@ -19,7 +19,6 @@ export const Workbench: React.FC = () => {
     showGroup: false,
   });
 
-  // const showGroup = oem?.theme.showSidebarPageGroup ?? urlShowGroup;
   const showGroup = true;
 
   useEffect(() => {

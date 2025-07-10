@@ -8,6 +8,7 @@ import { keyBy } from 'lodash';
 import { CircleSlash, Maximize2Icon, Minimize2Icon, PlusIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
@@ -45,6 +46,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const { teamId } = useVinesTeam();
 
   const navigate = useNavigate();
+
+  const { data: oem } = useSystemConfig();
+
+  const workbenchSidebarDefaultOpen = oem?.theme.workbenchSidebarDefaultOpen ?? true;
 
   const { data, isLoading, mutate } = useWorkspacePages();
 
@@ -226,6 +231,14 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const toggleOnlyShowWorkbenchIcon = useToggleOnlyShowWorkbenchIcon();
   const setOnlyShowWorkbenchIcon = useSetOnlyShowWorkbenchIcon();
+
+  useEffect(() => {
+    if (activePageFromWorkflowDisplayName) {
+      setOnlyShowWorkbenchIcon(true);
+      return;
+    }
+    setOnlyShowWorkbenchIcon(!workbenchSidebarDefaultOpen);
+  }, [workbenchSidebarDefaultOpen, activePageFromWorkflowDisplayName]);
 
   const hasGroups = lists.length && !isLoading;
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();

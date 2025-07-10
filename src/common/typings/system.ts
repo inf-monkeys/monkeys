@@ -1,4 +1,4 @@
-import { AuthMethod, CustomizationHeadbar, CustomizationModules, WorkflowPreviewExecutionGrid } from '../config';
+import { AuthMethod, CustomizationHeadbar, CustomizationModules, ExtraLanguageURL, WorkflowPreviewExecutionGrid } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
@@ -31,8 +31,8 @@ export interface ISystemConfig {
         };
       };
     };
+    extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader: boolean;
-    showSidebarPageGroup: boolean;
     showSidebarTeamSelector: boolean;
     defaults: {
       showFormInImageDetail?: boolean;
@@ -42,6 +42,7 @@ export interface ISystemConfig {
     paginationPosition?: 'left' | 'right';
     ugcViewIconOnlyMode?: boolean;
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
+    workbenchSidebarDefaultOpen: boolean;
   };
   auth: {
     enabled: AuthMethod[];

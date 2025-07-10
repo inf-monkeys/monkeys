@@ -57,6 +57,8 @@ export type WorkflowPreviewExecutionGrid = {
   showErrorFilter?: boolean;
 };
 
+export type ExtraLanguageURL = Record<'en' | 'zh', string>;
+
 export interface ISystemConfig {
   theme: {
     name: string;
@@ -85,9 +87,9 @@ export interface ISystemConfig {
         };
       };
     };
+    extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader: boolean;
     showSidebarTeamSelector: boolean;
-    showSidebarPageGroup: boolean;
     defaults: {
       showFormInImageDetail: boolean;
     };
@@ -96,6 +98,7 @@ export interface ISystemConfig {
     paginationPosition?: 'left' | 'right';
     ugcViewIconOnlyMode?: boolean;
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
+    workbenchSidebarDefaultOpen?: boolean;
   };
   auth: {
     enabled: AuthMethod[];

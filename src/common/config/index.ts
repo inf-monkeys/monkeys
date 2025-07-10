@@ -65,6 +65,8 @@ export type WorkflowPreviewExecutionGrid = {
   showErrorFilter?: boolean;
 };
 
+export type ExtraLanguageURL = Record<'en' | 'zh', string>;
+
 export interface ServerConfig {
   port: number;
   appId: string;
@@ -104,9 +106,9 @@ export interface ServerConfig {
         };
       };
     };
+    extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
-    showSidebarPageGroup?: boolean;
     defaults?: {
       showFormInImageDetail?: boolean;
     };
@@ -115,6 +117,7 @@ export interface ServerConfig {
     paginationPosition?: 'left' | 'right';
     ugcViewIconOnlyMode?: boolean;
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
+    workbenchSidebarDefaultOpen: boolean;
   };
 }
 
@@ -389,8 +392,8 @@ export const config: Config = {
           },
         },
       },
+      extraLanguageURL: readConfig('server.customization.extraLanguageURL', {}),
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
-      showSidebarPageGroup: readConfig('server.customization.showSidebarPageGroup', true),
       showSidebarTeamSelector: readConfig('server.customization.showSidebarTeamSelector', false),
       defaults: {
         showFormInImageDetail: readConfig('server.customization.defaults.showFormInImageDetail', true),
@@ -411,6 +414,7 @@ export const config: Config = {
         clickBehavior: readConfig('server.customization.workflowPreviewExecutionGrid.clickBehavior', 'preview'),
         showErrorFilter: readConfig('server.customization.workflowPreviewExecutionGrid.showErrorFilter', true),
       },
+      workbenchSidebarDefaultOpen: readConfig('server.customization.workbenchSidebarDefaultOpen', true),
     },
   },
   conductor: {
