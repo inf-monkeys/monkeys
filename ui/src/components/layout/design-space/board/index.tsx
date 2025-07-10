@@ -1,31 +1,24 @@
-import React, { startTransition, useCallback, useContext, useEffect } from 'react';
+import React, { startTransition, useCallback, useEffect } from 'react';
 
 import './index.scss';
 
 import {
-  ContextMenu,
+  AssetRecordType,
   createShapeId,
-  DEFAULT_SUPPORT_VIDEO_TYPES,
-  DEFAULT_SUPPORTED_IMAGE_TYPES,
   defaultBindingUtils,
-  DefaultContextMenuContent,
   defaultEditorAssetUrls,
   defaultShapeTools,
-  DefaultToolbar,
   defaultTools,
   Editor,
   FrameShapeUtil,
-  registerDefaultExternalContentHandlers,
-  registerDefaultSideEffects,
+  TLComponents,
   Tldraw,
   TLShape,
   TLShapeId,
-  useToasts,
-  useTranslation,
 } from 'tldraw';
 
-import { EditorContext } from '@/store/useBoardStore';
 import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
+import { getImageSize } from '@/utils/file';
 
 import 'tldraw/tldraw.css';
 
@@ -91,6 +84,14 @@ export const Board: React.FC<BoardProps> = ({
     }
   }, [width, height]);
 
+  // 定义自定义组件配置
+  const components: TLComponents = {
+    PageMenu: () => null,
+    MainMenu: () => null,
+    StylePanel: () => null,
+    Toolbar: () => null,
+  };
+
   return (
     <div className="h-full w-full">
       <Tldraw
@@ -120,12 +121,56 @@ export const Board: React.FC<BoardProps> = ({
           if (canvasWidth && canvasHeight) {
             createFrame(editor, canvasWidth, canvasHeight);
           }
+          editor.registerExternalContentHandler('url', async ({ url }) => {
+            // 检查是否是图片 URL
+            try {
+              // 获取图片数据
+
+              // 创建 asset
+              const imageUrl = url;
+              const { width, height } = await getImageSize(imageUrl);
+              const assetData = {
+                id: AssetRecordType.createId(),
+                url: imageUrl,
+                width: width,
+                height: height,
+              };
+
+              editor.createAssets([
+                {
+                  id: assetData.id,
+                  type: 'image',
+                  typeName: 'asset',
+                  props: {
+                    name: assetData.id,
+                    src: assetData.url,
+                    mimeType: 'image/png',
+                    isAnimated: false,
+                    h: assetData.height,
+                    w: assetData.width,
+                  },
+                  meta: {},
+                },
+              ]);
+
+              editor.createShape({
+                type: 'image',
+                props: {
+                  assetId: assetData.id,
+                  w: assetData.width,
+                  h: assetData.height,
+                },
+              });
+
+              return true; // 表示已处理
+            } catch (e) {
+              console.error(e);
+            }
+
+            return false; // 未处理,使用默认行为
+          });
         }}
-        components={{
-          Toolbar: () => {
-            return <DefaultToolbar></DefaultToolbar>;
-          },
-        }}
+        components={components}
         shapeUtils={[FixedFrameShapeUtil]}
         bindingUtils={defaultBindingUtils}
         tools={[...defaultShapeTools, ...defaultTools]}
@@ -137,40 +182,7 @@ export const Board: React.FC<BoardProps> = ({
             return tools;
           },
         }}
-      >
-        <InsideEditorAndUiContext />
-      </Tldraw>
+      ></Tldraw>
     </div>
-  );
-};
-
-const InsideEditorAndUiContext: React.FC = () => {
-  const { editor } = useContext(EditorContext);
-  const toasts = useToasts();
-  const msg = useTranslation();
-
-  useEffect(() => {
-    if (!editor) return;
-
-    registerDefaultExternalContentHandlers(editor, {
-      maxImageDimension: 5000,
-      maxAssetSize: 10 * 1024 * 1024, // 10mb
-      acceptedImageMimeTypes: DEFAULT_SUPPORTED_IMAGE_TYPES,
-      acceptedVideoMimeTypes: DEFAULT_SUPPORT_VIDEO_TYPES,
-      toasts,
-      msg,
-    });
-
-    const cleanupSideEffects = registerDefaultSideEffects(editor);
-
-    return () => {
-      cleanupSideEffects();
-    };
-  }, [editor, msg, toasts]);
-
-  return (
-    <ContextMenu>
-      <DefaultContextMenuContent />
-    </ContextMenu>
   );
 };

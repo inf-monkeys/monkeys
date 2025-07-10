@@ -22,7 +22,7 @@ import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 import { IVinesExecutionResultItem } from '@/utils/execution';
-import { downloadFile } from '@/utils/file.ts';
+import { downloadFile, getImageSize } from '@/utils/file.ts';
 
 interface DesignBoardViewProps {
   embed?: boolean;
@@ -113,25 +113,24 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
     );
   };
 
-  useEffect(() => {
+  const handleInsertImages = async (operation: string, tid: string) => {
     if (operation === 'insert-images' && tid && editor) {
       const data = getTemp(tid) as IVinesExecutionResultItem[] | undefined;
       if (!data) return;
       setTemp(tid, null);
 
-      const processedData = data.map((item) => {
-        const imageUrl = item.render.data as string;
-        const imgElement = new Image();
-        imgElement.src = imageUrl;
-        const imgWidth = imgElement.width;
-        const imgHeight = imgElement.height;
-        return {
-          id: AssetRecordType.createId(),
-          url: imageUrl,
-          width: imgWidth,
-          height: imgHeight,
-        };
-      });
+      const processedData = await Promise.all(
+        data.map(async (item) => {
+          const imageUrl = item.render.data as string;
+          const { width, height } = await getImageSize(imageUrl);
+          return {
+            id: AssetRecordType.createId(),
+            url: imageUrl,
+            width,
+            height,
+          };
+        }),
+      );
 
       editor.createAssets(
         processedData.map((item) => {
@@ -169,6 +168,12 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
           activePageFromType,
         },
       });
+    }
+  };
+
+  useEffect(() => {
+    if (operation === 'insert-images' && tid && editor) {
+      void handleInsertImages(operation, tid);
     }
   }, [operation, tid, editor]);
 
