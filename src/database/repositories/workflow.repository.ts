@@ -534,8 +534,23 @@ export class WorkflowRepository {
     );
   }
 
-  public async fetchWorkflowExecutionWithNoStatus() {
-    return await this.workflowExecutionRepository.findOne({
+  // 原方法：只查一条
+  // public async fetchWorkflowExecutionWithNoStatus() {
+  //   return await this.workflowExecutionRepository.findOne({
+  //     where: [
+  //       {
+  //         status: IsNull(),
+  //       },
+  //       {
+  //         status: WorkflowStatusEnum.RUNNING,
+  //       },
+  //     ],
+  //   });
+  // }
+
+  // 新方法：批量查多条
+  public async fetchWorkflowExecutionsWithNoStatus(limit = 10) {
+    return await this.workflowExecutionRepository.find({
       where: [
         {
           status: IsNull(),
@@ -544,6 +559,8 @@ export class WorkflowRepository {
           status: WorkflowStatusEnum.RUNNING,
         },
       ],
+      take: limit,
+      order: { createdTimestamp: 'ASC' },
     });
   }
 
@@ -1354,39 +1371,32 @@ ORDER BY
         }
       }
 
-      return await transactionalEntityManager.save(WorkflowAssociationsEntity, {
-        ...association,
-        ...pick(updateAssociation, ['description', 'displayName', 'mapper', 'targetWorkflowId', 'enabled', 'iconUrl', 'sortIndex', 'type', 'extraData']),
-      });
-    });
-  }
-
-  public async removeWorkflowAssociation(id: string, teamId: string) {
-    return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
-      const association = await transactionalEntityManager.findOne(WorkflowAssociationsEntity, {
-        where: { id },
+      const updateFields = {
+        ..._.pickBy(
+          {
+            displayName: updateAssociation.displayName,
+            description: updateAssociation.description,
+            enabled: updateAssociation.enabled,
+            mapper: updateAssociation.mapper,
+            targetWorkflowId: updateAssociation.targetWorkflowId,
+            iconUrl: updateAssociation.iconUrl,
+            sortIndex: updateAssociation.sortIndex,
+            type: updateAssociation.type,
+            extraData: updateAssociation.extraData,
+          },
+          (v) => typeof v !== 'undefined',
+        ),
+        updatedTimestamp: Date.now(),
+      };
+      await transactionalEntityManager.update(WorkflowAssociationsEntity, { id, isDeleted: false, teamId }, updateFields);
+      const updatedAssociation = await transactionalEntityManager.findOne(WorkflowAssociationsEntity, {
+        where: { id, isDeleted: false },
         relations: {
           originWorkflow: true,
           targetWorkflow: true,
         },
       });
-
-      if (!association) {
-        throw new NotFoundException(`workflow association not found: ${id}`);
-      }
-
-      if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
-        throw new ForbiddenException(`no permission to operate the workflow association: ${id}`);
-      }
-
-      // 删除 installed apps 中的记录
-      await transactionalEntityManager.delete(InstalledAppEntity, {
-        installedAssetIds: {
-          'workflow-association': [association.id],
-        },
-      });
-
-      return await transactionalEntityManager.update(WorkflowAssociationsEntity, { id }, { isDeleted: true });
+      return updatedAssociation;
     });
   }
 }
