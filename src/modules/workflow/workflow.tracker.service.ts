@@ -12,7 +12,7 @@ interface WorkflowTrackInfo {
   startTime: number;
   lastCheckTime: number;
   callbackUrl?: string;
-  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'TERMINATED' | 'TIMED_OUT';
+  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'TERMINATED' | 'TIMED_OUT' | 'CANCELED' | 'PAUSED';
 }
 
 @Injectable()
@@ -69,8 +69,8 @@ export class WorkflowTrackerService {
           // 检查工作流状态
           try {
             const executionDetail = await this.workflowExecutionService.getWorkflowExecutionDetail(trackInfo.teamId, workflowInstanceId);
-            const status = executionDetail.status;
-            const finished = status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT';
+            const status = executionDetail.status as string;
+            const finished = status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT' || status === 'CANCELED' || status === 'PAUSED';
 
             if (finished) {
               // 完成后删除

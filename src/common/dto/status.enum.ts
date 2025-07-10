@@ -5,6 +5,7 @@ export enum WorkflowStatusEnum {
   TIMED_OUT = 'TIMED_OUT',
   TERMINATED = 'TERMINATED',
   PAUSED = 'PAUSED',
+  CANCELED = 'CANCELED',
 
   // UNKNOWN
   UNKNOWN = 'UNKNOWN',

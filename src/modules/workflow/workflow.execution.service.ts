@@ -214,7 +214,7 @@ export class WorkflowExecutionService {
         const batchQueryArr = query.filter((q) => !q.startsWith('workflowType IN'));
         batchQueryArr.push(`workflowType IN (${batch.join(',')})`);
         const batchQuery = batchQueryArr.join(' AND ');
-        logger.debug(`Conductor batch search query: ${batchQuery}, freeText: ${freeText}, sort: ${sortText}`);
+        // logger.debug(`Conductor batch search query: ${batchQuery}, freeText: ${freeText}, sort: ${sortText}`);
         const searchData = await retry(() => conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, batchQuery), { max: 3 });
         allResults = allResults.concat(searchData.results ?? []);
         totalHits += searchData.totalHits ?? 0;
@@ -222,7 +222,7 @@ export class WorkflowExecutionService {
     } else {
       // 原有逻辑
       const conductorQueryString = query.join(' AND ') || undefined;
-      logger.debug(`Conductor search query: ${conductorQueryString}, freeText: ${freeText}, sort: ${sortText}`);
+      // logger.debug(`Conductor search query: ${conductorQueryString}, freeText: ${freeText}, sort: ${sortText}`);
       const searchData = await retry(() => conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, conductorQueryString), { max: 3 });
       allResults = searchData.results ?? [];
       totalHits = searchData.totalHits ?? 0;
