@@ -132,6 +132,7 @@ export class AppController {
         showSidebarPageGroup: config.server.customization.showSidebarPageGroup,
         defaults: config.server.customization.defaults,
         modules: config.server.customization.modules,
+        headbar: config.server.customization.headbar,
         paginationPosition: config.server.customization.paginationPosition,
         ugcViewIconOnlyMode: config.server.customization.ugcViewIconOnlyMode,
       },

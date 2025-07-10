@@ -1,9 +1,8 @@
 import React from 'react';
 
-import { Outlet, useRouterState } from '@tanstack/react-router';
+import { Outlet } from '@tanstack/react-router';
 
-import { useTranslation } from 'react-i18next';
-
+import { useSystemConfig } from '@/apis/common';
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
@@ -14,28 +13,33 @@ import { WorkflowInfoCard } from '@/components/layout-wrapper/workspace/header/w
 import { FullScreenDisplay } from '@/components/layout-wrapper/workspace/space/full-screen-display.tsx';
 import { Footer } from '@/components/layout-wrapper/workspace/space/sidebar/footer';
 import { SpaceTabs } from '@/components/layout-wrapper/workspace/space/sidebar/tabs';
-import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
 export const WorkspaceLayout: React.FC = () => {
   // 获取路由信息，判断是否是图片详情页
   const { isImageDetailPage } = useVinesRoute();
-  const { t } = useTranslation();
-  const { teamId } = useVinesTeam();
+  // const { t } = useTranslation();
+  // const { teamId } = useVinesTeam();
 
-  // 获取当前路径
-  const pathName = useRouterState({
-    select: (state) => {
-      return state.location.pathname;
-    },
-  });
+  // // 获取当前路径
+  // const pathName = useRouterState({
+  //   select: (state) => {
+  //     return state.location.pathname;
+  //   },
+  // });
+
+  const { data: oem } = useSystemConfig();
+
+  const showTeamSelector =
+    oem &&
+    (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-selector'));
 
   return (
-    <ViewGuard className="gap-global flex flex-col bg-neocard">
+    <ViewGuard className="flex flex-col gap-global bg-neocard">
       {isImageDetailPage ? (
         // 图片详情页使用与工作台、应用市场相同的header
-        <SpaceHeader tail={<TeamSelector />} disableSeparator>
+        <SpaceHeader tail={showTeamSelector ? <TeamSelector /> : undefined} disableSeparator>
           <SpaceHeaderTabs />
         </SpaceHeader>
       ) : (

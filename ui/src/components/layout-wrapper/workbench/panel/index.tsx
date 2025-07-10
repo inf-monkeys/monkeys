@@ -2,6 +2,7 @@ import React, { useLayoutEffect } from 'react';
 
 import { Outlet, useRouterState } from '@tanstack/react-router';
 
+import { useSystemConfig } from '@/apis/common';
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
@@ -31,16 +32,23 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
     },
   });
   const isSettingRoute = pathName.split('/').at(-1) === 'settings';
+
+  const { data: oem } = useSystemConfig();
+
+  const showTeamSelector =
+    oem &&
+    (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-selector'));
+
   return (
-    <ViewGuard className="gap-global flex flex-col bg-neocard">
-      <SpaceHeader tail={<TeamSelector />} disableSeparator>
+    <ViewGuard className="flex flex-col gap-global bg-neocard">
+      <SpaceHeader tail={showTeamSelector ? <TeamSelector /> : undefined} disableSeparator>
         <SpaceHeaderTabs />
       </SpaceHeader>
       <VinesSpace
         className={cn(
           isWorkbenchRoute && 'overflow-auto bg-transparent p-0 shadow-none transition-colors',
-          isWorkspaceRoute && !isSettingRoute && 'p-global w-full border border-input',
-          isSettingRoute && 'px-global w-full border border-input py-1',
+          isWorkspaceRoute && !isSettingRoute && 'w-full border border-input p-global',
+          isSettingRoute && 'w-full border border-input px-global py-1',
         )}
         sidebar={isWorkspaceRoute && <VinesPanelSidebar />}
       >

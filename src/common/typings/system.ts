@@ -1,4 +1,4 @@
-import { AuthMethod, CustomizationModules } from '../config';
+import { AuthMethod, CustomizationHeadbar, CustomizationModules } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
@@ -38,6 +38,7 @@ export interface ISystemConfig {
       showFormInImageDetail?: boolean;
     };
     modules: CustomizationModules;
+    headbar: CustomizationHeadbar;
     paginationPosition?: 'left' | 'right';
     ugcViewIconOnlyMode?: boolean;
   };

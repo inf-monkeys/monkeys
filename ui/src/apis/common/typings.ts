@@ -22,13 +22,31 @@ export type VinesSpaceSidebarModule =
   | 'media'
   | 'text-data'
   | 'table-data';
-export type VinesSpaceSidebarModules = undefined | '*' | VinesSpaceSidebarModule[];
+export type VinesSpaceSidebarModules = '*' | VinesSpaceSidebarModule[];
 
 export type VinesSpaceHeadbarModule = 'workbench' | 'app-store' | 'workspace';
-export type VinesSpaceHeadbarModules = undefined | '*' | VinesSpaceHeadbarModule[];
+export type VinesSpaceHeadbarModules = '*' | VinesSpaceHeadbarModule[];
 
 export type SettingsSidebarModule = 'account' | 'config' | 'stat' | 'apikey';
-export type SettingsSidebarModules = undefined | '*' | SettingsSidebarModule[];
+export type SettingsSidebarModules = '*' | SettingsSidebarModule[];
+
+export type CustomizationModules =
+  | {
+      vinesSpaceSidebar?: VinesSpaceSidebarModules;
+      vinesSpaceHeadbar?: VinesSpaceHeadbarModules;
+      settingsSidebar?: SettingsSidebarModules;
+    }
+  | undefined;
+
+export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile';
+export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
+
+export type CustomizationHeadbar =
+  | {
+      actions?: VinesSpaceHeadbar[] | '*';
+      profile?: VinesSpaceHeadbarProfile[] | '*';
+    }
+  | undefined;
 
 export interface ISystemConfig {
   theme: {
@@ -64,11 +82,8 @@ export interface ISystemConfig {
     defaults: {
       showFormInImageDetail: boolean;
     };
-    modules: {
-      vinesSpaceSidebar: VinesSpaceSidebarModules;
-      vinesSpaceHeadbar: VinesSpaceHeadbarModules;
-      settingsSidebar: SettingsSidebarModules;
-    };
+    modules: CustomizationModules;
+    headbar: CustomizationHeadbar;
     paginationPosition?: 'left' | 'right';
     ugcViewIconOnlyMode?: boolean;
   };

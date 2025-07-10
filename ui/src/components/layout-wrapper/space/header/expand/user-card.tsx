@@ -7,6 +7,7 @@ import { Languages, LogOut, Moon, Sun, SunMoon, UserCog } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
@@ -31,6 +32,21 @@ interface IUserCardProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const UserCard: React.FC<IUserCardProps> = () => {
   const { t, i18n } = useTranslation();
+
+  const { data: oem } = useSystemConfig();
+
+  const showDarkMode =
+    oem &&
+    (!oem.theme.headbar || oem.theme.headbar.profile === '*' || oem.theme.headbar.profile?.includes('dark-mode'));
+
+  const showLanguage =
+    oem && (!oem.theme.headbar || oem.theme.headbar.profile === '*' || oem.theme.headbar.profile?.includes('language'));
+
+  const showSettings =
+    oem && (!oem.theme.headbar || oem.theme.headbar.profile === '*' || oem.theme.headbar.profile?.includes('settings'));
+
+  const showLogout =
+    oem && (!oem.theme.headbar || oem.theme.headbar.profile === '*' || oem.theme.headbar.profile?.includes('logout'));
 
   const currentLanguage = i18n.language;
 
@@ -80,99 +96,107 @@ export const UserCard: React.FC<IUserCardProps> = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuGroup className="px-2">
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger
-              className="flex gap-2"
-              suffix={
-                <span className="ml-auto text-xs">
-                  {isAutoMode
-                    ? t('common.dark-mode-selector.auto')
-                    : isDarkMode
-                      ? t('common.dark-mode-selector.dark')
-                      : t('common.dark-mode-selector.light')}
-                </span>
-              }
-            >
-              <SunMoon strokeWidth={1.5} size={16} />
-              <span>{t('common.dark-mode-selector.label')}</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent sideOffset={16}>
-              <DropdownMenuGroup>
-                <DropdownMenuCheckboxItem
-                  checked={isAutoMode}
-                  disabled={isAutoMode}
-                  onCheckedChange={() => setLocalDarkMode('auto')}
-                  className="flex gap-2"
-                >
-                  <SunMoon size={16} strokeWidth={1.5} />
-                  <span>{t('common.dark-mode-selector.auto')}</span>
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={isLightMode}
-                  disabled={isLightMode}
-                  onCheckedChange={() => setLocalDarkMode('light')}
-                  className="flex gap-2"
-                >
-                  <Sun size={16} strokeWidth={1.5} />
-                  <span>{t('common.dark-mode-selector.light')}</span>
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={isDarkMode}
-                  disabled={isDarkMode}
-                  onCheckedChange={() => setLocalDarkMode('dark')}
-                  className="flex gap-2"
-                >
-                  <Moon size={16} strokeWidth={1.5} />
-                  <span>{t('common.dark-mode-selector.dark')}</span>
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger
-              className="flex gap-2"
-              suffix={
-                <span className="ml-auto text-xs">
-                  {LANGUAGES_LIST.find(([lang]) => lang === currentLanguage)?.[1] ?? currentLanguage}
-                </span>
-              }
-            >
-              <Languages strokeWidth={1.5} size={16} />
-              <span>{t('common.language-selector.tooltip')}</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent sideOffset={16}>
-              <DropdownMenuGroup>
-                {LANGUAGES_LIST.map(([lang, displayName]) => (
+          {showDarkMode && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                className="flex gap-2"
+                suffix={
+                  <span className="ml-auto text-xs">
+                    {isAutoMode
+                      ? t('common.dark-mode-selector.auto')
+                      : isDarkMode
+                        ? t('common.dark-mode-selector.dark')
+                        : t('common.dark-mode-selector.light')}
+                  </span>
+                }
+              >
+                <SunMoon strokeWidth={1.5} size={16} />
+                <span>{t('common.dark-mode-selector.label')}</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent sideOffset={16}>
+                <DropdownMenuGroup>
                   <DropdownMenuCheckboxItem
-                    key={lang}
-                    checked={currentLanguage === lang}
-                    onCheckedChange={() => handleToggleLanguage(lang)}
+                    checked={isAutoMode}
+                    disabled={isAutoMode}
+                    onCheckedChange={() => setLocalDarkMode('auto')}
+                    className="flex gap-2"
                   >
-                    {displayName}
+                    <SunMoon size={16} strokeWidth={1.5} />
+                    <span>{t('common.dark-mode-selector.auto')}</span>
                   </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          <DropdownMenuItem
-            className="flex gap-2"
-            onClick={() =>
-              navigate({
-                to: '/$teamId/settings',
-                params: { teamId },
-                search: {
-                  tab: 'account',
-                },
-              } as any)
-            }
-          >
-            <UserCog strokeWidth={1.5} size={16} />
-            <span>{t('components.layout.main.sidebar.toolbar.settings-tooltip')}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="flex gap-2 text-red-10" onClick={() => VinesEvent.emit('vines-logout')}>
-            <LogOut strokeWidth={1.5} size={16} />
-            <span>{t('workspace.wrapper.user.logout')}</span>
-          </DropdownMenuItem>
+                  <DropdownMenuCheckboxItem
+                    checked={isLightMode}
+                    disabled={isLightMode}
+                    onCheckedChange={() => setLocalDarkMode('light')}
+                    className="flex gap-2"
+                  >
+                    <Sun size={16} strokeWidth={1.5} />
+                    <span>{t('common.dark-mode-selector.light')}</span>
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={isDarkMode}
+                    disabled={isDarkMode}
+                    onCheckedChange={() => setLocalDarkMode('dark')}
+                    className="flex gap-2"
+                  >
+                    <Moon size={16} strokeWidth={1.5} />
+                    <span>{t('common.dark-mode-selector.dark')}</span>
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          )}
+          {showLanguage && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                className="flex gap-2"
+                suffix={
+                  <span className="ml-auto text-xs">
+                    {LANGUAGES_LIST.find(([lang]) => lang === currentLanguage)?.[1] ?? currentLanguage}
+                  </span>
+                }
+              >
+                <Languages strokeWidth={1.5} size={16} />
+                <span>{t('common.language-selector.tooltip')}</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent sideOffset={16}>
+                <DropdownMenuGroup>
+                  {LANGUAGES_LIST.map(([lang, displayName]) => (
+                    <DropdownMenuCheckboxItem
+                      key={lang}
+                      checked={currentLanguage === lang}
+                      onCheckedChange={() => handleToggleLanguage(lang)}
+                    >
+                      {displayName}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          )}
+          {showSettings && (
+            <DropdownMenuItem
+              className="flex gap-2"
+              onClick={() =>
+                navigate({
+                  to: '/$teamId/settings',
+                  params: { teamId },
+                  search: {
+                    tab: 'account',
+                  },
+                } as any)
+              }
+            >
+              <UserCog strokeWidth={1.5} size={16} />
+              <span>{t('components.layout.main.sidebar.toolbar.settings-tooltip')}</span>
+            </DropdownMenuItem>
+          )}
+          {showLogout && (
+            <DropdownMenuItem className="flex gap-2 text-red-10" onClick={() => VinesEvent.emit('vines-logout')}>
+              <LogOut strokeWidth={1.5} size={16} />
+              <span>{t('workspace.wrapper.user.logout')}</span>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

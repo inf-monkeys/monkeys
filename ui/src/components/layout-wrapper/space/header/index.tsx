@@ -48,11 +48,14 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
   const hasToken = !!getVinesToken();
 
   const showTeamQuota = oem && (oem.module === '*' || oem.module.includes('payment'));
+  const showHeaderInvite =
+    oem &&
+    (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-invite'));
 
   return hideSpaceHeader ? (
     <></>
   ) : (
-    <header className="p-global flex w-full items-center justify-between rounded-xl border border-input bg-slate-1">
+    <header className="flex w-full items-center justify-between rounded-xl border border-input bg-slate-1 p-global">
       <div className="z-20 flex h-8 items-center gap-6">
         <Link
           to="/$teamId"
@@ -69,9 +72,9 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
           </>
         )}
       </div>
-      <div className="gap-global z-20 flex items-center">
+      <div className="z-20 flex items-center gap-global">
         {showTeamQuota && <QuotaButton />}
-        <HeaderInvite />
+        {showHeaderInvite && <HeaderInvite />}
         {tail}
         {hasToken ? (
           <>
