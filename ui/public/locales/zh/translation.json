@@ -3868,7 +3868,8 @@
           "label": "设计项目",
           "placeholder": "请选择设计项目",
           "search-placeholder": "搜索设计项目",
-          "search-empty": "找不到设计项目"
+          "search-empty": "找不到设计项目",
+          "edit-tooltip": "编辑设计项目名称"
         },
         "design-board": {
           "label": "画板",

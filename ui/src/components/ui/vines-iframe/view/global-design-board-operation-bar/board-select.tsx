@@ -2,15 +2,17 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { useSearch } from '@tanstack/react-router';
 
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useDesignProjectMetadataList, useGetDesignProjectList } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings';
+import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { DEFAULT_DESIGN_PROJECT_ICON_URL, DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
@@ -37,7 +39,8 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
   };
 
   const [designProjectVisible, setDesignProjectVisible] = useState(false);
-  const [designBoardVisible, setDesignBoardVisible] = useState(false);
+  const [designProjectEditorVisible, setDesignProjectEditorVisible] = useState(false);
+  // const [designBoardVisible, setDesignBoardVisible] = useState(false);
   const { setDesignBoardId } = useDesignBoardStore();
 
   const { data: designProjectList, isLoading } = useGetDesignProjectList();
@@ -50,14 +53,23 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
     (designProject) => designProject.id === currentDesignProjectId,
   );
 
-  const { data: designBoardList, isLoading: isDesignBoardListLoading } =
-    useDesignProjectMetadataList(currentDesignProjectId);
+  const {
+    data: designBoardList,
+    isLoading: isDesignBoardListLoading,
+    mutate: mutateDesignProjectMetadataList,
+  } = useDesignProjectMetadataList(currentDesignProjectId);
 
   const [currentDesignBoardId, setCurrentDesignBoardId] = useState<string | undefined>(
     designBoardIdFromSearch ?? undefined,
   );
 
-  const selectedDesignBoard = (designBoardList ?? []).find((designBoard) => designBoard.id === currentDesignBoardId);
+  // const selectedDesignBoard = (designBoardList ?? []).find((designBoard) => designBoard.id === currentDesignBoardId);
+
+  useEffect(() => {
+    if (designProjectList && designProjectList.length > 0 && !currentDesignProjectId) {
+      setCurrentDesignProjectId(designProjectList[0]?.id ?? null);
+    }
+  }, [designProjectList, currentDesignProjectId]);
 
   useEffect(() => {
     if (currentDesignBoardId) {
@@ -82,71 +94,89 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
     }
   }, [designProjectIdFromSearch, designBoardIdFromSearch]);
 
+  const handleAfterUpdateDesignProject = () => {
+    setDesignProjectEditorVisible(false);
+    mutateDesignProjectMetadataList();
+  };
+
   return (
-    <div className="flex w-full flex-col gap-global">
-      <div className="flex w-full flex-col gap-2">
-        <span className="text-xs font-semibold">{t('common.type.design-project')}</span>
-        <Popover open={designProjectVisible} onOpenChange={setDesignProjectVisible}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              className={cn('w-full justify-between', !currentDesignProjectId && 'text-muted-foreground')}
-            >
-              {currentDesignProjectId
-                ? getDesignProjectDisplayName(selectedDesignProject!)
-                : isLoading
-                  ? t('common.load.loading')
-                  : t('workspace.global-design-board.operation-bar.design-project.placeholder')}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="p-0">
-            <Command>
-              <CommandInput
-                placeholder={t('workspace.global-design-board.operation-bar.design-project.search-placeholder')}
-              />
-              <CommandEmpty>
-                {t('workspace.global-design-board.operation-bar.design-project.search-empty')}
-              </CommandEmpty>
-              <ScrollArea className="h-64">
-                <CommandGroup>
-                  {(designProjectList ?? []).map((designProject) => (
-                    <CommandItem
-                      value={designProject.id}
-                      key={designProject.id}
-                      onSelect={() => {
-                        setCurrentDesignProjectId(designProject.id);
-                        setCurrentDesignBoardId(undefined);
-                        setDesignProjectVisible(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          'mr-2 h-4 w-4',
-                          designProject.id === currentDesignProjectId ? 'opacity-100' : 'opacity-0',
-                        )}
-                      />
-                      <div className="flex items-center gap-2">
-                        <VinesIcon src={designProject.iconUrl || DEFAULT_WORKFLOW_ICON_URL} size="xs" />
-                        <div className="flex flex-col">
-                          <span className="font-medium">{getI18nContent(designProject.displayName)}</span>
-                          {designProject.description && (
-                            <span className="text-xs text-muted-foreground">
-                              {getI18nContent(designProject.description)}
-                            </span>
+    <>
+      <div className="flex w-full flex-col gap-global">
+        <div className="flex w-full flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold">{t('common.type.design-project')}</span>
+            {currentDesignProjectId && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Pencil className="size-3 cursor-pointer" onClick={() => setDesignProjectEditorVisible(true)} />
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t('workspace.global-design-board.operation-bar.design-project.edit-tooltip')}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+          <Popover open={designProjectVisible} onOpenChange={setDesignProjectVisible}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                className={cn('w-full justify-between', !currentDesignProjectId && 'text-muted-foreground')}
+              >
+                {currentDesignProjectId
+                  ? getDesignProjectDisplayName(selectedDesignProject!)
+                  : isLoading
+                    ? t('common.load.loading')
+                    : t('workspace.global-design-board.operation-bar.design-project.placeholder')}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0">
+              <Command>
+                <CommandInput
+                  placeholder={t('workspace.global-design-board.operation-bar.design-project.search-placeholder')}
+                />
+                <CommandEmpty>
+                  {t('workspace.global-design-board.operation-bar.design-project.search-empty')}
+                </CommandEmpty>
+                <ScrollArea className="h-64">
+                  <CommandGroup>
+                    {(designProjectList ?? []).map((designProject) => (
+                      <CommandItem
+                        value={designProject.id}
+                        key={designProject.id}
+                        onSelect={() => {
+                          setCurrentDesignProjectId(designProject.id);
+                          setCurrentDesignBoardId(undefined);
+                          setDesignProjectVisible(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            designProject.id === currentDesignProjectId ? 'opacity-100' : 'opacity-0',
                           )}
+                        />
+                        <div className="flex items-center gap-2">
+                          <VinesIcon src={designProject.iconUrl || DEFAULT_WORKFLOW_ICON_URL} size="xs" />
+                          <div className="flex flex-col">
+                            <span className="font-medium">{getI18nContent(designProject.displayName)}</span>
+                            {designProject.description && (
+                              <span className="text-xs text-muted-foreground">
+                                {getI18nContent(designProject.description)}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </ScrollArea>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
-      <div className="flex w-full flex-col gap-2">
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </ScrollArea>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+        {/* <div className="flex w-full flex-col gap-2">
         <span className="text-xs font-semibold">{t('common.type.design-board')}</span>
         <Popover open={designBoardVisible} onOpenChange={setDesignBoardVisible}>
           <PopoverTrigger asChild>
@@ -203,7 +233,14 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
             </Command>
           </PopoverContent>
         </Popover>
+      </div> */}
       </div>
-    </div>
+      <DesignProjectInfoEditor
+        visible={designProjectEditorVisible}
+        setVisible={setDesignProjectEditorVisible}
+        designProject={selectedDesignProject}
+        afterUpdate={handleAfterUpdateDesignProject}
+      />
+    </>
   );
 };

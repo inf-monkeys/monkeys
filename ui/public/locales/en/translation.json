@@ -3848,7 +3848,8 @@
           "label": "Design Project",
           "placeholder": "Select a design project",
           "search-placeholder": "Search design project",
-          "search-empty": "No design project found"
+          "search-empty": "No design project found",
+          "edit-tooltip": "Edit design project name"
         },
         "design-board": {
           "label": "Design Board",
