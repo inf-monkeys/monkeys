@@ -73,9 +73,11 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
     <AnimatePresence>
       {hasPages && (
         <>
-          <ViewStoreProvider key="global-design-board" createStore={createViewStore}>
-            <VinesView id="global-design-board" pageId={currentPageId} type="global-design-board" />
-          </ViewStoreProvider>
+          {page && !(page as any).groupId && (
+            <ViewStoreProvider key="global-design-board" createStore={createViewStore}>
+              <VinesView id="global-design-board" pageId={currentPageId} type="global-design-board" />
+            </ViewStoreProvider>
+          )}
           {globalGroups.map(([_, pages]) => {
             return pages.map(({ id, type }) => (
               <ViewStoreProvider key={id} createStore={createViewStore}>
