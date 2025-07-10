@@ -2,10 +2,13 @@ import { LOCK_TOKEN } from '@/common/common.module';
 import { conductorClient } from '@/common/conductor';
 import { config } from '@/common/config';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
+import { logger } from '@/common/logger';
+import { flattenObjectToString } from '@/common/utils';
 import { LockManager } from '@/common/utils/lock';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { omit } from 'lodash';
 
 @Injectable()
 export class FillWorkflowExecutionStatusCronService {
@@ -27,11 +30,37 @@ export class FillWorkflowExecutionStatusCronService {
       try {
         const execution = await this.workflowRepository.fetchWorkflowExecutionWithNoStatus();
         if (execution) {
+          logger.info(`[CRON] Found execution with no status: ${execution.workflowInstanceId}`);
           try {
-            const data = await conductorClient.workflowResource.getExecutionStatus(execution.workflowInstanceId, false, false);
+            const data = await conductorClient.workflowResource.getExecutionStatus(execution.workflowInstanceId, true, true);
             const takes = data.endTime ? data.endTime - data.startTime : 0;
-            await this.workflowRepository.updateWorkflowExecutionStatus(execution.workflowInstanceId, data.status as WorkflowStatusEnum, takes);
+
+            // 构建完整的更新数据，包括 input、output 等字段
+            const inputForSearch = data.input ? omit(data.input, ['__context']) : null;
+            const outputForSearch = data.output || null;
+            const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
+
+            const updateData = {
+              status: data.status as WorkflowStatusEnum,
+              takes,
+              input: data.input || null,
+              output: data.output || null,
+              tasks: data.tasks || null,
+              conductorCreateTime: data.createTime,
+              conductorStartTime: data.startTime,
+              conductorEndTime: data.endTime,
+              conductorUpdateTime: data.updateTime,
+              executedWorkflowDefinition: data.workflowDefinition ? omit(data.workflowDefinition, ['tasks', 'inputTemplate', 'outputParameters']) : null,
+              executionVariables: data.variables || null,
+              updatedTimestamp: Date.now(),
+              searchableText,
+              extraMetadata: data.input?.extraMetadata,
+            };
+
+            await this.workflowRepository.updateWorkflowExecutionDetailsByInstanceId(execution.workflowInstanceId, updateData);
+            logger.info(`[CRON] Successfully updated execution ${execution.workflowInstanceId} with status: ${data.status}`);
           } catch (error) {
+            logger.error(`[CRON] Error updating execution ${execution.workflowInstanceId}:`, error);
             await this.workflowRepository.updateWorkflowExecutionStatus(execution.workflowInstanceId, WorkflowStatusEnum.UNKNOWN, 0);
           }
         }
