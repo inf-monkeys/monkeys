@@ -1399,4 +1399,27 @@ ORDER BY
       return updatedAssociation;
     });
   }
+
+  public async removeWorkflowAssociation(id: string, teamId: string) {
+    return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
+      const association = await transactionalEntityManager.findOne(WorkflowAssociationsEntity, {
+        where: { id, isDeleted: false },
+        relations: {
+          originWorkflow: true,
+          targetWorkflow: true,
+        },
+      });
+
+      if (!association) {
+        throw new NotFoundException(`workflow association not found: ${id}`);
+      }
+
+      if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
+        throw new ForbiddenException(`no permission to operate the workflow association: ${id}`);
+      }
+
+      await transactionalEntityManager.update(WorkflowAssociationsEntity, { id, isDeleted: false }, { isDeleted: true, updatedTimestamp: Date.now() });
+      return { success: true };
+    });
+  }
 }
