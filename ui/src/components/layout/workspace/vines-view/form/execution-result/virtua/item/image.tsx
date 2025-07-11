@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { useAsyncEffect } from 'ahooks';
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isObject } from 'lodash';
 import { Copy } from 'lucide-react';
 import Image from 'rc-image';
@@ -15,6 +16,7 @@ import { useCopy } from '@/hooks/use-copy.ts';
 import useUrlState from '@/hooks/use-url-state';
 import { useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { useFlowStore } from '@/store/useFlowStore';
+import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 import { IClickBehavior } from '../../grid/item';
 
@@ -36,6 +38,8 @@ interface IVirtuaExecutionResultGridImageItemProps {
   isSelectionMode?: boolean;
   onSelect?: (e: React.MouseEvent) => void;
   clickBehavior?: IClickBehavior;
+  event$: EventEmitter<void>;
+  data: IVinesExecutionResultItem;
 }
 
 export function getThumbUrl(url: string) {
@@ -53,6 +57,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   isSelectionMode = false,
   onSelect,
   clickBehavior,
+  event$,
+  data,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -98,6 +104,12 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
     }
     if ((clickBehavior === 'select' || isSelectionMode) && onSelect) {
       onSelect(e);
+    }
+    if (clickBehavior === 'fill-form' && event$) {
+      event$.emit({
+        type: 'set',
+        data: data.input,
+      });
     }
   };
 

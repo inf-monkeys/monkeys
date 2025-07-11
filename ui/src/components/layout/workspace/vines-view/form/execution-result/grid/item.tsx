@@ -119,6 +119,8 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
                 isSelectionMode={isSelectionMode}
                 onSelect={handleSelect}
                 clickBehavior={clickBehavior}
+                event$={event$}
+                data={result}
               />
               {renderSelectionOverlay()}
             </div>
