@@ -268,6 +268,10 @@ export function flattenObjectToSearchableText(obj: any): string {
     return /\.(jpg|jpeg|png|gif|bmp|webp|svg|mp4|avi|mov|mkv|flv|wmv|pdf|doc|docx|txt)$/i.test(str);
   }
 
+  function isMimeType(str: string): boolean {
+    return /^(image|video|audio|application|text)\/[a-zA-Z0-9][a-zA-Z0-9!#$&\-\^_]*$/i.test(str);
+  }
+
   function recurse(current: any) {
     if (current === null || current === undefined) {
       return;
@@ -276,10 +280,10 @@ export function flattenObjectToSearchableText(obj: any): string {
     // 只处理有用的 string 类型的值
     if (isString(current)) {
       // 过滤掉不需要的内容
-      if (!isUrl(current) && !isLongText(current) && !isUuid(current) && !isFileType(current)) {
-        // 只保留简短的、有意义的文本
+      if (!isUrl(current) && !isLongText(current) && !isUuid(current) && !isFileType(current) && !isMimeType(current)) {
+        // 只保留有意义的文本，但放宽长度限制以包含提示词
         const trimmed = current.trim();
-        if (trimmed.length > 0 && trimmed.length <= 100) {
+        if (trimmed.length > 0) {
           stringValues.push(trimmed);
         }
       }
