@@ -38,7 +38,7 @@ export class FillWorkflowExecutionStatusCronService {
               const takes = data.endTime ? data.endTime - data.startTime : 0;
 
               // 构建完整的更新数据，包括 input、output 等字段
-              const inputForSearch = data.input ? omit(data.input, ['__context']) : null;
+              const inputForSearch = data.input ? omit(data.input, ['__context', 'extraMetadata']) : null;
               const outputForSearch = data.output || null;
               const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
 
