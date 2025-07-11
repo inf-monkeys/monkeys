@@ -1,6 +1,6 @@
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { logger } from '@/common/logger';
-import { flattenObjectToString } from '@/common/utils';
+import { flattenObjectToSearchableText } from '@/common/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Workflow } from '@inf-monkeys/conductor-javascript';
@@ -28,7 +28,7 @@ export class WorkflowExecutionPersistenceService {
       const inputForSearch = detailedExecution.input ? omit(detailedExecution.input, ['__context', 'extraMetadata']) : null;
       const outputForSearch = detailedExecution.output || null;
 
-      const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
+      const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
 
       const updateData: Partial<WorkflowExecutionEntity> = {
         status: detailedExecution.status as WorkflowStatusEnum,

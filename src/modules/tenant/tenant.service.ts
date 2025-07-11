@@ -3,7 +3,7 @@ import { config } from '@/common/config';
 import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
-import { extractImageUrls, flattenKeys, flattenObject, flattenObjectToString, getDataType } from '@/common/utils';
+import { extractImageUrls, flattenKeys, flattenObject, flattenObjectToSearchableText, getDataType } from '@/common/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { FindWorkflowCondition, WorkflowRepository } from '@/database/repositories/workflow.repository';
@@ -517,12 +517,12 @@ export class TenantService {
     // 处理数据，转换为新的结构
     const data: Execution[] = rawData.map((execution) => {
       const workflowDef = workflowDefMap.get(execution.workflowId);
-      
+
       // 重新生成 searchableText，排除 extraMetadata
       const inputForSearch = execution.input ? omit(execution.input, ['__context', 'extraMetadata']) : null;
       const outputForSearch = execution.output || null;
-      const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
-      
+      const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
+
       return {
         status: execution.status,
         workflowId: execution.workflowId,

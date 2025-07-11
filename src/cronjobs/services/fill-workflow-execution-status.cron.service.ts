@@ -3,7 +3,7 @@ import { conductorClient } from '@/common/conductor';
 import { config } from '@/common/config';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { logger } from '@/common/logger';
-import { flattenObjectToString } from '@/common/utils';
+import { flattenObjectToSearchableText } from '@/common/utils';
 import { LockManager } from '@/common/utils/lock';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Inject, Injectable } from '@nestjs/common';
@@ -40,7 +40,7 @@ export class FillWorkflowExecutionStatusCronService {
               // 构建完整的更新数据，包括 input、output 等字段
               const inputForSearch = data.input ? omit(data.input, ['__context', 'extraMetadata']) : null;
               const outputForSearch = data.output || null;
-              const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
+              const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
 
               const updateData = {
                 status: data.status as WorkflowStatusEnum,

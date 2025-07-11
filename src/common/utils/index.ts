@@ -248,6 +248,60 @@ export function flattenObjectToString(obj: any): string {
   return stringValues.join(' ');
 }
 
+// 专门用于生成 searchableText 的函数，过滤掉不必要的内容
+export function flattenObjectToSearchableText(obj: any): string {
+  const stringValues: string[] = [];
+
+  function isUrl(str: string): boolean {
+    return /^https?:\/\//.test(str);
+  }
+
+  function isLongText(str: string): boolean {
+    return str.length > 100; // 过滤掉超过100字符的长文本
+  }
+
+  function isUuid(str: string): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+  }
+
+  function isFileType(str: string): boolean {
+    return /\.(jpg|jpeg|png|gif|bmp|webp|svg|mp4|avi|mov|mkv|flv|wmv|pdf|doc|docx|txt)$/i.test(str);
+  }
+
+  function recurse(current: any) {
+    if (current === null || current === undefined) {
+      return;
+    }
+
+    // 只处理有用的 string 类型的值
+    if (isString(current)) {
+      // 过滤掉不需要的内容
+      if (!isUrl(current) && !isLongText(current) && !isUuid(current) && !isFileType(current)) {
+        // 只保留简短的、有意义的文本
+        const trimmed = current.trim();
+        if (trimmed.length > 0 && trimmed.length <= 100) {
+          stringValues.push(trimmed);
+        }
+      }
+    } else if (Array.isArray(current)) {
+      // 如果是数组, 递归处理每个元素
+      for (const item of current) {
+        recurse(item);
+      }
+    } else if (isObject(current)) {
+      // 如果是对象, 递归处理其值, 同时跳过 __context 和 extraMetadata
+      const valuesToRecurse = '__context' in current || 'extraMetadata' in current ? Object.values(omit(current, ['__context', 'extraMetadata'])) : Object.values(current);
+      for (const value of valuesToRecurse) {
+        recurse(value);
+      }
+    }
+    // 其他类型 (number, boolean, etc.) 会被忽略
+  }
+
+  recurse(obj);
+  return stringValues.join(' ');
+}
+
 export const extractImageUrls = (text: unknown): string[] => {
   if (typeof text !== 'string') return [];
 

@@ -6,7 +6,7 @@ import { PaginationDto } from '@/common/dto/pagination.dto';
 import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-requests';
 import { logger } from '@/common/logger';
-import { extractImageUrls, extractVideoUrls, flattenKeys, flattenObjectToString, getDataType } from '@/common/utils';
+import { extractImageUrls, extractVideoUrls, flattenKeys, flattenObjectToSearchableText, getDataType } from '@/common/utils';
 import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
@@ -613,7 +613,7 @@ export class WorkflowExecutionService {
           const inputForSearch = input ? _.omit(input, ['__context', 'extraMetadata']) : null;
           const outputForSearch = output || null;
 
-          const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
+          const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
 
           let alt: string | string[] | undefined;
           const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, dataVal) => {
