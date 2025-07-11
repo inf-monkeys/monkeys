@@ -195,18 +195,31 @@ export class TenantService {
                   Object.entries(group).forEach(([key, value]) => {
                     paramIdx++;
                     if (Array.isArray(value)) {
-                      value.forEach((v, vIdx) => {
-                        const keyParam = `key_${groupIdx}_${paramIdx}_${vIdx}`;
-                        const valParam = `val_${groupIdx}_${paramIdx}_${vIdx}`;
-                        const valStrParam = `valStr_${groupIdx}_${paramIdx}_${vIdx}`;
+                      if (value.length === 0) {
+                        // 空数组的情况：查询该字段为空数组或不存在
+                        const keyParam = `key_${groupIdx}_${paramIdx}`;
+                        const emptyArrayParam = `emptyArray_${groupIdx}_${paramIdx}`;
                         qbAnd.andWhere(
                           new Brackets((qb2) => {
                             qb2
-                              .orWhere(`execution.extra_metadata->:${keyParam} @> :${valParam}`, { [keyParam]: key, [valParam]: JSON.stringify([v]) })
-                              .orWhere(`execution.extra_metadata->>:${keyParam} = :${valStrParam}`, { [keyParam]: key, [valStrParam]: v });
+                              .orWhere(`execution.extra_metadata->:${keyParam} = :${emptyArrayParam}`, { [keyParam]: key, [emptyArrayParam]: JSON.stringify([]) })
+                              .orWhere(`execution.extra_metadata->>:${keyParam} IS NULL`, { [keyParam]: key });
                           }),
                         );
-                      });
+                      } else {
+                        value.forEach((v, vIdx) => {
+                          const keyParam = `key_${groupIdx}_${paramIdx}_${vIdx}`;
+                          const valParam = `val_${groupIdx}_${paramIdx}_${vIdx}`;
+                          const valStrParam = `valStr_${groupIdx}_${paramIdx}_${vIdx}`;
+                          qbAnd.andWhere(
+                            new Brackets((qb2) => {
+                              qb2
+                                .orWhere(`execution.extra_metadata->:${keyParam} @> :${valParam}`, { [keyParam]: key, [valParam]: JSON.stringify([v]) })
+                                .orWhere(`execution.extra_metadata->>:${keyParam} = :${valStrParam}`, { [keyParam]: key, [valStrParam]: v });
+                            }),
+                          );
+                        });
+                      }
                     } else {
                       const keyParam = `key_${groupIdx}_${paramIdx}`;
                       const valueParam = `value_${groupIdx}_${paramIdx}`;
@@ -224,18 +237,31 @@ export class TenantService {
         Object.entries(extraMetadata).forEach(([key, value]) => {
           paramIdx++;
           if (Array.isArray(value)) {
-            value.forEach((v, vIdx) => {
-              const keyParam = `key_obj_${paramIdx}_${vIdx}`;
-              const valParam = `val_obj_${paramIdx}_${vIdx}`;
-              const valStrParam = `valStr_obj_${paramIdx}_${vIdx}`;
+            if (value.length === 0) {
+              // 空数组的情况：查询该字段为空数组或不存在
+              const keyParam = `key_obj_${paramIdx}`;
+              const emptyArrayParam = `emptyArray_obj_${paramIdx}`;
               qb.andWhere(
                 new Brackets((qb2) => {
                   qb2
-                    .orWhere(`execution.extra_metadata->:${keyParam} @> :${valParam}`, { [keyParam]: key, [valParam]: JSON.stringify([v]) })
-                    .orWhere(`execution.extra_metadata->>:${keyParam} = :${valStrParam}`, { [keyParam]: key, [valStrParam]: v });
+                    .orWhere(`execution.extra_metadata->:${keyParam} = :${emptyArrayParam}`, { [keyParam]: key, [emptyArrayParam]: JSON.stringify([]) })
+                    .orWhere(`execution.extra_metadata->>:${keyParam} IS NULL`, { [keyParam]: key });
                 }),
               );
-            });
+            } else {
+              value.forEach((v, vIdx) => {
+                const keyParam = `key_obj_${paramIdx}_${vIdx}`;
+                const valParam = `val_obj_${paramIdx}_${vIdx}`;
+                const valStrParam = `valStr_obj_${paramIdx}_${vIdx}`;
+                qb.andWhere(
+                  new Brackets((qb2) => {
+                    qb2
+                      .orWhere(`execution.extra_metadata->:${keyParam} @> :${valParam}`, { [keyParam]: key, [valParam]: JSON.stringify([v]) })
+                      .orWhere(`execution.extra_metadata->>:${keyParam} = :${valStrParam}`, { [keyParam]: key, [valStrParam]: v });
+                  }),
+                );
+              });
+            }
           } else {
             const keyParam = `key_obj_${paramIdx}`;
             const valueParam = `value_obj_${paramIdx}`;
@@ -411,13 +437,22 @@ export class TenantService {
                 new Brackets((qbAnd) => {
                   Object.entries(group).forEach(([key, value]) => {
                     if (Array.isArray(value)) {
-                      value.forEach((v) => {
+                      if (value.length === 0) {
+                        // 空数组的情况：查询该字段为空数组或不存在
                         qbAnd.andWhere(
                           new Brackets((qb2) => {
-                            qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
+                            qb2.orWhere(`execution.extra_metadata->:key = :emptyArray`, { key, emptyArray: JSON.stringify([]) }).orWhere(`execution.extra_metadata->>:key IS NULL`, { key });
                           }),
                         );
-                      });
+                      } else {
+                        value.forEach((v) => {
+                          qbAnd.andWhere(
+                            new Brackets((qb2) => {
+                              qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
+                            }),
+                          );
+                        });
+                      }
                     } else {
                       qbAnd.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
                     }
@@ -433,13 +468,22 @@ export class TenantService {
           new Brackets((qb1) => {
             Object.entries(extraMetadata).forEach(([key, value]) => {
               if (Array.isArray(value)) {
-                value.forEach((v) => {
+                if (value.length === 0) {
+                  // 空数组的情况：查询该字段为空数组或不存在
                   qb1.andWhere(
                     new Brackets((qb2) => {
-                      qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
+                      qb2.orWhere(`execution.extra_metadata->:key = :emptyArray`, { key, emptyArray: JSON.stringify([]) }).orWhere(`execution.extra_metadata->>:key IS NULL`, { key });
                     }),
                   );
-                });
+                } else {
+                  value.forEach((v) => {
+                    qb1.andWhere(
+                      new Brackets((qb2) => {
+                        qb2.orWhere(`execution.extra_metadata->:key @> :val`, { key, val: JSON.stringify([v]) }).orWhere(`execution.extra_metadata->>:key = :valStr`, { key, valStr: v });
+                      }),
+                    );
+                  });
+                }
               } else {
                 qb1.andWhere(`execution.extra_metadata->>:key = :value`, { key, value });
               }
