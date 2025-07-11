@@ -374,7 +374,7 @@ export class WorkflowExecutionService {
       const { variables } = definitions[0];
       if (variables && input) {
         formattedInput = Object.keys(input)
-          .filter((inputName) => !inputName.startsWith('__'))
+          .filter((inputName) => !inputName.startsWith('__') && inputName !== 'extraMetadata')
           .map((inputName) => {
             const value = input[inputName];
             const variable = variables.find((variable) => variable.name === inputName);
@@ -540,7 +540,7 @@ export class WorkflowExecutionService {
       let formattedInputArray = null;
       if (workflowDef?.variables && input) {
         formattedInputArray = Object.keys(input)
-          .filter((inputName) => !inputName.startsWith('__'))
+          .filter((inputName) => !inputName.startsWith('__') && inputName !== 'extraMetadata')
           .map((inputName) => {
             const dataVal = input[inputName];
             const variableDef = workflowDef.variables.find((v) => v.name === inputName);
@@ -686,7 +686,7 @@ export class WorkflowExecutionService {
           const variables = workflow.variables;
           if (variables && input) {
             formattedInput = Object.keys(input)
-              .filter((inputName) => !inputName.startsWith('__'))
+              .filter((inputName) => !inputName.startsWith('__') && inputName !== 'extraMetadata')
               .map((inputName) => {
                 const dataVal = input[inputName];
                 const variable = variables.find((variable) => variable.name === inputName);
