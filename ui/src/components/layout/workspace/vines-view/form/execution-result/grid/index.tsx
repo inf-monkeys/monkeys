@@ -65,7 +65,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const showErrorFilter = oem?.theme?.workflowPreviewExecutionGrid?.showErrorFilter ?? true;
 
   const executionResultFilterHeight =
-    showErrorFilter || selectionModeDisplayType === 'dropdown-menu' ? EXECUTION_RESULT_FILTER_HEIGHT : 0;
+    showErrorFilter || selectionModeDisplayType === 'dropdown-menu' ? EXECUTION_RESULT_FILTER_HEIGHT : 30;
 
   useEffect(() => {
     if (onSelectionChange) {
