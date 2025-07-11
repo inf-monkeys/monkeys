@@ -25,7 +25,7 @@ export class WorkflowExecutionPersistenceService {
         return;
       }
 
-      const inputForSearch = detailedExecution.input ? omit(detailedExecution.input, ['__context']) : null;
+      const inputForSearch = detailedExecution.input ? omit(detailedExecution.input, ['__context', 'extraMetadata']) : null;
       const outputForSearch = detailedExecution.output || null;
 
       const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
