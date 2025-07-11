@@ -165,11 +165,11 @@ export class SearchWorkflowExecutionsDto {
   groups?: string[];
 
   @ApiProperty({
-    description: '额外元数据',
+    description: '额外元数据，支持 JSON 对象、数组或编码字符串',
     type: Object,
     required: false,
   })
-  extraMetadata?: Record<string, any>;
+  extraMetadata?: Record<string, any> | Record<string, any>[] | string;
 
   @ApiProperty({
     description: '时间筛选维度，单位：天。7表示7天内，15表示15天内',

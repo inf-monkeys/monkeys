@@ -32,7 +32,7 @@ export class TenantController {
     body: {
       page?: number;
       limit?: number;
-      extraMetadata?: Record<string, any> | Record<string, any>[];
+      extraMetadata?: Record<string, any> | Record<string, any>[] | string;
       workflowWithExtraMetadata?: boolean;
       freeText?: string;
       status?: string[];
@@ -46,10 +46,30 @@ export class TenantController {
   ) {
     const { page = 1, limit = 20, extraMetadata, workflowWithExtraMetadata, freeText, status, startTimeFrom, startTimeTo, workflowId, workflowInstanceId, versions, time } = body;
 
+    // 处理 extraMetadata 参数解码
+    let decodedExtraMetadata = extraMetadata;
+    if (typeof extraMetadata === 'string' && extraMetadata !== '') {
+      try {
+        // 首先尝试 URL 解码
+        const urlDecoded = decodeURIComponent(extraMetadata);
+        // 然后尝试 JSON 解析
+        decodedExtraMetadata = JSON.parse(urlDecoded);
+      } catch (e1) {
+        try {
+          // 如果 URL 解码失败，尝试 Base64 解码
+          const base64Decoded = Buffer.from(extraMetadata, 'base64').toString('utf-8');
+          decodedExtraMetadata = JSON.parse(base64Decoded);
+        } catch (e2) {
+          // 如果都失败，保持原始值
+          console.warn('Failed to decode extraMetadata in controller', { original: extraMetadata, errors: [e1.message, e2.message] });
+        }
+      }
+    }
+
     const { data, total } = await this.tenantService.getAllExecutions({
       page: +page,
       limit: +limit,
-      extraMetadata,
+      extraMetadata: decodedExtraMetadata as Record<string, any> | Record<string, any>[],
       workflowWithExtraMetadata,
       freeText,
       status,
@@ -72,7 +92,27 @@ export class TenantController {
   @Post('/teams/:teamId/workflow-executions/search')
   @HttpCode(200)
   public async searchTeamWorkflowExecutions(@Param('teamId') teamId: string, @Body() body: SearchWorkflowExecutionsDto) {
-    const result = await this.tenantService.searchWorkflowExecutionsForTeam(teamId, body);
+    // 处理 extraMetadata 参数解码
+    const decodedBody = { ...body };
+    if (body.extraMetadata && typeof body.extraMetadata === 'string' && body.extraMetadata !== '') {
+      try {
+        // 首先尝试 URL 解码
+        const urlDecoded = decodeURIComponent(body.extraMetadata);
+        // 然后尝试 JSON 解析
+        decodedBody.extraMetadata = JSON.parse(urlDecoded);
+      } catch (e1) {
+        try {
+          // 如果 URL 解码失败，尝试 Base64 解码
+          const base64Decoded = Buffer.from(body.extraMetadata, 'base64').toString('utf-8');
+          decodedBody.extraMetadata = JSON.parse(base64Decoded);
+        } catch (e2) {
+          // 如果都失败，保持原始值
+          console.warn('Failed to decode extraMetadata in search controller', { original: body.extraMetadata, errors: [e1.message, e2.message] });
+        }
+      }
+    }
+
+    const result = await this.tenantService.searchWorkflowExecutionsForTeam(teamId, decodedBody);
     return new SuccessResponse({
       data: result,
     });

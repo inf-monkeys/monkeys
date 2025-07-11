@@ -3,6 +3,7 @@ import { config } from '@/common/config';
 import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
+import { logger } from '@/common/logger';
 import { extractImageUrls, flattenKeys, flattenObject, getDataType } from '@/common/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
@@ -283,8 +284,38 @@ export class TenantService {
 
     const [rawData, total] = await qb.getManyAndCount();
 
+    // 处理 extraMetadata 解码
+    const processedData = rawData.map((execution) => {
+      let decodedExtraMetadata = execution.extraMetadata;
+
+      // 如果 extraMetadata 是字符串，尝试解码
+      if (typeof decodedExtraMetadata === 'string' && decodedExtraMetadata !== '') {
+        const extraMetadataString = decodedExtraMetadata;
+        try {
+          // 首先尝试 URL 解码
+          const urlDecoded = decodeURIComponent(extraMetadataString);
+          // 然后尝试 JSON 解析
+          decodedExtraMetadata = JSON.parse(urlDecoded);
+        } catch (e1) {
+          try {
+            // 如果 URL 解码失败，尝试 Base64 解码
+            const base64Decoded = Buffer.from(extraMetadataString, 'base64').toString('utf-8');
+            decodedExtraMetadata = JSON.parse(base64Decoded);
+          } catch (e2) {
+            // 如果都失败，保持原始值
+            logger.warn('Failed to decode extraMetadata', { original: extraMetadataString, errors: [e1.message, e2.message] });
+          }
+        }
+      }
+
+      return {
+        ...execution,
+        extraMetadata: decodedExtraMetadata,
+      };
+    });
+
     return {
-      data: rawData,
+      data: processedData,
       total,
     };
   }
@@ -473,6 +504,28 @@ export class TenantService {
     // 处理数据，转换为新的结构
     const data: Execution[] = rawData.map((execution) => {
       const workflowDef = workflowDefMap.get(execution.workflowId);
+
+      // 处理 extraMetadata 解码
+      let decodedExtraMetadata = execution.extraMetadata;
+      if (typeof decodedExtraMetadata === 'string' && decodedExtraMetadata !== '') {
+        const extraMetadataString = decodedExtraMetadata;
+        try {
+          // 首先尝试 URL 解码
+          const urlDecoded = decodeURIComponent(extraMetadataString);
+          // 然后尝试 JSON 解析
+          decodedExtraMetadata = JSON.parse(urlDecoded);
+        } catch (e1) {
+          try {
+            // 如果 URL 解码失败，尝试 Base64 解码
+            const base64Decoded = Buffer.from(extraMetadataString, 'base64').toString('utf-8');
+            decodedExtraMetadata = JSON.parse(base64Decoded);
+          } catch (e2) {
+            // 如果都失败，保持原始值
+            logger.warn('Failed to decode extraMetadata', { original: extraMetadataString, errors: [e1.message, e2.message] });
+          }
+        }
+      }
+
       return {
         status: execution.status,
         workflowId: execution.workflowId,
@@ -481,7 +534,7 @@ export class TenantService {
         rawInput: execution.input,
         output: this.formatOutput(execution.output),
         rawOutput: execution.output,
-        extraMetadata: execution.extraMetadata,
+        extraMetadata: decodedExtraMetadata,
         searchableText: execution.searchableText || '',
         createTime: execution.createdTimestamp,
       };
