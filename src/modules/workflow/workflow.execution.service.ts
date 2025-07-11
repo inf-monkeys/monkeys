@@ -310,7 +310,14 @@ export class WorkflowExecutionService {
 
     let alt: string | string[] | undefined;
     const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, dataVal) => {
-      alt = dataVal;
+      // 确保 dataVal 是字符串类型，避免将整个对象作为 alt
+      if (typeof dataVal === 'string') {
+        alt = dataVal;
+      } else if (Array.isArray(dataVal)) {
+        alt = dataVal.map((item) => (typeof item === 'string' ? item : JSON.stringify(item))).join(' ');
+      } else if (dataVal !== null && dataVal !== undefined) {
+        alt = JSON.stringify(dataVal);
+      }
     });
 
     const outputKeys = Object.keys(flattenOutput);
@@ -481,7 +488,14 @@ export class WorkflowExecutionService {
 
       let alt: string | string[] | undefined;
       const flattenOutput = flattenKeys(output, undefined, ['__display_text'], (_, dataVal) => {
-        alt = dataVal;
+        // 确保 dataVal 是字符串类型，避免将整个对象作为 alt
+        if (typeof dataVal === 'string') {
+          alt = dataVal;
+        } else if (Array.isArray(dataVal)) {
+          alt = dataVal.map((item) => (typeof item === 'string' ? item : JSON.stringify(item))).join(' ');
+        } else if (dataVal !== null && dataVal !== undefined) {
+          alt = JSON.stringify(dataVal);
+        }
       });
       const outputKeys = Object.keys(flattenOutput);
       const outputValues = Object.values(flattenOutput);
@@ -617,7 +631,14 @@ export class WorkflowExecutionService {
 
           let alt: string | string[] | undefined;
           const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, dataVal) => {
-            alt = dataVal;
+            // 确保 dataVal 是字符串类型，避免将整个对象作为 alt
+            if (typeof dataVal === 'string') {
+              alt = dataVal;
+            } else if (Array.isArray(dataVal)) {
+              alt = dataVal.map((item) => (typeof item === 'string' ? item : JSON.stringify(item))).join(' ');
+            } else if (dataVal !== null && dataVal !== undefined) {
+              alt = JSON.stringify(dataVal);
+            }
           });
 
           const outputKeys = Object.keys(flattenOutput);
