@@ -14,6 +14,7 @@ import { IDesignProject } from '@/apis/designs/typings';
 import { useWorkspacePages } from '@/apis/pages';
 import { IAssetItem } from '@/apis/ugc/typings';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
+import { GLOBAL_DESIGN_BOARD_PAGE } from '@/components/layout/workbench/sidebar/mode/normal';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -114,6 +115,16 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
           success: (designProject) => {
             const tid = `insert-images-${Date.now()}`;
             setTemp(tid, selectedOutputItems);
+
+            const targetPageGroup = workspaceData?.groups.find((item) => item.isBuiltIn);
+
+            // console.log(targetPageGroup);
+
+            if (targetPageGroup) {
+              startTransition(() => {
+                setCurrentPage({ [teamId]: { ...GLOBAL_DESIGN_BOARD_PAGE, groupId: targetPageGroup.id } });
+              });
+            }
             navigate({
               to: '/$teamId',
               params: {
@@ -128,7 +139,7 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
                 operation: 'insert-images',
                 tid,
                 designProjectId: designProject.id,
-                activePageFromType: 'global-design-board',
+                // activePageFromType: 'global-design-board',
               },
             });
             return t('common.create.success');

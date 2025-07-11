@@ -49,15 +49,13 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   const { t } = useTranslation();
   const alt = getAlt(result);
 
-  const handleClick = (e: React.MouseEvent) => {
-    if ((clickBehavior === 'select' || isSelectionMode) && onSelect) {
-      e.stopPropagation();
-      onSelect(render.key);
-    }
+  const handleSelect = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect?.(render.key);
   };
 
   const renderSelectionOverlay = () => {
-    if (clickBehavior !== 'select' && !isSelectionMode && !isSelected) return null;
+    if ((clickBehavior !== 'select' && !isSelectionMode) || !isSelected) return null;
     return (
       <Button
         variant="outline"
@@ -101,7 +99,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   switch (type) {
     case 'image':
       return (
-        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm" onClick={handleClick}>
+        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
           <VirtuaExecutionResultGridWrapper
             data={result}
             src={data as string}
@@ -119,6 +117,8 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
                 instanceId={result.instanceId}
                 renderKey={render.key}
                 isSelectionMode={isSelectionMode}
+                onSelect={handleSelect}
+                clickBehavior={clickBehavior}
               />
               {renderSelectionOverlay()}
             </div>
@@ -127,7 +127,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
       );
     default:
       return (
-        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm" onClick={handleClick}>
+        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm" onClick={handleSelect}>
           <VirtuaExecutionResultGridWrapper
             data={result}
             event$={event$}

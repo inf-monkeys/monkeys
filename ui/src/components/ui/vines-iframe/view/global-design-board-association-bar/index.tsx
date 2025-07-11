@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { useNavigate } from '@tanstack/react-router';
+
 import {
   closestCenter,
   DndContext,
@@ -30,7 +32,11 @@ import { GlobalDesignBoardAssociationBarItem } from './item';
 interface IGlobalDesignBoardAssociationBarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssociationBarProps> = () => {
-  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  const [{ mode }] = useUrlState<{
+    mode: 'normal' | 'fast' | 'mini';
+  }>({ mode: 'normal' });
+
+  const navigate = useNavigate();
 
   const { data: initialData } = useGetDesignAssociationList();
 

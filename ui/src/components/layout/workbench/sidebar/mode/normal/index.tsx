@@ -32,6 +32,34 @@ import { cloneDeep, cn, getI18nContent } from '@/utils';
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
 import { IWorkbenchViewItemPage, WorkbenchViewItemCurrentData } from './virtua/item';
 
+export const GLOBAL_DESIGN_BOARD_PAGE = {
+  id: 'global-design-board',
+  displayName: JSON.stringify({
+    'zh-CN': '全局画板',
+    'en-US': 'Global Board',
+  }),
+  type: 'global-design-board',
+  workflowId: 'global-design-board',
+  isBuiltIn: true,
+  instance: {
+    name: 'Global Board',
+    icon: 'pencil-ruler',
+    type: 'global-design-board',
+    allowedPermissions: [],
+  },
+  designProject: {
+    id: 'global-design-board',
+    name: 'Global Board',
+    displayName: JSON.stringify({
+      'zh-CN': '全局画板',
+      'en-US': 'Global Board',
+    }),
+    iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
+    createdTimestamp: 0,
+    updatedTimestamp: 0,
+  },
+};
+
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   showGroup?: boolean;
   collapsed?: boolean;
@@ -67,33 +95,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const originalPages: IPinPage[] = useMemo(() => {
     const pages = [...(data?.pages ?? [])];
     if (!pages.some((page) => page.id === 'global-design-board')) {
-      pages.unshift({
-        id: 'global-design-board',
-        displayName: JSON.stringify({
-          'zh-CN': '全局画板',
-          'en-US': 'Global Board',
-        }),
-        type: 'global-design-board',
-        workflowId: 'global-design-board',
-        isBuiltIn: true,
-        instance: {
-          name: 'Global Board',
-          icon: 'pencil-ruler',
-          type: 'global-design-board',
-          allowedPermissions: [],
-        },
-        designProject: {
-          id: 'global-design-board',
-          name: 'Global Board',
-          displayName: JSON.stringify({
-            'zh-CN': '全局画板',
-            'en-US': 'Global Board',
-          }),
-          iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
-          createdTimestamp: 0,
-          updatedTimestamp: 0,
-        },
-      });
+      pages.unshift(GLOBAL_DESIGN_BOARD_PAGE);
     }
     return pages;
   }, [data?.pages]);
@@ -146,10 +148,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
     if (activePageFromType) {
       const targetPage = latestOriginalPages.current.find((it) => it.type === activePageFromType);
-      if (targetPage) {
+      const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(targetPage?.id ?? ''));
+      if (targetPage && groupWithPageId) {
         setPageId(targetPage.id);
         setCurrentPage({ [teamId]: targetPage });
-        const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(targetPage?.id ?? ''));
         groupWithPageId && setGroupId(groupWithPageId.id);
         return;
       }

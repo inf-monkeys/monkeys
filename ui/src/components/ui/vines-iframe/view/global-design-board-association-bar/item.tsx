@@ -1,6 +1,6 @@
 import React, { forwardRef, startTransition } from 'react';
 
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouter } from '@tanstack/react-router';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -34,13 +34,18 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
 >(({ data }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const router = useRouter();
   const { teamId } = useVinesTeam();
   const { isUseWorkbench } = useVinesRoute();
   const setCurrentPage = useSetCurrentPage();
   const setTemp = useSetTemp();
   const { data: workspaceData } = useWorkspacePages();
 
-  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  const [{ mode, activePageFromType, designProjectId }] = useUrlState<{
+    mode: 'normal' | 'fast' | 'mini';
+    activePageFromType?: string;
+    designProjectId?: string;
+  }>({ mode: 'normal' });
 
   const { editor } = useDesignBoardStore();
 
@@ -52,6 +57,21 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  // useEffect(() => {
+  //   if (activePageFromType === 'global-design-board' && designProjectId) {
+  //     setTimeout(() => {
+  //       router.navigate({
+  //         to: router.state.location.pathname,
+  //         search: (prev) => {
+  //           const { activePageFromType, designProjectId, ...rest } = prev as Record<string, string | undefined>;
+  //           return rest;
+  //         },
+  //         replace: true,
+  //       });
+  //     }, 1000);
+  //   }
+  // }, [activePageFromType, designProjectId]);
 
   const onItemClick = async () => {
     if (!editor) {
@@ -91,10 +111,7 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
           const targetPageGroup = workspaceData.groups.find((item) => item.pageIds.includes(targetPage?.id ?? ''));
 
           if (targetPage && targetPageGroup) {
-            // setCurrentPage({ [teamId]: targetPage });
             startTransition(() => {
-              // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
-              // setUrlState({ activePageFromWorkflowDisplayName: undefined });
               setCurrentPage({ [teamId]: { ...targetPage, groupId: targetPageGroup.id } });
             });
             if (!isUseWorkbench) {

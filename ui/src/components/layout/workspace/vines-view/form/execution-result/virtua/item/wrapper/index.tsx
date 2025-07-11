@@ -33,6 +33,7 @@ interface IVirtuaExecutionResultGridWrapperProps {
   onSelect?: (renderKey: string) => void;
   isSelected?: boolean;
   selectionModeDisplayType?: ISelectionModeDisplayType;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGridWrapperProps> = ({
@@ -45,6 +46,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   onSelect,
   isSelected,
   selectionModeDisplayType = 'dropdown-menu',
+  onClick,
 }) => {
   // const { mutate } = useSWRConfig();
 
@@ -123,7 +125,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   };
 
   return (
-    <div className="group/vgi relative flex h-full flex-1 flex-col">
+    <div className="group/vgi relative flex h-full flex-1 flex-col" onClick={onClick}>
       {/* 图片内容区域，保持点击可以触发预览 */}
       <div className="z-10 flex-1">{children}</div>
 

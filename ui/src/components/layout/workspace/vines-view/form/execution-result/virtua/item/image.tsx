@@ -16,6 +16,8 @@ import useUrlState from '@/hooks/use-url-state';
 import { useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { useFlowStore } from '@/store/useFlowStore';
 
+import { IClickBehavior } from '../../grid/item';
+
 import 'rc-image/assets/index.css';
 
 export type IVinesExecutionResultImageAlt =
@@ -32,6 +34,8 @@ interface IVirtuaExecutionResultGridImageItemProps {
   outputIndex?: number;
   renderKey: string;
   isSelectionMode?: boolean;
+  onSelect?: (e: React.MouseEvent) => void;
+  clickBehavior?: IClickBehavior;
 }
 
 export function getThumbUrl(url: string) {
@@ -47,6 +51,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   outputIndex = 0,
   renderKey,
   isSelectionMode = false,
+  onSelect,
+  clickBehavior,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -73,7 +79,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   // 处理图片点击，跳转到详情页面
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (workflowId && src && !isSelectionMode) {
+    if (workflowId && src && clickBehavior === 'preview' && !isSelectionMode) {
       const position = images?.findIndex((image) => image.render.key === renderKey);
       setPosition(position);
       navigate({
@@ -89,6 +95,9 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
           mode: isMiniFrame ? 'mini' : '',
         },
       });
+    }
+    if ((clickBehavior === 'select' || isSelectionMode) && onSelect) {
+      onSelect(e);
     }
   };
 

@@ -10,12 +10,15 @@ import { toast } from 'sonner';
 import { AssetRecordType, createShapeId, getSnapshot, TLShapeId } from 'tldraw';
 
 import { updateDesignBoardMetadata, useDesignBoardMetadata } from '@/apis/designs';
+import { useWorkspacePages } from '@/apis/pages';
 import { Board } from '@/components/layout/design-space/board';
+import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { useGetTemp, useSetTemp } from '@/store/useGlobalTempStore';
 import { usePageStore } from '@/store/usePageStore';
@@ -37,6 +40,12 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
     designProjectId?: string;
     activePageFromType?: string;
   };
+
+  const { data: workspaceData } = useWorkspacePages();
+
+  const { teamId } = useVinesTeam();
+
+  const setCurrentPage = useSetCurrentPage();
 
   const navigate = useNavigate();
 
@@ -165,7 +174,6 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       navigate({
         search: {
           designProjectId,
-          activePageFromType,
         },
       });
     }
