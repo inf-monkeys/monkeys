@@ -41,9 +41,10 @@ export class TenantController {
       workflowId?: string;
       workflowInstanceId?: string;
       versions?: number[];
+      time?: number;
     },
   ) {
-    const { page = 1, limit = 20, extraMetadata, workflowWithExtraMetadata, freeText, status, startTimeFrom, startTimeTo, workflowId, workflowInstanceId, versions } = body;
+    const { page = 1, limit = 20, extraMetadata, workflowWithExtraMetadata, freeText, status, startTimeFrom, startTimeTo, workflowId, workflowInstanceId, versions, time } = body;
 
     const { data, total } = await this.tenantService.getAllExecutions({
       page: +page,
@@ -57,6 +58,7 @@ export class TenantController {
       workflowId,
       workflowInstanceId,
       versions,
+      time,
     });
 
     return new SuccessListResponse({

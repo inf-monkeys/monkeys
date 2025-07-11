@@ -170,8 +170,9 @@ export class TenantService {
     workflowId?: string;
     workflowInstanceId?: string;
     versions?: number[];
+    time?: number;
   }) {
-    const { page, limit, extraMetadata, workflowWithExtraMetadata, freeText = '*', status = [], startTimeFrom, startTimeTo, workflowId, workflowInstanceId } = options;
+    const { page, limit, extraMetadata, workflowWithExtraMetadata, freeText = '*', status = [], startTimeFrom, startTimeTo, workflowId, workflowInstanceId, time } = options;
 
     const qb = this.workflowExecutionRepository.createQueryBuilder('execution');
 
@@ -258,12 +259,18 @@ export class TenantService {
       qb.andWhere('execution.status IN (:...status)', { status });
     }
 
-    if (startTimeFrom) {
-      qb.andWhere('execution.created_timestamp >= :startTimeFrom', { startTimeFrom });
-    }
+    if (time) {
+      const timeFromMillis = Date.now() - time * 24 * 60 * 60 * 1000;
+      const timeFromDate = new Date(timeFromMillis);
+      qb.andWhere('execution.created_timestamp >= :timeFromDate', { timeFromDate });
+    } else {
+      if (startTimeFrom) {
+        qb.andWhere('execution.created_timestamp >= :startTimeFrom', { startTimeFrom });
+      }
 
-    if (startTimeTo) {
-      qb.andWhere('execution.created_timestamp <= :startTimeTo', { startTimeTo });
+      if (startTimeTo) {
+        qb.andWhere('execution.created_timestamp <= :startTimeTo', { startTimeTo });
+      }
     }
 
     if (workflowId) {
@@ -300,6 +307,7 @@ export class TenantService {
       workflowInstanceId,
       extraMetadata,
       workflowWithExtraMetadata,
+      time,
     } = condition;
     const { page: p = 1, limit: l = 10 } = pagination as PaginationDto;
     const [page, limitNum] = [+p, +l];
@@ -332,11 +340,17 @@ export class TenantService {
     }
 
     // 添加时间范围过滤
-    if (startTimeFrom) {
-      qb.andWhere('execution.created_timestamp >= :startTimeFrom', { startTimeFrom });
-    }
-    if (startTimeTo) {
-      qb.andWhere('execution.created_timestamp <= :startTimeTo', { startTimeTo });
+    if (time) {
+      const timeFromMillis = Date.now() - time * 24 * 60 * 60 * 1000;
+      const timeFromDate = new Date(timeFromMillis);
+      qb.andWhere('execution.created_timestamp >= :timeFromDate', { timeFromDate });
+    } else {
+      if (startTimeFrom) {
+        qb.andWhere('execution.created_timestamp >= :startTimeFrom', { startTimeFrom });
+      }
+      if (startTimeTo) {
+        qb.andWhere('execution.created_timestamp <= :startTimeTo', { startTimeTo });
+      }
     }
 
     // 添加版本过滤

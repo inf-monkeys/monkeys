@@ -170,4 +170,13 @@ export class SearchWorkflowExecutionsDto {
     required: false,
   })
   extraMetadata?: Record<string, any>;
+
+  @ApiProperty({
+    description: '时间筛选维度，单位：天。7表示7天内，15表示15天内',
+    type: Number,
+    required: false,
+    example: 7,
+  })
+  @Joiful.number()
+  time?: number;
 }
