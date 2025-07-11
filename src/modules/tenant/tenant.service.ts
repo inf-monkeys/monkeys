@@ -322,7 +322,7 @@ export class TenantService {
 
   public async searchWorkflowExecutionsForTeam(
     teamId: string,
-    condition: SearchWorkflowExecutionsDto & { extraMetadata?: Record<string, any> | Record<string, any>[]; workflowWithExtraMetadata?: boolean },
+    condition: SearchWorkflowExecutionsDto & { extraMetadata?: Record<string, any> | Record<string, any>[] | string; workflowWithExtraMetadata?: boolean },
   ): Promise<{ page: number; limit: number; total: number; data: Execution[]; definitions: WorkflowMetadataEntity[] }> {
     const {
       pagination = {},
