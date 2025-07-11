@@ -517,12 +517,12 @@ export class TenantService {
     // 处理数据，转换为新的结构
     const data: Execution[] = rawData.map((execution) => {
       const workflowDef = workflowDefMap.get(execution.workflowId);
-
+      
       // 重新生成 searchableText，排除 extraMetadata
       const inputForSearch = execution.input ? omit(execution.input, ['__context', 'extraMetadata']) : null;
       const outputForSearch = execution.output || null;
       const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();
-
+      
       return {
         status: execution.status,
         workflowId: execution.workflowId,
@@ -534,12 +534,6 @@ export class TenantService {
         extraMetadata: execution.extraMetadata,
         searchableText,
         createTime: execution.createdTimestamp,
-        endTime: execution.conductorEndTime,
-        updateTime: execution.updatedTimestamp,
-        teamId: execution.input?.__context?.teamId || '',
-        userId: execution.userId || '',
-        instanceId: execution.workflowInstanceId,
-        startTime: execution.conductorStartTime,
       };
     });
 
