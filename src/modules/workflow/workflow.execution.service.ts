@@ -610,7 +610,7 @@ export class WorkflowExecutionService {
         .map((it) => {
           const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
 
-          const inputForSearch = input ? _.omit(input, ['__context']) : null;
+          const inputForSearch = input ? _.omit(input, ['__context', 'extraMetadata']) : null;
           const outputForSearch = output || null;
 
           const searchableText = `${flattenObjectToString(inputForSearch)} ${flattenObjectToString(outputForSearch)}`.trim();

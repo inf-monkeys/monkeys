@@ -235,8 +235,8 @@ export function flattenObjectToString(obj: any): string {
         recurse(item);
       }
     } else if (isObject(current)) {
-      // 如果是对象, 递归处理其值, 同时跳过 __context
-      const valuesToRecurse = '__context' in current ? Object.values(omit(current, ['__context'])) : Object.values(current);
+      // 如果是对象, 递归处理其值, 同时跳过 __context 和 extraMetadata
+      const valuesToRecurse = '__context' in current || 'extraMetadata' in current ? Object.values(omit(current, ['__context', 'extraMetadata'])) : Object.values(current);
       for (const value of valuesToRecurse) {
         recurse(value);
       }
