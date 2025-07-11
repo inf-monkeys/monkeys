@@ -753,6 +753,13 @@ export class WorkflowExecutionService {
       }
     }
 
+    // 过滤 extraMetadata，只保留必要的字段，排除可能包含大量数据的字段
+    if (extraMetadata && typeof extraMetadata === 'object') {
+      // 定义允许保存的元数据字段白名单
+      const allowedMetadataKeys = ['userId', 'teamId', 'source', 'type', 'category', 'tags', 'version'];
+      extraMetadata = pick(extraMetadata, allowedMetadataKeys);
+    }
+
     const workflowContext: WorkflowExecutionContext = {
       userId,
       teamId: teamId,
