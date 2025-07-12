@@ -46,7 +46,17 @@ function extractPromptFromFormattedInput(formattedInput: any[]): string {
     return false;
   });
 
-  return promptField?.data || '';
+  // 直接返回提示词内容，不做长度限制
+  if (promptField && promptField.data) {
+    const promptText = promptField.data;
+    if (typeof promptText === 'string') {
+      return promptText.trim();
+    }
+    // 如果不是字符串，转换为字符串
+    return String(promptText).trim();
+  }
+  
+  return '';
 }
 
 export interface WorkflowWithMetadata extends Workflow {
