@@ -26,6 +26,29 @@ import { DebugWorkflowRequest, StartWorkflowRequest, WorkflowExecutionOutput } f
 import { WorkflowObservabilityService } from './workflow.observability.service';
 import { WorkflowTrackerService } from './workflow.tracker.service';
 
+// 辅助函数：从input中提取提示词
+function extractPromptFromFormattedInput(formattedInput: any[]): string {
+  if (!formattedInput || !Array.isArray(formattedInput)) {
+    return '';
+  }
+
+  // 查找displayName包含"提示词"或"prompt"的字段
+  const promptField = formattedInput.find((field) => {
+    const displayName = field.displayName;
+    if (typeof displayName === 'string') {
+      return displayName.includes('提示词') || displayName.toLowerCase().includes('prompt');
+    }
+    if (typeof displayName === 'object' && displayName !== null) {
+      const zhName = displayName['zh-CN'] || '';
+      const enName = displayName['en-US'] || '';
+      return zhName.includes('提示词') || enName.toLowerCase().includes('prompt');
+    }
+    return false;
+  });
+
+  return promptField?.data || '';
+}
+
 export interface WorkflowWithMetadata extends Workflow {
   startBy: string;
   triggerType: WorkflowTriggerType;
@@ -610,11 +633,6 @@ export class WorkflowExecutionService {
         .map((it) => {
           const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
 
-          const inputForSearch = input ? _.omit(input, ['__context', 'extraMetadata']) : null;
-          const outputForSearch = output || null;
-
-          const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
-
           let alt: string | string[] | undefined;
           const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, dataVal) => {
             alt = dataVal;
@@ -709,6 +727,26 @@ export class WorkflowExecutionService {
               // 如果解析失败，保持原始值
               logger.warn('Failed to parse extraMetadata from base64', e);
             }
+          }
+
+          // 生成searchableText，优先使用提示词
+          let searchableText = '';
+          if (formattedInput && Array.isArray(formattedInput)) {
+            // 尝试提取提示词
+            const promptText = extractPromptFromFormattedInput(formattedInput);
+            if (promptText) {
+              searchableText = promptText.trim();
+            } else {
+              // 如果没有找到提示词，回退到原有逻辑
+              const inputForSearch = input ? _.omit(input, ['__context', 'extraMetadata']) : null;
+              const outputForSearch = output || null;
+              searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
+            }
+          } else {
+            // 如果没有formattedInput，使用原有逻辑
+            const inputForSearch = input ? _.omit(input, ['__context', 'extraMetadata']) : null;
+            const outputForSearch = output || null;
+            searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
           }
 
           return {
