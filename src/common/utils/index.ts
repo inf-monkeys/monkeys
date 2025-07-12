@@ -257,7 +257,7 @@ export function flattenObjectToSearchableText(obj: any): string {
   }
 
   function isLongText(str: string): boolean {
-    return str.length > 100; // 过滤掉超过100字符的长文本
+    return str.length > 1000; // 放宽长度限制以保留提示词，提高到1000字符
   }
 
   function isUuid(str: string): boolean {
