@@ -309,8 +309,49 @@ export class TenantService {
 
     const [rawData, total] = await qb.getManyAndCount();
 
+    // 获取所有相关的工作流定义信息，用于格式化输入数据
+    const workflowIds = [...new Set(rawData.map((execution) => execution.workflowId))];
+    const workflowsToSearch: WorkflowMetadataEntity[] = [];
+
+    if (workflowIds.length > 0) {
+      const workflowConditions = workflowIds.map((id) => ({ workflowId: id }));
+      for (const condition of workflowConditions) {
+        const workflows = await this.workflowRepository.findWorkflowByCondition(condition as FindWorkflowCondition);
+        workflowsToSearch.push(...workflows);
+      }
+    }
+
+    // 建立工作流定义映射
+    const workflowDefMap = new Map<string, WorkflowMetadataEntity>();
+    workflowsToSearch.forEach((workflow) => {
+      workflowDefMap.set(workflow.workflowId, workflow);
+    });
+
+    // 格式化数据，使其与 searchWorkflowExecutionsForTeam 返回的格式一致
+    const data: Execution[] = rawData.map((execution) => {
+      const workflowDef = workflowDefMap.get(execution.workflowId);
+
+      // 重新生成 searchableText，排除 extraMetadata
+      const inputForSearch = execution.input ? omit(execution.input, ['__context', 'extraMetadata']) : null;
+      const outputForSearch = execution.output || null;
+      const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
+
+      return {
+        status: execution.status,
+        workflowId: execution.workflowId,
+        workflowInstanceId: execution.workflowInstanceId,
+        input: this.formatInput(execution.input, workflowDef),
+        rawInput: execution.input,
+        output: this.formatOutput(execution.output),
+        rawOutput: execution.output,
+        extraMetadata: execution.extraMetadata,
+        searchableText,
+        createTime: execution.createdTimestamp,
+      };
+    });
+
     return {
-      data: rawData,
+      data,
       total,
     };
   }
