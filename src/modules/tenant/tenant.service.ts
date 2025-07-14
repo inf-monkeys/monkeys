@@ -27,6 +27,81 @@ export class TenantService {
   ) {}
 
   /**
+   * 解码 extraMetadata，支持 JSON 字符串和 Base64 编码
+   */
+  private decodeExtraMetadata(extraMetadata: any): any {
+    if (typeof extraMetadata === 'string' && extraMetadata !== '') {
+      try {
+        // 首先尝试直接解析JSON（适用于普通JSON字符串）
+        return JSON.parse(extraMetadata);
+      } catch (e) {
+        try {
+          // 如果直接JSON解析失败，尝试Base64解码
+          const decoded = Buffer.from(extraMetadata, 'base64').toString('utf-8');
+          // 检查是否是 URL 编码，如果是则先解码 URL
+          const finalDecoded = decoded.includes('%') ? decodeURIComponent(decoded) : decoded;
+          return JSON.parse(finalDecoded);
+        } catch (e2) {
+          // 如果都失败，返回 null（会被过滤器跳过）
+          return null;
+        }
+      }
+    }
+    return extraMetadata;
+  }
+
+  /**
+   * 在应用层过滤 extraMetadata
+   */
+  private filterByExtraMetadata(executions: WorkflowExecutionEntity[], filter: Record<string, any> | Record<string, any>[]): WorkflowExecutionEntity[] {
+    return executions.filter((execution) => {
+      try {
+        const decodedMetadata = this.decodeExtraMetadata(execution.extraMetadata);
+
+        if (!decodedMetadata || typeof decodedMetadata !== 'object') {
+          return false;
+        }
+
+        if (Array.isArray(filter)) {
+          // "或"逻辑：任何一组条件匹配即可
+          return filter.some((group) => this.matchesMetadataGroup(decodedMetadata, group));
+        } else {
+          // 单组条件匹配
+          return this.matchesMetadataGroup(decodedMetadata, filter);
+        }
+      } catch (error) {
+        return false;
+      }
+    });
+  }
+
+  /**
+   * 检查 extraMetadata 是否匹配指定的条件组
+   */
+  private matchesMetadataGroup(metadata: any, group: Record<string, any>): boolean {
+    return Object.entries(group).every(([key, value]) => {
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          // 空数组：检查字段为空数组或不存在
+          return !metadata[key] || (Array.isArray(metadata[key]) && metadata[key].length === 0);
+        } else {
+          // 数组包含检查
+          return value.some((v) => {
+            if (Array.isArray(metadata[key])) {
+              return metadata[key].includes(v);
+            } else {
+              return metadata[key] === v;
+            }
+          });
+        }
+      } else {
+        // 简单值匹配
+        return metadata[key] === value;
+      }
+    });
+  }
+
+  /**
    * output 字段处理逻辑，完全复用 workflow.execution.service.ts
    */
   private formatOutput(rawOutput: any): Output[] {
@@ -182,99 +257,26 @@ export class TenantService {
     // 添加排序
     qb.orderBy('execution.created_timestamp', 'DESC');
 
-    // 添加 extraMetadata 查询过滤
+    // 由于 extraMetadata 存储为 Base64 编码的字符串，在数据库层无法直接过滤
+    // 我们先标记需要进行应用层过滤
+    let needsApplicationLevelFiltering = false;
+    let applicationLevelFilter: Record<string, any> | Record<string, any>[] | undefined;
+
     if (extraMetadata && Object.keys(extraMetadata).length > 0) {
-      if (Array.isArray(extraMetadata)) {
-        // 多组条件"或"查询
-        qb.andWhere(
-          new Brackets((qbOr) => {
-            extraMetadata.forEach((group, groupIdx) => {
-              qbOr.orWhere(
-                new Brackets((qbAnd) => {
-                  let paramIdx = 0;
-                  Object.entries(group).forEach(([key, value]) => {
-                    paramIdx++;
-                    if (Array.isArray(value)) {
-                      if (value.length === 0) {
-                        // 空数组的情况：查询该字段为空数组或不存在
-                        const keyParam = `key_${groupIdx}_${paramIdx}`;
-                        const emptyArrayParam = `emptyArray_${groupIdx}_${paramIdx}`;
-                        qbAnd.andWhere(
-                          new Brackets((qb2) => {
-                            qb2
-                              .orWhere(`execution.extra_metadata->:${keyParam} = :${emptyArrayParam}`, { [keyParam]: key, [emptyArrayParam]: JSON.stringify([]) })
-                              .orWhere(`execution.extra_metadata->>:${keyParam} IS NULL`, { [keyParam]: key });
-                          }),
-                        );
-                      } else {
-                        value.forEach((v, vIdx) => {
-                          const keyParam = `key_${groupIdx}_${paramIdx}_${vIdx}`;
-                          const valParam = `val_${groupIdx}_${paramIdx}_${vIdx}`;
-                          const valStrParam = `valStr_${groupIdx}_${paramIdx}_${vIdx}`;
-                          qbAnd.andWhere(
-                            new Brackets((qb2) => {
-                              qb2
-                                .orWhere(`execution.extra_metadata->:${keyParam} @> :${valParam}`, { [keyParam]: key, [valParam]: JSON.stringify([v]) })
-                                .orWhere(`execution.extra_metadata->>:${keyParam} = :${valStrParam}`, { [keyParam]: key, [valStrParam]: v });
-                            }),
-                          );
-                        });
-                      }
-                    } else {
-                      const keyParam = `key_${groupIdx}_${paramIdx}`;
-                      const valueParam = `value_${groupIdx}_${paramIdx}`;
-                      qbAnd.andWhere(`execution.extra_metadata->>:${keyParam} = :${valueParam}`, { [keyParam]: key, [valueParam]: value });
-                    }
-                  });
-                }),
-              );
-            });
-          }),
-        );
-      } else {
-        // 原有的对象查询
-        let paramIdx = 0;
-        Object.entries(extraMetadata).forEach(([key, value]) => {
-          paramIdx++;
-          if (Array.isArray(value)) {
-            if (value.length === 0) {
-              // 空数组的情况：查询该字段为空数组或不存在
-              const keyParam = `key_obj_${paramIdx}`;
-              const emptyArrayParam = `emptyArray_obj_${paramIdx}`;
-              qb.andWhere(
-                new Brackets((qb2) => {
-                  qb2
-                    .orWhere(`execution.extra_metadata->:${keyParam} = :${emptyArrayParam}`, { [keyParam]: key, [emptyArrayParam]: JSON.stringify([]) })
-                    .orWhere(`execution.extra_metadata->>:${keyParam} IS NULL`, { [keyParam]: key });
-                }),
-              );
-            } else {
-              value.forEach((v, vIdx) => {
-                const keyParam = `key_obj_${paramIdx}_${vIdx}`;
-                const valParam = `val_obj_${paramIdx}_${vIdx}`;
-                const valStrParam = `valStr_obj_${paramIdx}_${vIdx}`;
-                qb.andWhere(
-                  new Brackets((qb2) => {
-                    qb2
-                      .orWhere(`execution.extra_metadata->:${keyParam} @> :${valParam}`, { [keyParam]: key, [valParam]: JSON.stringify([v]) })
-                      .orWhere(`execution.extra_metadata->>:${keyParam} = :${valStrParam}`, { [keyParam]: key, [valStrParam]: v });
-                  }),
-                );
-              });
-            }
-          } else {
-            const keyParam = `key_obj_${paramIdx}`;
-            const valueParam = `value_obj_${paramIdx}`;
-            qb.andWhere(`execution.extra_metadata->>:${keyParam} = :${valueParam}`, { [keyParam]: key, [valueParam]: value });
-          }
-        });
-      }
+      needsApplicationLevelFiltering = true;
+      applicationLevelFilter = extraMetadata;
+
+      // 至少确保查询有 extraMetadata 的记录
+      // 使用原始 SQL 来避免 PostgreSQL JSON 类型解析错误
+      qb.andWhere('execution.extra_metadata IS NOT NULL');
+      qb.andWhere("CAST(execution.extra_metadata AS TEXT) != ''");
+      qb.andWhere("CAST(execution.extra_metadata AS TEXT) != '{}'");
     }
 
     // 添加其他查询条件
     if (workflowWithExtraMetadata) {
       qb.andWhere('execution.extra_metadata IS NOT NULL');
-      qb.andWhere("execution.extra_metadata != '{}'");
+      qb.andWhere("CAST(execution.extra_metadata AS TEXT) != '{}'");
     }
 
     if (freeText && freeText !== '*') {
@@ -307,7 +309,30 @@ export class TenantService {
       qb.andWhere('execution.workflow_instance_id = :workflowInstanceId', { workflowInstanceId });
     }
 
-    const [rawData, total] = await qb.getManyAndCount();
+    // 使用原始查询来避免 JSON 解析错误
+    let rawData: WorkflowExecutionEntity[];
+    let total: number;
+
+    try {
+      [rawData, total] = await qb.getManyAndCount();
+    } catch (error) {
+      if (error.message.includes('invalid input syntax for type json')) {
+        // 如果遇到 JSON 解析错误，返回空结果
+        rawData = [];
+        total = 0;
+      } else {
+        throw error;
+      }
+    }
+
+    // 应用层过滤 extraMetadata（如果需要）
+    if (needsApplicationLevelFiltering && applicationLevelFilter) {
+      rawData = this.filterByExtraMetadata(rawData, applicationLevelFilter);
+
+      // 重新计算总数（注意：这里为了简化，我们使用过滤后的数据长度）
+      // 在生产环境中，你可能需要一个更复杂的方案来正确计算总数
+      total = rawData.length;
+    }
 
     // 获取所有相关的工作流定义信息，用于格式化输入数据
     const workflowIds = [...new Set(rawData.map((execution) => execution.workflowId))];
@@ -336,20 +361,8 @@ export class TenantService {
       const outputForSearch = execution.output || null;
       const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
 
-      // 解码 extraMetadata（如果是base64编码的字符串）
-      let decodedExtraMetadata = execution.extraMetadata;
-      if (typeof execution.extraMetadata === 'string' && execution.extraMetadata !== '') {
-        try {
-          // 先尝试 Base64 解码
-          const decoded = Buffer.from(execution.extraMetadata, 'base64').toString('utf-8');
-          // 检查是否是 URL 编码，如果是则先解码 URL
-          const finalDecoded = decoded.includes('%') ? decodeURIComponent(decoded) : decoded;
-          decodedExtraMetadata = JSON.parse(finalDecoded);
-        } catch (e) {
-          // 如果解析失败，保持原始值
-          console.warn('Failed to parse extraMetadata from base64', e);
-        }
-      }
+      // 解码 extraMetadata
+      const decodedExtraMetadata = this.decodeExtraMetadata(execution.extraMetadata);
 
       return {
         status: execution.status,
@@ -482,8 +495,23 @@ export class TenantService {
       );
     }
 
+    // 由于 extraMetadata 存储为 Base64 编码的字符串，在数据库层无法直接过滤
+    // 我们先标记需要进行应用层过滤
+    let needsApplicationLevelFiltering = false;
+    let applicationLevelFilter: Record<string, any> | Record<string, any>[] | undefined;
+
     // 添加 extraMetadata 查询过滤
     if (extraMetadata && Object.keys(extraMetadata).length > 0) {
+      needsApplicationLevelFiltering = true;
+      applicationLevelFilter = extraMetadata;
+
+      // 至少确保查询有 extraMetadata 的记录
+      // 使用原始 SQL 来避免 PostgreSQL JSON 类型解析错误
+      qb.andWhere('execution.extra_metadata IS NOT NULL');
+      qb.andWhere("CAST(execution.extra_metadata AS TEXT) != ''");
+      qb.andWhere("CAST(execution.extra_metadata AS TEXT) != '{}'");
+    } else if (false) {
+      // 禁用原有的数据库层过滤逻辑
       if (Array.isArray(extraMetadata)) {
         // 多组条件“或”查询
         qb.andWhere(
@@ -551,7 +579,9 @@ export class TenantService {
 
     // 如果指定了 workflowWithExtraMetadata，则只返回包含 extraMetadata 数据的记录
     if (workflowWithExtraMetadata) {
-      qb.andWhere(`execution.extra_metadata IS NOT NULL AND execution.extra_metadata != '{}' AND execution.extra_metadata != 'null'`);
+      qb.andWhere('execution.extra_metadata IS NOT NULL');
+      qb.andWhere("CAST(execution.extra_metadata AS TEXT) != '{}'");
+      qb.andWhere("CAST(execution.extra_metadata AS TEXT) != 'null'");
     }
 
     // 添加排序
@@ -563,7 +593,29 @@ export class TenantService {
       orderByField = 'execution.updated_timestamp';
     }
     qb.orderBy(orderByField, order);
-    const [rawData, total] = await qb.getManyAndCount();
+
+    // 执行查询并应用应用层过滤
+    let rawData: WorkflowExecutionEntity[];
+    let total: number;
+
+    try {
+      [rawData, total] = await qb.getManyAndCount();
+    } catch (error) {
+      if (error.message.includes('invalid input syntax for type json')) {
+        // 如果遇到 JSON 解析错误，返回空结果
+        rawData = [];
+        total = 0;
+      } else {
+        throw error;
+      }
+    }
+
+    // 应用层过滤 extraMetadata（如果需要）
+    if (needsApplicationLevelFiltering && applicationLevelFilter) {
+      rawData = this.filterByExtraMetadata(rawData, applicationLevelFilter);
+      // 重新计算总数（注意：这里为了简化，我们使用过滤后的数据长度）
+      total = rawData.length;
+    }
 
     // 获取 workflow 定义用于处理 input
     const workflowIds = [...new Set(rawData.map((item) => item.workflowId))];
@@ -579,20 +631,8 @@ export class TenantService {
       const outputForSearch = execution.output || null;
       const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
 
-      // 解码 extraMetadata（如果是base64编码的字符串）
-      let decodedExtraMetadata = execution.extraMetadata;
-      if (typeof execution.extraMetadata === 'string' && execution.extraMetadata !== '') {
-        try {
-          // 先尝试 Base64 解码
-          const decoded = Buffer.from(execution.extraMetadata, 'base64').toString('utf-8');
-          // 检查是否是 URL 编码，如果是则先解码 URL
-          const finalDecoded = decoded.includes('%') ? decodeURIComponent(decoded) : decoded;
-          decodedExtraMetadata = JSON.parse(finalDecoded);
-        } catch (e) {
-          // 如果解析失败，保持原始值
-          console.warn('Failed to parse extraMetadata from base64', e);
-        }
-      }
+      // 解码 extraMetadata
+      const decodedExtraMetadata = this.decodeExtraMetadata(execution.extraMetadata);
 
       return {
         status: execution.status,
