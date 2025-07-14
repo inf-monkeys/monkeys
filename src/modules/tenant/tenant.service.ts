@@ -340,7 +340,11 @@ export class TenantService {
       let decodedExtraMetadata = execution.extraMetadata;
       if (typeof execution.extraMetadata === 'string' && execution.extraMetadata !== '') {
         try {
-          decodedExtraMetadata = JSON.parse(Buffer.from(execution.extraMetadata, 'base64').toString('utf-8'));
+          // 先尝试 Base64 解码
+          const decoded = Buffer.from(execution.extraMetadata, 'base64').toString('utf-8');
+          // 检查是否是 URL 编码，如果是则先解码 URL
+          const finalDecoded = decoded.includes('%') ? decodeURIComponent(decoded) : decoded;
+          decodedExtraMetadata = JSON.parse(finalDecoded);
         } catch (e) {
           // 如果解析失败，保持原始值
           console.warn('Failed to parse extraMetadata from base64', e);
@@ -575,6 +579,21 @@ export class TenantService {
       const outputForSearch = execution.output || null;
       const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
 
+      // 解码 extraMetadata（如果是base64编码的字符串）
+      let decodedExtraMetadata = execution.extraMetadata;
+      if (typeof execution.extraMetadata === 'string' && execution.extraMetadata !== '') {
+        try {
+          // 先尝试 Base64 解码
+          const decoded = Buffer.from(execution.extraMetadata, 'base64').toString('utf-8');
+          // 检查是否是 URL 编码，如果是则先解码 URL
+          const finalDecoded = decoded.includes('%') ? decodeURIComponent(decoded) : decoded;
+          decodedExtraMetadata = JSON.parse(finalDecoded);
+        } catch (e) {
+          // 如果解析失败，保持原始值
+          console.warn('Failed to parse extraMetadata from base64', e);
+        }
+      }
+
       return {
         status: execution.status,
         workflowId: execution.workflowId,
@@ -583,7 +602,7 @@ export class TenantService {
         rawInput: execution.input,
         output: this.formatOutput(execution.output),
         rawOutput: execution.output,
-        extraMetadata: execution.extraMetadata,
+        extraMetadata: decodedExtraMetadata,
         searchableText,
         createTime: execution.createdTimestamp,
       };

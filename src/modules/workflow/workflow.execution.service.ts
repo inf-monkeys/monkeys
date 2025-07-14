@@ -55,7 +55,7 @@ function extractPromptFromFormattedInput(formattedInput: any[]): string {
     // 如果不是字符串，转换为字符串
     return String(promptText).trim();
   }
-  
+
   return '';
 }
 
