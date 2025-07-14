@@ -238,8 +238,8 @@ export class TenantService {
     limit: number;
     extraMetadata?: Record<string, any> | Record<string, any>[];
     workflowWithExtraMetadata?: boolean;
-    freeText?: string;
-    status?: string[];
+    searchText?: string;
+    status?: string | string[];
     startTimeFrom?: number;
     startTimeTo?: number;
     workflowId?: string;
@@ -247,7 +247,8 @@ export class TenantService {
     versions?: number[];
     time?: number;
   }) {
-    const { page, limit, extraMetadata, workflowWithExtraMetadata, freeText = '*', status = [], startTimeFrom, startTimeTo, workflowId, workflowInstanceId, time } = options;
+    const { page, limit, extraMetadata, workflowWithExtraMetadata, searchText = '*', status, startTimeFrom, startTimeTo, workflowId, workflowInstanceId, time } = options;
+    const statusArr = Array.isArray(status) ? status : status ? [status] : [];
 
     const qb = this.workflowExecutionRepository.createQueryBuilder('execution');
 
@@ -279,12 +280,12 @@ export class TenantService {
       qb.andWhere("CAST(execution.extra_metadata AS TEXT) != '{}'");
     }
 
-    if (freeText && freeText !== '*') {
-      qb.andWhere('execution.searchable_text ILIKE :freeText', { freeText: `%${freeText}%` });
+    if (searchText && searchText !== '*') {
+      qb.andWhere('execution.searchable_text ILIKE :searchText', { searchText: `%${searchText}%` });
     }
 
-    if (status && status.length > 0) {
-      qb.andWhere('execution.status IN (:...status)', { status });
+    if (statusArr.length > 0) {
+      qb.andWhere('execution.status IN (:...status)', { status: statusArr });
     }
 
     if (time) {
@@ -386,16 +387,16 @@ export class TenantService {
 
   public async searchWorkflowExecutionsForTeam(
     teamId: string,
-    condition: SearchWorkflowExecutionsDto & { extraMetadata?: Record<string, any> | Record<string, any>[]; workflowWithExtraMetadata?: boolean },
+    condition: SearchWorkflowExecutionsDto & { extraMetadata?: Record<string, any> | Record<string, any>[]; workflowWithExtraMetadata?: boolean; searchText?: string; status?: string | string[] },
   ): Promise<{ page: number; limit: number; total: number; data: Execution[]; definitions: WorkflowMetadataEntity[] }> {
     const {
       pagination = {},
       orderBy = {},
       workflowId,
-      status = [],
+      status,
       startTimeFrom,
       startTimeTo,
-      freeText = '*',
+      searchText = '*',
       startBy = [],
       triggerTypes = [],
       versions = [],
@@ -404,6 +405,7 @@ export class TenantService {
       workflowWithExtraMetadata,
       time,
     } = condition;
+    const statusArr = Array.isArray(status) ? status : status ? [status] : [];
     const { page: p = 1, limit: l = 10 } = pagination as PaginationDto;
     const [page, limitNum] = [+p, +l];
 
@@ -430,8 +432,8 @@ export class TenantService {
     }
 
     // 添加状态过滤
-    if (status.length > 0) {
-      qb.andWhere('execution.status IN (:...status)', { status });
+    if (statusArr.length > 0) {
+      qb.andWhere('execution.status IN (:...status)', { status: statusArr });
     }
 
     // 添加时间范围过滤
@@ -484,13 +486,13 @@ export class TenantService {
     }
 
     // 添加自由文本搜索（如果不是默认的 '*'）
-    if (freeText !== '*' && freeText.trim()) {
+    if (searchText !== '*' && searchText.trim()) {
       qb.andWhere(
         new Brackets((qb1) => {
           qb1
-            .orWhere('execution.searchable_text ILIKE :freeText', { freeText: `%${freeText}%` })
-            .orWhere('execution.workflow_id ILIKE :freeText', { freeText: `%${freeText}%` })
-            .orWhere('execution.workflow_instance_id ILIKE :freeText', { freeText: `%${freeText}%` });
+            .orWhere('execution.searchable_text ILIKE :searchText', { searchText: `%${searchText}%` })
+            .orWhere('execution.workflow_id ILIKE :searchText', { searchText: `%${searchText}%` })
+            .orWhere('execution.workflow_instance_id ILIKE :searchText', { searchText: `%${searchText}%` });
         }),
       );
     }
