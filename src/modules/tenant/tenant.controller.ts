@@ -34,7 +34,7 @@ export class TenantController {
       limit?: number;
       extraMetadata?: Record<string, any> | Record<string, any>[];
       workflowWithExtraMetadata?: boolean;
-      freeText?: string;
+      searchText?: string;
       status?: string[];
       startTimeFrom?: number;
       startTimeTo?: number;
@@ -44,14 +44,14 @@ export class TenantController {
       time?: number;
     },
   ) {
-    const { page = 1, limit = 20, extraMetadata, workflowWithExtraMetadata, freeText, status, startTimeFrom, startTimeTo, workflowId, workflowInstanceId, versions, time } = body;
+    const { page = 1, limit = 20, extraMetadata, workflowWithExtraMetadata, searchText, status, startTimeFrom, startTimeTo, workflowId, workflowInstanceId, versions, time } = body;
 
     const { data, total } = await this.tenantService.getAllExecutions({
       page: +page,
       limit: +limit,
       extraMetadata,
       workflowWithExtraMetadata,
-      freeText,
+      searchText,
       status,
       startTimeFrom,
       startTimeTo,
