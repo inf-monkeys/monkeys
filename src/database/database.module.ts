@@ -58,6 +58,7 @@ import { MarketplaceAppEntity } from './entities/marketplace/marketplace-app.ent
 import { WorkflowObservabilityEntity } from './entities/observability/workflow-observability';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
+import { TemporaryWorkflowEntity } from './entities/workflow/temporary-workflow.entity';
 import { WorkflowAssociationsEntity } from './entities/workflow/workflow-association';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
 
@@ -120,6 +121,7 @@ export const entities: EntityClassOrSchema[] = [
   BattleGroupEntity,
   EvaluationRatingHistoryEntity,
   EvaluationTaskEntity,
+  TemporaryWorkflowEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
