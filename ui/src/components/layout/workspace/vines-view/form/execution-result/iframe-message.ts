@@ -14,6 +14,15 @@ import {
 import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
+type MonkeyWorkflowExecutionStatus = 'COMPLETED' | 'RUNNING' | 'FAILED' | 'TERMINATED' | 'PAUSED' | 'UNKNOWN';
+
+interface MonkeyWorkflowExecution {
+  instanceId: string;
+  workflowId: string;
+  status: MonkeyWorkflowExecutionStatus;
+  [key: string]: any;
+}
+
 interface IVinesIframeMessage {
   outputs?: VinesWorkflowExecutionOutputListItem[];
   mutate:
@@ -24,6 +33,30 @@ interface IVinesIframeMessage {
 }
 
 export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVinesIframeMessage) => {
+  const sendExecutionStart = useMemoizedFn((workflows: MonkeyWorkflowExecution[]) => {
+    window.parent.postMessage(
+      stringify({
+        'v-event': 'vines-execution-start',
+        'v-data': {
+          workflows,
+        },
+      }),
+      '*',
+    );
+  });
+
+  const sendExecutionComplete = useMemoizedFn((workflows: MonkeyWorkflowExecution[], total: number) => {
+    window.parent.postMessage(
+      stringify({
+        'v-event': 'vines-execution-complete',
+        'v-data': {
+          workflows,
+          total,
+        },
+      }),
+      '*',
+    );
+  });
   useEffect(() => {
     if (enable && outputs) {
       // const msg: (VinesWorkflowExecutionOutput & {
@@ -106,6 +139,13 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
               console.error('[VinesIframeEmbed]: received invalid iframe message v-data');
             }
             break;
+          case 'vines-generate-button-clicked':
+            if (eventData?.workflows) {
+              sendExecutionStart(eventData.workflows);
+            } else {
+              console.error('[VinesIframeEmbed]: received invalid generation data');
+            }
+            break;
           default:
             console.error('[VinesIframeEmbed]: received unsupported iframe message v-event name:', eventName);
             break;
@@ -125,4 +165,27 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
       messageListened.current = false;
     }
   }, [enable]);
+
+  return {
+    sendExecutionStart,
+    sendExecutionComplete,
+  };
 };
+
+/**
+ * 通知父页面：生成任务已开始
+ * @param workflows MonkeyWorkflowExecution[] 新生成的任务
+ * @param total number 本次要生成的图片总数
+ */
+export function notifyExecutionStart(workflows: any[], total: number) {
+  window.parent.postMessage(
+    JSON.stringify({
+      'v-event': 'vines-execution-start',
+      'v-data': {
+        workflows,
+        total,
+      },
+    }),
+    '*',
+  );
+}
