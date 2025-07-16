@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
+import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
 import { ImageOperations } from '@/components/layout/workbench/image-detail/image-operation';
 import { RightSidebar } from '@/components/layout/workbench/image-detail/right-side-bar';
@@ -182,6 +183,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     }
   });
 
+  const [workflowAssociationList, setWorkflowAssociationList] = useState<IWorkflowAssociation[]>([]);
+
+  console.log(workflowAssociationList);
+
   return (
     <VinesFlowProvider workflowId={workflowId}>
       <FlowStoreProvider createStore={createFlowStore}>
@@ -199,7 +204,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
               {/* 左侧图片展示区 */}
               <div
                 className={cn(
-                  'flex h-full flex-col items-center justify-between overflow-auto pr-global dark:bg-[#111113]',
+                  'flex h-full flex-col items-center justify-between overflow-auto dark:bg-[#111113]',
                   isMiniFrame ? 'w-full' : !showFormInImageDetail ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
                 )}
               >
@@ -244,9 +249,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                       />
                       {/* 图片缩略图轮播 - 底部 */}
                       <div
-                        style={{
-                          maxWidth: showFormInImageDetail ? '70vw' : '93vw',
-                        }}
+                        className={cn(
+                          'w-full',
+                          showFormInImageDetail
+                            ? 'max-w-[70vw]'
+                            : workflowAssociationList.length > 0
+                              ? 'max-w-[calc(100vw-(var(--global-spacing)*10)-(var(--operation-bar-width)*2))]'
+                              : 'max-w-[calc(100vw-(var(--global-spacing)*7)-var(--operation-bar-width))]',
+                        )}
                       >
                         <ImagesCarousel />
                       </div>
@@ -281,7 +291,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
             </main>
 
             {/* 如果关联存在，则显示关联 */}
-            <WorkbenchOperationBar />
+            <WorkbenchOperationBar onDataChange={setWorkflowAssociationList} />
 
             {/* 右侧边栏 */}
             <RightSidebar

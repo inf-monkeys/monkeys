@@ -28,9 +28,11 @@ import { cn } from '@/utils';
 
 import { OperationItem } from './item';
 
-interface IWorkbenchOperationBarProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkbenchOperationBarProps extends React.ComponentPropsWithoutRef<'div'> {
+  onDataChange?: (data: IWorkflowAssociation[]) => void;
+}
 
-export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = () => {
+export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ onDataChange }) => {
   const { workflowId } = useFlowStore();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
@@ -43,6 +45,7 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = () =
   // 当外部数据变化时更新本地状态
   useEffect(() => {
     setLocalData(initialData?.filter((it) => it.enabled) ?? []);
+    onDataChange?.(initialData?.filter((it) => it.enabled) ?? []);
   }, [initialData]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
