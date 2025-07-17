@@ -1,0 +1,165 @@
+import { useEffect, useRef, useState } from 'react';
+
+import { useAsyncEffect } from 'ahooks';
+import { Mousewheel, Virtual } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
+import { cn } from '@/utils';
+
+import 'swiper/css';
+import 'swiper/css/mousewheel';
+
+interface CarouselProps {
+  className?: string;
+  images: Array<{
+    render?: {
+      data: string;
+      key?: string;
+      origin: string;
+    };
+    instanceId: string;
+  }>;
+  position: number;
+  onPositionChange: (position: number) => void;
+}
+
+const SwiperModules = [Virtual, Mousewheel];
+
+export const Carousel: React.FC<CarouselProps> = ({ className, images, position, onPositionChange }) => {
+  const [slidesPerView, setSlidesPerView] = useState(1);
+  const [swiperInstance, setSwiperInstance] = useState<any>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  // 计算 slidesPerView 的函数
+  const calculateSlidesPerView = (containerWidth: number) => {
+    const slideWidth = 90; // 幻灯片宽度
+    const spaceBetween = 12; // 间距
+    const calculated = Math.floor((containerWidth + spaceBetween) / (slideWidth + spaceBetween));
+    return Math.max(1, Math.min(calculated, images?.length || 1));
+  };
+
+  // 监听容器宽度变化
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width } = entry.contentRect;
+        const newSlidesPerView = calculateSlidesPerView(width);
+        setSlidesPerView(newSlidesPerView);
+      }
+    });
+
+    resizeObserver.observe(container);
+
+    // 初始计算
+    const initialWidth = container.offsetWidth;
+    if (initialWidth > 0) {
+      setSlidesPerView(calculateSlidesPerView(initialWidth));
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [images?.length]);
+
+  useEffect(() => {
+    if (swiperInstance && position !== undefined && position >= 0) {
+      swiperInstance.slideTo(position);
+    }
+  }, [position, swiperInstance]);
+
+  const handleThumbnailClick = (index: number) => {
+    onPositionChange(index);
+  };
+
+  if (!images || images.length === 0) {
+    return (
+      <div className="flex h-24 w-full items-center justify-center overflow-hidden">
+        <span className="text-sm text-gray-500">No images</span>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={containerRef} className="h-24 overflow-hidden">
+      <Swiper
+        spaceBetween={12}
+        slidesPerGroup={3}
+        direction={'horizontal'}
+        modules={SwiperModules}
+        freeMode={true}
+        grabCursor={true}
+        mousewheel={{
+          forceToAxis: false,
+          releaseOnEdges: true,
+          sensitivity: 2000,
+          thresholdDelta: 0.2,
+          thresholdTime: 10,
+          enabled: true,
+        }}
+        virtual
+        slidesPerView={slidesPerView}
+        initialSlide={position}
+        className={cn('h-full w-full', className)}
+        onSwiper={(swiper) => {
+          setSwiperInstance(swiper);
+          if (position !== undefined && position >= 0) {
+            setTimeout(() => swiper.slideTo(position, 0), 0); // 0ms 无动画
+          }
+        }}
+      >
+        {images.map((image, index) => (
+          <SwiperSlide
+            key={`slide-${image.render?.key || index}`}
+            style={{
+              width: 80,
+              height: '100%',
+            }}
+            className="flex items-center hover:cursor-pointer"
+            onClick={() => handleThumbnailClick(index)}
+          >
+            <CarouselItemImage image={image} />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
+  );
+};
+
+interface CarouselItemImageProps {
+  image: {
+    render?: {
+      data: string;
+      key?: string;
+      origin: string;
+    };
+    instanceId: string;
+  };
+}
+
+function CarouselItemImage({ image }: CarouselItemImageProps) {
+  const [shouldUseThumbnail, setShouldUseThumbnail] = useState(true);
+
+  useAsyncEffect(async () => {
+    if (!image.render?.data) return;
+    const res = await checkImageUrlAvailable(image.render.data);
+    // console.log(res);
+    setShouldUseThumbnail(res);
+  }, [image]);
+
+  if (!image.render?.data || !image.render?.origin) {
+    return null;
+  }
+
+  return (
+    <img
+      src={shouldUseThumbnail ? image.render.data : image.render.origin}
+      alt={`Thumbnail`}
+      className="size-[var(--history-result-image-size)] flex-shrink-0 rounded-md border border-border object-cover"
+      loading="lazy"
+    />
+  );
+}

@@ -8,6 +8,7 @@ import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
+import { ImagePreview } from '@/components/layout-wrapper/main/image-preview';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
@@ -34,7 +35,7 @@ interface HistoryResultProps {
   setSize: Dispatch<SetStateAction<number>>;
 }
 
-const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, className, setSize }) => {
+const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, setSize }) => {
   const [slidesPerView, setSlidesPerView] = useState(1);
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -103,6 +104,9 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
     return () => abortController.abort();
   }, []);
 
+  const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState(0);
+
   return (
     <AnimatePresence>
       <div
@@ -123,6 +127,24 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
             animate={{ opacity: 1, transition: { delay: 0.3 } }}
             exit={{ opacity: 0 }}
           >
+            <ImagePreview
+              images={images}
+              position={position}
+              onPositionChange={setPosition}
+              onNext={() => {
+                setPosition((position) => position + 1);
+              }}
+              onPrev={() => {
+                setPosition((position) => position - 1);
+              }}
+              onClose={() => {
+                setOpen(false);
+              }}
+              hasPrev={position > 0}
+              hasNext={position < images.length - 1}
+              open={open}
+              setOpen={setOpen}
+            />
             <Button icon={<ArrowLeftIcon />} variant="outline" size="icon" ref={slideLeftRef}></Button>
             <Swiper
               virtual
@@ -180,6 +202,10 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ loading, images, cla
                           image={item as ImagesResultWithOrigin}
                           index={index}
                           handleDragStart={handleDragStart}
+                          onClick={() => {
+                            setPosition(index);
+                            setOpen(true);
+                          }}
                         />
                       </div>
                     </SwiperSlide>
@@ -273,10 +299,12 @@ function CarouselItemImage({
   image,
   index,
   handleDragStart,
+  onClick,
 }: {
   image: ImagesResultWithOrigin;
   index: number;
   handleDragStart: (e: React.DragEvent, item: ImagesResultWithOrigin, src: string) => void;
+  onClick?: () => void;
 }) {
   const [shouldUseThumbnail, setShouldUseThumbnail] = useState(true);
   useAsyncEffect(async () => {
@@ -292,6 +320,7 @@ function CarouselItemImage({
       src={shouldUseThumbnail ? (image.render.data as string) : (image.render.origin as string)}
       alt={typeof image.render.alt === 'string' ? image.render.alt : `Image ${index + 1}`}
       className="h-full w-full select-none object-cover"
+      onClick={onClick}
     />
   );
 }

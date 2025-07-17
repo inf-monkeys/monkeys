@@ -1,4 +1,5 @@
 export const checkImageUrlAvailable = async (url: string) => {
+  // console.log(new URL(url).search);
   if (url.startsWith('blob:')) {
     return true;
   }

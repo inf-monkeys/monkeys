@@ -79,6 +79,12 @@ const config = {
           // light: 'var(--neocard-light)',
         }
       },
+      backgroundImage: {
+        'body': `linear-gradient(
+          rgb(var(--vines-100, 220 220 220) / 0.35) 0%,
+          rgb(var(--gray1) / 1) 50%
+        )`,
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
