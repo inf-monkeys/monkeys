@@ -55,92 +55,10 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
     console.log('[sendExecutionStart] 发送的消息:', message);
 
     // 只发送给父窗口，和vines-execution-image-outputs保持一致
-    // 添加发送前的额外检查
-    console.log('[sendExecutionStart] 即将发送消息...');
-    console.log('[sendExecutionStart] window.parent === window:', window.parent === window);
-    console.log('[sendExecutionStart] window.top === window:', window.top === window);
-
     window.parent.postMessage(message, '*');
-
-    // 验证消息是否真的被发送 - 立即发送一个测试消息到当前窗口来验证postMessage机制
-    window.postMessage('test-postmessage-working', '*');
 
     console.log('[sendExecutionStart] 消息已发送到父窗口');
   });
-
-  /**
-   *
-   * @param workflows - 工作流执行实例数组，包含instanceId、workflowId、status等信息
-   * @param total - 此次任务预计生成的图片总数
-   */
-  const notifyExecutionStart = useMemoizedFn((workflows: MonkeyWorkflowExecution[] = [], total: number = 0) => {
-    console.log('[notifyExecutionStart] 业务方调用执行开始通知:', { workflows, total });
-
-    const message = stringify({
-      'v-event': 'vines-execution-start',
-      'v-data': {
-        workflows,
-        total,
-      },
-    });
-    console.log('[notifyExecutionStart] 发送的消息:', message);
-
-    // 同时发送给当前窗口和父窗口
-    window.postMessage(message, '*');
-    if (window.parent !== window) {
-      window.parent.postMessage(message, '*');
-    }
-
-    console.log('[notifyExecutionStart] 消息已发送');
-  });
-
-  // 将函数暴露到全局，供业务方调用
-  useEffect(() => {
-    // 始终暴露到全局window对象，不依赖于enable参数
-    (window as any).notifyExecutionStart = notifyExecutionStart;
-    console.log('[useVinesIframeMessage] notifyExecutionStart函数已暴露到全局window对象');
-
-    // 添加自动监听生成开始的机制
-    const handleExecutionStart = () => {
-      console.log('[useVinesIframeMessage] 检测到生成开始，自动发送vines-execution-start事件');
-      notifyExecutionStart([], 0); // 开始时还不知道具体信息，使用默认值
-    };
-
-    // 监听生成按钮点击事件（通过监听表单提交事件）
-    const handleFormSubmit = (event: Event) => {
-      const target = event.target as HTMLElement;
-      if (target && (target.tagName === 'FORM' || target.closest('form'))) {
-        console.log('[useVinesIframeMessage] 检测到表单提交，可能是生成按钮点击');
-        setTimeout(handleExecutionStart, 100); // 延迟一点确保事件顺序正确
-      }
-    };
-
-    // 监听按钮点击事件
-    const handleButtonClick = (event: Event) => {
-      const target = event.target as HTMLElement;
-      if (target && target.tagName === 'BUTTON') {
-        const buttonText = target.textContent || '';
-        if (
-          buttonText.includes('生成') ||
-          buttonText.includes('Generate') ||
-          target.querySelector('[data-icon="sparkles"]')
-        ) {
-          console.log('[useVinesIframeMessage] 检测到生成按钮点击');
-          handleExecutionStart();
-        }
-      }
-    };
-
-    document.addEventListener('submit', handleFormSubmit);
-    document.addEventListener('click', handleButtonClick);
-
-    return () => {
-      // 清理时移除全局函数和事件监听器
-      delete (window as any).notifyExecutionStart;
-      document.removeEventListener('submit', handleFormSubmit);
-      document.removeEventListener('click', handleButtonClick);
-    };
-  }, [notifyExecutionStart]);
 
   useEffect(() => {
     if (enable && outputs) {
@@ -172,7 +90,16 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
           workflowId: task.workflowId || 'unknown',
           status: task.status as MonkeyWorkflowExecutionStatus,
         }));
-        notifyExecutionStart(workflows, runningTasks.length);
+
+        const message = stringify({
+          'v-event': 'vines-execution-start',
+          'v-data': {
+            workflows,
+            total: runningTasks.length,
+          },
+        });
+        console.log('[useVinesIframeMessage] 发送vines-execution-start事件:', message);
+        window.parent.postMessage(message, '*');
       }
 
       const data: VinesWorkflowExecutionOutputListItemForIframe[] = outputs
@@ -204,7 +131,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
         '*',
       );
     }
-  }, [enable, outputs, notifyExecutionStart]);
+  }, [enable, outputs]);
 
   const messageListened = useRef(false);
   const messageEvent = useMemoizedFn((event: MessageEvent<any>) => {
@@ -270,6 +197,5 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
 
   return {
     sendExecutionStart,
-    notifyExecutionStart,
   };
 };
