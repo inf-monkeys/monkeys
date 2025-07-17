@@ -96,17 +96,15 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
 
   // 将函数暴露到全局，供业务方调用
   useEffect(() => {
-    if (enable) {
-      // 暴露到全局window对象
-      (window as any).notifyExecutionStart = notifyExecutionStart;
-      console.log('[useVinesIframeMessage] notifyExecutionStart函数已暴露到全局window对象');
+    // 始终暴露到全局window对象，不依赖于enable参数
+    (window as any).notifyExecutionStart = notifyExecutionStart;
+    console.log('[useVinesIframeMessage] notifyExecutionStart函数已暴露到全局window对象');
 
-      return () => {
-        // 清理时移除全局函数
-        delete (window as any).notifyExecutionStart;
-      };
-    }
-  }, [enable, notifyExecutionStart]);
+    return () => {
+      // 清理时移除全局函数
+      delete (window as any).notifyExecutionStart;
+    };
+  }, [notifyExecutionStart]);
 
   useEffect(() => {
     if (enable && outputs) {
