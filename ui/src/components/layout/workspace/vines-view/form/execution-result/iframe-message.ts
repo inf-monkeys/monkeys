@@ -35,19 +35,8 @@ interface IVinesIframeMessage {
 export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVinesIframeMessage) => {
   // console.log('outputs', outputs);
   const [lastOutputsLength, setLastOutputsLength] = useState(0);
-  
-  const sendExecutionStart = useMemoizedFn((workflows: MonkeyWorkflowExecution[]) => {
-    console.log('[sendExecutionStart] 准备发送执行开始通知:', workflows);
-    console.log('[sendExecutionStart] 当前窗口信息:', {
-      location: window.location.href,
-      parent: window.parent !== window ? '有父窗口' : '无父窗口',
-      origin: window.location.origin,
-      hostname: window.location.hostname,
-      protocol: window.location.protocol,
-      port: window.location.port,
-      href: window.location.href,
-    });
 
+  const sendExecutionStart = useMemoizedFn((workflows: MonkeyWorkflowExecution[]) => {
     const message = stringify({
       'v-event': 'vines-execution-start',
       'v-data': {
@@ -55,12 +44,8 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
         total: 0, // 开始时还不知道总数，设为0
       },
     });
-    console.log('[sendExecutionStart] 发送的消息:', message);
-
     // 只发送给父窗口，和vines-execution-image-outputs保持一致
     window.parent.postMessage(message, '*');
-
-    console.log('[sendExecutionStart] 消息已发送到父窗口');
   });
 
   useEffect(() => {
@@ -88,7 +73,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
       if (outputs.length > lastOutputsLength) {
         const newTasks = outputs.slice(lastOutputsLength); // 只取新增的任务
         console.log('[useVinesIframeMessage] 检测到新增任务，发送执行开始事件:', newTasks);
-        
+
         const workflows = newTasks.map((task) => ({
           instanceId: task.instanceId,
           workflowId: task.workflowId || 'unknown',
@@ -102,9 +87,9 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
             total: 0, // 开始时还不知道总数，设为0
           },
         });
-        console.log('[useVinesIframeMessage] 发送vines-execution-start事件:', message);
+        // console.log('[useVinesIframeMessage] 发送vines-execution-start事件:', message);
         window.parent.postMessage(message, '*');
-        
+
         // 更新记录的长度
         setLastOutputsLength(outputs.length);
       }
@@ -172,11 +157,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
             }
             break;
           case 'vines-generate-button-clicked':
-            console.log('[messageEvent] 收到生成按钮点击事件:', eventData);
-            console.log('[messageEvent] 消息来源origin:', event.origin);
-            console.log('[messageEvent] 当前页面origin:', window.location.origin);
             if (eventData?.workflows) {
-              console.log('[messageEvent] 工作流数据有效，调用sendExecutionStart');
               sendExecutionStart(eventData.workflows);
             } else {
               console.error('[VinesIframeEmbed]: received invalid generation data');
