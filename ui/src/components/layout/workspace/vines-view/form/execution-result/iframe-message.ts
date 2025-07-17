@@ -100,9 +100,45 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
     (window as any).notifyExecutionStart = notifyExecutionStart;
     console.log('[useVinesIframeMessage] notifyExecutionStart函数已暴露到全局window对象');
 
+    // 添加自动监听生成开始的机制
+    const handleExecutionStart = () => {
+      console.log('[useVinesIframeMessage] 检测到生成开始，自动发送vines-execution-start事件');
+      notifyExecutionStart([], 0); // 开始时还不知道具体信息，使用默认值
+    };
+
+    // 监听生成按钮点击事件（通过监听表单提交事件）
+    const handleFormSubmit = (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (target && (target.tagName === 'FORM' || target.closest('form'))) {
+        console.log('[useVinesIframeMessage] 检测到表单提交，可能是生成按钮点击');
+        setTimeout(handleExecutionStart, 100); // 延迟一点确保事件顺序正确
+      }
+    };
+
+    // 监听按钮点击事件
+    const handleButtonClick = (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (target && target.tagName === 'BUTTON') {
+        const buttonText = target.textContent || '';
+        if (
+          buttonText.includes('生成') ||
+          buttonText.includes('Generate') ||
+          target.querySelector('[data-icon="sparkles"]')
+        ) {
+          console.log('[useVinesIframeMessage] 检测到生成按钮点击');
+          handleExecutionStart();
+        }
+      }
+    };
+
+    document.addEventListener('submit', handleFormSubmit);
+    document.addEventListener('click', handleButtonClick);
+
     return () => {
-      // 清理时移除全局函数
+      // 清理时移除全局函数和事件监听器
       delete (window as any).notifyExecutionStart;
+      document.removeEventListener('submit', handleFormSubmit);
+      document.removeEventListener('click', handleButtonClick);
     };
   }, [notifyExecutionStart]);
 
@@ -126,6 +162,19 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
       //   break;
       // }
       if (!outputs || outputs.length === 0) return;
+
+      // 检查是否有新的RUNNING状态的任务，如果有则发送执行开始事件
+      const runningTasks = outputs.filter((it) => it.status === 'RUNNING');
+      if (runningTasks.length > 0) {
+        console.log('[useVinesIframeMessage] 检测到新的运行中任务，自动发送执行开始事件:', runningTasks);
+        const workflows = runningTasks.map((task) => ({
+          instanceId: task.instanceId,
+          workflowId: task.workflowId || 'unknown',
+          status: task.status as MonkeyWorkflowExecutionStatus,
+        }));
+        notifyExecutionStart(workflows, runningTasks.length);
+      }
+
       const data: VinesWorkflowExecutionOutputListItemForIframe[] = outputs
         .filter((it) => it.status === 'COMPLETED')
         .slice(0, 4)
@@ -155,7 +204,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
         '*',
       );
     }
-  }, [enable, outputs]);
+  }, [enable, outputs, notifyExecutionStart]);
 
   const messageListened = useRef(false);
   const messageEvent = useMemoizedFn((event: MessageEvent<any>) => {
@@ -221,6 +270,6 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
 
   return {
     sendExecutionStart,
-    notifyExecutionStart, // 导出给业务方使用
+    notifyExecutionStart,
   };
 };
