@@ -81,11 +81,11 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
       // }
       if (!outputs || outputs.length === 0) return;
 
-      // 检查是否有新的RUNNING状态的任务，如果有则发送执行开始事件
-      const runningTasks = outputs.filter((it) => it.status === 'RUNNING');
-      if (runningTasks.length > 0) {
-        console.log('[useVinesIframeMessage] 检测到新的运行中任务，自动发送执行开始事件:', runningTasks);
-        const workflows = runningTasks.map((task) => ({
+      // 检查是否有新的任务（任何状态），如果有则发送执行开始事件
+      const newTasks = outputs.filter((it) => it.status !== 'COMPLETED');
+      if (newTasks.length > 0) {
+        console.log('[useVinesIframeMessage] 检测到新任务，自动发送执行开始事件:', newTasks);
+        const workflows = newTasks.map((task) => ({
           instanceId: task.instanceId,
           workflowId: task.workflowId || 'unknown',
           status: task.status as MonkeyWorkflowExecutionStatus,
@@ -95,7 +95,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
           'v-event': 'vines-execution-start',
           'v-data': {
             workflows,
-            total: runningTasks.length,
+            total: 0, // 开始时还不知道总数，设为0
           },
         });
         console.log('[useVinesIframeMessage] 发送vines-execution-start事件:', message);
