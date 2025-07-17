@@ -54,11 +54,10 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
     });
     console.log('[sendExecutionStart] 发送的消息:', message);
 
-    // 同时向当前窗口和父窗口发送（用于调试）
-    window.postMessage(message, '*');
+    // 只发送给父窗口，和vines-execution-image-outputs保持一致
     window.parent.postMessage(message, '*');
 
-    console.log('[sendExecutionStart] 消息已发送到父窗口和当前窗口');
+    console.log('[sendExecutionStart] 消息已发送到父窗口');
   });
 
   useEffect(() => {
