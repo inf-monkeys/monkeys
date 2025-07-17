@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { KeyedMutator } from 'swr/_internal';
 import { SWRInfiniteResponse } from 'swr/infinite';
@@ -33,13 +33,11 @@ interface IVinesIframeMessage {
 }
 
 export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVinesIframeMessage) => {
-  console.log('outputs', outputs);
-
-  // 记录已发送开始事件的任务，避免重复发送
-  const sentStartEvents = useRef<Set<string>>(new Set());
-
-  const sendExecutionStart = useMemoizedFn((workflows: MonkeyWorkflowExecution[], total: number = 0) => {
-    console.log('[sendExecutionStart] 准备发送执行开始通知:', { workflows, total });
+  // console.log('outputs', outputs);
+  const [lastOutputsLength, setLastOutputsLength] = useState(0);
+  
+  const sendExecutionStart = useMemoizedFn((workflows: MonkeyWorkflowExecution[]) => {
+    console.log('[sendExecutionStart] 准备发送执行开始通知:', workflows);
     console.log('[sendExecutionStart] 当前窗口信息:', {
       location: window.location.href,
       parent: window.parent !== window ? '有父窗口' : '无父窗口',
@@ -54,7 +52,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
       'v-event': 'vines-execution-start',
       'v-data': {
         workflows,
-        total, // 生成张数
+        total: 0, // 开始时还不知道总数，设为0
       },
     });
     console.log('[sendExecutionStart] 发送的消息:', message);
@@ -63,60 +61,54 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
     window.parent.postMessage(message, '*');
 
     console.log('[sendExecutionStart] 消息已发送到父窗口');
-
-    // 记录已发送的任务
-    workflows.forEach((workflow) => {
-      sentStartEvents.current.add(workflow.instanceId);
-    });
-  });
-
-  // 发送生成完成更新事件
-  const sendExecutionUpdate = useMemoizedFn((workflows: MonkeyWorkflowExecution[], total: number) => {
-    console.log('[sendExecutionUpdate] 发送生成完成更新:', { workflows, total });
-
-    const message = stringify({
-      'v-event': 'vines-execution-update',
-      'v-data': {
-        workflows,
-        total,
-      },
-    });
-
-    window.parent.postMessage(message, '*');
-    console.log('[sendExecutionUpdate] 更新事件已发送');
   });
 
   useEffect(() => {
     if (enable && outputs) {
+      // const msg: (VinesWorkflowExecutionOutput & {
+      //   instance: Omit<VinesWorkflowExecutionOutputListItem, 'output'>;
+      // })[] = [];
+      // for (const it of outputs) {
+      //   if (msg.length > 4) break;
+      //   if (it.status !== 'COMPLETED') continue;
+
+      //   for (const result of it.output) {
+      //     if (result.type !== 'image') continue;
+      //     msg.push({
+      //       ...result,
+      //       instance: omit(it, 'output'),
+      //     });
+      //   }
+
+      //   break;
+      // }
       if (!outputs || outputs.length === 0) return;
 
-      // 处理已完成的生成任务，发送更新事件
-      const completedTasks = outputs.filter((it) => it.status === 'COMPLETED');
-      if (completedTasks.length > 0) {
-        // 计算实际生成的图片数量
-        let totalImages = 0;
-        completedTasks.forEach((task) => {
-          if (task.output && Array.isArray(task.output)) {
-            task.output.forEach((output) => {
-              if (output.type === 'image') {
-                totalImages++;
-              }
-            });
-          }
+      // 检查是否有新增的任务，只在第一次出现新任务时发送执行开始事件
+      if (outputs.length > lastOutputsLength) {
+        const newTasks = outputs.slice(lastOutputsLength); // 只取新增的任务
+        console.log('[useVinesIframeMessage] 检测到新增任务，发送执行开始事件:', newTasks);
+        
+        const workflows = newTasks.map((task) => ({
+          instanceId: task.instanceId,
+          workflowId: task.workflowId || 'unknown',
+          status: task.status as MonkeyWorkflowExecutionStatus,
+        }));
+
+        const message = stringify({
+          'v-event': 'vines-execution-start',
+          'v-data': {
+            workflows,
+            total: 0, // 开始时还不知道总数，设为0
+          },
         });
-
-        if (totalImages > 0) {
-          const workflows = completedTasks.map((task) => ({
-            instanceId: task.instanceId,
-            workflowId: task.workflowId || 'unknown',
-            status: task.status as MonkeyWorkflowExecutionStatus,
-          }));
-
-          sendExecutionUpdate(workflows, totalImages);
-        }
+        console.log('[useVinesIframeMessage] 发送vines-execution-start事件:', message);
+        window.parent.postMessage(message, '*');
+        
+        // 更新记录的长度
+        setLastOutputsLength(outputs.length);
       }
 
-      // 发送vines-execution-image-outputs事件（原有逻辑）
       const data: VinesWorkflowExecutionOutputListItemForIframe[] = outputs
         .filter((it) => it.status === 'COMPLETED')
         .slice(0, 4)
@@ -140,6 +132,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
       window.parent.postMessage(
         stringify({
           'v-event': 'vines-execution-image-outputs',
+          // 'v-data': msg.slice(0, 4),
           'v-data': data.slice(0, 4),
         }),
         '*',
@@ -184,9 +177,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
             console.log('[messageEvent] 当前页面origin:', window.location.origin);
             if (eventData?.workflows) {
               console.log('[messageEvent] 工作流数据有效，调用sendExecutionStart');
-              // 从事件数据中获取预估的生成张数，如果没有则默认为0
-              const total = eventData.total || 0;
-              sendExecutionStart(eventData.workflows, total);
+              sendExecutionStart(eventData.workflows);
             } else {
               console.error('[VinesIframeEmbed]: received invalid generation data');
             }
@@ -213,6 +204,5 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
 
   return {
     sendExecutionStart,
-    sendExecutionUpdate,
   };
 };
