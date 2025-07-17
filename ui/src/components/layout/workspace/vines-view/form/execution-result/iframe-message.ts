@@ -55,10 +55,58 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
     console.log('[sendExecutionStart] 发送的消息:', message);
 
     // 只发送给父窗口，和vines-execution-image-outputs保持一致
+    // 添加发送前的额外检查
+    console.log('[sendExecutionStart] 即将发送消息...');
+    console.log('[sendExecutionStart] window.parent === window:', window.parent === window);
+    console.log('[sendExecutionStart] window.top === window:', window.top === window);
+
     window.parent.postMessage(message, '*');
+
+    // 验证消息是否真的被发送 - 立即发送一个测试消息到当前窗口来验证postMessage机制
+    window.postMessage('test-postmessage-working', '*');
 
     console.log('[sendExecutionStart] 消息已发送到父窗口');
   });
+
+  /**
+   *
+   * @param workflows - 工作流执行实例数组，包含instanceId、workflowId、status等信息
+   * @param total - 此次任务预计生成的图片总数
+   */
+  const notifyExecutionStart = useMemoizedFn((workflows: MonkeyWorkflowExecution[] = [], total: number = 0) => {
+    console.log('[notifyExecutionStart] 业务方调用执行开始通知:', { workflows, total });
+
+    const message = stringify({
+      'v-event': 'vines-execution-start',
+      'v-data': {
+        workflows,
+        total,
+      },
+    });
+    console.log('[notifyExecutionStart] 发送的消息:', message);
+
+    // 同时发送给当前窗口和父窗口
+    window.postMessage(message, '*');
+    if (window.parent !== window) {
+      window.parent.postMessage(message, '*');
+    }
+
+    console.log('[notifyExecutionStart] 消息已发送');
+  });
+
+  // 将函数暴露到全局，供业务方调用
+  useEffect(() => {
+    if (enable) {
+      // 暴露到全局window对象
+      (window as any).notifyExecutionStart = notifyExecutionStart;
+      console.log('[useVinesIframeMessage] notifyExecutionStart函数已暴露到全局window对象');
+
+      return () => {
+        // 清理时移除全局函数
+        delete (window as any).notifyExecutionStart;
+      };
+    }
+  }, [enable, notifyExecutionStart]);
 
   useEffect(() => {
     if (enable && outputs) {
@@ -175,5 +223,6 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
 
   return {
     sendExecutionStart,
+    notifyExecutionStart, // 导出给业务方使用
   };
 };
