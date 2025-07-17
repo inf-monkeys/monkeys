@@ -33,6 +33,7 @@ interface IVinesIframeMessage {
 }
 
 export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVinesIframeMessage) => {
+  console.log('outputs', outputs);
   const sendExecutionStart = useMemoizedFn((workflows: MonkeyWorkflowExecution[]) => {
     console.log('[sendExecutionStart] 准备发送执行开始通知:', workflows);
     console.log('[sendExecutionStart] 当前窗口信息:', {
