@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { IPageInstanceType, IPinPage } from '@/apis/pages/typings.ts';
 import { ViewItemMenu } from '@/components/layout/workbench/sidebar/mode/normal/virtua/menu.tsx';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
@@ -26,6 +27,10 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
   ({ page, onClick, onlyShowWorkbenchIcon = false }) => {
     const { t } = useTranslation();
     const { pageId: currentPageId, groupId: currentGroupId } = useContext(WorkbenchViewItemCurrentData);
+
+    const { data: oem } = useSystemConfig();
+
+    const showMoreAction = oem?.theme.workbenchSidebarMoreAction ?? true;
 
     const info = page?.workflow || page?.agent || page?.designProject;
     const viewIcon = page?.instance?.icon ?? '';
@@ -79,7 +84,9 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
                 </span>
               </div>
             </div>
-            {!page.type.startsWith('global-') && <ViewItemMenu page={page} groupId={currentGroupId} />}
+            {!page.type.startsWith('global-') && showMoreAction && (
+              <ViewItemMenu page={page} groupId={currentGroupId} />
+            )}
           </>
         ) : null}
       </div>

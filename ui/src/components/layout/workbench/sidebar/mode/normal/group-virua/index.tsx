@@ -18,8 +18,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { FolderIcon } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -42,6 +42,9 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
   data: initialData,
   onReorder,
 }) => {
+  const { data: oem } = useSystemConfig();
+  const showMoreAction = oem?.theme.workbenchSidebarMoreAction ?? true;
+
   // 添加本地状态
   const [localData, setLocalData] = useState(initialData);
 
@@ -52,7 +55,6 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
-  const { t } = useTranslation();
 
   // 添加传感器
   const sensors = useSensors(
@@ -115,7 +117,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
                 onlyShowWorkbenchIcon={onlyShowWorkbenchIcon}
                 onClick={() => setGroupId(id)}
               >
-                <NavDropdown groupId={id} />
+                {showMoreAction && <NavDropdown groupId={id} />}
               </SideBarNavItem>
             ))}
           </SortableContext>

@@ -118,6 +118,7 @@ export interface ServerConfig {
     ugcViewIconOnlyMode?: boolean;
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
     workbenchSidebarDefaultOpen: boolean;
+    workbenchSidebarMoreAction: boolean;
   };
 }
 
@@ -415,6 +416,7 @@ export const config: Config = {
         showErrorFilter: readConfig('server.customization.workflowPreviewExecutionGrid.showErrorFilter', true),
       },
       workbenchSidebarDefaultOpen: readConfig('server.customization.workbenchSidebarDefaultOpen', true),
+      workbenchSidebarMoreAction: readConfig('server.customization.workbenchSidebarMoreAction', true),
     },
   },
   conductor: {

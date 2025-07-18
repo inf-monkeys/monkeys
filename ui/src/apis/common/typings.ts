@@ -99,6 +99,7 @@ export interface ISystemConfig {
     ugcViewIconOnlyMode?: boolean;
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
     workbenchSidebarDefaultOpen?: boolean;
+    workbenchSidebarMoreAction?: boolean;
   };
   auth: {
     enabled: AuthMethod[];

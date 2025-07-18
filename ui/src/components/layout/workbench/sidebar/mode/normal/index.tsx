@@ -32,7 +32,7 @@ import { cloneDeep, cn, getI18nContent } from '@/utils';
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
 import { IWorkbenchViewItemPage, WorkbenchViewItemCurrentData } from './virtua/item';
 
-export const GLOBAL_DESIGN_BOARD_PAGE = {
+export const GLOBAL_DESIGN_BOARD_PAGE: IPinPage = {
   id: 'global-design-board',
   displayName: JSON.stringify({
     'zh-CN': '全局画板',

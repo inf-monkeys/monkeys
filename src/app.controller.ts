@@ -137,6 +137,7 @@ export class AppController {
         ugcViewIconOnlyMode: config.server.customization.ugcViewIconOnlyMode,
         workflowPreviewExecutionGrid: config.server.customization.workflowPreviewExecutionGrid,
         workbenchSidebarDefaultOpen: config.server.customization.workbenchSidebarDefaultOpen,
+        workbenchSidebarMoreAction: config.server.customization.workbenchSidebarMoreAction,
       },
       auth: {
         enabled: config.auth.enabled,
