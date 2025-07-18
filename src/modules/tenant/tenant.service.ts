@@ -693,7 +693,7 @@ export class TenantService {
       workflowVersion: version,
       teamId,
       userId,
-      status: 'pending',
+      status: 'PENDING',
       expiresAt,
       inputData,
       createdTimestamp: Date.now(),
@@ -742,7 +742,7 @@ export class TenantService {
   async executeTemporaryWorkflow(temporaryId: string): Promise<{ workflowInstanceId: string }> {
     const temporaryWorkflow = await this.getTemporaryWorkflowByTemporaryId(temporaryId);
 
-    if (temporaryWorkflow.status !== 'pending') {
+    if (temporaryWorkflow.status !== 'PENDING') {
       throw new BadRequestException('临时工作流状态不允许执行');
     }
 
@@ -750,7 +750,7 @@ export class TenantService {
     await this.temporaryWorkflowRepository.update(
       { id: temporaryWorkflow.id },
       {
-        status: 'running',
+        status: 'RUNNING',
         executionTime: Date.now(),
         updatedTimestamp: Date.now(),
       },
@@ -789,7 +789,7 @@ export class TenantService {
       await this.temporaryWorkflowRepository.update(
         { id: temporaryWorkflow.id },
         {
-          status: 'failed',
+          status: 'FAILED',
           errorMessage: error.message,
           updatedTimestamp: Date.now(),
         },
@@ -806,18 +806,18 @@ export class TenantService {
   async getTemporaryWorkflowResult(temporaryId: string): Promise<any> {
     const temporaryWorkflow = await this.getTemporaryWorkflowByTemporaryId(temporaryId);
 
-    if (temporaryWorkflow.status === 'pending') {
+    if (temporaryWorkflow.status === 'PENDING') {
       throw new BadRequestException('临时工作流尚未执行');
     }
 
-    if (temporaryWorkflow.status === 'running') {
+    if (temporaryWorkflow.status === 'RUNNING') {
       // 如果正在执行，尝试获取最新状态
       if (temporaryWorkflow.workflowInstanceId) {
         try {
           const result = await this.workflowExecutionService.getWorkflowExecutionSimpleDetail(temporaryWorkflow.teamId, temporaryWorkflow.workflowInstanceId);
 
           // 根据执行结果更新状态
-          const newStatus = result.status === 'COMPLETED' ? 'completed' : result.status === 'FAILED' ? 'failed' : 'running';
+          const newStatus = result.status === 'COMPLETED' ? 'COMPLETED' : result.status === 'FAILED' ? 'FAILED' : 'RUNNING';
 
           if (newStatus !== temporaryWorkflow.status) {
             await this.temporaryWorkflowRepository.update(
@@ -825,7 +825,7 @@ export class TenantService {
               {
                 status: newStatus,
                 outputData: result.rawOutput,
-                completionTime: newStatus === 'completed' || newStatus === 'failed' ? Date.now() : undefined,
+                completionTime: newStatus === 'COMPLETED' || newStatus === 'FAILED' ? Date.now() : undefined,
                 updatedTimestamp: Date.now(),
               },
             );
@@ -838,7 +838,7 @@ export class TenantService {
       }
 
       return {
-        status: 'running',
+        status: 'RUNNING',
         message: '工作流正在执行中',
       };
     }
@@ -868,7 +868,7 @@ export class TenantService {
     while (attempts < maxAttempts) {
       result = await this.getTemporaryWorkflowResult(temporaryId);
 
-      if (result.status === 'completed' || result.status === 'failed') {
+      if (result.status === 'COMPLETED' || result.status === 'FAILED') {
         break;
       }
 

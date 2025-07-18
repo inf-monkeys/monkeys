@@ -72,7 +72,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
       // 检查是否有新增的任务，只在第一次出现新任务时发送执行开始事件
       if (outputs.length > lastOutputsLength) {
         const newTasks = outputs.slice(lastOutputsLength); // 只取新增的任务
-        console.log('[useVinesIframeMessage] 检测到新增任务，发送执行开始事件:', newTasks);
+        // console.log('[useVinesIframeMessage] 检测到新增任务，发送执行开始事件:', newTasks);
 
         const workflows = newTasks.map((task) => ({
           instanceId: task.instanceId,

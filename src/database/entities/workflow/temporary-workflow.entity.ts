@@ -43,10 +43,10 @@ export class TemporaryWorkflowEntity extends BaseEntity {
 
   @Column({
     name: 'status',
-    default: 'pending',
-    comment: '状态：pending-待执行，running-执行中，completed-已完成，failed-失败',
+    default: 'PENDING',
+    comment: '状态：PENDING-待执行，RUNNING-执行中，COMPLETED-已完成，FAILED-失败',
   })
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
 
   @Column({
     name: 'expires_at',
