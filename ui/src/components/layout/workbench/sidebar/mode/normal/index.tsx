@@ -1,11 +1,11 @@
 import React, { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Link, useNavigate } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
 import { useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence } from 'framer-motion';
 import { keyBy } from 'lodash';
-import { CircleSlash, Maximize2Icon, Minimize2Icon, PlusIcon } from 'lucide-react';
+import { CircleSlash, Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
@@ -329,8 +329,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             />
             <div
               className={cn(
-                'flex items-center justify-between gap-global px-global pb-global pt-2',
-                onlyShowWorkbenchIcon && 'justify-center',
+                'flex items-center justify-center gap-global px-global pb-global pt-2',
+                // onlyShowWorkbenchIcon && 'justify-center',
               )}
             >
               {globalViewSize !== 'sm' && (
@@ -347,7 +347,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                   <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
                 </Tooltip>
               )}
-              {!onlyShowWorkbenchIcon && (
+              {/* {!onlyShowWorkbenchIcon && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="vines-center shrink grow">
@@ -360,7 +360,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                     {t('workbench.sidebar.add')}
                   </TooltipContent>
                 </Tooltip>
-              )}
+              )} */}
             </div>
           </div>
         </WorkbenchViewItemCurrentData.Provider>
