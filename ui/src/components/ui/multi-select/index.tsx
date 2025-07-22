@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 
 import { cva, type VariantProps } from 'class-variance-authority';
+import { isArray } from 'lodash';
 import { CheckIcon, ChevronRightIcon, WandSparkles, XCircle, XIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -156,7 +157,7 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
     }, [defaultValue, selectedValues]);
 
     useEffect(() => {
-      if (stringify(selectedValues) !== stringify(value)) {
+      if (stringify(selectedValues) !== stringify(value) && isArray(value)) {
         setSelectedValues(value);
       }
     }, [value]);
