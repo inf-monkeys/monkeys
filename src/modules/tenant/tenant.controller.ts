@@ -2,7 +2,8 @@ import { TenantStatisticsAuthGuard } from '@/common/guards/tenant-statistics.gua
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateTemporaryWorkflowDto } from '../workflow/dto/req/create-temporary-workflow.dto';
+import { TemporaryWorkflowService } from '../temporary-workflow/temporary-workflow.service';
+import { CreateTemporaryWorkflowByInstanceDto, CreateTemporaryWorkflowDto } from '../workflow/dto/req/create-temporary-workflow.dto';
 import { SearchWorkflowExecutionsDto } from '../workflow/dto/req/search-workflow-execution.dto';
 import { TenantService } from './tenant.service';
 
@@ -10,7 +11,10 @@ import { TenantService } from './tenant.service';
 @ApiTags('Tenant')
 @UseGuards(TenantStatisticsAuthGuard)
 export class TenantController {
-  constructor(private readonly tenantService: TenantService) {}
+  constructor(
+    private readonly tenantService: TenantService,
+    private readonly temporaryWorkflowService: TemporaryWorkflowService,
+  ) {}
 
   @Get()
   async findAll() {
@@ -88,7 +92,20 @@ export class TenantController {
     description: '为外部系统创建临时工作流，返回临时ID',
   })
   async createTemporaryWorkflow(@Body() dto: CreateTemporaryWorkflowDto) {
-    const result = await this.tenantService.createTemporaryWorkflow(dto);
+    const result = await this.temporaryWorkflowService.createTemporaryWorkflow(dto);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
+  // 临时工作流相关接口
+  @Post('/temporary-workflow/create-by-instance-id')
+  @ApiOperation({
+    summary: '创建临时工作流（租户鉴权）',
+    description: '为外部系统创建临时工作流，返回临时ID，根据实例ID创建',
+  })
+  async createTemporaryWorkflowByInstance(@Body() dto: CreateTemporaryWorkflowByInstanceDto) {
+    const result = await this.temporaryWorkflowService.createTemporaryWorkflowByInstance(dto);
     return new SuccessResponse({
       data: result,
     });
@@ -100,7 +117,7 @@ export class TenantController {
     description: '根据临时ID获取工作流信息',
   })
   async getTemporaryWorkflowInfo(@Param('temporaryId') temporaryId: string) {
-    const result = await this.tenantService.getTemporaryWorkflowInfo(temporaryId);
+    const result = await this.temporaryWorkflowService.getTemporaryWorkflowInfo(temporaryId);
     return new SuccessResponse({
       data: result,
     });
@@ -112,7 +129,7 @@ export class TenantController {
     description: '执行指定的临时工作流',
   })
   async executeTemporaryWorkflow(@Param('temporaryId') temporaryId: string) {
-    const result = await this.tenantService.executeTemporaryWorkflow(temporaryId);
+    const result = await this.temporaryWorkflowService.executeTemporaryWorkflow(temporaryId);
     return new SuccessResponse({
       data: result,
     });
@@ -124,19 +141,19 @@ export class TenantController {
     description: '获取临时工作流的执行结果',
   })
   async getTemporaryWorkflowResult(@Param('temporaryId') temporaryId: string) {
-    const result = await this.tenantService.getTemporaryWorkflowResult(temporaryId);
+    const result = await this.temporaryWorkflowService.getTemporaryWorkflowResult(temporaryId);
     return new SuccessResponse({
       data: result,
     });
   }
 
-  @Post('/temporary-workflow/:temporaryId/execute-and-wait')
+  @Post('/temporary-workflow/:temporaryId/execute-sync')
   @ApiOperation({
     summary: '执行临时工作流并等待结果（支持租户鉴权）',
     description: '执行临时工作流并等待执行完成，返回最终结果',
   })
   async executeAndWaitForResult(@Param('temporaryId') temporaryId: string) {
-    const result = await this.tenantService.executeAndWaitForTemporaryWorkflow(temporaryId);
+    const result = await this.temporaryWorkflowService.executeAndWaitForTemporaryWorkflow(temporaryId);
     return new SuccessResponse({
       data: result,
     });

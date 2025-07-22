@@ -244,3 +244,7 @@ export type WorkflowExecutionOutput = Pick<Workflow, 'status' | 'startTime' | 'c
   teamId: string;
   searchableText?: string;
 };
+
+export type WorkflowExecutionOutputExtra = Omit<WorkflowExecutionOutput, 'teamId'> & {
+  version: number;
+};

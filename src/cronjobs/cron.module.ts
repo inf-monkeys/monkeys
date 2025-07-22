@@ -1,4 +1,5 @@
 import { ComfyuiModelModule } from '@/modules/assets/comfyui-model/comfyui-model.module';
+import { TemporaryWorkflowModule } from '@/modules/temporary-workflow/temporary-workflow.module';
 import { TenantModule } from '@/modules/tenant/tenant.module';
 import { ComfyUIModule } from '@/modules/tools/comfyui/comfyui.module';
 import { ToolsModule } from '@/modules/tools/tools.module';
@@ -22,6 +23,6 @@ import { WorkflowCronService } from './services/workflow.cron.service';
     FillWorkflowExecutionStatusCronService,
     TenantTemporaryWorkflowCleanupCronService,
   ],
-  imports: [ToolsModule, WorkflowModule, ComfyuiModelModule, ComfyUIModule, TenantModule],
+  imports: [ToolsModule, WorkflowModule, ComfyuiModelModule, ComfyUIModule, TenantModule, TemporaryWorkflowModule],
 })
 export class CronJobModule {}

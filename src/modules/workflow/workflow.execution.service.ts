@@ -16,13 +16,14 @@ import { FindWorkflowCondition, WorkflowRepository } from '@/database/repositori
 import { Task, Workflow } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InjectRepository } from '@nestjs/typeorm';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
-import { FindManyOptions, In, IsNull, Not } from 'typeorm';
+import { FindManyOptions, In, IsNull, Not, Repository } from 'typeorm';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
-import { DebugWorkflowRequest, StartWorkflowRequest, WorkflowExecutionOutput } from './interfaces';
+import { DebugWorkflowRequest, StartWorkflowRequest, WorkflowExecutionOutput, WorkflowExecutionOutputExtra } from './interfaces';
 import { WorkflowObservabilityService } from './workflow.observability.service';
 import { WorkflowTrackerService } from './workflow.tracker.service';
 
@@ -74,6 +75,8 @@ export class WorkflowExecutionService {
     @Inject(forwardRef(() => WorkflowTrackerService))
     private readonly workflowTrackerService: WorkflowTrackerService,
     private readonly workflowObservabilityService: WorkflowObservabilityService,
+    @InjectRepository(WorkflowExecutionEntity)
+    private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
   ) {}
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
@@ -445,6 +448,122 @@ export class WorkflowExecutionService {
       teamId: ctx?.teamId || teamId,
       extraMetadata,
     } as WorkflowExecutionOutput;
+  }
+  public async getWorkflowExecutionSimpleDetailFromDb(workflowInstanceId: string): Promise<WorkflowExecutionOutputExtra> {
+    const executionData = await this.workflowExecutionRepository.findOne({
+      where: {
+        workflowInstanceId,
+      },
+    });
+
+    const { input, output } = executionData;
+    const ctx = input?.['__context'];
+    const startByUserId = executionData.userId || ctx?.userId;
+
+    let alt: string | string[] | undefined;
+    const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, dataVal) => {
+      alt = dataVal;
+    });
+
+    const outputKeys = Object.keys(flattenOutput);
+    const outputValues = Object.values(flattenOutput);
+    const finalOutput = [];
+    let isInserted = false;
+
+    // 为每个 key-value 对单独处理
+    for (let i = 0; i < outputKeys.length; i++) {
+      const key = outputKeys[i];
+      const value = outputValues[i];
+
+      // 提取图片和视频
+      const images = extractImageUrls(value);
+      const videos = extractVideoUrls(value);
+
+      // 处理图片
+      for (const image of images) {
+        finalOutput.push({
+          type: 'image',
+          data: image,
+          alt,
+          key: key,
+        });
+        isInserted = true;
+      }
+
+      // 处理视频
+      for (const video of videos) {
+        finalOutput.push({
+          type: 'video',
+          data: video,
+          key: key,
+        });
+        isInserted = true;
+      }
+    }
+
+    // 如果没有图片和视频，处理文本或 JSON
+    if (!isInserted && output) {
+      if (typeof output === 'string') {
+        finalOutput.push({
+          type: 'text',
+          data: output,
+          key: 'root',
+        });
+      } else {
+        finalOutput.push({
+          type: 'json',
+          data: output,
+          key: 'root',
+        });
+      }
+      isInserted = true;
+    }
+
+    let formattedInput = null;
+    const definitions = await this.workflowRepository.findWorkflowByIds([executionData.workflowId]);
+
+    if (definitions.length > 0) {
+      const { variables } = definitions[0];
+      if (variables && input) {
+        formattedInput = Object.keys(input)
+          .filter((inputName) => !inputName.startsWith('__') && inputName !== 'extraMetadata')
+          .map((inputName) => {
+            const value = input[inputName];
+            const variable = variables.find((variable) => variable.name === inputName);
+            return {
+              id: inputName,
+              displayName: variable?.displayName || inputName,
+              description: variable?.description || '',
+              data: value,
+              type: getDataType(value),
+            };
+          });
+      }
+    }
+
+    // 从输入数据中提取 extraMetadata
+    let extraMetadata = input?.extraMetadata;
+    if (typeof extraMetadata === 'string' && extraMetadata !== '') {
+      try {
+        extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
+      } catch (e) {
+        // 如果解析失败，保持原始值
+        logger.warn('Failed to parse extraMetadata from base64', e);
+      }
+    }
+
+    return {
+      ..._.pick(executionData, ['status', 'createTime', 'startTime', 'updateTime', 'endTime']),
+      input: formattedInput,
+      rawInput: input,
+      output: finalOutput,
+      rawOutput: output,
+      workflowId: executionData.workflowId,
+      instanceId: executionData.workflowInstanceId,
+      userId: startByUserId,
+      extraMetadata,
+      version: executionData.workflowVersion,
+    } as WorkflowExecutionOutputExtra;
   }
 
   public async getAllWorkflowsExecutionOutputs(

@@ -1,27 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateTemporaryWorkflowDto {
-  @ApiProperty({
-    description: '工作流ID',
-    required: true,
-    type: String,
-  })
-  workflowId: string;
-
-  @ApiProperty({
-    description: '工作流版本，默认为最新版本',
-    required: false,
-    type: Number,
-  })
-  workflowVersion?: number;
-
-  @ApiProperty({
-    description: '输入数据',
-    required: false,
-    type: Object,
-  })
-  inputData?: Record<string, any>;
-
+export class CreateTemporaryWorkflowBaseDto {
   @ApiProperty({
     description: '过期时间（小时），默认24小时',
     required: false,
@@ -43,4 +22,36 @@ export class CreateTemporaryWorkflowDto {
     type: String,
   })
   userId?: string;
+}
+
+export class CreateTemporaryWorkflowDto extends CreateTemporaryWorkflowBaseDto {
+  @ApiProperty({
+    description: '工作流ID',
+    required: true,
+    type: String,
+  })
+  workflowId: string;
+
+  @ApiProperty({
+    description: '工作流版本，默认为最新版本',
+    required: false,
+    type: Number,
+  })
+  workflowVersion?: number;
+
+  @ApiProperty({
+    description: '输入数据',
+    required: false,
+    type: Object,
+  })
+  inputData?: Record<string, any>;
+}
+
+export class CreateTemporaryWorkflowByInstanceDto extends CreateTemporaryWorkflowBaseDto {
+  @ApiProperty({
+    description: '实例ID',
+    required: true,
+    type: String,
+  })
+  workflowInstanceId: string;
 }

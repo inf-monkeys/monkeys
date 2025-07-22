@@ -2,6 +2,7 @@ import { CommonModule } from '@/common/common.module';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
+import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { forwardRef, Module } from '@nestjs/common';
@@ -79,7 +80,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
   imports: [
     ConductorModule,
     forwardRef(() => AssetsModule),
-    TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity, DesignMetadataEntity, DesignProjectEntity]),
+    TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity, DesignMetadataEntity, DesignProjectEntity, WorkflowExecutionEntity]),
     ToolsModule,
     CommonModule,
     MarketplaceModule,
