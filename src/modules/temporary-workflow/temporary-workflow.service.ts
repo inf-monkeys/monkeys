@@ -5,7 +5,9 @@ import { WorkflowRepository } from '@/database/repositories/workflow.repository'
 import { WorkflowTriggerType } from '@inf-monkeys/monkeys';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import _ from 'lodash';
 import { Repository } from 'typeorm';
+import { ConductorService } from '../workflow/conductor/conductor.service';
 import { CreateTemporaryWorkflowByInstanceDto, CreateTemporaryWorkflowDto } from '../workflow/dto/req/create-temporary-workflow.dto';
 import { WorkflowExecutionService } from '../workflow/workflow.execution.service';
 
@@ -16,6 +18,7 @@ export class TemporaryWorkflowService {
     private readonly temporaryWorkflowRepository: Repository<TemporaryWorkflowEntity>,
     private readonly workflowExecutionService: WorkflowExecutionService,
     private readonly workflowRepository: WorkflowRepository,
+    private readonly conductorService: ConductorService,
   ) {}
 
   // 临时工作流相关方法
@@ -53,7 +56,11 @@ export class TemporaryWorkflowService {
       userId,
       status: 'PENDING',
       expiresAt,
-      inputData,
+      inputData: inputData as unknown as {
+        id: string;
+        data: any;
+        [key: string]: any;
+      }[],
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,
@@ -91,7 +98,11 @@ export class TemporaryWorkflowService {
       userId,
       status: 'PENDING',
       expiresAt,
-      inputData: instance.input,
+      inputData: instance.input as unknown as {
+        id: string;
+        data: any;
+        [key: string]: any;
+      }[],
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,
@@ -135,7 +146,7 @@ export class TemporaryWorkflowService {
   /**
    * 执行临时工作流
    */
-  async executeTemporaryWorkflow(temporaryId: string, teamId?: string, userId?: string): Promise<{ workflowInstanceId: string }> {
+  async executeTemporaryWorkflow(temporaryId: string, originalInputData?: Record<string, any>, teamId?: string, userId?: string): Promise<{ workflowInstanceId: string }> {
     const temporaryWorkflow = await this.getTemporaryWorkflowByTemporaryId(temporaryId);
 
     if (temporaryWorkflow.status !== 'PENDING') {
@@ -153,20 +164,43 @@ export class TemporaryWorkflowService {
     );
 
     try {
+      const originWorkflow = await this.workflowRepository.getWorkflowById(temporaryWorkflow.workflowId, temporaryWorkflow.workflowVersion);
+
       // 执行工作流
-      const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
+      await this.conductorService.saveWorkflowInConductor({
+        workflowId: temporaryWorkflow.temporaryId,
         teamId: teamId || temporaryWorkflow.teamId,
-        userId: userId || temporaryWorkflow.userId,
-        workflowId: temporaryWorkflow.workflowId,
-        inputData: temporaryWorkflow.inputData || {},
+        tasks: originWorkflow.tasks,
+        output: originWorkflow.output,
         version: temporaryWorkflow.workflowVersion,
-        triggerType: WorkflowTriggerType.MANUALLY,
-        group: `temporary-${temporaryId}`,
-        extraMetadata: {
-          source: 'temporary-workflow',
-          temporaryId,
-        },
       });
+
+      const inputData = _.merge(
+        temporaryWorkflow.inputData
+          ? temporaryWorkflow.inputData.reduce((acc, curr) => {
+              acc[curr.id] = curr.data;
+              return acc;
+            }, {})
+          : {},
+        originalInputData,
+      );
+
+      const workflowInstanceId = await this.workflowExecutionService.startWorkflow(
+        {
+          teamId: teamId || temporaryWorkflow.teamId,
+          userId: userId || temporaryWorkflow.userId,
+          workflowId: temporaryWorkflow.temporaryId,
+          inputData,
+          version: temporaryWorkflow.workflowVersion,
+          triggerType: WorkflowTriggerType.MANUALLY,
+          group: `temporary-${temporaryId}`,
+          extraMetadata: {
+            source: 'temporary-workflow',
+            temporaryId,
+          },
+        },
+        true,
+      );
 
       // 更新临时工作流记录
       await this.temporaryWorkflowRepository.update(
@@ -252,9 +286,9 @@ export class TemporaryWorkflowService {
   /**
    * 执行并等待临时工作流结果
    */
-  async executeAndWaitForTemporaryWorkflow(temporaryId: string, teamId?: string, userId?: string): Promise<any> {
+  async executeAndWaitForTemporaryWorkflow(temporaryId: string, inputData: Record<string, any>, teamId?: string, userId?: string): Promise<any> {
     // 先执行工作流
-    await this.executeTemporaryWorkflow(temporaryId, teamId, userId);
+    await this.executeTemporaryWorkflow(temporaryId, inputData, teamId, userId);
 
     // 等待执行完成
     let result;

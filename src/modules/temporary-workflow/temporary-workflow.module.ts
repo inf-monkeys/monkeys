@@ -2,13 +2,15 @@ import { TemporaryWorkflowEntity } from '@/database/entities/workflow/temporary-
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConductorModule } from '../workflow/conductor/conductor.module';
 import { WorkflowModule } from '../workflow/workflow.module';
+import { TemporaryWorkflowController } from './temporary-workflow.controller';
 import { TemporaryWorkflowService } from './temporary-workflow.service';
 
 @Module({
-  controllers: [],
+  controllers: [TemporaryWorkflowController],
   providers: [TemporaryWorkflowService],
-  imports: [TypeOrmModule.forFeature([WorkflowExecutionEntity, TemporaryWorkflowEntity]), WorkflowModule],
+  imports: [TypeOrmModule.forFeature([WorkflowExecutionEntity, TemporaryWorkflowEntity]), WorkflowModule, ConductorModule],
   exports: [TemporaryWorkflowService],
 })
 export class TemporaryWorkflowModule {}

@@ -61,7 +61,11 @@ export class TemporaryWorkflowEntity extends BaseEntity {
     nullable: true,
     comment: '输入数据',
   })
-  inputData?: Record<string, any>;
+  inputData?: {
+    id: string;
+    data: any;
+    [key: string]: any;
+  }[];
 
   @Column({
     name: 'output_data',

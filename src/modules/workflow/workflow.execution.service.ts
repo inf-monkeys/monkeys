@@ -902,7 +902,7 @@ export class WorkflowExecutionService {
     return await this.conductorService.deleteWorkflowExecution(workflowInstanceId);
   }
 
-  public async startWorkflow(request: StartWorkflowRequest) {
+  public async startWorkflow(request: StartWorkflowRequest, temp = false) {
     const { teamId, userId, triggerType, chatSessionId, apiKey, group } = request;
 
     // 解码 extraMetadata
@@ -936,16 +936,30 @@ export class WorkflowExecutionService {
     if (!version) {
       version = await this.workflowRepository.getMaxVersion(workflowId);
     }
-    const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
 
-    if (workflow.isRateLimitEnabled()) {
-      const can = await this.rateLimiter.can(`workflow_execitions:${workflowId}:${version}`, workflow.rateLimiter.windowMs, workflow.rateLimiter.max);
-      if (!can) {
-        throw new TooManyRequestsException();
+    const extra: Partial<Pick<WorkflowExecutionEntity, 'chatSessionId' | 'group'>> = {};
+
+    if (!temp) {
+      const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
+
+      if (workflow.isRateLimitEnabled()) {
+        const can = await this.rateLimiter.can(`workflow_execitions:${workflowId}:${version}`, workflow.rateLimiter.windowMs, workflow.rateLimiter.max);
+        if (!can) {
+          throw new TooManyRequestsException();
+        }
       }
-    }
-    if (!workflow) {
-      throw new Error('Workflow not exists');
+      if (!workflow) {
+        throw new Error('Workflow not exists');
+      }
+
+      const originalWorkflowIdForShortcut = workflow.workflowId;
+
+      const convertedWorkflow = await this.workflowRepository.convertWorkflowWhitShortcutsFlowId(workflow, version, true);
+      if (convertedWorkflow) {
+        extra['group'] = `shortcut-${originalWorkflowIdForShortcut}`;
+        workflowId = convertedWorkflow.workflowId;
+        version = convertedWorkflow.version;
+      }
     }
 
     let { inputData = {} } = request;
@@ -953,21 +967,11 @@ export class WorkflowExecutionService {
       throw new Error('inputData 不能包含内置参数 __context');
     }
 
-    const extra: Partial<Pick<WorkflowExecutionEntity, 'chatSessionId' | 'group'>> = {};
     if (chatSessionId) {
       extra['chatSessionId'] = chatSessionId;
     }
     if (group) {
       extra['group'] = group;
-    }
-
-    const originalWorkflowIdForShortcut = workflow.workflowId;
-
-    const convertedWorkflow = await this.workflowRepository.convertWorkflowWhitShortcutsFlowId(workflow, version, true);
-    if (convertedWorkflow) {
-      extra['group'] = `shortcut-${originalWorkflowIdForShortcut}`;
-      workflowId = convertedWorkflow.workflowId;
-      version = convertedWorkflow.version;
     }
 
     inputData = {

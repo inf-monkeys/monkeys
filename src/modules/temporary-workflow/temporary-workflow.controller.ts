@@ -2,7 +2,7 @@ import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { TemporaryWorkflowService } from './temporary-workflow.service';
 
@@ -10,15 +10,28 @@ import { TemporaryWorkflowService } from './temporary-workflow.service';
 export class TemporaryWorkflowController {
   constructor(private readonly temporaryWorkflowService: TemporaryWorkflowService) {}
 
+  @Get('/:temporaryId')
+  @ApiOperation({
+    summary: '获取临时工作流信息（支持租户鉴权）',
+    description: '根据临时ID获取工作流信息',
+  })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
+  async getTemporaryWorkflowInfo(@Param('temporaryId') temporaryId: string) {
+    const result = await this.temporaryWorkflowService.getTemporaryWorkflowInfo(temporaryId);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
   @Post('/:temporaryId/execute')
   @ApiOperation({
     summary: '执行临时工作流',
     description: '执行指定的临时工作流',
   })
   @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
-  async executeTemporaryWorkflow(@Req() req: IRequest, @Param('temporaryId') temporaryId: string) {
+  async executeTemporaryWorkflow(@Req() req: IRequest, @Param('temporaryId') temporaryId: string, @Body() body: { inputData: Record<string, any> }) {
     const { teamId, userId } = req;
-    const result = await this.temporaryWorkflowService.executeTemporaryWorkflow(temporaryId, teamId, userId);
+    const result = await this.temporaryWorkflowService.executeTemporaryWorkflow(temporaryId, body.inputData, teamId, userId);
     return new SuccessResponse({
       data: result,
     });
@@ -43,9 +56,9 @@ export class TemporaryWorkflowController {
     description: '执行临时工作流并等待执行完成，返回最终结果',
   })
   @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
-  async executeAndWaitForResult(@Req() req: IRequest, @Param('temporaryId') temporaryId: string) {
+  async executeAndWaitForResult(@Req() req: IRequest, @Param('temporaryId') temporaryId: string, @Body() body: { inputData: Record<string, any> }) {
     const { teamId, userId } = req;
-    const result = await this.temporaryWorkflowService.executeAndWaitForTemporaryWorkflow(temporaryId, teamId, userId);
+    const result = await this.temporaryWorkflowService.executeAndWaitForTemporaryWorkflow(temporaryId, body.inputData, teamId, userId);
     return new SuccessResponse({
       data: result,
     });

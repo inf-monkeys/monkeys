@@ -111,7 +111,7 @@ export class TenantController {
     });
   }
 
-  @Get('/temporary-workflow/:temporaryId/info')
+  @Get('/temporary-workflow/:temporaryId')
   @ApiOperation({
     summary: '获取临时工作流信息（支持租户鉴权）',
     description: '根据临时ID获取工作流信息',
@@ -128,8 +128,8 @@ export class TenantController {
     summary: '执行临时工作流（支持租户鉴权）',
     description: '执行指定的临时工作流',
   })
-  async executeTemporaryWorkflow(@Param('temporaryId') temporaryId: string) {
-    const result = await this.temporaryWorkflowService.executeTemporaryWorkflow(temporaryId);
+  async executeTemporaryWorkflow(@Param('temporaryId') temporaryId: string, @Body() body: { inputData: Record<string, any> }) {
+    const result = await this.temporaryWorkflowService.executeTemporaryWorkflow(temporaryId, body.inputData);
     return new SuccessResponse({
       data: result,
     });
@@ -152,8 +152,8 @@ export class TenantController {
     summary: '执行临时工作流并等待结果（支持租户鉴权）',
     description: '执行临时工作流并等待执行完成，返回最终结果',
   })
-  async executeAndWaitForResult(@Param('temporaryId') temporaryId: string) {
-    const result = await this.temporaryWorkflowService.executeAndWaitForTemporaryWorkflow(temporaryId);
+  async executeAndWaitForResult(@Param('temporaryId') temporaryId: string, @Body() body: { inputData: Record<string, any> }) {
+    const result = await this.temporaryWorkflowService.executeAndWaitForTemporaryWorkflow(temporaryId, body.inputData);
     return new SuccessResponse({
       data: result,
     });
