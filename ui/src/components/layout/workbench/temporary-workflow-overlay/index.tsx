@@ -228,10 +228,10 @@ export const TemporaryWorkflowOverlay: React.FC<TemporaryWorkflowOverlayProps> =
   return temporaryWorkflowId ? (
     <VinesFlowProvider workflowId={temporaryWorkflowId}>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className={cn('pb-8', mode === 'mini' && 'flex h-full flex-col')}>
+        <DialogContent className={cn('min-h-64 pb-8', mode === 'mini' && 'flex h-full flex-col')}>
           {isExecuting ? (
             result && ['COMPLETED', 'FAILED', 'CANCELLED'].includes(result.status) ? (
-              <>
+              <div className="grid max-h-[calc(100vh-4rem)] grid-cols-2 gap-global overflow-y-auto">
                 {result.output.map((it) => {
                   return (
                     <ExecutionResultItem
@@ -248,7 +248,7 @@ export const TemporaryWorkflowOverlay: React.FC<TemporaryWorkflowOverlayProps> =
                     />
                   );
                 })}
-              </>
+              </div>
             ) : (
               <VinesLoading className="vines-center absolute left-0 top-0 size-full" />
             )

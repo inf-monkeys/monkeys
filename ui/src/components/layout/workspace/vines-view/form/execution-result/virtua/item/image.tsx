@@ -15,7 +15,6 @@ import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { useCopy } from '@/hooks/use-copy.ts';
 import useUrlState from '@/hooks/use-url-state';
 import { useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
-import { useFlowStore } from '@/store/useFlowStore';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 import { IClickBehavior } from '../../grid/item';
@@ -40,6 +39,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   clickBehavior?: IClickBehavior;
   event$?: EventEmitter<void>;
   data: IVinesExecutionResultItem;
+  workflowId?: string;
 }
 
 export function getThumbUrl(url: string) {
@@ -59,11 +59,11 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   clickBehavior,
   event$,
   data,
+  workflowId,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { copy } = useCopy();
-  const workflowId = useFlowStore((s) => s.workflowId);
   const { images, setPosition } = useExecutionImageResultStore();
 
   const altLabel = isObject(alt) ? alt.label.toString() : alt;

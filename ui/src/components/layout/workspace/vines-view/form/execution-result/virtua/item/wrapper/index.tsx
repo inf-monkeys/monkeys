@@ -55,21 +55,35 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   const { vines } = useVinesFlow();
 
   const { t } = useTranslation();
-  const handleDownload = useMemoizedFn(() => {
+  const handleDownload = useMemoizedFn(async () => {
     if (!src) return;
 
-    // 创建一个a标签在新窗口打开图片
-    try {
-      const link = document.createElement('a');
-      link.href = src;
-      link.setAttribute('download', '');
-      link.setAttribute('rel', 'noreferrer');
-      link.click();
+    toast.promise(
+      async () => {
+        // 使用 fetch 获取图片数据
+        const response = await fetch(src);
+        const blob = await response.blob();
 
-      toast.success(t('common.utils.download.success'));
-    } catch (error) {
-      toast.error(t('common.utils.download.error'));
-    }
+        // 创建 blob URL
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        // 创建下载链接并触发下载
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = src.split('/').pop() || 'image'; // 提取文件名或使用默认名称
+        document.body.appendChild(link);
+        link.click();
+
+        // 清理
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      },
+      {
+        success: t('common.utils.download.success'),
+        error: t('common.utils.download.error'),
+        loading: t('common.utils.download.loading'),
+      },
+    );
   });
 
   const handleDelete = useMemoizedFn(() => {
@@ -116,13 +130,6 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
       }
     });
   });
-
-  const handleShowInput = () => {
-    event$?.emit?.({
-      type: 'set',
-      data: data.input,
-    });
-  };
 
   return (
     <div className="group/vgi relative flex h-full flex-1 flex-col" onClick={onClick}>

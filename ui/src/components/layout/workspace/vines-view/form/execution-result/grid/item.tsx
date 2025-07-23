@@ -27,6 +27,7 @@ interface IExecutionResultItemProps {
   onSelect?: (renderKey: string) => void;
   clickBehavior?: IClickBehavior;
   selectionModeDisplayType?: ISelectionModeDisplayType;
+  workflowId?: string;
 }
 
 export type IClickBehavior = 'preview' | 'select' | 'fill-form';
@@ -43,6 +44,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   onSelect,
   clickBehavior = 'preview',
   selectionModeDisplayType = 'dropdown-menu',
+  workflowId,
 }) => {
   const { render } = result;
   const { type, data, status } = render;
@@ -121,6 +123,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
                 clickBehavior={clickBehavior}
                 event$={event$}
                 data={result}
+                workflowId={workflowId}
               />
               {renderSelectionOverlay()}
             </div>

@@ -166,6 +166,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           onSelect={(id) => toggleOutputSelection(id, item)}
           clickBehavior={clickBehavior}
           selectionModeDisplayType={selectionModeDisplayType}
+          workflowId={workflowId ?? undefined}
         />
       ),
       [data, deletedInstanceIdList, isSelectionMode, selectedOutputs, toggleOutputSelection],
