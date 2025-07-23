@@ -238,11 +238,13 @@ export type DebugWorkflowDto = Omit<DebugWorkflowRequest, 'teamId' | 'userId' | 
 export type WorkflowExecutionOutput = Pick<Workflow, 'status' | 'startTime' | 'createTime' | 'updateTime' | 'endTime' | 'workflowId' | 'output' | 'input'> & {
   output: any[];
   rawOutput: Record<string, any>;
+  rawInput?: Record<string, any>;
   workflowId: string;
   instanceId: string;
   userId: string;
   teamId: string;
   searchableText?: string;
+  extraMetadata?: Record<string, any>;
 };
 
 export type WorkflowExecutionOutputExtra = Omit<WorkflowExecutionOutput, 'teamId'> & {

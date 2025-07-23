@@ -257,11 +257,20 @@ export class TemporaryWorkflowService {
           const newStatus = result.status === 'COMPLETED' ? 'COMPLETED' : result.status === 'FAILED' ? 'FAILED' : 'RUNNING';
 
           if (newStatus !== temporaryWorkflow.status) {
+            // 保存完整的结果数据
             await this.temporaryWorkflowRepository.update(
               { id: temporaryWorkflow.id },
               {
                 status: newStatus,
                 outputData: result.rawOutput,
+                rawInput: result.rawInput,
+                formattedOutput: result.output,
+                createTime: result.createTime,
+                startTime: result.startTime,
+                updateTime: result.updateTime,
+                endTime: result.endTime,
+                instanceId: result.instanceId,
+                extraMetadata: result.extraMetadata,
                 completionTime: newStatus === 'COMPLETED' || newStatus === 'FAILED' ? Date.now() : undefined,
                 updatedTimestamp: Date.now(),
               },
@@ -280,13 +289,22 @@ export class TemporaryWorkflowService {
       };
     }
 
-    // 返回已保存的结果
+    // 返回已保存的完整结果，保持与实时数据相同的结构
     return {
       status: temporaryWorkflow.status,
-      output: temporaryWorkflow.outputData,
-      error: temporaryWorkflow.errorMessage,
-      executionTime: temporaryWorkflow.executionTime,
-      completionTime: temporaryWorkflow.completionTime,
+      createTime: temporaryWorkflow.createTime,
+      startTime: temporaryWorkflow.startTime,
+      updateTime: temporaryWorkflow.updateTime,
+      endTime: temporaryWorkflow.endTime,
+      input: temporaryWorkflow.inputData,
+      rawInput: temporaryWorkflow.rawInput,
+      output: temporaryWorkflow.formattedOutput || temporaryWorkflow.outputData,
+      rawOutput: temporaryWorkflow.outputData,
+      workflowId: temporaryWorkflow.workflowId,
+      instanceId: temporaryWorkflow.instanceId || temporaryWorkflow.workflowInstanceId,
+      userId: temporaryWorkflow.userId,
+      teamId: temporaryWorkflow.teamId,
+      extraMetadata: temporaryWorkflow.extraMetadata,
     };
   }
 

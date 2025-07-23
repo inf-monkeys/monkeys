@@ -95,4 +95,68 @@ export class TemporaryWorkflowEntity extends BaseEntity {
     comment: '完成时间戳',
   })
   completionTime?: number;
+
+  // 新增字段：保存完整的工作流执行结果
+  @Column({
+    name: 'raw_input',
+    type: 'jsonb',
+    nullable: true,
+    comment: '原始输入数据',
+  })
+  rawInput?: Record<string, any>;
+
+  @Column({
+    name: 'formatted_output',
+    type: 'jsonb',
+    nullable: true,
+    comment: '格式化输出数据（数组格式）',
+  })
+  formattedOutput?: any[];
+
+  @Column({
+    name: 'create_time',
+    type: 'bigint',
+    nullable: true,
+    comment: '创建时间戳',
+  })
+  createTime?: number;
+
+  @Column({
+    name: 'start_time',
+    type: 'bigint',
+    nullable: true,
+    comment: '开始时间戳',
+  })
+  startTime?: number;
+
+  @Column({
+    name: 'update_time',
+    type: 'bigint',
+    nullable: true,
+    comment: '更新时间戳',
+  })
+  updateTime?: number;
+
+  @Column({
+    name: 'end_time',
+    type: 'bigint',
+    nullable: true,
+    comment: '结束时间戳',
+  })
+  endTime?: number;
+
+  @Column({
+    name: 'instance_id',
+    nullable: true,
+    comment: '工作流实例ID',
+  })
+  instanceId?: string;
+
+  @Column({
+    name: 'extra_metadata',
+    type: 'jsonb',
+    nullable: true,
+    comment: '额外元数据',
+  })
+  extraMetadata?: Record<string, any>;
 }
