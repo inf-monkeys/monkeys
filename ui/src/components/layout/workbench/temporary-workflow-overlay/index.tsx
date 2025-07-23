@@ -22,7 +22,6 @@ import { Label } from '@/components/ui/label';
 import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
-import { useElementSize } from '@/hooks/use-resize-observer';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form';
@@ -61,9 +60,7 @@ export const TemporaryWorkflowOverlay: React.FC<TemporaryWorkflowOverlayProps> =
 
   const isMiniFrame = mode === 'mini';
 
-  const { ref, height: divHeight } = useElementSize();
-
-  const height = divHeight - 16;
+  const height = 'calc(100vh-4rem)';
 
   const form = useForm<IWorkflowInputForm>({
     resolver: zodResolver(workflowInputFormSchema),
@@ -257,10 +254,13 @@ export const TemporaryWorkflowOverlay: React.FC<TemporaryWorkflowOverlayProps> =
             )
           ) : (
             <>
-              <div ref={ref} className={cn('grid size-full grid-cols-5', isMiniFrame && 'grid-cols-1')}>
+              <div>
                 <Form {...form}>
                   <form
-                    className={cn('relative flex flex-col gap-global')}
+                    className={cn(
+                      'flex flex-col gap-global',
+                      isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-global transition-opacity',
+                    )}
                     onSubmit={handleSubmit}
                     onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
                   >
