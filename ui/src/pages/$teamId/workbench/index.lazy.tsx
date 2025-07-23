@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { createLazyFileRoute } from '@tanstack/react-router';
 
 import { HistoryResult } from '@/components/layout/workbench/history';
 import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
+import { TemporaryWorkflowOverlay } from '@/components/layout/workbench/temporary-workflow-overlay';
 import { WorkbenchView } from '@/components/layout/workbench/view';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useGlobalViewSize, useSidebarCollapsed } from '@/store/useGlobalViewStore';
@@ -14,9 +15,14 @@ export const Workbench: React.FC = () => {
   const sidebarCollapsed = useSidebarCollapsed();
   // const { data: oem } = useSystemConfig();
 
-  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini'; showGroup: boolean }>({
+  const [{ mode, temporaryWorkflowId }] = useUrlState<{
+    mode: 'normal' | 'fast' | 'mini';
+    showGroup: boolean;
+    temporaryWorkflowId?: string;
+  }>({
     mode: 'normal',
     showGroup: false,
+    temporaryWorkflowId: undefined,
   });
 
   const showGroup = true;
@@ -32,6 +38,14 @@ export const Workbench: React.FC = () => {
 
   const globalViewSize = useGlobalViewSize();
 
+  const [temporaryWorkflowDialogOpen, setTemporaryWorkflowDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (temporaryWorkflowId) {
+      setTemporaryWorkflowDialogOpen(true);
+    }
+  }, [temporaryWorkflowId]);
+
   return (
     <main className="relative flex size-full gap-global">
       <WorkbenchSidebar mode={mode} showGroup={showGroup} collapsed={sidebarCollapsed} />
@@ -39,6 +53,12 @@ export const Workbench: React.FC = () => {
         <WorkbenchView mode={mode} />
         {mode !== 'mini' && globalViewSize !== 'sm' && <HistoryResult />}
       </div>
+      <TemporaryWorkflowOverlay
+        mode={mode}
+        temporaryWorkflowId={temporaryWorkflowId}
+        open={temporaryWorkflowDialogOpen}
+        setOpen={setTemporaryWorkflowDialogOpen}
+      />
     </main>
   );
 };

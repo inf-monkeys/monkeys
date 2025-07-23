@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 
-import { useSWRConfig } from 'swr';
-
 import { useDebounceFn, useEventEmitter, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isBoolean } from 'lodash';
@@ -15,24 +13,20 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useClipboard } from '@/hooks/use-clipboard';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
-import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { cn } from '@/utils';
 
 interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
-  setHistoryVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  onWorkflowStart?: () => void;
   isMiniFrame?: boolean;
   event$: EventEmitter<void>;
   height: number;
 }
 
-export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, setHistoryVisible, event$, height }) => {
-  const { mutate } = useSWRConfig();
+export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, event$, height, onWorkflowStart }) => {
   const { t } = useTranslation();
 
   const { data: oem } = useSystemConfig();
-
-  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   const { vines } = useVinesFlow();
 
@@ -67,8 +61,6 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
 
     event$.emit?.();
 
-    console.log('inputData', inputData);
-
     vines
       .start({ inputData, onlyStart: true })
       .then((status) => {
@@ -78,7 +70,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
             oem?.theme?.views?.form?.toast?.afterCreate != false
           )
             toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
-          setHistoryVisible(true);
+
+          onWorkflowStart?.();
           event$.emit?.();
         }
       })

@@ -26,7 +26,7 @@ export class TemporaryWorkflowService {
    * 创建临时工作流
    */
   async createTemporaryWorkflow(dto: CreateTemporaryWorkflowDto): Promise<{ temporaryId: string }> {
-    const { workflowId, workflowVersion, inputData, expiresInHours = 24, teamId = 'default', userId = 'default' } = dto;
+    const { workflowId, workflowVersion, inputData: originalInputData, expiresInHours = 24, teamId = 'default', userId = 'default' } = dto;
 
     // 验证工作流是否存在
     const version = workflowVersion || (await this.workflowRepository.getMaxVersion(workflowId));
@@ -46,6 +46,11 @@ export class TemporaryWorkflowService {
     // 计算过期时间
     const expiresAt = Date.now() + expiresInHours * 60 * 60 * 1000;
 
+    const inputData = workflow.variables.map((variable) => ({
+      ...variable,
+      default: originalInputData[variable.name] || variable.default,
+    }));
+
     // 创建临时工作流记录
     const temporaryWorkflow = this.temporaryWorkflowRepository.create({
       id: generateDbId(),
@@ -56,11 +61,7 @@ export class TemporaryWorkflowService {
       userId,
       status: 'PENDING',
       expiresAt,
-      inputData: inputData as unknown as {
-        id: string;
-        data: any;
-        [key: string]: any;
-      }[],
+      inputData,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,
@@ -82,6 +83,16 @@ export class TemporaryWorkflowService {
       throw new NotFoundException('实例不存在');
     }
 
+    const workflow = await this.workflowRepository.getWorkflowById(instance.workflowId, instance.version);
+    if (!workflow) {
+      throw new NotFoundException('工作流不存在');
+    }
+
+    const inputData = workflow.variables.map((variable) => ({
+      ...variable,
+      default: instance.input.find((input) => input.id === variable.name)?.data || variable.default,
+    }));
+
     // 生成临时ID
     const temporaryId = generateDbId();
 
@@ -98,11 +109,7 @@ export class TemporaryWorkflowService {
       userId,
       status: 'PENDING',
       expiresAt,
-      inputData: instance.input as unknown as {
-        id: string;
-        data: any;
-        [key: string]: any;
-      }[],
+      inputData,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,
@@ -178,7 +185,7 @@ export class TemporaryWorkflowService {
       const inputData = _.merge(
         temporaryWorkflow.inputData
           ? temporaryWorkflow.inputData.reduce((acc, curr) => {
-              acc[curr.id] = curr.data;
+              acc[curr.name] = curr.default;
               return acc;
             }, {})
           : {},

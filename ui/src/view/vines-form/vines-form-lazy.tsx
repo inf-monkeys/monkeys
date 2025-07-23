@@ -65,7 +65,9 @@ const VinesForm: React.FC = () => {
             vinesIFrameVisible && !isMiniFrame && 'pr-global',
           )}
           isMiniFrame={isMiniFrame}
-          setHistoryVisible={setHistoryVisible}
+          onWorkflowStart={() => {
+            setHistoryVisible(true);
+          }}
           event$={event$}
           height={height}
         />

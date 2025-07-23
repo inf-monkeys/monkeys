@@ -1,3 +1,4 @@
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
@@ -61,11 +62,7 @@ export class TemporaryWorkflowEntity extends BaseEntity {
     nullable: true,
     comment: '输入数据',
   })
-  inputData?: {
-    id: string;
-    data: any;
-    [key: string]: any;
-  }[];
+  inputData?: ToolProperty[];
 
   @Column({
     name: 'output_data',

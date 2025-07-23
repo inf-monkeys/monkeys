@@ -38,7 +38,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   isSelectionMode?: boolean;
   onSelect?: (e: React.MouseEvent) => void;
   clickBehavior?: IClickBehavior;
-  event$: EventEmitter<void>;
+  event$?: EventEmitter<void>;
   data: IVinesExecutionResultItem;
 }
 
@@ -106,7 +106,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
       onSelect(e);
     }
     if (clickBehavior === 'fill-form' && event$) {
-      event$.emit({
+      event$?.emit?.({
         type: 'set',
         data: data.input,
       });

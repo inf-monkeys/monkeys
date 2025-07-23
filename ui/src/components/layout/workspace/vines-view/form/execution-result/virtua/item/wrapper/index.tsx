@@ -5,7 +5,7 @@ import { SWRInfiniteResponse } from 'swr/infinite';
 import { useMemoizedFn } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isBoolean } from 'lodash';
-import { Download, Ellipsis, Eye, RotateCcw, Square, SquareCheck, Trash } from 'lucide-react';
+import { Download, Ellipsis, RotateCcw, Square, SquareCheck, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -27,7 +27,7 @@ interface IVirtuaExecutionResultGridWrapperProps {
   data: IVinesExecutionResultItem;
   children: React.ReactNode;
   src?: string;
-  event$: EventEmitter<void>;
+  event$?: EventEmitter<void>;
   addDeletedInstanceId?: IAddDeletedInstanceId;
   mutate?: SWRInfiniteResponse['mutate'];
   onSelect?: (renderKey: string) => void;
@@ -112,13 +112,13 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
         )
           toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
         handleDelete();
-        event$.emit?.();
+        event$?.emit?.();
       }
     });
   });
 
   const handleShowInput = () => {
-    event$.emit({
+    event$?.emit?.({
       type: 'set',
       data: data.input,
     });
@@ -149,7 +149,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           </Tooltip>
         )}
 
-        <Tooltip>
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button
               className={OPERATION_ICON_BUTTON_CLASSNAME}
@@ -163,7 +163,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
             />
           </TooltipTrigger>
           <TooltipContent>Show Input</TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
 
         {src && (
           <Tooltip>

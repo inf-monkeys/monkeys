@@ -18,7 +18,7 @@ import { VirtuaExecutionResultGridWrapper } from '../virtua/item/wrapper';
 
 interface IExecutionResultItemProps {
   result: IVinesExecutionResultItem;
-  event$: EventEmitter<void>;
+  event$?: EventEmitter<void>;
   isDeleted?: boolean;
   addDeletedInstanceId?: IAddDeletedInstanceId;
   mutate?: SWRInfiniteResponse['mutate'];
