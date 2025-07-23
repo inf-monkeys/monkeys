@@ -1,11 +1,15 @@
+import { config } from '@/common/config';
 import { MigrationInterface, QueryRunner } from 'typeorm';
+
+const appId = config.server.appId;
+const tableName = `${appId}_temporary_workflows`;
 
 export class AddCompleteResultFieldsToTemporaryWorkflow1752000000002 implements MigrationInterface {
   name = 'AddCompleteResultFieldsToTemporaryWorkflow1752000000002';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      ALTER TABLE "temporary_workflows" 
+      ALTER TABLE "${tableName}" 
       ADD COLUMN "raw_input" JSONB,
       ADD COLUMN "formatted_output" JSONB,
       ADD COLUMN "create_time" BIGINT,
@@ -19,7 +23,7 @@ export class AddCompleteResultFieldsToTemporaryWorkflow1752000000002 implements 
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      ALTER TABLE "temporary_workflows" 
+      ALTER TABLE "${tableName}" 
       DROP COLUMN "raw_input",
       DROP COLUMN "formatted_output",
       DROP COLUMN "create_time",
