@@ -4,7 +4,6 @@ import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { extractImageUrls, flattenKeys, flattenObject, flattenObjectToSearchableText, getDataType } from '@/common/utils';
-import { TemporaryWorkflowEntity } from '@/database/entities/workflow/temporary-workflow.entity';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { FindWorkflowCondition, WorkflowRepository } from '@/database/repositories/workflow.repository';
@@ -20,7 +19,6 @@ export class TenantService {
   constructor(
     @InjectRepository(WorkflowExecutionEntity)
     private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
-    @InjectRepository(TemporaryWorkflowEntity)
     private readonly workflowRepository: WorkflowRepository,
   ) {}
 
