@@ -186,12 +186,16 @@ export class TenantService {
   }
 
   async findAll() {
-    const totalExecutions = await this.workflowExecutionRepository.find();
+    const totalExecutions = await this.workflowExecutionRepository.find({
+      where: {
+        isTemporary: false,
+      },
+    });
 
     return {
       workflow: {
         execution: {
-          // 从数据库拿到的是所有的统计
+          // 从数据库拿到的是所有的统计（排除临时工作流）
           total: {
             count: totalExecutions.length,
             success: totalExecutions.filter((e) => e.status === WorkflowStatusEnum.COMPLETED).length,
@@ -204,7 +208,10 @@ export class TenantService {
 
   async findBetween(startTime: number, endTime: number) {
     const { results: rawCurrentExecutions } = await conductorClient.workflowResource.searchV21(undefined, undefined, undefined, undefined, `startTime > ${startTime} AND startTime < ${endTime}`);
-    const currentExecutions = rawCurrentExecutions.filter((e) => e.input?.__context?.appId === config.server.appId && e.startTime >= startTime && e.endTime <= endTime);
+    const currentExecutions = rawCurrentExecutions.filter(
+      (e) =>
+        e.input?.__context?.appId === config.server.appId && e.startTime >= startTime && e.endTime <= endTime && !(e.input?.['__context']?.['group']?.toString() as string)?.startsWith('temporary-'),
+    );
 
     const imageSuffix = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
     const output = {
@@ -253,6 +260,9 @@ export class TenantService {
 
     // 添加排序
     qb.orderBy('execution.created_timestamp', 'DESC');
+
+    // 排除临时工作流执行记录
+    qb.andWhere('execution.is_temporary = false');
 
     // 由于 extraMetadata 存储为 Base64 编码的字符串，在数据库层无法直接过滤
     // 我们先标记需要进行应用层过滤
