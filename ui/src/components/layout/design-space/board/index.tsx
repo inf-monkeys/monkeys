@@ -6,6 +6,8 @@ import {
   AssetRecordType,
   createShapeId,
   defaultBindingUtils,
+  DefaultContextMenu,
+  DefaultContextMenuContent,
   defaultEditorAssetUrls,
   defaultShapeTools,
   defaultTools,
@@ -13,10 +15,17 @@ import {
   FrameShapeUtil,
   TLComponents,
   Tldraw,
+  TldrawUiMenuGroup,
+  TldrawUiMenuItem,
+  TLImageShape,
   TLShape,
   TLShapeId,
+  TLUiContextMenuProps,
+  useEditor,
+  useToasts,
 } from 'tldraw';
 
+import { useUniImagePreview } from '@/components/layout-wrapper/main/uni-image-preview';
 import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
 import { getImageSize } from '@/utils/file';
 
@@ -39,6 +48,63 @@ interface BoardProps {
   canvasHeight?: number;
   instance?: BoardInstance;
   persistenceKey?: string;
+}
+
+// 创建自定义右键菜单组件
+function CustomContextMenu(props: TLUiContextMenuProps) {
+  const editor = useEditor();
+  const { addToast } = useToasts();
+  const { openPreview } = useUniImagePreview();
+
+  const handleViewDetails = () => {
+    const selectedShapes = editor.getSelectedShapes();
+    if (selectedShapes.length != 1 || selectedShapes[0].type !== 'image') {
+      addToast({
+        title: 'Please select only one image',
+        severity: 'error',
+      });
+      return;
+    }
+
+    const imageShape = selectedShapes[0] as TLImageShape;
+    const assetId = imageShape.props.assetId;
+
+    if (!assetId) {
+      addToast({
+        title: 'Image asset not found',
+        severity: 'error',
+      });
+      return;
+    }
+
+    const asset = editor.getAsset(assetId);
+
+    if (asset?.type != 'image' || !asset.props.src) {
+      addToast({
+        title: 'Image asset not found',
+        severity: 'error',
+      });
+      return;
+    }
+
+    const imageUrl = asset.props.src;
+    openPreview(imageUrl);
+  };
+
+  return (
+    <DefaultContextMenu {...props}>
+      <TldrawUiMenuGroup id="custom-actions">
+        <TldrawUiMenuItem
+          id="view-details"
+          label="Show Image Detail"
+          icon="info"
+          readonlyOk
+          onSelect={handleViewDetails}
+        />
+      </TldrawUiMenuGroup>
+      <DefaultContextMenuContent />
+    </DefaultContextMenu>
+  );
 }
 
 export const Board: React.FC<BoardProps> = ({
@@ -90,6 +156,7 @@ export const Board: React.FC<BoardProps> = ({
     MainMenu: () => null,
     StylePanel: () => null,
     Toolbar: () => null,
+    ContextMenu: CustomContextMenu, // 添加自定义右键菜单
   };
 
   return (

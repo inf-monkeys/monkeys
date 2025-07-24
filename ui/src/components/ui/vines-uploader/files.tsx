@@ -7,6 +7,8 @@ import { CircleCheck, CircleX, Eye, Loader2, RotateCw, Trash2, Zap } from 'lucid
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
+import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-image-preview';
 import { Button } from '@/components/ui/button';
 import { useVinesImageManage } from '@/components/ui/image/use-vines-image-manage.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -41,6 +43,10 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
 
   const listLen = list.length;
 
+  const { data: oem } = useSystemConfig();
+
+  const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
+
   return (
     <motion.div
       className="z-10 dark:bg-card-dark"
@@ -69,18 +75,24 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                   key={id}
                   className="vines-center group relative h-48 min-w-28 overflow-hidden dark:bg-card-dark [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static"
                 >
-                  <Image
-                    src={preview}
-                    fallback={isDarkMode ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
-                    className="border-0"
-                    style={{ border: 'none' }}
-                    preview={{
-                      src,
-                      icons,
-                      closeIcon,
-                      mask: <Eye className="stroke-white" />,
-                    }}
-                  />
+                  {isUniImagePreview ? (
+                    <UniImagePreviewWrapper imageUrl={(meta.originUrl as string | undefined) || src}>
+                      <img src={preview} alt={name} />
+                    </UniImagePreviewWrapper>
+                  ) : (
+                    <Image
+                      src={preview}
+                      fallback={isDarkMode ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
+                      className="border-0"
+                      style={{ border: 'none' }}
+                      preview={{
+                        src,
+                        icons,
+                        closeIcon,
+                        mask: <Eye className="stroke-white" />,
+                      }}
+                    />
+                  )}
                   <div className="absolute left-2 top-2 flex items-center justify-center gap-1 rounded border border-input bg-slate-1 px-2 py-1.5 shadow dark:bg-card-dark">
                     {isError ? (
                       <CircleX size={13} />

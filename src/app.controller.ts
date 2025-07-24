@@ -138,6 +138,7 @@ export class AppController {
         workflowPreviewExecutionGrid: config.server.customization.workflowPreviewExecutionGrid,
         workbenchSidebarDefaultOpen: config.server.customization.workbenchSidebarDefaultOpen,
         workbenchSidebarMoreAction: config.server.customization.workbenchSidebarMoreAction,
+        uniImagePreview: config.server.customization.uniImagePreview,
       },
       auth: {
         enabled: config.auth.enabled,

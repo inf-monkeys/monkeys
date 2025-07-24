@@ -6,6 +6,7 @@ import { isUndefined, keyBy } from 'lodash';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
+import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
 import { WorkbenchMiniGroupList } from '@/components/layout/workbench/sidebar/mode/mini/group.tsx';
 import { VirtuaWorkbenchMiniViewList } from '@/components/layout/workbench/sidebar/mode/mini/virtua';
 import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
@@ -23,12 +24,20 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   const { data } = useWorkspacePages();
 
   const [
-    { sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve, activePageFromWorkflowDisplayName },
+    {
+      sidebarFilter: routeSidebarFilter,
+      sidebarReserve: routeSidebarReserve,
+      activePageFromWorkflowDisplayName,
+      activePageFromWorkflowInstanceId,
+    },
   ] = useUrlState<{
     sidebarFilter?: string;
     sidebarReserve?: string;
     activePageFromWorkflowDisplayName?: string;
+    activePageFromWorkflowInstanceId?: string;
   }>();
+
+  const { data: workflowExecution } = useWorkflowExecutionSimple(activePageFromWorkflowInstanceId);
 
   const [groupId, setGroupId] = useState<string>('default');
 
@@ -89,7 +98,9 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   const { teamId } = useVinesTeam();
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
-  const toggleToActivePageRef = useRef(activePage || activePageFromWorkflowDisplayName ? false : null);
+  const toggleToActivePageRef = useRef(
+    activePage || activePageFromWorkflowDisplayName || workflowExecution ? false : null,
+  );
 
   // const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
   const currentPage = useCurrentPage();
@@ -102,8 +113,14 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     () => {
       if (!teamId || latestOriginalPages.current === null) return;
 
-      if (toggleToActivePageRef.current === false && (activePage || activePageFromWorkflowDisplayName)) {
+      if (
+        toggleToActivePageRef.current === false &&
+        (activePage || activePageFromWorkflowDisplayName || workflowExecution)
+      ) {
         const page = latestOriginalPages.current.find((it) => {
+          if (workflowExecution) {
+            return it.workflowId === workflowExecution.workflowId;
+          }
           if (activePage) {
             return it.workflowId === activePage;
           }
@@ -146,7 +163,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
         }
       }
     },
-    [originalPages, activePageFromWorkflowDisplayName],
+    [originalPages, activePageFromWorkflowDisplayName, workflowExecution],
     { wait: 180 },
   );
 

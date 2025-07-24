@@ -257,6 +257,10 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                           type: blob.type || 'image/png',
                         });
 
+                        file['meta'] = {
+                          originUrl: url,
+                        };
+
                         // console.log('Created file:', file.name, file.type, file.size);
 
                         if (max === 1 && !isEmpty(filesMapper)) {
@@ -305,6 +309,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
       onDrop={(files, _rejected, event) => {
         // 这里只处理react-dropzone能识别的文件拖拽
         // console.log('React-dropzone onDrop:', files);
+        console.log(event);
         if (files.length > 0) {
           if (max === 1 && !isEmpty(filesMapper)) {
             const existingFiles = uppy.getFiles();

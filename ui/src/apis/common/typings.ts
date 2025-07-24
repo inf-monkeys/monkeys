@@ -43,6 +43,7 @@ export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | '
 
 export type CustomizationHeadbar =
   | {
+      theme?: 'fixed' | 'card';
       actions?: VinesSpaceHeadbar[] | '*';
       profile?: VinesSpaceHeadbarProfile[] | '*';
     }
@@ -100,6 +101,7 @@ export interface ISystemConfig {
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
     workbenchSidebarDefaultOpen?: boolean;
     workbenchSidebarMoreAction?: boolean;
+    uniImagePreview?: boolean;
   };
   auth: {
     enabled: AuthMethod[];

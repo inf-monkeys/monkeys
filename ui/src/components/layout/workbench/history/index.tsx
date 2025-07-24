@@ -7,8 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
+import { useSystemConfig } from '@/apis/common';
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { ImagePreview } from '@/components/layout-wrapper/main/image-preview';
+import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-image-preview';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
@@ -107,6 +109,10 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState(0);
 
+  const { data: oem } = useSystemConfig();
+
+  const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
+
   return (
     <AnimatePresence>
       <div
@@ -127,24 +133,26 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
             animate={{ opacity: 1, transition: { delay: 0.3 } }}
             exit={{ opacity: 0 }}
           >
-            <ImagePreview
-              images={images}
-              position={position}
-              onPositionChange={setPosition}
-              onNext={() => {
-                setPosition((position) => position + 1);
-              }}
-              onPrev={() => {
-                setPosition((position) => position - 1);
-              }}
-              onClose={() => {
-                setOpen(false);
-              }}
-              hasPrev={position > 0}
-              hasNext={position < images.length - 1}
-              open={open}
-              setOpen={setOpen}
-            />
+            {!isUniImagePreview && (
+              <ImagePreview
+                images={images}
+                position={position}
+                onPositionChange={setPosition}
+                onNext={() => {
+                  setPosition((position) => position + 1);
+                }}
+                onPrev={() => {
+                  setPosition((position) => position - 1);
+                }}
+                onClose={() => {
+                  setOpen(false);
+                }}
+                hasPrev={position > 0}
+                hasNext={position < images.length - 1}
+                open={open}
+                setOpen={setOpen}
+              />
+            )}
             <Button icon={<ArrowLeftIcon />} variant="outline" size="icon" ref={slideLeftRef}></Button>
             <Swiper
               virtual
@@ -198,15 +206,28 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                     className="h-full w-full select-none object-cover"
                   />
                 )} */}
-                        <CarouselItemImage
-                          image={item as ImagesResultWithOrigin}
-                          index={index}
-                          handleDragStart={handleDragStart}
-                          onClick={() => {
-                            setPosition(index);
-                            setOpen(true);
-                          }}
-                        />
+                        {isUniImagePreview ? (
+                          <UniImagePreviewWrapper>
+                            <CarouselItemImage
+                              image={item as ImagesResultWithOrigin}
+                              index={index}
+                              handleDragStart={handleDragStart}
+                              onClick={() => {
+                                setPosition(index);
+                              }}
+                            />
+                          </UniImagePreviewWrapper>
+                        ) : (
+                          <CarouselItemImage
+                            image={item as ImagesResultWithOrigin}
+                            index={index}
+                            handleDragStart={handleDragStart}
+                            onClick={() => {
+                              setPosition(index);
+                              setOpen(true);
+                            }}
+                          />
+                        )}
                       </div>
                     </SwiperSlide>
                   ))

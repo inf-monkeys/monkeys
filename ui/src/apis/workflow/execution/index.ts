@@ -59,6 +59,12 @@ export const useWorkflowExecution = (instanceId: string) =>
 export const getWorkflowExecution = (instanceId: string) =>
   vinesFetcher<VinesWorkflowExecution>({ simple: true })(`/api/workflow/executions/${instanceId}`);
 
+export const useWorkflowExecutionSimple = (instanceId?: string) =>
+  useSWR<VinesWorkflowExecutionOutputListItem | undefined>(
+    instanceId ? `/api/workflow/executions/${instanceId}/simple` : null,
+    vinesFetcher(),
+  );
+
 export const deleteWorkflowExecution = (instanceId: string) =>
   vinesFetcher({ method: 'DELETE' })(`/api/workflow/executions/${instanceId}`);
 
