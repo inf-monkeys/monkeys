@@ -2,6 +2,7 @@ import { CommonModule } from '@/common/common.module';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
+import { WorkflowArtifactEntity } from '@/database/entities/workflow/workflow-artifact.entity';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
@@ -11,6 +12,8 @@ import { AssetsModule } from '../assets/assets.module';
 import { MarketplaceModule } from '../marketplace/marketplace.module';
 import { ToolsModule } from '../tools/tools.module';
 import { ConductorModule } from './conductor/conductor.module';
+import { WorkflowArtifactController } from './workflow.artifact.controller';
+import { WorkflowArtifactService } from './workflow.artifact.service';
 import { WorkflowAssetsController } from './workflow.assets.controller';
 import { WorkflowAssetsService } from './workflow.assets.service';
 import { WorkflowAssociationController } from './workflow.association.controller';
@@ -57,6 +60,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowStatisticsController,
     WorkflowObservabilityController,
     WorkflowAssociationController,
+    WorkflowArtifactController,
   ],
   providers: [
     WorkflowCrudService,
@@ -76,11 +80,12 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowObservabilityService,
     WorkflowExecutionPersistenceService,
     WorkflowAssociationService,
+    WorkflowArtifactService,
   ],
   imports: [
     ConductorModule,
     forwardRef(() => AssetsModule),
-    TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity, DesignMetadataEntity, DesignProjectEntity, WorkflowExecutionEntity]),
+    TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity, DesignMetadataEntity, DesignProjectEntity, WorkflowExecutionEntity, WorkflowArtifactEntity]),
     ToolsModule,
     CommonModule,
     MarketplaceModule,

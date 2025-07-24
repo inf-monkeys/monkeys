@@ -1,16 +1,25 @@
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { logger } from '@/common/logger';
 import { flattenObjectToSearchableText } from '@/common/utils';
+import { convertOutputFromRawOutput } from '@/common/utils/output';
+import { WorkflowArtifactEntity } from '@/database/entities/workflow/workflow-artifact.entity';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Workflow } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { InjectRepository } from '@nestjs/typeorm';
 import { omit } from 'lodash';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class WorkflowExecutionPersistenceService {
-  constructor(private readonly workflowRepository: WorkflowRepository) {}
+  constructor(
+    private readonly workflowRepository: WorkflowRepository,
+
+    @InjectRepository(WorkflowArtifactEntity)
+    private readonly workflowArtifactRepository: Repository<WorkflowArtifactEntity>,
+  ) {}
 
   @OnEvent('workflow.completed.*')
   async handleWorkflowCompletion(payload: { workflowInstanceId: string; result: Workflow; timestamp: number }): Promise<void> {
@@ -27,6 +36,25 @@ export class WorkflowExecutionPersistenceService {
 
       const inputForSearch = detailedExecution.input ? omit(detailedExecution.input, ['__context', 'extraMetadata']) : null;
       const outputForSearch = detailedExecution.output || null;
+
+      const finalOutput = convertOutputFromRawOutput(outputForSearch);
+
+      const filteredOutput = finalOutput.filter((item) => (item.type === 'image' || item.type === 'video') && item.data);
+
+      await Promise.all(
+        filteredOutput.map(async (item, index) => {
+          try {
+            const workflowArtifact = new WorkflowArtifactEntity();
+            workflowArtifact.id = `${workflowInstanceId}_${index}`;
+            workflowArtifact.url = item.data;
+            workflowArtifact.type = item.type;
+            workflowArtifact.instanceId = workflowInstanceId;
+            await this.workflowArtifactRepository.save(workflowArtifact);
+          } catch (error) {
+            logger.error(`Error persisting workflow artifact for ${workflowInstanceId}:`, error);
+          }
+        }),
+      );
 
       const searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
 

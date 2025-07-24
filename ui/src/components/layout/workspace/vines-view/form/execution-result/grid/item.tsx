@@ -30,7 +30,7 @@ interface IExecutionResultItemProps {
   workflowId?: string;
 }
 
-export type IClickBehavior = 'preview' | 'select' | 'fill-form';
+export type IClickBehavior = 'preview' | 'select' | 'fill-form' | 'none';
 export type ISelectionModeDisplayType = 'operation-button' | 'dropdown-menu';
 
 export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({

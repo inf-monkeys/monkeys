@@ -120,6 +120,7 @@ export interface ServerConfig {
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
     workbenchSidebarDefaultOpen: boolean;
     workbenchSidebarMoreAction: boolean;
+    uniImagePreview: boolean;
   };
 }
 
@@ -419,6 +420,7 @@ export const config: Config = {
       },
       workbenchSidebarDefaultOpen: readConfig('server.customization.workbenchSidebarDefaultOpen', true),
       workbenchSidebarMoreAction: readConfig('server.customization.workbenchSidebarMoreAction', true),
+      uniImagePreview: readConfig('server.customization.uniImagePreview', false),
     },
   },
   conductor: {

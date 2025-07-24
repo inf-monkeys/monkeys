@@ -14,6 +14,7 @@ import { AgentLayout } from '@/components/layout-wrapper/agent';
 import { DesignLayout } from '@/components/layout-wrapper/design';
 import { EvaluationLayout } from '@/components/layout-wrapper/evaluation';
 import { MainWrapper } from '@/components/layout-wrapper/main';
+import { UniImagePreviewProvider } from '@/components/layout-wrapper/main/uni-image-preview';
 import { WorkbenchMiniModeLayout } from '@/components/layout-wrapper/workbench/mini-mode';
 import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
 import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-view';
@@ -127,30 +128,32 @@ const RootComponent: React.FC = () => {
     <>
       <ScrollRestoration />
       <TooltipProvider delayDuration={100}>
-        <ReportDialog />
-        <main className="vines-ui grid size-full min-h-screen" style={{ zoom }}>
-          <AnimatePresence mode="popLayout">
-            {visible && (
-              <motion.div
-                className="vines-center relative size-full flex-col"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                {isUseShareView && <WorkspaceShareView />}
-                {isUseIFrame && <WorkspaceIframe />}
-                {isUseOutside && <Outlet />}
-                {isUseWorkSpace && <WorkspaceLayout />}
-                {isUseAgent && <AgentLayout />}
-                {isUseDesign && <DesignLayout />}
-                {isUseEvaluation && <EvaluationLayout />}
-                {isUsePanel && mode !== 'mini' && <WorkbenchPanelLayout layoutId={layoutId} />}
-                {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
-                {isUseDefault && <MainWrapper layoutId={layoutId} />}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </main>
+        <UniImagePreviewProvider>
+          <ReportDialog />
+          <main className="vines-ui grid size-full min-h-screen" style={{ zoom }}>
+            <AnimatePresence mode="popLayout">
+              {visible && (
+                <motion.div
+                  className="vines-center relative size-full flex-col"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  {isUseShareView && <WorkspaceShareView />}
+                  {isUseIFrame && <WorkspaceIframe />}
+                  {isUseOutside && <Outlet />}
+                  {isUseWorkSpace && <WorkspaceLayout />}
+                  {isUseAgent && <AgentLayout />}
+                  {isUseDesign && <DesignLayout />}
+                  {isUseEvaluation && <EvaluationLayout />}
+                  {isUsePanel && mode !== 'mini' && <WorkbenchPanelLayout layoutId={layoutId} />}
+                  {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
+                  {isUseDefault && <MainWrapper layoutId={layoutId} />}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
+        </UniImagePreviewProvider>
       </TooltipProvider>
       <OEM />
       <TeamsGuard />

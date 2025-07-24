@@ -101,6 +101,7 @@ export interface ISystemConfig {
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
     workbenchSidebarDefaultOpen?: boolean;
     workbenchSidebarMoreAction?: boolean;
+    uniImagePreview?: boolean;
   };
   auth: {
     enabled: AuthMethod[];

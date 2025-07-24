@@ -7,6 +7,7 @@ import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-contex
 import { TooManyRequestsException } from '@/common/exceptions/too-many-requests';
 import { logger } from '@/common/logger';
 import { extractImageUrls, extractVideoUrls, flattenKeys, flattenObjectToSearchableText, getDataType } from '@/common/utils';
+import { convertOutputFromRawOutput } from '@/common/utils/output';
 import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
@@ -420,6 +421,7 @@ export class WorkflowExecutionService {
               description: variable?.description || '',
               data: value,
               type: getDataType(value),
+              flag: variable?.flag || false,
             };
           });
       }
@@ -762,69 +764,7 @@ export class WorkflowExecutionService {
         .map((it) => {
           const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
 
-          let alt: string | string[] | undefined;
-          const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, dataVal) => {
-            alt = dataVal;
-          });
-
-          const outputKeys = Object.keys(flattenOutput);
-          const outputValues = Object.values(flattenOutput);
-          const finalOutput = [];
-          let isInserted = false;
-
-          // 为每个 key-value 对单独处理
-          for (let i = 0; i < outputKeys.length; i++) {
-            const key = outputKeys[i];
-            const currentKey = key.split('.')[key.split('.').length - 1];
-            const value = outputValues[i];
-
-            // __ 开头的 key 不处理
-            if (currentKey.startsWith('__')) {
-              continue;
-            }
-
-            // 提取图片和视频
-            const images = extractImageUrls(value);
-            const videos = extractVideoUrls(value);
-
-            // 处理图片
-            for (const image of images) {
-              finalOutput.push({
-                type: 'image',
-                data: image,
-                alt,
-                key: key,
-              });
-              isInserted = true;
-            }
-
-            // 处理视频
-            for (const video of videos) {
-              finalOutput.push({
-                type: 'video',
-                data: video,
-                key: key,
-              });
-              isInserted = true;
-            }
-          }
-
-          // 如果没有图片和视频，处理文本或 JSON
-          if (!isInserted && output) {
-            if (typeof output === 'string') {
-              finalOutput.push({
-                type: 'text',
-                data: output,
-                key: 'root',
-              });
-            } else {
-              finalOutput.push({
-                type: 'json',
-                data: output,
-                key: 'root',
-              });
-            }
-          }
+          const finalOutput = convertOutputFromRawOutput(output);
 
           const ctx = input?.['__context'];
 

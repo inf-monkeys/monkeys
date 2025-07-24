@@ -9,6 +9,7 @@ import { Copy } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 
+import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-image-preview';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
@@ -84,6 +85,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
 
   // 处理图片点击，跳转到详情页面
   const handleImageClick = (e: React.MouseEvent) => {
+    if (clickBehavior === 'none') return;
     e.stopPropagation();
     if (workflowId && src && clickBehavior === 'preview' && !isSelectionMode) {
       const position = images?.findIndex((image) => image.render.key === renderKey);
@@ -123,20 +125,22 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
 
   return (
     <div className="vines-center relative overflow-hidden rounded-lg">
-      <Image
-        className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
-        src={previewSrc}
-        alt="image"
-        style={{
-          objectFit: 'cover',
-          width: '100%',
-          height: '100%',
-        }}
-        preview={false}
-        onDragStart={handleDragStart}
-        draggable
-        onClick={handleImageClick}
-      />
+      <UniImagePreviewWrapper imageUrl={src}>
+        <Image
+          className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
+          src={previewSrc}
+          alt="image"
+          style={{
+            objectFit: 'cover',
+            width: '100%',
+            height: '100%',
+          }}
+          preview={false}
+          onDragStart={handleDragStart}
+          draggable
+          onClick={handleImageClick}
+        />
+      </UniImagePreviewWrapper>
 
       {altLabel.trim() !== '' && (
         <Tooltip>

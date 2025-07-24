@@ -63,6 +63,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     oem?.theme?.workflowPreviewExecutionGrid?.selectionModeDisplayType || 'dropdown-menu';
   const clickBehavior = oem?.theme?.workflowPreviewExecutionGrid?.clickBehavior || 'preview';
   const showErrorFilter = oem?.theme?.workflowPreviewExecutionGrid?.showErrorFilter ?? true;
+  const isUniImagePreview = oem?.theme?.uniImagePreview ?? false;
 
   const executionResultFilterHeight =
     showErrorFilter || selectionModeDisplayType === 'dropdown-menu' ? EXECUTION_RESULT_FILTER_HEIGHT : 30;
@@ -164,7 +165,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           isSelectionMode={isSelectionMode || clickBehavior === 'select'}
           isSelected={selectedOutputs.has(item.render.key)}
           onSelect={(id) => toggleOutputSelection(id, item)}
-          clickBehavior={clickBehavior}
+          clickBehavior={isUniImagePreview ? 'none' : clickBehavior}
           selectionModeDisplayType={selectionModeDisplayType}
           workflowId={workflowId ?? undefined}
         />

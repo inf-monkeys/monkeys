@@ -60,6 +60,7 @@ export type VinesWorkflowExecution = Omit<WorkflowExecution, 'tasks' | 'status'>
 };
 
 export type VinesWorkflowExecutionOutput = {
+  key: string;
   type: 'image' | 'video' | 'text' | 'json';
   data: JSONValue;
   alt?: string | string[] | undefined;
@@ -68,9 +69,10 @@ export type VinesWorkflowExecutionOutput = {
 export type VinesWorkflowExecutionInput = {
   id: string;
   data: JSONValue;
-  type: ToolPropertyTypes;
+  type: ToolPropertyTypes | 'text';
   displayName: string;
   description: string;
+  flag: boolean;
 };
 
 export type VinesWorkflowExecutionOutputListItem = {
