@@ -52,6 +52,7 @@ export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile'
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
 export type CustomizationHeadbar = {
+  theme?: 'fixed' | 'card';
   actions?: VinesSpaceHeadbar[] | '*';
   profile?: VinesSpaceHeadbarProfile[] | '*';
 };
@@ -405,6 +406,7 @@ export const config: Config = {
         settingsSidebar: readConfig('server.customization.modules.settingsSidebar', '*'),
       },
       headbar: {
+        theme: readConfig('server.customization.headbar.theme', 'card'),
         actions: readConfig('server.customization.headbar.actions', '*'),
         profile: readConfig('server.customization.headbar.profile', '*'),
       },

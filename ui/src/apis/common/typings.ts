@@ -43,6 +43,7 @@ export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | '
 
 export type CustomizationHeadbar =
   | {
+      theme?: 'fixed' | 'card';
       actions?: VinesSpaceHeadbar[] | '*';
       profile?: VinesSpaceHeadbarProfile[] | '*';
     }
