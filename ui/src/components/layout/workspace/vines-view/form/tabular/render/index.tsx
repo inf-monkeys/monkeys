@@ -119,7 +119,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
       // setDefValues(workbenchCacheVal);
       setInitValues(workbenchCacheVal);
       form.reset(workbenchCacheVal);
-      setHasRestoreValues(true);
+      // setHasRestoreValues(true);
       useFormResetRef.current = false;
     }
   }, [workbenchCacheVal, hasRestoreValues, inImageDetailRoute]);

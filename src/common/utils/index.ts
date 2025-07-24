@@ -309,14 +309,14 @@ export function flattenObjectToSearchableText(obj: any): string {
 export const extractImageUrls = (text: unknown): string[] => {
   if (typeof text !== 'string') return [];
 
-  const regex = /https?:\/\/[^\s"]+?\.(jpg|jpeg|png|gif|bmp|webp|svg)/gi;
+  const regex = /https?:\/\/[^\s"]+?\.(jpg|jpeg|png|gif|bmp|webp|svg)(?:[?#][^"]*)?/gi;
   return text.match(regex) || [];
 };
 
 export const extractVideoUrls = (text: unknown): string[] => {
   if (typeof text !== 'string') return [];
 
-  const regex = /https?:\/\/[^\s"]+?\.(mp4|avi|mov|mkv|flv|wmv|webm)/gi;
+  const regex = /https?:\/\/[^\s"]+?\.(mp4|avi|mov|mkv|flv|wmv|webm)(?:[?#][^"]*)?/gi;
   return text.match(regex) || [];
 };
 

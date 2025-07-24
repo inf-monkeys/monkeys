@@ -5,6 +5,7 @@ import { UniImagePreviewDialog } from './dialog';
 interface UniImagePreviewContextType {
   open: boolean;
   imageUrl: string | null;
+  setImageUrl: (url: string | null) => void;
   openPreview: (url: string) => void;
   closePreview: () => void;
 }
@@ -12,6 +13,7 @@ interface UniImagePreviewContextType {
 const UniImagePreviewContext = createContext<UniImagePreviewContextType>({
   open: false,
   imageUrl: null,
+  setImageUrl: () => {},
   openPreview: () => {},
   closePreview: () => {},
 });
@@ -43,6 +45,7 @@ export const UniImagePreviewProvider: React.FC<{ children: React.ReactNode }> = 
       value={{
         open,
         imageUrl,
+        setImageUrl,
         openPreview,
         closePreview,
       }}

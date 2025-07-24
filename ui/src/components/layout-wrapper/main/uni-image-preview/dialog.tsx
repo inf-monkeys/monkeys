@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useNavigate, useParams } from '@tanstack/react-router';
+
 import { useWorkflowInstanceByArtifactUrl } from '@/apis/workflow/artifact';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -9,6 +11,10 @@ import { useUniImagePreview } from './context';
 
 export const UniImagePreviewDialog: React.FC = () => {
   const { open, imageUrl, closePreview } = useUniImagePreview();
+
+  const navigate = useNavigate();
+
+  const { teamId } = useParams({ from: '/$teamId/' });
 
   const { data: instance, isLoading } = useWorkflowInstanceByArtifactUrl(imageUrl);
 
@@ -23,7 +29,7 @@ export const UniImagePreviewDialog: React.FC = () => {
       <DialogContent
         className={cn(
           'overflow-hidden transition-all',
-          !isLoading && instance
+          imageUrl && !isLoading && instance
             ? 'max-h-[600px] max-w-[1000px]'
             : 'max-h-[calc(500px+(var(--global-spacing)*3))] max-w-[calc(275px+(var(--global-spacing)*3))]',
         )}
@@ -85,7 +91,23 @@ export const UniImagePreviewDialog: React.FC = () => {
             >
               Cancel
             </Button>
-            <Button variant="solid">Remix in Studio</Button>
+            <Button
+              variant="solid"
+              onClick={async () => {
+                closePreview();
+                navigate({
+                  to: '/$teamId',
+                  params: {
+                    teamId,
+                  },
+                  search: {
+                    activePageFromWorkflowInstanceId: instance.instanceId,
+                  },
+                });
+              }}
+            >
+              Remix in Studio
+            </Button>
           </div>
         )}
       </DialogContent>

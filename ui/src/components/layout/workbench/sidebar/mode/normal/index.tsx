@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useSystemConfig } from '@/apis/common';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
+import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
 import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -27,6 +28,7 @@ import {
 } from '@/store/showWorkbenchIcon';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { useGlobalViewSize } from '@/store/useGlobalViewStore';
+import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cloneDeep, cn, getI18nContent } from '@/utils';
 
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
@@ -83,11 +85,17 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const { trigger: updateGroupSortTrigger } = useUpdateGroupSort();
 
-  const [{ activePageFromWorkflowDisplayName, activePageFromType, extraMetadata }] = useUrlState<{
-    activePageFromWorkflowDisplayName?: string;
-    activePageFromType?: string;
-    extraMetadata?: string;
-  }>({});
+  const setWorkbenchCacheVal = useSetWorkbenchCacheVal();
+
+  const [{ activePageFromWorkflowDisplayName, activePageFromWorkflowInstanceId, activePageFromType, extraMetadata }] =
+    useUrlState<{
+      activePageFromWorkflowDisplayName?: string;
+      activePageFromWorkflowInstanceId?: string;
+      activePageFromType?: string;
+      extraMetadata?: string;
+    }>({});
+
+  const { data: workflowExecution } = useWorkflowExecutionSimple(activePageFromWorkflowInstanceId);
 
   const [groupId, setGroupId] = useState<string>('default');
   const [pageId, setPageId] = useState<string>('');
@@ -119,7 +127,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const lists = pageGroupProcess(originalGroups, pagesMap);
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
-  const toggleToActivePageRef = useRef(activePage ? false : null);
+  const toggleToActivePageRef = useRef(activePage || workflowExecution ? false : null);
 
   // const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
   const currentPage = useCurrentPage();
@@ -132,6 +140,24 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     const pagesLength = latestOriginalPages.current.length;
     const groupsLength = latestOriginalGroups.current.length;
     if (!pagesLength) return;
+
+    if (workflowExecution) {
+      const targetPage = latestOriginalPages.current.find((it) => it.workflowId === workflowExecution.workflowId);
+      if (targetPage) {
+        const targetInput = {};
+
+        for (const { data, id } of workflowExecution.input) {
+          targetInput[id] = data;
+        }
+
+        setWorkbenchCacheVal(workflowExecution.workflowId, targetInput);
+
+        setPageId(targetPage.id);
+        setCurrentPage({ [teamId]: targetPage });
+
+        return;
+      }
+    }
 
     if (activePageFromWorkflowDisplayName) {
       const targetPage = latestOriginalPages.current.find(
@@ -216,7 +242,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     } else {
       setEmptyOrFirstPage();
     }
-  }, [currentPage?.[teamId], data, teamId, activePageFromWorkflowDisplayName, activePageFromType]);
+  }, [
+    currentPage?.[teamId],
+    data,
+    teamId,
+    activePageFromWorkflowDisplayName,
+    activePageFromType,
+    workflowExecution,
+    activePageFromWorkflowInstanceId,
+  ]);
 
   const { ref: wrapperRef, height: wrapperHeight } = useElementSize();
   const [height, setHeight] = useState<number | string>(500);

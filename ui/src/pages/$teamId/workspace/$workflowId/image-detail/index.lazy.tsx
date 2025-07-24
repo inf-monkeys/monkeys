@@ -185,8 +185,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   const [workflowAssociationList, setWorkflowAssociationList] = useState<IWorkflowAssociation[]>([]);
 
-  console.log(workflowAssociationList);
-
   return (
     <VinesFlowProvider workflowId={workflowId}>
       <FlowStoreProvider createStore={createFlowStore}>
