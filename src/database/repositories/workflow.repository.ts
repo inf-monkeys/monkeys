@@ -493,6 +493,7 @@ export class WorkflowRepository {
     apiKey,
     group,
     extraMetadata,
+    isTemporary = false,
   }: {
     workflowId: string;
     version: number;
@@ -503,6 +504,7 @@ export class WorkflowRepository {
     apiKey: string;
     group?: string;
     extraMetadata?: { [x: string]: any };
+    isTemporary?: boolean;
   }) {
     await this.workflowExecutionRepository.save({
       id: generateDbId(),
@@ -518,6 +520,7 @@ export class WorkflowRepository {
       apikey: apiKey,
       group,
       extraMetadata,
+      isTemporary,
     });
   }
 
@@ -603,6 +606,7 @@ FROM
     ${appId}_workflow_execution
 WHERE workflow_id = '${workflowId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
   AND ${groupCondition}
+  AND is_temporary = false
 GROUP BY
     workflow_id,
     TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
@@ -620,6 +624,7 @@ FROM
     ${appId}_workflow_execution
 WHERE workflow_id = '${workflowId}' AND status = 'COMPLETED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
   AND ${groupCondition}
+  AND is_temporary = false
 GROUP BY
     workflow_id,
     TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
@@ -637,6 +642,7 @@ FROM
     ${appId}_workflow_execution
 WHERE workflow_id = '${workflowId}' AND status in ('FAILED','TERMINATED','PAUSED') AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
   AND ${groupCondition}
+  AND is_temporary = false
 GROUP BY
     workflow_id,
     TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
@@ -655,6 +661,7 @@ FROM
 WHERE
   status = 'COMPLETED' AND workflow_id = '${workflowId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
   AND ${groupCondition}
+  AND is_temporary = false
 GROUP BY
   workflow_id,
   date
@@ -730,6 +737,7 @@ SELECT
 FROM
     ${appId}_workflow_execution
 WHERE workflow_id IN (${workflowIdsStr}) AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+  AND is_temporary = false
 GROUP BY
     workflow_id,
     TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
@@ -746,6 +754,7 @@ SELECT
 FROM
     ${appId}_workflow_execution
 WHERE workflow_id IN (${workflowIdsStr}) AND status = 'COMPLETED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+  AND is_temporary = false
 GROUP BY
     workflow_id,
     TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
@@ -762,6 +771,7 @@ SELECT
 FROM
     ${appId}_workflow_execution
 WHERE workflow_id IN (${workflowIdsStr}) AND status in ('FAILED','TERMINATED','PAUSED') AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+  AND is_temporary = false
 GROUP BY
     workflow_id,
     TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
@@ -779,6 +789,7 @@ FROM
   ${appId}_workflow_execution
 WHERE
   status = 'COMPLETED' AND workflow_id IN (${workflowIdsStr}) AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+  AND is_temporary = false
 GROUP BY
   workflow_id,
   date

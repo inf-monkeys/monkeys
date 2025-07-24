@@ -422,6 +422,9 @@ export class TenantService {
       .skip((page - 1) * limitNum)
       .take(limitNum);
 
+    // 排除临时工作流执行记录
+    qb.andWhere('execution.is_temporary = false');
+
     // 添加 workflow 类型过滤
     if (workflowTypes.length > 0) {
       qb.andWhere('execution.workflow_id IN (:...workflowTypes)', { workflowTypes });

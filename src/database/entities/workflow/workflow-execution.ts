@@ -141,4 +141,12 @@ export class WorkflowExecutionEntity extends BaseEntity {
     comment: 'Flattened string values from input and output for full-text search',
   })
   searchableText?: string;
+
+  @Column({
+    name: 'is_temporary',
+    type: 'boolean',
+    default: false,
+    comment: '是否为临时工作流执行',
+  })
+  isTemporary: boolean;
 }

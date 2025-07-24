@@ -222,6 +222,7 @@ export interface StartWorkflowRequest {
   chatSessionId?: string;
   group?: string;
   extraMetadata?: any;
+  isTemporary?: boolean;
 }
 
 export interface DebugWorkflowRequest {

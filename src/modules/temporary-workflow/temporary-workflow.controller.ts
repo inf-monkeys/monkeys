@@ -2,7 +2,7 @@ import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { TemporaryWorkflowService } from './temporary-workflow.service';
 
@@ -59,6 +59,19 @@ export class TemporaryWorkflowController {
   async executeAndWaitForResult(@Req() req: IRequest, @Param('temporaryId') temporaryId: string, @Body() body: { inputData: Record<string, any> }) {
     const { teamId, userId } = req;
     const result = await this.temporaryWorkflowService.executeAndWaitForTemporaryWorkflow(temporaryId, body.inputData, teamId, userId);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
+  @Get('/:temporaryId/executions')
+  @ApiOperation({
+    summary: '查询临时工作流执行历史记录',
+    description: '查询指定临时工作流的执行历史记录',
+  })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
+  async getTemporaryWorkflowExecutions(@Param('temporaryId') temporaryId: string, @Query('page') page = '1', @Query('limit') limit = '10') {
+    const result = await this.temporaryWorkflowService.getTemporaryWorkflowExecutions(temporaryId, parseInt(page, 10), parseInt(limit, 10));
     return new SuccessResponse({
       data: result,
     });

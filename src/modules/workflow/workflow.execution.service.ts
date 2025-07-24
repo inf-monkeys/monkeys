@@ -86,6 +86,10 @@ export class WorkflowExecutionService {
       const executionRecords = await this.workflowRepository.findExecutionsByWorkflowInstanceIds(workflowInstanceIds);
       for (const execution of executions) {
         const executionRecord = executionRecords.find((x) => x.workflowInstanceId === execution.workflowId);
+        // 过滤掉临时工作流的执行记录
+        if (executionRecord && executionRecord.isTemporary) {
+          continue;
+        }
         if (executionRecord) {
           result.push({
             ...execution,
@@ -604,6 +608,7 @@ export class WorkflowExecutionService {
         workflowId: In(workflowIdsForTeam),
         isDeleted: false,
         conductorStartTime: Not(IsNull()),
+        isTemporary: false,
       },
       order: { [orderByField]: orderDirection },
       skip: (page - 1) * limitNum,
@@ -759,6 +764,7 @@ export class WorkflowExecutionService {
       total: data?.totalHits ?? 0,
       data: (data?.results ?? [])
         .filter((it) => (!isShortcutFlow ? !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('shortcut') : true))
+        .filter((it) => !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('temporary-'))
         .map((it) => {
           const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
 
@@ -1016,6 +1022,7 @@ export class WorkflowExecutionService {
       extraMetadata,
       ...(extra.chatSessionId && { chatSessionId: extra.chatSessionId }),
       ...(extra.group && { group: extra.group }),
+      isTemporary: request.isTemporary || false,
     });
     return workflowInstanceId;
   }
@@ -1123,6 +1130,11 @@ export class WorkflowExecutionService {
     let count = 0;
     let thumbnails: string[] = [];
     for (const execution of data.results) {
+      // 过滤掉临时工作流的执行记录
+      if ((execution.input?.['__context']?.['group']?.toString() as string)?.startsWith('temporary-')) {
+        continue;
+      }
+
       const flattenOutput = flattenKeys(execution.output);
       const outputValues = Object.values(flattenOutput);
       const images = outputValues.map((it) => extractImageUrls(it)).flat();
@@ -1147,6 +1159,11 @@ export class WorkflowExecutionService {
     });
 
     for (const execution of data.results) {
+      // 过滤掉临时工作流的执行记录
+      if ((execution.input?.['__context']?.['group']?.toString() as string)?.startsWith('temporary-')) {
+        continue;
+      }
+
       const flattenOutput = flattenKeys(execution.output);
       const outputValues = Object.values(flattenOutput);
       if (outputValues.some((it) => extractImageUrls(it).includes(imageUrl))) {

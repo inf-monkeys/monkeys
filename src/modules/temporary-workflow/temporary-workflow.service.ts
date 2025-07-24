@@ -1,6 +1,7 @@
 import { logger } from '@/common/logger';
 import { generateDbId } from '@/common/utils';
 import { TemporaryWorkflowEntity } from '@/database/entities/workflow/temporary-workflow.entity';
+import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { WorkflowTriggerType } from '@inf-monkeys/monkeys';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -16,6 +17,8 @@ export class TemporaryWorkflowService {
   constructor(
     @InjectRepository(TemporaryWorkflowEntity)
     private readonly temporaryWorkflowRepository: Repository<TemporaryWorkflowEntity>,
+    @InjectRepository(WorkflowExecutionEntity)
+    private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
     private readonly workflowExecutionService: WorkflowExecutionService,
     private readonly workflowRepository: WorkflowRepository,
     private readonly conductorService: ConductorService,
@@ -205,6 +208,7 @@ export class TemporaryWorkflowService {
             source: 'temporary-workflow',
             temporaryId,
           },
+          isTemporary: true,
         },
         true,
       );
@@ -362,5 +366,40 @@ export class TemporaryWorkflowService {
     }
 
     return temporaryWorkflow;
+  }
+
+  /**
+   * 查询临时工作流的执行历史记录
+   */
+  async getTemporaryWorkflowExecutions(temporaryId: string, page = 1, limit = 10) {
+    // 验证临时工作流是否存在
+    await this.getTemporaryWorkflowByTemporaryId(temporaryId);
+
+    // 查询该临时工作流的所有执行记录
+    const [executions, total] = await this.workflowExecutionRepository.findAndCount({
+      where: {
+        group: `temporary-${temporaryId}`,
+        isDeleted: false,
+      },
+      order: { createdTimestamp: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      page,
+      limit,
+      total,
+      data: executions.map((execution) => ({
+        workflowInstanceId: execution.workflowInstanceId,
+        status: execution.status,
+        createdTimestamp: execution.createdTimestamp,
+        updatedTimestamp: execution.updatedTimestamp,
+        input: execution.input,
+        output: execution.output,
+        takes: execution.takes,
+        extraMetadata: execution.extraMetadata,
+      })),
+    };
   }
 }
