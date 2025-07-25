@@ -45,7 +45,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   // 计算 slidesPerView 的函数
   const calculateSlidesPerView = (containerWidth: number) => {
     const slideWidth = 90; // slide width
-    const spaceBetween = 10; // space between
+    const spaceBetween = 12; // space between
     const calculated = Math.floor((containerWidth + spaceBetween) / (slideWidth + spaceBetween));
     return Math.max(1, Math.min(calculated, images?.length || 1));
   };
@@ -128,7 +128,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
         {images.length > 0 ? (
           <motion.div
             key="vines-history-content"
-            className="flex size-full items-center justify-center gap-2 overflow-hidden p-global"
+            className="flex size-full items-center justify-center gap-global-1/2 overflow-hidden p-global"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.3 } }}
             exit={{ opacity: 0 }}
@@ -185,27 +185,16 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                   setSize((size) => size + 1);
                 }
               }}
-              className={cn('', className)}
-              // onSwiper={(swiper) => {}}
+              className={cn(className)}
             >
               {images.length > 0
                 ? images.map((item, index) => (
-                    <SwiperSlide key={item.render.key} className={cn('basis-auto')}>
+                    <SwiperSlide key={item.render.key}>
                       <div
                         className={cn(
                           'h-[var(--history-result-image-size)] w-[var(--history-result-image-size)] cursor-grab overflow-hidden rounded-md',
                         )}
                       >
-                        {/*                 {item.render.type === 'image' && (
-                  <img
-                    draggable
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onDragStart={(e) => handleDragStart(e, item)}
-                    src={item.render.data as string}
-                    alt={typeof item.render.alt === 'string' ? item.render.alt : `Image ${index + 1}`}
-                    className="h-full w-full select-none object-cover"
-                  />
-                )} */}
                         {isUniImagePreview ? (
                           <UniImagePreviewWrapper>
                             <CarouselItemImage
@@ -232,8 +221,6 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                     </SwiperSlide>
                   ))
                 : null}
-              {/* <CarouselPrevious className="h-8.5 w-9.5 absolute -left-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" />
-        <CarouselNext className="h-8.5 w-9.5 absolute -right-8 top-1/2 -translate-y-1/2 rounded-md border border-slate-300 bg-white px-2.5" /> */}
             </Swiper>
             <Button icon={<ArrowRightIcon />} variant="outline" size="icon" ref={slideRightRef}></Button>
           </motion.div>
