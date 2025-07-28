@@ -27,7 +27,7 @@ export const getTargetInput = async ({
   }
 
   for (const { origin, target, default: defaultVal } of mapper) {
-    _.set(targetInput, target, _.get(originData.rawOutput, origin, defaultVal ?? null));
+    _.set(targetInput, target, _.get(originData, origin, defaultVal ?? null));
   }
 
   return targetInput;
