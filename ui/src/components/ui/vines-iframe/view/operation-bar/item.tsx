@@ -4,7 +4,6 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import _ from 'lodash';
 import { Folder } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -25,6 +24,7 @@ import { useSetTemp } from '@/store/useGlobalTempStore';
 import { useOutputSelectionStore } from '@/store/useOutputSelectionStore';
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cn, getI18nContent } from '@/utils';
+import { getTargetInput } from '@/utils/association';
 
 export interface IWorkbenchOperationItemProps {
   data: IWorkflowAssociation;
@@ -52,7 +52,7 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
     transition,
   };
 
-  const onItemClick = () => {
+  const onItemClick = async () => {
     if (selectedOutputItems.length == 0) {
       toast.error(t('workspace.form-view.operation-bar.select-none'));
       return;
@@ -60,15 +60,14 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
 
     const originData = selectedOutputItems[0];
     if (data.type === 'to-workflow') {
-      const targetInput = {};
-
-      for (const { origin, target, default: defaultVal } of data.mapper) {
-        if (origin === '__value') {
-          _.set(targetInput, target, originData.render.data);
-          continue;
-        }
-        _.set(targetInput, target, _.get(originData.rawOutput, origin, defaultVal ?? null));
-      }
+      const targetInput = await getTargetInput({
+        workflowId: data.targetWorkflowId,
+        originData: {
+          ...originData.rawOutput,
+          __value: originData.render.data,
+        },
+        mapper: data.mapper,
+      });
       setWorkbenchCacheVal(data.targetWorkflowId, targetInput);
 
       // 跳转到目标工作流页面

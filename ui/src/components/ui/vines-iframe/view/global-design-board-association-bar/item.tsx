@@ -4,7 +4,6 @@ import { useNavigate, useRouter } from '@tanstack/react-router';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import _ from 'lodash';
 import { Folder } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -23,6 +22,7 @@ import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { useSetTemp } from '@/store/useGlobalTempStore';
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cn, getI18nContent } from '@/utils';
+import { getTargetInput } from '@/utils/association';
 
 export interface IGlobalDesignBoardAssociationBarItemProps {
   data: IDesignAssociation;
@@ -97,8 +97,18 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
           },
         });
         const boardImageUrl = result.urls[0];
-        const targetInput = {};
-        _.set(targetInput, data.targetInputId, boardImageUrl);
+        const targetInput = await getTargetInput({
+          workflowId: data.targetWorkflowId,
+          mapper: [
+            {
+              origin: '__value',
+              target: data.targetInputId,
+            },
+          ],
+          originData: {
+            __value: boardImageUrl,
+          },
+        });
         setWorkbenchCacheVal(data.targetWorkflowId, targetInput);
         // 跳转到目标工作流页面
         if (data.targetWorkflowId && workspaceData?.pages) {
