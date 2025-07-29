@@ -1,12 +1,16 @@
 import React, { startTransition, useCallback, useEffect, useState } from 'react';
 
+import { TrashIcon, X } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
 import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { ImageOperations } from '@/components/layout/workbench/image-detail/image-operation';
 import { RightSidebar } from '@/components/layout/workbench/image-detail/right-side-bar';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
 import { Carousel } from './carousel';
@@ -50,6 +54,8 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   setOpen,
 }) => {
   const { t } = useTranslation();
+
+  const { imagePreviewOperationBarStyle } = useCustomConfigs();
 
   const [imageRotation, setImageRotation] = useState(0);
   const [imageFlipX, setImageFlipX] = useState(false);
@@ -226,7 +232,11 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
                     />
                     {/* 图片缩略图轮播 - 底部 */}
                     <div
-                      className={cn('w-full max-w-[calc(100vw-(var(--global-spacing)*7)-var(--operation-bar-width))]')}
+                      className={cn(
+                        'w-full',
+                        imagePreviewOperationBarStyle === 'normal' &&
+                          'max-w-[calc(100vw-(var(--global-spacing)*7)-var(--operation-bar-width))]',
+                      )}
                     >
                       <Carousel
                         images={images}
@@ -240,21 +250,41 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
                 </>
               ) : (
                 <div className="vines-center size-full text-center text-3xl text-muted-foreground">
-                  {t('workspace.image-detail.no-image', '无图片数据')}
+                  {t('workspace.image-detail.no-image')}
                 </div>
               )}
             </div>
+
+            {/* 右上角 absolute toolbar */}
+            {imagePreviewOperationBarStyle === 'simple' && (
+              <div className="absolute right-global-2 top-global-2 flex gap-global">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button icon={<TrashIcon />} variant="outline" onClick={handleDeleteImage} />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('workspace.image-detail.delete')}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button icon={<X />} variant="outline" onClick={onClose} />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('common.utils.back')}</TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </main>
 
           {/* 右侧边栏 */}
-          <RightSidebar
-            onBack={onClose}
-            hasPrev={hasPrev}
-            hasNext={hasNext}
-            onPrevImage={nonUrgentPrevImage}
-            onNextImage={nonUrgentNextImage}
-            onDeleteImage={handleDeleteImage}
-          />
+          {imagePreviewOperationBarStyle === 'normal' && (
+            <RightSidebar
+              onBack={onClose}
+              hasPrev={hasPrev}
+              hasNext={hasNext}
+              onPrevImage={nonUrgentPrevImage}
+              onNextImage={nonUrgentNextImage}
+              onDeleteImage={handleDeleteImage}
+            />
+          )}
         </div>
       )}
     </>

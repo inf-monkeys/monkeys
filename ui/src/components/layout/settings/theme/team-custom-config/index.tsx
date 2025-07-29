@@ -3,19 +3,42 @@ import { toast } from 'sonner';
 
 import { useTeams } from '@/apis/authz/team';
 import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
+import { IImagePreviewOperationBarStyle } from '@/apis/authz/team/typings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import { TeamCustomConfigItem } from './item';
 
 export const TeamCustomConfig = () => {
   const { t } = useTranslation();
 
   const { mutate } = useTeams();
 
-  const { showFormInImageDetail, update } = useCustomConfigs();
+  const { showFormInImageDetail, imagePreviewOperationBarStyle, update } = useCustomConfigs();
 
   const onFormVisibilityChange = async (checked: boolean) => {
     toast.promise(
       update('showFormInImageDetail', checked)
+        .then((team) => {
+          void mutate();
+          return team;
+        })
+        .catch((error) => {
+          console.log('error', error);
+          throw error;
+        }),
+      {
+        loading: t('common.update.loading'),
+        success: t('common.update.success'),
+        error: t('common.update.error'),
+      },
+    );
+  };
+
+  const onImagePreviewOperationBarStyleChange = async (value: IImagePreviewOperationBarStyle) => {
+    toast.promise(
+      update('imagePreviewOperationBarStyle', value)
         .then((team) => {
           void mutate();
           return team;
@@ -39,26 +62,29 @@ export const TeamCustomConfig = () => {
         <CardDescription>{t('settings.theme.team-custom-config.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Card className="border-0 p-0 shadow-none">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <div className="flex flex-col">
-                <h3 className="line-clamp-1 font-semibold leading-tight">
-                  {t('settings.theme.team-custom-config.configs.show-form-in-image-detail.title')}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {t('settings.theme.team-custom-config.configs.show-form-in-image-detail.description')}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="form-visibility"
-                checked={showFormInImageDetail}
-                onCheckedChange={(checked) => onFormVisibilityChange(checked)}
-              />
-            </div>
-          </div>
+        <Card className="flex flex-col gap-global-1/2 border-0 p-0 shadow-none">
+          <TeamCustomConfigItem label="show-form-in-image-detail">
+            <Switch
+              id="form-visibility"
+              checked={showFormInImageDetail}
+              onCheckedChange={(checked) => onFormVisibilityChange(checked)}
+            />
+          </TeamCustomConfigItem>
+          <TeamCustomConfigItem label="image-preview-operation-bar-style">
+            <Tabs
+              value={imagePreviewOperationBarStyle ?? 'normal'}
+              onValueChange={(value) => onImagePreviewOperationBarStyleChange(value as IImagePreviewOperationBarStyle)}
+            >
+              <TabsList>
+                <TabsTrigger value="simple">
+                  {t('settings.theme.team-custom-config.configs.image-preview-operation-bar-style.options.simple')}
+                </TabsTrigger>
+                <TabsTrigger value="normal">
+                  {t('settings.theme.team-custom-config.configs.image-preview-operation-bar-style.options.normal')}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </TeamCustomConfigItem>
         </Card>
       </CardContent>
     </Card>

@@ -1008,6 +1008,14 @@
           "show-form-in-image-detail": {
             "title": "Form configuration",
             "description": "Set whether the form should be displayed"
+          },
+          "image-preview-operation-bar-style": {
+            "title": "Image preview operation bar style",
+            "description": "Set the style of the image preview operation bar",
+            "options": {
+              "normal": "Normal",
+              "simple": "Simple"
+            }
           }
         }
       },

@@ -3,6 +3,7 @@ import React, { startTransition, useCallback, useEffect, useState } from 'react'
 import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-router';
 
 import { useMemoizedFn } from 'ahooks';
+import { TrashIcon, X } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -15,7 +16,9 @@ import { RightSidebar } from '@/components/layout/workbench/image-detail/right-s
 import { ImagesCarousel } from '@/components/layout/workbench/image-detail/swiper-carousel';
 import { TabularFooterButtons } from '@/components/layout/workbench/image-detail/tabular-footer-buttons';
 import { TabularRenderWrapper } from '@/components/layout/workbench/image-detail/tabular-wrapper';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { WorkbenchOperationBar } from '@/components/ui/vines-iframe/view/operation-bar';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import useUrlState from '@/hooks/use-url-state';
@@ -45,7 +48,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'mini' });
   const isMiniFrame = mode === 'mini';
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
-  const { showFormInImageDetail } = useCustomConfigs();
+  const { showFormInImageDetail, imagePreviewOperationBarStyle, isLoading } = useCustomConfigs();
 
   // 提升的状态管理
   const [processedInputs, setProcessedInputs] = useState<any[]>([]);
@@ -185,6 +188,18 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   const [workflowAssociationList, setWorkflowAssociationList] = useState<IWorkflowAssociation[]>([]);
 
+  const baseWidth = showFormInImageDetail ? '70vw' : '100vw';
+  const spacingFormula =
+    imagePreviewOperationBarStyle === 'simple'
+      ? '0'
+      : workflowAssociationList.length > 0
+        ? '(var(--global-spacing) * 10) - (var(--operation-bar-width) * 2)'
+        : '(var(--global-spacing) * 7) - var(--operation-bar-width)';
+
+  // const widthClass = isLoading ? 'w-0' : `w-[calc(${baseWidth}-${spacingFormula})]`;
+
+  const width = `calc(${baseWidth} - ${spacingFormula})`;
+
   return (
     <VinesFlowProvider workflowId={workflowId}>
       <FlowStoreProvider createStore={createFlowStore}>
@@ -202,9 +217,12 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
               {/* 左侧图片展示区 */}
               <div
                 className={cn(
-                  'flex h-full flex-col items-center justify-between overflow-auto dark:bg-[#111113]',
-                  isMiniFrame ? 'w-full' : !showFormInImageDetail ? 'w-full' : 'w-[450px] sm:w-full md:w-[70%]',
+                  'flex h-full flex-col items-center justify-between overflow-auto pr-global dark:bg-[#111113]',
+                  isMiniFrame && '!w-full',
                 )}
+                style={{
+                  width,
+                }}
               >
                 {imageUrl ? (
                   <>
@@ -246,18 +264,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onDownload={handleDownload}
                       />
                       {/* 图片缩略图轮播 - 底部 */}
-                      <div
-                        className={cn(
-                          'w-full',
-                          showFormInImageDetail
-                            ? workflowAssociationList.length > 0
-                              ? 'max-w-[calc(70vw-(var(--global-spacing)*10)-(var(--operation-bar-width)*2))]'
-                              : 'max-w-[calc(70vw-(var(--global-spacing)*7)-var(--operation-bar-width))]'
-                            : workflowAssociationList.length > 0
-                              ? 'max-w-[calc(100vw-(var(--global-spacing)*10)-(var(--operation-bar-width)*2))]'
-                              : 'max-w-[calc(100vw-(var(--global-spacing)*7)-var(--operation-bar-width))]',
-                        )}
-                      >
+                      <div className={cn('w-full')}>
                         <ImagesCarousel />
                       </div>
                     </div>
@@ -288,20 +295,41 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                   </div>
                 </div>
               )}
+
+              {/* 右上角 fixed toolbar */}
+              {imagePreviewOperationBarStyle === 'simple' && (
+                <div className="absolute right-global top-global flex gap-global">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button icon={<TrashIcon />} variant="outline" onClick={handleDeleteImage} />
+                    </TooltipTrigger>
+                    <TooltipContent>{t('workspace.image-detail.delete')}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button icon={<X />} variant="outline" onClick={() => history.back()} />
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.utils.back')}</TooltipContent>
+                  </Tooltip>
+                </div>
+              )}
             </main>
+            {imagePreviewOperationBarStyle === 'normal' && (
+              <>
+                {/* 如果关联存在，则显示关联 */}
+                <WorkbenchOperationBar onDataChange={setWorkflowAssociationList} />
 
-            {/* 如果关联存在，则显示关联 */}
-            <WorkbenchOperationBar onDataChange={setWorkflowAssociationList} />
-
-            {/* 右侧边栏 */}
-            <RightSidebar
-              onBack={() => history.back()}
-              hasPrev={!!hasPrev}
-              hasNext={!!hasNext}
-              onPrevImage={nonUrgentPrevImage}
-              onNextImage={nonUrgentNextImage}
-              onDeleteImage={handleDeleteImage}
-            />
+                {/* 右侧边栏 */}
+                <RightSidebar
+                  onBack={() => history.back()}
+                  hasPrev={!!hasPrev}
+                  hasNext={!!hasNext}
+                  onPrevImage={nonUrgentPrevImage}
+                  onNextImage={nonUrgentNextImage}
+                  onDeleteImage={handleDeleteImage}
+                />
+              </>
+            )}
           </div>
         </OutputSelectionStoreProvider>
       </FlowStoreProvider>

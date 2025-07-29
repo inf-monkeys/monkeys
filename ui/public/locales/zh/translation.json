@@ -993,6 +993,14 @@
           "show-form-in-image-detail": {
             "title": "表单配置",
             "description": "设置是否显示表单"
+          },
+          "image-preview-operation-bar-style": {
+            "title": "图片预览操作栏样式",
+            "description": "设置图片预览操作栏样式",
+            "options": {
+              "normal": "正常",
+              "simple": "简洁"
+            }
           }
         }
       },

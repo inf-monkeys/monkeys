@@ -1,8 +1,11 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
+export type ImagePreviewOperationBarStyle = 'normal' | 'simple';
+
 export interface CustomConfigs {
   showFormInImageDetail?: boolean;
+  imagePreviewOperationBarStyle?: ImagePreviewOperationBarStyle;
 }
 
 export interface CustomTheme {

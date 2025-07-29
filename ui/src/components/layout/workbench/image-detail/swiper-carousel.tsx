@@ -6,6 +6,7 @@ import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { Button } from '@/components/ui/button';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import {
@@ -92,7 +93,7 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
   }
 
   return (
-    <div ref={containerRef} className="ustify-content flex h-24 items-center gap-global-1/2 overflow-hidden">
+    <div ref={containerRef} className="justify-content flex h-24 items-center gap-global-1/2 overflow-hidden">
       {imagePreviewStyle === 'normal' && (
         <Button icon={<ArrowLeftIcon />} variant="outline" size="icon" ref={slideLeftRef}></Button>
       )}
@@ -115,7 +116,7 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
         virtual
         slidesPerView={slidesPerView}
         initialSlide={position}
-        className={cn('h-full w-full', className)}
+        className={cn('size-full', className)}
         onSwiper={(swiper) => {
           setSwiperInstance(swiper);
           if (position !== undefined && position >= 0) {

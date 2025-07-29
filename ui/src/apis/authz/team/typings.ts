@@ -1,5 +1,7 @@
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 
+export type IImagePreviewOperationBarStyle = 'normal' | 'simple';
+
 export interface IVinesTeam {
   id: string;
   name: string;
@@ -14,6 +16,7 @@ export interface IVinesTeam {
     secondaryBackgroundColor?: string;
     configs: {
       showFormInImageDetail?: boolean;
+      imagePreviewOperationBarStyle?: IImagePreviewOperationBarStyle;
     };
   };
 }
