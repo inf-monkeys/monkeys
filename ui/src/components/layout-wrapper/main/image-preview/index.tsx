@@ -57,6 +57,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   const [imageScale, setImageScale] = useState(1);
 
   const currentImage = images[position];
+
   const imageUrl = currentImage?.render?.data;
   const imageOrigin = currentImage?.render?.origin;
   const instanceId = currentImage?.instanceId;
@@ -175,7 +176,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
     <>
       <div onClick={() => setOpen(!open)}>{children}</div>
       {open && (
-        <div className={cn('fixed inset-0 z-50 flex h-full w-full gap-global bg-neocard p-global', className)}>
+        <div className={cn('fixed inset-0 z-[301] flex h-full w-full gap-global bg-neocard p-global', className)}>
           {/* 主内容区域 */}
           <main
             className={cn(

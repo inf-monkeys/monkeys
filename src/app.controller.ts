@@ -139,6 +139,7 @@ export class AppController {
         workbenchSidebarDefaultOpen: config.server.customization.workbenchSidebarDefaultOpen,
         workbenchSidebarMoreAction: config.server.customization.workbenchSidebarMoreAction,
         uniImagePreview: config.server.customization.uniImagePreview,
+        imagePreviewStyle: config.server.customization.imagePreviewStyle,
       },
       auth: {
         enabled: config.auth.enabled,

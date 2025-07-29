@@ -121,6 +121,7 @@ export interface ServerConfig {
     workbenchSidebarDefaultOpen: boolean;
     workbenchSidebarMoreAction: boolean;
     uniImagePreview: boolean;
+    imagePreviewStyle: 'simple' | 'normal' | 'uni';
   };
 }
 
@@ -421,6 +422,7 @@ export const config: Config = {
       workbenchSidebarDefaultOpen: readConfig('server.customization.workbenchSidebarDefaultOpen', true),
       workbenchSidebarMoreAction: readConfig('server.customization.workbenchSidebarMoreAction', true),
       uniImagePreview: readConfig('server.customization.uniImagePreview', false),
+      imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
     },
   },
   conductor: {

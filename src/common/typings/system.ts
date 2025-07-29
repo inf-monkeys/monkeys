@@ -45,6 +45,7 @@ export interface ISystemConfig {
     workbenchSidebarDefaultOpen: boolean;
     workbenchSidebarMoreAction: boolean;
     uniImagePreview: boolean;
+    imagePreviewStyle: 'simple' | 'normal' | 'uni';
   };
   auth: {
     enabled: AuthMethod[];
