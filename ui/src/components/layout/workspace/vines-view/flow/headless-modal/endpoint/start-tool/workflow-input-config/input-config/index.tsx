@@ -52,6 +52,10 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
     vines.update({ variables: newInputs });
   };
 
+  const handleReorderInputs = (newInputs: typeof inputs) => {
+    vines.update({ variables: newInputs });
+  };
+
   const disabled = !isLatestWorkflowVersion || isWorkflowReadOnly;
 
   return (
@@ -61,6 +65,7 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
         className="px-2"
         contentWidth={contentWidth}
         defaultValueText={t('workspace.flow-view.endpoint.start-tool.input.def')}
+        onReorder={handleReorderInputs}
       >
         {(variableId, specialType) => (
           <div className="flex items-center gap-1">
