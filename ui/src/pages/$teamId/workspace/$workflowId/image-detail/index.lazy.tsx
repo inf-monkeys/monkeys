@@ -250,7 +250,9 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         className={cn(
                           'w-full',
                           showFormInImageDetail
-                            ? 'max-w-[70vw]'
+                            ? workflowAssociationList.length > 0
+                              ? 'max-w-[calc(70vw-(var(--global-spacing)*10)-(var(--operation-bar-width)*2))]'
+                              : 'max-w-[calc(70vw-(var(--global-spacing)*7)-var(--operation-bar-width))]'
                             : workflowAssociationList.length > 0
                               ? 'max-w-[calc(100vw-(var(--global-spacing)*10)-(var(--operation-bar-width)*2))]'
                               : 'max-w-[calc(100vw-(var(--global-spacing)*7)-var(--operation-bar-width))]',

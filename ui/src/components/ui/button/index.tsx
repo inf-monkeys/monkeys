@@ -28,7 +28,7 @@ const buttonVariants = cva(
         danger: 'button-theme-danger',
       },
       size: {
-        default: 'h-9  py-2',
+        default: 'h-9 p-global',
         icon: 'size-9',
         small: 'h-8 rounded-md px-3 text-xs',
         xs: 'h-6 rounded-md px-2 text-xs',
@@ -79,7 +79,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const hasChildren = Boolean(children);
     return (
       <Comp
-        className={cn(buttonVariants({ variant, theme, size, className, block }), !hasChildren && 'h-auto p-2')}
+        className={cn(buttonVariants({ variant, theme, size, className, block }), !hasChildren && '!h-auto !p-2')}
         ref={ref}
         disabled={disabled || loading}
         data-variant={variant}

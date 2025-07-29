@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAsyncEffect } from 'ahooks';
-import { Mousewheel, Virtual } from 'swiper/modules';
+import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
+import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
+import { useSystemConfig } from '@/apis/common';
+import { Button } from '@/components/ui/button';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import {
   ImagesResult,
@@ -16,18 +19,24 @@ import { cn } from '@/utils';
 
 import 'swiper/css';
 import 'swiper/css/mousewheel';
+import 'swiper/css/navigation';
 
 interface ImagesCarouselProps {
   className?: string;
 }
 
-const SwiperModules = [Virtual, Mousewheel];
+const SwiperModules = [Virtual, Mousewheel, Navigation];
 export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => {
+  const { data: oem } = useSystemConfig();
+  const imagePreviewStyle: ISystemConfig['theme']['imagePreviewStyle'] = oem?.theme.imagePreviewStyle ?? 'simple';
+
   const thumbImages = useThumbImages();
   const setPosition = useSetExecutionPosition();
   const position = useExecutionPosition();
   const [slidesPerView, setSlidesPerView] = useState(1);
   const [swiperInstance, setSwiperInstance] = useState<any>(null);
+  const slideLeftRef = useRef<HTMLButtonElement>(null);
+  const slideRightRef = useRef<HTMLButtonElement>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   // 计算 slidesPerView 的函数
@@ -83,7 +92,11 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
   }
 
   return (
-    <div ref={containerRef} className="h-24 overflow-hidden">
+    <div ref={containerRef} className="ustify-content flex h-24 items-center gap-global-1/2 overflow-hidden">
+      {imagePreviewStyle === 'normal' && (
+        <Button icon={<ArrowLeftIcon />} variant="outline" size="icon" ref={slideLeftRef}></Button>
+      )}
+
       <Swiper
         spaceBetween={12}
         slidesPerGroup={3}
@@ -110,6 +123,10 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
             // swiper.slideTo(position);
           }
         }}
+        navigation={{
+          prevEl: slideLeftRef.current,
+          nextEl: slideRightRef.current,
+        }}
       >
         {thumbImages.map((image, index) => (
           <SwiperSlide
@@ -118,13 +135,20 @@ export const ImagesCarousel: React.FC<ImagesCarouselProps> = ({ className }) => 
               width: 80,
               height: '100%',
             }}
-            className="flex items-center hover:cursor-pointer"
+            className={cn(
+              'flex items-center rounded-lg hover:cursor-pointer',
+              imagePreviewStyle === 'normal' && index === position ? 'border-[2px] border-vines-500' : 'p-[2px]',
+            )}
             onClick={() => handleThumbnailClick(index)}
           >
             <CarouselItemImage image={image} index={index} />
           </SwiperSlide>
         ))}
       </Swiper>
+
+      {imagePreviewStyle === 'normal' && (
+        <Button icon={<ArrowRightIcon />} variant="outline" size="icon" ref={slideRightRef}></Button>
+      )}
     </div>
   );
 };
@@ -141,7 +165,7 @@ function CarouselItemImage({ image, index }: { image: ImagesResult; index: numbe
     <img
       src={shouldUseThumbnail ? (image.render.data as string) : (images[index].render.data as string)}
       alt={`Thumbnail`}
-      className="size-[var(--history-result-image-size)] flex-shrink-0 rounded-md border border-border object-cover"
+      className="size-full flex-shrink-0 rounded-md border border-border object-cover"
       loading="lazy"
     />
   );
