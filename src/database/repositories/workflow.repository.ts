@@ -1176,12 +1176,38 @@ ORDER BY
   }
 
   public async updatePageGroup(groupId: string, updates: Partial<WorkflowPageGroupEntity>) {
-    await this.pageGroupRepository.update(
+    return await this.pageGroupRepository.update(
       {
         id: groupId,
       },
       updates,
     );
+  }
+
+  // 新增：根据分组名称获取分组
+  public async getPageGroupByName(teamId: string, displayName: string): Promise<WorkflowPageGroupEntity | null> {
+    return await this.pageGroupRepository.findOne({
+      where: {
+        teamId,
+        displayName,
+      },
+    });
+  }
+
+  // 新增：创建分组
+  public async createPageGroup(teamId: string, displayName: string, iconUrl?: string, pageId?: string): Promise<WorkflowPageGroupEntity> {
+    const pageGroup: WorkflowPageGroupEntity = {
+      id: generateDbId(),
+      displayName,
+      isBuiltIn: false,
+      teamId,
+      pageIds: pageId ? [pageId] : [],
+      iconUrl,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+    };
+    await this.pageGroupRepository.save(pageGroup);
+    return pageGroup;
   }
 
   public async listAllOpenAICompatibleWorkflows(teamId: string) {

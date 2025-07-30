@@ -1,0 +1,79 @@
+{
+  "groupNameMap": {
+    "llm": "AI 对话",
+    "image": "图像生成",
+    "productivity": "效率工具",
+    "content": "内容创作",
+    "hr": "人力资源",
+    "marketing": "内容营销",
+    "translation": "翻译工具",
+    "custom": "自定义分组"
+  },
+  "groupSortOrder": [
+    "llm",
+    "image",
+    "productivity",
+    "content",
+    "hr",
+    "marketing",
+    "translation",
+    "custom"
+  ],
+  "appSortOrder": {
+    "llm": [
+      "662a1c620b9fd2739ab8d3a6",
+      "662a1c620b9fd2739ab8d3a7",
+      "664f1e0db10cb3ffc558437a"
+    ],
+    "image": [
+      "665569753c72460540612445"
+    ],
+    "productivity": [
+      "66f12ee6480ed9e2e4999ef0",
+      "66f12ee6bee1ed58fe23ea3d",
+      "66f12ee6a15ef950b20f3e0d",
+      "66f12ee61d4f6d54f3746d16",
+      "66f12ee675d6716210bda905"
+    ],
+    "content": [
+      "66f12ee64acf0df5bac31fb2",
+      "66f12ee60d1196e612a3e16a",
+      "66f12ee654ae41d344264a26",
+      "66f12ee669a327496f4863ec",
+      "66f12ee6269595890b32a18a",
+      "66f12ee6a708208b3e68b0fb",
+      "66f12ee636c9b0a7b638d287",
+      "66f12ee64a28439a2526aee4"
+    ],
+    "hr": [
+      "66f12ee684163d972e05a92e",
+      "66f12ee69aca5420e6d524a1",
+      "66f12ee623dcd505ef621063"
+    ],
+    "marketing": [
+      "66f12ee6ef2105aa0ffd4579",
+      "66f12ee6144dbfa69b10f02f",
+      "66f12ee69baf25f4d2f3c47f",
+      "66f12ee604f72ddcc3e9b428",
+      "66f12ee64ff03a9ade4832b4",
+      "66f12ee6d96ef9b98204a77c",
+      "66f12ee6ab287d0112e36195",
+      "66f12ee65029ed4c91c25d60",
+      "66f12ee61bffae9beb0adb44",
+      "66f12ee64e9326dab341a33b",
+      "66f12ee67d773ab9dd4789e4",
+      "66f12ee6d66034fb571ec830",
+      "66f12ee6677226bbda4e5a6d"
+    ],
+    "translation": [
+      "66f12ee64ff03a9ade4832b4",
+      "66f12ee61bffae9beb0adb44",
+      "66f12ee64e9326dab341a33b"
+    ],
+    "custom": [
+      "your-custom-app-id-1",
+      "your-custom-app-id-2"
+    ]
+  },
+  "defaultGroupName": "其他应用"
+}
