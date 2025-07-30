@@ -1,29 +1,29 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    KeyboardSensor,
+    MouseSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Virtualizer, VListHandle } from 'virtua';
 
 import { IPinPage } from '@/apis/pages/typings.ts';
 import {
-  IWorkbenchViewItemPage,
-  IWorkbenchViewItemProps,
-  ViewItem,
+    IWorkbenchViewItemPage,
+    IWorkbenchViewItemProps,
+    ViewItem,
 } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
@@ -36,6 +36,7 @@ interface IVirtuaWorkbenchViewListProps {
   currentGroupId?: string;
   onChildClick?: IWorkbenchViewItemProps['onClick'];
   onReorder?: (newData: IPinPage[]) => void;
+  onlyShowWorkbenchIcon?: boolean;
 }
 
 let timeoutId: NodeJS.Timeout;
@@ -47,6 +48,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   currentGroupId,
   onChildClick,
   onReorder,
+  onlyShowWorkbenchIcon: propOnlyShowWorkbenchIcon,
 }) => {
   // 添加本地状态
   const [localData, setLocalData] = useState(initialData);
@@ -57,7 +59,9 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   }, [initialData]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
+  const storeOnlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
+  // 使用传入的prop，如果没有传入则使用store中的值
+  const onlyShowWorkbenchIcon = propOnlyShowWorkbenchIcon !== undefined ? propOnlyShowWorkbenchIcon : storeOnlyShowWorkbenchIcon;
   const ref = useRef<VListHandle>(null);
   const lastPageId = useRef<string>();
 

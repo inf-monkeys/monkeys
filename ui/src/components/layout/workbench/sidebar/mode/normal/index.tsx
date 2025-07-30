@@ -22,6 +22,7 @@ import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import {
+  useIsHoveringGroup,
   useOnlyShowWorkbenchIcon,
   useSetOnlyShowWorkbenchIcon,
   useToggleOnlyShowWorkbenchIcon,
@@ -274,10 +275,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
       return;
     }
     setOnlyShowWorkbenchIcon(!workbenchSidebarDefaultOpen);
-  }, [workbenchSidebarDefaultOpen, activePageFromWorkflowDisplayName]);
+  }, [workbenchSidebarDefaultOpen, activePageFromWorkflowDisplayName, setOnlyShowWorkbenchIcon]);
 
   const hasGroups = lists.length && !isLoading;
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
+  const isHoveringGroup = useIsHoveringGroup();
+  
+  // 计算是否显示详细信息：当hover到分组栏时显示，或者当onlyShowWorkbenchIcon为false时显示
+  const shouldShowDetails = !onlyShowWorkbenchIcon || isHoveringGroup;
+  
   const onPageClick = useCallback(
     (page: IWorkbenchViewItemPage) => {
       startTransition(() => {
@@ -289,14 +295,14 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         setCurrentPage({ [teamId]: { ...page, groupId } });
       });
     },
-    [teamId, groupId, setCurrentPage],
+    [teamId, groupId, setCurrentPage, navigate, extraMetadata],
   );
 
   useEffect(() => {
     if (globalViewSize === 'sm') {
       setOnlyShowWorkbenchIcon(true);
     }
-  }, [globalViewSize]);
+  }, [globalViewSize, setOnlyShowWorkbenchIcon]);
 
   const onPageGroupReorder = (
     newData: (Omit<IPageGroup, 'pageIds'> & {
@@ -360,6 +366,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               currentGroupId={groupId}
               onChildClick={onPageClick}
               onReorder={onPageGroupPageReorder}
+              onlyShowWorkbenchIcon={!shouldShowDetails}
             />
             <div
               className={cn(
@@ -374,7 +381,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                       onClick={() => toggleOnlyShowWorkbenchIcon()}
                       icon={onlyShowWorkbenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
                       size={'icon'}
-                      className={cn('shrink-0', onlyShowWorkbenchIcon && '')}
+                      className={cn('shrink-0', onlyShowWorkbenchIcon ? '' : '')}
                       variant="outline"
                     />
                   </TooltipTrigger>

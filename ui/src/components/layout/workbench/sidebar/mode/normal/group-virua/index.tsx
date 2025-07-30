@@ -1,39 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
+import { closestCenter, DndContext, DragEndEvent, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { Separator } from '@radix-ui/react-separator';
 import { FolderIcon } from 'lucide-react';
 
 import { useSystemConfig } from '@/apis/common';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
-import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useIsHoveringGroup, useOnlyShowWorkbenchIcon, useSetIsHoveringGroup } from '@/store/showWorkbenchIcon';
 import { cn } from '@/utils';
 
 import { NavDropdown } from './navTab';
 import { SideBarNavItem } from './sideBarNavItem';
 
 interface IVirtuaWorkbenchViewGroupListProps extends React.ComponentPropsWithoutRef<'div'> {
+  data: (Omit<IPageGroup, 'pageIds'> & {
+    pages: IPinPage[];
+  })[];
   groupId: string;
-  setGroupId: React.Dispatch<React.SetStateAction<string>>;
-  data: (Omit<IPageGroup, 'pageIds'> & { pages: IPinPage[] })[];
-  onReorder?: (newData: (Omit<IPageGroup, 'pageIds'> & { pages: IPinPage[] })[]) => void;
+  setGroupId: (groupId: string) => void;
+  onReorder?: (
+    newData: (Omit<IPageGroup, 'pageIds'> & {
+      pages: IPinPage[];
+    })[],
+  ) => void;
 }
 
 export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupListProps> = ({
@@ -55,10 +47,14 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
+  
+  // 新增hover状态管理
+  const isHoveringGroup = useIsHoveringGroup();
+  const setIsHoveringGroup = useSetIsHoveringGroup();
 
   // 添加传感器
   const sensors = useSensors(
-    useSensor(MouseSensor, {
+    useSensor(PointerSensor, {
       activationConstraint: {
         distance: 10,
       },
@@ -91,8 +87,21 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
     onReorder?.(newData);
   };
 
+  // 处理hover事件
+  const handleMouseEnter = () => {
+    setIsHoveringGroup(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHoveringGroup(false);
+  };
+
   return (
-    <div className="flex h-full pr-[1px]">
+    <div 
+      className="flex h-full pr-[1px]"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
