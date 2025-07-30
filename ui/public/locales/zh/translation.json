@@ -235,6 +235,12 @@
       "icon-selector": {
         "search": {
           "placeholder": "输入图标名称来搜索图标"
+        },
+        "custom": {
+          "upload": "自定义上传",
+          "title": "上传自定义图标",
+          "description": "支持 PNG、JPG、JPEG、WebP、SVG 格式，最大 5MB",
+          "select-file": "选择文件"
         }
       },
       "image-editor": {

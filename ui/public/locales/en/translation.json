@@ -246,6 +246,12 @@
       "icon-selector": {
         "search": {
           "placeholder": "Enter icon name to search icons"
+        },
+        "custom": {
+          "upload": "Custom Upload",
+          "title": "Upload Custom Icon",
+          "description": "Supports PNG, JPG, JPEG, WebP, SVG formats, max 5MB",
+          "select-file": "Select File"
         }
       },
       "image-editor": {

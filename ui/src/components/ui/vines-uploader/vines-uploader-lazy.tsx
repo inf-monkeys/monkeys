@@ -100,6 +100,16 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     const finalFiles = latestFiles.current.filter((it) => it.id !== file.id);
     onChange?.(finalFiles.map((it) => it.uploadURL || it.meta.remoteUrl) as string[], finalFiles);
   });
+  useUppyEvent(uppy, 'upload-success', (file, response) => {
+    // 确保 uploadURL 被设置
+    if (response.uploadURL && !file.uploadURL) {
+      const currentFile = uppy.getFile(file.id);
+      uppy.setFileState(file.id, {
+        ...currentFile,
+        uploadURL: response.uploadURL,
+      });
+    }
+  });
 
   const lastPropFiles = useRef<UppyFile<Meta, Record<string, never>>[]>([]);
   useEffect(() => {
