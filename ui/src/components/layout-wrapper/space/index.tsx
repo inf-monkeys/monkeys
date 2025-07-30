@@ -29,9 +29,15 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
 
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
 
-  const [{ hideSpaceHeader: urlHideSpaceHeader }] = useUrlState<{ hideSpaceHeader: boolean }>({
+  const [{ hideSpaceHeader: urlHideSpaceHeader, mode }] = useUrlState<{
+    hideSpaceHeader: boolean;
+    mode: 'normal' | 'fast' | 'mini';
+  }>({
     hideSpaceHeader: false,
+    mode: 'mini',
   });
+
+  const isMiniFrame = mode === 'mini';
 
   const hideSpaceHeader = urlHideSpaceHeader || oem?.theme.hideSpaceHeader || false;
 
@@ -51,7 +57,7 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
           'dark:bg-workspace-dark bg-workspace-light relative overflow-hidden rounded-xl',
           !vinesIFrameVisible && sidebar && 'ml-0',
           // 修改这里，当没有侧边栏时使用全宽
-          sidebar ? 'w-[calc(100vw-17rem)]' : 'w-full',
+          isMiniFrame ? '' : sidebar ? 'w-[calc(100vw-17rem)]' : 'w-full',
           className,
         )}
       >

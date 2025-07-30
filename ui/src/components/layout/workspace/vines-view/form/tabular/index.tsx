@@ -119,7 +119,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
   );
 
   return (
-    <div className={cn('flex flex-col pr-global', className)} style={style}>
+    <div className={cn('flex flex-col gap-global pr-global', className)} style={style}>
       <div className="flex-1">
         <TabularRender
           formClassName={''}

@@ -198,14 +198,16 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   // const widthClass = isLoading ? 'w-0' : `w-[calc(${baseWidth}-${spacingFormula})]`;
 
-  const width = `calc(${baseWidth} - ${spacingFormula})`;
+  const width = isMiniFrame
+    ? 'calc(100vw - var(--operation-bar-width) - (var(--global-spacing)))'
+    : `calc(${baseWidth} - ${spacingFormula})`;
 
   return (
     <VinesFlowProvider workflowId={workflowId}>
       <FlowStoreProvider createStore={createFlowStore}>
         <OutputSelectionStoreProvider createStore={createOutputSelectionStore}>
           <ImageDetailInitializer workflowId={workflowId} currentImage={currentImage} />
-          <div className={cn('flex h-full w-full gap-global bg-neocard', isMiniFrame && 'justify-center')}>
+          <div className={cn('flex h-full gap-global bg-neocard', isMiniFrame ? 'justify-center' : 'w-full')}>
             {/* 主内容区域 */}
             <main
               className={cn(
@@ -218,7 +220,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
               <div
                 className={cn(
                   'flex h-full flex-col items-center justify-between overflow-auto pr-global dark:bg-[#111113]',
-                  isMiniFrame && '!w-full',
                 )}
                 style={{
                   width,
@@ -297,7 +298,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
               )}
 
               {/* 右上角 fixed toolbar */}
-              {imagePreviewOperationBarStyle === 'simple' && (
+              {(imagePreviewOperationBarStyle === 'simple' || isMiniFrame) && (
                 <div className="absolute right-global top-global flex gap-global">
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -314,7 +315,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                 </div>
               )}
             </main>
-            {imagePreviewOperationBarStyle === 'normal' && (
+            {imagePreviewOperationBarStyle === 'normal' && !isMiniFrame && (
               <>
                 {/* 如果关联存在，则显示关联 */}
                 <WorkbenchOperationBar onDataChange={setWorkflowAssociationList} />
