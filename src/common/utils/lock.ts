@@ -1,5 +1,4 @@
 import Redis, { Cluster } from 'ioredis';
-import { promisify } from 'util';
 import { RedisConfig, config } from '../config';
 import { initRedisClient } from '../redis';
 
@@ -39,10 +38,9 @@ export class RedisLockManager implements LockManager {
   }
 
   async acquireLock(resource: string, timeout = 5000) {
-    const lockAsync = promisify(this.redis.set).bind(this.redis);
     const lockKey = `lock:${resource}`;
     const identifier = Math.random().toString(36).slice(2); // 生成一个随机的标识符
-    const result = await lockAsync(lockKey, identifier, 'NX', 'PX', timeout);
+    const result = await this.redis.set(lockKey, identifier, 'PX', timeout, 'NX');
     if (result === 'OK') {
       return identifier;
     }
@@ -50,12 +48,11 @@ export class RedisLockManager implements LockManager {
   }
 
   async releaseLock(resource: string, identifier: string) {
-    const unlockAsync = promisify(this.redis.del).bind(this.redis);
     const lockKey = `${config.server.appId}:lock:${resource}`;
     const currentIdentifier = await this.redis.get(lockKey);
 
     if (currentIdentifier === identifier) {
-      await unlockAsync(lockKey);
+      await this.redis.del(lockKey);
       return true;
     }
 

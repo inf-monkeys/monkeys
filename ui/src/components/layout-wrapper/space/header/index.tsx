@@ -7,9 +7,9 @@ import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
 import { getVinesToken } from '@/apis/utils.ts';
-import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { HeaderInvite } from '@/components/layout-wrapper/space/header/expand/header-invite';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
+import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';

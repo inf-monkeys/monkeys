@@ -25,6 +25,7 @@ import {
   useToasts,
 } from 'tldraw';
 
+import { useSystemConfig } from '@/apis/common';
 import { useUniImagePreview } from '@/components/layout-wrapper/main/uni-image-preview';
 import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
 import { getImageSize } from '@/utils/file';
@@ -116,6 +117,7 @@ export const Board: React.FC<BoardProps> = ({
   persistenceKey,
 }) => {
   const frameShapeId = instance?.frameShapeId || createShapeId();
+  const { data: oem } = useSystemConfig();
 
   const { setBoardCanvasSize, width, height } = useBoardCanvasSizeStore();
 
@@ -150,6 +152,27 @@ export const Board: React.FC<BoardProps> = ({
     }
   }, [width, height]);
 
+  // 应用 OEM 主题配置
+  useEffect(() => {
+    if (!editor || !oem) return;
+
+    // 应用主题颜色
+    const primaryColor = oem.theme?.colors?.primaryColor;
+    if (primaryColor) {
+      // 这里可以设置画板的主色调
+      editor.user.updateUserPreferences({
+        colorScheme: 'light', // 可以根据 OEM 配置调整
+      });
+    }
+
+    // 应用工作流预览网格配置
+    const workflowPreviewExecutionGrid = oem.theme?.workflowPreviewExecutionGrid;
+    if (workflowPreviewExecutionGrid) {
+      // 根据 OEM 配置调整工作流预览样式
+      console.log('Applying workflow preview config:', workflowPreviewExecutionGrid);
+    }
+  }, [editor, oem]);
+
   // 定义自定义组件配置
   const components: TLComponents = {
     PageMenu: () => null,
@@ -159,12 +182,22 @@ export const Board: React.FC<BoardProps> = ({
     ContextMenu: CustomContextMenu, // 添加自定义右键菜单
   };
 
+  // 根据 OEM 配置调整工具栏样式
+  const toolbarStyle = oem?.theme?.headbar?.theme === 'fixed' ? 'fixed' : 'card';
+
   return (
     <div className="h-full w-full">
       <Tldraw
         persistenceKey={persistenceKey}
         onMount={(editor: Editor) => {
           setEditor(editor);
+          
+          // 应用 OEM 主题配置到编辑器
+          if (oem?.theme?.colors?.primaryColor) {
+            // 这里可以设置编辑器的主题颜色
+            console.log('Applying OEM theme color:', oem.theme.colors.primaryColor);
+          }
+
           editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
             if (shape.id === frameShapeId) {
               return false;
