@@ -34,7 +34,7 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
     mode: 'normal' | 'fast' | 'mini';
   }>({
     hideSpaceHeader: false,
-    mode: 'mini',
+    mode: 'normal',
   });
 
   const isMiniFrame = mode === 'mini';

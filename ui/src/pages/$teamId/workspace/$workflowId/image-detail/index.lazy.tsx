@@ -45,7 +45,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [imageFlipX, setImageFlipX] = useState(false);
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
-  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'mini' });
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
   const isMiniFrame = mode === 'mini';
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
   const { showFormInImageDetail, imagePreviewOperationBarStyle, isLoading } = useCustomConfigs();
