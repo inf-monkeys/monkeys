@@ -1,5 +1,6 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
+import { TeamEntity } from '@/database/entities/identity/team';
 import { InstalledAppEntity } from '@/database/entities/marketplace/installed-app.entity';
 import { MarketplaceAppVersionEntity, MarketplaceAppVersionStatus } from '@/database/entities/marketplace/marketplace-app-version.entity';
 import { MarketplaceAppEntity, MarketplaceAppStatus } from '@/database/entities/marketplace/marketplace-app.entity';
@@ -393,6 +394,64 @@ export class MarketplaceService {
     const app = await this.appRepo.findOne({ where: { id: appId } });
     if (!app) throw new NotFoundException('Application not found.');
     app.isPreset = isPreset;
-    return this.appRepo.save(app);
+    const updatedApp = await this.appRepo.save(app);
+    if (isPreset) {
+      const installResult = await this.installAppLatestVersionToAllTeams(appId);
+      return { ...updatedApp, installResult };
+    }
+    return updatedApp;
+  }
+
+  public async getAppLatestVersion(appId: string) {
+    const appVersion = await this.versionRepo.findOne({ where: { appId }, order: { createdTimestamp: 'DESC' } });
+    return appVersion;
+  }
+
+  public async installAppLatestVersionToAllTeams(appId: string) {
+    // 使用事务来确保所有操作的原子性
+    return this.entityManager.transaction(async (transactionalEntityManager) => {
+      // 1. 获取应用的最新版本
+      const latestVersion = await this.getAppLatestVersion(appId);
+      if (!latestVersion) {
+        throw new NotFoundException(`No version found for app ${appId}`);
+      }
+
+      // 2. 获取所有团队，排除已安装此应用的团队
+      const teamsWithoutApp = await transactionalEntityManager
+        .createQueryBuilder(TeamEntity, 'team')
+        .where((qb) => {
+          const subQuery = qb
+            .subQuery()
+            .select('installed.teamId')
+            .from(InstalledAppEntity, 'installed')
+            .where('installed.marketplaceAppVersionId = :versionId', { versionId: latestVersion.id })
+            .getQuery();
+          return 'team.id NOT IN ' + subQuery;
+        })
+        .andWhere('team.isDeleted = :isDeleted', { isDeleted: false })
+        .getMany();
+
+      this.logger.debug(`Found ${teamsWithoutApp.length} teams without the app installed`);
+
+      // 3. 为每个团队安装应用
+      const failedInstallations = [];
+      for (const team of teamsWithoutApp) {
+        try {
+          // 使用团队所有者作为安装者
+          await this.installApp(latestVersion.id, team.id, team.ownerUserId);
+          this.logger.debug(`Successfully installed app for team ${team.id}`);
+        } catch (error) {
+          this.logger.error(`Failed to install app for team ${team.id}:`, error);
+          failedInstallations.push(team.id);
+          // 继续处理其他团队，不中断整个过程
+          continue;
+        }
+      }
+
+      return {
+        totalTeams: teamsWithoutApp.length,
+        failedInstallations,
+      };
+    });
   }
 }
