@@ -35,6 +35,8 @@ export const UserCard: React.FC<IUserCardProps> = () => {
 
   const { data: oem } = useSystemConfig();
 
+  const teamAsUser = oem?.theme.teamAsUser || false;
+
   const showDarkMode =
     oem &&
     (!oem.theme.headbar || oem.theme.headbar.profile === '*' || oem.theme.headbar.profile?.includes('dark-mode'));
@@ -87,12 +89,14 @@ export const UserCard: React.FC<IUserCardProps> = () => {
           </Avatar>
           <div>
             <h1 className="font-blod text-sm">{userName}</h1>
-            <p className="text-xs font-normal">
-              {t(
-                [`components.layout.main.sidebar.teams.${isJSONString(teamName) ? '' : teamName}`],
-                getI18nContent(teamName) ?? '',
-              )}
-            </p>
+            {!teamAsUser && (
+              <p className="text-xs font-normal">
+                {t(
+                  [`components.layout.main.sidebar.teams.${isJSONString(teamName) ? '' : teamName}`],
+                  getI18nContent(teamName) ?? '',
+                )}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuGroup className="px-2">

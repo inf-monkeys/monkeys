@@ -21,11 +21,14 @@ export const SettingsNavList: React.FC<INavListProps> = ({ className }) => {
 
   const { data: config } = useSystemConfig();
 
-  const showTeamQuota = config && (config.module === '*' || config.module.includes('payment'));
+  const teamAsUser = config?.theme.teamAsUser || false;
+
+  const showTeamQuota = config && (config.module === '*' || (config.module.includes('payment') && !teamAsUser));
 
   const settingsSidebarMap = SETTINGS_SIDEBAR_MAP.filter((item) => {
     if (!showTeamQuota && item.id === 'quota') return false;
     if (!config?.theme?.modules?.settingsSidebar || config?.theme?.modules?.settingsSidebar === '*') return true;
+    if (teamAsUser && ['config'].includes(item.id)) return false;
     return config?.theme?.modules?.settingsSidebar?.includes(item.id as SettingsSidebarModule);
   });
 

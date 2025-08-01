@@ -103,6 +103,7 @@ export interface ISystemConfig {
     workbenchSidebarMoreAction?: boolean;
     uniImagePreview?: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
+    teamAsUser: boolean;
   };
   auth: {
     enabled: AuthMethod[];

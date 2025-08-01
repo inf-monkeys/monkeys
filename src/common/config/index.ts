@@ -122,6 +122,7 @@ export interface ServerConfig {
     workbenchSidebarMoreAction: boolean;
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
+    teamAsUser: boolean;
   };
 }
 
@@ -423,6 +424,7 @@ export const config: Config = {
       workbenchSidebarMoreAction: readConfig('server.customization.workbenchSidebarMoreAction', true),
       uniImagePreview: readConfig('server.customization.uniImagePreview', false),
       imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
+      teamAsUser: readConfig('server.customization.teamAsUser', false),
     },
   },
   conductor: {

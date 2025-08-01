@@ -13,13 +13,15 @@ export const Account: React.FC<IAccountProps> = () => {
 
   const { data: oem } = useSystemConfig();
 
+  const teamAsUser = oem?.theme.teamAsUser || false;
+
   const hasPayment = (oem?.module || []).includes('payment');
 
   return (
     <div className="grid grid-cols-[1fr_2fr] items-start justify-center gap-global">
       <div className="grid items-start gap-global">
         <User />
-        <Team />
+        {!teamAsUser && <Team />}
         {/* <TeamMember /> */}
       </div>
 
