@@ -22,9 +22,10 @@ interface IMaskPreviewProps {
   setContrast: React.Dispatch<React.SetStateAction<boolean>>;
 
   mini?: boolean;
+  isDrawing?: boolean;
 }
 
-export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, visible, contrast, setContrast, mini }) => {
+export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, visible, contrast, setContrast, mini, isDrawing }) => {
   const { t } = useTranslation();
 
   const [miniPreview, setMiniPreview] = useState(true);
@@ -47,16 +48,25 @@ export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, visible, contras
 
   return (
     <div
-      className={cn('absolute bottom-1 right-1 space-y-1', mini && '-m-5 scale-75', miniPreview && mini && '!-mb-3')}
+      className={cn(
+        'absolute bottom-1 right-1 space-y-1 transition-all duration-200',
+        mini && '-m-5 scale-75',
+        miniPreview && mini && '!-mb-3',
+        isDrawing ? 'pointer-events-none' : 'pointer-events-auto'
+      )}
     >
       <motion.div
         key="vines-mask-editor-preview"
         className={cn(
           'flex h-24 overflow-hidden rounded border border-input bg-background transition-opacity hover:!opacity-100 [&>div]:mx-auto',
           !miniPreview && 'pointer-events-none',
+          isDrawing && 'pointer-events-none',
         )}
         initial={{ opacity: 0 }}
-        animate={{ opacity: miniPreview ? 0.85 : 0, height: miniPreview ? 96 : 0 }}
+        animate={{ 
+          opacity: miniPreview ? (isDrawing ? 0.3 : 0.85) : 0, 
+          height: miniPreview ? 96 : 0 
+        }}
       >
         <Image
           src={src}
@@ -67,7 +77,10 @@ export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, visible, contras
           }}
         />
       </motion.div>
-      <div className="flex w-full items-center gap-1 rounded border border-input bg-background p-1 opacity-85 transition-opacity hover:opacity-100">
+      <div className={cn(
+        "flex w-full items-center gap-1 rounded border border-input bg-background p-1 transition-opacity hover:opacity-100",
+        isDrawing ? "opacity-30 pointer-events-none" : "opacity-85"
+      )}>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

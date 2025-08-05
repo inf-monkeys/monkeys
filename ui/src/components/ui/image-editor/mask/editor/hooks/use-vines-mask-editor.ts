@@ -21,6 +21,7 @@ export interface IVinesMaskEditorProps {
 
   onDrawEnd?: () => void; // 绘制结束回调
   onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void; // 历史记录变化回调
+  onDrawingStateChange?: (isDrawing: boolean) => void; // 绘制状态变化回调
 }
 
 export const useVinesMaskEditor = ({
@@ -34,6 +35,7 @@ export const useVinesMaskEditor = ({
   zoom = 1, // 默认缩放比例为 1
   onDrawEnd,
   onHistoryChange,
+  onDrawingStateChange,
 }: IVinesMaskEditorProps) => {
   // 定义各种状态引用
   const isDrawingRef = useRef(false); // 是否正在绘制
@@ -183,6 +185,7 @@ export const useVinesMaskEditor = ({
       }
 
       isDrawingRef.current = true;
+      onDrawingStateChange?.(true);
 
       e.preventDefault();
 
@@ -280,6 +283,7 @@ export const useVinesMaskEditor = ({
     }
     // 重置状态
     isDrawingRef.current = false;
+    onDrawingStateChange?.(false);
     isErasingRef.current = false;
     lassoPointsRef.current = [];
   });
@@ -294,6 +298,7 @@ export const useVinesMaskEditor = ({
     }
     // 重置状态
     isDrawingRef.current = false;
+    onDrawingStateChange?.(false);
     isErasingRef.current = false;
     lassoPointsRef.current = [];
   });

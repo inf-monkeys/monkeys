@@ -36,6 +36,7 @@ export interface IMaskEditorProps extends Pick<React.ComponentPropsWithoutRef<'d
   maskContext: CanvasRenderingContext2D | null;
   setMaskContext: React.Dispatch<React.SetStateAction<CanvasRenderingContext2D | null>>;
 
+  onDrawingStateChange?: (isDrawing: boolean) => void;
   event$?: EventEmitter<IMaskEditorEvent>;
 }
 
@@ -57,6 +58,7 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
   setCanUndo,
   setCanRedo,
 
+  onDrawingStateChange,
   event$,
   ...props
 }) => {
@@ -138,6 +140,7 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
         setCanUndo?.(canUndo);
         setCanRedo?.(canRedo);
       },
+      onDrawingStateChange,
     },
   );
 

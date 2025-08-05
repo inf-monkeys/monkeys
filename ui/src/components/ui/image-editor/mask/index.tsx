@@ -63,6 +63,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
     const [brushType, setBrushType] = useState<IVinesMaskEditorProps['brushType']>('normal');
     const [canUndo, setCanUndo] = useState(false);
     const [canRedo, setCanRedo] = useState(false);
+    const [isDrawing, setIsDrawing] = useState(false);
 
     const maskEditorEvent$ = useEventEmitter<IMaskEditorEvent>();
 
@@ -102,6 +103,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
           if (!editable && e.buttons === 4) {
             setEditable(true);
           }
+          setIsDrawing(false);
         }}
       >
         <AnimatePresence mode="popLayout">
@@ -161,6 +163,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                           brushType={brushType}
                           setCanUndo={setCanUndo}
                           setCanRedo={setCanRedo}
+                          onDrawingStateChange={setIsDrawing}
                           event$={maskEditorEvent$}
                         />
                       </div>
@@ -172,6 +175,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                       contrast={contrast}
                       setContrast={setContrast}
                       mini={mini}
+                      isDrawing={isDrawing}
                     />
                   </>
                 )}
