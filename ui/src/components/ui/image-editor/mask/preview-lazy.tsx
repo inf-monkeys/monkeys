@@ -13,12 +13,19 @@ import { IVinesImageMaskPreviewProps } from '@/components/ui/image-editor/mask/p
 import { Separator } from '@/components/ui/separator.tsx';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { useMaskEditorStore } from '@/store/maskEditorStore';
 import { cn } from '@/utils';
 
 const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, className, onFinished }) => {
   const { t } = useTranslation();
 
   const [visible, setVisible] = useState(false);
+  const { setEditorOpen } = useMaskEditorStore();
+
+  // 同步遮罩编辑器状态到全局store
+  React.useEffect(() => {
+    setEditorOpen(visible);
+  }, [visible, setEditorOpen]);
 
   const [uppy, setUppy] = React.useState<Uppy<Meta, Record<string, never>> | null>(null);
   const uppy$ = useEventEmitter<Uppy<Meta, Record<string, never>>>();

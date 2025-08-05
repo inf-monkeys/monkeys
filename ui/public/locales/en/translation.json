@@ -3424,6 +3424,8 @@
           "unknown": "Unsupported tools, try recreating"
         },
         "execution": {
+          "label": "Generate",
+          "mask-editor-open-tips": "Please save changes in the mask editor first",
           "button": "Execution Workflow",
           "COMPLETED": "Workflow execution completed!",
           "FAILED": "Workflow execution failed!",

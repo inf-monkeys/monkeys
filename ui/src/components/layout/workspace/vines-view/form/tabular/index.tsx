@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useClipboard } from '@/hooks/use-clipboard';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
+import { useMaskEditorStore } from '@/store/maskEditorStore';
 import { cn } from '@/utils';
 
 interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -36,6 +37,9 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
   const openAIInterfaceEnabled = useOpenAIInterface.enable;
 
   const isInputNotEmpty = vines.workflowInput.length > 0;
+
+  // 获取遮罩编辑器状态
+  const { isEditorOpen } = useMaskEditorStore();
 
   const { ref: inputRef, height: wrapperHeight } = useElementSize();
   const [inputHeight, setInputHeight] = useState(500);
@@ -177,13 +181,15 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
           className="size-full text-base"
           onClick={debouncedSubmit.run}
           size="small"
-          disabled={openAIInterfaceEnabled || isSubmitting}
+          disabled={openAIInterfaceEnabled || isSubmitting || isEditorOpen}
           icon={<Sparkles className="fill-white" />}
           loading={loading}
         >
           {t(
             openAIInterfaceEnabled
               ? 'workspace.pre-view.disable.exec-button-tips'
+              : isEditorOpen
+              ? 'workspace.pre-view.actuator.execution.mask-editor-open-tips'
               : 'workspace.pre-view.actuator.execution.label',
           )}
         </Button>
