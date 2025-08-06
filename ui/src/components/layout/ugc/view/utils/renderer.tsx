@@ -67,7 +67,9 @@ export const RenderIcon: React.FC<{
   iconUrl?: string;
   size?: IVinesIconSize;
 }> = ({ iconUrl, size = 'md' }) => (
-  <VinesIcon size={size}>{iconUrl && iconUrl.trim() != '' ? iconUrl : DEFAULT_WORKFLOW_ICON_URL}</VinesIcon>
+  <VinesIcon size={size} fallbackColor="#eeeef1">
+    {iconUrl && iconUrl.trim() != '' ? iconUrl : DEFAULT_WORKFLOW_ICON_URL}
+  </VinesIcon>
 );
 
 export const RenderTags = (props: IUgcTagSelectorProps) => <UgcTagSelector {...props} />;

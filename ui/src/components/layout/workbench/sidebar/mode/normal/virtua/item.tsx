@@ -64,7 +64,12 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         )}
         onClick={() => onClick?.(page)}
       >
-        <VinesIcon className="!size-[calc(var(--global-icon-size)+var(--global-spacing)/2)]" size="sm" disabledPreview>
+        <VinesIcon
+          className="!size-[calc(var(--global-icon-size)+var(--global-spacing)/2)]"
+          fallbackColor="#eeeef1"
+          size="sm"
+          disabledPreview
+        >
           {info?.iconUrl}
         </VinesIcon>
         {!onlyShowWorkbenchIcon ? (

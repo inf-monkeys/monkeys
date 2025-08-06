@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 
-import { useCreation } from 'ahooks';
 import { isUndefined } from 'lodash';
 import emojiRenderer from 'react-easy-emoji';
 import isURL from 'validator/es/lib/isURL';
@@ -8,7 +7,9 @@ import isURL from 'validator/es/lib/isURL';
 import { VinesImage } from '@/components/ui/image';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { splitEmojiLink } from '@/components/ui/vines-icon/utils.ts';
+import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
+import VinesEvent from '@/utils/events';
 
 export type IVinesIconSize = 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'max' | 'gallery';
 
@@ -18,6 +19,7 @@ export interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
   size?: IVinesIconSize;
   alt?: string;
   disabledPreview?: boolean;
+  fallbackColor?: string;
 }
 
 export const VinesIcon: React.FC<IVinesIconProps> = ({
@@ -28,15 +30,26 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
   children,
   alt,
   disabledPreview,
+  fallbackColor,
 }) => {
   const src = (propSrc ?? children ?? '').toString().trim();
 
-  const { text, backgroundColor, type } = splitEmojiLink(src);
+  const initialized = useAppStore((s) => s.iconInitialized);
+  const iconNames = useAppStore((s) => s.iconNames);
 
-  const iconType = useCreation(() => {
+  useEffect(() => {
+    if (!initialized) {
+      VinesEvent.emit('vines-trigger-init-icons');
+    }
+  }, [initialized]);
+
+  const iconType = useMemo(() => {
+    if (iconNames.includes(src)) return 'lucide';
     if (isURL(src)) return 'img';
-    return type;
-  }, [src, type]);
+    return 'emoji';
+  }, [src, iconNames]);
+
+  const { text, backgroundColor } = splitEmojiLink(src, fallbackColor, iconType as 'emoji' | 'lucide' | 'img');
 
   return (
     <div
@@ -66,18 +79,17 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
           {iconType === 'img' && <VinesImage src={src} alt={alt} disabled={disabledPreview} />}
           {iconType === 'emoji' && emojiRenderer(text, { protocol: 'https', ext: '.png' })}
           {iconType === 'lucide' && (
-            <VinesLucideIcon
-              src={text}
+            <div
               className={cn(
-                'stroke-current text-black',
-                (size === 'xl' || size === '2xl' || size === '3xl') && 'size-6',
-                size === 'lg' && 'size-5',
-                size === 'md' && 'size-4',
-                size === 'sm' && 'size-3',
-                size === 'xs' && 'size-2',
-                className,
+                (size === 'xl' || size === '2xl' || size === '3xl') && 'size-7',
+                size === 'lg' && 'size-6',
+                size === 'md' && 'size-5',
+                size === 'sm' && 'size-4',
+                size === 'xs' && 'size-3',
               )}
-            />
+            >
+              <VinesLucideIcon src={text} className={cn('size-full stroke-current text-black')} />
+            </div>
           )}
         </div>
       )}

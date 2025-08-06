@@ -18,39 +18,37 @@ const morandiColorMapper: Record<string, string> = {
 export const splitEmojiLink = (
   src = '',
   fallbackColor = 'var(--slate1)',
-): { backgroundColor: string; text: string; emoji: string; type: 'emoji' | 'lucide' } => {
-  if (src?.toString()?.startsWith('emoji') && src.includes(':')) {
-    const [, emoji, color, lucide] = src.split(':');
-    const morandiColor = morandiColorMapper[color];
+  typeParameter: 'emoji' | 'lucide' | 'img' | undefined = undefined,
+): { backgroundColor: string; text: string; emoji?: string; type: 'emoji' | 'lucide' } => {
+  const splitContent = src.split(':');
 
-    if (lucide) {
-      return {
-        backgroundColor: morandiColor || color || fallbackColor,
-        text: lucide,
-        emoji,
-        type: 'lucide',
-      };
-    }
+  let [type, iconContent, color] = splitContent;
 
-    if (emoji && color) {
-      return {
-        backgroundColor: morandiColor || color || fallbackColor,
-        text: emoji,
-        emoji,
-        type: 'emoji',
-      };
-    }
+  if (splitContent.length === 1) {
+    type = 'emoji';
+    iconContent = splitContent[0];
   }
 
-  if (src?.toString()?.startsWith('lucide') && src.includes(':')) {
-    const [, icon, color] = src.split(':');
-    const morandiColor = morandiColorMapper[color];
+  if (typeParameter) {
+    type = typeParameter;
+  }
 
+  const morandiColor = morandiColorMapper[color];
+
+  if (type === 'lucide') {
     return {
       backgroundColor: morandiColor || color || fallbackColor,
-      text: icon,
-      emoji: icon,
+      text: iconContent,
       type: 'lucide',
+    };
+  }
+
+  if (type === 'emoji' && color) {
+    return {
+      backgroundColor: morandiColor || color || fallbackColor,
+      text: iconContent,
+      emoji: iconContent,
+      type: 'emoji',
     };
   }
 

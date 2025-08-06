@@ -13,11 +13,11 @@ import VinesEvent from '@/utils/events.ts';
 
 interface IVinesLucideIconProps extends React.ComponentPropsWithoutRef<'svg'> {
   src: string;
-  size?: number;
+  size?: number | string;
 }
 
 export const VinesLucideIcon = forwardRef<HTMLDivElement, IVinesLucideIconProps>(
-  ({ src, className, style, ...attr }, ref) => {
+  ({ src, className, size, style, ...attr }, ref) => {
     const initialized = useAppStore((s) => s.iconInitialized);
     const iconNames = useAppStore((s) => s.iconNames);
 
@@ -59,7 +59,11 @@ export const VinesLucideIcon = forwardRef<HTMLDivElement, IVinesLucideIconProps>
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {isLucide ? <LucideIconRender src={finalSrc} className={className} style={style} {...attr} /> : finalSrc}
+            {isLucide ? (
+              <LucideIconRender src={finalSrc ?? 'box'} className={className} style={style} {...attr} />
+            ) : (
+              finalSrc
+            )}
           </motion.div>
         ) : (
           <motion.div
