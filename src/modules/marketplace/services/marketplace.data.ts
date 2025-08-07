@@ -31,7 +31,7 @@ export const presetAppSort: PresetAppSort = JSON.parse(
   rawPresetAppSortList
     .filter(Boolean)
     .filter(fs.existsSync)
-    .map((file) => fs.readFileSync(file, 'utf-8'))[0],
+    .map((file) => fs.readFileSync(file, 'utf-8'))[0] || `[]`,
 );
 
 export const presetAllAppIds = presetAppSort.flatMap((it) => it.pages.map((page) => page.appId));
