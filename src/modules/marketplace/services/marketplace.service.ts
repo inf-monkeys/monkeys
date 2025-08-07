@@ -4,17 +4,21 @@ import { TeamEntity } from '@/database/entities/identity/team';
 import { InstalledAppEntity } from '@/database/entities/marketplace/installed-app.entity';
 import { MarketplaceAppVersionEntity, MarketplaceAppVersionStatus } from '@/database/entities/marketplace/marketplace-app-version.entity';
 import { MarketplaceAppEntity, MarketplaceAppStatus } from '@/database/entities/marketplace/marketplace-app.entity';
+import { PageInstanceType } from '@/database/entities/workflow/workflow-page';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { AssetsMapperService } from '@/modules/assets/assets.common.service';
 import { WorkflowCrudService } from '@/modules/workflow/workflow.curd.service';
+import { WorkflowPageService } from '@/modules/workflow/workflow.page.service';
 import { AssetType, MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
+import { uniq } from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateMarketplaceAppWithVersionDto } from '../dto/create-app.dto';
 import { UpdateMarketplaceAppDto } from '../dto/update-app.dto';
 import { InstalledAssetInfo, MarketplaceAssetSnapshot, SourceAssetReference } from '../types';
+import { presetAppSort } from './marketplace.data';
 
 @Injectable()
 export class MarketplaceService {
@@ -28,6 +32,7 @@ export class MarketplaceService {
     @InjectRepository(InstalledAppEntity)
     private readonly installedAppRepo: Repository<InstalledAppEntity>,
     private readonly workflowCrudService: WorkflowCrudService,
+    private readonly workflowPageService: WorkflowPageService,
     private readonly toolsRepository: ToolsRepository,
     private readonly eventEmitter: EventEmitter2,
     private readonly entityManager: EntityManager,
@@ -263,13 +268,65 @@ export class MarketplaceService {
   }
 
   public async installPresetApps(teamId: string, userId: string) {
-    const assetTypeInstallSort: (AssetType | 'design-association' | 'workflow-association')[] = ['comfyui-workflow', 'workflow', 'design-association', 'workflow-association'];
+    const assetTypeInstallSort: AssetType[] = ['comfyui-workflow', 'workflow', 'design-association', 'workflow-association'];
 
     const presetApps = await this.getPresetApps();
     if (!presetApps) throw new NotFoundException('Preset app not found.');
+    const installedApps: { installation: InstalledAppEntity; appVersion: MarketplaceAppVersionEntity }[] = [];
     for (const app of presetApps.sort((a, b) => assetTypeInstallSort.indexOf(a.assetType) - assetTypeInstallSort.indexOf(b.assetType))) {
-      await this.installApp(app.versions[0].id, teamId, userId);
+      const installedApp = await this.installApp(app.versions[0].id, teamId, userId);
+      installedApps.push(installedApp);
     }
+
+    // 按照 preset app sort 对 workflow page 进行分组和排序
+    const installedWorkflowApps = installedApps.filter((app) => app.appVersion.app.assetType === 'workflow');
+
+    // 根据 preset app sort 进行映射
+    const appIdToPageIdMapper = new Map<string, Record<PageInstanceType, string>>();
+    for (const app of installedWorkflowApps) {
+      // 获取 pages 列表
+      const pages = await this.workflowPageService.listWorkflowPages(app.installation.installedAssetIds.workflow[0]);
+      const formmatedPages = pages.reduce(
+        (acc, page) => {
+          acc[page.type] = page.id;
+          return acc;
+        },
+        {} as Record<PageInstanceType, string>,
+      );
+      appIdToPageIdMapper.set(app.appVersion.app.id, formmatedPages);
+    }
+
+    const presetPageGroupMapper = new Map<string, string>();
+
+    // 遍历 preset app sort 的 page group
+    for (const presetPageGroup of presetAppSort) {
+      // 获取当前团队下的 group id
+      const pageGroup = await this.workflowPageService.getPageGroupByPresetId(teamId, presetPageGroup.id);
+
+      presetPageGroupMapper.set(presetPageGroup.id, pageGroup.id);
+
+      // sort
+      // 规则是 preset 的顺序 + 现有的顺序
+      const pageIds: string[] = uniq([...presetPageGroup.pages.map((presetPage) => appIdToPageIdMapper.get(presetPage.appId)?.[presetPage.pageType]).filter(Boolean), ...pageGroup.pageIds]);
+
+      await this.workflowPageService.updatePageGroup(teamId, pageGroup.id, {
+        pageIds,
+        mode: 'set',
+      });
+
+      // 获取原本顺序
+      const originPageGroupIds = (await this.workflowPageService.getPageGroups(teamId)).map((it) => it.id);
+
+      // 然后 sort page group
+      const presetMapToPageGroupIds = presetAppSort.map((it) => presetPageGroupMapper.get(it.id)).filter(Boolean);
+
+      // 在 preset 中的排前面，不在的保持原顺序
+      const pageGroupIds = originPageGroupIds.sort((a, b) => presetMapToPageGroupIds.indexOf(a) - presetMapToPageGroupIds.indexOf(b));
+
+      await this.workflowPageService.updatePageGroupSort(teamId, pageGroupIds);
+    }
+
+    return;
   }
 
   public async installApp(versionId: string, teamId: string, userId: string) {
@@ -336,7 +393,19 @@ export class MarketplaceService {
 
       this.eventEmitter.emit('marketplace.app.installed', { installationId: installation.id, teamId });
 
-      return installation;
+      // // 阶段五：如果在 preset apps 里面，进行一个 page pin & sort
+      // if (presetAllAppIds.includes(version.app.id)) {
+      //   this.logger.debug(`Phase 5: Pin & sort page for preset app ${version.app.id}`);
+      //   const pageGroupPresetList = presetAppSort.filter((it) => it.pages.some((page) => page.appId === version.app.id));
+      //   for (const pageGroupPreset of pageGroupPresetList) {
+      //     await this.workflowPageService.createPageGroup(teamId, pageGroupPreset.id);
+      //   }
+      // }
+
+      return {
+        installation,
+        appVersion: version,
+      };
     });
   }
 

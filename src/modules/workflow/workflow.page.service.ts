@@ -9,6 +9,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isEmpty, keyBy, pick, pickBy, set, uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
+import { presetAppSort } from '../marketplace/services/marketplace.data';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageJson, WorkflowPageUpdateJson } from './interfaces';
@@ -49,6 +50,8 @@ export class WorkflowPageService {
     // 创建一个数组来收集需要 pin 的页面 ID
     const pinnedPageIds: string[] = [];
 
+    const allPages: WorkflowPageEntity[] = [];
+
     // 首先创建所有页面
     for (const { displayName, sortIndex, pinned, type, isBuiltIn, permissions } of pages) {
       const pageId = generateDbId();
@@ -67,7 +70,8 @@ export class WorkflowPageService {
         isDeleted: false,
         pinned,
       };
-      await this.pageRepository.save(page);
+      const result = await this.pageRepository.save(page);
+      allPages.push(result);
 
       // 如果页面需要被 pin，将其 ID 添加到收集数组中
       if (pinned) {
@@ -89,6 +93,8 @@ export class WorkflowPageService {
         pageIds: updatedPageIds,
       });
     }
+
+    return allPages;
   }
 
   async updateWorkflowPage(workflowId: string, pages: WorkflowPageUpdateJson[]) {
@@ -472,7 +478,7 @@ export class WorkflowPageService {
   }
 
   async updatePageGroup(teamId: string, groupId: string, body: UpdatePageGroupDto) {
-    const { displayName, pageId, mode, iconUrl } = body;
+    const { displayName, pageId, pageIds, mode, iconUrl } = body;
 
     const values: Partial<WorkflowPageGroupEntity> = {
       ...(displayName && { displayName }),
@@ -528,6 +534,10 @@ export class WorkflowPageService {
       set(currentGroup, 'pageIds', values.pageIds);
     }
 
+    if (pageIds && mode === 'set') {
+      values.pageIds = uniq(pageIds);
+    }
+
     const result = await this.pageGroupRepository.update(
       {
         id: groupId,
@@ -561,5 +571,33 @@ export class WorkflowPageService {
     group.pageIds = pageIds;
     await this.pageGroupRepository.save(group);
     return group;
+  }
+
+  /**
+   * 根据预置应用 id 获取工作台页面分组
+   * @description 当分组不存在则新建
+   * @param teamId 团队 id
+   * @param presetId 预置应用 id
+   * @returns 工作台页面分组
+   */
+  async getPageGroupByPresetId(teamId: string, presetId: string) {
+    const pageGroup = await this.pageGroupRepository.findOne({
+      where: {
+        teamId,
+        presetRelationId: presetId,
+      },
+    });
+    if (!pageGroup) {
+      const presetAppSortGroup = presetAppSort.find((it) => it.id === presetId);
+      if (!presetAppSortGroup) {
+        throw new NotFoundException('Preset app sort group not found');
+      }
+      const newGroup = (await this.createPageGroup(teamId, JSON.stringify(presetAppSortGroup.displayName), presetAppSortGroup.iconUrl)).pop();
+      await this.pageGroupRepository.update(newGroup.id, {
+        presetRelationId: presetId,
+      });
+      return newGroup;
+    }
+    return pageGroup;
   }
 }

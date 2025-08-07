@@ -6,6 +6,7 @@ import { flatTasks } from '@/common/utils/conductor';
 import { getI18NValue } from '@/common/utils/i18n';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
 import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
+import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
@@ -122,21 +123,17 @@ export class WorkflowCrudService implements IAssetHandler {
     return clonedSnapshot;
   }
 
-  public async cloneFromSnapshot(snapshot: any, teamId: string, userId: string): Promise<AssetCloneResult> {
+  public async cloneFromSnapshot(snapshot: any, teamId: string, userId: string): Promise<AssetCloneResult & { pages: WorkflowPageEntity[] }> {
     const { workflow, pages } = snapshot;
     const originalId = workflow.originalId;
 
     const processedWorkflow = await this.processWorkflowSnapshot(workflow, teamId);
 
-    const newWorkflowId = await this.importWorkflow(teamId, userId, {
+    const { id: newWorkflowId, pages: resultPages } = await this.importWorkflow(teamId, userId, {
       workflows: [processedWorkflow],
-      // TODO
-      pages: pages.map((it: WorkflowPageJson) => ({
-        ...it,
-        pinned: it.type === 'preview' ? true : it.pinned,
-      })),
+      pages,
     });
-    return { originalId, newId: newWorkflowId };
+    return { originalId, newId: newWorkflowId, pages: resultPages };
   }
 
   public async updateFromSnapshot(snapshot: any, teamId: string, userId: string, workflowId: string): Promise<AssetUpdateResult> {
@@ -146,11 +143,14 @@ export class WorkflowCrudService implements IAssetHandler {
     return { originalId: workflowId };
   }
 
-  private async importWorkflow(teamId: string, userId: string, data: { workflows: WorkflowExportJson[]; pages: WorkflowPageJson[] }): Promise<string> {
+  private async importWorkflow(teamId: string, userId: string, data: { workflows: WorkflowExportJson[]; pages: WorkflowPageJson[] }): Promise<{ id: string; pages: WorkflowPageEntity[] }> {
     const workflowData = data.workflows[0];
     const newWorkflowId = await this.createWorkflowDef(teamId, userId, workflowData);
-    await this.pageService.importWorkflowPage(newWorkflowId, teamId, data.pages);
-    return newWorkflowId;
+    const pages = await this.pageService.importWorkflowPage(newWorkflowId, teamId, data.pages);
+    return {
+      id: newWorkflowId,
+      pages,
+    };
   }
 
   private async updateWorkflow(teamId: string, userId: string, workflowId: string, data: { workflows: WorkflowExportJson[]; pages: WorkflowPageUpdateJson[] }): Promise<AssetUpdateResult> {

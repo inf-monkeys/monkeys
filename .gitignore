@@ -38,4 +38,5 @@ lerna-debug.log*
 config.yaml
 config.*.yaml
 builtInMarket.json
+presetAppSort.json
 docker/server/config/server-config.yaml

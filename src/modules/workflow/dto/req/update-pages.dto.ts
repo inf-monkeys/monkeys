@@ -47,12 +47,21 @@ export class UpdatePageGroupDto {
   pageId?: string;
 
   @ApiProperty({
+    name: 'pageIds',
+    description: '页面 ID 列表',
+    type: String,
+    isArray: true,
+    example: ['6561ed83a60ba37fee5c6e14', '6561ed83a60ba37fee5c6e15'],
+  })
+  pageIds?: string[];
+
+  @ApiProperty({
     name: 'mode',
     description: '操作类型',
     type: String,
     example: 'add',
   })
-  mode?: 'add' | 'remove';
+  mode?: 'add' | 'remove' | 'set';
 
   @ApiProperty({
     name: 'iconUrl',

@@ -39,4 +39,11 @@ export class WorkflowPageGroupEntity extends BaseEntity {
     nullable: true,
   })
   sortIndex?: number;
+
+  @Column({
+    name: 'preset_relation_id',
+    type: 'varchar',
+    nullable: true,
+  })
+  presetRelationId?: string;
 }
