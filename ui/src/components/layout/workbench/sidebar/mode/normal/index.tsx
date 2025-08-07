@@ -4,7 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence } from 'framer-motion';
-import { keyBy } from 'lodash';
+import { get, keyBy } from 'lodash';
 import { CircleSlash, Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -317,9 +317,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
       void mutate();
     });
   };
+
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  // 根据主题模式应用不同圆角样式
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+
   return (
     <div
-      className={cn('flex h-full items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm')}
+      className={cn(`flex h-full items-center justify-center ${roundedClass} border border-input bg-slate-1 shadow-sm`)}
       ref={wrapperRef}
     >
       {isLoading ? (
@@ -331,7 +337,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           {hasGroups ? (
             showGroup ? (
               <>
-                <div className="flex h-full justify-between rounded-l-xl bg-slate-1">
+                <div
+                  className={`flex h-full justify-between ${isShadowMode ? 'rounded-l-lg' : 'rounded-l-xl'} bg-slate-1`}
+                >
                   <VirtuaWorkbenchViewGroupList
                     data={lists}
                     groupId={groupId}
@@ -351,7 +359,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               </div>
             </div>
           )}
-          <div className="grid h-full grid-rows-[1fr_auto] rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+          <div
+            className={`grid h-full grid-rows-[1fr_auto] ${isShadowMode ? 'rounded-r-lg' : 'rounded-r-xl'} bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1`}
+          >
             {/* Second nav */}
             <VirtuaWorkbenchViewList
               height={height}

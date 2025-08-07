@@ -3,12 +3,14 @@ import React, { startTransition, useCallback, useEffect, useState } from 'react'
 import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-router';
 
 import { useMemoizedFn } from 'ahooks';
+import { get } from 'lodash';
 import { TrashIcon, X } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
+import { useSystemConfig } from '@/apis/common';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
 import { ImageOperations } from '@/components/layout/workbench/image-detail/image-operation';
@@ -49,6 +51,12 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const isMiniFrame = mode === 'mini';
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
   const { showFormInImageDetail, imagePreviewOperationBarStyle, isLoading } = useCustomConfigs();
+
+  // 获取 OEM 配置
+  const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
 
   // 提升的状态管理
   const [processedInputs, setProcessedInputs] = useState<any[]>([]);
@@ -211,7 +219,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
             {/* 主内容区域 */}
             <main
               className={cn(
-                'flex size-full flex-1 rounded-xl border border-input bg-slate-1 p-global dark:bg-[#111113] md:flex-row',
+                `flex size-full flex-1 ${roundedClass} border border-input bg-slate-1 p-global dark:bg-[#111113] md:flex-row`,
                 isMiniFrame && 'justify-center',
                 !isMiniFrame && !showFormInImageDetail && 'justify-center',
               )}
@@ -279,7 +287,9 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
               {/* 右侧表单区域 */}
               {!isMiniFrame && showFormInImageDetail && (
-                <div className="relative flex h-full flex-1 flex-col gap-global rounded-r-xl rounded-tr-xl border-l border-input pl-global dark:bg-[#111113]">
+                <div
+                  className={`relative flex h-full flex-1 flex-col gap-global ${isShadowMode ? 'rounded-r-lg rounded-tr-lg' : 'rounded-r-xl rounded-tr-xl'} border-l border-input pl-global dark:bg-[#111113]`}
+                >
                   <ScrollArea disabledOverflowMask className="flex-1 overflow-hidden">
                     <TabularRenderWrapper
                       execution={execution}

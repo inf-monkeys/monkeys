@@ -1,6 +1,6 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
 import { config } from '@/common/config';
 import { generateDbId } from '@/common/utils';
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 const appId = config.server.appId;
 
@@ -75,5 +75,6 @@ export class MigartionAddDefaultGroupForAllBuiltInPages1720748707927 implements 
     // const groupTable = await queryRunner.getTable(this.GROUP_TABLE_NAME);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async down(queryRunner: QueryRunner): Promise<void> {}
 }

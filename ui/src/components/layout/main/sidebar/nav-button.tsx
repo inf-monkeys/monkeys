@@ -3,7 +3,9 @@ import React from 'react';
 import { LinkOptions, useLinkProps } from '@tanstack/react-router';
 
 import { useCreation } from 'ahooks';
+import { get } from 'lodash';
 
+import { useSystemConfig } from '@/apis/common';
 import { cn } from '@/utils';
 
 interface INavButtonProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -18,6 +20,11 @@ export const NavButton: React.FC<INavButtonProps> = ({ to, children, icon, postf
     to: to as any,
     activeOptions: { exact: true },
   });
+
+  const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+
+  // nav-button 保持原有的 rounded-lg，不需要根据主题改变
 
   const isActive = useCreation(() => {
     const linkHref = link?.href ?? '';

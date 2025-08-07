@@ -2,6 +2,8 @@ import React from 'react';
 
 import { Outlet } from '@tanstack/react-router';
 
+import { get } from 'lodash';
+
 import { useSystemConfig } from '@/apis/common';
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesSpace } from '@/components/layout-wrapper/space';
@@ -15,6 +17,7 @@ import { Footer } from '@/components/layout-wrapper/workspace/space/sidebar/foot
 import { SpaceTabs } from '@/components/layout-wrapper/workspace/space/sidebar/tabs';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { cn } from '@/utils';
 
 export const WorkspaceLayout: React.FC = () => {
   // 获取路由信息，判断是否是图片详情页
@@ -30,13 +33,18 @@ export const WorkspaceLayout: React.FC = () => {
   // });
 
   const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  
+  // 针对LF客户的主题定制
+  const isLFTheme = themeMode === 'shadow';
+  const backgroundClass = isLFTheme ? 'bg-[#f3f4f6]' : 'bg-neocard';
 
   const showTeamSelector =
     oem &&
     (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-selector'));
 
   return (
-    <ViewGuard className="flex flex-col gap-global bg-neocard">
+    <ViewGuard className={cn("flex flex-col gap-global", backgroundClass)}>
       {isImageDetailPage ? (
         // 图片详情页使用与工作台、应用市场相同的header
         <SpaceHeader tail={showTeamSelector ? <TeamSelector /> : undefined} disableSeparator>

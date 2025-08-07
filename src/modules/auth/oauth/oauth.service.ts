@@ -164,6 +164,7 @@ export class OAuthService {
     return '解绑成功';
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async handleFeishuCallback(code: string, state: string) {
     const tokenApi = `${config.auth.feishu.feishuApiUrl}/open-apis/authen/v2/oauth/token`;
     const { data: tokenData } = await axios.post(tokenApi, {
@@ -183,8 +184,9 @@ export class OAuthService {
     if (userInfoData.code !== 0) {
       throw new Error(userInfoData.msg);
     }
-    let { avatar_url, email, mobile, enterprise_email, name, user_id } = userInfoData.data;
-    email = enterprise_email || email;
+    const { avatar_url, email: originalEmail, mobile: originalMobile, enterprise_email, name, user_id } = userInfoData.data;
+    const email = enterprise_email || originalEmail;
+    let mobile = originalMobile;
     if (mobile) {
       mobile = mobile.replace(/^(\+86|86)/, '');
     }

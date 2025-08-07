@@ -11,6 +11,7 @@ export class WorkflowCommonService {
   ASSET_TYPE_TEXT_COLLECTION: AssetType = 'knowledge-base';
   ASSET_TYPE_TABLE_COLLECTION: AssetType = 'sql-knowledge-base';
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async getAllSubWorkflowsRecursive(tasks: MonkeyTaskDefTypes[]): Promise<MonkeyWorkflowDef[]> {
     // let subWorkflows: WorkflowMetadataEntity[] = [];
     // const { tasks } = workflowDef;

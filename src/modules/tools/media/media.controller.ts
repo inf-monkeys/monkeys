@@ -93,7 +93,7 @@ export class MediaToolsController {
     },
   ])
   public async uploadBase64Media(@Body() body: UploadBase64MediaDto) {
-    let { base64, fileExtension } = body;
+    const { base64, fileExtension: originalFileExtension } = body;
 
     const matches = base64.match(/^data:(.*?);base64,(.*)$/);
     if (!matches) {
@@ -103,11 +103,12 @@ export class MediaToolsController {
     const base64Data = matches[2];
     const buffer = Buffer.from(base64Data, 'base64');
 
-    if (fileExtension.trim() === '') {
-      fileExtension = getFileExtensionFromMimeType(contentType);
+    let finalFileExtension = originalFileExtension;
+    if (originalFileExtension.trim() === '') {
+      finalFileExtension = getFileExtensionFromMimeType(contentType);
     }
 
-    const fileName = `${nanoid()}${fileExtension ? '.'.concat(fileExtension) : ''}`;
+    const fileName = `${nanoid()}${finalFileExtension ? '.'.concat(finalFileExtension) : ''}`;
 
     const s3Helpers = new S3Helpers();
 

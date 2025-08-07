@@ -123,6 +123,7 @@ export interface ServerConfig {
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
+    themeMode: 'shadow' | 'lborder';
   };
 }
 
@@ -425,6 +426,7 @@ export const config: Config = {
       uniImagePreview: readConfig('server.customization.uniImagePreview', false),
       imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
       teamAsUser: readConfig('server.customization.teamAsUser', false),
+      themeMode: readConfig('server.customization.themeMode', 'shadow'),
     },
   },
   conductor: {

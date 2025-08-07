@@ -47,6 +47,7 @@ export interface ISystemConfig {
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
+    themeMode: 'shadow' | 'lborder';
   };
   auth: {
     enabled: AuthMethod[];

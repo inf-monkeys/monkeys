@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 
 import { useThrottleEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
+import { get } from 'lodash';
 import { GitBranchPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { useWorkspacePages } from '@/apis/pages';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesLoading } from '@/components/ui/loading';
@@ -20,6 +22,12 @@ interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const { t } = useTranslation();
+
+  // 获取 OEM 配置
+  const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
 
   const { data, isLoading } = useWorkspacePages();
   const [pages, setPages] = useState(data?.pages);
@@ -65,7 +73,10 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   }, [teamPage]);
 
   return (
-    <div ref={ref} className={cn('relative w-full flex-1 overflow-hidden p-0', mode === 'mini' && 'rounded-none')}>
+    <div
+      ref={ref}
+      className={cn('relative w-full flex-1 overflow-hidden p-0', mode === 'mini' ? 'rounded-none' : roundedClass)}
+    >
       <AnimatePresence>
         {hasPages && hasPage ? (
           <motion.div

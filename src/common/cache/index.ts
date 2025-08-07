@@ -1,6 +1,5 @@
 import Redis, { Cluster } from 'ioredis';
 import { RedisConfig } from '../config';
-import { logger } from '../logger';
 import { initRedisClient } from '../redis';
 
 export interface CacheManager {

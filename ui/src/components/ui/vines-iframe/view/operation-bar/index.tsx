@@ -17,7 +17,9 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { get } from 'lodash';
 
+import { useSystemConfig } from '@/apis/common';
 import { useWorkflowAssociationList } from '@/apis/workflow/association';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -36,6 +38,13 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
   const { workflowId } = useFlowStore();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+
+  const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode
+    ? 'rounded-lg rounded-bl-lg rounded-tl-lg'
+    : 'rounded-xl rounded-bl-xl rounded-tl-xl';
 
   const { data: initialData } = useWorkflowAssociationList(workflowId);
 
@@ -88,7 +97,7 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
     <div
       className={cn(
         'flex h-full items-center justify-center border bg-slate-1',
-        mode === 'mini' ? '' : 'rounded-xl rounded-bl-xl rounded-tl-xl border-input',
+        mode === 'mini' ? '' : `${roundedClass} border-input`,
       )}
     >
       <DndContext

@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCreation, useDebounceEffect, useDebounceFn, useLatest, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
-import { isUndefined, keyBy } from 'lodash';
+import { get, isUndefined, keyBy } from 'lodash';
 
+import { useSystemConfig } from '@/apis/common';
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
@@ -205,10 +206,16 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   const [{ sidebar }] = useUrlState<{ sidebar: 'default' | 'embed' }>({ sidebar: 'default' });
   const isUseFixedSidebar = sidebar === 'default';
 
+  const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  // 根据主题模式应用不同圆角样式
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-bl-lg rounded-tl-lg' : 'rounded-bl-xl rounded-tl-xl';
+
   return (
     <motion.div
       className={cn(
-        'min-w-30 relative flex h-screen max-w-56 gap-2 rounded-bl-xl rounded-tl-xl border border-input bg-slate-1 p-2',
+        `min-w-30 relative flex h-screen max-w-56 gap-2 ${roundedClass} border border-input bg-slate-1 p-2`,
       )}
       ref={ref}
     >

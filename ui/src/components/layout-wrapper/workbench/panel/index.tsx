@@ -2,6 +2,8 @@ import React, { useLayoutEffect } from 'react';
 
 import { Outlet, useRouterState } from '@tanstack/react-router';
 
+import { get } from 'lodash';
+
 import { useSystemConfig } from '@/apis/common';
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesSpace } from '@/components/layout-wrapper/space';
@@ -34,21 +36,27 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   const isSettingRoute = pathName.split('/').at(-1) === 'settings';
 
   const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+
+  // 根据主题模式应用不同样式
+  const isShadowMode = themeMode === 'shadow';
+  const backgroundClass = isShadowMode ? 'bg-[#f3f4f6]' : 'bg-neocard';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
 
   const showTeamSelector =
     oem &&
     (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-selector'));
 
   return (
-    <ViewGuard className="flex flex-col gap-global bg-neocard">
+    <ViewGuard className={cn('flex flex-col gap-global', backgroundClass)}>
       <SpaceHeader tail={showTeamSelector ? <TeamSelector /> : undefined} disableSeparator>
         <SpaceHeaderTabs />
       </SpaceHeader>
       <VinesSpace
         className={cn(
           isWorkbenchRoute && 'overflow-auto bg-transparent p-0 shadow-none transition-colors',
-          isWorkspaceRoute && !isSettingRoute && 'w-full border border-input p-global',
-          isSettingRoute && 'w-full border border-input px-global py-1',
+          isWorkspaceRoute && !isSettingRoute && `w-full border border-input p-global ${roundedClass}`,
+          isSettingRoute && `w-full border border-input px-global py-1 ${roundedClass}`,
         )}
         sidebar={isWorkspaceRoute && <VinesPanelSidebar />}
       >

@@ -87,6 +87,7 @@ export function getFileExtensionFromUrl(url: string): string {
 
 export async function downloadImageAsBase64(imageUrl: string): Promise<string> {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const axios = require('axios');
     const response = await axios.get(imageUrl, {
       responseType: 'arraybuffer',

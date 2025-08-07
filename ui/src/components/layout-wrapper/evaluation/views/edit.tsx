@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { useParams } from '@tanstack/react-router';
 
+import { get } from 'lodash';
 import { Globe, Save, Settings, Target, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import {
   addEvaluatorToModule,
   addParticipantsToModule,
@@ -203,8 +205,14 @@ export const EditView: React.FC = () => {
     );
   }
 
+  // 获取 OEM 配置
+  const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+
   return (
-    <div className="h-full overflow-auto rounded-xl border border-input p-6">
+    <div className={`h-full overflow-auto ${roundedClass} border border-input p-6`}>
       <div className="mx-auto max-w-2xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

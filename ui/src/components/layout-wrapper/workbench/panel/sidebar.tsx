@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useRouterState } from '@tanstack/react-router';
 
+import { get } from 'lodash';
 import { UserCog } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,10 +12,8 @@ import { NavList } from '@/components/layout/main/sidebar/nav-list';
 import { SettingsNavList } from '@/components/layout/main/sidebar/settings-nav-list';
 import { Balance } from '@/components/layout/main/sidebar/teams/balance.tsx';
 
-interface IVinesPanelSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
-
 // Sidebar in workspace
-export const VinesPanelSidebar: React.FC<IVinesPanelSidebarProps> = () => {
+export const VinesPanelSidebar: React.FC = () => {
   const { t } = useTranslation();
 
   const { data: oem } = useSystemConfig();
@@ -26,8 +25,14 @@ export const VinesPanelSidebar: React.FC<IVinesPanelSidebarProps> = () => {
     },
   });
   const isSettingRoute = pathName.split('/').at(-1) === 'settings';
+
+  // 根据主题模式应用不同圆角样式
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+
   return (
-    <div className="flex h-full w-64 flex-col gap-global rounded-xl border border-input bg-slate-1 p-global">
+    <div className={`flex h-full w-64 flex-col gap-global ${roundedClass} border border-input bg-slate-1 p-global`}>
       {isSettingRoute ? (
         <SettingsNavList />
       ) : (

@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
+import { get } from 'lodash';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { useWorkflowExecutionList, useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
 import { ExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
 import { Card, CardContent } from '@/components/ui/card.tsx';
@@ -41,6 +43,12 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   enablePostMessage,
 }) => {
   const { t } = useTranslation();
+
+  // 获取 OEM 配置
+  const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
 
   const forceUpdate = useForceUpdate();
   event$.useSubscription(() => forceUpdate());
@@ -170,7 +178,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     }
   }, [executionResultList, shouldFilterError]);
   return (
-    <Card className={cn('relative rounded-xl !border-none bg-neocard !shadow-none', className)}>
+    <Card className={cn(`relative ${roundedClass} !border-none bg-neocard !shadow-none`, className)}>
       <CardContent className="p-0">
         {executionResultList && executionResultList.length > 0 && filteredData.length > 0 && !isLoading ? (
           <ExecutionResultGrid
@@ -201,7 +209,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
             </div>
             <ScrollArea
               style={{ height: height - 40 }}
-              className="z-20 mr-0.5 rounded-xl bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2"
+              className={`z-20 mr-0.5 ${roundedClass} bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2`}
             ></ScrollArea>
           </>
         )}

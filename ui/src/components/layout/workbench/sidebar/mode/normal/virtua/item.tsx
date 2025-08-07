@@ -2,6 +2,7 @@ import { createContext, forwardRef, useContext } from 'react';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
@@ -29,6 +30,11 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
     const { pageId: currentPageId, groupId: currentGroupId } = useContext(WorkbenchViewItemCurrentData);
 
     const { data: oem } = useSystemConfig();
+    const themeMode = get(oem, 'theme.themeMode', 'shadow');
+    
+    // 针对LF客户的主题定制
+    const isLFTheme = themeMode === 'shadow';
+    const backgroundClass = isLFTheme ? 'bg-[#f3f4f6]' : 'bg-neocard';
 
     const showMoreAction = oem?.theme.workbenchSidebarMoreAction ?? true;
 
@@ -57,7 +63,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         className={cn(
           'z-10 flex cursor-pointer items-center gap-global-1/2 rounded-md p-global-1/2 transition-colors hover:bg-accent hover:text-accent-foreground',
           currentPageId === pageId
-            ? 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]'
+            ? cn('group border border-input text-accent-foreground dark:bg-[#393939]', backgroundClass)
             : 'p-global-1/2',
           onlyShowWorkbenchIcon ? 'mb-1 size-[var(--operation-bar-width)]' : 'mb-global-1/2',
           isDragging && 'opacity-50',

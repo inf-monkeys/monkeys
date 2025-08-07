@@ -166,6 +166,7 @@ export class WorkflowCrudService implements IAssetHandler {
     return { originalId: workflowId };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async remapDependencies(newWorkflowId: string, idMapping: { [originalId: string]: string }): Promise<void> {
     return;
   }

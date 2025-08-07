@@ -31,5 +31,6 @@ export class MigartionAlterComfyuiModelTable1724905499551 implements MigrationIn
         ALTER COLUMN "team_id" DROP NOT NULL;`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

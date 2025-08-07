@@ -1,11 +1,13 @@
 import React, { startTransition, useCallback, useEffect, useState } from 'react';
 
+import { get } from 'lodash';
 import { TrashIcon, X } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCustomConfigs } from '@/apis/authz/team/custom-configs';
+import { useSystemConfig } from '@/apis/common';
 import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { ImageOperations } from '@/components/layout/workbench/image-detail/image-operation';
 import { RightSidebar } from '@/components/layout/workbench/image-detail/right-side-bar';
@@ -56,6 +58,12 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   const { t } = useTranslation();
 
   const { imagePreviewOperationBarStyle } = useCustomConfigs();
+
+  // 获取 OEM 配置
+  const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
 
   const [imageRotation, setImageRotation] = useState(0);
   const [imageFlipX, setImageFlipX] = useState(false);
@@ -186,7 +194,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
           {/* 主内容区域 */}
           <main
             className={cn(
-              'flex size-full flex-1 justify-center rounded-xl border border-input bg-slate-1 p-global dark:bg-[#111113]',
+              `flex size-full flex-1 justify-center ${roundedClass} border border-input bg-slate-1 p-global dark:bg-[#111113]`,
             )}
           >
             {/* 左侧图片展示区 */}

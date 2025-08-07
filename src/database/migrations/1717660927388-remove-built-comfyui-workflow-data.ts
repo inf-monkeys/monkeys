@@ -9,6 +9,7 @@ export class MigartionRemoveBuiltInComfyuiWorkflow1717660927388 implements Migra
     await queryRunner.query(`DELETE FROM ${appId}_comfyui_workflows WHERE "id" IN ('${comfyuiWorkflowIds.join("','")}')`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Do nothing
   }

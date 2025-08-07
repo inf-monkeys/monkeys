@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Link } from '@tanstack/react-router';
 
+import { get } from 'lodash';
 import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -55,6 +56,11 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
 
   const theme = oem?.theme.headbar?.theme || 'card';
 
+  // 根据主题模式应用不同圆角样式
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+
   const { height, ref } = useElementSize();
 
   return hideSpaceHeader ? (
@@ -67,7 +73,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
           'flex w-full items-center justify-between bg-slate-1 p-global',
           theme === 'fixed' &&
             'shadow-b-lg fixed left-0 top-0 border-b-[1px] border-t-[3px] border-t-[rgb(var(--vines-500))]',
-          theme === 'card' && 'rounded-xl border border-input',
+          theme === 'card' && `${roundedClass} border border-input`,
         )}
       >
         <div className="z-20 flex h-8 items-center gap-6">

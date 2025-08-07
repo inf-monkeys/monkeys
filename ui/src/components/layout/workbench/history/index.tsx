@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 're
 
 import { useAsyncEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
+import { get } from 'lodash';
 import { ArrowLeftIcon, ArrowRightIcon, ScanSearch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
@@ -113,11 +114,17 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
 
   const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
+  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  // 根据主题模式应用不同圆角样式
+  const isShadowMode = themeMode === 'shadow';
+  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+
   return (
     <AnimatePresence>
       <div
         className={cn(
-          'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] rounded-xl border border-input bg-slate-1 p-0 shadow-sm',
+          'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] border border-input bg-slate-1 p-0 shadow-sm',
+          roundedClass,
           className,
           onlyShowWorkbenchIcon
             ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*6.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*3))]'
@@ -283,7 +290,9 @@ const HistoryResultOg = () => {
     }
   }, [teamId]);
 
-  const executionResultList = newConvertExecutionResultToItemList(imagesResult?.flat() ?? []);
+  const executionResultList = newConvertExecutionResultToItemList(
+    (imagesResult?.flat() ?? []).filter(Boolean) as VinesWorkflowExecutionOutputListItem[],
+  );
   const allImages = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
   // const filerMap = new Map<string, any>();
   const thumbImages: ImagesResultWithOrigin[] = [];

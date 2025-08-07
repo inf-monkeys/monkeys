@@ -141,6 +141,7 @@ export class AppController {
         uniImagePreview: config.server.customization.uniImagePreview,
         imagePreviewStyle: config.server.customization.imagePreviewStyle,
         teamAsUser: config.server.customization.teamAsUser,
+        themeMode: config.server.customization.themeMode,
       },
       auth: {
         enabled: config.auth.enabled,
