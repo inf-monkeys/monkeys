@@ -50,6 +50,8 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const isShadowMode = themeMode === 'shadow';
   const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
 
+  const showErrorFilter = oem?.theme?.workflowPreviewExecutionGrid?.showErrorFilter ?? true;
+
   const forceUpdate = useForceUpdate();
   event$.useSubscription(() => forceUpdate());
 
@@ -193,7 +195,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
         ) : (
           <>
             <div className="flex justify-between gap-2 p-2">
-              <ErrorFilter />
+              {showErrorFilter && <ErrorFilter />}
               {/* <ExtraButtonFilter /> */}
               <div className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2">
                 <History size={64} />

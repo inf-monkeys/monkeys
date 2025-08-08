@@ -31,8 +31,8 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
 
     const { data: oem } = useSystemConfig();
     const themeMode = get(oem, 'theme.themeMode', 'shadow');
-    
-    // 针对LF客户的主题定制
+
+    //
     const isLFTheme = themeMode === 'shadow';
     const backgroundClass = isLFTheme ? 'bg-[#f3f4f6]' : 'bg-neocard';
 
