@@ -173,6 +173,7 @@ export class LlmService {
     defaultParams?: any;
     promptTemplate?: string;
     autoMergeConsecutiveMessages?: boolean;
+    endpointTypes?: LlmModelEndpointType[];
   }> {
     if (!modelName) {
       throw new Error('Model is required, check your workflow configuration.');
@@ -201,6 +202,7 @@ export class LlmService {
         defaultParams: model.defaultParams,
         promptTemplate: model.promptTemplate,
         autoMergeConsecutiveMessages: model.autoMergeConsecutiveMessages,
+        endpointTypes: model.type,
       };
     } else {
       const [channelIdStr, realModelName] = modelName.split(':');
@@ -212,6 +214,7 @@ export class LlmService {
         realModelName: this.getModelNameByModelMappings(modelMappings, realModelName),
         baseURL: `${config.oneapi.baseURL}/v1`,
         apiKey: `sk-${oneApiUser.apiKey}`,
+        endpointTypes: [LlmModelEndpointType.CHAT_COMPLETIONS],
       };
     }
   }
@@ -702,9 +705,63 @@ ${userQuestion}
       res.setHeader('content-type', 'text/event-stream;charset=utf-8');
       res.status(200);
     }
-    const { apiKey, baseURL, defaultParams, realModelName, autoMergeConsecutiveMessages = false } = await this.getModelConfig(teamId, model);
+    const { apiKey, baseURL, defaultParams, realModelName, autoMergeConsecutiveMessages = false, endpointTypes } = await this.getModelConfig(teamId, model);
     if (realModelName) {
       model = realModelName as string;
+    }
+
+    // 如果是图像生成模型，走 images 接口
+    if (endpointTypes?.includes(LlmModelEndpointType.IMAGES)) {
+      try {
+        // 从消息里提取文本 prompt（优先取用户消息中的文本）
+        const firstUserMsg = (messages || []).find((m) => m.role === 'user');
+        let prompt = '';
+        if (firstUserMsg) {
+          if (typeof firstUserMsg.content === 'string') {
+            prompt = firstUserMsg.content as string;
+          } else if (Array.isArray(firstUserMsg.content)) {
+            const textPart = (firstUserMsg.content as Array<any>).find((p) => p?.type === 'text');
+            prompt = textPart?.text || '';
+          }
+        }
+        // 兼容 systemPrompt
+        const finalPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt || 'Generate an image';
+
+        const reqBody = {
+          ...(defaultParams || {}),
+          model,
+          prompt: finalPrompt,
+        };
+
+        const imgResp = await axios.post(`${baseURL}/images/generations`, reqBody, {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+          },
+        });
+
+        const data = imgResp.data || {};
+        const images = Array.isArray(data?.data) ? data.data : [];
+        const urls: string[] = images
+          .map((x: any) => x?.url)
+          .filter((x: string) => typeof x === 'string' && x.length > 0);
+
+        const content = urls.map((u) => `![](${u})`).join('\n\n');
+
+        if (res) {
+          return res
+            .status(200)
+            .send(apiResponseType === 'full' ? data : { messages: content, usage: data?.usage });
+        } else {
+          return apiResponseType === 'full' ? data : { message: content, usage: data?.usage } as any;
+        }
+      } catch (error) {
+        logger.error(`Failed to generate images: `, error);
+        onFailed?.(error.message);
+        if (res) {
+          return this.setErrorResponse(res, Math.random().toString(36).substr(2, 16), model, false, error.message);
+        }
+        throw error;
+      }
     }
 
     const openai = new OpenAI({

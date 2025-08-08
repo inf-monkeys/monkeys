@@ -3,10 +3,8 @@ import React, { useContext } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { LucideIcon } from 'lucide-react';
-import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { useSystemConfig } from '@/apis/common';
 import { WorkbenchViewItemCurrentData } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { LANGUAGE_MAPPER } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/display-name';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -30,12 +28,6 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
 }) => {
   const { groupId: currentGroupId } = useContext(WorkbenchViewItemCurrentData);
   const { t, i18n } = useTranslation();
-  const { data: oem } = useSystemConfig();
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  
-  // 针对LF客户的主题定制
-  const isLFTheme = themeMode === 'shadow';
-  const backgroundClass = isLFTheme ? 'bg-[#f3f4f6]' : 'bg-neocard';
   // 获取当前语言的显示值
 
   const displayText = (() => {
@@ -71,7 +63,7 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
         onlyShowWorkbenchIcon
           ? 'flex size-[var(--operation-bar-width)] items-center justify-center'
           : 'mb-global-1/2 flex w-full shrink-0 items-center justify-start gap-global-1/2 px-global-1/2',
-        groupId === currentGroupId && cn('group border border-input text-accent-foreground dark:bg-[#393939]', backgroundClass),
+        groupId === currentGroupId && 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]',
       )}
       {...attr}
     >

@@ -271,6 +271,7 @@ export interface S3Config {
 export enum LlmModelEndpointType {
   CHAT_COMPLETIONS = 'chat_completions',
   COMPLITIONS = 'completions',
+  IMAGES = 'images',
 }
 
 export interface LlmModelConfig {

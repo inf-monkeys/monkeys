@@ -45,7 +45,7 @@ models:
     baseURL: https://api.openai.com/v1
     apiKey: sk-xxxxxxxxxxxxxxxxxx
     type:
-      - chat_completions
+      - images
   - model: Qwen/Qwen-7B-Chat-Int4
     baseURL: http://127.0.0.1:8000/v1
     apiKey: token-abc123
