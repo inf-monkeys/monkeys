@@ -133,7 +133,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
       <ScrollArea
         className={cn(
           'px-global pt-global',
-          onlyShowWorkbenchIcon ? '[&>*>*]:w-[calc(var(--operation-bar-width)+var(--global-spacing)*1.25)]' : 'w-56',
+          onlyShowWorkbenchIcon ? 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)]' : 'w-56',
         )}
         ref={scrollRef}
         style={{ height }}
