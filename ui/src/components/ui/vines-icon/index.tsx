@@ -11,6 +11,8 @@ import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 
+import { VinesCustomIcon } from './custom';
+
 export type IVinesIconSize = 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'max' | 'gallery';
 
 export interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -44,12 +46,17 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
   }, [initialized]);
 
   const iconType = useMemo(() => {
+    if (src.startsWith('custom-icon:')) return 'custom-icon';
     if (iconNames.includes(src)) return 'lucide';
     if (isURL(src)) return 'img';
     return 'emoji';
   }, [src, iconNames]);
 
-  const { text, backgroundColor } = splitEmojiLink(src, fallbackColor, iconType as 'emoji' | 'lucide' | 'img');
+  const { text, backgroundColor } = splitEmojiLink(
+    src,
+    fallbackColor,
+    iconType as 'emoji' | 'lucide' | 'img' | 'custom-icon',
+  );
 
   return (
     <div
@@ -89,6 +96,19 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
               )}
             >
               <VinesLucideIcon src={text} className={cn('size-full stroke-current text-black')} />
+            </div>
+          )}
+          {iconType === 'custom-icon' && (
+            <div
+              className={cn(
+                (size === 'xl' || size === '2xl' || size === '3xl') && 'size-7',
+                size === 'lg' && 'size-6',
+                size === 'md' && 'size-5',
+                size === 'sm' && 'size-4',
+                size === 'xs' && 'size-3',
+              )}
+            >
+              <VinesCustomIcon src={text} className={cn('size-full stroke-current text-black')} />
             </div>
           )}
         </div>

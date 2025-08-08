@@ -18,11 +18,13 @@ const morandiColorMapper: Record<string, string> = {
 export const splitEmojiLink = (
   src = '',
   fallbackColor = 'var(--slate1)',
-  typeParameter: 'emoji' | 'lucide' | 'img' | undefined = undefined,
-): { backgroundColor: string; text: string; emoji?: string; type: 'emoji' | 'lucide' } => {
+  typeParameter: 'emoji' | 'lucide' | 'img' | 'custom-icon' | undefined = undefined,
+): { backgroundColor: string; text: string; emoji?: string; type: 'emoji' | 'lucide' | 'custom-icon' } => {
   const splitContent = src.split(':');
 
-  let [type, iconContent, color] = splitContent;
+  let [type, iconContent] = splitContent;
+
+  const [, , color, extra] = splitContent;
 
   if (splitContent.length === 1) {
     type = 'emoji';
@@ -34,6 +36,15 @@ export const splitEmojiLink = (
   }
 
   const morandiColor = morandiColorMapper[color];
+
+  if (type === 'custom-icon') {
+    iconContent = iconContent + ':' + color;
+    return {
+      backgroundColor: morandiColor || extra || fallbackColor,
+      text: iconContent,
+      type: 'custom-icon',
+    };
+  }
 
   if (type === 'lucide') {
     return {
