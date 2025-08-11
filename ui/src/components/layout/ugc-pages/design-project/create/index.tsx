@@ -23,10 +23,24 @@ import { createDesignProjectSchema, ICreateDesignProject } from '@/schema/worksp
 
 import { useGetUgcViewIconOnlyMode } from '../../util';
 
-export const CreateDesignProjectDialog: React.FC = () => {
+interface ICreateDesignProjectDialogProps {
+  visible?: boolean;
+  setVisible?: (visible: boolean) => void;
+  afterCreate?: () => void;
+}
+
+export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps> = ({ 
+  visible, 
+  setVisible, 
+  afterCreate 
+}) => {
   const { t } = useTranslation();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // 使用外部传入的visible状态，如果没有则使用内部状态
+  const isOpen = visible !== undefined ? visible : dialogOpen;
+  const setIsOpen = setVisible || setDialogOpen;
 
   const form = useForm<ICreateDesignProject>({
     resolver: zodResolver(createDesignProjectSchema),
@@ -58,7 +72,8 @@ export const CreateDesignProjectDialog: React.FC = () => {
       {
         success: (designProject) => {
           open(`/${teamId}/design/${designProject.id}`, '_blank');
-          setDialogOpen(false);
+          setIsOpen(false);
+          afterCreate?.(); // 调用回调函数
           return t('common.create.success');
         },
         loading: t('common.create.loading'),
@@ -73,12 +88,14 @@ export const CreateDesignProjectDialog: React.FC = () => {
 
   const iconOnlyMode = useGetUgcViewIconOnlyMode();
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="small" icon={<Plus />}>
-          {iconOnlyMode ? null : t('common.utils.create')}
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {!visible && ( // 只有在没有外部控制时才显示触发器
+        <DialogTrigger asChild>
+          <Button variant="outline" size="small" icon={<Plus />}>
+            {iconOnlyMode ? null : t('common.utils.create')}
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t('ugc-page.design-project.create.dialog.title')}</DialogTitle>
@@ -150,7 +167,7 @@ export const CreateDesignProjectDialog: React.FC = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setDialogOpen(false);
+                    setIsOpen(false);
                   }}
                 >
                   {t('common.utils.cancel')}

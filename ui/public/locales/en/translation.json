@@ -1291,6 +1291,11 @@
           }
         }
       },
+      "dropdown": {
+        "create": "Create Design Project",
+        "delete": "Delete Current Project",
+        "manage-workspace": "Manage Workspace"
+      },
       "association-editor": {
         "button": "Association Editor",
         "title": "Association Editor",

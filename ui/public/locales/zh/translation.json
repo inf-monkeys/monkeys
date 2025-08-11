@@ -1279,6 +1279,11 @@
           }
         }
       },
+      "dropdown": {
+        "create": "新建设计项目",
+        "delete": "删除当前项目",
+        "manage-workspace": "管理工作空间"
+      },
       "association-editor": {
         "button": "关联编辑器",
         "title": "关联编辑器",
