@@ -187,6 +187,22 @@ export const getSubWorkflowDataList = (tasks: MonkeyTaskDefTypes[]) => {
   return result;
 };
 
+export const removeCredentials = (obj: any) => {
+  if (!obj || typeof obj !== 'object') return;
+
+  if (Array.isArray(obj)) {
+    obj.forEach((item) => removeCredentials(item));
+  } else {
+    for (const key in obj) {
+      if (key === 'credential') {
+        delete obj[key];
+      } else if (typeof obj[key] === 'object') {
+        removeCredentials(obj[key]);
+      }
+    }
+  }
+};
+
 type FlattenedObject = Record<string, any>;
 
 export const flattenKeys = (obj: unknown, path: string[] = [], triggerKeys?: string[], triggerCallback?: (key: string, data: any) => void): FlattenedObject =>

@@ -1,7 +1,7 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { logger } from '@/common/logger';
-import { generateDbId, getComfyuiWorkflowDataListFromWorkflow, getSubWorkflowDataList } from '@/common/utils';
+import { generateDbId, getComfyuiWorkflowDataListFromWorkflow, getSubWorkflowDataList, removeCredentials } from '@/common/utils';
 import { flatTasks } from '@/common/utils/conductor';
 import { getI18NValue } from '@/common/utils/i18n';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
@@ -54,6 +54,8 @@ export class WorkflowCrudService implements IAssetHandler {
     const pages = await this.pageService.listWorkflowPagesBrief(workflowId);
 
     const tasks = workflow.tasks;
+
+    removeCredentials(tasks);
 
     // 子工作流
     const subWorkflows = getSubWorkflowDataList(tasks);
