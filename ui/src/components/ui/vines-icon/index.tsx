@@ -47,6 +47,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
 
   const iconType = useMemo(() => {
     if (src.startsWith('custom-icon:')) return 'custom-icon';
+    if (src.startsWith('lucide:')) return 'lucide';
     if (iconNames.includes(src)) return 'lucide';
     if (isURL(src)) return 'img';
     return 'emoji';

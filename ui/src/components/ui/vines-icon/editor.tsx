@@ -34,20 +34,23 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
 
   // 判断当前图标类型
   const isEmojiIcon = value && value.startsWith('emoji:');
-  const isIconIcon = value && !value.startsWith('emoji:');
+  const isLucideIcon = value && value.startsWith('lucide:');
+  const isOldIconIcon = value && !value.startsWith('emoji:') && !value.startsWith('lucide:');
 
   // 初始化图标类型
   React.useEffect(() => {
     if (isEmojiIcon) {
       setIconType('emoji');
-    } else if (isIconIcon) {
+    } else if (isLucideIcon || isOldIconIcon) {
       setIconType('icon');
     }
   }, [value]);
 
   // 处理图标选择
   const handleIconSelect = (iconName: string) => {
-    onChange?.(iconName);
+    // 如果选择的是 lucide 图标，自动添加 lucide: 前缀
+    const formattedIconName = `lucide:${iconName}`;
+    onChange?.(formattedIconName);
     setIconDialogOpen(false);
   };
 
@@ -67,6 +70,19 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
     } else {
       setIconType('icon');
     }
+  };
+
+  // 获取显示的图标值
+  const getDisplayIconValue = () => {
+    if (isEmojiIcon) {
+      return value;
+    } else if (isLucideIcon) {
+      return value;
+    } else if (isOldIconIcon) {
+      // 如果是旧格式的图标，转换为 lucide 格式
+      return `lucide:${value}`;
+    }
+    return 'lucide:link';
   };
 
   return (
@@ -129,7 +145,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
             <DialogTrigger asChild>
               <div className="relative cursor-pointer">
                 <VinesIcon size={size}>
-                  {isIconIcon ? value : 'link'}
+                  {getDisplayIconValue()}
                 </VinesIcon>
                 <Tooltip>
                   <TooltipTrigger asChild>

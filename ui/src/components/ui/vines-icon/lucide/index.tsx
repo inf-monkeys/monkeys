@@ -28,6 +28,14 @@ export const VinesLucideIcon = forwardRef<HTMLDivElement, IVinesLucideIconProps>
     }, [initialized]);
 
     const { isLucide, finalSrc } = useCreation(() => {
+      // 处理 lucide: 前缀的图标名称
+      if (src.startsWith('lucide:')) {
+        const iconName = src.split(':')[1];
+        if (iconName && iconNames.includes(iconName)) {
+          return { finalSrc: iconName, isLucide: true };
+        }
+      }
+
       if (emojiRegex().test(src)) {
         return { finalSrc: src, isLucide: false };
       }
