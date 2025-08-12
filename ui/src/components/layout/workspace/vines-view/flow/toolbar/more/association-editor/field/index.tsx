@@ -13,6 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { IWorkflowAssociationForEditor } from '@/schema/workspace/workflow-association.ts';
 
 import { FieldNewDesignDisplayName } from './new-design-display-name';
+import { FieldPreferAppId } from './prefer-app-id';
 
 interface IAssociationEditorFieldsProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowAssociationForEditor>;
@@ -25,7 +26,10 @@ export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = 
       <ScrollArea className="-mx-3 h-[38rem] px-3">
         <div className="flex w-96 max-w-md flex-col gap-2 px-1">
           <FieldEnabled form={form} />
-          <FieldIconUrl form={form} />
+          <div className="flex justify-between gap-global">
+            <FieldIconUrl form={form} />
+            <FieldPreferAppId form={form} />
+          </div>
           <FieldDisplayName form={form} />
           <FieldDescription form={form} />
           <FieldType form={form} />

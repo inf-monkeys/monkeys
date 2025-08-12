@@ -13,11 +13,11 @@ import { AssetType, MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { uniq } from 'lodash';
+import { set, uniq } from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateMarketplaceAppWithVersionDto } from '../dto/create-app.dto';
 import { UpdateMarketplaceAppDto } from '../dto/update-app.dto';
-import { InstalledAssetInfo, MarketplaceAssetSnapshot, SourceAssetReference } from '../types';
+import { InstalledAssetInfo, IStagedAsset, IStagedAssets, MarketplaceAssetSnapshot, SourceAssetReference } from '../types';
 import { presetAppSort } from './marketplace.data';
 
 @Injectable()
@@ -42,6 +42,19 @@ export class MarketplaceService {
 
   private async createTasksSnapshot(tasks: MonkeyTaskDefTypes[]): Promise<MonkeyTaskDefTypes[]> {
     return JSON.parse(JSON.stringify(tasks));
+  }
+
+  public async getAssetSnapshot(assetType: AssetType, assetId: string, assetVersion: number, externalAssetList?: IStagedAssets) {
+    const handler = this.assetsMapperService.getAssetHandler(assetType);
+    const snapshot = await handler.getSnapshot(assetId, assetVersion, externalAssetList);
+    return snapshot;
+  }
+
+  public async getAssetSnapshotByStagedAssets(assets: IStagedAssets): Promise<(IStagedAsset & { snapshot: any })[]> {
+    for (const asset of assets) {
+      set(asset, 'snapshot', await this.getAssetSnapshot(asset.type, asset.id, asset.assetVersion, assets));
+    }
+    return assets as (IStagedAsset & { snapshot: any })[];
   }
 
   public async createAppWithVersion(teamId: string, userId: string, body: CreateMarketplaceAppWithVersionDto) {
@@ -70,8 +83,7 @@ export class MarketplaceService {
       const versionId = generateDbId();
 
       for (const assetRef of versionDto.assets) {
-        const handler = this.assetsMapperService.getAssetHandler(assetRef.assetType);
-        const snapshot = await handler.getSnapshot(assetRef.assetId, assetRef.version);
+        const snapshot = await this.getAssetSnapshot(assetRef.assetType, assetRef.assetId, assetRef.version);
 
         if (!assetSnapshot[assetRef.assetType]) {
           assetSnapshot[assetRef.assetType] = [];
@@ -79,7 +91,6 @@ export class MarketplaceService {
         assetSnapshot[assetRef.assetType].push(snapshot);
 
         sourceAssetReferences.push(assetRef);
-
         if (assetRef.assetType === 'workflow') {
           this.workflowCrudService.updateWorkflowDef(teamId, assetRef.assetId, assetRef.version, {
             forkFromId: versionId,

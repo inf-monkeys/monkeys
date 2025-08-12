@@ -196,6 +196,7 @@ export class WorkflowRepository {
       openaiModelName?: string;
       shortcutsFlow?: string;
       forkFromId?: string;
+      preferAppId?: string;
     },
   ) {
     const {
@@ -214,6 +215,7 @@ export class WorkflowRepository {
       openaiModelName,
       shortcutsFlow,
       forkFromId,
+      preferAppId,
     } = updates;
 
     // 字段都为空，则跳过更新
@@ -234,6 +236,7 @@ export class WorkflowRepository {
         openaiModelName,
         shortcutsFlow,
         forkFromId,
+        preferAppId,
       ].every((item) => typeof item === 'undefined')
     )
       return;
@@ -283,6 +286,7 @@ export class WorkflowRepository {
           openaiModelName,
           shortcutsFlow,
           forkFromId,
+          preferAppId,
         },
         (v) => typeof v !== 'undefined',
       ),
@@ -1295,7 +1299,24 @@ ORDER BY
     return null;
   }
 
-  public async listWorkflowAssociations(workflowId: string, teamId: string) {
+  public async listAllWorkflowAssociations(teamId: string, detail = false) {
+    return await this.workflowAssociationRepository
+      .find({
+        where: {
+          originWorkflow: {
+            teamId,
+          },
+          isDeleted: false,
+        },
+        relations: {
+          originWorkflow: true,
+          targetWorkflow: true,
+        },
+      })
+      .then((data) => (detail ? data : data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow']))));
+  }
+
+  public async listWorkflowAssociations(workflowId: string, teamId: string, detail = false) {
     return await this.workflowAssociationRepository
       .find({
         where: {
@@ -1310,7 +1331,7 @@ ORDER BY
           targetWorkflow: true,
         },
       })
-      .then((data) => data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow'])));
+      .then((data) => (detail ? data : data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow']))));
   }
 
   public async getWorkflowAssociation(workflowAssociationId: string, relation = true) {
@@ -1343,7 +1364,7 @@ ORDER BY
       }
 
       return await transactionalEntityManager.save(WorkflowAssociationsEntity, {
-        ...pick(createAssociation, ['displayName', 'description', 'enabled', 'mapper', 'targetWorkflowId', 'iconUrl', 'sortIndex', 'type', 'extraData']),
+        ...pick(createAssociation, ['displayName', 'description', 'enabled', 'mapper', 'targetWorkflowId', 'iconUrl', 'sortIndex', 'type', 'extraData', 'preferAppId']),
         originWorkflowId: workflowId,
         id: generateDbId(),
         isDeleted: false,
@@ -1394,12 +1415,13 @@ ORDER BY
             sortIndex: updateAssociation.sortIndex,
             type: updateAssociation.type,
             extraData: updateAssociation.extraData,
+            preferAppId: updateAssociation.preferAppId,
           },
           (v) => typeof v !== 'undefined',
         ),
         updatedTimestamp: Date.now(),
       };
-      await transactionalEntityManager.update(WorkflowAssociationsEntity, { id, isDeleted: false, teamId }, updateFields);
+      await transactionalEntityManager.update(WorkflowAssociationsEntity, { id, isDeleted: false }, updateFields);
       const updatedAssociation = await transactionalEntityManager.findOne(WorkflowAssociationsEntity, {
         where: { id, isDeleted: false },
         relations: {

@@ -70,6 +70,13 @@ export class BaseAssetEntity extends BaseEntity {
   })
   publishConfig?: AssetPublishConfig;
 
+  @Column({
+    name: 'prefer_app_id',
+    nullable: true,
+    type: 'varchar',
+  })
+  preferAppId?: string;
+
   @AfterLoad()
   afterLoad?() {
     try {

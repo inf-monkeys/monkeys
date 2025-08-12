@@ -35,4 +35,5 @@ export interface IDesignAssociation {
   updatedTimestamp: number;
   targetWorkflowId: string;
   targetInputId: string;
+  preferAppId?: string;
 }

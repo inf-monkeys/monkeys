@@ -673,6 +673,7 @@ export class WorkflowCrudService implements IAssetHandler {
       openaiModelName?: string;
       shortcutsFlow?: string;
       forkFromId?: string;
+      preferAppId?: string;
     },
   ) {
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);

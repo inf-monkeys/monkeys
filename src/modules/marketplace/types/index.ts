@@ -24,7 +24,7 @@ export interface AssetUpdateResult {
 }
 
 export interface IAssetHandler {
-  getSnapshot(assetId: string, version: number): Promise<any>;
+  getSnapshot(assetId: string, version: number, externalAssetList?: IStagedAssets): Promise<any>;
 
   cloneFromSnapshot(snapshot: any, teamId: string, userId: string): Promise<AssetCloneResult>;
 
@@ -32,3 +32,17 @@ export interface IAssetHandler {
 
   remapDependencies(assetId: string, idMapping: { [originalId: string]: string }): Promise<void>;
 }
+
+export interface IBaseAssetDto {
+  id: string;
+  type: AssetType;
+  assetVersion: number;
+}
+
+export interface IStagedAsset extends IBaseAssetDto {
+  appId: string;
+  version: string;
+  comments?: string;
+}
+
+export type IStagedAssets = IStagedAsset[];

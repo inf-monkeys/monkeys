@@ -79,16 +79,13 @@
       "open": "Open",
       "share": "Share",
       "select": "Select",
-      "unselect": "Unselect"
+      "unselect": "Unselect",
+      "next": "Next",
+      "previous": "Previous"
     },
     "status": {
       "active": "Active",
       "inactive": "Inactive"
-    },
-    "time": {
-      "minutes": "minutes",
-      "hours": "hours",
-      "days": "days"
     },
     "language": "Language",
     "display-name": "Display Name",
@@ -98,9 +95,11 @@
     "other-languages-available": "Other languages available",
     "type": {
       "workflow": "workflow",
+      "workflow-association": "workflow association",
+      "design-association": "design association",
       "agent": "agent",
-      "design-board": "Design Board",
-      "design-project": "Design Project",
+      "design-board": "design board",
+      "design-project": "design project",
       "comfyui-workflow": "ComfyUI workflow",
       "image-model": "image model",
       "image-model-type": "image model type",
@@ -130,7 +129,10 @@
       "year_one": "year",
       "year_other": "years",
       "ago": "{{ time }} ago",
-      "just-now": "just now"
+      "just-now": "just now",
+      "minutes": "minutes",
+      "hours": "hours",
+      "days": "days"
     },
     "workflow": {
       "trigger": {
@@ -826,7 +828,25 @@
           },
           "export-as-built-in-market": {
             "button": "Export Data as Built-in Market Format",
-            "title": "Export team data as built-in market format"
+            "title": "Export team data as built-in market format",
+            "form": {
+              "app-id": {
+                "label": "App ID",
+                "placeholder": "Please enter the app ID"
+              },
+              "asset-version": {
+                "label": "Asset Version",
+                "placeholder": "Please enter the asset version"
+              },
+              "version": {
+                "label": "Version",
+                "placeholder": "Please enter the version"
+              },
+              "comments": {
+                "label": "Comments",
+                "placeholder": "Please enter the comments"
+              }
+            }
           }
         },
         "join-public-team": {
@@ -2641,6 +2661,8 @@
           "workflow-desc": "Workflow description",
           "workflow-desc-placeholder": "Please enter a description of the workflow in no more than 200 characters.",
           "workflow-icon": "Workflow Icons",
+          "prefer-app-id": "Prefer App ID",
+          "prefer-app-id-placeholder": "Please enter a prefer app id",
           "submit": "Submit"
         },
         "workflow-id-empty": "Workflow ID does not exist",
@@ -2985,6 +3007,10 @@
                 "enabled": {
                   "label": "Enabled",
                   "description": "After enabling, the association will be displayed on the right side of the \"Workspace\" fixed \"Form View\" in the workflow"
+                },
+                "prefer-app-id": {
+                  "label": "Prefer App ID",
+                  "placeholder": "Please enter the prefer app ID"
                 },
                 "display-name": {
                   "label": "Display Name",

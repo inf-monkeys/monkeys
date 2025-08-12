@@ -1,8 +1,8 @@
 import { DesignAssociationEntity } from '@/database/entities/design/design-association';
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
-import { AssetCloneResult, AssetUpdateResult, IAssetHandler } from '../marketplace/types';
+import { AssetCloneResult, AssetUpdateResult, IAssetHandler, IStagedAssets } from '../marketplace/types';
 import { WorkflowCrudService } from '../workflow/workflow.curd.service';
 import { DesignAssociationService } from './design.association.service';
 
@@ -53,37 +53,50 @@ export class DesignAssociationCrudService implements IAssetHandler {
   /**
    * 获取设计关联的快照
    */
-  public async getSnapshot(designAssociationId: string): Promise<any> {
+  public async getSnapshot(designAssociationId: string, _version: number, externalAssetList?: IStagedAssets): Promise<any> {
     const association = await this.designAssociationService.findById(designAssociationId);
 
     if (!association) {
       throw new NotFoundException('关联不存在');
     }
 
-    const { targetWorkflowId } = association;
+    const { targetWorkflowId: originTargetWorkflowId } = association;
 
     // 获取目标工作流的信息
-    const targetWorkflow = await this.workflowCrudService.getWorkflowDef(targetWorkflowId);
+    const targetWorkflow = await this.workflowCrudService.getWorkflowDef(originTargetWorkflowId);
 
     if (!targetWorkflow) {
       throw new NotFoundException('目标工作流不存在');
     }
 
-    // 检查 forkFromId
-    if (!targetWorkflow?.forkFromId) {
-      throw new Error(`工作流 ${targetWorkflowId} 没有发布到市场`);
-    }
+    let targetWorkflowId = '';
 
-    // 获取应用市场版本信息
-    const appVersion = await this.marketplaceService.getAppVersionById(targetWorkflow.forkFromId);
-    if (!appVersion) {
-      throw new Error(`找不到工作流 ${targetWorkflowId} 对应的应用市场应用`);
+    // 如果有指定的资产列表，先从资产列表检查
+    if (isArray(externalAssetList) && externalAssetList.length > 0) {
+      const targetWorkflowAsset = externalAssetList.find((asset) => asset.type === 'workflow' && asset.id === originTargetWorkflowId);
+      if (targetWorkflowAsset) {
+        targetWorkflowId = targetWorkflowAsset.appId;
+      } else {
+        throw new Error(`工作流 ${originTargetWorkflowId} 不存在于资产列表中`);
+      }
+    } else {
+      if (targetWorkflow?.forkFromId) {
+        const appVersion = await this.marketplaceService.getAppVersionById(targetWorkflow.forkFromId);
+        // 获取应用市场版本信息
+        if (appVersion) {
+          targetWorkflowId = appVersion.appId;
+        } else {
+          throw new Error(`找不到工作流 ${targetWorkflowId} 对应的应用市场应用`);
+        }
+      } else {
+        throw new Error(`工作流 ${targetWorkflowId} 没有发布到市场`);
+      }
     }
 
     return {
       ...association,
       teamId: undefined,
-      targetWorkflowId: appVersion.appId,
+      targetWorkflowId,
     };
   }
 

@@ -86,9 +86,16 @@ export class WorkflowAssociationsEntity extends BaseEntity {
   @ManyToOne(() => WorkflowMetadataEntity)
   @JoinColumn({ name: 'target_workflow_id' })
   targetWorkflow: WorkflowMetadataEntity;
+
+  @Column({
+    name: 'prefer_app_id',
+    nullable: true,
+    type: 'varchar',
+  })
+  preferAppId?: string;
 }
 
 export type UpdateAndCreateWorkflowAssociation = Pick<
   WorkflowAssociationsEntity,
-  'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex' | 'type' | 'extraData'
+  'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex' | 'type' | 'extraData' | 'preferAppId'
 >;

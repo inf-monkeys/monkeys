@@ -9,6 +9,7 @@ import { FieldDescription } from './description';
 import { FieldDisplayName } from './display-name';
 import { FieldEnabled } from './enabled';
 import { FieldIconUrl } from './icon-url';
+import { FieldPreferAppId } from './prefer-app-id';
 import { FieldTargetInputId } from './target-input-id';
 import { FieldWorkflow } from './workflow';
 
@@ -22,7 +23,10 @@ export const DesignAssociationEditorFields: React.FC<IDesignAssociationEditorFie
       <ScrollArea className="-mx-3 h-[38rem] px-3">
         <div className="flex w-96 max-w-md flex-col gap-2 px-1">
           <FieldEnabled form={form} />
-          <FieldIconUrl form={form} />
+          <div className="flex justify-between gap-global">
+            <FieldIconUrl form={form} />
+            <FieldPreferAppId form={form} />
+          </div>
           <FieldDisplayName form={form} />
           <FieldDescription form={form} />
           <FieldWorkflow form={form} />

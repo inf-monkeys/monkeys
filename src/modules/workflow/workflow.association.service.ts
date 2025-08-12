@@ -6,6 +6,10 @@ import { Injectable } from '@nestjs/common';
 export class WorkflowAssociationService {
   constructor(private readonly workflowRepository: WorkflowRepository) {}
 
+  async listAllWorkflowAssociations(teamId: string) {
+    return await this.workflowRepository.listAllWorkflowAssociations(teamId);
+  }
+
   async listWorkflowAssociations(workflowId: string, teamId: string) {
     return await this.workflowRepository.listWorkflowAssociations(workflowId, teamId);
   }

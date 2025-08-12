@@ -6,6 +6,10 @@ export class CreateDesignAssociationDto extends BaseEntityDto {
   @IsBoolean()
   enabled: boolean;
 
+  @IsOptional()
+  @IsString()
+  preferAppId: string;
+
   @IsObject()
   displayName: I18nValue;
 

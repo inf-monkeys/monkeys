@@ -15,6 +15,7 @@ type IBaseWorkflowAssociation = {
   originWorkflowId: string;
   type: IWorkflowAssociationType;
   extraData?: IWorkflowAssociationExtraData | null;
+  preferAppId?: string;
 } & IBaseEntity;
 
 export type IWorkflowAssociationType = 'to-workflow' | 'new-design';

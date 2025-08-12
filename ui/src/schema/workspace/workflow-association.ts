@@ -1,6 +1,7 @@
 import z from 'zod';
 
 const baseWorkflowAssociationSchema = z.object({
+  preferAppId: z.string().optional(),
   displayName: z.union([
     z.string().min(1, 'Display name cannot be empty'),
     z

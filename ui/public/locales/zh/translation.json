@@ -79,7 +79,9 @@
       "open": "打开",
       "share": "分享",
       "select": "选择",
-      "unselect": "取消选择"
+      "unselect": "取消选择",
+      "next": "下一步",
+      "previous": "上一步"
     },
     "status": {
       "active": "活跃",
@@ -93,6 +95,8 @@
     "other-languages-available": "其他语言可用",
     "type": {
       "workflow": "工作流",
+      "workflow-association": "工作流关联",
+      "design-association": "设计关联",
       "agent": "智能体",
       "design-board": "设计画板",
       "design-project": "设计项目",
@@ -119,7 +123,10 @@
       "month": "月",
       "year": "年",
       "ago": "{{ time }}前",
-      "just-now": "刚刚"
+      "just-now": "刚刚",
+      "minutes": "分钟",
+      "hours": "小时",
+      "days": "天"
     },
     "workflow": {
       "trigger": {
@@ -811,7 +818,25 @@
           },
           "export-as-built-in-market": {
             "button": "导出数据为预置格式",
-            "title": "导出团队数据为预置格式"
+            "title": "导出团队数据为预置格式",
+            "form": {
+              "app-id": {
+                "label": "应用 ID",
+                "placeholder": "请输入应用 ID"
+              },
+              "asset-version": {
+                "label": "资产版本",
+                "placeholder": "请输入资产版本"
+              },
+              "version": {
+                "label": "版本号",
+                "placeholder": "请输入版本号"
+              },
+              "comments": {
+                "label": "更新日志",
+                "placeholder": "请输入更新日志"
+              }
+            }
           }
         },
         "join-public-team": {
@@ -2660,6 +2685,8 @@
           "workflow-desc": "工作流描述",
           "workflow-desc-placeholder": "请输入工作流描述，不超过 200 字",
           "workflow-icon": "工作流图标",
+          "prefer-app-id": "偏好应用 ID",
+          "prefer-app-id-placeholder": "请输入偏好应用 ID",
           "submit": "保存"
         },
         "workflow-id-empty": "工作流 ID 不存在",
@@ -3004,6 +3031,10 @@
                 "enabled": {
                   "label": "启用",
                   "description": "启用后，关联将展示在该工作流的「工作台」固定「表单视图」右侧"
+                },
+                "prefer-app-id": {
+                  "label": "偏好应用 ID",
+                  "placeholder": "请输入偏好应用 ID"
                 },
                 "display-name": {
                   "label": "显示名称",

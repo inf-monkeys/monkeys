@@ -91,4 +91,11 @@ export class UpdateWorkflowDefDto {
     type: String,
   })
   shortcutsFlow: string;
+
+  @ApiProperty({
+    description: '偏好应用 ID',
+    required: false,
+    type: String,
+  })
+  preferAppId?: string;
 }

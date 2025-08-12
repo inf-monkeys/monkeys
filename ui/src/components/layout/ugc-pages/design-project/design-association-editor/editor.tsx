@@ -33,6 +33,7 @@ export const DesignAssociationEditor: React.FC<IDesignAssociationEditorProps> = 
     displayName: '',
     description: '',
     iconUrl: DEFAULT_DESIGN_ASSOCIATION_LUCIDE_ICON_URL,
+    preferAppId: undefined,
   };
 
   const form = useForm<IDesignAssociationForEditor>({

@@ -13,6 +13,7 @@ export const workflowInfoSchema = z.object({
   description: z.union([z.string(), z.record(z.string(), z.string())]),
   iconUrl: z.string().optional(),
   thumbnail: z.string().optional(),
+  preferAppId: z.string().optional(),
 });
 
 export type IWorkflowInfo = z.infer<typeof workflowInfoSchema>;

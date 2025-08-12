@@ -55,4 +55,11 @@ export class DesignAssociationEntity extends BaseEntity {
     type: 'text',
   })
   targetInputId: string;
+
+  @Column({
+    name: 'prefer_app_id',
+    nullable: true,
+    type: 'varchar',
+  })
+  preferAppId?: string;
 }

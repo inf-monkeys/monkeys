@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { I18nInput } from '@/components/ui/i18n-input';
 import { I18nTextarea } from '@/components/ui/i18n-textarea';
+import { Input } from '@/components/ui/input';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
@@ -63,6 +64,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
         t('workspace.wrapper.workflow-info-card.default-workflow-name'),
       description: (workflow?.description as string | Record<string, string>) ?? '',
       iconUrl: workflow?.iconUrl ?? DEFAULT_WORKFLOW_ICON_URL,
+      preferAppId: workflow?.preferAppId,
     },
   });
 
@@ -74,6 +76,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
         t('workspace.wrapper.workflow-info-card.default-workflow-name'),
       description: (workflow.description as string | Record<string, string>) || '',
       iconUrl: workflow.iconUrl || DEFAULT_WORKFLOW_ICON_URL,
+      preferAppId: workflow.preferAppId,
     });
   }, [workflow, form, t]);
 
@@ -146,23 +149,43 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
               )}
             />
 
-            <FormField
-              name="iconUrl"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('workspace.wrapper.workflow-info-card.form.workflow-icon')}</FormLabel>
-                  <FormControl>
-                    <VinesIconEditor
-                      value={field.value ?? DEFAULT_WORKFLOW_ICON_URL}
-                      defaultValue={workflow?.iconUrl}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex w-full justify-between gap-global">
+              <FormField
+                name="iconUrl"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('workspace.wrapper.workflow-info-card.form.workflow-icon')}</FormLabel>
+                    <FormControl>
+                      <VinesIconEditor
+                        value={field.value ?? DEFAULT_WORKFLOW_ICON_URL}
+                        defaultValue={workflow?.iconUrl}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                name="preferAppId"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('workspace.wrapper.workflow-info-card.form.prefer-app-id')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={field.value as string | undefined}
+                        onChange={field.onChange}
+                        placeholder={t('workspace.wrapper.workflow-info-card.form.prefer-app-id-placeholder')}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <DialogFooter>
               <Button type="submit" loading={isLoading} variant="solid">

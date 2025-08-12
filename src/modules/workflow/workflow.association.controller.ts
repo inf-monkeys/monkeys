@@ -13,6 +13,18 @@ export class WorkflowAssociationController {
   constructor(private readonly associationService: WorkflowAssociationService) {}
 
   @ApiOperation({
+    summary: '获取所有关联',
+    description: '获取所有关联',
+  })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
+  @Get('/associations')
+  async listAllWorkflowAssociations(@Req() request: IRequest) {
+    const { teamId } = request;
+    const data = await this.associationService.listAllWorkflowAssociations(teamId);
+    return new SuccessResponse({ data });
+  }
+
+  @ApiOperation({
     summary: '获取工作流下的所有关联',
     description: '获取工作流下的所有关联',
   })

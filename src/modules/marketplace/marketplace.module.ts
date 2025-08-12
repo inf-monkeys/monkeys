@@ -9,6 +9,7 @@ import { WorkflowModule } from '../workflow/workflow.module';
 import { MarketplaceAdminController } from './controllers/marketplace.admin.controller';
 import { MarketplacePublicController } from './controllers/marketplace.public.controller';
 import { MarketplaceSubmissionController } from './controllers/marketplace.submission.controller';
+import { MarketplaceTeamController } from './controllers/marketplace.team.controller';
 import { MarketplaceNotificationService } from './services/marketplace.notification.service';
 import { MarketplaceService } from './services/marketplace.service';
 
@@ -19,7 +20,7 @@ import { MarketplaceService } from './services/marketplace.service';
     forwardRef(() => AssetsModule),
     forwardRef(() => DesignModule),
   ],
-  controllers: [MarketplaceAdminController, MarketplacePublicController, MarketplaceSubmissionController],
+  controllers: [MarketplaceAdminController, MarketplacePublicController, MarketplaceSubmissionController, MarketplaceTeamController],
   providers: [MarketplaceService, MarketplaceNotificationService],
   exports: [MarketplaceService],
 })
