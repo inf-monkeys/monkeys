@@ -46,3 +46,5 @@ export interface IStagedAsset extends IBaseAssetDto {
 }
 
 export type IStagedAssets = IStagedAsset[];
+
+export type IStagedAssetWithSnapshot = IStagedAsset & { snapshot: Record<string, any> };

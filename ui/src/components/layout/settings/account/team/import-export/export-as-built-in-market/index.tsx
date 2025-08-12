@@ -60,6 +60,9 @@ export const ExportTeamAsBuiltInMarket: React.FC<IExportTeamAsBuiltInMarketProps
       }
       setStep(2);
     } else {
+      form.getValues().assets.forEach((asset, index) => {
+        form.setValue(`assets.${index}.assetVersion`, Number(asset.assetVersion));
+      });
       const result = await form.trigger();
       if (result) {
         const data = form.getValues();
@@ -88,6 +91,7 @@ export const ExportTeamAsBuiltInMarket: React.FC<IExportTeamAsBuiltInMarketProps
           },
         });
       } else {
+        console.log(form.getValues());
         toast.error('Please check form like appId version');
       }
     }

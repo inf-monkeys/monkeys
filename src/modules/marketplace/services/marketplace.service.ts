@@ -17,8 +17,8 @@ import { set, uniq } from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateMarketplaceAppWithVersionDto } from '../dto/create-app.dto';
 import { UpdateMarketplaceAppDto } from '../dto/update-app.dto';
-import { InstalledAssetInfo, IStagedAsset, IStagedAssets, MarketplaceAssetSnapshot, SourceAssetReference } from '../types';
-import { presetAppSort } from './marketplace.data';
+import { InstalledAssetInfo, IStagedAsset, IStagedAssets, IStagedAssetWithSnapshot, MarketplaceAssetSnapshot, SourceAssetReference } from '../types';
+import { presetAppLocalDataList, presetAppSort } from './marketplace.data';
 
 @Injectable()
 export class MarketplaceService {
@@ -55,6 +55,75 @@ export class MarketplaceService {
       set(asset, 'snapshot', await this.getAssetSnapshot(asset.type, asset.id, asset.assetVersion, assets));
     }
     return assets as (IStagedAsset & { snapshot: any })[];
+  }
+
+  public async _createAppWithSnapshot(teamId: string, userId: string, body: IStagedAssetWithSnapshot, transactionalEntityManager: EntityManager) {
+    const { appId, version, comments: releaseNotes, type: assetType, snapshot, assetVersion } = body;
+
+    let app = await transactionalEntityManager.findOne(MarketplaceAppEntity, {
+      where: { id: appId, authorTeamId: teamId },
+    });
+
+    if (!app) {
+      this.logger.debug(`Create app ${appId} in team ${teamId}`);
+      app = transactionalEntityManager.create(MarketplaceAppEntity, {
+        id: appId,
+        name: appId,
+        authorTeamId: teamId,
+        status: MarketplaceAppStatus.PENDING_APPROVAL,
+        assetType,
+      });
+      await transactionalEntityManager.save(app);
+    } else {
+      this.logger.debug(`Update app ${appId} in team ${teamId}`);
+      app.status = MarketplaceAppStatus.PENDING_APPROVAL;
+      app.name = appId;
+      app.authorTeamId = teamId;
+      app.assetType = assetType;
+      await transactionalEntityManager.save(app);
+    }
+
+    this.logger.debug('Delete all other current versions');
+    const result = await transactionalEntityManager.delete(MarketplaceAppVersionEntity, { appId });
+    this.logger.debug(`Delete all other current versions: ${result.affected}`);
+
+    const assetSnapshot: MarketplaceAssetSnapshot = {};
+    const versionId = generateDbId();
+
+    if (!assetSnapshot[assetType]) {
+      assetSnapshot[assetType] = [];
+    }
+    assetSnapshot[assetType].push(snapshot);
+
+    this.logger.debug(`Create version ${version} for app ${appId}`);
+    const newVersion = transactionalEntityManager.create(MarketplaceAppVersionEntity, {
+      id: versionId,
+      appId,
+      version,
+      releaseNotes,
+      assetSnapshot,
+      sourceAssetReferences: [
+        {
+          assetType,
+          assetId: 'internal',
+          version: assetVersion,
+        },
+      ],
+      status: MarketplaceAppVersionStatus.ACTIVE,
+    });
+
+    this.logger.debug(`Save version ${version} for app ${appId}`);
+    await transactionalEntityManager.save(newVersion);
+
+    this.eventEmitter.emit('marketplace.app.submitted', { appId, versionId: newVersion.id });
+
+    return { ...app, version: newVersion };
+  }
+
+  public async createAppWithSnapshot(teamId: string, userId: string, body: IStagedAssetWithSnapshot, transactionalEntityManager?: EntityManager) {
+    return transactionalEntityManager
+      ? await this._createAppWithSnapshot(teamId, userId, body, transactionalEntityManager)
+      : this.entityManager.transaction(async (entityManager) => await this._createAppWithSnapshot(teamId, userId, body, entityManager));
   }
 
   public async createAppWithVersion(teamId: string, userId: string, body: CreateMarketplaceAppWithVersionDto) {
@@ -132,29 +201,36 @@ export class MarketplaceService {
     return this.createAppWithVersion(teamId, userId, body);
   }
 
-  public async approveSubmission(appId: string, isPreset?: boolean) {
-    return this.entityManager.transaction(async (transactionalEntityManager) => {
-      const app = await transactionalEntityManager.findOne(MarketplaceAppEntity, { where: { id: appId } });
-      if (!app) throw new NotFoundException('Application for approval not found.');
+  public async _approveSubmission(appId: string, transactionalEntityManager: EntityManager, isPreset?: boolean) {
+    this.logger.debug(`Approve submission ${appId}`);
+    const app = await transactionalEntityManager.findOne(MarketplaceAppEntity, { where: { id: appId } });
+    if (!app) throw new NotFoundException('Application for approval not found.');
 
-      app.status = MarketplaceAppStatus.APPROVED;
-      app.isPreset = isPreset;
-      await transactionalEntityManager.save(app);
+    app.status = MarketplaceAppStatus.APPROVED;
+    app.isPreset = isPreset;
+    await transactionalEntityManager.save(app);
 
-      const latestVersion = await transactionalEntityManager.findOne(MarketplaceAppVersionEntity, {
-        where: { appId },
-        order: { createdTimestamp: 'DESC' },
-      });
-
-      if (latestVersion) {
-        this.eventEmitter.emit('marketplace.app.version.approved', {
-          appId: app.id,
-          newVersionId: latestVersion.id,
-        });
-      }
-
-      return app;
+    const latestVersion = await transactionalEntityManager.findOne(MarketplaceAppVersionEntity, {
+      where: { appId },
+      order: { createdTimestamp: 'DESC' },
     });
+
+    if (latestVersion) {
+      this.eventEmitter.emit('marketplace.app.version.approved', {
+        appId: app.id,
+        newVersionId: latestVersion.id,
+      });
+    }
+
+    this.logger.debug(`Approve submission ${appId} completed`);
+
+    return app;
+  }
+
+  public async approveSubmission(appId: string, isPreset?: boolean, transactionalEntityManager?: EntityManager) {
+    return transactionalEntityManager
+      ? await this._approveSubmission(appId, transactionalEntityManager, isPreset)
+      : this.entityManager.transaction(async (entityManager) => await this._approveSubmission(appId, entityManager, isPreset));
   }
 
   public async rejectSubmission(appId: string) {
@@ -532,6 +608,31 @@ export class MarketplaceService {
         totalTeams: teamsWithoutApp.length,
         failedInstallations,
       };
+    });
+  }
+
+  public async initPresetAppMarketplace() {
+    if (presetAppLocalDataList.length === 0) {
+      this.logger.log('No internal preset apps need to be initialized.');
+      return;
+    }
+
+    this.logger.log(`${presetAppLocalDataList.length} apps need to be initialized.`);
+
+    // 进入事务
+    return this.entityManager.transaction(async (transactionalEntityManager) => {
+      // 清空所有 preset
+      this.logger.log('Clear all preset apps in database');
+      // await this.appRepo.update({ isPreset: true, isDeleted: false }, { isPreset: false });
+      await transactionalEntityManager.update(MarketplaceAppEntity, { isPreset: true, isDeleted: false }, { isPreset: false });
+
+      // 从文件 snapshot 更新数据库 snapshot & approve
+      this.logger.log('Update all preset apps from local data');
+      for (const [index, presetAppLocalData] of presetAppLocalDataList.entries()) {
+        this.logger.log(`${index + 1}/${presetAppLocalDataList.length}`);
+        await this.createAppWithSnapshot('system', 'system', presetAppLocalData, transactionalEntityManager);
+        await this.approveSubmission(presetAppLocalData.appId, true, transactionalEntityManager);
+      }
     });
   }
 }

@@ -2,6 +2,7 @@ import { config } from '@/common/config';
 import { I18nValue } from '@inf-monkeys/monkeys';
 import fs from 'fs';
 import path from 'path';
+import { IStagedAssetWithSnapshot } from '../types';
 
 export interface PresetAppSortPage {
   id: string;
@@ -35,3 +36,20 @@ export const presetAppSort: PresetAppSort = JSON.parse(
 );
 
 export const presetAllAppIds = presetAppSort.flatMap((it) => it.pages.map((page) => page.appId));
+
+export type PresetAppLocalData = IStagedAssetWithSnapshot;
+
+let rawPresetAppLocalDataList = [];
+if (process.env.MONKEYS_PRESET_APP_LOCAL_DATA_FILE) {
+  rawPresetAppLocalDataList = [path.resolve(process.env.MONKEYS_PRESET_APP_LOCAL_DATA_FILE)];
+} else {
+  const appPresetAppLocalDataFileList = [path.resolve(`/etc/monkeys/presetApp.${config.server.appId}.json`), path.resolve(`./presetApp.${config.server.appId}.json`)];
+  rawPresetAppLocalDataList = appPresetAppLocalDataFileList.some(fs.existsSync) ? appPresetAppLocalDataFileList : [path.resolve('/etc/monkeys/presetApp.json'), path.resolve('./presetApp.json')];
+}
+
+export const presetAppLocalDataList: PresetAppLocalData[] = JSON.parse(
+  rawPresetAppLocalDataList
+    .filter(Boolean)
+    .filter(fs.existsSync)
+    .map((file) => fs.readFileSync(file, 'utf-8'))[0] || `[]`,
+);

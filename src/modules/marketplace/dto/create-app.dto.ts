@@ -1,7 +1,7 @@
 import { AssetType } from '@inf-monkeys/monkeys';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 class AssetReferenceDto {
   @ApiProperty({ description: 'Type of the asset', enum: ['workflow', 'workflow-association', 'design-association'] })
@@ -61,6 +61,23 @@ export class AppVersionDto {
   @ValidateNested({ each: true })
   @Type(() => AssetReferenceDto)
   assets: AssetReferenceDto[];
+}
+
+export class AppVersionWithSnapshotDto {
+  @ApiProperty({ description: 'A semantic version string for the new version' })
+  @IsString()
+  @IsNotEmpty()
+  version: string;
+
+  @ApiProperty({ description: 'Release notes for this version', required: false })
+  @IsString()
+  @IsOptional()
+  releaseNotes?: string;
+
+  @ApiProperty({ description: 'Snapshot for this version' })
+  @IsObject()
+  @IsNotEmpty()
+  snapshot: Record<string, any>;
 }
 
 export class CreateMarketplaceAppWithVersionDto {
