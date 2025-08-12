@@ -17,3 +17,7 @@ export const exportAssetsSchema = z.object({
 });
 
 export type IExportAssets = z.infer<typeof exportAssetsSchema>;
+
+export type IExportedAsset = IExportAsset & {
+  snapshot: any;
+};
