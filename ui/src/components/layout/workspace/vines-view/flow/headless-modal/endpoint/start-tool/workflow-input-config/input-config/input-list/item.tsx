@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ToolPropertyTypes } from '@inf-monkeys/monkeys/src/types/tool.ts';
 import { get, isArray, isBoolean } from 'lodash';
+import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -15,6 +16,8 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tag } from '@/components/ui/tag';
 import { TagGroup } from '@/components/ui/tag/tag-group.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { useCopy } from '@/hooks/use-copy.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings';
 import { cn, getI18nContent } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
@@ -44,6 +47,7 @@ export const InputItem: React.FC<IInputItemProps> = ({
 }) => {
   const { name: variableId, displayName, type, default: defaultData, typeOptions } = it;
   const { t } = useTranslation();
+  const { copy } = useCopy({ timeout: 500 });
   const defaultValueType = typeof defaultData;
   const assetType = get(typeOptions, 'assetType', null);
   const multipleValues = get(typeOptions, 'multipleValues', false);
@@ -58,6 +62,9 @@ export const InputItem: React.FC<IInputItemProps> = ({
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  // 生成要复制的变量引用字符串
+  const variableReference = `\${workflow.input.${variableId}}`;
 
   return (
     <Card
@@ -86,6 +93,30 @@ export const InputItem: React.FC<IInputItemProps> = ({
           )}
 
           <h1 className="font-bold">{getI18nContent(displayName)}</h1>
+          
+          {/* 添加复制按钮 */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="scale-75 px-2"
+                variant="outline"
+                size="small"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  copy(variableReference);
+                }}
+              >
+                <Copy className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="text-center">
+                <div>点击复制变量引用</div>
+                <div className="text-xs text-gray-500 mt-1">{variableReference}</div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
         </div>
         {child}
       </div>
