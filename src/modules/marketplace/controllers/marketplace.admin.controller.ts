@@ -49,4 +49,11 @@ export class MarketplaceAdminController {
     const app = await this.marketplaceService.setPreset(appId, body.isPreset);
     return new SuccessResponse({ data: app });
   }
+
+  @Get('/apps/:appId/installed')
+  @ApiOperation({ summary: 'Get installed apps by appId' })
+  async getInstalledApps(@Param('appId') appId: string, @Query() query: { teamId: string }) {
+    const apps = await this.marketplaceService.getInstalledAppByAppId(appId, query.teamId);
+    return new SuccessResponse({ data: apps });
+  }
 }

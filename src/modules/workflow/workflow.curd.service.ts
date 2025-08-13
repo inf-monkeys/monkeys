@@ -778,4 +778,8 @@ export class WorkflowCrudService implements IAssetHandler {
       throw new NotFoundException(`工作流 (${workflowId}) 不存在！无法创建快捷方式`);
     }
   }
+
+  public async getById(assetId: string, _teamId: string): Promise<any> {
+    return await this.workflowRepository.getWorkflowById(assetId, 1);
+  }
 }

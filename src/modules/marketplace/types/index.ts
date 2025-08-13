@@ -31,6 +31,8 @@ export interface IAssetHandler {
   updateFromSnapshot(snapshot: any, teamId: string, userId: string, assetId: string): Promise<AssetUpdateResult>;
 
   remapDependencies(assetId: string, idMapping: { [originalId: string]: string }): Promise<void>;
+
+  getById(assetId: string, teamId: string): Promise<any>;
 }
 
 export interface IBaseAssetDto {

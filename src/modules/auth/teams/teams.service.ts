@@ -8,6 +8,7 @@ import { DesignMetadataService } from '@/modules/design/design.metadata.service'
 import { DesignProjectService } from '@/modules/design/design.project.service';
 import { MarketplaceService } from '@/modules/marketplace/services/marketplace.service';
 import { ConductorService } from '@/modules/workflow/conductor/conductor.service';
+import { WorkflowCrudService } from '@/modules/workflow/workflow.curd.service';
 import { WorkflowPageService } from '@/modules/workflow/workflow.page.service';
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
@@ -26,6 +27,7 @@ export class TeamsService {
     private readonly designMetadataService: DesignMetadataService,
     private readonly pageService: WorkflowPageService,
     private readonly marketplaceService: MarketplaceService,
+    private readonly workflowCrudService: WorkflowCrudService,
   ) {}
 
   public async forkAssetsFromMarketPlace(teamId: string, userId: string) {
@@ -50,9 +52,15 @@ export class TeamsService {
     return pick(await this.teamRepository.getTeamById(teamId), ['id', 'name', 'description', 'logoUrl']) as TeamEntity;
   }
 
-  public async initTeam(teamId: string, userId: string) {
+  public async initTeam(teamId: string, userId: string, deleteAllAssets = false) {
+    // 先清空页面组和固定页面
+    await this.pageService.clearTeamPageGroupsAndPinnedPages(teamId);
+
+    if (deleteAllAssets) {
+      await this.workflowCrudService.deleteWorkflowDef(teamId, '*');
+    }
+
     // Init assets from built-in marketplace
-    // await this.forkAssetsFromMarketPlace(teamId, userId);
     await this.marketplaceService.installPresetApps(teamId, userId);
 
     // Check if the default server can connect

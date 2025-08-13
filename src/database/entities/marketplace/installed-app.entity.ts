@@ -22,4 +22,8 @@ export class InstalledAppEntity extends BaseEntity {
   @Index()
   @Column({ name: 'is_update_available', default: false })
   isUpdateAvailable: boolean;
+
+  @Index()
+  @Column({ name: 'marketplace_app_id', nullable: true })
+  marketplaceAppId?: string;
 }

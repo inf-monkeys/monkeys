@@ -47,4 +47,8 @@ export class ComfyuiWorkflowCrudService implements IAssetHandler {
   public async remapDependencies(): Promise<void> {
     return;
   }
+
+  public async getById(assetId: string, _teamId: string): Promise<any> {
+    return await this.comfyuiService.getComfyuiWorkflowById(assetId);
+  }
 }

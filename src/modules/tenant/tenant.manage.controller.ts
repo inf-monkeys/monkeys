@@ -27,8 +27,8 @@ export class TenantManageController {
     summary: '初始化所有团队',
     description: '初始化所有团队',
   })
-  async initAllTeams() {
-    const result = await this.tenantManageService.initAllTeams();
+  async initAllTeams(@Body() body: { deleteAllAssets?: boolean }) {
+    const result = await this.tenantManageService.initAllTeams(body.deleteAllAssets);
     return new SuccessResponse({
       data: result,
     });

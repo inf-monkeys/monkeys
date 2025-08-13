@@ -100,13 +100,14 @@ export class TenantManageService {
     });
   }
 
-  async initAllTeams() {
+  async initAllTeams(deleteAllAssets = false) {
     this.logger.log('Starting to init all teams');
     const teams = await this.teamRepository.getAllTeams();
     this.logger.log(`Found ${teams.length} teams to init`);
     for (const team of teams) {
+      if (team.id != '683661a99c7729c311f3bdd4') continue;
       this.logger.debug(`Init team ${team.id}`);
-      await this.teamsService.initTeam(team.id, team.ownerUserId);
+      await this.teamsService.initTeam(team.id, team.ownerUserId, deleteAllAssets);
     }
     this.logger.log('All teams initialized');
   }

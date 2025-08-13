@@ -393,7 +393,7 @@ export class WorkflowRepository {
         WorkflowMetadataEntity,
         {
           teamId,
-          workflowId,
+          ...(workflowId === '*' ? {} : { workflowId }),
         },
         {
           isDeleted: true,
@@ -404,7 +404,7 @@ export class WorkflowRepository {
       await transactionalEntityManager.update(
         WorkflowTriggersEntity,
         {
-          workflowId,
+          ...(workflowId === '*' ? {} : { workflowId }),
         },
         {
           isDeleted: true,
@@ -414,7 +414,7 @@ export class WorkflowRepository {
       // 获取所有相关的 pages
       const pages = await transactionalEntityManager.find(WorkflowPageEntity, {
         where: {
-          workflowId,
+          ...(workflowId === '*' ? {} : { workflowId }),
         },
         select: ['id'],
       });
@@ -441,7 +441,7 @@ export class WorkflowRepository {
       await transactionalEntityManager.update(
         WorkflowPageEntity,
         {
-          workflowId,
+          ...(workflowId === '*' ? {} : { workflowId }),
         },
         {
           isDeleted: true,
@@ -449,11 +449,15 @@ export class WorkflowRepository {
       );
 
       // 删除 installed apps 中的记录
-      await transactionalEntityManager.delete(InstalledAppEntity, {
-        installedAssetIds: {
-          workflow: [workflowId],
-        },
-      });
+      if (workflowId === '*') {
+        await transactionalEntityManager.delete(InstalledAppEntity, {});
+      } else {
+        await transactionalEntityManager.delete(InstalledAppEntity, {
+          installedAssetIds: {
+            workflow: [workflowId],
+          },
+        });
+      }
     });
   }
 

@@ -148,4 +148,8 @@ export class DesignAssociationCrudService implements IAssetHandler {
       await this.designAssociationService.update(association.id, association);
     }
   }
+
+  public async getById(assetId: string, _teamId: string): Promise<any> {
+    return await this.designAssociationService.findById(assetId);
+  }
 }

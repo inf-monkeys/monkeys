@@ -600,4 +600,23 @@ export class WorkflowPageService {
     }
     return pageGroup;
   }
+
+  public async clearTeamPageGroupsAndPinnedPages(teamId: string) {
+    // 1. 清空所有 page groups
+    await this.pageGroupRepository.delete({
+      teamId,
+    });
+
+    // 2. 取消所有页面的 pinned 状态
+    await this.pageRepository.update(
+      {
+        teamId,
+        isDeleted: false,
+      },
+      {
+        pinned: false,
+        updatedTimestamp: Date.now(),
+      },
+    );
+  }
 }

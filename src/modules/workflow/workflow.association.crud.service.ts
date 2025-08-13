@@ -184,4 +184,8 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
       await this.workflowAssociationService.updateWorkflowAssociation(association.id, association.originWorkflow.teamId, updates);
     }
   }
+
+  public async getById(assetId: string, _teamId: string): Promise<any> {
+    return await this.workflowAssociationService.getWorkflowAssociation(assetId, false);
+  }
 }

@@ -13,8 +13,8 @@ import { AssetType, MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { set, uniq } from 'lodash';
-import { EntityManager, Repository } from 'typeorm';
+import { omit, set, uniq } from 'lodash';
+import { EntityManager, In, Repository } from 'typeorm';
 import { CreateMarketplaceAppWithVersionDto } from '../dto/create-app.dto';
 import { UpdateMarketplaceAppDto } from '../dto/update-app.dto';
 import { InstalledAssetInfo, IStagedAsset, IStagedAssets, IStagedAssetWithSnapshot, MarketplaceAssetSnapshot, SourceAssetReference } from '../types';
@@ -360,13 +360,66 @@ export class MarketplaceService {
     const presetApps = await this.getPresetApps();
     if (!presetApps) throw new NotFoundException('Preset app not found.');
     const installedApps: { installation: InstalledAppEntity; appVersion: MarketplaceAppVersionEntity }[] = [];
+
     for (const app of presetApps.sort((a, b) => assetTypeInstallSort.indexOf(a.assetType) - assetTypeInstallSort.indexOf(b.assetType))) {
-      const installedApp = await this.installApp(app.versions[0].id, teamId, userId);
-      installedApps.push(installedApp);
+      // 检查是否已安装该应用
+      const latestVersion = app.versions[0];
+      set(latestVersion, 'app', omit(app, 'versions'));
+      const existingInstallation = await this.getInstalledAppByAppId(app.id, teamId);
+
+      let shouldInstallNew = true;
+      let currentInstallation: InstalledAppEntity = null;
+
+      if (existingInstallation) {
+        // 检查安装的资产是否还存在
+        let assetsExist = true;
+        for (const [assetType, assetIds] of Object.entries(existingInstallation.installedAssetIds)) {
+          const handler = this.assetsMapperService.getAssetHandler(assetType as any);
+          // 检查每个资产是否存在
+          for (const assetId of assetIds) {
+            try {
+              const asset = await handler.getById(assetId, teamId);
+              if (!asset) {
+                this.logger.warn(`Asset ${assetId} of type ${assetType} not found in team ${teamId}, will reinstall app`);
+                assetsExist = false;
+                break;
+              }
+            } catch (error) {
+              this.logger.error(`Failed to check asset ${assetId} existence`, error.stack);
+              assetsExist = false;
+              break;
+            }
+          }
+          if (!assetsExist) break;
+        }
+
+        if (assetsExist) {
+          // 如果资产都存在，尝试更新到最新版本
+          shouldInstallNew = false;
+          // 更新后重新获取安装信息
+          currentInstallation = await this.upgradeSpecificInstalledApp(app.id, latestVersion, existingInstallation);
+          installedApps.push({
+            installation: currentInstallation,
+            appVersion: latestVersion,
+          });
+        } else {
+          // 如果有资产不存在，删除旧的安装记录
+          await this.installedAppRepo.delete(existingInstallation.id);
+        }
+      }
+
+      if (shouldInstallNew) {
+        // 执行新安装
+        this.logger.log(`Installing new app ${app.id} for team ${teamId}`);
+        const installedApp = await this.installApp(latestVersion.id, teamId, userId);
+        installedApps.push(installedApp);
+      }
     }
 
     // 按照 preset app sort 对 workflow page 进行分组和排序
     const installedWorkflowApps = installedApps.filter((app) => app.appVersion.app.assetType === 'workflow');
+
+    this.logger.debug(`Installed workflow apps: ${installedWorkflowApps.length}`);
 
     // 根据 preset app sort 进行映射
     const appIdToPageIdMapper = new Map<string, Record<PageInstanceType, string>>();
@@ -409,6 +462,8 @@ export class MarketplaceService {
 
       // 在 preset 中的排前面，不在的保持原顺序
       const pageGroupIds = originPageGroupIds.sort((a, b) => presetMapToPageGroupIds.indexOf(a) - presetMapToPageGroupIds.indexOf(b));
+
+      this.logger.debug(`Page group ids: ${pageGroupIds}`);
 
       await this.workflowPageService.updatePageGroupSort(teamId, pageGroupIds);
     }
@@ -472,6 +527,7 @@ export class MarketplaceService {
         installedAssetIds,
         marketplaceAppVersionId: version.id,
         isUpdateAvailable: false,
+        marketplaceAppId: version.app.id,
       });
       await transactionalEntityManager.save(installation);
 
@@ -499,6 +555,16 @@ export class MarketplaceService {
   public async getInstalledApps(teamId: string, userId: string) {
     const installedApps = await this.installedAppRepo.find({ where: { teamId, userId } });
     return installedApps;
+  }
+
+  public async getInstalledAppByAppId(appId: string, teamId: string) {
+    const installedApp = await this.installedAppRepo.findOne({
+      where: {
+        marketplaceAppId: appId,
+        teamId,
+      },
+    });
+    return installedApp;
   }
 
   public async getInstalledAppByAppVersionId(appVersionId: string, teamId: string) {
@@ -634,5 +700,124 @@ export class MarketplaceService {
         await this.approveSubmission(presetAppLocalData.appId, true, transactionalEntityManager);
       }
     });
+  }
+
+  public async upgradeInstalledApp(appId: string, newVersionId: string) {
+    this.logger.log(`Upgrading installations for app ${appId} to version ${newVersionId}`);
+
+    try {
+      const allVersionsOfApp = await this.versionRepo.find({ where: { appId }, select: ['id'] });
+      const allVersionIds = allVersionsOfApp.map((v) => v.id);
+
+      // 获取需要更新的安装记录的完整信息
+      const installationsToUpdate = await this.installedAppRepo.find({
+        where: {
+          marketplaceAppVersionId: In(allVersionIds.filter((id) => id !== newVersionId)),
+          isUpdateAvailable: false,
+        },
+      });
+
+      if (installationsToUpdate.length > 0) {
+        const idsToUpdate = installationsToUpdate.map((install) => install.id);
+        this.logger.log(`Found ${idsToUpdate.length} installations to update for app ${appId}.`);
+
+        // 获取新版本的 asset_snapshot
+        const newVersion = await this.versionRepo.findOne({
+          where: { id: newVersionId },
+        });
+
+        if (!newVersion || !newVersion.assetSnapshot) {
+          throw new Error('New version or its asset snapshot not found');
+        }
+
+        // 为每个安装进行更新
+        for (const installation of installationsToUpdate) {
+          this.logger.log(`Updating installation ${installation.id} for team ${installation.teamId}`);
+
+          // 遍历每种资产类型
+          for (const assetType in newVersion.assetSnapshot) {
+            if (!installation.installedAssetIds[assetType]) {
+              continue;
+            }
+
+            const newAssets = newVersion.assetSnapshot[assetType];
+            const installedAssets = installation.installedAssetIds[assetType];
+
+            // 确保数组长度匹配
+            if (newAssets.length !== installedAssets.length) {
+              this.logger.warn(`Asset count mismatch for type ${assetType} in installation ${installation.id}`);
+              continue;
+            }
+
+            // 更新每个资产
+            for (let i = 0; i < installedAssets.length; i++) {
+              const installedAssetId = installedAssets[i];
+              const handler = this.assetsMapperService.getAssetHandler(assetType as any);
+              try {
+                await handler.updateFromSnapshot(newAssets[i], installation.teamId, installation.userId, installedAssetId);
+              } catch (error) {
+                this.logger.error(`Failed to update asset ${installedAssetId} for type ${assetType} in installation ${installation.id}`, error.stack);
+              }
+            }
+          }
+
+          // 更新安装记录的版本ID
+          installation.marketplaceAppVersionId = newVersionId;
+          installation.isUpdateAvailable = false;
+          installation.marketplaceAppId = appId;
+          await this.installedAppRepo.save(installation);
+
+          this.logger.log(`Successfully updated installation ${installation.id}`);
+        }
+
+        this.logger.log(`Successfully updated ${idsToUpdate.length} installations.`);
+      } else {
+        this.logger.log(`No active installations found needing an update for app ${appId}.`);
+      }
+    } catch (error) {
+      this.logger.error(`Failed to upgrade installations for app ${appId}`, error.stack);
+      throw error;
+    }
+  }
+
+  public async upgradeSpecificInstalledApp(appId: string, newVersion: MarketplaceAppVersionEntity, installation: InstalledAppEntity) {
+    this.logger.log(`Updating installation ${installation.id} for team ${installation.teamId}`);
+
+    // 遍历每种资产类型
+    for (const assetType in newVersion.assetSnapshot) {
+      if (!installation.installedAssetIds[assetType]) {
+        continue;
+      }
+
+      const newAssets = newVersion.assetSnapshot[assetType];
+      const installedAssets = installation.installedAssetIds[assetType];
+
+      // 确保数组长度匹配
+      if (newAssets.length !== installedAssets.length) {
+        this.logger.warn(`Asset count mismatch for type ${assetType} in installation ${installation.id}`);
+        continue;
+      }
+
+      // 更新每个资产
+      for (let i = 0; i < installedAssets.length; i++) {
+        const installedAssetId = installedAssets[i];
+        const handler = this.assetsMapperService.getAssetHandler(assetType as any);
+        try {
+          await handler.updateFromSnapshot(newAssets[i], installation.teamId, installation.userId, installedAssetId);
+        } catch (error) {
+          this.logger.error(`Failed to update asset ${installedAssetId} for type ${assetType} in installation ${installation.id}`, error.stack);
+        }
+      }
+    }
+
+    // 更新安装记录的版本ID
+    installation.marketplaceAppVersionId = newVersion.id;
+    installation.isUpdateAvailable = false;
+    installation.marketplaceAppId = appId;
+    const updatedInstallation = await this.installedAppRepo.save(installation);
+
+    this.logger.log(`Successfully updated installation ${updatedInstallation.id}`);
+
+    return updatedInstallation;
   }
 }
