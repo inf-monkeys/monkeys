@@ -55,6 +55,14 @@ export class TeamRepository {
     await Promise.all(promises);
   }
 
+  public async getAllTeams() {
+    return await this.teamRepository.find({
+      where: {
+        isDeleted: false,
+      },
+    });
+  }
+
   public async getTeamById(id: string) {
     const team = await this.teamRepository.findOne({
       where: {
