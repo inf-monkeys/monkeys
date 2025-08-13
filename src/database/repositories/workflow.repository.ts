@@ -1133,7 +1133,10 @@ ORDER BY
     if (!defaultGroup) {
       const group = this.pageGroupRepository.create({
         id: generateDbId(),
-        displayName: '默认分组',
+        displayName: JSON.stringify({
+          'zh-CN': '默认',
+          'en-US': 'Default',
+        }),
         isBuiltIn: true,
         teamId,
         pageIds: [],

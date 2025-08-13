@@ -499,7 +499,10 @@ export class WorkflowPageService {
       } else {
         const newDefaultGroup: WorkflowPageGroupEntity = {
           id: generateDbId(),
-          displayName: '默认分组',
+          displayName: JSON.stringify({
+            'zh-CN': '默认',
+            'en-US': 'Default',
+          }),
           isBuiltIn: true,
           teamId,
           pageIds: [],

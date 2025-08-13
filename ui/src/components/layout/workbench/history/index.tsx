@@ -39,42 +39,42 @@ interface HistoryResultProps {
 }
 
 const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, setSize }) => {
-  const [slidesPerView, setSlidesPerView] = useState(1);
+  // const [slidesPerView, setSlidesPerView] = useState(1);
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
-  // 计算 slidesPerView 的函数
-  const calculateSlidesPerView = (containerWidth: number) => {
-    const slideWidth = 90; // slide width
-    const spaceBetween = 12; // space between
-    const calculated = Math.floor((containerWidth + spaceBetween) / (slideWidth + spaceBetween));
-    return Math.max(1, Math.min(calculated, images?.length || 1));
-  };
-  // 监听容器宽度变化
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  // // 计算 slidesPerView 的函数
+  // const calculateSlidesPerView = (containerWidth: number) => {
+  //   const slideWidth = 90; // slide width
+  //   const spaceBetween = 12; // space between
+  //   const calculated = Math.floor((containerWidth + spaceBetween) / (slideWidth + spaceBetween));
+  //   return Math.max(1, Math.min(calculated, images?.length || 1));
+  // };
+  // // 监听容器宽度变化
+  // useEffect(() => {
+  //   const container = containerRef.current;
+  //   if (!container) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width } = entry.contentRect;
-        const newSlidesPerView = calculateSlidesPerView(width);
-        setSlidesPerView(newSlidesPerView);
-      }
-    });
+  //   const resizeObserver = new ResizeObserver((entries) => {
+  //     for (const entry of entries) {
+  //       const { width } = entry.contentRect;
+  //       const newSlidesPerView = calculateSlidesPerView(width);
+  //       setSlidesPerView(newSlidesPerView);
+  //     }
+  //   });
 
-    resizeObserver.observe(container);
+  //   resizeObserver.observe(container);
 
-    // 初始计算
-    const initialWidth = container.offsetWidth;
-    if (initialWidth > 0) {
-      setSlidesPerView(calculateSlidesPerView(initialWidth));
-    }
+  //   // 初始计算
+  //   const initialWidth = container.offsetWidth;
+  //   if (initialWidth > 0) {
+  //     setSlidesPerView(calculateSlidesPerView(initialWidth));
+  //   }
 
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [images?.length]);
+  //   return () => {
+  //     resizeObserver.disconnect();
+  //   };
+  // }, [images?.length]);
 
   const handleDragStart = (e: React.DragEvent, item: ImagesResultWithOrigin, src: string) => {
     e.stopPropagation();
@@ -118,6 +118,8 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   // 根据主题模式应用不同圆角样式
   const isShadowMode = themeMode === 'shadow';
   const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+
+  // console.log(slidesPerView);
 
   return (
     <AnimatePresence>
@@ -182,13 +184,22 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                 prevEl: slideLeftRef.current,
                 nextEl: slideRightRef.current,
               }}
-              slidesPerView={slidesPerView}
+              slidesPerView={6}
+              breakpoints={{
+                320: {
+                  slidesPerView: 10,
+                },
+                480: {
+                  slidesPerView: 12,
+                },
+                640: {
+                  slidesPerView: 14,
+                },
+              }}
               onSlideChange={(swiper) => {
                 // 当滑动到接近最后几个slide时触发加载
                 // 提前3个slide开始加载
-                if (swiper.activeIndex + slidesPerView >= images.length - SLIDE_THRESHOLD) {
-                  // console.log('requesting more');
-
+                if (swiper.activeIndex + 10 >= images.length - SLIDE_THRESHOLD) {
                   setSize((size) => size + 1);
                 }
               }}
@@ -228,6 +239,17 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                     </SwiperSlide>
                   ))
                 : null}
+              {/* todo: placeholder*/}
+              <SwiperSlide key="p-1"></SwiperSlide>
+              <SwiperSlide key="p-2"></SwiperSlide>
+              <SwiperSlide key="p-3"></SwiperSlide>
+              <SwiperSlide key="p-4"></SwiperSlide>
+              <SwiperSlide key="p-5"></SwiperSlide>
+              <SwiperSlide key="p-6"></SwiperSlide>
+              <SwiperSlide key="p-7"></SwiperSlide>
+              <SwiperSlide key="p-8"></SwiperSlide>
+              <SwiperSlide key="p-9"></SwiperSlide>
+              <SwiperSlide key="p-10"></SwiperSlide>
             </Swiper>
             <Button icon={<ArrowRightIcon />} variant="outline" size="icon" ref={slideRightRef}></Button>
           </motion.div>
@@ -247,28 +269,6 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
         )}
       </div>
     </AnimatePresence>
-  );
-};
-
-const convertInfiniteDataToNormal = (data: VinesWorkflowExecutionOutputListItem[][] | undefined): ImagesResult[] => {
-  if (!data) return [];
-  return data.flat().flatMap((result) =>
-    result.output.flatMap((item, index) => {
-      const res = [];
-      if (item.type === 'image') {
-        // @ts-ignore
-        res.push({
-          ...item,
-          render: {
-            type: 'image',
-            // data: getThumbUrl(item.data as string),
-            data: item.data,
-            key: result.instanceId + '-' + result.status + '-' + index,
-          },
-        });
-      }
-      return res;
-    }),
   );
 };
 

@@ -65,7 +65,19 @@ export class MigartionAddDefaultGroupForAllBuiltInPages1720748707927 implements 
             $1, $2, $3, $4, $5, $6, $7, $8
           )
         `,
-          [newGroupId, targetTeamId, '默认分组', true, JSON.stringify(pageIds), createdTimestamp, updatedTimestamp, false],
+          [
+            newGroupId,
+            targetTeamId,
+            JSON.stringify({
+              'zh-CN': '默认',
+              'en-US': 'Default',
+            }),
+            true,
+            JSON.stringify(pageIds),
+            createdTimestamp,
+            updatedTimestamp,
+            false,
+          ],
         );
 
         console.log(`Inserted new group with ID ${newGroupId} for team ID ${targetTeamId}`);

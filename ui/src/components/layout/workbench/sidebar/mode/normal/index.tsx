@@ -108,16 +108,33 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     return pages;
   }, [data?.pages]);
   const originalGroups = useMemo(() => {
-    return (
-      data?.groups
+    return [
+      {
+        id: 'global-design-board',
+        pageIds: ['global-design-board'],
+        displayName: {
+          'zh-CN': '画板',
+          'en-US': 'Board',
+        },
+        isBuiltIn: false,
+        iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
+        sortIndex: 0,
+      },
+      ...(data?.groups
         ?.map((group) => ({
           ...group,
-          pageIds: group.isBuiltIn
-            ? ['global-design-board', ...group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId))]
-            : group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId)),
+          pageIds: group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId)),
         }))
-        ?.filter((group) => group.pageIds.length) ?? []
-    );
+        ?.filter((group) => group.pageIds.length) ?? []),
+    ];
+    // data?.groups
+    //   ?.map((group) => ({
+    //     ...group,
+    //     pageIds: group.isBuiltIn
+    //       ? ['global-design-board', ...group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId))]
+    //       : group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId)),
+    //   }))
+    //   ?.filter((group) => group.pageIds.length) ?? []
   }, [data?.groups, originalPages, data]);
 
   const { trigger: updateGroupPageSortTrigger } = useUpdateGroupPageSort(groupId);
