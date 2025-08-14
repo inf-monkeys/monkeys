@@ -79,6 +79,7 @@ export interface ServerConfig {
     max: number;
   };
   customization: {
+    id: string;
     title: string;
     logo: {
       light: string;
@@ -376,6 +377,7 @@ export const config: Config = {
       max: readConfig('server.rateLimit.max', 100),
     },
     customization: {
+      id: readConfig('server.customization.id', 'default'),
       title: readConfig('server.customization.title', '猴子无限'),
       logo: typeof logoConfig === 'string' ? { light: logoConfig, dark: logoConfig } : logoConfig,
       favicon: typeof faviconConfig === 'string' ? { light: faviconConfig, dark: faviconConfig } : faviconConfig,

@@ -62,6 +62,7 @@ export type ExtraLanguageURL = Record<'en' | 'zh', string>;
 
 export interface ISystemConfig {
   theme: {
+    id?: string;
     name: string;
     favicon: {
       dark: string;

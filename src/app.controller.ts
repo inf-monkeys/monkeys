@@ -114,6 +114,7 @@ export class AppController {
 
     const data: ISystemConfig = {
       theme: {
+        id: config.server.customization.id,
         title: config.server.customization.title,
         logo: config.server.customization.logo,
         favicon: config.server.customization.favicon,

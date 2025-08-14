@@ -3,6 +3,7 @@ export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
   theme: {
+    id: string;
     title: string;
     favicon: {
       light: string;
