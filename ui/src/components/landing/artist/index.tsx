@@ -12,7 +12,7 @@ export const ArtistLandingPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="main-container">
+    <div className="artist-main-container">
       <HeadBar />
 
       <div className="content-container">
