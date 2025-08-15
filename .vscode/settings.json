@@ -43,5 +43,8 @@
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": "active",
   // 禁用Prettier（如果已安装）
-  "prettier.enable": false
+  "prettier.enable": false,
+  "[scss]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  }
 }

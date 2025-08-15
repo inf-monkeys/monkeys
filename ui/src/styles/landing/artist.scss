@@ -1,0 +1,130 @@
+$head-bar-height: 100px;
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/fonts/CormorantGaramond-VariableFont_wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.main-container {
+  width: 100%;
+  height: 100%;
+  background: url('https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/bg.jpg') no-repeat center center;
+  background-size: cover;
+}
+
+.rect-group {
+  display: flex;
+  height: 483px;
+}
+
+.rect {
+  mix-blend-mode: overlay;
+  opacity: 0.8;
+  width: 45px;
+  height: 100%;
+  background: linear-gradient(90deg, #FFFFFF 1%, rgba(0, 0, 0, 0.35) 38%, #FFFFFF 100%);
+  background-blend-mode: overlay;
+  backdrop-filter: blur(45.5px);
+  box-shadow: inset 0px 0px 0px 0px rgba(0, 0, 0, 0.1);
+}
+
+.head-bar {
+  height: $head-bar-height;
+}
+
+.head-bar-line {
+  box-shadow: 0px 1.5px 0px 0px rgba(255, 255, 255, 0.5);
+}
+
+.content-container {
+  position: absolute;
+  top: $head-bar-height;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.content-bg {
+  height: 100%;
+}
+
+.content-content {
+  width: 100%;
+  height: calc(100% - $head-bar-height);
+  top: $head-bar-height;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.slogan {
+  font-family: 'Cormorant Garamond';
+  font-size: 144px;
+  font-style: normal;
+  color: #FFFFFF;
+  text-align: center;
+}
+
+
+@keyframes waveMove {
+  from {
+    background-position-x: 0;
+  }
+
+  to {
+    background-position-x: 100%;
+  }
+}
+
+.quick-action {
+  background-color: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(10px);
+  position: relative; // 添加相对定位
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 1);
+  }
+}
+
+.enter-button {
+  width: 200px;
+  height: 80px;
+  border-radius: 15px;
+  background: linear-gradient(rgba(40, 82, 173, 0.08)), rgba(139, 0, 0, 1);
+  color: #FFFFFF;
+  font-size: 26px;
+  font-weight: 600;
+  z-index: 10;
+  box-shadow: inset 4px 4px 4px 4px rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.group {
+
+  .rectangle,
+  .rectangle-1 {
+    position: absolute;
+    translate: -50% -100%;
+    width: 200px;
+    height: 80px;
+    mix-blend-mode: plus-darker;
+    border-radius: 15px;
+    z-index: 1;
+  }
+
+  .rectangle {
+    filter: blur(15px);
+    background: linear-gradient(150deg, rgba(191, 131, 114, 1) 0%, rgba(107, 86, 50, 0.74) 50%, rgba(183, 66, 48, 1) 100%);
+  }
+
+  .rectangle-1 {
+    filter: blur(5px);
+    background: linear-gradient(172deg, rgba(254, 188, 169, 1) 0%, rgba(235, 172, 114, 0.38) 95%);
+  }
+}

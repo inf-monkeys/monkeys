@@ -1,33 +1,21 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import { createLazyFileRoute } from '@tanstack/react-router';
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { useSystemConfig } from '@/apis/common';
-import { ArtistLandingPage } from '@/components/landing/artist';
-import { BSDLandingPage } from '@/components/landing/bsd';
-import { ConceptDesignLandingPage } from '@/components/landing/concept-design';
 import { DefaultLandingPage } from '@/components/landing/default';
-import { VinesLoading } from '@/components/ui/loading';
+import { isAuthed } from '@/components/router/guard/auth';
 
 const LandingPage: React.FC = () => {
-  const { data: oem, isLoading } = useSystemConfig();
+  const navigate = useNavigate();
 
-  const Page = useMemo(() => {
-    switch (oem?.theme.id) {
-      case 'concept-design':
-        return ConceptDesignLandingPage;
-      case 'artist':
-        return ArtistLandingPage;
-      case 'bsd':
-        return BSDLandingPage;
+  if (!isAuthed()) {
+    navigate({
+      to: '/home',
+    });
+    return null;
+  }
 
-      case 'default':
-      default:
-        return DefaultLandingPage;
-    }
-  }, [oem?.theme.id]);
-
-  return isLoading ? <VinesLoading /> : <Page />;
+  return <DefaultLandingPage />;
 };
 
 export const Route = createLazyFileRoute('/')({

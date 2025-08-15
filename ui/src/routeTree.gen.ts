@@ -20,6 +20,7 @@ import { Route as TeamIdEvaluationsDetailImport } from './pages/$teamId/evaluati
 
 const IndexLazyImport = createFileRoute('/')()
 const LoginIndexLazyImport = createFileRoute('/login/')()
+const HomeIndexLazyImport = createFileRoute('/home/')()
 const TeamIdIndexLazyImport = createFileRoute('/$teamId/')()
 const LoginOauthLazyImport = createFileRoute('/login/oauth')()
 const LoginCallbackLazyImport = createFileRoute('/login/callback')()
@@ -121,6 +122,11 @@ const LoginIndexLazyRoute = LoginIndexLazyImport.update({
   path: '/login/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./pages/login/index.lazy').then((d) => d.Route))
+
+const HomeIndexLazyRoute = HomeIndexLazyImport.update({
+  path: '/home/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./pages/home/index.lazy').then((d) => d.Route))
 
 const TeamIdIndexLazyRoute = TeamIdIndexLazyImport.update({
   path: '/$teamId/',
@@ -485,6 +491,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/home/': {
+      preLoaderRoute: typeof HomeIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/login/': {
       preLoaderRoute: typeof LoginIndexLazyImport
       parentRoute: typeof rootRoute
@@ -659,6 +669,7 @@ export const routeTree = rootRoute.addChildren([
   LoginCallbackLazyRoute,
   LoginOauthLazyRoute,
   TeamIdIndexLazyRoute,
+  HomeIndexLazyRoute,
   LoginIndexLazyRoute,
   TeamIdEvaluationsDetailRoute,
   TeamIdEvaluationsIndexRoute,
