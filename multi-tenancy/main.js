@@ -58,14 +58,42 @@ if (!servers.length) {
 const serverHostToPortMap = {};
 const startPort = 8000;
 const serverConfigYamls = servers.map((server, index) => {
-  const { appId, host, auth, paymentServer, ...rest } = server;
+  const { appId, host, hosts, auth, paymentServer, ...rest } = server;
   const port = startPort + index;
-  serverHostToPortMap[host] = port;
+  
+  // 处理hosts配置
+  const serverHosts = [];
+  if (host) {
+    // 兼容旧的单host配置
+    serverHosts.push(host);
+  }
+  if (Array.isArray(hosts)) {
+    // 支持新的多host配置
+    serverHosts.push(...hosts);
+  }
+  
+  // 验证host配置
+  if (serverHosts.length === 0) {
+    logger.error(`Server ${appId} has no host configuration`);
+    throw new Error(`Server ${appId} has no host configuration`);
+  }
+  
+  // 建立所有host到port的映射
+  serverHosts.forEach(h => {
+    if (serverHostToPortMap[h]) {
+      logger.error(`Duplicate host configuration found: ${h}`);
+      throw new Error(`Duplicate host configuration found: ${h}`);
+    }
+    serverHostToPortMap[h] = port;
+    logger.info(`Mapping host ${h} to port ${port}`);
+  });
+
   const serverConfig = {
     ...config,
     server: {
       appId,
       port,
+      hosts: serverHosts, // 保存所有host配置到server配置中
       ...rest,
     },
     servers: undefined,
@@ -240,22 +268,33 @@ const runPorxyServer = (port) => {
   const httpServer = http.createServer((req, res) => {
     const host = req.headers.host;
     const targetServerPort = serverHostToPortMap[host];
+    
     if (!targetServerPort) {
       logger.warn(`Domain not found in configuration: ${host}`);
+      logger.debug(`Available hosts: ${Object.keys(serverHostToPortMap).join(', ')}`);
       res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('Not found');
+      res.end('Domain not configured');
       return;
     }
 
     const serverUrl = `http://127.0.0.1:${targetServerPort}`;
+    logger.debug(`Proxying request from ${host} to ${serverUrl}`);
+    
     // 转发 http 请求
     proxy.web(req, res, { target: serverUrl }, (err, req, res) => {
-      logger.warn(err);
+      logger.error(`Proxy error for ${host} to ${serverUrl}:`, err);
       res.writeHead(500, { 'Content-Type': 'text/plain' });
-      res.end('');
+      res.end('Internal Server Error');
     });
   });
-  httpServer.listen(port);
+  
+  httpServer.listen(port, () => {
+    logger.info(`Proxy server listening on port ${port}`);
+    logger.info(`Configured host mappings:`);
+    Object.entries(serverHostToPortMap).forEach(([host, port]) => {
+      logger.info(`  ${host} -> :${port}`);
+    });
+  });
 };
 
 const main = async () => {
