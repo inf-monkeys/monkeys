@@ -27,18 +27,27 @@ export const LANGUAGE = {
   'zh-CN': '中文',
 };
 
-export const getI18nContent = (content: string | I18nValue | null | undefined): string | undefined => {
+export const getI18nContent = (
+  content: string | I18nValue | null | undefined,
+  fallback?: string,
+): string | undefined => {
   if (!content) return;
   const contentType = typeof content;
   if (contentType === 'string' || contentType === 'number') {
     try {
       const parseContent = JSON.parse(content.toString());
-      return parseContent[I18N_MAPPER[i18n.language] ?? 'en-US'] ?? parseContent['en-US'];
+      return (
+        parseContent[I18N_MAPPER[i18n.language]] ??
+        parseContent['zh-CN'] ??
+        parseContent['en-US'] ??
+        fallback ??
+        content.toString()
+      );
     } catch (e) {
       return content.toString();
     }
   }
-  return content[I18N_MAPPER[i18n.language] ?? 'en-US'] ?? content['en-US'];
+  return content[I18N_MAPPER[i18n.language]] ?? content['zh-CN'] ?? content['en-US'] ?? fallback;
 };
 
 export const I18nAllContent = (content: string | I18nValue | undefined): string | undefined => {
@@ -101,4 +110,17 @@ export const isJSONString = (str: any) => {
   } catch {
     return false;
   }
+};
+
+export const downloadJson = (data: any, fileName: string) => {
+  const jsonContent = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonContent], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };

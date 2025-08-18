@@ -7,6 +7,7 @@ import { updateComfyuiWorkflow } from '@/apis/comfyui';
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
+import { downloadJson, getI18nContent } from '@/utils';
 
 interface IComfyuiWofrkflowProps {
   data: IComfyuiWorkflow;
@@ -42,7 +43,19 @@ export const ComfyuiWorkflowDetail: React.FC<IComfyuiWofrkflowProps> = ({ data }
 
   return (
     <div>
-      <h1 className="text-xl font-bold">{t('ugc-page.comfyui-workflow.detail.tabs.workflow.json')}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">{t('ugc-page.comfyui-workflow.detail.tabs.workflow.json')}</h1>
+        <Button
+          variant="outline"
+          onClick={() => {
+            const displayName = getI18nContent(data.displayName);
+            const fileName = `${displayName} (${data.id}).json`;
+            downloadJson(workflow, fileName);
+          }}
+        >
+          {t('common.utils.download.label')}
+        </Button>
+      </div>
       <br></br>
       <CodeEditor
         data={JSON.stringify(workflow, null, 4)}
@@ -51,7 +64,19 @@ export const ComfyuiWorkflowDetail: React.FC<IComfyuiWofrkflowProps> = ({ data }
         onUpdate={setUpdatedWorkflowJson}
       />
       <br></br>
-      <h1 className="text-xl font-bold">{t('ugc-page.comfyui-workflow.detail.tabs.workflow.api-json')}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">{t('ugc-page.comfyui-workflow.detail.tabs.workflow.api-json')}</h1>
+        <Button
+          variant="outline"
+          onClick={() => {
+            const displayName = getI18nContent(data.displayName);
+            const fileName = `${displayName} (${data.id})-api.json`;
+            downloadJson(prompt, fileName);
+          }}
+        >
+          {t('common.utils.download.label')}
+        </Button>
+      </div>
       <br></br>
       <CodeEditor
         data={JSON.stringify(prompt, null, 4)}
