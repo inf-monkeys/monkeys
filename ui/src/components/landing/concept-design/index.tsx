@@ -4,10 +4,22 @@ import { useNavigate } from '@tanstack/react-router';
 
 import '@/styles/landing/concept-design.scss';
 
+import { isAuthed } from '@/components/router/guard/auth';
+
 import { QuickAction } from './quick-action';
 
 export const ConceptDesignLandingPage: React.FC = () => {
   const navigate = useNavigate();
+
+  const handleToWorkbench = () => {
+    isAuthed()
+      ? navigate({
+          to: '/',
+        })
+      : navigate({
+          to: '/login',
+        });
+  };
 
   return (
     <div className="concept-design-main-container flex flex-col px-[80px] py-[40px]">
@@ -67,11 +79,7 @@ export const ConceptDesignLandingPage: React.FC = () => {
             <QuickAction
               key={`${index}`}
               cardUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/concept-design/quick-actions/${item}/card.svg`}
-              onClick={() => {
-                navigate({
-                  to: '/',
-                });
-              }}
+              onClick={handleToWorkbench}
             />
           ))}
         </div>

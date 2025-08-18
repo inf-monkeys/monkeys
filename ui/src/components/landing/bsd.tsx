@@ -68,6 +68,16 @@ export const BSDLandingPage: React.FC = () => {
     setIsAuthenticated(!!isAuthed());
   }, []);
 
+  const handleToWorkbench = () => {
+    isAuthed()
+      ? navigate({
+          to: '/',
+        })
+      : navigate({
+          to: '/login',
+        });
+  };
+
   // 处理团队跳转逻辑（如已登录且有团队）
   useEffect(() => {
     if (isAuthenticated && teams?.length && user) {
@@ -107,26 +117,6 @@ export const BSDLandingPage: React.FC = () => {
   const handleNext = () => {
     setIsAutoPlaying(false);
     setCurrentIndex((prev) => (prev + 1) % carouselData.length);
-  };
-
-  // 处理进入工作台
-  const handleEnterWorkspace = () => {
-    if (!isAuthenticated) {
-      VinesEvent.emit('vines-nav', '/login');
-      return;
-    }
-
-    if (teams?.length) {
-      const finalTeamId = teamId ? teamId : teams[0].id;
-      localStorage.setItem('vines-team-id', finalTeamId);
-      window['vinesTeamId'] = finalTeamId;
-      void navigate({
-        to: '/$teamId/',
-        params: {
-          teamId: finalTeamId,
-        },
-      });
-    }
   };
 
   // 处理登录
@@ -222,7 +212,7 @@ export const BSDLandingPage: React.FC = () => {
               <>
                 <Button
                   size="large"
-                  onClick={handleEnterWorkspace}
+                  onClick={handleToWorkbench}
                   className="group relative h-[80px] w-[293px] overflow-hidden rounded-[15px] border-[1.5px] border-white/10 px-5 py-0 text-[24px] font-medium backdrop-blur-[30px] transition-all hover:scale-105 hover:border-white/20"
                   style={{
                     background: 'linear-gradient(0deg, rgba(40, 82,173, 0.08), rgba(40, 82, 173,0.08)), #171717',

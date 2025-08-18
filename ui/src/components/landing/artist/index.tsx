@@ -4,12 +4,24 @@ import { useNavigate } from '@tanstack/react-router';
 
 import '@/styles/landing/artist.scss';
 
+import { isAuthed } from '@/components/router/guard/auth';
+
 import { HeadBar } from './headbar';
 import { QuickAction } from './quick-action';
 import { Rect } from './rect';
 
 export const ArtistLandingPage: React.FC = () => {
   const navigate = useNavigate();
+
+  const handleToWorkbench = () => {
+    isAuthed()
+      ? navigate({
+          to: '/',
+        })
+      : navigate({
+          to: '/login',
+        });
+  };
 
   return (
     <div className="artist-main-container">
@@ -26,14 +38,7 @@ export const ArtistLandingPage: React.FC = () => {
         <div className="content-content fixed z-10 flex flex-col">
           <div className="center-content flex flex-1 flex-col items-center justify-center">
             <div className="slogan cursor-default">Imagine it. Create it.</div>
-            <div
-              className="enter-button"
-              onClick={() => {
-                navigate({
-                  to: '/',
-                });
-              }}
-            >
+            <div className="enter-button" onClick={handleToWorkbench}>
               进入工作台
             </div>
             <div className="group">
@@ -49,11 +54,7 @@ export const ArtistLandingPage: React.FC = () => {
                 iconUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/quick-actions/${item}/icon.svg`}
                 titleUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/quick-actions/${item}/title.svg`}
                 subtitleUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/quick-actions/${item}/subtitle.svg`}
-                onClick={() => {
-                  navigate({
-                    to: '/',
-                  });
-                }}
+                onClick={handleToWorkbench}
               />
             ))}
           </div>
