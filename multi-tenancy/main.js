@@ -128,10 +128,10 @@ async function runCommand(path, command, envVars = {}) {
     const env = {
       ...process.env,
       ...envVars,
-      TYPEORM_LOGGING: "all",
-      TYPEORM_LOGGER: "advanced-console",
-      DEBUG: "typeorm:*,typeorm-model-shim",
-      NODE_DEBUG: "typeorm,postgres"
+      // TYPEORM_LOGGING: "all",
+      // TYPEORM_LOGGER: "advanced-console",
+      // DEBUG: "typeorm:*,typeorm-model-shim",
+      // NODE_DEBUG: "typeorm,postgres"
     };
 
     logger.info(`Executing command: ${command} in path: ${path}`);
