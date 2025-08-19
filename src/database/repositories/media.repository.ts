@@ -17,8 +17,9 @@ export class MediaFileRepository {
     private readonly mediaFileAssetRepositroy: MediaFileAssetRepositroy,
   ) {}
 
-  private async refreshLogo(records: MediaFileEntity[]) {
+  private async preprocess(records: MediaFileEntity[]) {
     const promises = records.filter(Boolean).map(async (record) => {
+      // refresh logo
       if (record.iconUrl) {
         try {
           const s3Helpers = new S3Helpers();
@@ -29,6 +30,7 @@ export class MediaFileRepository {
           }
         } catch (e) {}
       }
+      record.url = encodeURI(record.url);
     });
     await Promise.all(promises);
   }
@@ -47,7 +49,7 @@ export class MediaFileRepository {
       undefined,
       excludeIds,
     );
-    await this.refreshLogo(list);
+    await this.preprocess(list);
     return {
       list,
       totalCount,
@@ -81,7 +83,7 @@ export class MediaFileRepository {
         id: id,
       },
     });
-    await this.refreshLogo([data]);
+    await this.preprocess([data]);
     return data;
   }
 
@@ -93,7 +95,7 @@ export class MediaFileRepository {
       id: In(ids),
       isDeleted: false,
     });
-    await this.refreshLogo(data);
+    await this.preprocess(data);
     return data;
   }
 
@@ -105,7 +107,7 @@ export class MediaFileRepository {
         isDeleted: false,
       },
     });
-    await this.refreshLogo([data]);
+    await this.preprocess([data]);
     return data;
   }
 
@@ -120,7 +122,7 @@ export class MediaFileRepository {
       teamId,
       creatorUserId: userId,
       displayName,
-      url,
+      url: encodeURI(url),
       source: source as any,
       params,
       size,
@@ -139,7 +141,7 @@ export class MediaFileRepository {
         teamId: teamId,
       },
     });
-    await this.refreshLogo([data]);
+    await this.preprocess([data]);
     return data;
   }
 }
