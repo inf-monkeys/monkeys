@@ -122,7 +122,7 @@ export class MediaFileRepository {
       teamId,
       creatorUserId: userId,
       displayName,
-      url: encodeURI(url),
+      url,
       source: source as any,
       params,
       size,
