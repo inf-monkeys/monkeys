@@ -49,6 +49,12 @@ export interface ISystemConfig {
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
     themeMode: 'shadow' | 'lborder';
+    miniMode: {
+      showPreviewViewExecutionResultGrid: boolean;
+    };
+    workflow: {
+      allowConcurrentRuns: boolean;
+    };
   };
   auth: {
     enabled: AuthMethod[];

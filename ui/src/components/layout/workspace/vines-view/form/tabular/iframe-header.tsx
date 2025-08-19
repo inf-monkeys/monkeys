@@ -1,8 +1,10 @@
 import React from 'react';
 
+import { get } from 'lodash';
 import { CircleEllipsisIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -25,6 +27,8 @@ interface IIframeHeaderProps {
 export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, setHistoryVisible }) => {
   const { t } = useTranslation();
 
+  const { data: oem } = useSystemConfig();
+
   const { workflow: data } = useVinesOriginWorkflow();
 
   const { teamId } = useVinesTeam();
@@ -35,7 +39,8 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
   const hidden = (routeHidden?.toString() ?? '')?.split(',');
 
   const moreBtnVisible = !hidden.includes('form-header-more-btn');
-  const historyBtnVisible = !hidden.includes('form-header-history-btn');
+  const historyBtnVisible =
+    !get(oem, 'theme.miniMode.showPreviewViewExecutionResultGrid', true) || hidden.includes('form-header-history-btn');
 
   const workflow = page?.[teamId]?.workflow ?? data;
 

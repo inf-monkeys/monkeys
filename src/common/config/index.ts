@@ -125,6 +125,12 @@ export interface ServerConfig {
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
     themeMode: 'shadow' | 'lborder';
+    miniMode: {
+      showPreviewViewExecutionResultGrid: boolean;
+    };
+    workflow: {
+      allowConcurrentRuns: boolean;
+    };
   };
 }
 
@@ -429,6 +435,12 @@ export const config: Config = {
       imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
       teamAsUser: readConfig('server.customization.teamAsUser', false),
       themeMode: readConfig('server.customization.themeMode', 'shadow'),
+      miniMode: {
+        showPreviewViewExecutionResultGrid: readConfig('server.customization.miniMode.showPreviewViewExecutionResultGrid', true),
+      },
+      workflow: {
+        allowConcurrentRuns: readConfig('server.customization.workflow.allowConcurrentRuns', true),
+      },
     },
   },
   conductor: {

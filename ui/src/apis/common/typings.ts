@@ -105,6 +105,12 @@ export interface ISystemConfig {
     uniImagePreview?: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
+    miniMode: {
+      showPreviewViewExecutionResultGrid: boolean;
+    };
+    workflow: {
+      allowConcurrentRuns: boolean;
+    };
   };
   auth: {
     enabled: AuthMethod[];

@@ -189,8 +189,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
             openAIInterfaceEnabled
               ? 'workspace.pre-view.disable.exec-button-tips'
               : isEditorOpen
-              ? 'workspace.pre-view.actuator.execution.mask-editor-open-tips'
-              : 'workspace.pre-view.actuator.execution.label',
+                ? 'workspace.pre-view.actuator.execution.mask-editor-open-tips'
+                : 'workspace.pre-view.actuator.execution.label',
           )}
         </Button>
       </div>

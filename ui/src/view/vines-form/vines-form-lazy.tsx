@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useEventEmitter, useInViewport } from 'ahooks';
+import { get } from 'lodash';
 import { ShieldBan } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { VinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { IframeHeader } from '@/components/layout/workspace/vines-view/form/tabular/iframe-header.tsx';
@@ -16,6 +18,10 @@ import { cn } from '@/utils';
 
 const VinesForm: React.FC = () => {
   const { t } = useTranslation();
+
+  const { data: oem } = useSystemConfig();
+
+  const showPreviewViewExecutionResultGrid = !get(oem, 'theme.miniMode.showPreviewViewExecutionResultGrid', true);
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
@@ -66,7 +72,7 @@ const VinesForm: React.FC = () => {
           )}
           isMiniFrame={isMiniFrame}
           onWorkflowStart={() => {
-            setHistoryVisible(true);
+            showPreviewViewExecutionResultGrid && setHistoryVisible(true);
           }}
           event$={event$}
           height={height}
