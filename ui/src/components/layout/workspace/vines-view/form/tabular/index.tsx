@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useDebounceFn, useEventEmitter, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isBoolean } from 'lodash';
+import { get, isBoolean } from 'lodash';
 import { Clipboard, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -15,6 +15,7 @@ import { useClipboard } from '@/hooks/use-clipboard';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useMaskEditorStore } from '@/store/maskEditorStore';
+import { useExecutionStore } from '@/store/useExecutionStore';
 import { cn } from '@/utils';
 
 interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -28,6 +29,9 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
   const { t } = useTranslation();
 
   const { data: oem } = useSystemConfig();
+
+  const allowConcurrentRuns = get(oem, 'theme.workflow.allowConcurrentRuns', true);
+  const { status: executionStatus, setStatus: setExecutionStatus } = useExecutionStore();
 
   const { vines } = useVinesFlow();
 
@@ -83,6 +87,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
         // 执行失败时的处理
       })
       .finally(() => {
+        setExecutionStatus('running');
         setLoading(false);
         setIsSubmitting(false);
       });
@@ -183,7 +188,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
           size="small"
           disabled={openAIInterfaceEnabled || isSubmitting || isEditorOpen}
           icon={<Sparkles className="fill-white" />}
-          loading={loading}
+          loading={loading || (!allowConcurrentRuns && executionStatus === 'running')}
         >
           {t(
             openAIInterfaceEnabled

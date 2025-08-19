@@ -17,6 +17,7 @@ import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 import { ImagesResult, useSetExecutionImages } from '@/store/useExecutionImageResultStore';
 import { useSetThumbImages } from '@/store/useExecutionImageTumbStore';
+import { useExecutionStore } from '@/store/useExecutionStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
 import { useViewStore } from '@/store/useViewStore';
@@ -49,6 +50,8 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
   const isShadowMode = themeMode === 'shadow';
   const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+
+  const { status, setStatus } = useExecutionStore();
 
   const showErrorFilter = oem?.theme?.workflowPreviewExecutionGrid?.showErrorFilter ?? true;
 
@@ -124,6 +127,8 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       finalRawData = [...newItems, ...Array.from(existingMap.values())];
       setUpdateExecutionResultList([...updateItems, ...newItems]);
     }
+
+    setStatus(finalRawData.find((item) => item.status === 'RUNNING') ? 'running' : 'idle');
 
     // 统一转换为渲染数据
     const renderList = newConvertExecutionResultToItemList(finalRawData);

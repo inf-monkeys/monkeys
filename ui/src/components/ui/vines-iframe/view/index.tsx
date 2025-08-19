@@ -14,6 +14,7 @@ import useUrlState from '@/hooks/use-url-state';
 import { AgentStoreProvider, createAgentStore } from '@/store/useAgentStore';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { createDesignBoardStore, DesignBoardProvider } from '@/store/useDesignBoardStore';
+import { createExecutionStore, ExecutionStoreProvider } from '@/store/useExecutionStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { createOutputSelectionStore, OutputSelectionStoreProvider } from '@/store/useOutputSelectionStore';
 import { useViewStore } from '@/store/useViewStore';
@@ -99,20 +100,22 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
           <CanvasStoreProvider createStore={createCanvasStore}>
             <VinesViewWrapper workflowId={workflowId}>
               {type === 'preview' ? (
-                <OutputSelectionStoreProvider createStore={createOutputSelectionStore}>
-                  {isUseWorkbench ? (
-                    <div className={cn('flex size-full', mode === 'mini' ? 'gap-2' : 'gap-global')}>
+                <ExecutionStoreProvider createStore={createExecutionStore}>
+                  <OutputSelectionStoreProvider createStore={createOutputSelectionStore}>
+                    {isUseWorkbench ? (
+                      <div className={cn('flex size-full', mode === 'mini' ? 'gap-2' : 'gap-global')}>
+                        <VinesViewFrame>
+                          <View />
+                        </VinesViewFrame>
+                        <WorkbenchOperationBar />
+                      </div>
+                    ) : (
                       <VinesViewFrame>
                         <View />
                       </VinesViewFrame>
-                      <WorkbenchOperationBar />
-                    </div>
-                  ) : (
-                    <VinesViewFrame>
-                      <View />
-                    </VinesViewFrame>
-                  )}
-                </OutputSelectionStoreProvider>
+                    )}
+                  </OutputSelectionStoreProvider>
+                </ExecutionStoreProvider>
               ) : (
                 <VinesViewFrame>
                   <View />
