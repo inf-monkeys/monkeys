@@ -95,7 +95,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
       }
 
       const data: VinesWorkflowExecutionOutputListItemForIframe[] = outputs
-        .filter((it) => it.status === 'COMPLETED')
+        // .filter((it) => it.status === 'COMPLETED')
         .slice(0, 4)
         .map(
           ({
