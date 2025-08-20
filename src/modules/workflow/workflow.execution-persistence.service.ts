@@ -49,13 +49,6 @@ export class WorkflowExecutionPersistenceService {
             workflowArtifact.url = item.data;
             workflowArtifact.type = item.type;
             workflowArtifact.instanceId = workflowInstanceId;
-
-            // 获取原始SQL
-            const queryBuilder = this.workflowArtifactRepository.createQueryBuilder().insert().into(WorkflowArtifactEntity).values(workflowArtifact);
-
-            const sql = queryBuilder.getQuery();
-            logger.info(`保存工作流制品的SQL: ${sql}`);
-
             await this.workflowArtifactRepository.save(workflowArtifact);
           } catch (error) {
             logger.error(`Error persisting workflow artifact for ${workflowInstanceId}:`, error);
