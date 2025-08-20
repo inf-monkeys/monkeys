@@ -209,8 +209,8 @@ const startServers = async () => {
       try {
         // 修改命令格式
         const migrationResult = await runCommand(
-          '/usr/src/server',
-          `npx typeorm-ts-node-commonjs migration:run -d ./ormconfig.js`, 
+          MONKEYS_DIST_FOLDER,
+          `yarn migration:run`, 
           {
             MONKEYS_CONFIG_FILE: configFile,
           }
