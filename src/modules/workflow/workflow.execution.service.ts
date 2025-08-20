@@ -942,7 +942,7 @@ export class WorkflowExecutionService {
       workflowId,
       teamId,
     });
-    this.eventEmitter.on(`workflow.completed.${workflowInstanceId}`, async (result: { workflowInstanceId: string; result: Workflow; timestamp: number }) => {
+    this.eventEmitter.on(`${config.server.appId}.workflow.completed.${workflowInstanceId}`, async (result: { workflowInstanceId: string; result: Workflow; timestamp: number }) => {
       const observabilityFactories = await this.workflowObservabilityService.getWorkflowObservabilityInstanceList(teamId, workflowId);
       if (observabilityFactories.length) {
         logger.info(`${workflowInstanceId} completed, start to notify observability factories`);
@@ -1022,7 +1022,7 @@ export class WorkflowExecutionService {
 
     // 修改：为所有完成状态（包括失败状态）触发事件
     if (status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT' || status === 'CANCELED' || status === 'PAUSED') {
-      this.eventEmitter.emit(`workflow.completed.${workflowInstanceId}`, {
+      this.eventEmitter.emit(`${config.server.appId}.workflow.completed.${workflowInstanceId}`, {
         workflowInstanceId,
         result: workflowExecutionDetails,
         timestamp: Date.now(),

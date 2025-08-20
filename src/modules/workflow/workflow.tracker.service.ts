@@ -1,5 +1,6 @@
 import { CacheManager } from '@/common/cache';
 import { CACHE_TOKEN } from '@/common/common.module';
+import { config } from '@/common/config';
 import { Workflow } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -125,7 +126,7 @@ export class WorkflowTrackerService {
   }
 
   private async sendNotification(workflowInstanceId: string, result: Workflow) {
-    this.eventEmitter.emit(`workflow.completed.${workflowInstanceId}`, {
+    this.eventEmitter.emit(`${config.server.appId}.workflow.completed.${workflowInstanceId}`, {
       workflowInstanceId,
       result,
       timestamp: Date.now(),

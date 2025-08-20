@@ -1,3 +1,4 @@
+import { config } from '@/common/config';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { logger } from '@/common/logger';
 import { flattenObjectToSearchableText } from '@/common/utils';
@@ -21,10 +22,10 @@ export class WorkflowExecutionPersistenceService {
     private readonly workflowArtifactRepository: Repository<WorkflowArtifactEntity>,
   ) {}
 
-  @OnEvent('workflow.completed.*')
+  @OnEvent(`${config.server.appId}.workflow.completed.*`)
   async handleWorkflowCompletion(payload: { workflowInstanceId: string; result: Workflow; timestamp: number }): Promise<void> {
     const { workflowInstanceId, result: conductorWorkflowExecution } = payload;
-    logger.info(`[EVENT] workflow.completed.* received for ${workflowInstanceId}, output: ${JSON.stringify(conductorWorkflowExecution?.output)}`);
+    logger.info(`[EVENT] ${config.server.appId}.workflow.completed.* received for ${workflowInstanceId}, output: ${JSON.stringify(conductorWorkflowExecution?.output)}`);
 
     try {
       const detailedExecution = conductorWorkflowExecution;
