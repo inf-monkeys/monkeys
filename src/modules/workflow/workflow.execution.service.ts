@@ -279,7 +279,7 @@ export class WorkflowExecutionService {
     }
 
     for (const executionItem of allResults) {
-      this.conductorService.convertConductorTasksToVinesTasks(teamId, (executionItem.tasks || []) as Task[], executionItem.workflowDefinition);
+      this.conductorService.convertConductorTasksToVinesTasks((executionItem.tasks || []) as Task[], executionItem.workflowDefinition);
     }
 
     const executionsWithMetadata = await this.populateMetadataByForExecutions(allResults);
@@ -335,13 +335,13 @@ export class WorkflowExecutionService {
   }
 
   public async getWorkflowExecutionDetail(teamId: string, workflowInstanceId: string) {
-    const data = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
+    const data = await this.conductorService.getWorkflowExecutionStatus(workflowInstanceId);
     const populatedDataArray = await this.populateMetadataByForExecutions([data]);
     return populatedDataArray[0] || data;
   }
 
   public async getWorkflowExecutionSimpleDetail(teamId: string, workflowInstanceId: string): Promise<WorkflowExecutionOutput> {
-    const conductorWorkflow = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
+    const conductorWorkflow = await this.conductorService.getWorkflowExecutionStatus(workflowInstanceId);
     const populatedResults = await this.populateMetadataByForExecutions([conductorWorkflow]);
     const executionData: WorkflowWithMetadata = populatedResults[0];
 
@@ -451,7 +451,7 @@ export class WorkflowExecutionService {
       workflowId: executionData.workflowName,
       instanceId: executionData.workflowId,
       userId: startByUserId,
-      teamId: ctx?.teamId || teamId,
+      teamId: ctx?.teamId,
       extraMetadata,
     } as WorkflowExecutionOutput;
   }
@@ -844,7 +844,6 @@ export class WorkflowExecutionService {
   }
 
   public async deleteWorkflowExecution(teamId: string, workflowInstanceId: string) {
-    await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
     return await this.conductorService.deleteWorkflowExecution(workflowInstanceId);
   }
 

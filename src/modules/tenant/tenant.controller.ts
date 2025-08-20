@@ -5,6 +5,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TemporaryWorkflowService } from '../temporary-workflow/temporary-workflow.service';
 import { CreateTemporaryWorkflowByInstanceDto, CreateTemporaryWorkflowDto } from '../workflow/dto/req/create-temporary-workflow.dto';
 import { SearchWorkflowExecutionsDto } from '../workflow/dto/req/search-workflow-execution.dto';
+import { WorkflowArtifactService } from '../workflow/workflow.artifact.service';
 import { TenantService } from './tenant.service';
 
 @Controller('tenant')
@@ -14,6 +15,7 @@ export class TenantController {
   constructor(
     private readonly tenantService: TenantService,
     private readonly temporaryWorkflowService: TemporaryWorkflowService,
+    private readonly artifactService: WorkflowArtifactService,
   ) {}
 
   @Get()
@@ -157,5 +159,15 @@ export class TenantController {
     return new SuccessResponse({
       data: result,
     });
+  }
+
+  @Post('/workflow/artifact/getInstanceByUrl')
+  @ApiOperation({
+    summary: '根据产物 url 获取工作流实例',
+    description: '根据产物 url 获取工作流实例',
+  })
+  async getWorkflowInstanceByArtfactUrl(@Body() body: { url: string }) {
+    const data = await this.artifactService.getWorkflowInstanceByArtfactUrl(body.url, 'system');
+    return new SuccessResponse({ data });
   }
 }

@@ -42,7 +42,7 @@ export class ConductorService {
 
   constructor(private readonly toolsRepository: ToolsRepository) {}
 
-  public convertConductorTasksToVinesTasks(teamId: string, tasks: Task[], workflowDefinition: WorkflowDefinition) {
+  public convertConductorTasksToVinesTasks(tasks: Task[], workflowDefinition: WorkflowDefinition) {
     // const team = await this.teamService.getTeamById(teamId);
 
     const flattedTasks = flatTasks(tasks);
@@ -273,9 +273,9 @@ export class ConductorService {
     }
   }
 
-  public async getWorkflowExecutionStatus(teamId: string, workflowInstanceId: string) {
+  public async getWorkflowExecutionStatus(workflowInstanceId: string) {
     const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId, true, true);
-    this.convertConductorTasksToVinesTasks(teamId, (data.tasks || []) as Task[], data.workflowDefinition);
+    this.convertConductorTasksToVinesTasks((data.tasks || []) as Task[], data.workflowDefinition);
     return data;
   }
 
