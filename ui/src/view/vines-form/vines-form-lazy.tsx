@@ -21,7 +21,7 @@ const VinesForm: React.FC = () => {
 
   const { data: oem } = useSystemConfig();
 
-  const showPreviewViewExecutionResultGrid = !get(oem, 'theme.miniMode.showPreviewViewExecutionResultGrid', true);
+  const showPreviewViewExecutionResultGrid = get(oem, 'theme.miniMode.showPreviewViewExecutionResultGrid', true);
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);

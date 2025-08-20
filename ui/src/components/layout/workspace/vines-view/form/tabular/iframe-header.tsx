@@ -40,7 +40,7 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
 
   const moreBtnVisible = !hidden.includes('form-header-more-btn');
   const historyBtnVisible =
-    !get(oem, 'theme.miniMode.showPreviewViewExecutionResultGrid', true) || hidden.includes('form-header-history-btn');
+    get(oem, 'theme.miniMode.showPreviewViewExecutionResultGrid', true) || hidden.includes('form-header-history-btn');
 
   const workflow = page?.[teamId]?.workflow ?? data;
 
