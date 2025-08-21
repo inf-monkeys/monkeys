@@ -54,7 +54,8 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
     oem &&
     (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-invite'));
 
-  const theme = oem?.theme.headbar?.theme || 'card';
+  const theme = get(oem, 'theme.headbar.theme', 'card');
+  const navPosition = get(oem, 'theme.headbar.navPosition', 'left');
 
   // 根据主题模式应用不同圆角样式
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
@@ -70,28 +71,30 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
       <header
         ref={ref}
         className={cn(
-          'flex w-full items-center justify-between bg-slate-1 p-global',
+          'flex w-full items-center justify-between gap-4 bg-slate-1 p-global',
           theme === 'fixed' &&
             'shadow-b-lg fixed left-0 top-0 border-b-[1px] border-t-[3px] border-t-[rgb(var(--vines-500))]',
           theme === 'card' && `${roundedClass} border border-input`,
         )}
       >
+        <Link
+          to="/$teamId"
+          params={{ teamId }}
+          disabled={!hasToken}
+          onClick={() => Object.keys(mode).length && setMode({ mode: 'normal' })}
+        >
+          <VinesLogo description="" height={'2rem'} className={cn('ml-2', hasToken && 'cursor-pointer')} />
+        </Link>
+        {navPosition === 'right' && <div className="flex-1" />}
         <div className="z-20 flex h-8 items-center gap-6">
-          <Link
-            to="/$teamId"
-            params={{ teamId }}
-            disabled={!hasToken}
-            onClick={() => Object.keys(mode).length && setMode({ mode: 'normal' })}
-          >
-            <VinesLogo description="" height={'2rem'} className={cn('ml-2', hasToken && 'cursor-pointer')} />
-          </Link>
           {children && (
             <>
               {!disableSeparator && <Separator orientation="vertical" className="h-1/2" />}
-              {children}
+              <div className={cn(navPosition === 'center' && 'flex-1')}>{children}</div>
             </>
           )}
         </div>
+        {navPosition === 'left' && <div className="flex-1" />}
         <div className="z-20 flex items-center gap-global">
           {showTeamQuota && <QuotaButton />}
           {showHeaderInvite && <HeaderInvite />}

@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 
-import { Layers2, Package, PackagePlus } from 'lucide-react';
+import { get, unionBy } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
-import { VinesSpaceHeadbarModule } from '@/apis/common/typings';
+import { CustomizationHeadbarTheme, VinesSpaceHeadbarModules } from '@/apis/common/typings';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import { getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 export const SpaceHeaderTabs: React.FC = () => {
@@ -15,6 +17,10 @@ export const SpaceHeaderTabs: React.FC = () => {
   const { teamId } = useVinesTeam();
 
   const { data: oem } = useSystemConfig();
+
+  const oemVinesSpaceHeadbarModules: VinesSpaceHeadbarModules = get(oem, 'theme.modules.vinesSpaceHeadbar', []);
+
+  const headbarTheme: CustomizationHeadbarTheme = get(oem, 'theme.headbar.theme', 'card');
 
   const { isUseWorkbench, isUseAppStore, isUsePanel } = useVinesRoute();
 
@@ -30,32 +36,35 @@ export const SpaceHeaderTabs: React.FC = () => {
     }
   }, [isUseWorkbench, isUseAppStore, isUsePanel]);
 
-  const TAB_LIST = [
+  const TAB_LIST: VinesSpaceHeadbarModules = [
     {
-      value: 'workbench',
-      icon: Layers2,
+      id: 'workbench',
+      icon: 'layers',
+      visible: true,
+      disabled: false,
     },
     {
-      value: 'app-store',
-      icon: Package,
+      id: 'app-store',
+      icon: 'package',
+      visible: true,
+      disabled: false,
     },
     {
-      value: 'workspace',
-      icon: PackagePlus,
+      id: 'workspace',
+      icon: 'package-plus',
+      visible: true,
+      disabled: false,
     },
   ];
 
-  const tabsList = TAB_LIST.filter((item) => {
-    if (oem?.theme?.modules?.vinesSpaceHeadbar === '*' || !oem?.theme?.modules?.vinesSpaceHeadbar) {
-      return true;
-    }
-    return oem?.theme?.modules?.vinesSpaceHeadbar?.includes(item.value as VinesSpaceHeadbarModule);
-  });
+  const tabsList: VinesSpaceHeadbarModules = unionBy(oemVinesSpaceHeadbarModules, TAB_LIST, 'id');
 
   return (
     <Tabs
+      variant={headbarTheme === 'fixed' ? 'ghost' : 'default'}
       value={value}
       onValueChange={(val) => {
+        if (tabsList.find((item) => item.id === val)?.disabled) return;
         switch (val) {
           case 'workbench':
             VinesEvent.emit('vines-nav', '/$teamId/', { teamId });
@@ -69,13 +78,15 @@ export const SpaceHeaderTabs: React.FC = () => {
         }
       }}
     >
-      <TabsList className="!h-9">
-        {tabsList.map((item) => (
-          <TabsTrigger key={item.value} className="gap-1 py-1" value={item.value}>
-            <item.icon size={14} />
-            {t(`components.layout.header.tabs.${item.value}`)}
-          </TabsTrigger>
-        ))}
+      <TabsList className="!h-9" gap="10px">
+        {tabsList
+          .filter((item) => item.visible)
+          .map((item) => (
+            <TabsTrigger key={item.id} className="gap-1 py-1" value={item.id}>
+              {item.icon && <VinesLucideIcon src={item.icon} size={14} className="size-[14px]" />}
+              {getI18nContent(item.displayName, t(`components.layout.header.tabs.${item.id}`))}
+            </TabsTrigger>
+          ))}
       </TabsList>
     </Tabs>
   );

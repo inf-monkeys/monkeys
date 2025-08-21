@@ -31,7 +31,7 @@ export const getI18nContent = (
   content: string | I18nValue | null | undefined,
   fallback?: string,
 ): string | undefined => {
-  if (!content) return;
+  if (!content) return fallback;
   const contentType = typeof content;
   if (contentType === 'string' || contentType === 'number') {
     try {

@@ -1,3 +1,4 @@
+import { I18nValue } from '@inf-monkeys/monkeys';
 import { ClusterNode, RedisOptions, SentinelAddress } from 'ioredis';
 import { ClientAuthMethod } from 'openid-client';
 import { DataSourceOptions } from 'typeorm';
@@ -36,8 +37,15 @@ export type VinesSpaceSidebarModule =
   | 'table-data';
 export type VinesSpaceSidebarModules = '*' | VinesSpaceSidebarModule[];
 
-export type VinesSpaceHeadbarModule = 'workbench' | 'app-store' | 'workspace';
-export type VinesSpaceHeadbarModules = '*' | VinesSpaceHeadbarModule[];
+export type VinesSpaceHeadBarIdType = 'workbench' | 'app-store' | 'workspace';
+export type VinesSpaceHeadbarModule = {
+  id: VinesSpaceHeadBarIdType | string;
+  displayName?: string | I18nValue;
+  visible?: boolean;
+  disabled?: boolean;
+  icon?: string;
+};
+export type VinesSpaceHeadbarModules = VinesSpaceHeadbarModule[];
 
 export type SettingsSidebarModule = 'account' | 'config' | 'stat' | 'apikey';
 export type SettingsSidebarModules = '*' | SettingsSidebarModule[];
@@ -51,8 +59,10 @@ export type CustomizationModules = {
 export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile';
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
+export type CustomizationHeadbarTheme = 'fixed' | 'card';
 export type CustomizationHeadbar = {
-  theme?: 'fixed' | 'card';
+  theme?: CustomizationHeadbarTheme;
+  navPosition?: 'left' | 'center' | 'right';
   actions?: VinesSpaceHeadbar[] | '*';
   profile?: VinesSpaceHeadbarProfile[] | '*';
 };
