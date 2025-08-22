@@ -20,10 +20,10 @@ export class DesignAssociationCrudService implements IAssetHandler {
 
   async processSnapshot(snapshot: DesignAssociationEntity, teamId: string): Promise<DesignAssociationEntity> {
     const clonedSnapshot = _.cloneDeep(snapshot);
-    const association = await this.designAssociationService.findById(clonedSnapshot.id);
-    if (!association) {
-      throw new NotFoundException('关联不存在');
-    }
+    // const association = await this.designAssociationService.findById(clonedSnapshot.id);
+    // if (!association) {
+    //   throw new NotFoundException('关联不存在');
+    // }
 
     if (clonedSnapshot.targetWorkflowId) {
       // 1. 通过 app id 找到所有版本
