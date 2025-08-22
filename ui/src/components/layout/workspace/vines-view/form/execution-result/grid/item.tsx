@@ -3,9 +3,11 @@ import React from 'react';
 import { SWRInfiniteResponse } from 'swr/infinite';
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import { get } from 'lodash';
 import { Check, CirclePause, FileMinus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid/index.tsx';
 import { Button } from '@/components/ui/button';
@@ -15,6 +17,7 @@ import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 import { VirtuaExecutionResultGridImageItem } from '../virtua/item/image';
 import { VirtuaExecutionResultGridWrapper } from '../virtua/item/wrapper';
+import { ExecutionResultItemLoading } from './loading';
 
 interface IExecutionResultItemProps {
   result: IVinesExecutionResultItem;
@@ -28,6 +31,7 @@ interface IExecutionResultItemProps {
   clickBehavior?: IClickBehavior;
   selectionModeDisplayType?: ISelectionModeDisplayType;
   workflowId?: string;
+  estimatedTime?: number;
 }
 
 export type IClickBehavior = 'preview' | 'select' | 'fill-form' | 'none';
@@ -45,11 +49,16 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   clickBehavior = 'preview',
   selectionModeDisplayType = 'dropdown-menu',
   workflowId,
+  estimatedTime = 180,
 }) => {
-  const { render } = result;
+  const { render, startTime } = result;
   const { type, data, status } = render;
   const { t } = useTranslation();
   const alt = getAlt(result);
+
+  const { data: oem } = useSystemConfig();
+
+  const progressType = get(oem, 'theme.views.form.progress', 'infinite');
 
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,9 +90,13 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
       return (
         <div
           key={render.key}
-          className="relative flex h-40 items-center justify-center rounded-lg border border-input shadow-sm"
+          className="relative flex h-40 flex-col items-center justify-center gap-4 rounded-lg border border-input p-4 shadow-sm"
         >
-          <VinesLoading />
+          {progressType === 'estimate' ? (
+            <ExecutionResultItemLoading startTime={startTime} estimatedTime={estimatedTime} status={status} />
+          ) : (
+            <VinesLoading />
+          )}
         </div>
       );
     case 'PAUSED':

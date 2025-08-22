@@ -98,6 +98,7 @@ export interface ISystemConfig {
           afterCreate: boolean;
           afterDelete: boolean;
         };
+        progress: 'estimate' | 'infinite';
       };
     };
     extraLanguageURL?: ExtraLanguageURL;

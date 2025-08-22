@@ -116,6 +116,7 @@ export interface ServerConfig {
           afterCreate: boolean;
           afterDelete: boolean;
         };
+        progress: 'estimate' | 'infinite';
       };
     };
     extraLanguageURL?: ExtraLanguageURL;
@@ -414,6 +415,7 @@ export const config: Config = {
             afterCreate: readConfig('server.customization.views.form.toast.afterCreate', true),
             afterDelete: readConfig('server.customization.views.form.toast.afterDelete', true),
           },
+          progress: readConfig('server.customization.views.form.toast.progress', 'infinite'),
         },
       },
       extraLanguageURL: readConfig('server.customization.extraLanguageURL', {}),

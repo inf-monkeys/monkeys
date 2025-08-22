@@ -7,7 +7,7 @@ import { fileTypeFromBlob, MimeType } from 'file-type';
 import { getFileNameByOssUrl } from '@/components/ui/vines-uploader/utils.ts';
 
 interface IImageOptimizeProps extends Omit<Options, 'useWebWorker'> {
-  src: string | File;
+  src?: string | File;
 
   retry?: number;
   onFetchImageFailed?: (end: boolean) => void;
@@ -58,13 +58,13 @@ export const useImageOptimize = ({
       return newFile;
     } catch (error) {
       if (fetchImageCount.current < retry) {
-        onFetchImageFailed?.(false);
+        src && onFetchImageFailed?.(false);
         fetchImageCount.current += 1;
         return new Promise((resolve) => {
           setTimeout(() => resolve(fetchImage(url)), 2 ** fetchImageCount.current * 1000);
         });
       } else {
-        onFetchImageFailed?.(true);
+        src && onFetchImageFailed?.(true);
       }
     }
     return null;

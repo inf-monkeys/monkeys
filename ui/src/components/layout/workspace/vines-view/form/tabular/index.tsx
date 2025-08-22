@@ -71,8 +71,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
 
     vines
       .start({ inputData, onlyStart: true })
-      .then((status) => {
-        if (status) {
+      .then((instanceId) => {
+        if (instanceId) {
           if (
             !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
             oem?.theme?.views?.form?.toast?.afterCreate != false

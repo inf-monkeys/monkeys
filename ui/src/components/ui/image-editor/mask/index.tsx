@@ -4,7 +4,6 @@ import { useEventEmitter, useLatest } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import { toast } from 'sonner';
 
 import { IMaskEditorEvent, IMaskEditorProps, MaskEditor } from '@/components/ui/image-editor/mask/editor';
 import { BrushBar } from '@/components/ui/image-editor/mask/editor/brush-bar.tsx';
@@ -48,10 +47,10 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
       src,
       onProgress: setProgress,
       onFetchImageFailed: () => {
-        toast.error(t('components.ui.vines-image-mask-editor.init.failed-to-fetch'));
+        // toast.error(t('components.ui.vines-image-mask-editor.init.failed-to-fetch'));
       },
       onOptimizeFailed: () => {
-        toast.error(t('components.ui.vines-image-mask-editor.init.failed-to-optimize'));
+        // toast.error(t('components.ui.vines-image-mask-editor.init.failed-to-optimize'));
       },
       onFinished: () => {
         setPreviewImage(null);
