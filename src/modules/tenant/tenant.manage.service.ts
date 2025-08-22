@@ -20,6 +20,9 @@ const assetEntities = [ApiKeyEntity, WorkflowMetadataEntity, WorkflowObservabili
 export class TenantManageService {
   private readonly logger = new Logger(TenantManageService.name);
 
+  // 添加进度订阅管理
+  private progressSubscribers = new Map<string, (progress: any) => void>();
+
   constructor(
     private readonly teamRepository: TeamRepository,
     private readonly teamsService: TeamsService,
@@ -109,5 +112,94 @@ export class TenantManageService {
       await this.teamsService.initTeam(team.id, team.ownerUserId, deleteAllAssets);
     }
     this.logger.log('All teams initialized');
+  }
+
+  async initAllTeamsWithProgress(deleteAllAssets = false, onProgress?: (progress: any) => void) {
+    this.logger.log('Starting to init all teams with progress tracking');
+
+    const teams = await this.teamRepository.getAllTeams();
+    const total = teams.length;
+
+    this.logger.log(`Found ${total} teams to init`);
+
+    let current = 0;
+
+    for (const team of teams) {
+      current++;
+      this.logger.debug(`Init team ${team.id} (${current}/${total})`);
+
+      // 发送进度更新
+      if (onProgress) {
+        onProgress({
+          status: 'processing',
+          message: `正在初始化团队: ${team.name || team.id}`,
+          progress: Math.round((current / total) * 100),
+          total,
+          current,
+          currentTeam: {
+            id: team.id,
+            name: team.name,
+          },
+        });
+      }
+
+      try {
+        await this.teamsService.initTeam(team.id, team.ownerUserId, deleteAllAssets);
+
+        // 发送成功状态
+        if (onProgress) {
+          onProgress({
+            status: 'processing',
+            message: `团队 ${team.name || team.id} 初始化成功`,
+            progress: Math.round((current / total) * 100),
+            total,
+            current,
+            currentTeam: {
+              id: team.id,
+              name: team.name,
+              status: 'success',
+            },
+          });
+        }
+      } catch (error) {
+        this.logger.error(`Failed to init team ${team.id}:`, error);
+
+        // 发送错误状态
+        if (onProgress) {
+          onProgress({
+            status: 'processing',
+            message: `团队 ${team.name || team.id} 初始化失败: ${error.message}`,
+            progress: Math.round((current / total) * 100),
+            total,
+            current,
+            currentTeam: {
+              id: team.id,
+              name: team.name,
+              status: 'error',
+              error: error.message,
+            },
+          });
+        }
+      }
+    }
+
+    this.logger.log('All teams initialized');
+  }
+
+  // 进度订阅管理方法
+  subscribeToProgress(taskId: string, callback: (progress: any) => void) {
+    this.progressSubscribers.set(taskId, callback);
+
+    return () => {
+      this.progressSubscribers.delete(taskId);
+    };
+  }
+
+  // 发布进度更新
+  private publishProgress(taskId: string, progress: any) {
+    const callback = this.progressSubscribers.get(taskId);
+    if (callback) {
+      callback(progress);
+    }
   }
 }

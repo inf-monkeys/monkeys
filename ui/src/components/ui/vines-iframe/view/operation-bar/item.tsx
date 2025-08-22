@@ -115,15 +115,9 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
             const tid = `insert-images-${Date.now()}`;
             setTemp(tid, selectedOutputItems);
 
-            const targetPageGroup = workspaceData?.groups.find((item) => item.isBuiltIn);
-
-            // console.log(targetPageGroup);
-
-            if (targetPageGroup) {
-              startTransition(() => {
-                setCurrentPage({ [teamId]: { ...GLOBAL_DESIGN_BOARD_PAGE, groupId: targetPageGroup.id } });
-              });
-            }
+            startTransition(() => {
+              setCurrentPage({ [teamId]: { ...GLOBAL_DESIGN_BOARD_PAGE, groupId: 'global-design-board' } });
+            });
             navigate({
               to: '/$teamId',
               params: {
