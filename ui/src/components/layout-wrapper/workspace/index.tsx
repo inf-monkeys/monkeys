@@ -34,7 +34,7 @@ export const WorkspaceLayout: React.FC = () => {
 
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  
+
   // 针对LF客户的主题定制
   const isLFTheme = themeMode === 'shadow';
   const backgroundClass = isLFTheme ? 'bg-[#f3f4f6]' : 'bg-neocard';
@@ -44,7 +44,7 @@ export const WorkspaceLayout: React.FC = () => {
     (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-selector'));
 
   return (
-    <ViewGuard className={cn("flex flex-col gap-global", backgroundClass)}>
+    <ViewGuard className={cn('flex flex-col gap-global', backgroundClass)}>
       {isImageDetailPage ? (
         // 图片详情页使用与工作台、应用市场相同的header
         <SpaceHeader tail={showTeamSelector ? <TeamSelector /> : undefined} disableSeparator>

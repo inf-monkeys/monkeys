@@ -415,7 +415,7 @@ export const config: Config = {
             afterCreate: readConfig('server.customization.views.form.toast.afterCreate', true),
             afterDelete: readConfig('server.customization.views.form.toast.afterDelete', true),
           },
-          progress: readConfig('server.customization.views.form.toast.progress', 'infinite'),
+          progress: readConfig('server.customization.views.form.progress', 'infinite'),
         },
       },
       extraLanguageURL: readConfig('server.customization.extraLanguageURL', {}),
@@ -430,6 +430,7 @@ export const config: Config = {
         settingsSidebar: readConfig('server.customization.modules.settingsSidebar', '*'),
       },
       headbar: {
+        navPosition: readConfig('server.customization.headbar.navPosition', 'left'),
         theme: readConfig('server.customization.headbar.theme', 'card'),
         actions: readConfig('server.customization.headbar.actions', '*'),
         profile: readConfig('server.customization.headbar.profile', '*'),
