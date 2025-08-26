@@ -75,8 +75,22 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
   useEffect(() => {
     if (!editor) return;
+    
+    // 确保 colorScheme 值符合 tldraw 的预期格式
+    let colorScheme: 'light' | 'dark' | 'system';
+    if (themeMode === 'auto') {
+      colorScheme = 'system';
+    } else if (themeMode === 'dark') {
+      colorScheme = 'dark';
+    } else if (themeMode === 'light') {
+      colorScheme = 'light';
+    } else {
+      // 如果 themeMode 不是预期值，默认使用 system
+      colorScheme = 'system';
+    }
+    
     editor.user.updateUserPreferences({
-      colorScheme: themeMode === 'auto' ? 'system' : (themeMode as 'dark' | 'light'),
+      colorScheme,
     });
   }, [editor, themeMode]);
 
