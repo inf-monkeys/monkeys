@@ -79,6 +79,7 @@
     "reflect-metadata": "^0.1.13",
     "retry-as-promised": "^7.0.4",
     "rxjs": "^7.8.1",
+    "sharp": "^0.34.3",
     "shortid": "^2.2.16",
     "simple-statistics": "^7.8.8",
     "totp-generator": "^1.0.0",

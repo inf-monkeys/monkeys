@@ -276,6 +276,8 @@ export interface AdminConfig {
 
 export interface S3Config {
   proxy: boolean;
+  randomFilename: boolean;
+  autoGenerateThumbnail: boolean;
   isPrivate: boolean;
   forcePathStyle: boolean;
   endpoint: string;
@@ -550,6 +552,8 @@ export const config: Config = {
   admin: readConfig('admin'),
   s3: {
     proxy: readConfig('s3.proxy', true),
+    randomFilename: readConfig('s3.randomFilename', false),
+    autoGenerateThumbnail: readConfig('s3.autoGenerateThumbnail', false),
     isPrivate: readConfig('s3.isPrivate', false),
     forcePathStyle: readConfig('s3.forcePathStyle', false),
     endpoint: readConfig('s3.endpoint'),

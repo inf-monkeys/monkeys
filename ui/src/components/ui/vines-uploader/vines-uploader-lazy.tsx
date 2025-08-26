@@ -6,6 +6,7 @@ import { useClickAway, useCreation, useDrop, useLatest, useMemoizedFn } from 'ah
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty } from 'lodash';
 import { FileUp, Plus } from 'lucide-react';
+import { nanoid } from 'nanoid';
 import Dropzone from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 
@@ -60,16 +61,21 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
 
   const filesMapper = useUppyState(uppy, (state) => state.files);
 
-  const handleConvertFile = useMemoizedFn((file: File) => ({
-    source: 'VinesUploader',
-    name: file.name,
-    type: file.type,
-    data: file,
-    meta: {
-      ...((file as any).meta || {}),
-      relativePath: (file as any).relativePath || null,
-    } as any,
-  }));
+  const handleConvertFile = useMemoizedFn((file: File) => {
+    const suffix = file.name.split('.').pop()?.toLowerCase();
+    const id = nanoid();
+    const newName = `${id}.${suffix}`;
+    return {
+      source: 'VinesUploader',
+      name: newName,
+      type: file.type,
+      data: file,
+      meta: {
+        ...((file as any).meta || {}),
+        relativePath: (file as any).relativePath || null,
+      } as any,
+    };
+  });
 
   const { onDropRejected, validator, onDrag, onPaste } = useVinesDropzone({
     ...props,

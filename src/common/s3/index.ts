@@ -1,4 +1,4 @@
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Readable } from 'stream';
 import { config } from '../config';
@@ -26,6 +26,14 @@ export class S3Helpers {
       return;
     }
     throw new Error('未配置 s3 存储，请联系管理员');
+  }
+
+  public async getFileList(prefix: string) {
+    const command = new ListObjectsV2Command({
+      Bucket: config.s3.bucket,
+      Prefix: prefix,
+    });
+    return await this.client.send(command);
   }
 
   public async getFile(fileKey: string) {

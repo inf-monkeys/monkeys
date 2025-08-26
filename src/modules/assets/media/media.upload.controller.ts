@@ -2,8 +2,10 @@ import { config } from '@/common/config';
 import { SuccessResponse } from '@/common/response';
 import { S3Helpers } from '@/common/s3';
 import { getMimeType } from '@/common/utils/file';
+import { generateThumbnail } from '@/common/utils/image';
 import { Body, Controller, Get, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { nanoid } from 'ai';
 import { Response } from 'express';
 import { Readable } from 'stream';
 
@@ -77,6 +79,25 @@ export class MediaUploadController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFileStream(@UploadedFile() file: any, @Body('key') key: string) {
     const s3Helpers = new S3Helpers();
+    let thumbKey: string | undefined = undefined;
+    const suffix = key.split('.').pop()?.toLowerCase();
+    if (config.s3.randomFilename) {
+      const id = nanoid();
+      key = `r/${id}.${suffix}`;
+      if (['jpeg', 'png', 'webp', 'avif', 'gif', 'heic', 'heif', 'jpg'].includes(suffix) && config.s3.autoGenerateThumbnail) {
+        thumbKey = `r_thumb/${id}.${suffix}`;
+      }
+    } else if (['jpeg', 'png', 'webp', 'avif', 'gif', 'heic', 'heif', 'jpg'].includes(suffix) && config.s3.autoGenerateThumbnail) {
+      thumbKey = key
+        .split('/')
+        .map((it, i, arr) => (i === arr.length - 2 ? `${it}_thumb` : it))
+        .join('/');
+    }
+
+    if (thumbKey) {
+      const thumbFile = await generateThumbnail(file.buffer);
+      await s3Helpers.uploadFile(thumbFile.buffer, thumbKey);
+    }
     const url = await s3Helpers.uploadFile(file.buffer, key);
     const data = config.s3.isPrivate ? await s3Helpers.getSignedUrl(key) : url;
     return new SuccessResponse({
