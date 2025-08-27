@@ -48,6 +48,8 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
 
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable(sortableProps);
 
+    const isActive = currentPageId === pageId;
+
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
@@ -62,7 +64,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         key={pageId}
         className={cn(
           'z-10 flex cursor-pointer items-center gap-global-1/2 rounded-md p-global-1/2 transition-colors hover:bg-accent hover:text-accent-foreground',
-          currentPageId === pageId
+          isActive
             ? cn('group border border-input text-accent-foreground dark:bg-[#393939]', backgroundClass)
             : 'p-global-1/2',
           onlyShowWorkbenchIcon ? 'mb-1 size-[var(--operation-bar-width)]' : 'mb-global-1/2',
@@ -75,6 +77,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
           fallbackColor="#eeeef1"
           size="sm"
           disabledPreview
+          active={isActive}
         >
           {info?.iconUrl}
         </VinesIcon>

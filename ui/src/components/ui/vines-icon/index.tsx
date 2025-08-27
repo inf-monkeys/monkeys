@@ -22,6 +22,7 @@ export interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
   alt?: string;
   disabledPreview?: boolean;
   fallbackColor?: string;
+  active?: boolean;
 }
 
 export const VinesIcon: React.FC<IVinesIconProps> = ({
@@ -33,6 +34,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
   alt,
   disabledPreview,
   fallbackColor,
+  active,
 }) => {
   const src = (propSrc ?? children ?? '').toString().trim();
 
@@ -96,7 +98,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
                 size === 'xs' && 'size-3',
               )}
             >
-              <VinesLucideIcon src={text} className={cn('size-full stroke-current text-black')} />
+              <VinesLucideIcon src={text} className={cn('size-full stroke-current text-black')} active={active} />
             </div>
           )}
           {iconType === 'custom-icon' && (

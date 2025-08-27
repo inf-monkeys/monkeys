@@ -42,6 +42,8 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const isActive = groupId === currentGroupId;
+
   const child = (
     <div
       ref={setNodeRef}
@@ -53,13 +55,12 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
         onlyShowWorkbenchIcon
           ? 'flex size-[var(--operation-bar-width)] items-center justify-center'
           : 'mb-global-1/2 flex w-full shrink-0 items-center justify-start gap-global-1/2 px-global-1/2',
-        groupId === currentGroupId &&
-          cn('group border border-input text-accent-foreground dark:bg-[#393939]', backgroundClass),
+        isActive && cn('group border border-input text-accent-foreground dark:bg-[#393939]', backgroundClass),
       )}
       {...attr}
     >
       {typeof icon === 'string' ? (
-        <VinesLucideIcon className="size-icon shrink-0" size={20} src={icon} />
+        <VinesLucideIcon className="size-icon shrink-0" size={20} src={icon} active={isActive} />
       ) : (
         React.createElement(icon, { className: 'size-icon shrink-0', size: 20 })
       )}
