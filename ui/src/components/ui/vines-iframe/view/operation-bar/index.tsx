@@ -28,6 +28,7 @@ import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
 import { OperationItem } from './item';
+import { OperationBarTipButton } from './tip-button';
 
 interface IWorkbenchOperationBarProps extends React.ComponentPropsWithoutRef<'div'> {
   onDataChange?: (data: IWorkflowAssociation[]) => void;
@@ -90,34 +91,37 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
   return localData.length > 0 ? (
     <div
       className={cn(
-        'flex h-full items-center justify-center border bg-slate-1',
+        'flex flex-col border bg-slate-1',
         mode === 'mini' ? '' : `${roundedBLClass} ${roundedTLClass} ${roundedClass} border-input`,
       )}
     >
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        onDragEnd={handleDragEnd}
-      >
-        <ScrollArea
-          className={cn(
-            'h-full',
-            mode === 'mini'
-              ? 'px-global-1/2 pt-global-1/2'
-              : 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)] px-global pt-global',
-          )}
-          ref={scrollRef}
-          disabledOverflowMask
+      <OperationBarTipButton mode={mode} type="form-view" />
+      <div className="flex h-full items-center justify-center">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragEnd={handleDragEnd}
         >
-          <SortableContext items={localData.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-            {localData.map((it) => (
-              <OperationItem key={it.id} data={it}></OperationItem>
-            ))}
-          </SortableContext>
-        </ScrollArea>
-        {mode != 'mini' && <Separator orientation="vertical" />}
-      </DndContext>
+          <ScrollArea
+            className={cn(
+              'h-full',
+              mode === 'mini'
+                ? 'px-global-1/2'
+                : 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)] px-global',
+            )}
+            ref={scrollRef}
+            disabledOverflowMask
+          >
+            <SortableContext items={localData.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+              {localData.map((it) => (
+                <OperationItem key={it.id} data={it}></OperationItem>
+              ))}
+            </SortableContext>
+          </ScrollArea>
+          {mode != 'mini' && <Separator orientation="vertical" />}
+        </DndContext>
+      </div>
     </div>
   ) : (
     <></>

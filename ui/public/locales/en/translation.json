@@ -81,7 +81,8 @@
       "select": "Select",
       "unselect": "Unselect",
       "next": "Next",
-      "previous": "Previous"
+      "previous": "Previous",
+      "tips": "Tips"
     },
     "status": {
       "active": "Active",
@@ -3852,7 +3853,8 @@
         }
       },
       "operation-bar": {
-        "select-none": "No content selected, please select content first"
+        "select-none": "No content selected, please select content first",
+        "tips": "Please select the generated result content first, then select the button below, and jump to the next application for operation"
       },
       "execution-result": {
         "select-mode": {
@@ -3903,7 +3905,8 @@
           "placeholder": "Select a design board",
           "search-placeholder": "Search design board",
           "search-empty": "No design board found"
-        }
+        },
+        "tips": "Select the button below to export the currently opened canvas as an image file (PNG), and then jump to the next application for operation"
       }
     }
   },

@@ -81,7 +81,8 @@
       "select": "选择",
       "unselect": "取消选择",
       "next": "下一步",
-      "previous": "上一步"
+      "previous": "上一步",
+      "tips": "提示"
     },
     "status": {
       "active": "活跃",
@@ -3876,7 +3877,8 @@
         }
       },
       "operation-bar": {
-        "select-none": "请先选择内容"
+        "select-none": "请先选择内容",
+        "tips": "请先选择生成结果内容，然后选择下方的按钮，跳转到下一个应用进行操作"
       },
       "execution-result": {
         "select-mode": {
@@ -3927,7 +3929,8 @@
           "placeholder": "请选择画板",
           "search-placeholder": "搜索画板",
           "search-empty": "找不到画板"
-        }
+        },
+        "tips": "选择下方的按钮，将会将当前打开画板作为图像文件 (PNG) 导出，然后跳转到下一个应用进行操作"
       }
     }
   },

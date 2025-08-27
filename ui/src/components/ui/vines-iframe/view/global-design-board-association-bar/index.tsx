@@ -28,6 +28,7 @@ import { Separator } from '@/components/ui/separator.tsx';
 import useUrlState from '@/hooks/use-url-state';
 import { cn } from '@/utils';
 
+import { OperationBarTipButton } from '../operation-bar/tip-button';
 import { GlobalDesignBoardAssociationBarItem } from './item';
 
 interface IGlobalDesignBoardAssociationBarProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -91,29 +92,37 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
   return localData.length > 0 ? (
     <div
       className={cn(
-        'flex h-full items-center justify-center border bg-slate-1',
+        'flex flex-col border bg-slate-1',
         mode === 'mini' ? '' : `${roundedBLClass} ${roundedTLClass} ${roundedClass} border-input`,
       )}
     >
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        onDragEnd={handleDragEnd}
-      >
-        <ScrollArea
-          className={cn('h-full', mode === 'mini' ? 'px-2 pt-2' : 'px-global pt-global')}
-          ref={scrollRef}
-          disabledOverflowMask
+      <OperationBarTipButton mode={mode} type="global-design-board" />
+      <div className="flex h-full items-center justify-center">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragEnd={handleDragEnd}
         >
-          <SortableContext items={localData.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-            {localData.map((it) => (
-              <GlobalDesignBoardAssociationBarItem key={it.id} data={it} />
-            ))}
-          </SortableContext>
-        </ScrollArea>
-        {mode != 'mini' && <Separator orientation="vertical" />}
-      </DndContext>
+          <ScrollArea
+            className={cn(
+              'h-full',
+              mode === 'mini'
+                ? 'px-global-1/2'
+                : 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)] px-global',
+            )}
+            ref={scrollRef}
+            disabledOverflowMask
+          >
+            <SortableContext items={localData.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+              {localData.map((it) => (
+                <GlobalDesignBoardAssociationBarItem key={it.id} data={it} />
+              ))}
+            </SortableContext>
+          </ScrollArea>
+          {mode != 'mini' && <Separator orientation="vertical" />}
+        </DndContext>
+      </div>
     </div>
   ) : (
     <></>
