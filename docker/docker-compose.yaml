@@ -29,19 +29,19 @@ services:
           cpus: '1'
           memory: 4G
 
-  ui:
-    build:
-      context: ../ui
-      dockerfile: ../docker/ui/Dockerfile
-    networks:
-      - monkeys
-    logging:
-      driver: 'json-file'
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 4G
+  # ui:
+  #   build:
+  #     context: ../ui
+  #     dockerfile: ../docker/ui/Dockerfile
+  #   networks:
+  #     - monkeys
+  #   logging:
+  #     driver: 'json-file'
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: 4G
 
   monkeys-nginx:
     image: nginx
@@ -57,7 +57,7 @@ services:
       driver: 'json-file'
     depends_on:
       - server
-      - ui
+      # - ui
 
 networks:
   monkeys:
