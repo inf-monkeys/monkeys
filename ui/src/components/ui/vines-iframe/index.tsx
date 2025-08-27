@@ -19,9 +19,10 @@ export interface IVinesIFramePropsRequired {
 interface IVinesIFrameProps<P extends IVinesIFramePropsRequired> extends React.ComponentPropsWithoutRef<'div'> {
   pages: P[];
   page?: P | null;
+  from?: string;
 }
 
-export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }: IVinesIFrameProps<P>) => {
+export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages, from }: IVinesIFrameProps<P>) => {
   const hasPages = (pages?.length ?? 0) > 0;
   const [renderer, setRenderer] = useState<P[]>([]);
 
@@ -75,13 +76,13 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
         <>
           {page && !(page as any).groupId && (
             <ViewStoreProvider key="global-design-board" createStore={createViewStore}>
-              <VinesView id="global-design-board" pageId={currentPageId} type="global-design-board" />
+              <VinesView id="global-design-board" pageId={currentPageId} type="global-design-board" from={from} />
             </ViewStoreProvider>
           )}
           {globalGroups.map(([_, pages]) => {
             return pages.map(({ id, type }) => (
               <ViewStoreProvider key={id} createStore={createViewStore}>
-                <VinesView id={id} pageId={currentPageId} type={type} />
+                <VinesView id={id} pageId={currentPageId} type={type} from={from} />
               </ViewStoreProvider>
             ));
           })}
@@ -89,7 +90,7 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
             <VinesFlowProvider key={pages[0].workflowId} workflowId={pages[0].workflowId ?? _}>
               {pages.map(({ id, type, workflowId }) => (
                 <ViewStoreProvider key={id} createStore={createViewStore}>
-                  <VinesView id={id} workflowId={workflowId} pageId={currentPageId} type={type} />
+                  <VinesView id={id} workflowId={workflowId} pageId={currentPageId} type={type} from={from} />
                 </ViewStoreProvider>
               ))}
             </VinesFlowProvider>
@@ -97,14 +98,14 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
           {agents.map(([_, pages]) => {
             return pages.map(({ id, type, agentId }) => (
               <ViewStoreProvider key={id} createStore={createViewStore}>
-                <VinesView id={id} agentId={agentId} pageId={currentPageId} type={type} />
+                <VinesView id={id} agentId={agentId} pageId={currentPageId} type={type} from={from} />
               </ViewStoreProvider>
             ));
           })}
           {designBoards.map(([_, pages]) => {
             return pages.map(({ id, designMetadataId, type }) => (
               <ViewStoreProvider key={id} createStore={createViewStore}>
-                <VinesView id={id} designBoardId={designMetadataId} pageId={currentPageId} type={type} />
+                <VinesView id={id} designBoardId={designMetadataId} pageId={currentPageId} type={type} from={from} />
               </ViewStoreProvider>
             ));
           })}

@@ -32,10 +32,12 @@ interface IVinesViewProps {
   agentId?: string;
   pageId?: string;
   type?: string;
+  from?: string;
 }
 
-export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type }: IVinesViewProps) {
+export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type, from }: IVinesViewProps) {
   const setVisible = useViewStore((s) => s.setVisible);
+  const setFrom = useViewStore((s) => s.setFrom);
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
@@ -140,8 +142,17 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
 
   useEffect(() => {
     const finalVisible = id === pageId;
-    setTimeout(() => setVisible(finalVisible), finalVisible ? 0 : 216);
+    setTimeout(
+      () => {
+        setVisible(finalVisible);
+      },
+      finalVisible ? 0 : 216,
+    );
   }, [pageId, id]);
+
+  useEffect(() => {
+    setFrom(from);
+  }, [from]);
 
   return (
     <motion.div

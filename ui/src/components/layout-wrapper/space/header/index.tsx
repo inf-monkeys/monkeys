@@ -7,11 +7,11 @@ import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useRoundedClass, useSystemConfig } from '@/apis/common';
-import { CustomizationHeadbarNavPosition, CustomizationHeadbarTheme, ISystemConfig } from '@/apis/common/typings';
+import { CustomizationHeadbarNavPosition, CustomizationHeadbarTheme } from '@/apis/common/typings';
 import { getVinesToken } from '@/apis/utils.ts';
-import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { HeaderInvite } from '@/components/layout-wrapper/space/header/expand/header-invite';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
+import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -58,13 +58,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
   const theme = get(oem, 'theme.headbar.theme', 'card') as CustomizationHeadbarTheme;
   const navPosition = get(oem, 'theme.headbar.navPosition', 'left') as CustomizationHeadbarNavPosition;
 
-  // 根据主题模式应用不同圆角样式
-  const themeMode = get(oem, 'theme.themeMode', 'shadow') as ISystemConfig['theme']['themeMode'];
-  const isShadowMode = themeMode === 'shadow';
-
   const { roundedClass } = useRoundedClass();
-
-  console.log(roundedClass);
 
   const { height, ref } = useElementSize();
 

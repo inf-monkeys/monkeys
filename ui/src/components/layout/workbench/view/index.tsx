@@ -89,7 +89,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
           >
             {/*{mode !== 'mini' && <WorkbenchViewHeader page={teamPage} groupId={groupId} />}*/}
             <div className={cn('relative size-full overflow-hidden')}>
-              <VinesIFrame pages={pages ?? []} page={teamPage} />
+              <VinesIFrame from="workbench" pages={pages ?? []} page={teamPage} />
             </div>
           </motion.div>
         ) : isLoading ? (

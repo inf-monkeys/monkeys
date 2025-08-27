@@ -14,7 +14,7 @@ import useUrlState from '@/hooks/use-url-state.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 const VinesForm: React.FC = () => {
   const { t } = useTranslation();
@@ -25,6 +25,7 @@ const VinesForm: React.FC = () => {
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
+  const pageFrom = useViewStore((s) => s.from);
 
   const [historyVisible, setHistoryVisible] = useState(false);
 
@@ -54,6 +55,18 @@ const VinesForm: React.FC = () => {
   return (
     <>
       {isMiniFrame && <IframeHeader historyVisible={historyVisible} setHistoryVisible={setHistoryVisible} />}
+      {pageFrom === 'workbench' && (
+        <div className="absolute left-[calc(var(--global-spacing)*1.5)] top-0 flex flex-col gap-1">
+          <span className="border-t-[3px] border-vines-500 pt-[8px] font-bold text-vines-500">
+            {getI18nContent(
+              workflow?.displayName ?? {
+                'zh-CN': '未知',
+                'en-US': 'Unknown',
+              },
+            )}
+          </span>
+        </div>
+      )}
       <div
         ref={ref}
         className={cn(
@@ -66,6 +79,7 @@ const VinesForm: React.FC = () => {
         <VinesTabular
           className={cn(
             'col-span-2',
+            pageFrom === 'workbench' && 'mt-[32px]',
             isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-global px-2 transition-opacity',
             isMiniFrame && historyVisible && 'pointer-events-none opacity-0',
             vinesIFrameVisible && !isMiniFrame && 'pr-global',
@@ -75,7 +89,7 @@ const VinesForm: React.FC = () => {
             showPreviewViewExecutionResultGrid && setHistoryVisible(true);
           }}
           event$={event$}
-          height={height}
+          height={height - (pageFrom === 'workbench' ? 32 : 0)}
         />
         <VinesExecutionResult
           className={cn(
