@@ -17,8 +17,10 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { get } from 'lodash';
 
-import { useRoundedClass } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { useWorkflowAssociationList } from '@/apis/workflow/association';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -40,6 +42,10 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   const { roundedClass, roundedBLClass, roundedTLClass } = useRoundedClass();
+
+  const { data: oem } = useSystemConfig();
+
+  const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
   const { data: initialData } = useWorkflowAssociationList(workflowId);
 
@@ -91,8 +97,10 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
   return localData.length > 0 ? (
     <div
       className={cn(
-        'flex flex-col border bg-slate-1',
-        mode === 'mini' ? '' : `${roundedBLClass} ${roundedTLClass} ${roundedClass} border-input`,
+        'flex flex-col bg-slate-1',
+        mode === 'mini' ? '' : `${roundedBLClass} ${roundedTLClass} ${roundedClass}`,
+        themeMode === 'border' && 'border border-input',
+        themeMode === 'shadow' && 'shadow-around',
       )}
     >
       <OperationBarTipButton mode={mode} type="form-view" />

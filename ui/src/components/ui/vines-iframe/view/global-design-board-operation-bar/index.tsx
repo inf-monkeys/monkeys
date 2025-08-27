@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
+import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { useRoundedClass } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { Button } from '@/components/ui/button';
 import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
@@ -12,6 +14,10 @@ import { GlobalDesignBoardOperationBarBoardSelect } from './board-select';
 
 export const GlobalDesignBoardOperationBar = () => {
   const { t } = useTranslation();
+
+  const { data: oem } = useSystemConfig();
+
+  const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
   const { roundedClass, roundedBLClass, roundedTLClass } = useRoundedClass();
 
@@ -29,7 +35,9 @@ export const GlobalDesignBoardOperationBar = () => {
   return (
     <div
       className={cn(
-        `flex h-full w-72 flex-col items-center justify-between gap-global ${roundedBLClass} ${roundedTLClass} ${roundedClass} border border-input bg-slate-1 p-global text-base`,
+        `flex h-full w-72 flex-col items-center justify-between gap-global ${roundedBLClass} ${roundedTLClass} ${roundedClass} bg-slate-1 p-global text-base`,
+        themeMode === 'border' && 'border border-input',
+        themeMode === 'shadow' && 'shadow-around',
       )}
     >
       <GlobalDesignBoardOperationBarBoardSelect />

@@ -4,11 +4,12 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence } from 'framer-motion';
-import { keyBy } from 'lodash';
+import { get, keyBy } from 'lodash';
 import { CircleSlash, Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
@@ -78,6 +79,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const navigate = useNavigate();
 
   const { data: oem } = useSystemConfig();
+
+  const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
   const workbenchSidebarDefaultOpen = oem?.theme.workbenchSidebarDefaultOpen ?? true;
 
@@ -339,7 +342,11 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   return (
     <div
-      className={cn(`flex h-full items-center justify-center ${roundedClass} border border-input bg-slate-1 shadow-sm`)}
+      className={cn(
+        `flex h-full items-center justify-center ${roundedClass} bg-slate-1`,
+        themeMode === 'border' && 'border border-input',
+        themeMode === 'shadow' && 'shadow-around',
+      )}
       ref={wrapperRef}
     >
       {isLoading ? (

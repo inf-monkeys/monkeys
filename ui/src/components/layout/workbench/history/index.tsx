@@ -2,12 +2,14 @@ import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 're
 
 import { useAsyncEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
+import { get } from 'lodash';
 import { ArrowLeftIcon, ArrowRightIcon, ScanSearch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { ImagePreview } from '@/components/layout-wrapper/main/image-preview';
 import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-image-preview';
@@ -110,6 +112,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   const [position, setPosition] = useState(0);
 
   const { data: oem } = useSystemConfig();
+  const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
   const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
@@ -119,7 +122,9 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
     <AnimatePresence>
       <div
         className={cn(
-          'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] border border-input bg-slate-1 p-0 shadow-sm',
+          'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] bg-slate-1 p-0',
+          themeMode === 'border' && 'border border-input',
+          themeMode === 'shadow' && 'shadow-around',
           roundedClass,
           className,
           onlyShowWorkbenchIcon

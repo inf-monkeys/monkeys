@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useNavigate } from '@tanstack/react-router';
-
 import {
   closestCenter,
   DndContext,
@@ -19,8 +17,10 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { get } from 'lodash';
 
-import { useRoundedClass } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { useGetDesignAssociationList } from '@/apis/designs/index.ts';
 import { IDesignAssociation } from '@/apis/designs/typings';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -38,7 +38,9 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
     mode: 'normal' | 'fast' | 'mini';
   }>({ mode: 'normal' });
 
-  const navigate = useNavigate();
+  const { data: oem } = useSystemConfig();
+
+  const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
   const { roundedClass, roundedBLClass, roundedTLClass } = useRoundedClass();
 
@@ -92,8 +94,10 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
   return localData.length > 0 ? (
     <div
       className={cn(
-        'flex flex-col border bg-slate-1',
-        mode === 'mini' ? '' : `${roundedBLClass} ${roundedTLClass} ${roundedClass} border-input`,
+        'flex flex-col bg-slate-1',
+        mode === 'mini' ? '' : `${roundedBLClass} ${roundedTLClass} ${roundedClass}`,
+        themeMode === 'border' && 'border border-input',
+        themeMode === 'shadow' && 'shadow-around',
       )}
     >
       <OperationBarTipButton mode={mode} type="global-design-board" />
