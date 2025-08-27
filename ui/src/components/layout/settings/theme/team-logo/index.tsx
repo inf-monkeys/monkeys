@@ -12,7 +12,7 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { VinesImageEditor } from '@/components/ui/image-editor';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGetDisplayTextFromPlainTextJson } from '@/utils';
 
 interface ITeamLogoProps extends React.ComponentPropsWithoutRef<'div'> {}

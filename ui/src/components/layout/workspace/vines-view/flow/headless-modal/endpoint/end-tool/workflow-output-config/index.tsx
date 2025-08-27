@@ -10,7 +10,7 @@ import { WorkflowOutputVariableEditor } from '@/components/layout/workspace/vine
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';

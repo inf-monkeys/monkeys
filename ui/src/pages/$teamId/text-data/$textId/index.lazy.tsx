@@ -15,7 +15,7 @@ import { RelatedApplication } from '@/components/layout/ugc-pages/text-data/text
 import { Button } from '@/components/ui/button';
 import { VinesLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator.tsx';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn, getI18nContent } from '@/utils';
 

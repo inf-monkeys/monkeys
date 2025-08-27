@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { VinesActuatorDetailData } from '@/components/layout/workspace/vines-view/_common/actuator/detail/content/data.tsx';
 import { ExecutionRawDataDisplay } from '@/components/layout/workspace/vines-view/_common/data-display/raw';
 import { JSONValue } from '@/components/ui/code-editor';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { cn } from '@/utils';

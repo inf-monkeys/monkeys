@@ -4,16 +4,18 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 
 import { cn } from '@/utils/index.ts';
 
-const TabsVariantContext = React.createContext<'default' | 'ghost'>('default');
+export type TabsVariant = 'default' | 'ghost' | 'rounded';
+
+const TabsVariantContext = React.createContext<TabsVariant>('default');
 
 const Tabs = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> & {
-    variant?: 'default' | 'ghost';
+    variant?: TabsVariant;
   }
->(({ variant = 'default', children, ...props }, ref) => (
+>(({ variant = 'default', className, children, ...props }, ref) => (
   <TabsVariantContext.Provider value={variant}>
-    <TabsPrimitive.Root ref={ref} {...props}>
+    <TabsPrimitive.Root ref={ref} className={cn('vines-tabs', className)} {...props}>
       {children}
     </TabsPrimitive.Root>
   </TabsVariantContext.Provider>
@@ -29,8 +31,12 @@ const TabsList = React.forwardRef<
   const variant = React.useContext(TabsVariantContext);
 
   const variantStyles = {
-    default: 'bg-muted',
-    ghost: 'bg-transparent',
+    default:
+      'bg-muted data-[orientation=horizontal]:h-10 data-[orientation=vertical]:flex-col data-[orientation=vertical]:gap-1 p-1 ',
+    ghost:
+      'bg-transparent data-[orientation=horizontal]:h-10 data-[orientation=vertical]:flex-col data-[orientation=vertical]:gap-1 p-1 ',
+    rounded:
+      'bg-transparent data-[orientation=horizontal]:h-12 data-[orientation=vertical]:flex-col data-[orientation=vertical]:gap-1',
   };
 
   return (
@@ -38,7 +44,7 @@ const TabsList = React.forwardRef<
       ref={ref}
       className={cn(
         variantStyles[variant],
-        'inline-flex items-center justify-center rounded-md p-1 text-muted-foreground data-[orientation=horizontal]:h-10 data-[orientation=vertical]:flex-col data-[orientation=vertical]:gap-1',
+        'inline-flex items-center justify-center rounded-md text-muted-foreground',
         className,
       )}
       style={gap ? { gap } : undefined}
@@ -57,16 +63,26 @@ const TabsTrigger = React.forwardRef<
   const variantStyles = {
     default: 'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
     ghost: 'data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:font-semibold',
+    rounded: 'data-[state=active]:bg-vines-500 data-[state=active]:text-white rounded-3xl px-4 h-full glassy-border',
   };
 
   return (
     <TabsPrimitive.Trigger
       ref={ref}
+      data-variant={variant}
       className={cn(
-        'inline-flex w-full items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[orientation=vertical]:justify-start',
+        'vines-tabs-trigger inline-flex w-full items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[orientation=vertical]:justify-start',
         variantStyles[variant],
         className,
       )}
+      style={
+        variant === 'rounded'
+          ? {
+              border: '1.5px solid rgba(255, 255, 255, 0.5)',
+              boxShadow: 'inset 0px 0px 0px 0px rgba(0, 0, 0, 0.1)',
+            }
+          : {}
+      }
       {...props}
     />
   );

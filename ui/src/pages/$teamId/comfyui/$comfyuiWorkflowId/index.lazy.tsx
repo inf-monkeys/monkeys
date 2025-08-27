@@ -6,13 +6,13 @@ import { Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useComfyuiWorkflow } from '@/apis/comfyui';
-import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { createComfyuiWorkflowColumns } from '@/components/layout/ugc-pages/comfyui-workflows/consts';
 import { ComfyuiWorkflowDependency } from '@/components/layout/ugc-pages/comfyui-workflows/detail/dependency';
 import { ComfyuiWorkflowToolInput } from '@/components/layout/ugc-pages/comfyui-workflows/detail/tool-input';
 import { ComfyuiWorkflowDetail } from '@/components/layout/ugc-pages/comfyui-workflows/detail/workflow';
+import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface IComfyUIWorkflowDetailProps {}

@@ -13,7 +13,7 @@ import { EmailAuth } from '@/components/layout/login/auth/email-auth.tsx';
 import { PhoneAuth } from '@/components/layout/login/auth/phone-auth.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
 

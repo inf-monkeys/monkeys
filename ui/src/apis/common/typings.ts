@@ -50,11 +50,13 @@ export type CustomizationModules =
 export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile';
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
-export type CustomizationHeadbarTheme = 'fixed' | 'card';
+export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy';
+export type CustomizationHeadbarNavPosition = 'left' | 'center' | 'right';
+
 export type CustomizationHeadbar =
   | {
       theme?: CustomizationHeadbarTheme;
-      navPosition?: 'left' | 'center' | 'right';
+      navPosition?: CustomizationHeadbarNavPosition;
       actions?: VinesSpaceHeadbar[] | '*';
       profile?: VinesSpaceHeadbarProfile[] | '*';
     }
@@ -67,6 +69,10 @@ export type WorkflowPreviewExecutionGrid = {
   selectionModeDisplayType?: SelectionModeDisplayType;
   clickBehavior?: ClickBehavior;
   showErrorFilter?: boolean;
+};
+
+export type CustomizationHistoryResult = {
+  display: boolean;
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
@@ -83,9 +89,11 @@ export interface ISystemConfig {
       dark: string;
       light: string;
     };
+    background?: string;
     colors: {
       primaryColor: string;
     };
+    roundedSize?: string;
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
@@ -117,12 +125,14 @@ export interface ISystemConfig {
     uniImagePreview?: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
+    themeMode: 'shadow' | 'border';
     miniMode: {
       showPreviewViewExecutionResultGrid: boolean;
     };
     workflow: {
       allowConcurrentRuns: boolean;
     };
+    historyResult: CustomizationHistoryResult;
   };
   auth: {
     enabled: AuthMethod[];

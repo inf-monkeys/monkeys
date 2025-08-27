@@ -7,11 +7,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useTool } from '@/apis/tools';
 import { useSearchReferenceWorkflows } from '@/apis/ugc';
+import { createActionToolsColumns } from '@/components/layout/ugc-pages/action-tools/consts.tsx';
 import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { UgcDetailWorkflows } from '@/components/layout/ugc/detail/workflows';
-import { createActionToolsColumns } from '@/components/layout/ugc-pages/action-tools/consts.tsx';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface IActionToolDetailProps {}

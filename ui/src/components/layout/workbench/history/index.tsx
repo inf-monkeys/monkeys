@@ -2,13 +2,12 @@ import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 're
 
 import { useAsyncEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
-import { get } from 'lodash';
 import { ArrowLeftIcon, ArrowRightIcon, ScanSearch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { ImagePreview } from '@/components/layout-wrapper/main/image-preview';
 import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-image-preview';
@@ -114,10 +113,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
 
   const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  // 根据主题模式应用不同圆角样式
-  const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+  const { roundedClass } = useRoundedClass();
 
   return (
     <AnimatePresence>

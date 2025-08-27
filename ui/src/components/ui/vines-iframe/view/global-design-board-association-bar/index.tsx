@@ -19,9 +19,8 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { get } from 'lodash';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass } from '@/apis/common';
 import { useGetDesignAssociationList } from '@/apis/designs/index.ts';
 import { IDesignAssociation } from '@/apis/designs/typings';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -40,12 +39,7 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
 
   const navigate = useNavigate();
 
-  const { data: oem } = useSystemConfig();
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode
-    ? 'rounded-lg rounded-bl-lg rounded-tl-lg'
-    : 'rounded-xl rounded-bl-xl rounded-tl-xl';
+  const { roundedClass, roundedBLClass, roundedTLClass } = useRoundedClass();
 
   const { data: initialData } = useGetDesignAssociationList();
 
@@ -98,7 +92,7 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
     <div
       className={cn(
         'flex h-full items-center justify-center border bg-slate-1',
-        mode === 'mini' ? '' : `${roundedClass} border-input`,
+        mode === 'mini' ? '' : `${roundedBLClass} ${roundedTLClass} ${roundedClass} border-input`,
       )}
     >
       <DndContext

@@ -18,13 +18,13 @@ import { cn } from '@/utils';
 export const AgentLayout: React.FC = () => {
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  
+
   // 针对LF客户的主题定制
   const isLFTheme = themeMode === 'shadow';
   const backgroundClass = isLFTheme ? 'bg-[#f3f4f6]' : 'bg-slate-3';
-  
+
   return (
-    <main className={cn("size-full p-global", backgroundClass)}>
+    <main className={cn('size-full p-global', backgroundClass)}>
       <SpaceHeader>
         <AgentInfoCard />
       </SpaceHeader>

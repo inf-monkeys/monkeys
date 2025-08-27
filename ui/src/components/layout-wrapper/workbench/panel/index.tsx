@@ -5,6 +5,7 @@ import { Outlet, useRouterState } from '@tanstack/react-router';
 import { get } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
@@ -36,11 +37,12 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   const isSettingRoute = pathName.split('/').at(-1) === 'settings';
 
   const { data: oem } = useSystemConfig();
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
+  const background = get(oem, 'theme.background', undefined) as ISystemConfig['theme']['background'];
 
   // 根据主题模式应用不同样式
   const isShadowMode = themeMode === 'shadow';
-  const backgroundClass = isShadowMode ? 'bg-[#f3f4f6]' : 'bg-neocard';
+  const backgroundClass = background ? '' : isShadowMode ? 'bg-[#f3f4f6]' : 'bg-neocard';
   const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
 
   const showTeamSelector =
@@ -48,7 +50,10 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
     (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-selector'));
 
   return (
-    <ViewGuard className={cn('flex flex-col gap-global', backgroundClass)}>
+    <ViewGuard
+      className={cn('flex flex-col gap-global', backgroundClass)}
+      style={{ background: `url(${background}) no-repeat center center` }}
+    >
       <SpaceHeader tail={showTeamSelector ? <TeamSelector /> : undefined} disableSeparator>
         <SpaceHeaderTabs />
       </SpaceHeader>

@@ -21,7 +21,7 @@ import { IVinesEditorRefProps } from '@/components/ui/code-editor';
 import { Label } from '@/components/ui/label.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 

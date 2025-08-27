@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { TabsTrigger } from '@/components/ui/tabs.tsx';
+import { TabsTrigger } from '@/components/ui/tabs';
 
 interface IVirtuaDatabaseTableListItemProps {
   name: string;

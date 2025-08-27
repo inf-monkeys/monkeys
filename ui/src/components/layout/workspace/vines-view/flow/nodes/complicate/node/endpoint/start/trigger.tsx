@@ -11,7 +11,7 @@ import { InputPreview } from '@/components/layout/workspace/vines-view/flow/node
 import { ComplicateNodeHeader } from '@/components/layout/workspace/vines-view/flow/nodes/complicate/node/header.tsx';
 import { TabularRender } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';

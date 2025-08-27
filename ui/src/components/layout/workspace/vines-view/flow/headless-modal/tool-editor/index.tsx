@@ -11,7 +11,7 @@ import { Header } from '@/components/layout/workspace/vines-view/flow/headless-m
 import { Button } from '@/components/ui/button';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';

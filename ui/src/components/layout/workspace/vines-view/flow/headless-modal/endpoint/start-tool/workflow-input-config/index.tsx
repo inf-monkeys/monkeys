@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { InputConfig } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config';
 import { WorkflowTrigger } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { WorkflowApiConfig } from './api-config';
 

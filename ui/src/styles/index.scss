@@ -10,15 +10,20 @@
 @import "rc-image";
 
 @layer utilities {
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
+
   .debug-outline {
     @apply outline outline-2 outline-red-500;
   }
@@ -31,6 +36,7 @@
 
   body {
     @apply bg-background text-foreground h-screen;
+
     #vines-ui {
       @apply size-full;
     }
@@ -68,13 +74,17 @@ body {
   @apply text-adjust leading-none;
 }
 
-.vines-result-streaming>:not(ol):not(ul):not(pre):last-child:after, .result-streaming>ol:last-child li:last-child:after, .result-streaming>pre:last-child code:after, .result-streaming>ul:last-child li:last-child:after {
+.vines-result-streaming>:not(ol):not(ul):not(pre):last-child:after,
+.result-streaming>ol:last-child li:last-child:after,
+.result-streaming>pre:last-child code:after,
+.result-streaming>ul:last-child li:last-child:after {
   @apply content-['▋'] -ml-1 align-baseline opacity-0;
   animation: pulse 0.6s infinite;
 }
 
 ::selection {
   background-color: theme('colors.vines.500/0.15');
+
   @media (prefers-color-scheme: dark) {
     background-color: theme('colors.vines.500/0.25');
   }
@@ -104,9 +114,10 @@ body {
   background: transparent;
 }
 
-img[src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/.png"]
-{
+img[src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/.png"] {
   @apply hidden flex-none;
 }
 
-.monaco-editor { position: absolute !important; }
+.monaco-editor {
+  position: absolute !important;
+}

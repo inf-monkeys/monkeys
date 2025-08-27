@@ -11,7 +11,7 @@ import { Stat } from '@/components/layout/settings/stat';
 import { TeamSettings } from '@/components/layout/settings/team';
 import { TeamCredit } from '@/components/layout/settings/team-quota';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Tabs, TabsContent } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import useUrlState from '@/hooks/use-url-state.ts';
 import VinesEvent from '@/utils/events.ts';
 

@@ -7,7 +7,7 @@ import { VinesLogViewLogTab } from '@/components/layout/workspace/vines-view/log
 import { VinesLogViewLogObservabilityModal } from '@/components/layout/workspace/vines-view/log/log/observability';
 import { VinesLogViewStatTab } from '@/components/layout/workspace/vines-view/log/stat';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';

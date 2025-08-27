@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 
-import useSWR from 'swr';
 import { useParams } from '@tanstack/react-router';
+import useSWR from 'swr';
 
 import { get } from 'lodash';
 import { AlertCircle, CheckCircle2, Image as ImageIcon, Loader2, Plus, Swords, Target, Upload } from 'lucide-react';

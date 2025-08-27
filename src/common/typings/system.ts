@@ -1,10 +1,11 @@
-import { AuthMethod, CustomizationHeadbar, CustomizationModules, ExtraLanguageURL, WorkflowPreviewExecutionGrid } from '../config';
+import { AuthMethod, CustomizationHeadbar, CustomizationHistoryResult, CustomizationModules, ExtraLanguageURL, WorkflowPreviewExecutionGrid } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
   theme: {
     id: string;
     title: string;
+    background?: string;
     favicon: {
       light: string;
       dark: string;
@@ -18,6 +19,7 @@ export interface ISystemConfig {
       neocardColor: string;
       neocardDarkColor: string;
     };
+    roundedSize?: string;
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
@@ -49,13 +51,14 @@ export interface ISystemConfig {
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
-    themeMode: 'shadow' | 'lborder';
+    themeMode: 'shadow' | 'border';
     miniMode: {
       showPreviewViewExecutionResultGrid: boolean;
     };
     workflow: {
       allowConcurrentRuns: boolean;
     };
+    historyResult: CustomizationHistoryResult;
   };
   auth: {
     enabled: AuthMethod[];

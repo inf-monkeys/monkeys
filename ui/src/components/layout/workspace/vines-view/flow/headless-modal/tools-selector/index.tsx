@@ -8,7 +8,7 @@ import { ToolLists } from '@/components/layout/workspace/vines-view/flow/headles
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VinesToolDef, VinesToolWithCategory } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';

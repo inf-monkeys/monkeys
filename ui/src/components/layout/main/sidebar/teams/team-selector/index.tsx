@@ -3,11 +3,10 @@ import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { useMemoizedFn } from 'ahooks';
-import { get } from 'lodash';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
@@ -46,11 +45,6 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal', te
   const currentTeam = (teams ?? []).find((team) => team.id === teamId);
 
   const { data: oem } = useSystemConfig();
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
-
-  // 根据主题模式应用不同圆角样式
-  const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
 
   const handleSwapTeam = useMemoizedFn(async (id: string) => {
     setTeamId(id);
@@ -78,6 +72,8 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal', te
   const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   const isDarkMode = mode === 'dark' || (mode === 'auto' && darkModeMediaQuery.matches);
 
+  const { roundedClass } = useRoundedClass();
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -85,8 +81,8 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal', te
           variant="outline"
           role="combobox"
           className={cn(
-            'justify-between gap-1 shadow-none',
-            size === 'large' ? `${roundedClass} px-global py-6` : 'px-3',
+            `justify-between gap-1 shadow-none ${roundedClass}`,
+            size === 'large' ? 'px-global py-6' : 'px-3',
           )}
           aria-expanded={open}
           aria-label="Select a team"

@@ -7,10 +7,16 @@ import { useSystemConfig } from '@/apis/common';
 import { CustomizationHeadbarTheme, VinesSpaceHeadbarModules } from '@/apis/common/typings';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsList, TabsTrigger, TabsVariant } from '@/components/ui/tabs';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
-import { getI18nContent } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
+
+const HEADBAR_THEME_MAP: Record<CustomizationHeadbarTheme, TabsVariant> = {
+  card: 'default',
+  fixed: 'ghost',
+  glassy: 'rounded',
+};
 
 export const SpaceHeaderTabs: React.FC = () => {
   const { t } = useTranslation();
@@ -61,7 +67,7 @@ export const SpaceHeaderTabs: React.FC = () => {
 
   return (
     <Tabs
-      variant={headbarTheme === 'fixed' ? 'ghost' : 'default'}
+      variant={HEADBAR_THEME_MAP[headbarTheme]}
       value={value}
       onValueChange={(val) => {
         if (tabsList.find((item) => item.id === val)?.disabled) return;
@@ -82,8 +88,18 @@ export const SpaceHeaderTabs: React.FC = () => {
         {tabsList
           .filter((item) => item.visible)
           .map((item) => (
-            <TabsTrigger key={item.id} className="gap-1 py-1" value={item.id}>
-              {item.icon && <VinesLucideIcon src={item.icon} size={14} className="size-[14px]" />}
+            <TabsTrigger
+              key={item.id}
+              className={cn('gap-1 py-1', headbarTheme === 'glassy' && 'gap-2')}
+              value={item.id}
+            >
+              {item.icon && (
+                <VinesLucideIcon
+                  src={item.icon}
+                  size={14}
+                  className={cn('size-[14px]', headbarTheme === 'glassy' && 'stroke-white')}
+                />
+              )}
               {getI18nContent(item.displayName, t(`components.layout.header.tabs.${item.id}`))}
             </TabsTrigger>
           ))}

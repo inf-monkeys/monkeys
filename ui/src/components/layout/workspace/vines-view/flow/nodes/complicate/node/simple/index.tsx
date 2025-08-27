@@ -12,7 +12,7 @@ import { ComplicateNodeHeader } from '@/components/layout/workspace/vines-view/f
 import { Button } from '@/components/ui/button';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesNodeCustomData, VinesNodeExecutionTask, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';

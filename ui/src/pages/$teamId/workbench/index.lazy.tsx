@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import { createLazyFileRoute } from '@tanstack/react-router';
 
+import { get } from 'lodash';
+
+import { useSystemConfig } from '@/apis/common';
 import { HistoryResult } from '@/components/layout/workbench/history';
 import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
 import { TemporaryWorkflowOverlay } from '@/components/layout/workbench/temporary-workflow-overlay';
@@ -13,7 +16,9 @@ import { usePageStore } from '@/store/usePageStore';
 export const Workbench: React.FC = () => {
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
   const sidebarCollapsed = useSidebarCollapsed();
-  // const { data: oem } = useSystemConfig();
+  const { data: oem } = useSystemConfig();
+
+  const showHistoryResult = get(oem, 'theme.historyResult.display', false) as boolean;
 
   const [{ mode, temporaryWorkflowId }] = useUrlState<{
     mode: 'normal' | 'fast' | 'mini';
@@ -51,7 +56,7 @@ export const Workbench: React.FC = () => {
       <WorkbenchSidebar mode={mode} showGroup={showGroup} collapsed={sidebarCollapsed} />
       <div className={`flex size-full flex-col gap-global ${sidebarCollapsed ? 'flex-1' : ''}`}>
         <WorkbenchView mode={mode} />
-        {mode !== 'mini' && globalViewSize !== 'sm' && <HistoryResult />}
+        {mode !== 'mini' && globalViewSize !== 'sm' && showHistoryResult && <HistoryResult />}
       </div>
       <TemporaryWorkflowOverlay
         mode={mode}

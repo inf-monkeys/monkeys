@@ -6,7 +6,8 @@ import { get } from 'lodash';
 import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { CustomizationHeadbarNavPosition, CustomizationHeadbarTheme, ISystemConfig } from '@/apis/common/typings';
 import { getVinesToken } from '@/apis/utils.ts';
 import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { HeaderInvite } from '@/components/layout-wrapper/space/header/expand/header-invite';
@@ -54,13 +55,16 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
     oem &&
     (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-invite'));
 
-  const theme = get(oem, 'theme.headbar.theme', 'card');
-  const navPosition = get(oem, 'theme.headbar.navPosition', 'left');
+  const theme = get(oem, 'theme.headbar.theme', 'card') as CustomizationHeadbarTheme;
+  const navPosition = get(oem, 'theme.headbar.navPosition', 'left') as CustomizationHeadbarNavPosition;
 
   // 根据主题模式应用不同圆角样式
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
+  const themeMode = get(oem, 'theme.themeMode', 'shadow') as ISystemConfig['theme']['themeMode'];
   const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+
+  const { roundedClass } = useRoundedClass();
+
+  console.log(roundedClass);
 
   const { height, ref } = useElementSize();
 
@@ -71,11 +75,24 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
       <header
         ref={ref}
         className={cn(
-          'flex w-full items-center justify-between gap-4 bg-slate-1 p-global',
+          `flex w-full items-center justify-between gap-4 bg-slate-1 p-global ${roundedClass}`,
           theme === 'fixed' &&
             'shadow-b-lg fixed left-0 top-0 border-b-[1px] border-t-[3px] border-t-[rgb(var(--vines-500))]',
-          theme === 'card' && `${roundedClass} border border-input`,
+          theme === 'card' && `border border-input`,
         )}
+        style={
+          theme === 'glassy'
+            ? {
+                background:
+                  'linear-gradient(90deg, rgb(244, 219, 190) 1%, rgba(255, 182, 172, 0.58) 38%, rgba(255, 255, 255, 0.6) 100%)',
+                backgroundBlendMode: 'overlay',
+                boxSizing: 'border-box',
+                border: '1.5px solid rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(45px)',
+                boxShadow: 'inset 0px 0px 0px 0px rgba(0, 0, 0, 0.1)',
+              }
+            : {}
+        }
       >
         <Link
           to="/$teamId"

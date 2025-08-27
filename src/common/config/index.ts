@@ -59,7 +59,7 @@ export type CustomizationModules = {
 export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile';
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
-export type CustomizationHeadbarTheme = 'fixed' | 'card';
+export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy';
 export type CustomizationHeadbar = {
   theme?: CustomizationHeadbarTheme;
   navPosition?: 'left' | 'center' | 'right';
@@ -74,6 +74,10 @@ export type WorkflowPreviewExecutionGrid = {
   selectionModeDisplayType?: SelectionModeDisplayType;
   clickBehavior?: ClickBehavior;
   showErrorFilter?: boolean;
+};
+
+export type CustomizationHistoryResult = {
+  display: boolean;
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
@@ -91,6 +95,7 @@ export interface ServerConfig {
   customization: {
     id: string;
     title: string;
+    background?: string;
     logo: {
       light: string;
       dark: string;
@@ -104,6 +109,7 @@ export interface ServerConfig {
       neocard: string;
       neocardDark: string;
     };
+    roundedSize?: string;
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
@@ -135,13 +141,14 @@ export interface ServerConfig {
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
-    themeMode: 'shadow' | 'lborder';
+    themeMode: 'shadow' | 'border';
     miniMode: {
       showPreviewViewExecutionResultGrid: boolean;
     };
     workflow: {
       allowConcurrentRuns: boolean;
     };
+    historyResult: CustomizationHistoryResult;
   };
 }
 
@@ -400,11 +407,13 @@ export const config: Config = {
       title: readConfig('server.customization.title', '猴子无限'),
       logo: typeof logoConfig === 'string' ? { light: logoConfig, dark: logoConfig } : logoConfig,
       favicon: typeof faviconConfig === 'string' ? { light: faviconConfig, dark: faviconConfig } : faviconConfig,
+      background: readConfig('server.customization.background', undefined),
       colors: {
         primary: readConfig('server.customization.colors.primary', '#52ad1f'),
         neocard: readConfig('server.customization.colors.neocard', '#F1F5F9'),
         neocardDark: readConfig('server.customization.colors.neocardDark', '#1D1D1F'),
       },
+      roundedSize: readConfig('server.customization.roundedSize', undefined),
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),
       },
@@ -455,6 +464,9 @@ export const config: Config = {
       },
       workflow: {
         allowConcurrentRuns: readConfig('server.customization.workflow.allowConcurrentRuns', true),
+      },
+      historyResult: {
+        display: readConfig('server.customization.historyResult.display', true),
       },
     },
   },

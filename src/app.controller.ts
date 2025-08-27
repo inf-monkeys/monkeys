@@ -118,11 +118,13 @@ export class AppController {
         title: config.server.customization.title,
         logo: config.server.customization.logo,
         favicon: config.server.customization.favicon,
+        background: config.server.customization.background,
         colors: {
           primaryColor: config.server.customization.colors.primary,
           neocardColor: config.server.customization.colors.neocard,
           neocardDarkColor: config.server.customization.colors.neocardDark,
         },
+        roundedSize: config.server.customization.roundedSize,
         toast: {
           position: config.server.customization.toast.position,
         },
@@ -145,6 +147,7 @@ export class AppController {
         themeMode: config.server.customization.themeMode,
         miniMode: config.server.customization.miniMode,
         workflow: config.server.customization.workflow,
+        historyResult: config.server.customization.historyResult,
       },
       auth: {
         enabled: config.auth.enabled,

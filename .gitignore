@@ -39,5 +39,7 @@ config.yaml
 config.*.yaml
 builtInMarket.json
 presetApp.json
+presetApp.*.json
 presetAppSort.json
+presetAppSort.*.json
 docker/server/config/server-config.yaml

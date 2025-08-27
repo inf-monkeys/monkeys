@@ -4,11 +4,11 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence } from 'framer-motion';
-import { get, keyBy } from 'lodash';
+import { keyBy } from 'lodash';
 import { CircleSlash, Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
@@ -335,10 +335,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     });
   };
 
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  // 根据主题模式应用不同圆角样式
-  const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+  const { roundedClass, roundedLClass, roundedRClass } = useRoundedClass();
 
   return (
     <div
@@ -354,9 +351,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           {hasGroups ? (
             showGroup ? (
               <>
-                <div
-                  className={`flex h-full justify-between ${isShadowMode ? 'rounded-l-lg' : 'rounded-l-xl'} bg-slate-1`}
-                >
+                <div className={`flex h-full justify-between ${roundedLClass} bg-slate-1`}>
                   <VirtuaWorkbenchViewGroupList
                     data={lists}
                     groupId={groupId}
@@ -377,7 +372,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             </div>
           )}
           <div
-            className={`grid h-full grid-rows-[1fr_auto] ${isShadowMode ? 'rounded-r-lg' : 'rounded-r-xl'} bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1`}
+            className={`grid h-full grid-rows-[1fr_auto] ${roundedRClass} bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1`}
           >
             {/* Second nav */}
             <VirtuaWorkbenchViewList

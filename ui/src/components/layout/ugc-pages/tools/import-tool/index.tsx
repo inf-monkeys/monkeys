@@ -10,7 +10,7 @@ import { ImportToolService } from '@/components/layout/ugc-pages/tools/import-to
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 
 import { useGetUgcViewIconOnlyMode } from '../../util';
 

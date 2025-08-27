@@ -10,7 +10,7 @@ import { ICONS_CATEGORIES } from '@/components/ui/icon-selector/consts.ts';
 import { IVinesIconSelectorProps } from '@/components/ui/icon-selector/index.tsx';
 import { VirtuaIconGrid } from '@/components/ui/icon-selector/virtua';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 import { useAppStore } from '@/store/useAppStore';
 import { getI18nContent } from '@/utils';
