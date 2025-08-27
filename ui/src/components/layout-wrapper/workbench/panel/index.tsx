@@ -52,7 +52,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   return (
     <ViewGuard
       className={cn('flex flex-col gap-global', backgroundClass)}
-      style={{ background: `url(${background}) no-repeat center center / cover` }}
+      style={background ? { background: `url(${background}) no-repeat center center / cover` } : {}}
     >
       <SpaceHeader tail={showTeamSelector ? <TeamSelector /> : undefined} disableSeparator>
         <SpaceHeaderTabs />
