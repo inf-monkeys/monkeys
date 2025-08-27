@@ -58,12 +58,7 @@ const VinesForm: React.FC = () => {
       {pageFrom === 'workbench' && (
         <div className="absolute left-[calc(var(--global-spacing)*1.5)] top-0 flex flex-col gap-1">
           <span className="border-t-[3px] border-vines-500 pt-[8px] font-bold text-vines-500">
-            {getI18nContent(
-              workflow?.displayName ?? {
-                'zh-CN': '未知',
-                'en-US': 'Unknown',
-              },
-            )}
+            {getI18nContent(workflow?.displayName)}
           </span>
         </div>
       )}
