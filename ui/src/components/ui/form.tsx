@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, VariantProps } from 'class-variance-authority';
+import { get } from 'lodash';
 import { composeRenderProps, Group as AriaGroup, GroupProps as AriaGroupProps } from 'react-aria-components';
 import {
   Controller,
@@ -16,6 +17,7 @@ import {
 } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common/index.ts';
 import { Label } from '@/components/ui/label';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { cn } from '@/utils/index.ts';
@@ -76,14 +78,18 @@ const FormItemContext = React.createContext<FormItemContextValue>({} as FormItem
 const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { card?: boolean }>(
   ({ className, card = false, ...props }, ref) => {
     const id = React.useId();
+    const { data: systemConfig } = useSystemConfig();
+    const formVariant = get(systemConfig, 'theme.form.variant', 'bento') as 'bento' | 'ghost';
+
+    const shouldApplyCardStyle = card && formVariant === 'bento';
 
     return (
       <FormItemContext.Provider value={{ id }}>
         <div
           ref={ref}
           className={cn(
-            'space-y-4',
-            card && 'rounded-lg bg-neocard px-global pt-global text-[#3F3E39] dark:text-[#EDEDED]',
+            formVariant === 'bento' ? 'space-y-4' : 'space-y-2',
+            shouldApplyCardStyle && 'rounded-lg bg-neocard px-global pt-global text-[#3F3E39] dark:text-[#EDEDED]',
             className,
           )}
           {...props}
@@ -97,16 +103,25 @@ FormItem.displayName = 'FormItem';
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
->(({ className, ...props }, ref) => {
+>(({ className, children, ...props }, ref) => {
   const { error, formItemId } = useFormField();
 
+  const { data: systemConfig } = useSystemConfig();
+  const formVariant = get(systemConfig, 'theme.form.variant', 'bento') as 'bento' | 'ghost';
   return (
     <Label
       ref={ref}
-      className={cn('font-medium text-[#3F3E39] dark:text-[#EDEDED]', error && 'text-destructive', className)}
+      className={cn(
+        'flex items-center gap-2 font-medium text-[#3F3E39] dark:text-[#EDEDED]',
+        error && 'text-destructive',
+        className,
+      )}
       htmlFor={formItemId}
       {...props}
-    />
+    >
+      {formVariant === 'ghost' && <span className="ml-global-1/2 inline-block size-2 rounded-full bg-vines-500" />}
+      {children}
+    </Label>
   );
 });
 FormLabel.displayName = 'FormLabel';

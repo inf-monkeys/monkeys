@@ -82,7 +82,8 @@
       "unselect": "Unselect",
       "next": "Next",
       "previous": "Previous",
-      "tips": "Tips"
+      "tips": "Tips",
+      "optional": "Optional"
     },
     "status": {
       "active": "Active",

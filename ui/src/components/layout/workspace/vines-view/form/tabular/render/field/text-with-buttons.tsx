@@ -32,7 +32,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="relative">
+    <div className="relative p-1">
       <textarea
         placeholder={placeholder}
         value={value}

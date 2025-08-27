@@ -75,6 +75,10 @@ export type CustomizationHistoryResult = {
   display: boolean;
 };
 
+export type CustomizationForm = {
+  variant: 'bento' | 'ghost';
+};
+
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
 
 export interface ISystemConfig {
@@ -94,6 +98,7 @@ export interface ISystemConfig {
       primaryColor: string;
     };
     roundedSize?: string;
+    form?: CustomizationForm;
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };

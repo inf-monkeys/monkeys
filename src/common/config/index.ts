@@ -80,6 +80,10 @@ export type CustomizationHistoryResult = {
   display: boolean;
 };
 
+export type CustomizationForm = {
+  variant: 'bento' | 'ghost';
+};
+
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
 
 export interface ServerConfig {
@@ -149,6 +153,7 @@ export interface ServerConfig {
       allowConcurrentRuns: boolean;
     };
     historyResult: CustomizationHistoryResult;
+    form: CustomizationForm;
   };
 }
 
@@ -414,6 +419,9 @@ export const config: Config = {
         neocardDark: readConfig('server.customization.colors.neocardDark', '#1D1D1F'),
       },
       roundedSize: readConfig('server.customization.roundedSize', undefined),
+      form: {
+        variant: readConfig('server.customization.form.variant', 'bento'),
+      },
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),
       },

@@ -1,4 +1,4 @@
-import { AuthMethod, CustomizationHeadbar, CustomizationHistoryResult, CustomizationModules, ExtraLanguageURL, WorkflowPreviewExecutionGrid } from '../config';
+import { AuthMethod, CustomizationForm, CustomizationHeadbar, CustomizationHistoryResult, CustomizationModules, ExtraLanguageURL, WorkflowPreviewExecutionGrid } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
@@ -20,6 +20,7 @@ export interface ISystemConfig {
       neocardDarkColor: string;
     };
     roundedSize?: string;
+    form: CustomizationForm;
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
