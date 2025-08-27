@@ -10,8 +10,11 @@ import { cn } from '@/utils';
 export const OperationBarTipButton: React.FC<{
   mode: 'normal' | 'fast' | 'mini';
   type: 'form-view' | 'global-design-board';
-}> = ({ mode, type }) => {
+  density: 'compact' | 'default';
+}> = ({ mode, type, density }) => {
   const { t } = useTranslation();
+
+  const isCompact = density === 'compact';
 
   return (
     <div
@@ -19,7 +22,9 @@ export const OperationBarTipButton: React.FC<{
         'z-10 flex cursor-pointer items-center justify-center gap-global-1/2 rounded-md p-global-1/2 transition-colors hover:bg-accent hover:text-accent-foreground',
         mode === 'mini'
           ? 'mx-global-1/2 mt-global-1/2 size-[calc(var(--global-icon-size)+8px)]'
-          : 'mx-global mt-global size-[var(--operation-bar-width)]',
+          : isCompact
+            ? 'mx-global-1/2 mt-global size-[calc(var(--operation-bar-width))]'
+            : 'mx-global mt-global size-[var(--operation-bar-width)]',
       )}
     >
       <Tooltip>

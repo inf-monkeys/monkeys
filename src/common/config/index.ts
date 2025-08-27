@@ -50,6 +50,8 @@ export type VinesSpaceHeadbarModules = VinesSpaceHeadbarModule[];
 export type SettingsSidebarModule = 'account' | 'config' | 'stat' | 'apikey';
 export type SettingsSidebarModules = '*' | SettingsSidebarModule[];
 
+export type CustomizationDensity = 'compact' | 'default';
+
 export type CustomizationModules = {
   vinesSpaceSidebar?: VinesSpaceSidebarModules;
   vinesSpaceHeadbar?: VinesSpaceHeadbarModules;
@@ -146,6 +148,7 @@ export interface ServerConfig {
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
     themeMode: 'shadow' | 'border';
+    density: CustomizationDensity;
     miniMode: {
       showPreviewViewExecutionResultGrid: boolean;
     };
@@ -467,6 +470,7 @@ export const config: Config = {
       imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
       teamAsUser: readConfig('server.customization.teamAsUser', false),
       themeMode: readConfig('server.customization.themeMode', 'shadow'),
+      density: readConfig('server.customization.density', 'default'),
       miniMode: {
         showPreviewViewExecutionResultGrid: readConfig('server.customization.miniMode.showPreviewViewExecutionResultGrid', true),
       },

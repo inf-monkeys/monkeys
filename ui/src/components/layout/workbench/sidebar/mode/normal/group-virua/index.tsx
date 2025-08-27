@@ -43,6 +43,9 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
   onReorder,
 }) => {
   const { data: oem } = useSystemConfig();
+
+  const density = oem?.theme.density ?? 'default';
+
   const showMoreAction = oem?.theme.workbenchSidebarMoreAction ?? true;
 
   // 添加本地状态
@@ -101,7 +104,9 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
       >
         <ScrollArea
           className={cn(
-            'h-full px-global pt-global',
+            'h-full pt-global',
+            density === 'compact' && 'px-global-1/2',
+            density === 'default' && 'px-global',
             onlyShowWorkbenchIcon ? '[&>*]:w-[calc(var(--global-icon-size)+8px+var(--global-spacing))]' : 'min-w-44',
           )}
           ref={scrollRef}

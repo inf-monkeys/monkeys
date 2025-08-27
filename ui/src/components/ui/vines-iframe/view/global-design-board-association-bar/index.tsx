@@ -40,6 +40,8 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
 
   const { data: oem } = useSystemConfig();
 
+  const density = oem?.theme.density ?? 'default';
+
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
   const { roundedClass, roundedBLClass, roundedTLClass } = useRoundedClass();
@@ -100,7 +102,7 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
         themeMode === 'shadow' && 'shadow-around',
       )}
     >
-      <OperationBarTipButton mode={mode} type="global-design-board" />
+      <OperationBarTipButton mode={mode} type="global-design-board" density={density} />
       <div className="flex h-full items-center justify-center">
         <DndContext
           sensors={sensors}
@@ -113,7 +115,9 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
               'h-full',
               mode === 'mini'
                 ? 'px-global-1/2'
-                : 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)] px-global',
+                : density === 'compact'
+                  ? 'w-[calc(var(--operation-bar-width)+var(--global-spacing))] px-global-1/2'
+                  : 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)] px-global',
             )}
             ref={scrollRef}
             disabledOverflowMask

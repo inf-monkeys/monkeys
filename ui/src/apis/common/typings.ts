@@ -62,6 +62,8 @@ export type CustomizationHeadbar =
     }
   | undefined;
 
+export type CustomizationDensity = 'compact' | 'default';
+
 export type SelectionModeDisplayType = 'operation-button' | 'dropdown-menu';
 export type ClickBehavior = 'preview' | 'select' | 'fill-form';
 
@@ -131,6 +133,7 @@ export interface ISystemConfig {
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
     themeMode: 'shadow' | 'border';
+    density: CustomizationDensity;
     miniMode: {
       showPreviewViewExecutionResultGrid: boolean;
     };

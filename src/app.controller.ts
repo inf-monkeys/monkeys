@@ -146,6 +146,7 @@ export class AppController {
         imagePreviewStyle: config.server.customization.imagePreviewStyle,
         teamAsUser: config.server.customization.teamAsUser,
         themeMode: config.server.customization.themeMode,
+        density: config.server.customization.density,
         miniMode: config.server.customization.miniMode,
         workflow: config.server.customization.workflow,
         historyResult: config.server.customization.historyResult,

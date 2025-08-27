@@ -34,7 +34,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
 
     //
     const isLFTheme = themeMode === 'shadow';
-    const backgroundClass = isLFTheme ? 'bg-[#f3f4f6]' : 'bg-neocard';
+    const backgroundClass = isLFTheme ? 'bg-[#f2f3f4]' : 'bg-neocard';
 
     const showMoreAction = oem?.theme.workbenchSidebarMoreAction ?? true;
 

@@ -19,6 +19,7 @@ import {
 } from '@dnd-kit/sortable';
 import { Virtualizer, VListHandle } from 'virtua';
 
+import { useSystemConfig } from '@/apis/common';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import {
   IWorkbenchViewItemPage,
@@ -48,6 +49,10 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   onChildClick,
   onReorder,
 }) => {
+  const { data: oem } = useSystemConfig();
+
+  const density = oem?.theme.density ?? 'default';
+
   // 添加本地状态
   const [localData, setLocalData] = useState(initialData);
 
@@ -132,8 +137,14 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
     >
       <ScrollArea
         className={cn(
-          'px-global pt-global',
-          onlyShowWorkbenchIcon ? 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)]' : 'w-56',
+          'pt-global',
+          density === 'compact' && 'px-global-1/2',
+          density === 'default' && 'px-global',
+          onlyShowWorkbenchIcon
+            ? density === 'compact'
+              ? 'w-[calc(var(--operation-bar-width)+var(--global-spacing))]'
+              : 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)]'
+            : 'w-56',
         )}
         ref={scrollRef}
         style={{ height }}

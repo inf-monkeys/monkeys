@@ -31,7 +31,7 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
 
   const isShadowTheme = themeMode === 'shadow';
-  const backgroundClass = isShadowTheme ? 'bg-[#f3f4f6]' : 'bg-neocard';
+  const backgroundClass = isShadowTheme ? 'bg-[#f2f3f4]' : 'bg-neocard';
   // 获取当前语言的显示值
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: groupId });

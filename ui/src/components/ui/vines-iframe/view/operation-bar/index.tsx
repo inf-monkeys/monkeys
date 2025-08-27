@@ -45,6 +45,8 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
 
   const { data: oem } = useSystemConfig();
 
+  const density = oem?.theme.density ?? 'default';
+
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
   const { data: initialData } = useWorkflowAssociationList(workflowId);
@@ -103,7 +105,7 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
         themeMode === 'shadow' && 'shadow-around',
       )}
     >
-      <OperationBarTipButton mode={mode} type="form-view" />
+      <OperationBarTipButton mode={mode} type="form-view" density={density} />
       <div className="flex h-full items-center justify-center">
         <DndContext
           sensors={sensors}
@@ -116,7 +118,9 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
               'h-full',
               mode === 'mini'
                 ? 'px-global-1/2'
-                : 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)] px-global',
+                : density === 'compact'
+                  ? 'w-[calc(var(--operation-bar-width)+var(--global-spacing))] px-global-1/2'
+                  : 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)] px-global',
             )}
             ref={scrollRef}
             disabledOverflowMask

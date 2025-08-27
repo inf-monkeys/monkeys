@@ -1,4 +1,4 @@
-import { AuthMethod, CustomizationForm, CustomizationHeadbar, CustomizationHistoryResult, CustomizationModules, ExtraLanguageURL, WorkflowPreviewExecutionGrid } from '../config';
+import { AuthMethod, CustomizationDensity, CustomizationForm, CustomizationHeadbar, CustomizationHistoryResult, CustomizationModules, ExtraLanguageURL, WorkflowPreviewExecutionGrid } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
@@ -53,6 +53,7 @@ export interface ISystemConfig {
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
     themeMode: 'shadow' | 'border';
+    density: CustomizationDensity;
     miniMode: {
       showPreviewViewExecutionResultGrid: boolean;
     };

@@ -82,6 +82,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
+  const density = oem?.theme.density ?? 'default';
+
   const workbenchSidebarDefaultOpen = oem?.theme.workbenchSidebarDefaultOpen ?? true;
 
   const { data, isLoading, mutate } = useWorkspacePages();
@@ -392,8 +394,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             />
             <div
               className={cn(
-                'flex items-center justify-center gap-global px-global pb-global pt-2',
-                // onlyShowWorkbenchIcon && 'justify-center',
+                'flex items-center justify-center gap-global pb-global pt-2',
+                density === 'compact' && 'px-global-1/2',
+                density === 'default' && 'px-global',
               )}
             >
               {globalViewSize !== 'sm' && (
@@ -410,20 +413,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                   <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
                 </Tooltip>
               )}
-              {/* {!onlyShowWorkbenchIcon && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="vines-center shrink grow">
-                      <Link to="/$teamId/workflows/" className="contents" params={{ teamId }}>
-                        <Button icon={<PlusIcon />} className="shrink grow" variant="outline" />
-                      </Link>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent align="start" side="top" className="z-10">
-                    {t('workbench.sidebar.add')}
-                  </TooltipContent>
-                </Tooltip>
-              )} */}
             </div>
           </div>
         </WorkbenchViewItemCurrentData.Provider>

@@ -114,6 +114,8 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
+  const density = oem?.theme.density ?? 'default';
+
   const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
   const { roundedClass } = useRoundedClass();
@@ -128,7 +130,9 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
           roundedClass,
           className,
           onlyShowWorkbenchIcon
-            ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*6.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*3))]'
+            ? density === 'compact'
+              ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*4.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
+              : 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*6.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*3))]'
             : 'w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))] max-w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))]',
         )}
         ref={containerRef}

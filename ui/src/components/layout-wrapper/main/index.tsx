@@ -20,7 +20,7 @@ export const MainWrapper: React.FC<IProps> = ({ layoutId }) => {
 
   // 根据主题模式应用不同样式
   const isShadowMode = themeMode === 'shadow';
-  const backgroundClass = isShadowMode ? 'bg-[#f3f4f6]' : 'bg-slate-3';
+  const backgroundClass = isShadowMode ? 'bg-[#f2f3f4]' : 'bg-slate-3';
   const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-md';
 
   return (
