@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ChevronLeft, ChevronRight, Inbox, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toolSearchService } from '@/package/vines-flow/core/tools/search-utils.ts';
 import { VinesToolDef, VinesToolWithCategory } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
@@ -26,6 +27,8 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
 
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const [targetNodeId, setTargetNodeId] = useState<string>('');
   const [disabledSelector, setDisabledSelector] = useState(false);
@@ -37,6 +40,8 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
 
       setOpen(true);
       setSearchValue('');
+      setSuggestions([]);
+      setShowSuggestions(false);
       setTargetNodeId(targetId);
       setDisabledSelector(disabled);
       setIsInsertBefore(insertBefore);
@@ -80,6 +85,25 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
 
   const [activeTab, setActiveTab] = useState('all');
 
+  // 处理搜索建议
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchValue(value);
+
+    if (value?.trim()) {
+      const newSuggestions = toolSearchService.getSuggestions(value, 5);
+      setSuggestions(newSuggestions);
+      setShowSuggestions(newSuggestions.length > 0);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, []);
+
+  const handleSuggestionClick = useCallback((suggestion: string) => {
+    setSearchValue(suggestion);
+    setShowSuggestions(false);
+  }, []);
+
   const listLength = list.length;
   useEffect(() => {
     if (searchValue) {
@@ -95,13 +119,36 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-[51.6rem]">
         <DialogTitle>{t('workspace.flow-view.headless-modal.tool-selector.title')}</DialogTitle>
-        <div className="relative flex w-full items-center">
-          <Search className="absolute ml-3 size-4 shrink-0 opacity-50" />
-          <Input
-            className="pl-9"
-            placeholder={t('workspace.flow-view.headless-modal.tool-selector.placeholder')}
-            onChange={setSearchValue}
-          />
+        <div className="relative w-full">
+          <div className="relative flex w-full items-center">
+            <Search className="absolute ml-3 size-4 shrink-0 opacity-50" />
+            <Input
+              className="pl-9"
+              placeholder={t('workspace.flow-view.headless-modal.tool-selector.placeholder')}
+              value={searchValue}
+              onChange={handleSearchChange}
+              onFocus={() => {
+                if (searchValue.trim() && suggestions.length > 0) {
+                  setShowSuggestions(true);
+                }
+              }}
+            />
+          </div>
+
+          {/* 搜索建议下拉框 */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full z-50 mt-1 w-full rounded-md border bg-popover shadow-md">
+              {suggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="cursor-pointer px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <Tabs className="h-[31.125rem]" defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
           <div className="flex justify-between">

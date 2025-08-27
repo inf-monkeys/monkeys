@@ -11,6 +11,7 @@ import {
   TOOL_CATEGORY,
   TOOL_CATEGORY_SORT_INDEX_LIST,
 } from '@/package/vines-flow/core/tools/consts.ts';
+import { toolSearchService } from '@/package/vines-flow/core/tools/search-utils.ts';
 import {
   IVinesVariable,
   IVinesVariableGroupInfo,
@@ -20,7 +21,7 @@ import {
   VinesVariableMapper,
 } from '@/package/vines-flow/core/tools/typings.ts';
 import { Constructor, VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
-import { cloneDeep, getI18nContent, I18nAllContent } from '@/utils';
+import { cloneDeep, getI18nContent } from '@/utils';
 import { format } from '@/utils/string-template.ts';
 
 export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
@@ -47,6 +48,13 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
     // ... other methods
     private checkoutData() {
       this.tools = this.vinesTools.concat(this.vinesSubWorkflowTools);
+
+      // 更新搜索索引
+      const allTools = this.tools
+        .concat(this.vinesSubWorkflowTools, this.vinesComfyUITools)
+        .filter(({ name }) => !IGNORE_TOOLS.some((n) => name.startsWith(n)));
+      toolSearchService.buildSearchIndex(allTools);
+
       if (this.status !== VINES_STATUS.IDLE) return;
       if (this.toolInitialized && this.subWorkflowInitialized && this.comfyUIInitialized) {
         this.status = VINES_STATUS.READY;
@@ -189,26 +197,58 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
     public getToolsByCategory(search?: string) {
       // 当前分类下的工具、数量、分类 ID、分类名称
       const tools: VinesToolWithCategory[] = [];
+
+      // 如果有搜索词，使用优化的搜索服务
+      if (search?.trim()) {
+        for (const [category, categoryDisplayName] of Object.entries(TOOL_CATEGORY)) {
+          let searchResults: VinesToolDef[] = [];
+
+          if (category === 'all') {
+            searchResults = toolSearchService.search(search);
+          } else if (category === 'sub-workflow') {
+            searchResults = toolSearchService.search(search).filter((tool) => tool.type === ToolType.SUB_WORKFLOW);
+          } else if (category === 'comfyui') {
+            searchResults = toolSearchService.search(search).filter((tool) => tool.name.startsWith('comfyui:'));
+          } else if (category === 'api') {
+            searchResults = toolSearchService.search(search).filter((tool) => tool.categories?.includes('api'));
+          } else if (category === 'service') {
+            searchResults = toolSearchService
+              .search(search)
+              .filter((tool) => tool.categories?.includes('service') && tool.categories?.length === 1);
+          } else {
+            searchResults = toolSearchService
+              .search(search)
+              .filter((tool) => tool.categories?.includes(category as ToolCategory));
+          }
+
+          if (searchResults.length > 0) {
+            tools.push([searchResults, searchResults.length, category, categoryDisplayName]);
+          }
+        }
+
+        const result = tools.sort(
+          (a, b) => TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(a[2]) - TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(b[2]),
+        );
+
+        return result.filter(([list, , key]) => list.length && key !== 'all');
+      }
+
+      // 无搜索词时保持原有逻辑
       for (const [category, categoryDisplayName] of Object.entries(TOOL_CATEGORY)) {
         if (category === 'all') {
           const allApp = this.tools
             .concat(this.vinesSubWorkflowTools, this.vinesComfyUITools)
-            .filter(({ displayName, name, description }) => {
-              if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
-              return !search ? true : [displayName, name, description].some((s) => getI18nContent(s)?.includes(search));
-            });
+            .filter(({ name }) => !IGNORE_TOOLS.some((n) => name.startsWith(n)));
           tools.push([allApp, allApp.length, category, categoryDisplayName]);
 
-          const subWorkflowTools = this.vinesSubWorkflowTools.filter(({ displayName, name, description }) => {
-            if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
-            return !search ? true : [displayName, name, description].some((s) => I18nAllContent(s)?.includes(search));
-          });
+          const subWorkflowTools = this.vinesSubWorkflowTools.filter(
+            ({ name }) => !IGNORE_TOOLS.some((n) => name.startsWith(n)),
+          );
           tools.push([subWorkflowTools, subWorkflowTools.length, 'sub-workflow', 'sub-workflow']);
 
-          const comfyUITools = this.vinesComfyUITools.filter(({ displayName, name, description }) => {
-            if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
-            return !search ? true : [displayName, name, description].some((s) => I18nAllContent(s)?.includes(search));
-          });
+          const comfyUITools = this.vinesComfyUITools.filter(
+            ({ name }) => !IGNORE_TOOLS.some((n) => name.startsWith(n)),
+          );
           tools.push([comfyUITools, comfyUITools.length, 'comfyui', 'comfyui']);
 
           const apiApp = this.tools.filter(({ categories }) => categories?.includes('api'));
@@ -221,10 +261,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         } else {
           const appList = this.tools
             .filter(({ categories }) => categories?.includes(category as ToolCategory))
-            .filter(({ displayName, name, description }) => {
-              if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
-              return !search ? true : [displayName, name, description].some((s) => I18nAllContent(s)?.includes(search));
-            });
+            .filter(({ name }) => !IGNORE_TOOLS.some((n) => name.startsWith(n)));
           const listLength = appList.length;
           if (listLength) {
             tools.push([appList, listLength, category, categoryDisplayName]);
@@ -232,15 +269,9 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         }
       }
 
-      const result = tools.sort(
+      return tools.sort(
         (a, b) => TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(a[2]) - TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(b[2]),
       );
-
-      if (search && result.length) {
-        return result.filter(([list, , key]) => list.length && key !== 'all');
-      }
-
-      return result;
     }
 
     // region Variable
