@@ -97,6 +97,8 @@ export class ConversationAppRepository {
     entity.presence_penalty = params.presence_penalty;
     entity.frequency_penalty = params.frequency_penalty;
     entity.customModelName = params.customModelName;
+    entity.mode = params.mode;
+    entity.maxReActSteps = params.maxReActSteps;
     return await this.repository.save(entity);
   }
 
@@ -174,6 +176,12 @@ export class ConversationAppRepository {
     }
     if (updates.frequency_penalty != undefined) {
       entity.frequency_penalty = updates.frequency_penalty;
+    }
+    if (updates.mode != undefined) {
+      entity.mode = updates.mode;
+    }
+    if (updates.maxReActSteps != undefined) {
+      entity.maxReActSteps = updates.maxReActSteps;
     }
     entity.updatedTimestamp = Date.now();
     return await this.repository.save(entity);

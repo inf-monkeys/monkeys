@@ -15,6 +15,8 @@ export interface CreateConversationAppParams {
   temperature?: number;
   presence_penalty?: number;
   frequency_penalty?: number;
+  mode?: 'chat' | 'react';
+  maxReActSteps?: number;
 }
 
 export interface UpdateConversationAppParams {
@@ -30,6 +32,8 @@ export interface UpdateConversationAppParams {
   temperature?: number;
   presence_penalty?: number;
   frequency_penalty?: number;
+  mode?: 'chat' | 'react';
+  maxReActSteps?: number;
 }
 
 @Entity({ name: 'conversation_apps' })
@@ -100,4 +104,21 @@ export class ConversationAppEntity extends BaseAssetEntity {
     default: 0.5,
   })
   frequency_penalty?: number;
+
+  @Column({
+    name: 'mode',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+    default: 'chat',
+  })
+  mode?: 'chat' | 'react';
+
+  @Column({
+    name: 'max_react_steps',
+    type: 'int',
+    nullable: true,
+    default: 10,
+  })
+  maxReActSteps?: number;
 }
