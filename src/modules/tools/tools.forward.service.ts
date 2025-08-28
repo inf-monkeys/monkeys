@@ -1,14 +1,20 @@
 import { config } from '@/common/config';
 import { IRequest } from '@/common/typings/request';
-import { API_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
+import { API_NAMESPACE, SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { AuthType } from '../../common/typings/tools';
+import { REACT_TOOL_NAMES, ReActToolsService } from './builtin/react-tools';
+import { ToolsRegistryService } from './tools.registry.service';
 
 @Injectable()
 export class ToolsForwardService {
-  constructor(private readonly toolsRepository: ToolsRepository) {}
+  constructor(
+    private readonly toolsRepository: ToolsRepository,
+    private readonly toolsRegistryService: ToolsRegistryService,
+    private readonly reactToolsService: ReActToolsService,
+  ) {}
 
   private replaceUrlParams(url: string, params: { [x: string]: any }) {
     let resultUrl = url;
@@ -100,9 +106,43 @@ export class ToolsForwardService {
     return data;
   }
 
-  public async invoke<T>(toolName: string, reqData: { [x: string]: any }) {
+  public async invoke<T>(toolName: string, reqData: { [x: string]: any }, context?: { sessionId?: string; maxSteps?: number }) {
     const tool = await this.toolsRepository.getToolByName(toolName);
     const namespace = toolName.split(':')[0];
+
+    // 处理 ReAct 专用工具
+    if (REACT_TOOL_NAMES.includes(toolName as any)) {
+      try {
+        switch (toolName) {
+          case 'ask_followup_question':
+            return await this.reactToolsService.askFollowupQuestion(reqData as { question: string; suggestions?: string[] }, context);
+          case 'new_task':
+            return await this.reactToolsService.newTask(reqData as { message: string; todos?: string }, context);
+          case 'update_todo_list':
+            return await this.reactToolsService.updateTodoList(reqData as { todos: string }, context);
+          case 'task_completion':
+            return await this.reactToolsService.taskCompletion(reqData as { result: string; summary?: string }, context);
+          default:
+            throw new Error(`ReAct tool ${toolName} not implemented`);
+        }
+      } catch (error) {
+        throw new Error(`ReAct tool ${toolName} execution failed: ${error.message}`);
+      }
+    }
+
+    // 处理系统内置工具
+    if (namespace === SYSTEM_NAMESPACE) {
+      const builtInTool = await this.toolsRegistryService.isBuiltInTool(toolName);
+      if (builtInTool && builtInTool.handler) {
+        const result = await builtInTool.handler(reqData, {
+          taskId: 'direct-call',
+          workflowInstanceId: 'direct-call',
+        });
+        return result;
+      } else {
+        throw new Error(`Built-in tool ${toolName} not found or has no handler`);
+      }
+    }
 
     if (namespace === API_NAMESPACE) {
       const apiInfo = tool.extra?.apiInfo;

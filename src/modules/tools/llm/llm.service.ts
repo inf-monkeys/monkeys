@@ -20,6 +20,7 @@ import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completion
 import { Stream } from 'openai/streaming';
 import { Readable } from 'stream';
 import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base.service';
+import { ReActStepManager } from '../builtin/react-step-manager';
 import { ToolsForwardService } from '../tools.forward.service';
 import { ResponseFormat } from './dto/req/create-chat-compltion.dto';
 
@@ -46,6 +47,8 @@ export interface CreateChatCompelitionsParams {
   knowledgeBase?: string;
   sqlKnowledgeBase?: string;
   response_format?: ResponseFormat;
+  mode?: 'chat' | 'react';
+  maxReActSteps?: number;
 }
 
 export interface CreateCompelitionsParams {
@@ -152,6 +155,7 @@ export class LlmService {
     private readonly llmModelRepository: LlmModelRepository,
     private readonly oneApiRepository: OneApiRepository,
     private readonly mediaFileService: MediaFileService,
+    private readonly reactStepManager: ReActStepManager,
   ) {}
 
   private getModelNameByModelMappings(modelMappings: { [x: string]: string }, modelName: string): string {
@@ -239,7 +243,20 @@ export class LlmService {
       name?: string;
     }>,
   ) {
-    const messageHistory = messages.filter(({ content }) => !!content);
+    const messageHistory = messages.filter(({ content, role }) => {
+      if (!content) return false;
+
+      // 过滤掉错误格式的工具调用消息
+      if (role === 'assistant' && typeof content === 'string') {
+        // 检查是否是被错误序列化的工具调用
+        if (content.includes('tool_calls') && (content.startsWith('{') || content.startsWith('{"'))) {
+          console.log('[DEBUG] Filtering out malformed tool call message:', content.substring(0, 100));
+          return false;
+        }
+      }
+
+      return true;
+    });
     return messageHistory;
   }
 
@@ -250,49 +267,60 @@ export class LlmService {
       name?: string;
     }>,
   ): Array<ChatCompletionMessageParam> {
-    return messages.map((message) => {
-      // 如果content是字符串，直接使用标准格式
-      if (typeof message.content === 'string') {
-        return {
-          role: message.role as any,
-          content: message.content,
-          name: message.name,
-        } as ChatCompletionMessageParam;
-      }
-      // 如果content是数组，转换为OpenAI要求的格式
-      else if (Array.isArray(message.content)) {
-        const formattedContent = message.content.map((item) => {
-          if (item.type === 'text') {
-            return {
-              type: 'text',
-              text: item.text,
-            };
-          } else if (item.type === 'image_url') {
-            return {
-              type: 'image_url',
-              image_url: {
-                url: item.image_url.url,
-                detail: item.image_url.detail || 'auto',
-              },
-            };
+    return messages
+      .filter(({ content, role }) => {
+        // 再次过滤错误格式的工具调用消息
+        if (role === 'assistant' && typeof content === 'string') {
+          if (content.includes('tool_calls') && (content.startsWith('{') || content.startsWith('{"'))) {
+            console.log('[DEBUG] Filtering malformed tool call in convertToOpenAI:', content.substring(0, 100));
+            return false;
           }
-          return item;
-        });
+        }
+        return !!content;
+      })
+      .map((message) => {
+        // 如果content是字符串，直接使用标准格式
+        if (typeof message.content === 'string') {
+          return {
+            role: message.role as any,
+            content: message.content,
+            name: message.name,
+          } as ChatCompletionMessageParam;
+        }
+        // 如果content是数组，转换为OpenAI要求的格式
+        else if (Array.isArray(message.content)) {
+          const formattedContent = message.content.map((item) => {
+            if (item.type === 'text') {
+              return {
+                type: 'text',
+                text: item.text,
+              };
+            } else if (item.type === 'image_url') {
+              return {
+                type: 'image_url',
+                image_url: {
+                  url: item.image_url.url,
+                  detail: item.image_url.detail || 'auto',
+                },
+              };
+            }
+            return item;
+          });
 
+          return {
+            role: message.role as any,
+            content: formattedContent as any,
+            name: message.name,
+          } as ChatCompletionMessageParam;
+        }
+
+        // 兜底，避免类型错误
         return {
           role: message.role as any,
-          content: formattedContent as any,
+          content: '',
           name: message.name,
         } as ChatCompletionMessageParam;
-      }
-
-      // 兜底，避免类型错误
-      return {
-        role: message.role as any,
-        content: '',
-        name: message.name,
-      } as ChatCompletionMessageParam;
-    });
+      });
   }
 
   public async createCompelitions(teamId: string, params: CreateCompelitionsParams) {
@@ -411,41 +439,215 @@ export class LlmService {
     if (sqlKnowledgeBase) {
       tools.push(SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL);
     }
-    const toolEntities = await this.toolsReopsitory.getToolsByNames(tools);
-    return await Promise.all(
-      toolEntities.map(async (tool): Promise<ChatCompletionTool> => {
-        const toolParams = this.resolveToolParameter(tool.input);
-        if (tool.name === SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL) {
-          const tableStaements = await this.sqlKnowledgeBaseService.getCreateTableStatements(sqlKnowledgeBase);
-          if ((toolParams.properties as any).sql) {
-            (toolParams.properties as any).sql.description = `SQL query to get data from the table. Available tables: ${tableStaements.map((table) => {
-              return `Table Name：${table.name}\n Create Table Statements：${table.sql}`;
-            })}`;
+
+    const resolvedTools: Array<ChatCompletionTool> = [];
+    const dbToolNames: string[] = [];
+    const reactToolNames: string[] = [];
+
+    // 分离ReAct工具和数据库工具
+    for (const toolName of tools) {
+      if (['ask_followup_question', 'new_task', 'update_todo_list', 'task_completion'].includes(toolName)) {
+        reactToolNames.push(toolName);
+      } else {
+        dbToolNames.push(toolName);
+      }
+    }
+
+    // 处理数据库工具
+    if (dbToolNames.length > 0) {
+      const toolEntities = await this.toolsReopsitory.getToolsByNames(dbToolNames);
+      const dbTools = await Promise.all(
+        toolEntities.map(async (tool): Promise<ChatCompletionTool> => {
+          const toolParams = this.resolveToolParameter(tool.input);
+          if (tool.name === SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL) {
+            const tableStaements = await this.sqlKnowledgeBaseService.getCreateTableStatements(sqlKnowledgeBase);
+            if ((toolParams.properties as any).sql) {
+              (toolParams.properties as any).sql.description = `SQL query to get data from the table. Available tables: ${tableStaements.map((table) => {
+                return `Table Name：${table.name}\n Create Table Statements：${table.sql}`;
+              })}`;
+            }
+            if ((toolParams.properties as any).sql_knowledge_base_id) {
+              (toolParams.properties as any).sql_knowledge_base_id.enum = [sqlKnowledgeBase];
+            }
           }
-          if ((toolParams.properties as any).sql_knowledge_base_id) {
-            (toolParams.properties as any).sql_knowledge_base_id.enum = [sqlKnowledgeBase];
-          }
-        }
-        return {
-          type: 'function',
-          function: {
-            name: tool.name.replaceAll(':', '__'),
-            parameters: toolParams,
-          },
-        };
-      }),
-    );
+          return {
+            type: 'function',
+            function: {
+              name: tool.name.replaceAll(':', '__'),
+              parameters: toolParams,
+            },
+          };
+        }),
+      );
+      resolvedTools.push(...dbTools);
+    }
+
+    // 处理内置ReAct工具
+    for (const reactToolName of reactToolNames) {
+      let toolDefinition: ChatCompletionTool;
+
+      switch (reactToolName) {
+        case 'ask_followup_question':
+          toolDefinition = {
+            type: 'function',
+            function: {
+              name: 'ask_followup_question',
+              description: 'Ask users for more information when you need clarification or additional details',
+              parameters: {
+                type: 'object',
+                properties: {
+                  question: { type: 'string', description: 'Clear, specific question' },
+                  suggestions: { type: 'array', items: { type: 'string' }, description: 'List of suggested answers' },
+                },
+                required: ['question'],
+              },
+            },
+          };
+          break;
+        case 'new_task':
+          toolDefinition = {
+            type: 'function',
+            function: {
+              name: 'new_task',
+              description: 'Create a new task with an initial todo list for complex multi-step work. MUST be called first for any complex task.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  message: {
+                    type: 'string',
+                    description: 'Task description explaining what needs to be accomplished',
+                  },
+                  todos: {
+                    type: 'string',
+                    description: 'Initial todo list in markdown format with [ ] for pending tasks',
+                  },
+                },
+                required: ['message'],
+              },
+            },
+          };
+          break;
+        case 'update_todo_list':
+          toolDefinition = {
+            type: 'function',
+            function: {
+              name: 'update_todo_list',
+              description: 'Update the full TODO list with current progress status',
+              parameters: {
+                type: 'object',
+                properties: {
+                  todos: { type: 'string', description: 'Complete todo list with status updates' },
+                },
+                required: ['todos'],
+              },
+            },
+          };
+          break;
+        case 'task_completion':
+          toolDefinition = {
+            type: 'function',
+            function: {
+              name: 'task_completion',
+              description: 'Summarize results when the task is completed',
+              parameters: {
+                type: 'object',
+                properties: {
+                  result: { type: 'string', description: 'Final result or answer' },
+                  summary: { type: 'string', description: 'Summary of the process' },
+                },
+                required: ['result'],
+              },
+            },
+          };
+          break;
+        default:
+          continue;
+      }
+      resolvedTools.push(toolDefinition);
+    }
+
+    return resolvedTools;
   }
 
-  private async executeTool(name: string, data: any, sqlKnowledgeBase?: string) {
+  private async executeTool(name: string, data: any, sqlKnowledgeBase?: string, sessionId?: string, maxSteps?: number) {
     logger.info(`Start to call tool call: ${name} with arguments: ${JSON.stringify(data)}`);
     name = name.replaceAll('__', ':');
+
+    // ReAct模式下发送步骤开始事件
+    let stepId: string | undefined;
+    if (sessionId && this.reactStepManager.isSessionActive(sessionId)) {
+      // 根据工具名称确定步骤类型和标题
+      let stepType: 'new_task' | 'update_todo_list' | 'ask_followup_question' | 'task_completion' | 'thinking' = 'thinking';
+      let title = `执行工具: ${name}`;
+
+      if (name === 'new_task') {
+        stepType = 'new_task';
+        title = `创建新任务: ${data.message || ''}`;
+      } else if (name === 'update_todo_list') {
+        stepType = 'update_todo_list';
+        title = '更新任务列表';
+      } else if (name === 'ask_followup_question') {
+        stepType = 'ask_followup_question';
+        title = `询问问题: ${data.question || ''}`;
+      } else if (name === 'task_completion') {
+        stepType = 'task_completion';
+        title = '任务完成';
+      }
+
+      stepId = this.reactStepManager.sendStepStart(sessionId, stepType, title, {
+        name,
+        arguments: data,
+      });
+    }
+
     if (sqlKnowledgeBase && name === SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL) {
       data.sql_knowledge_base_id = sqlKnowledgeBase;
     }
-    const result = await this.toolForwardServie.invoke<{ [x: string]: any }>(name, data);
-    logger.info(`Tool call ${name} result: ${JSON.stringify(result)}`);
-    return result;
+
+    // 为ReAct工具传递会话上下文
+    const context = sessionId ? { sessionId, maxSteps } : undefined;
+
+    try {
+      const result = await this.toolForwardServie.invoke<{ [x: string]: any }>(name, data, context);
+      logger.info(`Tool call ${name} result: ${JSON.stringify(result)}`);
+
+      // ReAct模式下发送步骤完成事件
+      if (stepId && sessionId && this.reactStepManager.isSessionActive(sessionId)) {
+        // 解析工具结果中的特殊数据
+        const metadata: any = {};
+        if (name === 'new_task' || name === 'update_todo_list') {
+          // 尝试解析待办事项列表
+          const resultStr = typeof result === 'string' ? result : JSON.stringify(result);
+          const todoMatch = resultStr.match(/Todo items?:\s*([\s\S]*?)(?:\n\n|\n*$)/i);
+          if (todoMatch) {
+            const todoLines = todoMatch[1].split('\n').filter((line) => line.trim());
+            metadata.todos = todoLines
+              .map((line, index) => ({
+                id: `todo_${Date.now()}_${index}`,
+                content: line.replace(/^\s*[-\[\] ]*/, '').trim(),
+                status: line.includes('[x]') ? 'completed' : line.includes('[-]') ? 'in_progress' : 'pending',
+              }))
+              .filter((todo) => todo.content);
+          }
+        } else if (name === 'ask_followup_question') {
+          metadata.question = data.question;
+          metadata.suggestions = data.suggestions;
+        }
+
+        this.reactStepManager.sendStepComplete(sessionId, stepId, typeof result === 'string' ? result : JSON.stringify(result), metadata);
+      }
+
+      return result;
+    } catch (error) {
+      logger.error(`Tool call ${name} failed:`, error);
+
+      // ReAct模式下发送错误事件
+      if (stepId && sessionId && this.reactStepManager.isSessionActive(sessionId)) {
+        this.reactStepManager.sendError(sessionId, error.message, stepId);
+      }
+
+      throw error;
+    }
   }
 
   private async summarizeUserMessages(openai: OpenAI, model: string, messages: Array<ChatCompletionMessageParam>): Promise<string> {
@@ -691,13 +893,49 @@ ${userQuestion}
       throw new Error('Stream is not supported in simple api response type');
     }
     let { model } = params;
-    const { stream, systemPrompt, knowledgeBase, sqlKnowledgeBase, response_format = ResponseFormat.text } = params;
+    const { stream, systemPrompt, knowledgeBase, sqlKnowledgeBase, response_format = ResponseFormat.text, mode = 'chat', maxReActSteps = 10 } = params;
+
+    // 临时：为ReAct模式关闭流模式以避免AI SDK问题
+    const actualStream = mode === 'react' ? false : stream;
+
+    // 为ReAct模式生成sessionId
+    const sessionId = mode === 'react' ? `react_session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}` : undefined;
+
+    console.log('[DEBUG] LLM Service 模式参数:', {
+      mode,
+      maxReActSteps,
+      hasSystemPrompt: !!systemPrompt,
+      sessionId,
+    });
+
+    // 根据模式处理工具和系统提示词
+    let modeSpecificTools: string[] = [];
+    let finalSystemPrompt = systemPrompt;
+
+    if (mode === 'react') {
+      // ReAct 模式：使用任务管理工具
+      modeSpecificTools = ['ask_followup_question', 'new_task', 'update_todo_list', 'task_completion'];
+
+      console.log('[DEBUG] 启用ReAct模式，添加任务管理工具:', modeSpecificTools);
+
+      // 导入 ReAct 工具服务来生成系统提示词
+      const { ReActToolsService } = await import('../builtin/react-tools');
+      const reactTools = new ReActToolsService();
+      const reactSystemPrompt = reactTools.generateSystemPrompt();
+
+      finalSystemPrompt = `${systemPrompt || ''}
+
+${reactSystemPrompt}`;
+    }
+    // chat 模式保持原有逻辑，不添加额外工具
 
     // Messages passed by the user
     const { messages } = params;
+    console.log('[DEBUG] Raw messages received:', JSON.stringify(messages, null, 2));
     const historyMessages = this.sanitizeMessages(messages);
+    console.log('[DEBUG] Messages after sanitization:', JSON.stringify(historyMessages, null, 2));
 
-    if (stream && res) {
+    if (actualStream && res) {
       // 只有在有 res 对象时才设置 header
       res.setHeader('content-type', 'text/event-stream;charset=utf-8');
       res.status(200);
@@ -710,12 +948,12 @@ ${userQuestion}
     const openai = new OpenAI({
       apiKey: apiKey || 'mock-apikey',
       baseURL: baseURL,
-      maxRetries: config.llm.maxRetries,
-      timeout: config.llm.timeout,
+      maxRetries: config.llm.maxRetries || 5, // 增加重试次数
+      timeout: config.llm.timeout || 60000, // 增加超时时间到60秒
     });
 
     // Generate system messages
-    const { generatedByKnowledgeBase, systemMessages } = await this.generateSystemMessages(openai, model, messages, systemPrompt, knowledgeBase);
+    const { generatedByKnowledgeBase, systemMessages } = await this.generateSystemMessages(openai, model, messages, finalSystemPrompt, knowledgeBase);
     const randomChatCmplId = Math.random().toString(36).substr(2, 16);
 
     const logs = [];
@@ -737,8 +975,18 @@ ${userQuestion}
     // 转换消息格式并进行类型转换
     const openAIHistoryMessages = this.convertToOpenAIMessages(historyMessages);
 
+    // 最终检查和清理消息
+    const cleanedMessages = openAIHistoryMessages.filter((msg) => {
+      if (typeof msg.content === 'string' && msg.content.includes('tool_calls')) {
+        console.log('[DEBUG] Final filter: removing malformed message:', msg.content.substring(0, 100));
+        return false;
+      }
+      return true;
+    });
+    console.log('[DEBUG] Final cleaned messages count:', cleanedMessages.length);
+
     // Cap messages
-    const cappedMessages = await this.capMessages(systemMessages, openAIHistoryMessages);
+    const cappedMessages = await this.capMessages(systemMessages, cleanedMessages);
 
     // 使用转换后的消息
     let openAIMessages = cappedMessages;
@@ -748,16 +996,27 @@ ${userQuestion}
       openAIMessages = this.mergeConsecutiveMessages(openAIMessages);
     }
 
-    const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools || [], sqlKnowledgeBase);
+    // 根据模式合并工具
+    const userTools = params.tools || [];
+    let allTools: string[] = [];
+
+    if (mode === 'react') {
+      // ReAct 模式：只使用思维工具，不允许混合功能性工具
+      allTools = [...modeSpecificTools];
+    } else {
+      // Chat 模式：使用用户配置的功能性工具
+      allTools = [...userTools];
+    }
+    const tools: Array<ChatCompletionTool> = await this.resolveTools(allTools, sqlKnowledgeBase);
 
     let response: ChatCompletion | Stream<ChatCompletionChunk>;
     const createChatCompelitionsBody: ChatCompletionCreateParamsBase = {
       model,
-      stream: stream,
+      stream: actualStream,
       temperature: params.temperature ?? undefined,
       frequency_penalty: params.frequency_penalty ?? undefined,
       presence_penalty: params.presence_penalty ?? undefined,
-      max_tokens: params.max_tokens ?? undefined,
+      max_tokens: params.max_tokens ?? (mode === 'react' ? 8000 : undefined),
       messages: openAIMessages, // 使用转换后的消息格式
       tools: tools?.length ? tools : undefined,
       tool_choice: tools?.length ? 'auto' : undefined,
@@ -770,13 +1029,23 @@ ${userQuestion}
           : undefined,
       ...defaultParams,
     };
+
+    // 用于存储ReAct模式下最后一个工具调用的结果
+    let lastToolResult: string = '';
+
     try {
-      logger.info(`Start to create chat completions: baseURL=${baseURL}, apiKey=${maskString(apiKey)}, model=${model}, stream=${stream}, messages=${JSON.stringify(messages)}`);
+      logger.info(`Start to create chat completions: baseURL=${baseURL}, apiKey=${maskString(apiKey)}, model=${model}, stream=${actualStream}, messages=${JSON.stringify(openAIMessages)}`);
       response = await openai.chat.completions.create(createChatCompelitionsBody);
+      console.log('[DEBUG] OpenAI response created successfully, response type:', typeof response);
+      if (actualStream) {
+        console.log('[DEBUG] Response is a stream, beginning stream processing');
+      } else {
+        console.log('[DEBUG] Response is not a stream, processing as regular response');
+      }
     } catch (error) {
       let errorMsg: string = error.message;
       // Can't get the error message when stream mode is on, make a anothier request to get the error message
-      if (stream) {
+      if (actualStream) {
         try {
           await axios.post(`${baseURL}/chat/completions`, {
             ...createChatCompelitionsBody,
@@ -791,18 +1060,29 @@ ${userQuestion}
       onFailed?.(errorMsg);
 
       if (res) {
-        return this.setErrorResponse(res, randomChatCmplId, model, stream, errorMsg);
+        return this.setErrorResponse(res, randomChatCmplId, model, actualStream, errorMsg);
       } else {
         throw error;
       }
     }
 
     try {
-      if (stream) {
+      if (actualStream) {
+        console.log('[DEBUG] Starting stream processing with AI SDK');
         const data = new StreamData();
         const streamResponse = OpenAIStream(response as Stream<ChatCompletionChunk>, {
           experimental_onToolCall: async (call: ToolCallPayload, appendToolCallMessage) => {
+            console.log('[DEBUG] Tool call received:', JSON.stringify(call, null, 2));
             for (const toolCall of call.tools) {
+              console.log('[DEBUG] Processing tool call:', {
+                id: toolCall.id,
+                name: toolCall.func.name,
+                arguments: toolCall.func.arguments,
+                argumentsType: typeof toolCall.func.arguments,
+                argumentsLength: toolCall.func.arguments ? String(toolCall.func.arguments).length : 'null/undefined',
+                argumentsValue: toolCall.func.arguments,
+              });
+
               let toolResult: any;
               try {
                 sendAndCollectLogs('info', 'tool_call', `Start to execute tool call ${toolCall.func.name} with arguments: ${JSON.stringify(toolCall.func.arguments)}`, {
@@ -811,7 +1091,44 @@ ${userQuestion}
                   arguments: toolCall.func.arguments,
                   status: 'inprogress',
                 });
-                toolResult = await this.executeTool(toolCall.func.name, toolCall.func.arguments, sqlKnowledgeBase);
+                // 处理空的arguments参数，避免JSON.parse错误
+                let parsedArguments: any = toolCall.func.arguments;
+
+                // 处理各种空值情况
+                if (parsedArguments === null || parsedArguments === undefined) {
+                  console.log('[DEBUG] Arguments is null/undefined, using empty object');
+                  parsedArguments = {};
+                } else if (typeof parsedArguments === 'string') {
+                  if (parsedArguments.trim() === '') {
+                    console.log('[DEBUG] Arguments is empty string, using empty object');
+                    parsedArguments = {};
+                  } else {
+                    try {
+                      parsedArguments = JSON.parse(parsedArguments);
+                      console.log('[DEBUG] Successfully parsed arguments:', parsedArguments);
+                    } catch (e) {
+                      console.log('[DEBUG] Failed to parse arguments, using empty object. Error:', e.message);
+                      logger.warn(`Failed to parse tool arguments: ${parsedArguments}, using empty object`);
+                      parsedArguments = {};
+                    }
+                  }
+                } else if (typeof parsedArguments === 'object') {
+                  console.log('[DEBUG] Arguments is already an object:', parsedArguments);
+                } else {
+                  console.log('[DEBUG] Arguments has unexpected type, using empty object');
+                  parsedArguments = {};
+                }
+
+                // 验证ReAct工具的必需参数
+                if (toolCall.func.name === 'new_task') {
+                  if (!parsedArguments.message) {
+                    console.log('[DEBUG] new_task missing required message parameter, adding default');
+                    parsedArguments.message = 'Task created without specific description';
+                  }
+                }
+
+                toolResult = await this.executeTool(toolCall.func.name, parsedArguments, sqlKnowledgeBase, sessionId, maxReActSteps);
+                console.log('[DEBUG] Tool execution result:', toolResult);
                 sendAndCollectLogs('info', 'tool_call', `Tool call ${toolCall.func.name} result: ${JSON.stringify(toolResult)}`, {
                   toolCallId: toolCall.id,
                   toolName: toolCall.func.name.replace('__', ':'),
@@ -820,6 +1137,7 @@ ${userQuestion}
                   status: 'success',
                 });
               } catch (error) {
+                console.log('[DEBUG] Tool execution error:', error);
                 sendAndCollectLogs('error', 'tool_call', `Failed to execute tool call: ${toolCall.func.name}, error: ${error.message}`, {
                   toolCallId: toolCall.id,
                   toolName: toolCall.func.name.replace('__', ':'),
@@ -840,6 +1158,7 @@ ${userQuestion}
                   toolMessage.content = toolMessage.content.slice(0, config.llm.toolResultMaxLength) + '...';
                 }
               }
+              console.log('[DEBUG] Returning tool messages to OpenAI:', toolMessages);
               return openai.chat.completions.create({
                 messages: [...openAIMessages, ...toolMessages] as Array<ChatCompletionMessageParam>,
                 model,
@@ -875,14 +1194,38 @@ ${userQuestion}
           }
         });
       } else {
-        const data = response as ChatCompletion;
-        if (data.choices[0].message.tool_calls?.length) {
-          let toolMessages: Array<ChatCompletionMessageParam> = [];
-          const toolCalls = data.choices[0].message.tool_calls;
+        // Non-streaming completion with tool call loop
+        console.log('[DEBUG] Starting non-streaming tool call processing');
+
+        let currentResponse = response as ChatCompletion;
+        const allToolMessages: Array<ChatCompletionMessageParam> = [];
+        let maxToolCallRounds = 15; // 增加到15轮，确保完整的ReAct流程
+        let stepCount = 0;
+
+        while (currentResponse.choices[0].message?.tool_calls?.length && maxToolCallRounds > 0) {
+          console.log(`[DEBUG] Processing tool calls (round ${16 - maxToolCallRounds}, step ${stepCount})`);
+          const toolCalls = currentResponse.choices[0].message.tool_calls;
+
+          // 添加助手消息（包含工具调用）
+          allToolMessages.push({
+            role: 'assistant',
+            content: currentResponse.choices[0].message.content || '',
+            tool_calls: toolCalls,
+          });
+
+          // 检查是否调用了task_completion，如果是则记录并准备结束
+          let isTaskCompletion = false;
+
           for (const toolCall of toolCalls) {
             const {
               function: { name, arguments: argumentsData },
             } = toolCall;
+
+            if (name === 'task_completion') {
+              isTaskCompletion = true;
+              console.log('[DEBUG] task_completion called, this will be the final round');
+            }
+
             let toolResult: any;
             try {
               sendAndCollectLogs('info', 'tool_call', `Start to execute tool call ${name} with arguments: ${JSON.stringify(argumentsData)}`, {
@@ -891,7 +1234,29 @@ ${userQuestion}
                 arguments: argumentsData,
                 status: 'inprogress',
               });
-              toolResult = await this.executeTool(name, argumentsData, sqlKnowledgeBase);
+              // 处理空的arguments参数，避免JSON.parse错误
+              let parsedArgumentsData: any = argumentsData;
+              if (typeof parsedArgumentsData === 'string') {
+                if (parsedArgumentsData.trim() === '') {
+                  parsedArgumentsData = {};
+                } else {
+                  try {
+                    parsedArgumentsData = JSON.parse(parsedArgumentsData);
+                  } catch (e) {
+                    logger.warn(`Failed to parse tool arguments: ${parsedArgumentsData}, using empty object`);
+                    parsedArgumentsData = {};
+                  }
+                }
+              } else if (!parsedArgumentsData) {
+                parsedArgumentsData = {};
+              }
+              toolResult = await this.executeTool(name, parsedArgumentsData, sqlKnowledgeBase, sessionId, maxReActSteps);
+
+              // 存储最后一个工具结果，特别是task_completion的结果
+              if (name === 'task_completion') {
+                lastToolResult = toolResult as string;
+                console.log('[DEBUG] Stored task_completion result for final output');
+              }
               sendAndCollectLogs('info', 'tool_call', `Tool call ${name} result: ${JSON.stringify(toolResult)}`, {
                 toolCallId: toolCall.id,
                 toolName: name.replace('__', ':'),
@@ -910,65 +1275,149 @@ ${userQuestion}
               logger.error(`Failed to execute tool call: ${name}`, error);
               toolResult = `Can't find anything related`;
             }
-            toolMessages = toolMessages.concat([
-              {
-                role: 'assistant',
-                content: '',
-                tool_calls: data.choices[0].message.tool_calls,
-              },
-              {
-                role: 'tool',
-                tool_call_id: toolCall.id,
-                content: JSON.stringify(toolResult),
-              },
-            ]);
-            for (const toolMessage of toolMessages) {
-              if (toolMessage.content?.length > config.llm.toolResultMaxLength) {
-                toolMessage.content = toolMessage.content.slice(0, config.llm.toolResultMaxLength) + '...';
-              }
+            // 添加工具结果消息
+            allToolMessages.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              content: JSON.stringify(toolResult),
+            });
+          }
+
+          // 限制消息长度
+          for (const toolMessage of allToolMessages) {
+            if (toolMessage.content?.length > config.llm.toolResultMaxLength) {
+              toolMessage.content = toolMessage.content.slice(0, config.llm.toolResultMaxLength) + '...';
             }
           }
-          const result = await openai.chat.completions.create({
-            messages: [...openAIMessages, ...toolMessages] as Array<ChatCompletionMessageParam>,
-            model,
-            stream: false,
-            tools,
-            tool_choice: 'auto',
-          });
 
-          if (showLogs) {
-            (result as any).logs = logs;
+          stepCount++;
+          maxToolCallRounds--;
+
+          // 如果调用了task_completion，直接结束循环
+          if (isTaskCompletion) {
+            console.log('[DEBUG] task_completion executed, ending tool call loop');
+            break;
           }
 
-          let content = result.choices[0].message?.content ?? '';
-          if (!stream && isMarkdown(content) && options?.userId) content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
-          onSuccess?.(content);
+          // 简化的ReAct逻辑：每次都必须调用工具
+          try {
+            console.log(`[DEBUG] Calling OpenAI for next round (${allToolMessages.length} messages)`);
 
-          if (res) {
-            return res.status(200).send(apiResponseType === 'full' ? result : { messages: content, usage: result.usage });
-          } else {
-            return apiResponseType === 'full' ? result : { message: content, usage: result.usage };
-          }
-        } else {
-          if (showLogs) {
-            (response as any).logs = logs;
-          }
-          let content = (response as ChatCompletion).choices[0].message?.content;
-          if (!stream && isMarkdown(content) && options?.userId) content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
-          onSuccess?.(content);
+            currentResponse = await openai.chat.completions.create({
+              messages: [
+                ...openAIMessages,
+                ...allToolMessages,
+                {
+                  role: 'system',
+                  content: `ReAct Mode: You MUST call a function in every response.
 
-          if (res) {
-            return res.status(200).send(apiResponseType === 'full' ? response : { message: content, usage: (response as ChatCompletion).usage });
-          } else {
-            return apiResponseType === 'full' ? response : { message: content, usage: (response as ChatCompletion).usage };
+Step ${stepCount}: Check your todo list:
+- Items with [ ] or [-] = continue working on next item
+- All items [x] = call task_completion  
+- YOU MUST CALL A FUNCTION - never just write text`,
+                },
+              ] as Array<ChatCompletionMessageParam>,
+              model,
+              stream: false,
+              tools,
+              tool_choice: 'auto',
+              max_tokens: 4000,
+            });
+
+            console.log('[DEBUG] Response:', {
+              finish_reason: currentResponse.choices[0].finish_reason,
+              tool_calls: currentResponse.choices[0].message?.tool_calls?.length || 0,
+            });
+
+            // 如果没有调用工具，强制重新回复
+            if (!currentResponse.choices[0].message?.tool_calls?.length) {
+              console.log('[DEBUG] No tool calls detected, forcing AI to use tools');
+
+              currentResponse = await openai.chat.completions.create({
+                messages: [
+                  ...openAIMessages,
+                  ...allToolMessages,
+                  {
+                    role: 'system',
+                    content: 'ERROR: You must call a function. Either update_todo_list or task_completion. Choose now.',
+                  },
+                ] as Array<ChatCompletionMessageParam>,
+                model,
+                stream: false,
+                tools,
+                tool_choice: 'auto',
+                max_tokens: 2000,
+              });
+
+              // 如果还是不调用工具，直接强制task_completion结束
+              if (!currentResponse.choices[0].message?.tool_calls?.length) {
+                console.log('[DEBUG] Still no tools, forcing task_completion');
+                currentResponse = await openai.chat.completions.create({
+                  messages: [...openAIMessages, ...allToolMessages],
+                  model,
+                  stream: false,
+                  tools,
+                  tool_choice: {
+                    type: 'function',
+                    function: { name: 'task_completion' },
+                  },
+                  max_tokens: 1000,
+                });
+              }
+            }
+          } catch (error) {
+            console.log('[DEBUG] Error:', error.message);
+            break;
           }
         }
+
+        console.log(`[DEBUG] Tool call loop completed. Steps: ${stepCount}, Remaining rounds: ${maxToolCallRounds}`);
+
+        // 为ReAct模式设置最终响应内容
+        if (mode === 'react' && lastToolResult) {
+          // 创建一个包含工具结果的响应对象
+          (currentResponse as any).finalContent = lastToolResult;
+        }
+
+        response = currentResponse;
+      }
+
+      // Final response processing
+      if (showLogs) {
+        (response as any).logs = logs;
+      }
+
+      let content = (response as ChatCompletion).choices[0].message?.content ?? '';
+
+      // ReAct模式特殊处理：如果有finalContent，使用它作为最终输出
+      if (mode === 'react' && (response as any).finalContent) {
+        content = (response as any).finalContent;
+        console.log('[DEBUG] Using ReAct task_completion result as final content');
+      }
+
+      // ReAct模式下发送任务完成事件
+      if (mode === 'react' && sessionId && this.reactStepManager.isSessionActive(sessionId)) {
+        const finalResult = lastToolResult || content;
+        this.reactStepManager.sendTaskComplete(sessionId, finalResult);
+      }
+
+      if (!actualStream && isMarkdown(content) && options?.userId) {
+        content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
+      }
+      onSuccess?.(content);
+
+      if (res) {
+        console.log('[DEBUG] Sending final response. Content length:', content.length);
+        return res.status(200).send(apiResponseType === 'full' ? response : { message: content, usage: (response as ChatCompletion).usage });
+      } else {
+        console.log('[DEBUG] Returning response without res object');
+        return apiResponseType === 'full' ? response : { message: content, usage: (response as ChatCompletion).usage };
       }
     } catch (error) {
       logger.error(`Failed to create chat completions: `, error);
       onFailed?.(error.message);
       if (res) {
-        return this.setErrorResponse(res, randomChatCmplId, model, stream, error.message);
+        return this.setErrorResponse(res, randomChatCmplId, model, actualStream, error.message);
       } else {
         throw error;
       }
