@@ -333,6 +333,13 @@ export class WorkflowOpenAICompatibleController {
           await this.conversationAppRepository.createConversationExecution(userId, conversationApp.id, ConversationStatusEnum.FAILED, end - start);
         }
       };
+
+      console.log('[DEBUG] 智能体配置:', {
+        mode: conversationApp.mode,
+        maxReActSteps: conversationApp.maxReActSteps,
+        appId: conversationApp.id,
+      });
+
       await this.llmService.createChatCompelitions(
         res,
         teamId,
@@ -346,6 +353,8 @@ export class WorkflowOpenAICompatibleController {
           knowledgeBase: conversationApp.knowledgeBase,
           sqlKnowledgeBase: conversationApp.sqlKnowledgeBase,
           systemPrompt: conversationApp.systemPrompt,
+          mode: conversationApp.mode || 'chat',
+          maxReActSteps: conversationApp.maxReActSteps || 10,
         },
         {
           onSuccess,
