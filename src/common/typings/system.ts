@@ -19,6 +19,7 @@ export interface ISystemConfig {
       neocardColor: string;
       neocardDarkColor: string;
     };
+    gradient?: string;
     roundedSize?: string;
     form: CustomizationForm;
     toast: {

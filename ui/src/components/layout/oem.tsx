@@ -4,6 +4,7 @@ import { useFavicon, useTitle } from 'ahooks';
 import { get } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -32,6 +33,7 @@ export const OEM: React.FC = () => {
   const teamThemeColor = get(team, 'customTheme.primaryColor', '');
   const teamNeocardColor = get(team, 'customTheme.neocardColor', '');
   const teamNeocardDarkColor = get(team, 'customTheme.neocardDarkColor', '');
+  const themeGradient = get(oem, 'theme.gradient', undefined) as ISystemConfig['theme']['gradient'];
 
   useEffect(() => {
     setValue(teamThemeColor || siteThemeColor);
@@ -110,6 +112,10 @@ export const OEM: React.FC = () => {
 
   useTitle(title + get(oem, 'theme.title', 'AI'));
   useFavicon(get(oem, `theme.favicon.${darkMode ? 'dark' : 'light'}`, ''));
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--vines-gradient', themeGradient ?? null);
+  }, [themeGradient]);
 
   return null;
 };

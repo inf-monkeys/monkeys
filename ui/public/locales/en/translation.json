@@ -267,7 +267,7 @@
       },
       "updater": {
         "title": "Upload files",
-        "click-or-drag-area": "Click or drag to upload files",
+        "click-or-drag-area": "Drag or Click to Upload",
         "toast": {
           "file-too-small": "File '{{ filename }}' is too large",
           "file-too-big": "File '{{ filename }}' is too small",
@@ -277,10 +277,10 @@
         },
         "hint": {
           "accept": {
-            "custom": "Only support files in {{acceptString}} format",
-            "any": "Support uploading files of any format"
+            "custom": "Support {{acceptString}} files",
+            "any": "Support any file format"
           },
-          "max-size": "No more than {{maxSize}}MB",
+          "max-size": "within {{maxSize}}MB",
           "limit": "Upload up to {{limit}} files"
         },
         "file-list": {

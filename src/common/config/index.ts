@@ -115,6 +115,7 @@ export interface ServerConfig {
       neocard: string;
       neocardDark: string;
     };
+    gradient?: string;
     roundedSize?: string;
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
@@ -421,6 +422,7 @@ export const config: Config = {
         neocard: readConfig('server.customization.colors.neocard', '#F1F5F9'),
         neocardDark: readConfig('server.customization.colors.neocardDark', '#1D1D1F'),
       },
+      gradient: readConfig('server.customization.gradient', undefined),
       roundedSize: readConfig('server.customization.roundedSize', undefined),
       form: {
         variant: readConfig('server.customization.form.variant', 'bento'),

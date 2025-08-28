@@ -6,6 +6,7 @@ import { ShieldBan } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { VinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { IframeHeader } from '@/components/layout/workspace/vines-view/form/tabular/iframe-header.tsx';
@@ -22,6 +23,8 @@ const VinesForm: React.FC = () => {
   const { data: oem } = useSystemConfig();
 
   const showPreviewViewExecutionResultGrid = get(oem, 'theme.miniMode.showPreviewViewExecutionResultGrid', true);
+
+  const themeGradient = get(oem, 'theme.gradient', undefined) as ISystemConfig['theme']['gradient'];
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
@@ -57,7 +60,19 @@ const VinesForm: React.FC = () => {
       {isMiniFrame && <IframeHeader historyVisible={historyVisible} setHistoryVisible={setHistoryVisible} />}
       {pageFrom === 'workbench' && (
         <div className="absolute left-[calc(var(--global-spacing)*1.5)] top-0 flex flex-col gap-1">
-          <span className="border-t-[3px] border-vines-500 pt-[8px] font-bold text-vines-500">
+          <span
+            className={cn(
+              'border-t-[3px] pt-[8px] font-bold',
+              themeGradient ? 'text-gradient bg-gradient bg-clip-text' : 'border-vines-500 text-vines-500',
+            )}
+            style={
+              themeGradient
+                ? {
+                    borderImage: 'var(--vines-gradient) 1',
+                  }
+                : {}
+            }
+          >
             {getI18nContent(workflow?.displayName)}
           </span>
         </div>

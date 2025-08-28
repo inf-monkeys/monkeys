@@ -124,6 +124,7 @@ export class AppController {
           neocardColor: config.server.customization.colors.neocard,
           neocardDarkColor: config.server.customization.colors.neocardDark,
         },
+        gradient: config.server.customization.gradient,
         roundedSize: config.server.customization.roundedSize,
         form: config.server.customization.form,
         toast: {

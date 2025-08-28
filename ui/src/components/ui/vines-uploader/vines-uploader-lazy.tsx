@@ -4,12 +4,14 @@ import Uppy, { Meta, UppyFile } from '@uppy/core';
 import ThumbnailGenerator from '@uppy/thumbnail-generator';
 import { useClickAway, useCreation, useDrop, useLatest, useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { FileUp, Plus } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import Dropzone from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
+import { ISystemConfig } from '@/apis/common/typings';
 import { Button } from '@/components/ui/button';
 import { VinesFiles } from '@/components/ui/vines-uploader/files.tsx';
 import { useUppyEvent, useUppyState, useVinesDropzone } from '@/components/ui/vines-uploader/hooks.ts';
@@ -320,6 +322,9 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     }
   });
 
+  const { data: systemConfig } = useSystemConfig();
+  const themeGradient = get(systemConfig, 'theme.gradient', undefined) as ISystemConfig['theme']['gradient'];
+
   return (
     <Dropzone
       onDrop={(files, _rejected, event) => {
@@ -381,7 +386,12 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                   >
                     <FileUp size={50} className="stroke-muted-foreground" />
                     <div className="flex max-w-[70%] flex-col gap-1">
-                      <h1 className="text-xl font-bold leading-tight text-muted-foreground">
+                      <h1
+                        className={cn(
+                          'text-xl font-bold leading-tight',
+                          themeGradient ? 'text-gradient bg-gradient bg-clip-text' : 'text-muted-foreground',
+                        )}
+                      >
                         {isHovering
                           ? t('components.ui.updater.release-file')
                           : t('components.ui.updater.click-or-drag-area')}
@@ -392,7 +402,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                               acceptString: accept.map((it) => `.${it}`).join('、'),
                               count: max,
                             })
-                          : t('components.ui.updater.hint.accept.any')}
+                          : t('components.ui.updater.hint.accept.any')}{' '}
                         {t('components.ui.updater.hint.max-size', { maxSize })}
                       </p>
                       <p className="text-sm text-muted-foreground text-opacity-85">

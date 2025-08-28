@@ -18,6 +18,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common/index.ts';
+import { ISystemConfig } from '@/apis/common/typings';
 import { Label } from '@/components/ui/label';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { cn } from '@/utils/index.ts';
@@ -108,6 +109,7 @@ const FormLabel = React.forwardRef<
 
   const { data: systemConfig } = useSystemConfig();
   const formVariant = get(systemConfig, 'theme.form.variant', 'bento') as 'bento' | 'ghost';
+  const themeGradient = get(systemConfig, 'theme.gradient', undefined) as ISystemConfig['theme']['gradient'];
   return (
     <Label
       ref={ref}
@@ -119,7 +121,14 @@ const FormLabel = React.forwardRef<
       htmlFor={formItemId}
       {...props}
     >
-      {formVariant === 'ghost' && <span className="ml-global-1/2 inline-block size-2 rounded-full bg-vines-500" />}
+      {formVariant === 'ghost' && (
+        <span
+          className={cn(
+            'ml-global-1/2 inline-block size-2 rounded-full',
+            themeGradient ? 'bg-gradient' : 'bg-vines-500',
+          )}
+        />
+      )}
       {children}
     </Label>
   );

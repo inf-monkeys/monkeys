@@ -84,6 +84,13 @@ const config = {
           rgb(var(--vines-100, 220 220 220) / 0.35) 0%,
           rgb(var(--gray1) / 1) 50%
         )`,
+        'gradient': 'var(--vines-gradient)',
+      },
+      textColor: {
+        "gradient": "transparent",
+      },
+      backgroundClip: {
+        text: "text",
       },
       borderRadius: {
         lg: 'var(--radius)',
