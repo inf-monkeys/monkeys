@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import useUrlState from '@/hooks/use-url-state';
 import { usePageStore } from '@/store/usePageStore';
@@ -16,8 +16,6 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
   const { ref, width, height } = useElementSize();
 
   const { data: oem } = useSystemConfig();
-
-  const { roundedClass } = useRoundedClass();
 
   const setContainerWidth = usePageStore((s) => s.setContainerWidth);
   const setContainerHeight = usePageStore((s) => s.setContainerHeight);
@@ -56,8 +54,7 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
       {!vinesIFrameVisible && sidebar}
       <div
         className={cn(
-          'dark:bg-workspace-dark bg-workspace-light relative overflow-hidden',
-          roundedClass,
+          'dark:bg-workspace-dark bg-workspace-light relative overflow-hidden rounded-lg',
           !vinesIFrameVisible && sidebar && 'ml-0',
           // 修改这里，当没有侧边栏时使用全宽
           isMiniFrame ? '' : sidebar ? 'w-[calc(100vw-17rem)]' : 'w-full',

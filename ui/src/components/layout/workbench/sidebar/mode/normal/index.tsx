@@ -8,7 +8,7 @@ import { get, keyBy } from 'lodash';
 import { CircleSlash, Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
@@ -340,12 +340,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     });
   };
 
-  const { roundedClass, roundedLClass, roundedRClass } = useRoundedClass();
-
   return (
     <div
       className={cn(
-        `flex h-full items-center justify-center ${roundedClass} bg-slate-1`,
+        `flex h-full items-center justify-center rounded-lg bg-slate-1`,
         themeMode === 'border' && 'border border-input',
         themeMode === 'shadow' && 'shadow-around',
       )}
@@ -360,7 +358,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           {hasGroups ? (
             showGroup ? (
               <>
-                <div className={`flex h-full justify-between ${roundedLClass} bg-slate-1`}>
+                <div className={`flex h-full justify-between rounded-l-lg bg-slate-1`}>
                   <VirtuaWorkbenchViewGroupList
                     data={lists}
                     groupId={groupId}
@@ -381,7 +379,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             </div>
           )}
           <div
-            className={`grid h-full grid-rows-[1fr_auto] ${roundedRClass} bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1`}
+            className={`grid h-full grid-rows-[1fr_auto] rounded-r-lg bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1`}
           >
             {/* Second nav */}
             <VirtuaWorkbenchViewList

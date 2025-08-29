@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { ImagePreview } from '@/components/layout-wrapper/main/image-preview';
@@ -118,16 +118,13 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
 
   const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
-  const { roundedClass } = useRoundedClass();
-
   return (
     <AnimatePresence>
       <div
         className={cn(
-          'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] bg-slate-1 p-0',
+          'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] rounded-lg bg-slate-1 p-0',
           themeMode === 'border' && 'border border-input',
           themeMode === 'shadow' && 'shadow-around',
-          roundedClass,
           className,
           onlyShowWorkbenchIcon
             ? density === 'compact'

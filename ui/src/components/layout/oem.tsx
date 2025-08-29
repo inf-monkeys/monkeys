@@ -112,10 +112,18 @@ export const OEM: React.FC = () => {
 
   useTitle(title + get(oem, 'theme.title', 'AI'));
   useFavicon(get(oem, `theme.favicon.${darkMode ? 'dark' : 'light'}`, ''));
+  const themeMode = get(oem, 'theme.themeMode', 'shadow') as ISystemConfig['theme']['themeMode'];
+  const roundedSize = get(oem, 'theme.roundedSize') as ISystemConfig['theme']['roundedSize'];
 
   useEffect(() => {
     document.documentElement.style.setProperty('--vines-gradient', themeGradient ?? null);
   }, [themeGradient]);
+
+  useEffect(() => {
+    const defaultSize = themeMode === 'shadow' ? '0.5rem' : '0.75rem';
+    const value = roundedSize ?? defaultSize;
+    document.documentElement.style.setProperty('--radius', value ?? null);
+  }, [roundedSize, themeMode]);
 
   return null;
 };

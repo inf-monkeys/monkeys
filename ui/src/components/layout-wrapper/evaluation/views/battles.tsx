@@ -3,12 +3,10 @@ import React, { useRef, useState } from 'react';
 import useSWR from 'swr';
 import { useParams } from '@tanstack/react-router';
 
-import { get } from 'lodash';
 import { AlertCircle, CheckCircle2, Image as ImageIcon, Loader2, Plus, Swords, Target, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { useSystemConfig } from '@/apis/common';
 import {
   EvaluationStatus,
   getAssetsInModule,
@@ -42,12 +40,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 export const BattlesView: React.FC = () => {
   const { t } = useTranslation();
   const { moduleId } = useParams({ from: '/$teamId/evaluations/$moduleId/$tab/' });
-
-  // 获取 OEM 配置
-  const { data: oem } = useSystemConfig();
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  const isShadowMode = themeMode === 'shadow';
-  const { roundedClass } = useRoundedClass();
 
   const [activeTab, setActiveTab] = useState('ongoing');
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
@@ -191,7 +183,7 @@ export const BattlesView: React.FC = () => {
   const availableAssetsCount = availableAssets?.total || 0;
 
   return (
-    <div className={`h-full overflow-auto ${roundedClass} border border-input p-6`}>
+    <div className={`h-full overflow-auto rounded-lg border border-input p-6`}>
       <div className="mx-auto max-w-4xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

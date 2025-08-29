@@ -2,18 +2,16 @@ import * as React from 'react';
 
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 
-import { useRoundedClass } from '@/apis/common';
 import { cn } from '@/utils/index.ts';
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  const { roundedClass } = useRoundedClass();
   return (
     <AvatarPrimitive.Root
       ref={ref}
-      className={cn(`relative flex size-10 shrink-0 overflow-hidden ${roundedClass}`, className)}
+      className={cn(`relative flex size-10 shrink-0 overflow-hidden rounded-lg`, className)}
       {...props}
     />
   );

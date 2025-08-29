@@ -19,7 +19,7 @@ import {
 } from '@dnd-kit/sortable';
 import { get } from 'lodash';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
 import { useGetDesignAssociationList } from '@/apis/designs/index.ts';
 import { IDesignAssociation } from '@/apis/designs/typings';
@@ -43,8 +43,6 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
   const density = oem?.theme.density ?? 'default';
 
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
-
-  const { roundedClass, roundedBLClass, roundedTLClass } = useRoundedClass();
 
   const { data: initialData } = useGetDesignAssociationList();
 
@@ -97,7 +95,7 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
     <div
       className={cn(
         'flex flex-col bg-slate-1',
-        mode === 'mini' ? '' : `${roundedBLClass} ${roundedTLClass} ${roundedClass}`,
+        mode === 'mini' ? '' : 'rounded-lg',
         themeMode === 'border' && 'border border-input',
         themeMode === 'shadow' && 'shadow-around',
       )}

@@ -6,7 +6,7 @@ import { get } from 'lodash';
 import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { CustomizationHeadbarNavPosition, CustomizationHeadbarTheme } from '@/apis/common/typings';
 import { getVinesToken } from '@/apis/utils.ts';
 import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
@@ -58,8 +58,6 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
   const theme = get(oem, 'theme.headbar.theme', 'card') as CustomizationHeadbarTheme;
   const navPosition = get(oem, 'theme.headbar.navPosition', 'left') as CustomizationHeadbarNavPosition;
 
-  const { roundedClass } = useRoundedClass();
-
   const { height, ref } = useElementSize();
 
   return hideSpaceHeader ? (
@@ -69,7 +67,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
       <header
         ref={ref}
         className={cn(
-          `flex w-full items-center justify-between gap-4 bg-slate-1 p-global ${roundedClass}`,
+          `flex w-full items-center justify-between gap-4 rounded-lg bg-slate-1 p-global`,
           theme === 'fixed' &&
             'shadow-b-lg fixed left-0 top-0 border-b-[1px] border-t-[3px] border-t-[rgb(var(--vines-500))]',
           !['fixed', 'glassy'].includes(theme) && `border border-input`,

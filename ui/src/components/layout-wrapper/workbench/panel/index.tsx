@@ -4,7 +4,7 @@ import { Outlet, useRouterState } from '@tanstack/react-router';
 
 import { get } from 'lodash';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesSpace } from '@/components/layout-wrapper/space';
@@ -43,7 +43,6 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   // 根据主题模式应用不同样式
   const isShadowMode = themeMode === 'shadow';
   const backgroundClass = background ? '' : isShadowMode ? 'bg-[#f2f3f4]' : 'bg-neocard';
-  const { roundedClass } = useRoundedClass();
 
   const showTeamSelector =
     oem &&
@@ -60,8 +59,8 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
       <VinesSpace
         className={cn(
           isWorkbenchRoute && 'overflow-auto bg-transparent p-0 shadow-none transition-colors',
-          isWorkspaceRoute && !isSettingRoute && `w-full border border-input p-global ${roundedClass}`,
-          isSettingRoute && `w-full border border-input px-global py-1 ${roundedClass}`,
+          isWorkspaceRoute && !isSettingRoute && `w-full rounded-lg border border-input p-global`,
+          isSettingRoute && `w-full rounded-lg border border-input px-global py-1`,
         )}
         sidebar={isWorkspaceRoute && <VinesPanelSidebar />}
       >

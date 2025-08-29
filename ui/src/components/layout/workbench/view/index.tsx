@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { GitBranchPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
 import { useWorkspacePages } from '@/apis/pages';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesLoading } from '@/components/ui/loading';
@@ -21,11 +20,6 @@ interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const { t } = useTranslation();
-
-  // 获取 OEM 配置
-  const { data: oem } = useSystemConfig();
-
-  const { roundedClass } = useRoundedClass();
 
   const { data, isLoading } = useWorkspacePages();
   const [pages, setPages] = useState(data?.pages);
@@ -73,7 +67,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   return (
     <div
       ref={ref}
-      className={cn('relative w-full flex-1 overflow-hidden p-0', mode === 'mini' ? 'rounded-none' : roundedClass)}
+      className={cn('relative w-full flex-1 overflow-hidden p-0', mode === 'mini' ? 'rounded-none' : 'rounded-lg')}
     >
       <AnimatePresence>
         {hasPages && hasPage ? (

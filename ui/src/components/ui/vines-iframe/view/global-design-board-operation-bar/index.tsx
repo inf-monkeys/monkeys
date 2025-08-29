@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
 import { Button } from '@/components/ui/button';
 import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
@@ -19,8 +19,6 @@ export const GlobalDesignBoardOperationBar = () => {
 
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
-  const { roundedClass, roundedBLClass, roundedTLClass } = useRoundedClass();
-
   const { designBoardId } = useDesignBoardStore();
 
   const handleExport = () => {
@@ -35,7 +33,7 @@ export const GlobalDesignBoardOperationBar = () => {
   return (
     <div
       className={cn(
-        `flex h-full w-72 flex-col items-center justify-between gap-global ${roundedBLClass} ${roundedTLClass} ${roundedClass} bg-slate-1 p-global text-base`,
+        `flex h-full w-72 flex-col items-center justify-between gap-global rounded-lg bg-slate-1 p-global text-base`,
         themeMode === 'border' && 'border border-input',
         themeMode === 'shadow' && 'shadow-around',
       )}

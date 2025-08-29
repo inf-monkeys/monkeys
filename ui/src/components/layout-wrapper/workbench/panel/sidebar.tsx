@@ -5,7 +5,7 @@ import { useRouterState } from '@tanstack/react-router';
 import { UserCog } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { CustomNavCommonSidebar } from '@/components/layout/custom-nav/common-sidebar';
 import { CUSTOM_NAV_LIST_MAP } from '@/components/layout/custom-nav/custom-nav-sidebar-map';
 import { NavButton } from '@/components/layout/main/sidebar/nav-button.tsx';
@@ -30,14 +30,12 @@ export const VinesPanelSidebar: React.FC = () => {
 
   const { isUseCustomNav, routeCustomNavId } = useVinesRoute();
 
-  const { roundedClass } = useRoundedClass();
-
   const CustomNav = CUSTOM_NAV_LIST_MAP[routeCustomNavId] ? (
     <CustomNavCommonSidebar sidebarMap={CUSTOM_NAV_LIST_MAP[routeCustomNavId]} />
   ) : null;
 
   return isUseCustomNav && !CustomNav ? null : (
-    <div className={`flex h-full w-64 flex-col gap-global ${roundedClass} border border-input bg-slate-1 p-global`}>
+    <div className={`flex h-full w-64 flex-col gap-global rounded-lg border border-input bg-slate-1 p-global`}>
       {isUseCustomNav && CustomNav ? (
         CustomNav
       ) : isSettingRoute ? (

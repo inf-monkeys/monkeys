@@ -19,7 +19,7 @@ import {
 } from '@dnd-kit/sortable';
 import { get } from 'lodash';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
 import { useWorkflowAssociationList } from '@/apis/workflow/association';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
@@ -40,8 +40,6 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
   const { workflowId } = useFlowStore();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
-
-  const { roundedClass, roundedBLClass, roundedTLClass } = useRoundedClass();
 
   const { data: oem } = useSystemConfig();
 
@@ -100,7 +98,7 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
     <div
       className={cn(
         'flex flex-col bg-slate-1',
-        mode === 'mini' ? '' : `${roundedBLClass} ${roundedTLClass} ${roundedClass}`,
+        mode === 'mini' ? '' : 'rounded-lg',
         themeMode === 'border' && 'border border-input',
         themeMode === 'shadow' && 'shadow-around',
       )}

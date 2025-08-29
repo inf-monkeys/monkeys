@@ -56,7 +56,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
   const isShadowMode = themeMode === 'shadow';
-  const { roundedClass } = useRoundedClass();
 
   // 提升的状态管理
   const [processedInputs, setProcessedInputs] = useState<any[]>([]);
@@ -219,7 +218,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
             {/* 主内容区域 */}
             <main
               className={cn(
-                `flex size-full flex-1 ${roundedClass} border border-input bg-slate-1 p-global dark:bg-[#111113] md:flex-row`,
+                `flex size-full flex-1 rounded-lg border border-input bg-slate-1 p-global dark:bg-[#111113] md:flex-row`,
                 isMiniFrame && 'justify-center',
                 !isMiniFrame && !showFormInImageDetail && 'justify-center',
               )}

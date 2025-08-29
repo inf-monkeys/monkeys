@@ -6,7 +6,7 @@ import { useMemoizedFn } from 'ahooks';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
@@ -72,18 +72,13 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal', te
   const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   const isDarkMode = mode === 'dark' || (mode === 'auto' && darkModeMediaQuery.matches);
 
-  const { roundedClass } = useRoundedClass();
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
-          className={cn(
-            `justify-between gap-1 shadow-none ${roundedClass}`,
-            size === 'large' ? 'px-global py-6' : 'px-3',
-          )}
+          className={cn(`justify-between gap-1 rounded-lg shadow-none`, size === 'large' ? 'px-global py-6' : 'px-3')}
           aria-expanded={open}
           aria-label="Select a team"
         >
