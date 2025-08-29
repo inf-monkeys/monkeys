@@ -262,7 +262,7 @@ export const LeaderboardView: React.FC = () => {
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
   const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+  const { roundedClass } = useRoundedClass();
 
   return (
     <div className={`h-full overflow-auto ${roundedClass} border border-input p-6`}>

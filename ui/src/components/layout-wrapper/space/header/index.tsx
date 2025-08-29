@@ -9,9 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { useRoundedClass, useSystemConfig } from '@/apis/common';
 import { CustomizationHeadbarNavPosition, CustomizationHeadbarTheme } from '@/apis/common/typings';
 import { getVinesToken } from '@/apis/utils.ts';
+import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { HeaderInvite } from '@/components/layout-wrapper/space/header/expand/header-invite';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
-import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -72,7 +72,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
           `flex w-full items-center justify-between gap-4 bg-slate-1 p-global ${roundedClass}`,
           theme === 'fixed' &&
             'shadow-b-lg fixed left-0 top-0 border-b-[1px] border-t-[3px] border-t-[rgb(var(--vines-500))]',
-          theme === 'card' && `border border-input`,
+          !['fixed', 'glassy'].includes(theme) && `border border-input`,
         )}
         style={
           theme === 'glassy'

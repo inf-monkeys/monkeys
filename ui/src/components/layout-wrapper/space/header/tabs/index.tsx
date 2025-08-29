@@ -16,6 +16,7 @@ const HEADBAR_THEME_MAP: Record<CustomizationHeadbarTheme, TabsVariant> = {
   card: 'default',
   fixed: 'ghost',
   glassy: 'rounded',
+  ghost: 'ghost',
 };
 
 export const SpaceHeaderTabs: React.FC = () => {
@@ -28,19 +29,21 @@ export const SpaceHeaderTabs: React.FC = () => {
 
   const headbarTheme: CustomizationHeadbarTheme = get(oem, 'theme.headbar.theme', 'card');
 
-  const { isUseWorkbench, isUseAppStore, isUsePanel } = useVinesRoute();
+  const { isUseWorkbench, isUseAppStore, isUsePanel, isUseCustomNav, routeCustomNavId } = useVinesRoute();
 
   const [value, setValue] = useState('workbench');
 
   useEffect(() => {
-    if (isUseWorkbench) {
+    if (isUseCustomNav && routeCustomNavId) {
+      setValue(routeCustomNavId);
+    } else if (isUseWorkbench) {
       setValue('workbench');
     } else if (isUseAppStore) {
       setValue('app-store');
     } else if (isUsePanel) {
       setValue('workspace');
     }
-  }, [isUseWorkbench, isUseAppStore, isUsePanel]);
+  }, [isUseWorkbench, isUseAppStore, isUsePanel, isUseCustomNav, routeCustomNavId]);
 
   const TAB_LIST: VinesSpaceHeadbarModules = [
     {
@@ -80,6 +83,9 @@ export const SpaceHeaderTabs: React.FC = () => {
             break;
           case 'workspace':
             VinesEvent.emit('vines-nav', '/$teamId/evaluations', { teamId });
+            break;
+          default:
+            VinesEvent.emit('vines-nav', `/$teamId/nav/$navId`, { teamId, navId: val });
             break;
         }
       }}

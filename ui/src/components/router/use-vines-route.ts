@@ -32,6 +32,10 @@ export const useVinesRoute = () => {
   const isUsePanel =
     (!!routeIds || !isUseWorkbench) && !isUseWorkSpace && !isUseAgent && !isUseDesign && !isUseEvaluation;
   const isUseAppStore = routeAppId === 'store';
+  const isUseCustomNav = routeAppId === 'nav';
+
+  const routeCustomNavId = isUseCustomNav ? matches[0].params?.['navId'] : undefined;
+  const routeCustomSubModuleId = isUseCustomNav ? matches[0].params?.['subModuleId'] : undefined;
 
   // 对于图片详情页面，确保路由信息中包含workbench，以便高亮工作台选项
   window['vinesRoute'] = isImageDetailPage
@@ -44,6 +48,8 @@ export const useVinesRoute = () => {
     routeId,
     routeIds,
     routeAppId,
+    routeCustomNavId,
+    routeCustomSubModuleId,
     isUseOutside,
     isUseWorkSpace,
     isUseShareView,
@@ -55,5 +61,6 @@ export const useVinesRoute = () => {
     isImageDetailPage,
     isUseAppStore,
     isUseEvaluation,
+    isUseCustomNav,
   };
 };

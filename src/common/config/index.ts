@@ -61,7 +61,7 @@ export type CustomizationModules = {
 export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile';
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
-export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy';
+export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy' | 'ghost';
 export type CustomizationHeadbar = {
   theme?: CustomizationHeadbarTheme;
   navPosition?: 'left' | 'center' | 'right';
@@ -471,7 +471,7 @@ export const config: Config = {
       uniImagePreview: readConfig('server.customization.uniImagePreview', false),
       imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
       teamAsUser: readConfig('server.customization.teamAsUser', false),
-      themeMode: readConfig('server.customization.themeMode', 'shadow'),
+      themeMode: readConfig('server.customization.themeMode', 'border'),
       density: readConfig('server.customization.density', 'default'),
       miniMode: {
         showPreviewViewExecutionResultGrid: readConfig('server.customization.miniMode.showPreviewViewExecutionResultGrid', true),

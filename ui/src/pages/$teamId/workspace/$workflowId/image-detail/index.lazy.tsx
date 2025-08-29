@@ -56,7 +56,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
   const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+  const { roundedClass } = useRoundedClass();
 
   // 提升的状态管理
   const [processedInputs, setProcessedInputs] = useState<any[]>([]);

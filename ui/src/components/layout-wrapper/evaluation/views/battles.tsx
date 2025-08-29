@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 
-import { useParams } from '@tanstack/react-router';
 import useSWR from 'swr';
+import { useParams } from '@tanstack/react-router';
 
 import { get } from 'lodash';
 import { AlertCircle, CheckCircle2, Image as ImageIcon, Loader2, Plus, Swords, Target, Upload } from 'lucide-react';
@@ -47,7 +47,7 @@ export const BattlesView: React.FC = () => {
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
   const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+  const { roundedClass } = useRoundedClass();
 
   const [activeTab, setActiveTab] = useState('ongoing');
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);

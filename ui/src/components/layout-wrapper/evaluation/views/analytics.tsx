@@ -4,7 +4,7 @@ import { get } from 'lodash';
 import { BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const AnalyticsView: React.FC = () => {
@@ -14,7 +14,7 @@ export const AnalyticsView: React.FC = () => {
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
   const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+  const { roundedClass } = useRoundedClass();
 
   return (
     <div className={`h-full overflow-auto ${roundedClass} border border-input p-6`}>

@@ -5,7 +5,7 @@ import { Outlet } from '@tanstack/react-router';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
 import { Sidebar } from '@/components/layout/main/sidebar';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { cn } from '@/utils';
@@ -21,7 +21,8 @@ export const MainWrapper: React.FC<IProps> = ({ layoutId }) => {
   // 根据主题模式应用不同样式
   const isShadowMode = themeMode === 'shadow';
   const backgroundClass = isShadowMode ? 'bg-[#f2f3f4]' : 'bg-slate-3';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-md';
+
+  const { roundedClass } = useRoundedClass();
 
   return (
     <ViewGuard className={cn('flex w-screen', backgroundClass)}>

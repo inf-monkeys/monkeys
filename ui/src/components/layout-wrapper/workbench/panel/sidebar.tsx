@@ -2,15 +2,17 @@ import React from 'react';
 
 import { useRouterState } from '@tanstack/react-router';
 
-import { get } from 'lodash';
 import { UserCog } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
+import { CustomNavCommonSidebar } from '@/components/layout/custom-nav/common-sidebar';
+import { CUSTOM_NAV_LIST_MAP } from '@/components/layout/custom-nav/custom-nav-sidebar-map';
 import { NavButton } from '@/components/layout/main/sidebar/nav-button.tsx';
 import { NavList } from '@/components/layout/main/sidebar/nav-list';
 import { SettingsNavList } from '@/components/layout/main/sidebar/settings-nav-list';
 import { Balance } from '@/components/layout/main/sidebar/teams/balance.tsx';
+import { useVinesRoute } from '@/components/router/use-vines-route';
 
 // Sidebar in workspace
 export const VinesPanelSidebar: React.FC = () => {
@@ -26,14 +28,19 @@ export const VinesPanelSidebar: React.FC = () => {
   });
   const isSettingRoute = pathName.split('/').at(-1) === 'settings';
 
-  // 根据主题模式应用不同圆角样式
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+  const { isUseCustomNav, routeCustomNavId } = useVinesRoute();
 
-  return (
+  const { roundedClass } = useRoundedClass();
+
+  const CustomNav = CUSTOM_NAV_LIST_MAP[routeCustomNavId] ? (
+    <CustomNavCommonSidebar sidebarMap={CUSTOM_NAV_LIST_MAP[routeCustomNavId]} />
+  ) : null;
+
+  return isUseCustomNav && !CustomNav ? null : (
     <div className={`flex h-full w-64 flex-col gap-global ${roundedClass} border border-input bg-slate-1 p-global`}>
-      {isSettingRoute ? (
+      {isUseCustomNav && CustomNav ? (
+        CustomNav
+      ) : isSettingRoute ? (
         <SettingsNavList />
       ) : (
         <>

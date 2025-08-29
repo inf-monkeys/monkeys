@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 import { useThrottleEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
-import { get } from 'lodash';
 import { GitBranchPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
 import { useWorkspacePages } from '@/apis/pages';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesLoading } from '@/components/ui/loading';
@@ -25,9 +24,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
 
   // 获取 OEM 配置
   const { data: oem } = useSystemConfig();
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+
+  const { roundedClass } = useRoundedClass();
 
   const { data, isLoading } = useWorkspacePages();
   const [pages, setPages] = useState(data?.pages);

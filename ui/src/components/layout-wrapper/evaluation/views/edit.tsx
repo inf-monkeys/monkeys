@@ -3,12 +3,11 @@ import React, { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { useParams } from '@tanstack/react-router';
 
-import { get } from 'lodash';
 import { Globe, Save, Settings, Target, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass } from '@/apis/common';
 import {
   addEvaluatorToModule,
   addParticipantsToModule,
@@ -38,6 +37,8 @@ import { Textarea } from '@/components/ui/textarea';
 export const EditView: React.FC = () => {
   const { t } = useTranslation();
   const { moduleId } = useParams({ from: '/$teamId/evaluations/$moduleId/$tab/' });
+
+  const { roundedClass } = useRoundedClass();
 
   const { data: module, mutate } = useSWR(moduleId ? ['evaluation-module', moduleId] : null, () =>
     getModuleDetails(moduleId),
@@ -204,12 +205,6 @@ export const EditView: React.FC = () => {
       </div>
     );
   }
-
-  // 获取 OEM 配置
-  const { data: oem } = useSystemConfig();
-  const themeMode = get(oem, 'theme.themeMode', 'shadow');
-  const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
 
   return (
     <div className={`h-full overflow-auto ${roundedClass} border border-input p-6`}>

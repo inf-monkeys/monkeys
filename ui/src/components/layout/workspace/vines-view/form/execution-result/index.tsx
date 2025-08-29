@@ -6,7 +6,7 @@ import { get } from 'lodash';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useSystemConfig } from '@/apis/common';
+import { useRoundedClass, useSystemConfig } from '@/apis/common';
 import { useWorkflowExecutionList, useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
 import { ExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
 import { Card, CardContent } from '@/components/ui/card.tsx';
@@ -49,7 +49,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
   const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+  const { roundedClass } = useRoundedClass();
 
   const { status, setStatus } = useExecutionStore();
 

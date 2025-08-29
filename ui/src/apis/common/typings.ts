@@ -50,7 +50,7 @@ export type CustomizationModules =
 export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile';
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
-export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy';
+export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy' | 'ghost';
 export type CustomizationHeadbarNavPosition = 'left' | 'center' | 'right';
 
 export type CustomizationHeadbar =

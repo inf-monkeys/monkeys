@@ -63,7 +63,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
   const isShadowMode = themeMode === 'shadow';
-  const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-xl';
+  const { roundedClass } = useRoundedClass();
 
   const [imageRotation, setImageRotation] = useState(0);
   const [imageFlipX, setImageFlipX] = useState(false);

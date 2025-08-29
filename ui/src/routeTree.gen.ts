@@ -44,6 +44,7 @@ const TeamIdSettingsIndexLazyImport = createFileRoute('/$teamId/settings/')()
 const TeamIdRenderToolsIndexLazyImport = createFileRoute(
   '/$teamId/render-tools/',
 )()
+const TeamIdNavIndexLazyImport = createFileRoute('/$teamId/nav/')()
 const TeamIdMediaDataIndexLazyImport = createFileRoute('/$teamId/media-data/')()
 const TeamIdJoinTeamIndexLazyImport = createFileRoute('/$teamId/join-team/')()
 const TeamIdImageModelsIndexLazyImport = createFileRoute(
@@ -77,6 +78,7 @@ const TeamIdTextDataTextIdIndexLazyImport = createFileRoute(
 const TeamIdTableDataDatabaseIdIndexLazyImport = createFileRoute(
   '/$teamId/table-data/$databaseId/',
 )()
+const TeamIdNavNavIdIndexLazyImport = createFileRoute('/$teamId/nav/$navId/')()
 const TeamIdImageModelsImageModelIdIndexLazyImport = createFileRoute(
   '/$teamId/image-models/$imageModelId/',
 )()
@@ -100,6 +102,9 @@ const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport = createFileRoute(
 )()
 const TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport = createFileRoute(
   '/$teamId/workspace/$workflowId/$pageId/',
+)()
+const TeamIdNavNavIdSubModuleIdIndexLazyImport = createFileRoute(
+  '/$teamId/nav/$navId/$subModuleId/',
 )()
 const TeamIdEvaluationsModuleIdTabIndexLazyImport = createFileRoute(
   '/$teamId/evaluations/$moduleId/$tab/',
@@ -229,6 +234,13 @@ const TeamIdRenderToolsIndexLazyRoute = TeamIdRenderToolsIndexLazyImport.update(
   } as any,
 ).lazy(() =>
   import('./pages/$teamId/render-tools/index.lazy').then((d) => d.Route),
+)
+
+const TeamIdNavIndexLazyRoute = TeamIdNavIndexLazyImport.update({
+  path: '/$teamId/nav/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./pages/$teamId/nav/index.lazy').then((d) => d.Route),
 )
 
 const TeamIdMediaDataIndexLazyRoute = TeamIdMediaDataIndexLazyImport.update({
@@ -363,6 +375,13 @@ const TeamIdTableDataDatabaseIdIndexLazyRoute =
     ),
   )
 
+const TeamIdNavNavIdIndexLazyRoute = TeamIdNavNavIdIndexLazyImport.update({
+  path: '/$teamId/nav/$navId/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./pages/$teamId/nav/$navId/index.lazy').then((d) => d.Route),
+)
+
 const TeamIdImageModelsImageModelIdIndexLazyRoute =
   TeamIdImageModelsImageModelIdIndexLazyImport.update({
     path: '/$teamId/image-models/$imageModelId/',
@@ -437,6 +456,16 @@ const TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute =
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
     import('./pages/$teamId/workspace/$workflowId/$pageId/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const TeamIdNavNavIdSubModuleIdIndexLazyRoute =
+  TeamIdNavNavIdSubModuleIdIndexLazyImport.update({
+    path: '/$teamId/nav/$navId/$subModuleId/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./pages/$teamId/nav/$navId/$subModuleId/index.lazy').then(
       (d) => d.Route,
     ),
   )
@@ -551,6 +580,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdMediaDataIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/nav/': {
+      preLoaderRoute: typeof TeamIdNavIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/render-tools/': {
       preLoaderRoute: typeof TeamIdRenderToolsIndexLazyImport
       parentRoute: typeof rootRoute
@@ -623,6 +656,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdImageModelsImageModelIdIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/nav/$navId/': {
+      preLoaderRoute: typeof TeamIdNavNavIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/table-data/$databaseId/': {
       preLoaderRoute: typeof TeamIdTableDataDatabaseIdIndexLazyImport
       parentRoute: typeof rootRoute
@@ -649,6 +686,10 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/evaluations/$moduleId/$tab/': {
       preLoaderRoute: typeof TeamIdEvaluationsModuleIdTabIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/nav/$navId/$subModuleId/': {
+      preLoaderRoute: typeof TeamIdNavNavIdSubModuleIdIndexLazyImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/workspace/$workflowId/$pageId/': {
@@ -684,6 +725,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdImageModelsIndexLazyRoute,
   TeamIdJoinTeamIndexLazyRoute,
   TeamIdMediaDataIndexLazyRoute,
+  TeamIdNavIndexLazyRoute,
   TeamIdRenderToolsIndexLazyRoute,
   TeamIdSettingsIndexLazyRoute,
   TeamIdStoreIndexLazyRoute,
@@ -702,6 +744,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdDesignDesignProjectIdIndexLazyRoute,
   TeamIdEvaluationsModuleIdIndexLazyRoute,
   TeamIdImageModelsImageModelIdIndexLazyRoute,
+  TeamIdNavNavIdIndexLazyRoute,
   TeamIdTableDataDatabaseIdIndexLazyRoute,
   TeamIdTextDataTextIdIndexLazyRoute,
   TeamIdTextModelsLlmModelIdIndexLazyRoute,
@@ -709,6 +752,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyRoute,
   TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyRoute,
   TeamIdEvaluationsModuleIdTabIndexLazyRoute,
+  TeamIdNavNavIdSubModuleIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute,
 ])

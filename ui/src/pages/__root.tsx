@@ -47,6 +47,7 @@ const RootComponent: React.FC = () => {
     isUseWorkbench,
     isUsePanel,
     isUseEvaluation,
+    isUseCustomNav,
   } = useVinesRoute();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
@@ -85,6 +86,7 @@ const RootComponent: React.FC = () => {
     !isUseDesign &&
     !isUseEvaluation &&
     !isUsePanel &&
+    !isUseCustomNav &&
     (mode !== 'mini' || !isUseWorkbench);
 
   const { teamId } = useVinesTeam();
@@ -148,7 +150,7 @@ const RootComponent: React.FC = () => {
                   {isUseEvaluation && <EvaluationLayout />}
                   {isUsePanel && mode !== 'mini' && <WorkbenchPanelLayout layoutId={layoutId} />}
                   {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
-                  {isUseDefault && <MainWrapper layoutId={layoutId} />}
+                  {(isUseDefault || isUseCustomNav) && <MainWrapper layoutId={layoutId} />}
                 </motion.div>
               )}
             </AnimatePresence>
