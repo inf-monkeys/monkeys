@@ -1,11 +1,11 @@
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 import { useAsyncEffect } from 'ahooks';
-
+import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 import { ArrowLeftIcon, ArrowRightIcon, ScanSearch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Mousewheel, Navigation } from 'swiper/modules';
+import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import { useSystemConfig } from '@/apis/common';
@@ -27,9 +27,9 @@ import { getThumbUrl } from '../../workspace/vines-view/form/execution-result/vi
 import 'swiper/css';
 import 'swiper/css/mousewheel';
 import 'swiper/css/navigation';
+import 'swiper/css/virtual';
 
-
-const SwiperModules = [Mousewheel, Navigation];
+const SwiperModules = [Virtual, Mousewheel, Navigation];
 const SLIDE_THRESHOLD = 10;
 interface HistoryResultProps {
   loading: boolean;
@@ -119,6 +119,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
   return (
+    <AnimatePresence>
       <div
         className={cn(
           'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] rounded-lg bg-slate-1 p-0',
@@ -134,9 +135,12 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
         ref={containerRef}
       >
         {images.length > 0 ? (
-          <div
+          <motion.div
             key="vines-history-content"
             className="flex size-full items-center justify-center gap-global-1/2 overflow-hidden p-global"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.3 } }}
+            exit={{ opacity: 0 }}
           >
             {!isUniImagePreview && (
               <ImagePreview
@@ -160,6 +164,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
             )}
             <Button icon={<ArrowLeftIcon />} variant="outline" size="icon" ref={slideLeftRef}></Button>
             <Swiper
+              virtual
               allowTouchMove={false}
               spaceBetween={12}
               direction={'horizontal'}
@@ -167,13 +172,6 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
               freeMode={false}
               grabCursor={false}
               slidesPerGroup={3}
-              speed={0}
-              watchSlidesProgress={false}
-              watchOverflow={false}
-              updateOnWindowResize={false}
-              observer={false}
-              observeParents={false}
-              observeSlideChildren={false}
               mousewheel={{
                 forceToAxis: false,
                 releaseOnEdges: true,
@@ -187,11 +185,6 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                 nextEl: slideRightRef.current,
               }}
               slidesPerView={slidesPerView}
-              initialSlide={0}
-              onSwiper={(swiper) => {
-                // 确保没有初始化动画
-                setTimeout(() => swiper.slideTo(0, 0), 0);
-              }}
               onSlideChange={(swiper) => {
                 // 当滑动到接近最后几个slide时触发加载
                 // 提前3个slide开始加载
@@ -239,19 +232,23 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                 : null}
             </Swiper>
             <Button icon={<ArrowRightIcon />} variant="outline" size="icon" ref={slideRightRef}></Button>
-          </div>
+          </motion.div>
         ) : (
-          <div
+          <motion.div
             key="vines-history-empty"
             className="vines-center size-full flex-col gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.3 } }}
+            exit={{ opacity: 0 }}
           >
             <ScanSearch size={48} />
             <div className="flex flex-col text-center">
               <h2 className="text-sm font-bold">{t('workbench.history.empty')}</h2>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
+    </AnimatePresence>
   );
 };
 
