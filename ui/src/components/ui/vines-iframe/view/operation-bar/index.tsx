@@ -129,7 +129,7 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
               ))}
             </SortableContext>
           </ScrollArea>
-          {mode != 'mini' && <Separator orientation="vertical" />}
+          {mode === 'mini' && <Separator orientation="vertical" />}
         </DndContext>
       </div>
     </div>

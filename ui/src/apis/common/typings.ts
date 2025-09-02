@@ -132,6 +132,8 @@ export interface ISystemConfig {
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
     workbenchSidebarDefaultOpen?: boolean;
     workbenchSidebarMoreAction?: boolean;
+    workbenchSidebarApart?: boolean;
+    workbenchSidebarToggleGroupDetail?: boolean;
     uniImagePreview?: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;

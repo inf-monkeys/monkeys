@@ -22,7 +22,6 @@ import { FolderIcon } from 'lucide-react';
 import { useSystemConfig } from '@/apis/common';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { cn } from '@/utils';
 
@@ -48,6 +47,8 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
 
   const showMoreAction = oem?.theme.workbenchSidebarMoreAction ?? true;
 
+  const workbenchSidebarToggleGroupDetail = oem?.theme.workbenchSidebarToggleGroupDetail ?? true;
+
   // 添加本地状态
   const [localData, setLocalData] = useState(initialData);
 
@@ -57,7 +58,9 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
   }, [initialData]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
+  const onlyShowWorkbenchIconHook = useOnlyShowWorkbenchIcon();
+
+  const onlyShowWorkbenchIcon = workbenchSidebarToggleGroupDetail ? onlyShowWorkbenchIconHook : true;
 
   // 添加传感器
   const sensors = useSensors(
@@ -127,7 +130,6 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
             ))}
           </SortableContext>
         </ScrollArea>
-        <Separator orientation="vertical" />
       </DndContext>
     </div>
   );

@@ -143,6 +143,8 @@ export class AppController {
         workflowPreviewExecutionGrid: config.server.customization.workflowPreviewExecutionGrid,
         workbenchSidebarDefaultOpen: config.server.customization.workbenchSidebarDefaultOpen,
         workbenchSidebarMoreAction: config.server.customization.workbenchSidebarMoreAction,
+        workbenchSidebarApart: config.server.customization.workbenchSidebarApart,
+        workbenchSidebarToggleGroupDetail: config.server.customization.workbenchSidebarToggleGroupDetail,
         uniImagePreview: config.server.customization.uniImagePreview,
         imagePreviewStyle: config.server.customization.imagePreviewStyle,
         teamAsUser: config.server.customization.teamAsUser,

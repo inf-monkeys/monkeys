@@ -18,6 +18,7 @@ import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/uti
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
+import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { useElementSize } from '@/hooks/use-resize-observer';
@@ -81,6 +82,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const { data: oem } = useSystemConfig();
 
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
+
+  const workbenchSidebarApart = get(oem, 'theme.workbenchSidebarApart', false) as boolean;
 
   const density = oem?.theme.density ?? 'default';
 
@@ -343,9 +346,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   return (
     <div
       className={cn(
-        `flex h-full items-center justify-center rounded-lg bg-slate-1`,
-        themeMode === 'border' && 'border border-input',
-        themeMode === 'shadow' && 'shadow-around',
+        `flex h-full items-center justify-center`,
+        workbenchSidebarApart ? 'gap-global-1/2' : 'rounded-lg bg-slate-1',
+        !workbenchSidebarApart && themeMode === 'border' && 'border border-input',
+        !workbenchSidebarApart && themeMode === 'shadow' && 'shadow-around',
       )}
       ref={wrapperRef}
     >
@@ -358,7 +362,12 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           {hasGroups ? (
             showGroup ? (
               <>
-                <div className={`flex h-full justify-between rounded-l-lg bg-slate-1`}>
+                <div
+                  className={cn(
+                    'flex h-full justify-between bg-slate-1',
+                    workbenchSidebarApart ? 'rounded-lg' : 'rounded-l-lg',
+                  )}
+                >
                   <VirtuaWorkbenchViewGroupList
                     data={lists}
                     groupId={groupId}
@@ -367,9 +376,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                   />
                 </div>
               </>
-            ) : (
-              <></>
-            )
+            ) : null
           ) : (
             <div className="vines-center absolute flex-col gap-global">
               <CircleSlash size={64} />
@@ -378,8 +385,12 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               </div>
             </div>
           )}
+          {!workbenchSidebarApart && <Separator orientation="vertical" />}
           <div
-            className={`grid h-full grid-rows-[1fr_auto] rounded-r-lg bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1`}
+            className={cn(
+              'grid h-full grid-rows-[1fr_auto] bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1',
+              workbenchSidebarApart ? 'rounded-lg' : 'rounded-r-lg',
+            )}
           >
             {/* Second nav */}
             <VirtuaWorkbenchViewList

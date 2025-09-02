@@ -145,6 +145,8 @@ export interface ServerConfig {
     workflowPreviewExecutionGrid?: WorkflowPreviewExecutionGrid;
     workbenchSidebarDefaultOpen: boolean;
     workbenchSidebarMoreAction: boolean;
+    workbenchSidebarApart: boolean;
+    workbenchSidebarToggleGroupDetail: boolean;
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
@@ -468,6 +470,8 @@ export const config: Config = {
       },
       workbenchSidebarDefaultOpen: readConfig('server.customization.workbenchSidebarDefaultOpen', true),
       workbenchSidebarMoreAction: readConfig('server.customization.workbenchSidebarMoreAction', true),
+      workbenchSidebarApart: readConfig('server.customization.workbenchSidebarApart', false),
+      workbenchSidebarToggleGroupDetail: readConfig('server.customization.workbenchSidebarToggleGroupDetail', true),
       uniImagePreview: readConfig('server.customization.uniImagePreview', false),
       imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
       teamAsUser: readConfig('server.customization.teamAsUser', false),

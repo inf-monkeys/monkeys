@@ -126,7 +126,7 @@ export const GlobalDesignBoardAssociationBar: React.FC<IGlobalDesignBoardAssocia
               ))}
             </SortableContext>
           </ScrollArea>
-          {mode != 'mini' && <Separator orientation="vertical" />}
+          {mode === 'mini' && <Separator orientation="vertical" />}
         </DndContext>
       </div>
     </div>

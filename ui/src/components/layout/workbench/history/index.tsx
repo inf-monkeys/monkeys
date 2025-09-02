@@ -1,7 +1,6 @@
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 import { useAsyncEffect } from 'ahooks';
-
 import { get } from 'lodash';
 import { ArrowLeftIcon, ArrowRightIcon, ScanSearch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -27,7 +26,6 @@ import { getThumbUrl } from '../../workspace/vines-view/form/execution-result/vi
 import 'swiper/css';
 import 'swiper/css/mousewheel';
 import 'swiper/css/navigation';
-
 
 const SwiperModules = [Mousewheel, Navigation];
 const SLIDE_THRESHOLD = 10;
@@ -119,139 +117,136 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
   return (
-      <div
-        className={cn(
-          'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] rounded-lg bg-slate-1 p-0',
-          themeMode === 'border' && 'border border-input',
-          themeMode === 'shadow' && 'shadow-around',
-          className,
-          onlyShowWorkbenchIcon
-            ? density === 'compact'
-              ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*4.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
-              : 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*6.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*3))]'
-            : 'w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))] max-w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))]',
-        )}
-        ref={containerRef}
-      >
-        {images.length > 0 ? (
-          <div
-            key="vines-history-content"
-            className="flex size-full items-center justify-center gap-global-1/2 overflow-hidden p-global"
-          >
-            {!isUniImagePreview && (
-              <ImagePreview
-                images={images}
-                position={position}
-                onPositionChange={setPosition}
-                onNext={() => {
-                  setPosition((position) => position + 1);
-                }}
-                onPrev={() => {
-                  setPosition((position) => position - 1);
-                }}
-                onClose={() => {
-                  setOpen(false);
-                }}
-                hasPrev={position > 0}
-                hasNext={position < images.length - 1}
-                open={open}
-                setOpen={setOpen}
-              />
-            )}
-            <Button icon={<ArrowLeftIcon />} variant="outline" size="icon" ref={slideLeftRef}></Button>
-            <Swiper
-              allowTouchMove={false}
-              spaceBetween={12}
-              direction={'horizontal'}
-              modules={SwiperModules}
-              freeMode={false}
-              grabCursor={false}
-              slidesPerGroup={3}
-              speed={0}
-              watchSlidesProgress={false}
-              watchOverflow={false}
-              updateOnWindowResize={false}
-              observer={false}
-              observeParents={false}
-              observeSlideChildren={false}
-              mousewheel={{
-                forceToAxis: false,
-                releaseOnEdges: true,
-                sensitivity: 2000,
-                thresholdDelta: 0.2,
-                thresholdTime: 10,
-                enabled: true,
+    <div
+      className={cn(
+        'h-[calc(var(--history-result-image-size)+var(--global-spacing)*2)] rounded-lg bg-slate-1 p-0',
+        themeMode === 'border' && 'border border-input',
+        themeMode === 'shadow' && 'shadow-around',
+        className,
+        onlyShowWorkbenchIcon
+          ? density === 'compact'
+            ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*4.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
+            : 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*6.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*3))]'
+          : 'w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))] max-w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))]',
+      )}
+      ref={containerRef}
+    >
+      {images.length > 0 ? (
+        <div
+          key="vines-history-content"
+          className="flex size-full items-center justify-center gap-global-1/2 overflow-hidden p-global"
+        >
+          {!isUniImagePreview && (
+            <ImagePreview
+              images={images}
+              position={position}
+              onPositionChange={setPosition}
+              onNext={() => {
+                setPosition((position) => position + 1);
               }}
-              navigation={{
-                prevEl: slideLeftRef.current,
-                nextEl: slideRightRef.current,
+              onPrev={() => {
+                setPosition((position) => position - 1);
               }}
-              slidesPerView={slidesPerView}
-              initialSlide={0}
-              onSwiper={(swiper) => {
-                // 确保没有初始化动画
-                setTimeout(() => swiper.slideTo(0, 0), 0);
+              onClose={() => {
+                setOpen(false);
               }}
-              onSlideChange={(swiper) => {
-                // 当滑动到接近最后几个slide时触发加载
-                // 提前3个slide开始加载
-                if (swiper.activeIndex + slidesPerView >= images.length - SLIDE_THRESHOLD) {
-                  // console.log('requesting more');
+              hasPrev={position > 0}
+              hasNext={position < images.length - 1}
+              open={open}
+              setOpen={setOpen}
+            />
+          )}
+          <Button icon={<ArrowLeftIcon />} variant="outline" size="icon" ref={slideLeftRef}></Button>
+          <Swiper
+            allowTouchMove={false}
+            spaceBetween={12}
+            direction={'horizontal'}
+            modules={SwiperModules}
+            freeMode={false}
+            grabCursor={false}
+            slidesPerGroup={3}
+            speed={0}
+            watchSlidesProgress={false}
+            watchOverflow={false}
+            updateOnWindowResize={false}
+            observer={false}
+            observeParents={false}
+            observeSlideChildren={false}
+            mousewheel={{
+              forceToAxis: false,
+              releaseOnEdges: true,
+              sensitivity: 2000,
+              thresholdDelta: 0.2,
+              thresholdTime: 10,
+              enabled: true,
+            }}
+            navigation={{
+              prevEl: slideLeftRef.current,
+              nextEl: slideRightRef.current,
+            }}
+            slidesPerView={slidesPerView}
+            initialSlide={0}
+            onSwiper={(swiper) => {
+              // 确保没有初始化动画
+              setTimeout(() => swiper.slideTo(0, 0), 0);
+            }}
+            onSlideChange={(swiper) => {
+              // 当滑动到接近最后几个slide时触发加载
+              // 提前3个slide开始加载
+              if (swiper.activeIndex + slidesPerView >= images.length - SLIDE_THRESHOLD) {
+                // console.log('requesting more');
 
-                  setSize((size) => size + 1);
-                }
-              }}
-              className={cn(className)}
-            >
-              {images.length > 0
-                ? images.map((item, index) => (
-                    <SwiperSlide key={item.render.key}>
-                      <div
-                        className={cn(
-                          'h-[var(--history-result-image-size)] w-[var(--history-result-image-size)] cursor-grab overflow-hidden rounded-md',
-                        )}
-                      >
-                        {isUniImagePreview ? (
-                          <UniImagePreviewWrapper>
-                            <CarouselItemImage
-                              image={item as ImagesResultWithOrigin}
-                              index={index}
-                              handleDragStart={handleDragStart}
-                              onClick={() => {
-                                setPosition(index);
-                              }}
-                            />
-                          </UniImagePreviewWrapper>
-                        ) : (
+                setSize((size) => size + 1);
+              }
+            }}
+            className={cn(className)}
+          >
+            {images.length > 0
+              ? images.map((item, index) => (
+                  <SwiperSlide key={item.render.key}>
+                    <div
+                      className={cn(
+                        'h-[var(--history-result-image-size)] w-[var(--history-result-image-size)] cursor-grab overflow-hidden rounded-md',
+                      )}
+                    >
+                      {isUniImagePreview ? (
+                        <UniImagePreviewWrapper>
                           <CarouselItemImage
                             image={item as ImagesResultWithOrigin}
                             index={index}
                             handleDragStart={handleDragStart}
                             onClick={() => {
                               setPosition(index);
-                              setOpen(true);
                             }}
                           />
-                        )}
-                      </div>
-                    </SwiperSlide>
-                  ))
-                : null}
-            </Swiper>
-            <Button icon={<ArrowRightIcon />} variant="outline" size="icon" ref={slideRightRef}></Button>
+                        </UniImagePreviewWrapper>
+                      ) : (
+                        <CarouselItemImage
+                          image={item as ImagesResultWithOrigin}
+                          index={index}
+                          handleDragStart={handleDragStart}
+                          onClick={() => {
+                            setPosition(index);
+                            setOpen(true);
+                          }}
+                        />
+                      )}
+                    </div>
+                  </SwiperSlide>
+                ))
+              : null}
+          </Swiper>
+          <Button icon={<ArrowRightIcon />} variant="outline" size="icon" ref={slideRightRef}></Button>
+        </div>
+      ) : (
+        <div key="vines-history-empty" className="vines-center size-full flex-col gap-2">
+          <ScanSearch size={48} />
+          <div className="flex flex-col text-center">
+            <h2 className="text-sm font-bold">{t('workbench.history.empty')}</h2>
           </div>
-        ) : (
-          <div
-            key="vines-history-empty"
-            className="vines-center size-full flex-col gap-2"
-          >
-            <ScanSearch size={48} />
-            <div className="flex flex-col text-center">
-              <h2 className="text-sm font-bold">{t('workbench.history.empty')}</h2>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
   );
 };
 
