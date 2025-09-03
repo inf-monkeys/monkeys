@@ -1,4 +1,5 @@
 import { CommonModule } from '@/common/common.module';
+import { AgentV2Entity } from '@/database/entities/agent-v2/agent-v2.entity';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
@@ -85,7 +86,16 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
   imports: [
     ConductorModule,
     forwardRef(() => AssetsModule),
-    TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity, DesignMetadataEntity, DesignProjectEntity, WorkflowExecutionEntity, WorkflowArtifactEntity]),
+    TypeOrmModule.forFeature([
+      WorkflowPageEntity,
+      WorkflowPageGroupEntity,
+      ConversationAppEntity,
+      AgentV2Entity,
+      DesignMetadataEntity,
+      DesignProjectEntity,
+      WorkflowExecutionEntity,
+      WorkflowArtifactEntity,
+    ]),
     ToolsModule,
     CommonModule,
     MarketplaceModule,

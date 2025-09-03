@@ -1,5 +1,6 @@
 import { generateDbId } from '@/common/utils';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
+import { AgentV2Entity } from '@/database/entities/agent-v2/agent-v2.entity';
 import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
@@ -23,6 +24,8 @@ export class WorkflowPageService {
     private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
     @InjectRepository(ConversationAppEntity)
     private readonly conversationAppRepository: Repository<ConversationAppEntity>,
+    @InjectRepository(AgentV2Entity)
+    private readonly agentV2Repository: Repository<AgentV2Entity>,
     @InjectRepository(DesignMetadataEntity)
     private readonly designMetadataRepository: Repository<DesignMetadataEntity>,
     @InjectRepository(DesignProjectEntity)
@@ -196,9 +199,10 @@ export class WorkflowPageService {
 
   splitPageIds(pageIds: (string | null)[]) {
     const agentPageIds = pageIds.filter((id) => id && id.startsWith('agent-'));
+    const agentV2PageIds = pageIds.filter((id) => id && id.startsWith('agentv2-'));
     const designBoardPageIds = pageIds.filter((id) => id && id.startsWith('design-board-'));
-    const normalPageIds = pageIds.filter((id) => id && !designBoardPageIds.includes(id) && !agentPageIds.includes(id));
-    return { agentPageIds, designBoardPageIds, normalPageIds };
+    const normalPageIds = pageIds.filter((id) => id && !designBoardPageIds.includes(id) && !agentPageIds.includes(id) && !agentV2PageIds.includes(id));
+    return { agentPageIds, agentV2PageIds, designBoardPageIds, normalPageIds };
   }
 
   public async getPinnedPages(teamId: string) {
@@ -217,7 +221,7 @@ export class WorkflowPageService {
 
     const pageIds = uniq(groups.map((it) => it.pageIds).flat(1)) as string[];
 
-    const { agentPageIds, designBoardPageIds, normalPageIds } = this.splitPageIds(pageIds);
+    const { agentPageIds, agentV2PageIds, designBoardPageIds, normalPageIds } = this.splitPageIds(pageIds);
 
     const pages = await this.pageRepository.find({
       where: {
@@ -272,6 +276,47 @@ export class WorkflowPageService {
         agent: agentApps.find((it) => it.id === id),
         id: agentPageId,
         type: 'agent-' + type,
+        displayName: isChat ? '对话视图' : '配置视图',
+        agentId: id,
+        instance: {
+          name: isChat ? '对话视图' : '配置视图',
+          icon: isChat ? 'square-play' : 'bolt',
+          type,
+        },
+      };
+    });
+
+    // agentv2 page
+    const [agentV2Ids, agentV2PageInfo] = agentV2PageIds.reduce(
+      ([ids, map], str) => {
+        const match = str.match(/agentv2-(\w+)-(\w+)/);
+        if (match) {
+          const [, id, type] = match;
+          ids.push(id);
+          map[str] = {
+            type,
+            id,
+          };
+        }
+        return [ids, map];
+      },
+      [[], {}],
+    ) as [string[], Record<string, Record<string, string>>];
+    const agentV2Apps = await this.agentV2Repository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+        id: In(agentV2Ids),
+      },
+    });
+    const agentV2Pages = agentV2PageIds.map((agentV2PageId) => {
+      const { type, id } = agentV2PageInfo[agentV2PageId];
+      const isChat = type === 'chat';
+
+      return {
+        agent: agentV2Apps.find((it) => it.id === id),
+        id: agentV2PageId,
+        type: 'agentv2-' + type,
         displayName: isChat ? '对话视图' : '配置视图',
         agentId: id,
         instance: {
@@ -338,6 +383,7 @@ export class WorkflowPageService {
           instance: pageInstanceTypeMapper[p.type],
         })),
         ...agentPages,
+        ...agentV2Pages,
         ...designBoardPages,
       ],
       groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn', 'iconUrl', 'sortIndex'])),

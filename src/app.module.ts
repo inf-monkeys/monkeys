@@ -10,6 +10,7 @@ import { ToolsMiddleware } from './common/middlewares/tools.middleware';
 import { CronJobModule } from './cronjobs/cron.module';
 import { DatabaseModule } from './database/database.module';
 import { RepositoryMoule } from './database/repositories.module';
+import { AgentV2Module } from './modules/agent-v2/agent-v2.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
@@ -38,6 +39,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     ToolsModule,
     RepositoryMoule,
     WorkflowModule,
+    AgentV2Module,
     OpenapiModule,
     ScheduleModule.forRoot(),
     CronJobModule,
