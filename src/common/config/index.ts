@@ -372,6 +372,28 @@ export interface EvaluationConfig {
   defaultLlmEvaluatorModel: string;
 }
 
+export interface AgentV2Config {
+  // OpenAI Compatible API configuration
+  openaiCompatible: {
+    url: string; // e.g., https://api.openai.com/v1
+    apiKey: string; // API key for authentication
+    models: string[]; // Available models list, e.g., ["gpt-4", "gpt-3.5-turbo", "claude-3-sonnet"]
+  };
+
+  // Rate limiting (hard-coded per team)
+  rateLimits: {
+    perMinute: number; // Default: 60
+    perDay: number; // Default: 1000
+  };
+
+  // Default model parameters
+  defaults: {
+    temperature: number; // Default: 0.7
+    maxTokens: number; // Default: 4096
+    timeout: number; // Default: 30000ms
+  };
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -391,6 +413,7 @@ export interface Config {
   tenant: TenantStatisticsConfig;
   admin: AdminConfig;
   evaluation: EvaluationConfig;
+  agentv2: AgentV2Config;
 }
 
 const port = readConfig('server.port', 3000);
@@ -654,6 +677,22 @@ When answer to user:
   },
   evaluation: {
     defaultLlmEvaluatorModel: readConfig('evaluation.defaultLlmEvaluatorModel', ''),
+  },
+  agentv2: {
+    openaiCompatible: {
+      url: readConfig('agentv2.openaiCompatible.url', 'https://api.openai.com/v1'),
+      apiKey: readConfig('agentv2.openaiCompatible.apiKey', ''),
+      models: readConfig('agentv2.openaiCompatible.models', ['gpt-3.5-turbo', 'gpt-4']),
+    },
+    rateLimits: {
+      perMinute: 60,
+      perDay: 1000,
+    },
+    defaults: {
+      temperature: 0.7,
+      maxTokens: 4096,
+      timeout: 30000,
+    },
   },
 };
 
