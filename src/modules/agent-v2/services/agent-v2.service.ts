@@ -7,14 +7,8 @@ import { AgentV2ToolsService } from './tools/agent-v2-tools.service';
 
 @Injectable()
 export class AgentV2Service {
+  private readonly logger = new Logger(AgentV2Service.name);
   // Add conditional logging for debugging
-  private shouldLog = process.env.NODE_ENV !== 'production' || process.env.AGENT_V2_DEBUG === 'true';
-
-  private debugLog(message: string): void {
-    if (this.shouldLog) {
-      this.logger.debug(message);
-    }
-  }
 
   // Global session context registry for coordination
   private activeContexts = new Map<string, AgentV2PersistentExecutionContext>();
@@ -108,7 +102,6 @@ export class AgentV2Service {
 
     // Queue through persistent task manager
     await this.taskManager.queueMessage(sessionId, messageEntity.id, message, senderId);
-
   }
 
   // Get active session context (useful for debugging/monitoring)
@@ -213,7 +206,7 @@ export class AgentV2Service {
     this.activeContexts.set(session.id, context);
 
     // Set up callbacks (these would be no-ops for resume unless you want logging)
-    context.onComplete = (finalMessage: string) => {
+    context.onComplete = () => {
       // Don't remove from registry on attempt_completion - conversation continues
     };
     context.onError = (error: Error) => {

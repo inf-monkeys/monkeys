@@ -22,6 +22,7 @@ export interface StreamChunk {
 
 @Injectable()
 export class AgentV2LlmService {
+  private readonly logger = new Logger(AgentV2LlmService.name);
   // Add conditional logging for debugging
   private shouldLog = process.env.NODE_ENV !== 'production' || process.env.AGENT_V2_DEBUG === 'true';
 
@@ -49,7 +50,6 @@ export class AgentV2LlmService {
    * Create chat completion with real OpenAI compatible API
    */
   async createChatCompletion(teamId: string, params: AgentV2ChatParams): Promise<any> {
-
     try {
       const openaiParams: OpenAI.Chat.ChatCompletionCreateParams = {
         model: params.model || 'gpt-3.5-turbo',

@@ -15,14 +15,9 @@ import { AssistantMessageParser, ToolCall } from './utils/assistant-message-pars
 // Persistent execution context that relies entirely on database state
 @Injectable()
 export class AgentV2PersistentExecutionContext extends EventEmitter {
+  private readonly logger = new Logger(AgentV2PersistentExecutionContext.name);
   // Add conditional logging for debugging
-  private shouldLog = process.env.NODE_ENV !== 'production' || process.env.AGENT_V2_DEBUG === 'true';
 
-  private debugLog(message: string): void {
-    if (this.shouldLog) {
-      this.logger.debug(message);
-    }
-  }
   private parser = new AssistantMessageParser();
   private isProcessingActive = false;
   private processingIntervalId?: NodeJS.Timeout;
@@ -139,7 +134,6 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
         this.onError?.(error);
       }
     }, 500); // Poll every 500ms
-
   }
 
   // Process the next message from the database queue
@@ -159,7 +153,6 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
     }
 
     try {
-
       // Only process user messages through the agent loop (senderId should be the actual user ID, not 'user')
       if (nextMessage.senderId !== 'system' && nextMessage.senderId !== 'assistant') {
         await this.runLoop();
@@ -183,7 +176,6 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
   // Run the agent loop - same logic as before but with database persistence
   private async runLoop() {
-
     // Get current task state
     const taskState = await this.taskManager.getTaskState(this.session.id);
 
@@ -317,7 +309,6 @@ Please use one of these tools in your next response.`;
 
     for (const tool of tools) {
       try {
-
         // Save tool execution context to database
         await this.taskManager.updateTaskState(this.session.id, {
           processingContext: { currentToolCalls: [tool] },
@@ -347,7 +338,6 @@ Please use one of these tools in your next response.`;
               toolsExecuted: tools.map((t) => t.name),
             },
           });
-
 
           // Send completion signal to UI (like agent-code's completion_result)
           this.onComplete?.(result.output || 'Response completed');
@@ -390,7 +380,6 @@ Please use one of these tools in your next response.`;
         await this.repository.updateMessage(toolCallMessage.id, {
           toolCalls: updatedToolCalls,
         });
-
       }
 
       // Also create a summary message for easy reading in chat history
@@ -419,7 +408,7 @@ Please use one of these tools in your next response.`;
 
   // Setup tool handlers with database persistence
   private setupToolHandlers() {
-    this.askApproval = async (type: string, message?: string) => {
+    this.askApproval = async () => {
       // Auto-approve all tool executions for continuous conversation
       return true;
     };
@@ -434,8 +423,7 @@ Please use one of these tools in your next response.`;
       });
     };
 
-    this.pushToolResult = async (result: ToolResult) => {
-
+    this.pushToolResult = async () => {
       // Results are already saved as messages in executeTools
       // This is just for logging/callback purposes
     };
@@ -470,7 +458,6 @@ Please use one of these tools in your next response.`;
         suggestions = this.parseFollowUpSuggestions(followUp);
       }
 
-
       // Call the callback and wait for user response
       const userAnswer = await this.onFollowupQuestion(question, suggestions);
 
@@ -481,7 +468,6 @@ Please use one of these tools in your next response.`;
         content: userAnswer,
         isSystem: false,
       });
-
 
       return {
         tool_call_id: tool.id,
