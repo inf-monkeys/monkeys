@@ -15,7 +15,14 @@ import { AssistantMessageParser, ToolCall } from './utils/assistant-message-pars
 // Persistent execution context that relies entirely on database state
 @Injectable()
 export class AgentV2PersistentExecutionContext extends EventEmitter {
-  private readonly logger = new Logger(AgentV2PersistentExecutionContext.name);
+  // Add conditional logging for debugging
+  private shouldLog = process.env.NODE_ENV !== 'production' || process.env.AGENT_V2_DEBUG === 'true';
+
+  private debugLog(message: string): void {
+    if (this.shouldLog) {
+      this.logger.debug(message);
+    }
+  }
   private parser = new AssistantMessageParser();
   private isProcessingActive = false;
   private processingIntervalId?: NodeJS.Timeout;
@@ -81,7 +88,6 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
   // Stop the processing loop
   public stop() {
-    this.logger.log(`[${this.session.id}] Stopping persistent execution context...`);
     this.isProcessingActive = false;
 
     if (this.processingIntervalId) {
@@ -112,7 +118,6 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
   private async startPersistentProcessingLoop() {
     // Register this processor with the persistent manager
     if (!this.taskManager.registerProcessor(this.session.id)) {
-      this.logger.log(`[${this.session.id}] Session already being processed by another instance`);
       return;
     }
 
@@ -135,7 +140,6 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
       }
     }, 500); // Poll every 500ms
 
-    this.logger.log(`[${this.session.id}] Persistent processing loop started`);
   }
 
   // Process the next message from the database queue
@@ -149,21 +153,17 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
       if (!hasPending && taskState?.status === TaskExecutionStatus.RUNNING) {
         // No pending messages and no active processing - task might be complete
-        this.logger.log(`[${this.session.id}] No pending messages, task appears complete`);
         // Task completion will be handled by attempt_completion tool
       }
       return;
     }
 
     try {
-      this.logger.log(`[${this.session.id}] Processing queued message: ${nextMessage.content.substring(0, 50)}...`);
 
       // Only process user messages through the agent loop (senderId should be the actual user ID, not 'user')
       if (nextMessage.senderId !== 'system' && nextMessage.senderId !== 'assistant') {
-        this.logger.log(`[${this.session.id}] Starting agent loop for user message from ${nextMessage.senderId}...`);
         await this.runLoop();
       } else {
-        this.logger.log(`[${this.session.id}] Skipping agent loop for system/assistant message`);
       }
 
       // Mark message as processed
@@ -183,7 +183,6 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
   // Run the agent loop - same logic as before but with database persistence
   private async runLoop() {
-    this.logger.log(`[${this.session.id}] Starting agent loop...`);
 
     // Get current task state
     const taskState = await this.taskManager.getTaskState(this.session.id);
@@ -191,7 +190,6 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
     // Only skip if the session was explicitly stopped or encountered an error
     // We continue processing even after attempt_completion since conversation can continue
     if (taskState?.status === TaskExecutionStatus.STOPPED || taskState?.status === TaskExecutionStatus.ERROR) {
-      this.logger.log(`[${this.session.id}] Session stopped or has errors (${taskState.status}), ending loop`);
       return;
     }
 
@@ -319,7 +317,6 @@ Please use one of these tools in your next response.`;
 
     for (const tool of tools) {
       try {
-        this.logger.log(`[${this.session.id}] Executing tool: ${tool.name}`);
 
         // Save tool execution context to database
         await this.taskManager.updateTaskState(this.session.id, {
@@ -351,7 +348,6 @@ Please use one of these tools in your next response.`;
             },
           });
 
-          this.logger.log(`[${this.session.id}] Response completed via attempt_completion tool, waiting for next message`);
 
           // Send completion signal to UI (like agent-code's completion_result)
           this.onComplete?.(result.output || 'Response completed');
@@ -395,7 +391,6 @@ Please use one of these tools in your next response.`;
           toolCalls: updatedToolCalls,
         });
 
-        this.logger.log(`[${this.session.id}] Updated tool call message with ${toolResults.length} results`);
       }
 
       // Also create a summary message for easy reading in chat history
@@ -426,7 +421,6 @@ Please use one of these tools in your next response.`;
   private setupToolHandlers() {
     this.askApproval = async (type: string, message?: string) => {
       // Auto-approve all tool executions for continuous conversation
-      this.logger.log(`Auto-approving ${type}: ${message}`);
       return true;
     };
 
@@ -441,7 +435,6 @@ Please use one of these tools in your next response.`;
     };
 
     this.pushToolResult = async (result: ToolResult) => {
-      this.logger.log(`Tool result: ${result.tool_call_id} - ${result.output?.substring(0, 100)}...`);
 
       // Results are already saved as messages in executeTools
       // This is just for logging/callback purposes
@@ -477,7 +470,6 @@ Please use one of these tools in your next response.`;
         suggestions = this.parseFollowUpSuggestions(followUp);
       }
 
-      this.logger.log(`[${this.session.id}] Asking user followup question: ${question.substring(0, 100)}...`);
 
       // Call the callback and wait for user response
       const userAnswer = await this.onFollowupQuestion(question, suggestions);
@@ -490,7 +482,6 @@ Please use one of these tools in your next response.`;
         isSystem: false,
       });
 
-      this.logger.log(`[${this.session.id}] User answered followup question: ${userAnswer.substring(0, 100)}...`);
 
       return {
         tool_call_id: tool.id,

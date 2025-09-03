@@ -59,7 +59,6 @@ export class AgentV2McpService {
    * 在实际实现中，这里会连接到MCP服务器
    */
   async initializeServer(server: McpServer): Promise<boolean> {
-    this.logger.log(`Initializing MCP server: ${server.name}`);
 
     if (server.disabled) {
       this.logger.warn(`MCP server ${server.name} is disabled`);
@@ -80,7 +79,6 @@ export class AgentV2McpService {
       this.serverTools.set(server.name, mockConnection.tools);
       this.serverResources.set(server.name, mockConnection.resources);
 
-      this.logger.log(`Successfully connected to MCP server: ${server.name}`);
       return true;
     } catch (error) {
       this.logger.error(`Failed to initialize MCP server ${server.name}: ${error.message}`);
@@ -119,7 +117,6 @@ export class AgentV2McpService {
    * Execute a tool on an MCP server
    */
   async callTool(serverName: string, toolName: string, args: Record<string, unknown> = {}): Promise<McpToolCallResponse> {
-    this.logger.log(`Calling MCP tool: ${serverName}/${toolName}`);
 
     const server = this.connectedServers.get(serverName);
     if (!server) {
@@ -144,7 +141,6 @@ export class AgentV2McpService {
         ],
       };
 
-      this.logger.log(`MCP tool call successful: ${serverName}/${toolName}`);
       return mockResponse;
     } catch (error) {
       this.logger.error(`Error calling MCP tool ${serverName}/${toolName}: ${error.message}`);
@@ -164,7 +160,6 @@ export class AgentV2McpService {
    * Read a resource from an MCP server
    */
   async readResource(serverName: string, uri: string): Promise<McpResourceResponse> {
-    this.logger.log(`Reading MCP resource: ${serverName}/${uri}`);
 
     const server = this.connectedServers.get(serverName);
     if (!server) {
@@ -184,7 +179,6 @@ export class AgentV2McpService {
         ],
       };
 
-      this.logger.log(`MCP resource read successful: ${serverName}/${uri}`);
       return mockResponse;
     } catch (error) {
       this.logger.error(`Error reading MCP resource ${serverName}/${uri}: ${error.message}`);
@@ -210,7 +204,6 @@ export class AgentV2McpService {
       this.connectedServers.delete(serverName);
       this.serverTools.delete(serverName);
       this.serverResources.delete(serverName);
-      this.logger.log(`Disconnected from MCP server: ${serverName}`);
     }
   }
 

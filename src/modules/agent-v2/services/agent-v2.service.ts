@@ -7,7 +7,14 @@ import { AgentV2ToolsService } from './tools/agent-v2-tools.service';
 
 @Injectable()
 export class AgentV2Service {
-  private readonly logger = new Logger(AgentV2Service.name);
+  // Add conditional logging for debugging
+  private shouldLog = process.env.NODE_ENV !== 'production' || process.env.AGENT_V2_DEBUG === 'true';
+
+  private debugLog(message: string): void {
+    if (this.shouldLog) {
+      this.logger.debug(message);
+    }
+  }
 
   // Global session context registry for coordination
   private activeContexts = new Map<string, AgentV2PersistentExecutionContext>();
@@ -41,6 +48,9 @@ export class AgentV2Service {
       userId,
       title: initialMessage.substring(0, 50),
     });
+
+    // Log session start event (important for monitoring)
+    this.logger.log(`Session started: ${session.id} for user ${userId} with agent ${agentId}`);
 
     const context = new AgentV2PersistentExecutionContext(agent, session, this.repository, this.llmService, this.agentToolsService, this.taskManager);
 
@@ -99,7 +109,6 @@ export class AgentV2Service {
     // Queue through persistent task manager
     await this.taskManager.queueMessage(sessionId, messageEntity.id, message, senderId);
 
-    this.logger.log(`Message queued for inactive session ${sessionId}: ${message.substring(0, 50)}...`);
   }
 
   // Get active session context (useful for debugging/monitoring)
@@ -113,6 +122,8 @@ export class AgentV2Service {
     if (context) {
       context.stop();
       this.activeContexts.delete(sessionId);
+      // Log session stop event (important for monitoring)
+      this.logger.log(`Session stopped: ${sessionId}`);
     }
   }
 
@@ -204,7 +215,6 @@ export class AgentV2Service {
     // Set up callbacks (these would be no-ops for resume unless you want logging)
     context.onComplete = (finalMessage: string) => {
       // Don't remove from registry on attempt_completion - conversation continues
-      this.logger.log(`Resumed session ${sessionId} completed response: ${finalMessage.substring(0, 50)}...`);
     };
     context.onError = (error: Error) => {
       this.activeContexts.delete(session.id);
@@ -216,6 +226,9 @@ export class AgentV2Service {
       this.activeContexts.delete(session.id);
       throw error;
     });
+
+    // Log session resume event (important for monitoring)
+    this.logger.log(`Session resumed: ${sessionId} with ${queueInfo.totalQueued} queued messages`);
 
     return {
       resumed: true,

@@ -122,7 +122,6 @@ export class AgentV2ToolsService {
       }
 
       // Execute the MCP tool using the actual MCP service
-      this.logger.log(`Executing MCP tool: ${serverName}/${toolName}`);
       const toolResult = await this.mcpService.callTool(serverName, toolName, parsedArguments);
 
       const resultText = toolResult?.content ? toolResult.content.map((item: any) => (item.type === 'text' ? item.text : '')).join('\\n\\n') : 'No response';
@@ -182,7 +181,6 @@ export class AgentV2ToolsService {
       }
 
       // Access the MCP resource using the actual MCP service
-      this.logger.log(`Accessing MCP resource: ${serverName}/${uri}`);
       const resourceResult = await this.mcpService.readResource(serverName, uri);
 
       const resultText =
@@ -244,7 +242,6 @@ export class AgentV2ToolsService {
 
       // Check if we have the askFollowupQuestion callback (proper interactive mode)
       if (askFollowupQuestion) {
-        this.logger.log(`Asking user follow-up question: ${question.substring(0, 100)}...`);
 
         // Ask the user the question and wait for response
         const userAnswer = await askFollowupQuestion(question, suggestions);
@@ -255,7 +252,6 @@ export class AgentV2ToolsService {
           output: `<answer>\n${userAnswer}\n</answer>`,
         });
 
-        this.logger.log(`User answered follow-up question: ${userAnswer?.substring(0, 100)}...`);
       } else {
         // Fallback mode - just return the question for non-interactive sessions
         pushToolResult({
@@ -336,7 +332,6 @@ export class AgentV2ToolsService {
       }
 
       // In a full implementation, this would create a new session/task
-      this.logger.log(`New task requested: ${message}`);
 
       pushToolResult({
         tool_call_id: block.id,

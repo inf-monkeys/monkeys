@@ -55,7 +55,6 @@ export class AgentV2PersistentTaskManager extends EventEmitter {
 
     await this.messageQueueRepository.save(queueItem);
 
-    this.logger.log(`Message queued for session ${sessionId}: ${content.substring(0, 50)}...`);
 
     // Emit event for potential processors
     this.emit('messageQueued', sessionId, messageId);
@@ -154,7 +153,8 @@ export class AgentV2PersistentTaskManager extends EventEmitter {
       await entityManager.update(AgentV2TaskStateEntity, { sessionId }, { ...updates, updatedAt: new Date() });
     });
 
-    this.logger.log(`Task state updated atomically for session ${sessionId}: ${JSON.stringify(updates)}`);
+    this.logger.debug(`Task state updated for session ${sessionId}`);
+    // Uncomment for debugging: this.logger.debug(`Updates: ${JSON.stringify(updates)}`);
   }
 
   // Get current task state
@@ -182,14 +182,12 @@ export class AgentV2PersistentTaskManager extends EventEmitter {
     }
 
     this.activeProcessors.add(sessionId);
-    this.logger.log(`Processor registered for session ${sessionId}`);
     return true;
   }
 
   // Unregister processor
   unregisterProcessor(sessionId: string): void {
     this.activeProcessors.delete(sessionId);
-    this.logger.log(`Processor unregistered for session ${sessionId}`);
   }
 
   // Check if session is being processed
@@ -217,6 +215,6 @@ export class AgentV2PersistentTaskManager extends EventEmitter {
     // Reset task states that were running but server crashed
     await this.taskStateRepository.update({ status: TaskExecutionStatus.RUNNING }, { status: TaskExecutionStatus.PENDING });
 
-    this.logger.log('Cleaned up stale processing states');
+    this.logger.debug('Cleaned up stale processing states');
   }
 }
