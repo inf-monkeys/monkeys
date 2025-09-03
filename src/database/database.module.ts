@@ -62,6 +62,10 @@ import { TemporaryWorkflowEntity } from './entities/workflow/temporary-workflow.
 import { WorkflowArtifactEntity } from './entities/workflow/workflow-artifact.entity';
 import { WorkflowAssociationsEntity } from './entities/workflow/workflow-association';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
+import { AgentV2Entity } from './entities/agent-v2/agent-v2.entity';
+import { AgentV2SessionEntity } from './entities/agent-v2/agent-v2-session.entity';
+import { AgentV2MessageEntity } from './entities/agent-v2/agent-v2-message.entity';
+import { AgentV2TaskStateEntity, AgentV2MessageQueueEntity } from './entities/agent-v2/agent-v2-task-state.entity';
 
 export const entities: EntityClassOrSchema[] = [
   ThemeEntity,
@@ -124,6 +128,11 @@ export const entities: EntityClassOrSchema[] = [
   EvaluationRatingHistoryEntity,
   EvaluationTaskEntity,
   TemporaryWorkflowEntity,
+  AgentV2Entity,
+  AgentV2SessionEntity,
+  AgentV2MessageEntity,
+  AgentV2TaskStateEntity,
+  AgentV2MessageQueueEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
