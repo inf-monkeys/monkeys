@@ -6,7 +6,7 @@ import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IWorkflowValidationIssue } from '@/apis/workflow/validation/typings.ts';
 
-export const useWorkflowVersions = (workflowId: string) =>
+export const useWorkflowVersions = (workflowId?: string) =>
   useSWR<MonkeyWorkflow[] | undefined>(
     workflowId ? `/api/workflow/metadata/${workflowId}/versions` : null,
     vinesFetcher({ wrapper: (data) => data?.reverse() }),

@@ -60,6 +60,9 @@ export const useUpdateWorkflow = (workflowId: string) =>
     Partial<MonkeyWorkflow>
   >(workflowId ? `/api/workflow/metadata/${workflowId}` : null, vinesFetcher({ method: 'PUT' }));
 
+export const rollbackWorkflow = (workflowId: string, version: number) =>
+  vinesFetcher<MonkeyWorkflow>({ method: 'PUT' })(`/api/workflow/metadata/${workflowId}/rollback`, { version });
+
 export const useWorkflowRelatedAssets = (workflowId?: string, version?: number) =>
   useSWR<IWorkflowRelatedAssetResult | undefined>(
     workflowId ? `/api/workflow/${workflowId}/related-assets${version ? `?version=${version}` : ''}` : null,

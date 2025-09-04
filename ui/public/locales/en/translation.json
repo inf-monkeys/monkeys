@@ -83,7 +83,8 @@
       "next": "Next",
       "previous": "Previous",
       "tips": "Tips",
-      "optional": "Optional"
+      "optional": "Optional",
+      "rollback": "Rollback"
     },
     "status": {
       "active": "Active",
@@ -613,6 +614,18 @@
           "button": {
             "publish": "Publish"
           }
+        },
+        "rollback-dialog": {
+          "title": "Rollback Workflow",
+          "description": "This feature is used to rollback the workflow to the version before the last update operation, mainly used to fix errors encountered after modifying the workflow, similar to automatic backup.",
+          "version": {
+            "label": "Workflow Version",
+            "placeholder": "Please select the workflow version"
+          },
+          "version-item": {
+            "label": "Version: {{version}} ({{date}})"
+          },
+          "no-versions": "No versions available"
         },
         "view": {
           "filter": {

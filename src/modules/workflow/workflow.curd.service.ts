@@ -677,6 +677,7 @@ export class WorkflowCrudService implements IAssetHandler {
       forkFromId?: string;
       preferAppId?: string;
     },
+    autoBackup = true,
   ) {
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
     if (!workflow) {
@@ -690,17 +691,23 @@ export class WorkflowCrudService implements IAssetHandler {
       };
     }
 
-    const workflowEntity = await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, updates);
+    const workflowEntity = await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, updates, autoBackup);
     let validated = workflow.validated;
     let validationIssues: WorkflowValidationIssue[] = [];
     if (updates.tasks || updates.output) {
       validationIssues = await this.workflowValidateService.validateWorkflow(teamId, updates.tasks || workflow.tasks, updates.output || workflow.output || []);
       const errors = validationIssues.filter((i) => i.issueType === ValidationIssueType.ERROR);
       validated = errors.length === 0;
-      await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, {
-        validationIssues,
-        validated,
-      });
+      await this.workflowRepository.updateWorkflowDef(
+        teamId,
+        workflowId,
+        version,
+        {
+          validationIssues,
+          validated,
+        },
+        autoBackup,
+      );
       await this.conductorService.saveWorkflowInConductor(workflowEntity);
     }
 
@@ -781,5 +788,9 @@ export class WorkflowCrudService implements IAssetHandler {
 
   public async getById(assetId: string, _teamId: string): Promise<any> {
     return await this.workflowRepository.getWorkflowById(assetId, 1);
+  }
+
+  public async rollbackWorkflow(teamId: string, workflowId: string, version: number) {
+    return await this.workflowRepository.rollbackWorkflow(teamId, workflowId, version);
   }
 }

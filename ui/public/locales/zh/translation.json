@@ -83,7 +83,8 @@
       "next": "下一步",
       "previous": "上一步",
       "tips": "提示",
-      "optional": "可选"
+      "optional": "可选",
+      "rollback": "回滚"
     },
     "status": {
       "active": "活跃",
@@ -607,6 +608,18 @@
           "button": {
             "publish": "发布"
           }
+        },
+        "rollback-dialog": {
+          "title": "回滚工作流",
+          "description": "该功能用于将指定版本工作流回滚到上次执行更新操作前，主要用于修复修改工作流后遇到的错误，类似于自动备份。",
+          "version": {
+            "label": "工作流版本",
+            "placeholder": "请选择工作流版本"
+          },
+          "version-item": {
+            "label": "版本: {{version}} ({{date}})"
+          },
+          "no-versions": "没有工作流版本"
         },
         "view": {
           "filter": {

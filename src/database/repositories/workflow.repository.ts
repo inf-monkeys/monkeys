@@ -14,7 +14,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { isEmpty, isString, keyBy, omit, pick } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
-import { DataSource, FindManyOptions, In, IsNull, Repository } from 'typeorm';
+import { DataSource, FindManyOptions, In, IsNull, MoreThan, Repository } from 'typeorm';
 import { InstalledAppEntity } from '../entities/marketplace/installed-app.entity';
 import { UpdateAndCreateWorkflowAssociation, WorkflowAssociationsEntity } from '../entities/workflow/workflow-association';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
@@ -198,6 +198,7 @@ export class WorkflowRepository {
       forkFromId?: string;
       preferAppId?: string;
     },
+    autoBackup = true,
   ) {
     const {
       displayName,
@@ -267,7 +268,40 @@ export class WorkflowRepository {
       }
     }
 
-    await this.workflowMetadataRepository.findOneOrFail({ where: { workflowId: workflowId, version, teamId, isDeleted: false } });
+    const originWorkflow = await this.workflowMetadataRepository.findOneOrFail({ where: { workflowId: workflowId, version, teamId, isDeleted: false } });
+    if (autoBackup) {
+      const backupVersion = 0 - originWorkflow.version;
+      // 检查备份版本是否已存在
+      const existingBackup = await this.workflowMetadataRepository.findOne({
+        where: { workflowId: workflowId, version: backupVersion, teamId, isDeleted: false },
+      });
+      if (existingBackup) {
+        // 如果备份版本已存在，更新它
+        await this.updateWorkflowDef(teamId, workflowId, backupVersion, originWorkflow, false);
+      } else {
+        // 如果备份版本不存在，创建它
+        await this.createWorkflow(
+          teamId,
+          originWorkflow.creatorUserId,
+          workflowId,
+          backupVersion,
+          {
+            displayName: originWorkflow.displayName,
+            description: originWorkflow.description,
+            iconUrl: originWorkflow.iconUrl,
+            tasks: originWorkflow.tasks,
+            variables: originWorkflow.variables,
+            output: originWorkflow.output,
+            exposeOpenaiCompatibleInterface: originWorkflow.exposeOpenaiCompatibleInterface,
+            rateLimiter: originWorkflow.rateLimiter,
+            validationIssues: originWorkflow.validationIssues,
+            validated: originWorkflow.validated,
+            shortcutsFlow: originWorkflow.shortcutsFlow,
+          },
+          true, // useNewId = true 来生成新的主键ID
+        );
+      }
+    }
     const updateFields = {
       ..._.pickBy(
         {
@@ -292,7 +326,13 @@ export class WorkflowRepository {
       ),
       updatedTimestamp: Date.now(),
     };
-    await this.workflowMetadataRepository.update({ workflowId, isDeleted: false, teamId, version }, updateFields);
+
+    const result = await this.workflowMetadataRepository.update({ workflowId, isDeleted: false, teamId, version }, updateFields);
+
+    if (!result.affected) {
+      throw new Error('Update workflow failed');
+    }
+
     const workflow = await this.workflowMetadataRepository.findOne({
       where: {
         teamId,
@@ -303,6 +343,16 @@ export class WorkflowRepository {
     });
     workflow.md5 = this.calcWorkflowMd5(workflow);
     await this.workflowMetadataRepository.save(workflow);
+    return workflow;
+  }
+
+  public async rollbackWorkflow(teamId: string, workflowId: string, version: number) {
+    const backupVersion = 0 - version;
+    const backupWorkflow = await this.workflowMetadataRepository.findOne({ where: { workflowId, version: backupVersion, teamId, isDeleted: false } });
+    if (!backupWorkflow) {
+      throw new Error('Backup workflow not found');
+    }
+    const workflow = await this.updateWorkflowDef(teamId, workflowId, version, backupWorkflow, false);
     return workflow;
   }
 
@@ -466,6 +516,7 @@ export class WorkflowRepository {
       where: {
         workflowId,
         isDeleted: false,
+        version: MoreThan(0),
       },
     });
   }

@@ -12,6 +12,7 @@ import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
 import { CreateWorkflowDefDto } from './dto/req/create-workflow-def.dto';
 import { GetWorkflowDto } from './dto/req/get-workflow.dto';
 import { ImportWorkflowDto } from './dto/req/import-workflow.dto';
+import { RollbackWorkflowDto } from './dto/req/rollback-workflow-def.dto';
 import { UpdateWorkflowDefDto } from './dto/req/update-workflow-def.dto';
 import { WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowCrudService } from './workflow.curd.service';
@@ -150,13 +151,29 @@ export class WorkflowCrudController {
   public async updateWorkflowDef(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: UpdateWorkflowDefDto) {
     const { teamId } = req;
     const { version = 1 } = body;
-    const { validationIssues, validated } = await this.service.updateWorkflowDef(teamId, workflowId, version, body);
+    const { autoBackup = true } = body;
+    const { validationIssues, validated } = await this.service.updateWorkflowDef(teamId, workflowId, version, body, autoBackup);
     return new SuccessResponse({
       data: {
         success: true,
         validationIssues,
         validated,
       },
+    });
+  }
+
+  @Put('/:workflowId/rollback')
+  @ApiOperation({
+    summary: '回滚 workflow',
+    description: '回滚 workflow',
+  })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
+  public async rollbackWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: RollbackWorkflowDto) {
+    const { teamId } = req;
+    const { version = 1 } = body;
+    const result = await this.service.rollbackWorkflow(teamId, workflowId, version);
+    return new SuccessResponse({
+      data: result,
     });
   }
 

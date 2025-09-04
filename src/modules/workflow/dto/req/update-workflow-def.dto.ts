@@ -98,4 +98,11 @@ export class UpdateWorkflowDefDto {
     type: String,
   })
   preferAppId?: string;
+
+  @ApiProperty({
+    description: '是否自动备份',
+    required: false,
+    type: Boolean,
+  })
+  autoBackup?: boolean;
 }

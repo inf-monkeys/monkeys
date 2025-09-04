@@ -4,7 +4,7 @@ import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, Share, Trash } from 'lucide-react';
+import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, Share, Trash, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -20,6 +20,8 @@ import { ExportWorkflowDialog } from '@/components/layout/ugc-pages/workflows/ex
 import { IExportWorkflowWithAssetsContext } from '@/components/layout/ugc-pages/workflows/export-workflow/typings.ts';
 import { PublishToMarket } from '@/components/layout/ugc-pages/workflows/publish-to-market';
 import { IPublishToMarketWithAssetsContext } from '@/components/layout/ugc-pages/workflows/publish-to-market/typings.ts';
+import { RollbackWorkflow } from '@/components/layout/ugc-pages/workflows/rollback-workflow';
+import { IRollbackWorkflowContext } from '@/components/layout/ugc-pages/workflows/rollback-workflow/typings';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow-info-editor.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
@@ -67,6 +69,8 @@ export const Workflows: React.FC = () => {
   const [exportAssetContext, setExportAssetContext] = useState<IExportWorkflowWithAssetsContext | undefined>();
   const [publishToMarketVisible, setPublishToMarketVisible] = useState(false);
   const [publishToMarketContext, setPublishToMarketContext] = useState<IPublishToMarketWithAssetsContext | undefined>();
+  const [rollbackWorkflowVisible, setRollbackWorkflowVisible] = useState(false);
+  const [rollbackWorkflowContext, setRollbackWorkflowContext] = useState<IRollbackWorkflowContext | undefined>();
 
   const handleAfterUpdateWorkflow = () => {
     void mutateWorkflows();
@@ -165,6 +169,19 @@ export const Workflows: React.FC = () => {
                     <Copy size={15} />
                   </DropdownMenuShortcut>
                   {t('ugc-page.workflow.ugc-view.operate-area.options.create-a-copy')}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setRollbackWorkflowContext({
+                      workflowId: item.workflowId,
+                    });
+                    setRollbackWorkflowVisible(true);
+                  }}
+                >
+                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                    <Undo2 size={15} />
+                  </DropdownMenuShortcut>
+                  {t('components.layout.ugc.rollback-dialog.title')}
                 </DropdownMenuItem>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
@@ -323,6 +340,11 @@ export const Workflows: React.FC = () => {
         visible={publishToMarketVisible}
         setVisible={setPublishToMarketVisible}
         context={publishToMarketContext}
+      />
+      <RollbackWorkflow
+        visible={rollbackWorkflowVisible}
+        setVisible={setRollbackWorkflowVisible}
+        context={rollbackWorkflowContext}
       />
     </main>
   );

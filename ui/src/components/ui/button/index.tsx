@@ -40,7 +40,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: 'outline',
       theme: 'primary',
       size: 'default',
       block: false,
