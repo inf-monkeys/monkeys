@@ -4,6 +4,7 @@ import { SWRInfiniteResponse } from 'swr/infinite';
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { t } from 'i18next';
+import { get } from 'lodash';
 import { Square, SquareCheck } from 'lucide-react';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
@@ -18,6 +19,7 @@ import { useOutputSelectionStore } from '@/store/useOutputSelectionStore';
 import { usePageStore } from '@/store/usePageStore';
 import { useLastScrollTop, useSetScrollTop } from '@/store/useScrollPositionStore';
 import { useShouldFilterError } from '@/store/useShouldErrorFilterStore.ts';
+import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
@@ -58,12 +60,15 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const { isSelectionMode, setSelectionMode, selectedOutputs, toggleOutputSelection } = useOutputSelectionStore();
   const { data: associations } = useWorkflowAssociationList(workflowId);
   const { data: oem } = useSystemConfig();
+  const pageFrom = useViewStore((s) => s.from);
 
   const selectionModeDisplayType =
     oem?.theme?.workflowPreviewExecutionGrid?.selectionModeDisplayType || 'dropdown-menu';
   const clickBehavior = oem?.theme?.workflowPreviewExecutionGrid?.clickBehavior || 'preview';
   const showErrorFilter = oem?.theme?.workflowPreviewExecutionGrid?.showErrorFilter ?? true;
   const isUniImagePreview = oem?.theme?.uniImagePreview ?? false;
+  const oemOnlyResult = get(oem, 'theme.views.form.onlyResult', false);
+  const onlyResult = oemOnlyResult && pageFrom === 'workbench';
 
   const executionResultFilterHeight =
     showErrorFilter || selectionModeDisplayType === 'dropdown-menu' ? EXECUTION_RESULT_FILTER_HEIGHT : 30;
@@ -89,8 +94,9 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const [deletedInstanceIdList, setDeletedInstanceIdList] = useState<string[]>([]);
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
   const isMiniFrame = mode === 'mini';
-  const containerWidth =
-    formContainerWidth * (isMiniFrame ? 1 : 0.6) - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0) - (isMiniFrame ? 12 : 0);
+  const containerWidth = onlyResult
+    ? formContainerWidth - 64
+    : formContainerWidth * (isMiniFrame ? 1 : 0.6) - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0) - (isMiniFrame ? 12 : 0);
   const shouldFilterError = useShouldFilterError();
   const positioner = usePositioner(
     {
