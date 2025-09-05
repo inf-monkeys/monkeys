@@ -1,4 +1,15 @@
-import { AuthMethod, CustomizationDensity, CustomizationForm, CustomizationHeadbar, CustomizationHistoryResult, CustomizationModules, ExtraLanguageURL, WorkflowPreviewExecutionGrid } from '../config';
+import {
+  AuthMethod,
+  CustomizationDensity,
+  CustomizationForm,
+  CustomizationFormView,
+  CustomizationHeadbar,
+  CustomizationHistoryResult,
+  CustomizationModules,
+  CustomizationUploader,
+  ExtraLanguageURL,
+  WorkflowPreviewExecutionGrid,
+} from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
@@ -29,13 +40,7 @@ export interface ISystemConfig {
       error?: string;
     };
     views: {
-      form: {
-        toast: {
-          afterCreate: boolean;
-          afterDelete: boolean;
-        };
-        progress: 'estimate' | 'infinite';
-      };
+      form: CustomizationFormView;
     };
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader: boolean;
@@ -52,6 +57,8 @@ export interface ISystemConfig {
     workbenchSidebarMoreAction: boolean;
     workbenchSidebarApart: boolean;
     workbenchSidebarToggleGroupDetail: boolean;
+    workbenchSidebarViewType: boolean;
+    workbenchSidebarFormViewEmbed: boolean;
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
@@ -64,6 +71,7 @@ export interface ISystemConfig {
       allowConcurrentRuns: boolean;
     };
     historyResult: CustomizationHistoryResult;
+    uploader: CustomizationUploader;
   };
   auth: {
     enabled: AuthMethod[];

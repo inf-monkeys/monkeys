@@ -86,6 +86,22 @@ export type CustomizationForm = {
   variant: 'bento' | 'ghost';
 };
 
+export type CustomizationUploader = {
+  orientation: 'vertical' | 'horizontal';
+};
+
+export type CustomizationFormView = {
+  toast: {
+    afterCreate: boolean;
+    afterDelete: boolean;
+  };
+  progress: 'estimate' | 'infinite';
+  onlyResult: boolean;
+  tabular: {
+    theme: 'tentiary' | 'primary';
+  };
+};
+
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
 
 export interface ServerConfig {
@@ -124,13 +140,7 @@ export interface ServerConfig {
       error?: string;
     };
     views: {
-      form: {
-        toast: {
-          afterCreate: boolean;
-          afterDelete: boolean;
-        };
-        progress: 'estimate' | 'infinite';
-      };
+      form: CustomizationFormView;
     };
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader?: boolean;
@@ -147,6 +157,8 @@ export interface ServerConfig {
     workbenchSidebarMoreAction: boolean;
     workbenchSidebarApart: boolean;
     workbenchSidebarToggleGroupDetail: boolean;
+    workbenchSidebarViewType: boolean;
+    workbenchSidebarFormViewEmbed: boolean;
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
@@ -160,6 +172,7 @@ export interface ServerConfig {
     };
     historyResult: CustomizationHistoryResult;
     form: CustomizationForm;
+    uploader: CustomizationUploader;
   };
 }
 
@@ -465,6 +478,10 @@ export const config: Config = {
             afterDelete: readConfig('server.customization.views.form.toast.afterDelete', true),
           },
           progress: readConfig('server.customization.views.form.progress', 'infinite'),
+          onlyResult: readConfig('server.customization.views.form.onlyResult', false),
+          tabular: {
+            theme: readConfig('server.customization.views.form.tabular.theme', 'default'),
+          },
         },
       },
       extraLanguageURL: readConfig('server.customization.extraLanguageURL', {}),
@@ -495,6 +512,8 @@ export const config: Config = {
       workbenchSidebarMoreAction: readConfig('server.customization.workbenchSidebarMoreAction', true),
       workbenchSidebarApart: readConfig('server.customization.workbenchSidebarApart', false),
       workbenchSidebarToggleGroupDetail: readConfig('server.customization.workbenchSidebarToggleGroupDetail', true),
+      workbenchSidebarViewType: readConfig('server.customization.workbenchSidebarViewType', true),
+      workbenchSidebarFormViewEmbed: readConfig('server.customization.workbenchSidebarFormViewEmbed', false),
       uniImagePreview: readConfig('server.customization.uniImagePreview', false),
       imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
       teamAsUser: readConfig('server.customization.teamAsUser', false),
@@ -508,6 +527,9 @@ export const config: Config = {
       },
       historyResult: {
         display: readConfig('server.customization.historyResult.display', true),
+      },
+      uploader: {
+        orientation: readConfig('server.customization.uploader.orientation', 'horizontal'),
       },
     },
   },

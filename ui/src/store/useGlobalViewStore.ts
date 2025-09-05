@@ -8,6 +8,8 @@ interface IGlobalViewStore {
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  embedSidebar: boolean;
+  setEmbedSidebar: (embed: boolean) => void;
 }
 
 const getInitialSize = (): GlobalViewSize => {
@@ -24,6 +26,8 @@ export const useGlobalViewStore = create<IGlobalViewStore>((set) => ({
   sidebarCollapsed: false,
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+  embedSidebar: false,
+  setEmbedSidebar: (embed) => set({ embedSidebar: embed }),
 }));
 
 export const useGlobalViewSize = () => useGlobalViewStore((state) => state.size);
@@ -31,6 +35,8 @@ export const useSetGlobalViewSize = () => useGlobalViewStore((state) => state.se
 export const useSidebarCollapsed = () => useGlobalViewStore((state) => state.sidebarCollapsed);
 export const useToggleSidebar = () => useGlobalViewStore((state) => state.toggleSidebar);
 export const useSetSidebarCollapsed = () => useGlobalViewStore((state) => state.setSidebarCollapsed);
+export const useEmbedSidebar = () => useGlobalViewStore((state) => state.embedSidebar);
+export const useSetEmbedSidebar = () => useGlobalViewStore((state) => state.setEmbedSidebar);
 
 export const initializeGlobalViewStore = () => {
   if (typeof window === 'undefined') return;

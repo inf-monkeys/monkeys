@@ -5,14 +5,13 @@ import ThumbnailGenerator from '@uppy/thumbnail-generator';
 import { useClickAway, useCreation, useDrop, useLatest, useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get, isEmpty } from 'lodash';
-import { FileUp, Plus } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import Dropzone from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
-import { Button } from '@/components/ui/button';
 import { VinesFiles } from '@/components/ui/vines-uploader/files.tsx';
 import { useUppyEvent, useUppyState, useVinesDropzone } from '@/components/ui/vines-uploader/hooks.ts';
 import { IVinesUploaderProps } from '@/components/ui/vines-uploader/index.tsx';
@@ -22,6 +21,8 @@ import RemoteUrlToFile from '@/components/ui/vines-uploader/plugin/remote-url-to
 import VinesUpload from '@/components/ui/vines-uploader/plugin/vines-upload.ts';
 import { addProtocolToURL, checkIfCorrectURL, getFileNameByOssUrl } from '@/components/ui/vines-uploader/utils.ts';
 import { cn } from '@/utils';
+
+import { LucideIconGradient } from '../vines-icon/lucide/gradient';
 
 const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
   const { t } = useTranslation();
@@ -324,6 +325,11 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
 
   const { data: systemConfig } = useSystemConfig();
   const themeGradient = get(systemConfig, 'theme.gradient', undefined) as ISystemConfig['theme']['gradient'];
+  const uploaderOrientation = get(
+    systemConfig,
+    'theme.uploader.orientation',
+    'horizontal',
+  ) as ISystemConfig['theme']['uploader']['orientation'];
 
   return (
     <Dropzone
@@ -354,7 +360,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
 
         return (
           <div
-            className={cn('relative h-[15.5rem] rounded dark:bg-card-dark', className)}
+            className={cn('relative h-[12rem] rounded dark:bg-card-dark', className)}
             {...getRootProps({
               onPaste: onPaste as any,
               ref,
@@ -372,7 +378,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
               {isEmptyFilesOrDragAccept && (
                 <motion.div
                   key="vines-uploader-hint"
-                  className="absolute left-0 top-0 z-20 size-full p-2 pb-[3rem] dark:bg-card-dark"
+                  className="absolute left-0 top-0 z-20 size-full p-2 dark:bg-card-dark"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -380,16 +386,19 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                   <div
                     className={cn(
                       'vines-center h-full cursor-pointer gap-global rounded border-2 border-dashed border-input bg-muted/75 dark:bg-[#111113]',
+                      uploaderOrientation === 'vertical' && 'flex-col',
+                      uploaderOrientation === 'horizontal' && 'flex-row',
                       isHovering && '!border-solid !bg-muted/75 dark:!bg-[#111113]',
                     )}
                     onClick={open}
                   >
-                    <FileUp size={50} className="stroke-muted-foreground" />
-                    <div className="flex max-w-[70%] flex-col gap-1">
+                    <LucideIconGradient icon={Upload} size={uploaderOrientation === 'horizontal' ? 50 : 25} />
+                    <div className="flex max-w-[80%] flex-col gap-1">
                       <h1
                         className={cn(
-                          'text-xl font-bold leading-tight',
-                          themeGradient ? 'text-gradient bg-gradient bg-clip-text' : 'text-muted-foreground',
+                          'text-xl font-bold',
+                          uploaderOrientation === 'vertical' && 'text-md',
+                          themeGradient ? 'bg-gradient bg-clip-text text-gradient' : 'text-muted-foreground',
                         )}
                       >
                         {isHovering
@@ -405,9 +414,11 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                           : t('components.ui.updater.hint.accept.any')}{' '}
                         {t('components.ui.updater.hint.max-size', { maxSize })}
                       </p>
-                      <p className="text-sm text-muted-foreground text-opacity-85">
-                        {t('components.ui.updater.paste-hint')}
-                      </p>
+                      {uploaderOrientation === 'horizontal' && (
+                        <p className="text-sm text-muted-foreground text-opacity-85">
+                          {t('components.ui.updater.paste-hint')}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -419,7 +430,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                 filesLength <= 3 && 'pt-0',
               )}
             >
-              <Button
+              {/* <Button
                 variant="outline"
                 size="small"
                 icon={<Plus />}
@@ -427,7 +438,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                 disabled={filesLength >= (max ?? Infinity)}
               >
                 {t('components.ui.updater.add-local-file')}
-              </Button>
+              </Button> */}
               {children}
             </div>
           </div>

@@ -47,7 +47,7 @@ export type TTabularEvent =
 
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];
-  height?: number;
+  height?: number | string;
   isLoading?: boolean;
 
   children?: React.ReactNode;

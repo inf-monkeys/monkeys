@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
+import { CustomizationFormView } from '@/apis/common/typings';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -22,10 +23,18 @@ interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
   onWorkflowStart?: () => void;
   isMiniFrame?: boolean;
   event$: EventEmitter<void>;
-  height: number;
+  height: string | number;
+  theme?: CustomizationFormView['tabular']['theme'];
 }
 
-export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, event$, height, onWorkflowStart }) => {
+export const VinesTabular: React.FC<IVinesTabularProps> = ({
+  className,
+  style,
+  event$,
+  height,
+  onWorkflowStart,
+  theme = 'default',
+}) => {
   const { t } = useTranslation();
 
   const { data: oem } = useSystemConfig();
@@ -128,26 +137,27 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
   );
 
   return (
-    <div className={cn('flex flex-col gap-global pr-global', className)} style={style}>
+    <div className={cn('flex flex-col gap-global', className)} style={style}>
       <div className="flex-1">
         <TabularRender
           formClassName={''}
           inputs={vines.workflowInput}
           isLoading={!vines.workflowLoaded}
-          height={height - inputHeight}
+          height={typeof height === 'number' ? height - inputHeight : height}
           onSubmit={handleSubmit}
           event$={tabular$}
           workflowId={vines.workflowId}
         ></TabularRender>
       </div>
-      <div ref={inputRef} className="flex gap-2">
+      <div ref={inputRef} className="flex items-stretch gap-2">
         {isInputNotEmpty && (
           <>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   className="!px-2.5"
-                  variant="outline"
+                  variant={theme === 'default' ? 'outline' : 'ghost'}
+                  theme={theme === 'default' ? 'primary' : 'black'}
                   onClick={() => tabular$.emit('restore-previous-param')}
                   icon={<Undo2 />}
                   size="small"
@@ -159,7 +169,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
               <TooltipTrigger asChild>
                 <Button
                   className="!px-2.5"
-                  variant="outline"
+                  variant={theme === 'default' ? 'outline' : 'ghost'}
+                  theme={theme === 'default' ? 'primary' : 'black'}
                   onClick={() => tabular$.emit('reset')}
                   icon={<RotateCcw />}
                   size="small"
@@ -173,7 +184,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
           <TooltipTrigger asChild>
             <Button
               className="!px-2.5"
-              variant="outline"
+              variant={theme === 'default' ? 'outline' : 'ghost'}
+              theme={theme === 'default' ? 'primary' : 'black'}
               onClick={handlePasteInput}
               icon={<Clipboard />}
               size="small"
@@ -183,9 +195,9 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, e
         </Tooltip>
         <Button
           variant="solid"
-          className="size-full text-base"
+          className="flex-1 text-base"
           onClick={debouncedSubmit.run}
-          size="small"
+          size="with-icon"
           disabled={openAIInterfaceEnabled || isSubmitting || isEditorOpen}
           icon={<Sparkles className="fill-white" />}
           loading={loading || (!allowConcurrentRuns && executionStatus === 'running')}

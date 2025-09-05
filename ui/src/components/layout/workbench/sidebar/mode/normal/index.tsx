@@ -2,24 +2,28 @@ import React, { startTransition, useCallback, useEffect, useMemo, useRef, useSta
 
 import { useNavigate } from '@tanstack/react-router';
 
-import { useLatest, useThrottleEffect } from 'ahooks';
+import { useEventEmitter, useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence } from 'framer-motion';
 import { get, keyBy } from 'lodash';
 import { CircleSlash, Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
-import { ISystemConfig } from '@/apis/common/typings';
+import { CustomizationFormView, ISystemConfig } from '@/apis/common/typings';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
 import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
+import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
+import { ViewTitle } from '@/components/layout/workspace/vines-view/form/tabular/view-title';
+import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -28,8 +32,11 @@ import {
   useSetOnlyShowWorkbenchIcon,
   useToggleOnlyShowWorkbenchIcon,
 } from '@/store/showWorkbenchIcon';
+import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
-import { useGlobalViewSize } from '@/store/useGlobalViewStore';
+import { createExecutionStore, ExecutionStoreProvider } from '@/store/useExecutionStore';
+import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
+import { useGlobalViewSize, useSetEmbedSidebar } from '@/store/useGlobalViewStore';
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cloneDeep, cn, getI18nContent } from '@/utils';
 
@@ -73,7 +80,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   showGroup = true,
   collapsed = false,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const { teamId } = useVinesTeam();
 
@@ -84,6 +91,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
   const workbenchSidebarApart = get(oem, 'theme.workbenchSidebarApart', false) as boolean;
+
+  const workbenchSidebarFormViewEmbed = get(oem, 'theme.workbenchSidebarFormViewEmbed', false) as boolean;
 
   const density = oem?.theme.density ?? 'default';
 
@@ -343,6 +352,23 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     });
   };
 
+  const event$ = useEventEmitter();
+
+  const showFormEmbed =
+    workbenchSidebarFormViewEmbed && currentPage?.[teamId]?.type === 'preview' && currentPage?.[teamId]?.workflowId;
+
+  const setEmbedSidebar = useSetEmbedSidebar();
+
+  useEffect(() => {
+    setEmbedSidebar(showFormEmbed);
+  }, [showFormEmbed]);
+
+  const tabularTheme = get(
+    oem,
+    'theme.views.form.tabular.theme',
+    'default',
+  ) as CustomizationFormView['tabular']['theme'];
+
   return (
     <div
       className={cn(
@@ -385,10 +411,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               </div>
             </div>
           )}
-          {!workbenchSidebarApart && <Separator orientation="vertical" />}
           <div
             className={cn(
-              'grid h-full grid-rows-[1fr_auto] bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1',
+              'h-full bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1',
+              showFormEmbed ? 'flex' : 'grid grid-rows-[1fr_auto]',
               workbenchSidebarApart ? 'rounded-lg' : 'rounded-r-lg',
             )}
           >
@@ -401,28 +427,57 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               onChildClick={onPageClick}
               onReorder={onPageGroupPageReorder}
             />
-            <div
-              className={cn(
-                'flex items-center justify-center gap-global pb-global pt-2',
-                density === 'compact' && 'px-global-1/2',
-                density === 'default' && 'px-global',
-              )}
-            >
-              {globalViewSize !== 'sm' && (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Button
-                      onClick={() => toggleOnlyShowWorkbenchIcon()}
-                      icon={onlyShowWorkbenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
-                      size={'icon'}
-                      className={cn('shrink-0', onlyShowWorkbenchIcon && '')}
-                      variant="outline"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
-                </Tooltip>
-              )}
-            </div>
+            {showFormEmbed ? (
+              <>
+                <Separator orientation="vertical" />
+                <VinesFlowProvider workflowId={currentPage?.[teamId]?.workflowId}>
+                  <FlowStoreProvider createStore={createFlowStore}>
+                    <CanvasStoreProvider createStore={createCanvasStore}>
+                      <VinesViewWrapper workflowId={currentPage?.[teamId]?.workflowId}>
+                        <ExecutionStoreProvider createStore={createExecutionStore}>
+                          <div className="relative w-[320px] p-global">
+                            <ViewTitle
+                              displayName={getI18nContent(currentPage?.[teamId]?.workflow?.displayName)}
+                              themeGradient={Boolean(oem?.theme.gradient)}
+                            />
+                            <VinesTabular
+                              theme={tabularTheme}
+                              className="mt-[42px] w-full"
+                              isMiniFrame={false}
+                              event$={event$}
+                              height={height}
+                            />
+                          </div>
+                        </ExecutionStoreProvider>
+                      </VinesViewWrapper>
+                    </CanvasStoreProvider>
+                  </FlowStoreProvider>
+                </VinesFlowProvider>
+              </>
+            ) : (
+              <div
+                className={cn(
+                  'flex items-center justify-center gap-global pb-global pt-2',
+                  density === 'compact' && 'px-global-1/2',
+                  density === 'default' && 'px-global',
+                )}
+              >
+                {globalViewSize !== 'sm' && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        onClick={() => toggleOnlyShowWorkbenchIcon()}
+                        icon={onlyShowWorkbenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
+                        size={'icon'}
+                        className={cn('shrink-0', onlyShowWorkbenchIcon && '')}
+                        variant="outline"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+            )}
           </div>
         </WorkbenchViewItemCurrentData.Provider>
       )}

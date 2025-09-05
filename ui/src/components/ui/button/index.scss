@@ -5,6 +5,7 @@
 
   &[data-variant="solid"] {
     color: theme('colors.white');
+
     svg {
       stroke: theme('colors.white');
     }
@@ -30,6 +31,13 @@
   --bg-hover-color: rgba(var(--gray10));
   --bg-active-color: rgba(var(--gray10) / var(--tw-bg-opacity, 0.95));
   --text-color: rgba(var(--gray9) / var(--tw-text-opacity, 1))
+}
+
+.button-theme-black {
+  --bg-color: rgba(var(--black11) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: rgba(var(--gray12));
+  --bg-active-color: rgba(var(--gray12) / var(--tw-bg-opacity, 0.95));
+  --text-color: rgba(var(--gray11) / var(--tw-text-opacity, 1))
 }
 
 .button-theme-warning {

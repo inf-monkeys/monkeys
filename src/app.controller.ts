@@ -145,6 +145,8 @@ export class AppController {
         workbenchSidebarMoreAction: config.server.customization.workbenchSidebarMoreAction,
         workbenchSidebarApart: config.server.customization.workbenchSidebarApart,
         workbenchSidebarToggleGroupDetail: config.server.customization.workbenchSidebarToggleGroupDetail,
+        workbenchSidebarViewType: config.server.customization.workbenchSidebarViewType,
+        workbenchSidebarFormViewEmbed: config.server.customization.workbenchSidebarFormViewEmbed,
         uniImagePreview: config.server.customization.uniImagePreview,
         imagePreviewStyle: config.server.customization.imagePreviewStyle,
         teamAsUser: config.server.customization.teamAsUser,
@@ -153,6 +155,7 @@ export class AppController {
         miniMode: config.server.customization.miniMode,
         workflow: config.server.customization.workflow,
         historyResult: config.server.customization.historyResult,
+        uploader: config.server.customization.uploader,
       },
       auth: {
         enabled: config.auth.enabled,

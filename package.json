@@ -11,7 +11,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "rimraf dist && nest start",
+    "start": "rimraf dist && nest start --",
     "start:dev": "rimraf dist && nest start --watch --",
     "start:debug": "rimraf dist && nest start --debug --watch --",
     "start:prod": "node dist/main",

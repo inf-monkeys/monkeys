@@ -18,6 +18,7 @@ import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { ImagesResult } from '@/store/useExecutionImageResultStore';
+import { useEmbedSidebar } from '@/store/useGlobalViewStore';
 import { cn } from '@/utils';
 import { newConvertExecutionResultToItemList } from '@/utils/execution';
 
@@ -116,6 +117,8 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
 
   const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
+  const embedSidebar = useEmbedSidebar();
+
   return (
     <div
       className={cn(
@@ -125,7 +128,9 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
         className,
         onlyShowWorkbenchIcon
           ? density === 'compact'
-            ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*4.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
+            ? embedSidebar
+              ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*5)-320px)] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
+              : 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
             : 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*6.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*3))]'
           : 'w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))] max-w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))]',
       )}

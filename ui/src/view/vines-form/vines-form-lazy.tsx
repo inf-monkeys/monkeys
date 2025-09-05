@@ -10,6 +10,7 @@ import { ISystemConfig } from '@/apis/common/typings';
 import { VinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { IframeHeader } from '@/components/layout/workspace/vines-view/form/tabular/iframe-header.tsx';
+import { ViewTitle } from '@/components/layout/workspace/vines-view/form/tabular/view-title';
 import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useFlowStore } from '@/store/useFlowStore';
@@ -23,6 +24,8 @@ const VinesForm: React.FC = () => {
   const { data: oem } = useSystemConfig();
 
   const showPreviewViewExecutionResultGrid = get(oem, 'theme.miniMode.showPreviewViewExecutionResultGrid', true);
+
+  const oemOnlyResult = get(oem, 'theme.views.form.onlyResult', false);
 
   const themeGradient = get(oem, 'theme.gradient', undefined) as ISystemConfig['theme']['gradient'];
 
@@ -49,6 +52,8 @@ const VinesForm: React.FC = () => {
 
   const setVisible = useViewStore((s) => s.setVisible);
 
+  const onlyResult = oemOnlyResult && pageFrom === 'workbench';
+
   useEffect(() => {
     if (isMiniFrame) {
       setVisible(!!inViewport);
@@ -58,24 +63,8 @@ const VinesForm: React.FC = () => {
   return (
     <>
       {isMiniFrame && <IframeHeader historyVisible={historyVisible} setHistoryVisible={setHistoryVisible} />}
-      {pageFrom === 'workbench' && (
-        <div className="absolute left-[calc(var(--global-spacing)*1.5)] top-0 flex flex-col gap-1">
-          <span
-            className={cn(
-              'border-t-[3px] pt-[8px] font-bold',
-              themeGradient ? 'text-gradient bg-gradient bg-clip-text' : 'border-vines-500 text-vines-500',
-            )}
-            style={
-              themeGradient
-                ? {
-                    borderImage: 'var(--vines-gradient) 1',
-                  }
-                : {}
-            }
-          >
-            {getI18nContent(workflow?.displayName)}
-          </span>
-        </div>
+      {!onlyResult && pageFrom === 'workbench' && (
+        <ViewTitle displayName={getI18nContent(workflow?.displayName)} themeGradient={Boolean(themeGradient)} />
       )}
       <div
         ref={ref}
@@ -86,24 +75,26 @@ const VinesForm: React.FC = () => {
           vinesIFrameVisible && 'p-global',
         )}
       >
-        <VinesTabular
-          className={cn(
-            'col-span-2',
-            pageFrom === 'workbench' && 'mt-[32px]',
-            isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-global px-2 transition-opacity',
-            isMiniFrame && historyVisible && 'pointer-events-none opacity-0',
-            vinesIFrameVisible && !isMiniFrame && 'pr-global',
-          )}
-          isMiniFrame={isMiniFrame}
-          onWorkflowStart={() => {
-            showPreviewViewExecutionResultGrid && setHistoryVisible(true);
-          }}
-          event$={event$}
-          height={height - (pageFrom === 'workbench' ? 32 : 0)}
-        />
+        {!onlyResult && (
+          <VinesTabular
+            className={cn(
+              'col-span-2 pr-global',
+              pageFrom === 'workbench' && 'mt-[32px]',
+              isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-global px-2 transition-opacity',
+              isMiniFrame && historyVisible && 'pointer-events-none opacity-0',
+              vinesIFrameVisible && !isMiniFrame && 'pr-global',
+            )}
+            isMiniFrame={isMiniFrame}
+            onWorkflowStart={() => {
+              showPreviewViewExecutionResultGrid && setHistoryVisible(true);
+            }}
+            event$={event$}
+            height={height - (pageFrom === 'workbench' ? 32 : 0)}
+          />
+        )}
         <VinesExecutionResult
           className={cn(
-            'col-span-3',
+            onlyResult ? 'col-span-5' : 'col-span-3',
             isMiniFrame && !historyVisible ? 'pointer-events-none z-0 opacity-0 [&_*]:pointer-events-none' : '',
           )}
           event$={event$}

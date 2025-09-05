@@ -24,10 +24,12 @@ const buttonVariants = cva(
         primary: 'button-theme-primary',
         secondary: 'button-theme-secondary',
         tertiary: 'button-theme-tertiary',
+        black: 'button-theme-black',
         warning: 'button-theme-warning',
         danger: 'button-theme-danger',
       },
       size: {
+        'with-icon': 'h-9 px-global',
         default: 'h-9 p-global',
         icon: 'size-9',
         small: 'h-8 rounded-md px-3 text-xs',

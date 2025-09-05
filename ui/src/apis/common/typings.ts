@@ -81,6 +81,22 @@ export type CustomizationForm = {
   variant: 'bento' | 'ghost';
 };
 
+export type CustomizationUploader = {
+  orientation: 'vertical' | 'horizontal';
+};
+
+export type CustomizationFormView = {
+  toast: {
+    afterCreate: boolean;
+    afterDelete: boolean;
+  };
+  progress: 'estimate' | 'infinite';
+  onlyResult: boolean;
+  tabular: {
+    theme: 'tentiary' | 'primary';
+  };
+};
+
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
 
 export interface ISystemConfig {
@@ -111,13 +127,7 @@ export interface ISystemConfig {
       error?: string;
     };
     views: {
-      form: {
-        toast: {
-          afterCreate: boolean;
-          afterDelete: boolean;
-        };
-        progress: 'estimate' | 'infinite';
-      };
+      form: CustomizationFormView;
     };
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader: boolean;
@@ -134,6 +144,8 @@ export interface ISystemConfig {
     workbenchSidebarMoreAction?: boolean;
     workbenchSidebarApart?: boolean;
     workbenchSidebarToggleGroupDetail?: boolean;
+    workbenchSidebarViewType?: boolean;
+    workbenchSidebarFormViewEmbed?: boolean;
     uniImagePreview?: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
@@ -146,6 +158,7 @@ export interface ISystemConfig {
       allowConcurrentRuns: boolean;
     };
     historyResult: CustomizationHistoryResult;
+    uploader: CustomizationUploader;
   };
   auth: {
     enabled: AuthMethod[];
