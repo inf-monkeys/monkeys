@@ -78,7 +78,7 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
         </TooltipTrigger>
         <TooltipContent>{t('workspace.pre-view.actuator.detail.form-render.tips')}</TooltipContent>
       </Tooltip>
-      <DialogContent className="max-w-[30rem] overflow-hidden">
+      <DialogContent className="max-w-[30rem] overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>{t('workspace.pre-view.actuator.detail.form-render.title')}</DialogTitle>
         </DialogHeader>
