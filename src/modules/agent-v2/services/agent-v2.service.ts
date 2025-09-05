@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AgentV2LlmService } from './agent-v2-llm.service';
 import { AgentV2PersistentExecutionContext } from './agent-v2-persistent-execution-context.service';
 import { AgentV2PersistentTaskManager } from './agent-v2-persistent-task-manager.service';
+import { AgentV2TaskStateManager } from './agent-v2-task-state-manager.service';
 import { AgentV2Repository } from './agent-v2.repository';
 import { AgentV2ToolsService } from './tools/agent-v2-tools.service';
 
@@ -21,6 +22,7 @@ export class AgentV2Service {
     private readonly llmService: AgentV2LlmService,
     private readonly agentToolsService: AgentV2ToolsService,
     private readonly taskManager: AgentV2PersistentTaskManager,
+    private readonly taskStateManager: AgentV2TaskStateManager,
   ) {}
 
   public async startNewSession(
@@ -46,7 +48,7 @@ export class AgentV2Service {
     // Log session start event (important for monitoring)
     this.logger.log(`Session started: ${session.id} for user ${userId} with agent ${agentId}`);
 
-    const context = new AgentV2PersistentExecutionContext(agent, session, this.repository, this.llmService, this.agentToolsService, this.taskManager);
+    const context = new AgentV2PersistentExecutionContext(agent, session, this.repository, this.llmService, this.agentToolsService, this.taskManager, this.taskStateManager);
 
     // Store context in global registry
     this.activeContexts.set(session.id, context);
@@ -200,7 +202,7 @@ export class AgentV2Service {
     }
 
     // Create execution context but don't start with initial message
-    const context = new AgentV2PersistentExecutionContext(agent, session, this.repository, this.llmService, this.agentToolsService, this.taskManager);
+    const context = new AgentV2PersistentExecutionContext(agent, session, this.repository, this.llmService, this.agentToolsService, this.taskManager, this.taskStateManager);
 
     // Store context in global registry
     this.activeContexts.set(session.id, context);

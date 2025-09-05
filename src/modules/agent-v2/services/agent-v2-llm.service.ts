@@ -23,14 +23,6 @@ export interface StreamChunk {
 @Injectable()
 export class AgentV2LlmService {
   private readonly logger = new Logger(AgentV2LlmService.name);
-  // Add conditional logging for debugging
-  private shouldLog = process.env.NODE_ENV !== 'production' || process.env.AGENT_V2_DEBUG === 'true';
-
-  private debugLog(message: string): void {
-    if (this.shouldLog) {
-      this.logger.debug(message);
-    }
-  }
   private openaiClient: OpenAI;
 
   constructor() {

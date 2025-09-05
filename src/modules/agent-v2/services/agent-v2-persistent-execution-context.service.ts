@@ -6,6 +6,7 @@ import { TaskExecutionStatus } from '../../../database/entities/agent-v2/agent-v
 import { AgentV2Entity } from '../../../database/entities/agent-v2/agent-v2.entity';
 import { AgentV2ChatParams, AgentV2LlmService } from './agent-v2-llm.service';
 import { AgentV2PersistentTaskManager } from './agent-v2-persistent-task-manager.service';
+import { AgentV2TaskStateManager } from './agent-v2-task-state-manager.service';
 import { AgentV2Repository } from './agent-v2.repository';
 import { ASK_MODE_SYSTEM_PROMPT } from './prompts/ask-mode-system';
 import { AgentV2ToolsService } from './tools/agent-v2-tools.service';
@@ -16,7 +17,6 @@ import { AssistantMessageParser, ToolCall } from './utils/assistant-message-pars
 @Injectable()
 export class AgentV2PersistentExecutionContext extends EventEmitter {
   private readonly logger = new Logger(AgentV2PersistentExecutionContext.name);
-  // Add conditional logging for debugging
 
   private parser = new AssistantMessageParser();
   private isProcessingActive = false;
@@ -37,6 +37,7 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
     private readonly llmService: AgentV2LlmService,
     private readonly agentToolsService: AgentV2ToolsService,
     private readonly taskManager: AgentV2PersistentTaskManager,
+    private readonly taskStateManager: AgentV2TaskStateManager,
   ) {
     super();
     this.setupToolHandlers();
@@ -79,6 +80,20 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
     // Queue for processing through persistent manager
     await this.taskManager.queueMessage(this.session.id, message.id, content, senderId);
+  }
+
+  // Queue a system message (uses session userId but marks as system)
+  public async queueSystemMessage(content: string) {
+    // Save to database first, using session userId but marking as system message
+    const message = await this.repository.createMessage({
+      sessionId: this.session.id,
+      senderId: this.session.userId, // Use real user ID to satisfy foreign key constraint
+      content,
+      isSystem: true, // Mark as system message
+    });
+
+    // Queue for processing through persistent manager
+    await this.taskManager.queueMessage(this.session.id, message.id, content, 'system');
   }
 
   // Stop the processing loop
@@ -153,10 +168,10 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
     }
 
     try {
-      // Only process user messages through the agent loop (senderId should be the actual user ID, not 'user')
-      if (nextMessage.senderId !== 'system' && nextMessage.senderId !== 'assistant') {
+      // Process user messages and system continuation messages through the agent loop
+      // System continuation messages have senderId='system' in the queue
+      if (nextMessage.senderId !== 'assistant') {
         await this.runLoop();
-      } else {
       }
 
       // Mark message as processed
@@ -248,10 +263,10 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
           if (textContent || toolCalls.length > 0) {
             await this.repository.createMessage({
               sessionId: this.session.id,
-              senderId: this.session.userId,
+              senderId: this.session.userId, // Use real user ID to satisfy foreign key constraint
               content: textContent || '[Tool Calls Only]',
               toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
-              isSystem: true,
+              isSystem: true, // Mark as assistant message (isSystem=true for non-user messages)
             });
           }
 
@@ -279,8 +294,8 @@ You MUST use a tool in every response. Available tools:
 
 Please use one of these tools in your next response.`;
 
-            // Queue error message for processing
-            await this.queueMessage(noToolsMessage, this.session.userId);
+            // Queue error message for processing as system message
+            await this.queueSystemMessage(noToolsMessage);
 
             // Update mistake count
             const currentState = await this.taskManager.getTaskState(this.session.id);
@@ -320,7 +335,7 @@ Please use one of these tools in your next response.`;
         if (tool.name === 'ask_followup_question' && this.onFollowupQuestion) {
           result = await this.executeAskFollowupQuestionTool(tool);
         } else {
-          result = await this.agentToolsService.executeTool(tool.name, tool.params, this.askApproval, this.handleError, this.pushToolResult);
+          result = await this.agentToolsService.executeTool(tool.name, tool.params, this.session.id, this.askApproval, this.handleError, this.pushToolResult);
         }
 
         toolResults.push(result);
@@ -345,6 +360,23 @@ Please use one of these tools in your next response.`;
           // Don't return here - let the execution continue to handle more messages
           // The session stays active and ready for the next user message
           return;
+        }
+
+        // Handle update_todo_list tool specially - implement task-driven continuation
+        if (tool.name === 'update_todo_list') {
+          // Check if we should continue execution based on task state
+          const shouldContinue = this.taskStateManager.shouldContinueExecution(this.session.id);
+
+          if (shouldContinue) {
+            // Get the continuation message from task state manager
+            const taskState = this.taskStateManager.getSessionTaskState(this.session.id);
+            if (taskState) {
+              const continuationMessage = this.taskStateManager.generateContinuationMessage(taskState);
+
+              // Queue the continuation message to trigger next execution cycle
+              await this.queueSystemMessage(continuationMessage);
+            }
+          }
         }
       } catch (error) {
         this.logger.error(`Error executing tool ${tool.name}: ${error.message}`);
@@ -387,9 +419,9 @@ Please use one of these tools in your next response.`;
 
       await this.repository.createMessage({
         sessionId: this.session.id,
-        senderId: this.session.userId,
+        senderId: this.session.userId, // Use real user ID to satisfy foreign key constraint
         content: resultSummary,
-        isSystem: true,
+        isSystem: true, // Mark as system/tool result message
       });
     }
 
@@ -464,9 +496,9 @@ Please use one of these tools in your next response.`;
       // Add the user's answer to the conversation
       await this.repository.createMessage({
         sessionId: this.session.id,
-        senderId: this.session.userId,
+        senderId: this.session.userId, // Real user answer
         content: userAnswer,
-        isSystem: false,
+        isSystem: false, // This is a real user message
       });
 
       return {

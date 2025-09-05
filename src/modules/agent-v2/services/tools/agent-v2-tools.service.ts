@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { AgentV2TaskStateManager } from '../agent-v2-task-state-manager.service';
 import { AgentV2McpService } from '../mcp/agent-v2-mcp.service';
 import { AskApproval, HandleError, PushToolResult, ToolResult, ToolUse } from '../types/tool-types';
 
@@ -6,10 +7,13 @@ import { AskApproval, HandleError, PushToolResult, ToolResult, ToolUse } from '.
 export class AgentV2ToolsService {
   private readonly logger = new Logger(AgentV2ToolsService.name);
 
-  constructor(private readonly mcpService: AgentV2McpService) {}
+  constructor(
+    private readonly mcpService: AgentV2McpService,
+    private readonly taskStateManager: AgentV2TaskStateManager,
+  ) {}
 
   // Generic tool execution method
-  async executeTool(toolName: string, params: any, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<ToolResult> {
+  async executeTool(toolName: string, params: any, sessionId: string, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<ToolResult> {
     const toolCall: ToolUse = {
       id: `tool_${Date.now()}`,
       name: toolName,
@@ -45,8 +49,9 @@ export class AgentV2ToolsService {
           result.output = 'New task created successfully';
           break;
         case 'update_todo_list':
-          await this.updateTodoListTool(toolCall, askApproval, handleError, pushToolResult);
-          result.output = 'Todo list updated successfully';
+          const todoResult = await this.updateTodoListTool(toolCall, sessionId, askApproval, handleError, pushToolResult);
+          result.output = todoResult.output;
+          result.is_error = todoResult.is_error;
           break;
         default:
           throw new Error(`Unknown tool: ${toolName}`);
@@ -242,7 +247,6 @@ export class AgentV2ToolsService {
 
       // Check if we have the askFollowupQuestion callback (proper interactive mode)
       if (askFollowupQuestion) {
-
         // Ask the user the question and wait for response
         const userAnswer = await askFollowupQuestion(question, suggestions);
 
@@ -251,7 +255,6 @@ export class AgentV2ToolsService {
           tool_call_id: block.id,
           output: `<answer>\n${userAnswer}\n</answer>`,
         });
-
       } else {
         // Fallback mode - just return the question for non-interactive sessions
         pushToolResult({
@@ -347,51 +350,68 @@ export class AgentV2ToolsService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async updateTodoListTool(block: ToolUse, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<void> {
+  async updateTodoListTool(block: ToolUse, sessionId: string, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<ToolResult> {
     const todos: string | undefined = block.input.todos;
+
     try {
       if (!todos) {
-        pushToolResult({
+        const errorResult: ToolResult = {
           tool_call_id: block.id,
           output: 'Error: Missing todos parameter',
           is_error: true,
-        });
-        return;
+        };
+        pushToolResult(errorResult);
+        return errorResult;
       }
-
-      // Parse the markdown todo list
-      const parsedTodos = this.parseMarkdownTodoList(todos);
 
       // Get approval for updating todo list
       const approvalMessage = JSON.stringify({
         tool: 'updateTodoList',
-        todos: parsedTodos,
+        todosPreview: todos.substring(0, 200) + (todos.length > 200 ? '...' : ''),
       });
 
       const didApprove = await askApproval('tool', approvalMessage);
       if (!didApprove) {
-        pushToolResult({
+        const declinedResult: ToolResult = {
           tool_call_id: block.id,
           output: 'User declined to update todo list',
-        });
-        return;
+        };
+        pushToolResult(declinedResult);
+        return declinedResult;
       }
 
-      // Todo list management will be handled by the persistent execution context
-      // Just send the tool result
+      // Update task state using the task state manager
+      const taskState = this.taskStateManager.updateSessionTaskState(sessionId, todos);
 
-      pushToolResult({
+      // Generate continuation message based on task state
+      const continuationMessage = this.taskStateManager.generateContinuationMessage(taskState);
+
+      // Create comprehensive result message
+      let resultOutput = `Todo list updated successfully!\n\nTask Status:\n`;
+      resultOutput += `- Total tasks: ${taskState.todos.length}\n`;
+      resultOutput += `- Completed: ${taskState.todos.filter((t) => t.status === 'completed').length}\n`;
+      resultOutput += `- In Progress: ${taskState.todos.filter((t) => t.status === 'in_progress').length}\n`;
+      resultOutput += `- Pending: ${taskState.todos.filter((t) => t.status === 'pending').length}\n\n`;
+
+      // Add the continuation message that will guide the next action
+      resultOutput += `${continuationMessage}`;
+
+      const successResult: ToolResult = {
         tool_call_id: block.id,
-        output: 'Todo list updated successfully',
-      });
+        output: resultOutput,
+      };
+
+      pushToolResult(successResult);
+      return successResult;
     } catch (error) {
       await handleError('updating todo list', error);
-      pushToolResult({
+      const errorResult: ToolResult = {
         tool_call_id: block.id,
         output: `Error: ${error.message}`,
         is_error: true,
-      });
+      };
+      pushToolResult(errorResult);
+      return errorResult;
     }
   }
 
