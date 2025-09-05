@@ -10,7 +10,6 @@ import {
 import { getVinesToken } from '@/apis/utils';
 import { getVinesTeamId } from '@/components/router/guard/team';
 import { nanoIdLowerCase } from '@/utils';
-import { getSSELogger, resetSSELogger } from '@/utils/sse-logger';
 
 interface IFollowupQuestion {
   question: string;
@@ -145,14 +144,6 @@ export const useAgentV2Chat = (
 
   // 建立 SSE 连接
   const establishConnection = useCallback(async (agentId: string, initialMessage: string) => {
-    // 重置并开始SSE日志记录
-    const sseLogger = resetSSELogger(`agent-${agentId}-${Date.now()}`);
-    sseLogger.startRecording();
-    sseLogger.logMessage('Connection establishment started', {
-      agentId,
-      initialMessage: initialMessage.substring(0, 100),
-    });
-
     try {
       setConnectionError(undefined);
       setIsLoading(true);
@@ -246,10 +237,6 @@ export const useAgentV2Chat = (
 
   // 处理 SSE 事件
   const handleSSEEvent = useCallback((data: any) => {
-    // 记录SSE事件到日志文件
-    const sseLogger = getSSELogger();
-    sseLogger.logSSEEvent(data.type, data);
-
     switch (data.type) {
       case 'session_start':
         break;
