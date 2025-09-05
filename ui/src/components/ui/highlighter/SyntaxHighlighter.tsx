@@ -14,14 +14,15 @@ interface ISyntaxHighlighterProps {
 
 export const SyntaxHighlighter = memo<ISyntaxHighlighterProps>(({ children, language, className, style }) => {
   const darkMode = useAppStore((s) => s.darkMode);
-  const { data, isLoading } = useHighlight(children.trim(), language, darkMode);
+  const safeChildren = typeof children === 'string' ? children : String(children || '');
+  const { data, isLoading } = useHighlight(safeChildren.trim(), language, darkMode);
 
   return (
     <>
       {isLoading ? (
         <div className={className} style={style}>
           <pre>
-            <code>{children.trim()}</code>
+            <code>{safeChildren.trim()}</code>
           </pre>
         </div>
       ) : (

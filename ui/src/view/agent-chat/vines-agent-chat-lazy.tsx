@@ -3,14 +3,15 @@ import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useGetAgent } from '@/apis/agents';
+import { useGetAgentV2 } from '@/apis/agents-v2';
 import { ChatSidebar } from '@/components/layout/workspace/vines-view/chat/sidebar';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useAgentStore } from '@/store/useAgentStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
-import { VinesChatMode } from '@/view/vines-chat/chat-bot.tsx';
+import { AgentV2ChatMode } from '@/view/vines-chat/agent-v2-chat-bot.tsx';
 
 const AgentChatView: React.FC = () => {
   const { t } = useTranslation();
@@ -22,14 +23,18 @@ const AgentChatView: React.FC = () => {
 
   const agentId = useAgentStore((s) => s.agentId);
 
-  const { data: agentData } = useGetAgent(agentId);
+  // 获取当前选中的sessionId
+  const [chatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
+  const currentSessionId = chatSessions[agentId];
+
+  const { data: agentData } = useGetAgentV2(agentId);
 
   return (
     <div className={cn('relative flex h-full max-h-full', workbenchVisible ? 'p-0' : 'p-6 pr-2')}>
       <div className={cn('flex flex-1 flex-col overflow-hidden', workbenchVisible ? 'p-global' : 'pr-global')}>
-        <VinesChatMode
-          multipleChat
-          id={agentId}
+        <AgentV2ChatMode
+          agentId={agentId}
+          sessionId={currentSessionId}
           botPhoto={agentData?.iconUrl}
           height={containerHeight - (workbenchVisible ? 32 : 60)}
         />
@@ -55,7 +60,13 @@ const AgentChatView: React.FC = () => {
         </Separator>
       </div>
 
-      <ChatSidebar className="py-global" id={agentId} sidebarVisible={sidebarVisible} side="right" />
+      <ChatSidebar
+        className="py-global"
+        id={agentId}
+        sidebarVisible={sidebarVisible}
+        side="right"
+        isAgentV2Mode={true}
+      />
     </div>
   );
 };

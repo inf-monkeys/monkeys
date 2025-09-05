@@ -54,7 +54,7 @@ export const AgentSpaceTab: React.FC<IAgentSpaceTabProps> = ({ value, icon, disp
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" alignOffset={-6} side="right" sideOffset={12}>
                   <DropdownMenuGroup>
-                    <ViewGroup pageId={`agent-${agentId}-${value}`} />
+                    <ViewGroup pageId={`agentv2-${agentId}-${value}`} />
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>

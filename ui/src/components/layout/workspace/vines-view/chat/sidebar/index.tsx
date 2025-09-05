@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
+import { useAgentV2SessionsAsVinesFormat } from '@/apis/agents-v2/chat';
 import { ChatSession } from '@/components/layout/workspace/vines-view/chat/sidebar/chat-session.tsx';
 import { WorkflowChatViewOptions } from '@/components/layout/workspace/vines-view/chat/sidebar/options.tsx';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ interface IChatSidebarProps {
 
   side?: 'left' | 'right';
   isWorkflowMode?: boolean; // !!! 只能给工作流模式使用
+  isAgentV2Mode?: boolean; // !!! 只能给Agent V2模式使用
 }
 
 export const ChatSidebar: React.FC<IChatSidebarProps> = ({
@@ -31,11 +33,17 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({
   id,
   sidebarVisible,
   isWorkflowMode,
+  isAgentV2Mode,
   side = 'left',
 }) => {
   const { t } = useTranslation();
 
-  const { data, mutate } = useWorkflowChatSessions(id);
+  // Use different APIs based on mode
+  const workflowSessionsResult = useWorkflowChatSessions(isWorkflowMode ? id : '');
+  const agentV2SessionsResult = useAgentV2SessionsAsVinesFormat(isAgentV2Mode ? id : undefined);
+  
+  // Select the appropriate result based on mode
+  const { data, mutate } = isAgentV2Mode ? agentV2SessionsResult : workflowSessionsResult;
   const { trigger } = useCreateWorkflowChatSession();
 
   const [chatSessions, setChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
@@ -84,6 +92,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({
               active={activeSessionId === session.id}
               session={session}
               key={session.id}
+              disableDelete={isAgentV2Mode} // Agent V2 sessions cannot be deleted
               onDeleted={() => {
                 mutate().then((newData) => {
                   if (!newData?.length) {
@@ -107,29 +116,52 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({
             />
           ))}
 
-          <SimpleInputDialog
-            title={t('workspace.chat-view.sidebar.create.label')}
-            placeholder={t('workspace.chat-view.sidebar.create.placeholder')}
-            onFinished={(displayName) =>
-              toast.promise(trigger({ displayName, workflowId: id }), {
-                loading: t('workspace.chat-view.sidebar.create.loading'),
-                success: (session) => {
-                  session &&
-                    setChatSessions({
-                      ...chatSessions,
-                      [id]: session.id,
-                    });
-                  return t('workspace.chat-view.sidebar.create.success');
-                },
-                error: t('workspace.chat-view.sidebar.create.error'),
-                finally: () => void mutate(),
-              })
-            }
-          >
-            <Button variant="outline" icon={<Plus />} size="small">
+          {/* Show create session button for both workflow and Agent V2 modes */}
+          {isWorkflowMode && (
+            <SimpleInputDialog
+              title={t('workspace.chat-view.sidebar.create.label')}
+              placeholder={t('workspace.chat-view.sidebar.create.placeholder')}
+              onFinished={(displayName) =>
+                toast.promise(trigger({ displayName, workflowId: id }), {
+                  loading: t('workspace.chat-view.sidebar.create.loading'),
+                  success: (session) => {
+                    session &&
+                      setChatSessions({
+                        ...chatSessions,
+                        [id]: session.id,
+                      });
+                    return t('workspace.chat-view.sidebar.create.success');
+                  },
+                  error: t('workspace.chat-view.sidebar.create.error'),
+                  finally: () => void mutate(),
+                })
+              }
+            >
+              <Button variant="outline" icon={<Plus />} size="small">
+                {t('workspace.chat-view.sidebar.create.label')}
+              </Button>
+            </SimpleInputDialog>
+          )}
+          
+          {/* New chat button for Agent V2 mode - clears current session to start fresh */}
+          {isAgentV2Mode && (
+            <Button 
+              variant="outline" 
+              icon={<Plus />} 
+              size="small"
+              onClick={() => {
+                // Clear the current session ID to start a new chat
+                const newSessions = {
+                  ...chatSessions,
+                  [id]: '', // Empty session ID means new chat
+                };
+                
+                setChatSessions(newSessions);
+              }}
+            >
               {t('workspace.chat-view.sidebar.create.label')}
             </Button>
-          </SimpleInputDialog>
+          )}
         </div>
       </ScrollArea>
     </motion.div>
