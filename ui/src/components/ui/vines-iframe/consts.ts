@@ -19,6 +19,9 @@ export const IFRAME_MAP = {
   'agent-chat': AgentChatView,
   'agent-config': AgentConfigView,
   'agent-logs': AgentLogsView,
+  'agentv2-chat': AgentChatView,
+  'agentv2-config': AgentConfigView,
+  'agentv2-logs': AgentLogsView,
   'design-board': DesignBoardView,
   'global-design-board': GlobalDesignBoardView,
 };
