@@ -21,6 +21,7 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
   private parser = new AssistantMessageParser();
   private isProcessingActive = false;
   private processingIntervalId?: NodeJS.Timeout;
+  private streamDetectedToolCalls: ToolCall[] = []; // Store tool calls detected during streaming
 
   // Callbacks for streaming updates
   public onMessage?: (chunk: string) => void;
@@ -191,6 +192,8 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
   // Run the agent loop - same logic as before but with database persistence
   private async runLoop() {
+    // Reset stream-detected tool calls for this loop
+    this.streamDetectedToolCalls = [];
     // Get current task state
     const taskState = await this.taskManager.getTaskState(this.session.id);
 
@@ -202,21 +205,36 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
     // Load conversation history from database
     const messages = await this.repository.findMessagesBySession(this.session.id);
-    const conversationHistory: ChatCompletionMessageParam[] = messages.messages.map((m) => ({
-      role: m.isSystem ? 'assistant' : 'user',
-      content: m.content,
-    }));
+    const conversationHistory: ChatCompletionMessageParam[] = messages.messages.map((m) => {
+      // Special handling for continuation messages - they should be system messages
+      if (m.isSystem && m.content.startsWith('SYSTEM:')) {
+        this.logger.log(`📋 [CONVERSATION] Converting continuation message to system role: ${m.content.substring(0, 100)}...`);
+        return {
+          role: 'system' as const,
+          content: m.content.replace(/^SYSTEM:\s*/, ''), // Remove "SYSTEM:" prefix
+        };
+      }
+      // Regular message mapping
+      return {
+        role: m.isSystem ? 'assistant' : 'user',
+        content: m.content,
+      };
+    });
 
-    const systemPrompt = this.getSystemPrompt();
+    this.logger.log(`📝 [CONVERSATION] ${conversationHistory.length} messages`);
+
+    const systemPrompt = await this.getContextAwareSystemPrompt();
 
     const params: AgentV2ChatParams = {
       model: this.agent.config?.model || 'gpt-3.5-turbo',
       messages: [systemPrompt, ...conversationHistory],
       stream: true,
-      tools: ['ask_followup_question', 'attempt_completion', 'update_todo_list'], // 添加核心任务管理工具
+      tools: ['ask_followup_question', 'attempt_completion', 'update_todo_list', 'web_search'], // 添加核心任务管理工具和网络搜索
       temperature: this.agent.config?.temperature || 0.7,
       max_tokens: this.agent.config?.maxTokens || 4096,
     };
+
+    this.logger.log(`🚀 [LLM] ${params.model} request`);
 
     try {
       const llmResponse = await this.llmService.createChatCompletion(this.agent.teamId, params);
@@ -239,25 +257,32 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
           // Handle function calls
           if (chunk.choices && chunk.choices[0]?.delta?.tool_calls) {
             const toolCalls = chunk.choices[0].delta.tool_calls;
+            this.logger.log(`🛠️ [STREAM] ${toolCalls.length} tool calls`);
+
             const convertedToolCalls = toolCalls.map((tc: any) => ({
               id: tc.id || `tool_${Date.now()}`,
               name: tc.function?.name || '',
               params: tc.function?.arguments ? JSON.parse(tc.function.arguments) : {},
             }));
+            // Store tool calls detected during streaming
+            this.streamDetectedToolCalls.push(...convertedToolCalls);
             this.onToolCall?.(convertedToolCalls);
           }
 
           streamResult = await iterator.next();
         }
 
-        // Process the complete message
-        if (fullResponseText) {
+        // Process the complete message - continue even if no text content but tool calls exist
+        if (fullResponseText || this.streamDetectedToolCalls.length > 0) {
           this.parser.processChunk(fullResponseText);
           this.parser.finalizeContentBlocks();
           const parsedContent = this.parser.getContentBlocks();
 
           const textContent = parsedContent.find((c) => c.type === 'text')?.['content'] || '';
-          const toolCalls = parsedContent.filter((c) => c.type === 'tool_use').map((c) => c as any as ToolCall);
+          // Use stream-detected tool calls instead of XML parsing for OpenAI function calls
+          const toolCalls = this.streamDetectedToolCalls.length > 0 ? this.streamDetectedToolCalls : parsedContent.filter((c) => c.type === 'tool_use').map((c) => c as any as ToolCall);
+
+          this.logger.log(`📝 [RESPONSE] ${toolCalls.length} tools, text: ${textContent ? 'yes' : 'no'}`);
 
           // Save assistant response to database with tool calls
           if (textContent || toolCalls.length > 0) {
@@ -272,14 +297,33 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
           // Handle tool calls
           if (toolCalls.length > 0) {
+            this.logger.log(`🚀 [EXECUTE] ${toolCalls.length} tools`);
             this.onToolCall?.(toolCalls);
             await this.executeTools(toolCalls);
+
+            // Add selective continuation for tools that should trigger follow-up actions
+            // Only continue after web_search and specific update_todo_list cases to avoid infinite loops
+            const shouldContinue = toolCalls.some((tool) => {
+              if (tool.name === 'web_search') {
+                return true; // Always continue after web_search to process results
+              }
+              if (tool.name === 'update_todo_list') {
+                // Continue if there are pending tasks or in-progress tasks to execute
+                const taskState = this.taskStateManager.getSessionTaskState(this.session.id);
+                return taskState?.nextAction === 'start_next_task' || taskState?.nextAction === 'continue_task';
+              }
+              // Never continue after attempt_completion to prevent loops
+              return false;
+            });
+
+            if (shouldContinue) {
+              this.logger.log(`🔄 [CONTINUATION] Continuing execution`);
+              await this.queueSystemMessage('Continue with the next appropriate action based on the tool results.');
+            }
 
             // After attempt_completion, the current response is done but conversation continues
             // We don't check for COMPLETED status here anymore since we keep the session running
             // The session only ends when explicitly stopped or an error occurs
-
-            // Continue processing (new loop will be triggered by message queue)
           } else {
             // No tools used - send error and queue for retry
             const noToolsMessage = `[ERROR] You did not use a tool in your previous response! Please retry with a tool use.
@@ -306,7 +350,8 @@ Please use one of these tools in your next response.`;
         }
       }
     } catch (error) {
-      this.logger.error(`Error in agent loop: ${error.message}`, error.stack);
+      this.logger.error(`❌ [ERROR] Error in agent loop: ${error.message}`, error.stack);
+      this.logger.error(`❌ [ERROR] Error occurred at: ${new Date().toISOString()}`);
 
       // Update task state with error
       await this.taskManager.updateTaskState(this.session.id, {
@@ -323,6 +368,7 @@ Please use one of these tools in your next response.`;
     const toolResults: ToolResult[] = [];
 
     for (const tool of tools) {
+      this.logger.log(`⚡ [TOOL] ${tool.name}`);
       try {
         // Save tool execution context to database
         await this.taskManager.updateTaskState(this.session.id, {
@@ -338,6 +384,9 @@ Please use one of these tools in your next response.`;
           result = await this.agentToolsService.executeTool(tool.name, tool.params, this.session.id, this.askApproval, this.handleError, this.pushToolResult);
         }
 
+        if (result.is_error) {
+          this.logger.error(`❌ [TOOL] ${tool.name}: ${result.output}`);
+        }
         toolResults.push(result);
 
         // 发送工具执行结果的SSE事件
@@ -362,21 +411,13 @@ Please use one of these tools in your next response.`;
           return;
         }
 
-        // Handle update_todo_list tool specially - implement task-driven continuation
+        // update_todo_list tool handling - update task state manager
         if (tool.name === 'update_todo_list') {
-          // Check if we should continue execution based on task state
-          const shouldContinue = this.taskStateManager.shouldContinueExecution(this.session.id);
+          this.logger.log(`📋 [TODO] Todo list updated - updating task state manager`);
 
-          if (shouldContinue) {
-            // Get the continuation message from task state manager
-            const taskState = this.taskStateManager.getSessionTaskState(this.session.id);
-            if (taskState) {
-              const continuationMessage = this.taskStateManager.generateContinuationMessage(taskState);
-
-              // Queue the continuation message to trigger next execution cycle
-              await this.queueSystemMessage(continuationMessage);
-            }
-          }
+          // Update task state manager with the original todos parameter, not the formatted output
+          const todosMarkdown = tool.params?.todos || '';
+          this.taskStateManager.updateSessionTaskState(this.session.id, todosMarkdown);
         }
       } catch (error) {
         this.logger.error(`Error executing tool ${tool.name}: ${error.message}`);
@@ -431,10 +472,75 @@ Please use one of these tools in your next response.`;
     });
   }
 
-  private getSystemPrompt(): ChatCompletionMessageParam {
+  private async getContextAwareSystemPrompt(): Promise<ChatCompletionMessageParam> {
+    let contextualGuidance = '';
+
+    // Get the latest user message to analyze intent
+    const recentMessages = await this.repository.findMessagesBySession(this.session.id, { limit: 5 });
+    const latestUserMessage = recentMessages.messages.find((msg) => !msg.isSystem)?.content || '';
+
+    // For first-time requests without existing todos, check if it's a simple task
+    const isFirstRequest = recentMessages.messages.length <= 1;
+    const messageContainsWebSearchMention = latestUserMessage.toLowerCase().includes('web_search');
+    if (isFirstRequest && messageContainsWebSearchMention) {
+      contextualGuidance = `
+
+DIRECT SEARCH GUIDANCE:
+The user explicitly mentioned using web_search tool for current information. 
+DO NOT create a todo list for this simple task.
+Instead, directly use the web_search tool with an appropriate query.`;
+    }
+
+    // Analyze current task state to provide specific guidance
+    const taskState = this.taskStateManager.getSessionTaskState(this.session.id);
+    if (taskState) {
+      const { todos, nextAction } = taskState;
+
+      // Check for tasks that need execution
+      const pendingTasks = todos.filter((todo) => todo.status === 'pending');
+      const inProgressTasks = todos.filter((todo) => todo.status === 'in_progress');
+      // Check if the last few messages show recent todo updates
+      const recentMessages = await this.repository.findMessagesBySession(this.session.id, { limit: 3 });
+      const recentlyUpdatedTodos = recentMessages.messages.filter((msg) => msg.isSystem && msg.toolCalls?.some((tc) => tc.name === 'update_todo_list')).length;
+
+      if (nextAction === 'start_next_task' && pendingTasks.length > 0) {
+        const nextTask = pendingTasks[0];
+        contextualGuidance = `
+
+TASK EXECUTION GUIDANCE:
+You have a todo list with pending tasks. Execute the first pending task immediately:
+"${nextTask.content}"
+
+DO NOT call update_todo_list again. Use the appropriate action tool:
+- If task involves searching/research → use web_search
+- If task needs user input → use ask_followup_question
+- Execute this task now!`;
+      } else if (nextAction === 'continue_task' && inProgressTasks.length > 0) {
+        const currentTask = inProgressTasks[0];
+        contextualGuidance = `
+
+CONTINUE TASK GUIDANCE:
+Continue working on your in-progress task:
+"${currentTask.content}"
+
+Use the appropriate tool to complete this task:
+- If it involves searching/research → use web_search
+- If you need user clarification → use ask_followup_question`;
+      } else if (recentlyUpdatedTodos > 0 && (pendingTasks.length > 0 || inProgressTasks.length > 0)) {
+        contextualGuidance = `
+
+EXECUTION PRIORITY:
+You recently updated todos but haven't executed any tasks yet.
+DO NOT update todos again. Focus on DOING the work:
+- Execute pending/in-progress tasks using appropriate tools
+- Use web_search for research tasks
+- Use ask_followup_question for clarification needs`;
+      }
+    }
+
     return {
       role: 'system',
-      content: ASK_MODE_SYSTEM_PROMPT,
+      content: ASK_MODE_SYSTEM_PROMPT + contextualGuidance,
     };
   }
 
