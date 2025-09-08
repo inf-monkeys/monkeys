@@ -2,11 +2,11 @@
 
 // Simplified tool-related types for backend usage.
 // In a real scenario, these might be more robustly defined in a shared types library.
-export type ToolName = 'use_mcp_tool' | 'access_mcp_resource' | 'ask_followup_question' | 'attempt_completion' | 'new_task' | 'update_todo_list';
-export const toolNames: ToolName[] = ['use_mcp_tool', 'access_mcp_resource', 'ask_followup_question', 'attempt_completion', 'new_task', 'update_todo_list'];
+export type ToolName = 'use_mcp_tool' | 'access_mcp_resource' | 'ask_followup_question' | 'attempt_completion' | 'new_task' | 'update_todo_list' | 'web_search';
+export const toolNames: ToolName[] = ['use_mcp_tool', 'access_mcp_resource', 'ask_followup_question', 'attempt_completion', 'new_task', 'update_todo_list', 'web_search'];
 
-export type ToolParamName = 'server_name' | 'tool_name' | 'arguments' | 'uri' | 'question' | 'result' | 'message' | 'todos' | 'content';
-export const toolParamNames: ToolParamName[] = ['server_name', 'tool_name', 'arguments', 'uri', 'question', 'result', 'message', 'todos', 'content'];
+export type ToolParamName = 'server_name' | 'tool_name' | 'arguments' | 'uri' | 'question' | 'result' | 'message' | 'todos' | 'content' | 'query' | 'scope';
+export const toolParamNames: ToolParamName[] = ['server_name', 'tool_name', 'arguments', 'uri', 'question', 'result', 'message', 'todos', 'content', 'query', 'scope'];
 
 export interface TextContent {
   type: 'text';
