@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 export interface TodoItem {
   id: string;
@@ -19,8 +19,6 @@ export interface TaskExecutionState {
 
 @Injectable()
 export class AgentV2TaskStateManager {
-  private readonly logger = new Logger(AgentV2TaskStateManager.name);
-
   // Store task state per session
   private sessionTaskStates = new Map<string, TaskExecutionState>();
 
@@ -37,7 +35,8 @@ export class AgentV2TaskStateManager {
     let idCounter = 1;
 
     for (const line of lines) {
-      const match = line.match(/^\[\s*([ xX\-~])\s*\]\s+(.+)$/);
+      // Support both formats: "[x] task" and "- [x] task"
+      const match = line.match(/^(?:-\s*)?\[\s*([ xX\-~])\s*\]\s+(.+)$/);
       if (!match) continue;
 
       let status: 'pending' | 'in_progress' | 'completed' = 'pending';
@@ -114,8 +113,6 @@ export class AgentV2TaskStateManager {
 
     this.sessionTaskStates.set(sessionId, taskState);
 
-    this.logger.debug(`Task state updated for session ${sessionId}: ${taskState.nextAction}`);
-
     return taskState;
   }
 
@@ -132,10 +129,10 @@ export class AgentV2TaskStateManager {
   public generateContinuationMessage(taskState: TaskExecutionState): string {
     switch (taskState.nextAction) {
       case 'continue_task':
-        return `SYSTEM: You must continue working on the current in-progress task: "${taskState.todos[taskState.currentTaskIndex].content}". Use the appropriate tool to proceed with this task. Do not stop - you must take action to continue this task.`;
+        return `SYSTEM: You must continue working on the current in-progress task: "${taskState.todos[taskState.currentTaskIndex].content}". You MUST use the appropriate tool (web_search for research/information, ask_followup_question for user input, or attempt_completion for final results) to make progress on this specific task. Do not just update the todo list - execute the task using the right tool immediately.`;
 
       case 'start_next_task':
-        return `SYSTEM: You have updated the todo list. Now you must immediately start the next pending task: "${taskState.todos[taskState.currentTaskIndex].content}". Use the appropriate tool to begin working on this task. Do not stop - continuous execution is required.`;
+        return `SYSTEM: You have updated the todo list. Now you must immediately start the next pending task: "${taskState.todos[taskState.currentTaskIndex].content}". You MUST use the appropriate tool (web_search for research/information, ask_followup_question for user input) to begin executing this task. Do not stop after updating - take concrete action on this task immediately.`;
 
       case 'all_completed':
         return `SYSTEM: All tasks are completed! You must now use the attempt_completion tool to present the final result to the user. Include a comprehensive summary of all completed work.`;
