@@ -54,7 +54,10 @@ export class AgentV2LlmService {
       // Add tools if specified - convert our tool names to OpenAI function calling format
       if (params.tools && params.tools.length > 0) {
         openaiParams.tools = this.convertToolsToOpenAIFormat(params.tools);
+        openaiParams.tool_choice = 'auto'; // Let model choose when to use tools
       }
+
+      this.logger.log(`📤 [LLM] ${openaiParams.model} | ${openaiParams.messages.length} msgs | ${openaiParams.tools?.length || 0} tools`);
 
       const response = await this.openaiClient.chat.completions.create(openaiParams);
 
@@ -169,6 +172,30 @@ export class AgentV2LlmService {
                   todos: { type: 'string', description: 'Markdown checklist of todos' },
                 },
                 required: ['todos'],
+              },
+            },
+          });
+          break;
+        case 'web_search':
+          tools.push({
+            type: 'function',
+            function: {
+              name: 'web_search',
+              description: 'Search the internet for current information, news, or recent data. Use this for queries that require up-to-date information beyond your training data.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  query: {
+                    type: 'string',
+                    description: 'The search query - be specific and clear about what you are looking for',
+                  },
+                  scope: {
+                    type: 'string',
+                    enum: ['general', 'news', 'academic', 'local'],
+                    description: 'The type of search to perform (optional, defaults to general)',
+                  },
+                },
+                required: ['query'],
               },
             },
           });
