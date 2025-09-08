@@ -391,6 +391,7 @@ export interface AgentV2Config {
     url: string; // e.g., https://api.openai.com/v1
     apiKey: string; // API key for authentication
     models: string[]; // Available models list, e.g., ["gpt-4", "gpt-3.5-turbo", "claude-3-sonnet"]
+    webSearchModel?: string; // Model ID for web search functionality, e.g., "gpt-4o-search-preview-2025-03-11"
   };
 
   // Rate limiting (hard-coded per team)
@@ -404,6 +405,13 @@ export interface AgentV2Config {
     temperature: number; // Default: 0.7
     maxTokens: number; // Default: 4096
     timeout: number; // Default: 30000ms
+  };
+
+  // Web search configuration
+  webSearch?: {
+    enabled: boolean; // Enable/disable web search functionality
+    maxTokensPerSearch?: number; // Maximum tokens per search request, default: 2000
+    timeout?: number; // Search request timeout in milliseconds, default: 60000ms
   };
 }
 
@@ -705,6 +713,7 @@ When answer to user:
       url: readConfig('agentv2.openaiCompatible.url', 'https://api.openai.com/v1'),
       apiKey: readConfig('agentv2.openaiCompatible.apiKey', ''),
       models: readConfig('agentv2.openaiCompatible.models', ['gpt-3.5-turbo', 'gpt-4']),
+      webSearchModel: readConfig('agentv2.openaiCompatible.webSearchModel', 'gpt-4o-search-preview-2025-03-11'),
     },
     rateLimits: {
       perMinute: 60,
@@ -714,6 +723,11 @@ When answer to user:
       temperature: 0.7,
       maxTokens: 4096,
       timeout: 30000,
+    },
+    webSearch: {
+      enabled: readConfig('agentv2.webSearch.enabled', true),
+      maxTokensPerSearch: readConfig('agentv2.webSearch.maxTokensPerSearch', 2000),
+      timeout: readConfig('agentv2.webSearch.timeout', 60000),
     },
   },
 };
