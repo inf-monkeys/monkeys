@@ -55,7 +55,6 @@ export class AgentV2PersistentTaskManager extends EventEmitter {
 
     await this.messageQueueRepository.save(queueItem);
 
-
     // Emit event for potential processors
     this.emit('messageQueued', sessionId, messageId);
   }
@@ -152,9 +151,6 @@ export class AgentV2PersistentTaskManager extends EventEmitter {
       // Apply updates atomically
       await entityManager.update(AgentV2TaskStateEntity, { sessionId }, { ...updates, updatedAt: new Date() });
     });
-
-    this.logger.debug(`Task state updated for session ${sessionId}`);
-    // Uncomment for debugging: this.logger.debug(`Updates: ${JSON.stringify(updates)}`);
   }
 
   // Get current task state
