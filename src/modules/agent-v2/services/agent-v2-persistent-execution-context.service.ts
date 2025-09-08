@@ -259,11 +259,22 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
             const toolCalls = chunk.choices[0].delta.tool_calls;
             this.logger.log(`🛠️ [STREAM] ${toolCalls.length} tool calls`);
 
-            const convertedToolCalls = toolCalls.map((tc: any) => ({
-              id: tc.id || `tool_${Date.now()}`,
-              name: tc.function?.name || '',
-              params: tc.function?.arguments ? JSON.parse(tc.function.arguments) : {},
-            }));
+            const convertedToolCalls = toolCalls.map((tc: any) => {
+              let params = {};
+              if (tc.function?.arguments) {
+                try {
+                  params = JSON.parse(tc.function.arguments);
+                } catch (error) {
+                  this.logger.warn(`Failed to parse tool arguments for ${tc.function?.name}: ${error.message}. Raw arguments: ${tc.function.arguments}`);
+                  params = { _raw_arguments: tc.function.arguments };
+                }
+              }
+              return {
+                id: tc.id || `tool_${Date.now()}`,
+                name: tc.function?.name || '',
+                params,
+              };
+            });
             // Store tool calls detected during streaming
             this.streamDetectedToolCalls.push(...convertedToolCalls);
             this.onToolCall?.(convertedToolCalls);
