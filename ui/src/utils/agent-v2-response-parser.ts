@@ -21,9 +21,14 @@ export interface IParsedTodoUpdate {
   todosText: string;
 }
 
+export interface IParsedWebSearchResult {
+  query: string;
+  results: string;
+}
+
 export interface IParsedSegment {
   id: string;
-  type: 'text' | 'todo_update' | 'task_completion' | 'followup_question';
+  type: 'text' | 'todo_update' | 'task_completion' | 'followup_question' | 'web_search_result';
   content: string;
   data?: any; // 结构化数据
   timestamp: number;
@@ -36,6 +41,7 @@ export interface IParsedAgentResponse {
   followupQuestion?: IParsedFollowupQuestion;
   taskCompletion?: IParsedTaskCompletion;
   todoUpdate?: IParsedTodoUpdate;
+  webSearchResult?: IParsedWebSearchResult;
   toolCalls?: string[]; // 工具调用的文本描述
 }
 
@@ -160,6 +166,35 @@ export const parseTodoUpdate = (text: string): IParsedTodoUpdate | undefined => 
   };
 };
 
+// 解析 web_search_result 标签
+export const parseWebSearchResult = (text: string): IParsedWebSearchResult | undefined => {
+  // 匹配 <web_search_result>...</web_search_result>
+  const searchRegex = /<web_search_result>([\s\S]*?)<\/web_search_result>/i;
+  const searchMatch = searchRegex.exec(text);
+
+  if (!searchMatch) return undefined;
+
+  const searchContent = searchMatch[1];
+
+  // 提取 query 内容（在 <query>...</query> 之间）
+  const queryRegex = /<query>([\s\S]*?)<\/query>/i;
+  const queryMatch = queryRegex.exec(searchContent);
+
+  // 提取 results 内容（在 <results>...</results> 之间）
+  const resultsRegex = /<results>([\s\S]*?)<\/results>/i;
+  const resultsMatch = resultsRegex.exec(searchContent);
+
+  if (!resultsMatch) return undefined;
+
+  const query = queryMatch ? queryMatch[1].trim() : '';
+  const results = resultsMatch[1].trim();
+
+  return {
+    query,
+    results,
+  };
+};
+
 // 解析工具调用标签
 export const parseToolCalls = (text: string): string[] => {
   const toolCalls: string[] = [];
@@ -193,6 +228,8 @@ export const cleanResponseText = (text: string): string => {
       .replace(/<attempt_completion>[\s\S]*?<\/attempt_completion>/gi, '')
       // 移除任务更新标签
       .replace(/<update_todo_list>[\s\S]*?<\/update_todo_list>/gi, '')
+      // 移除网络搜索结果标签
+      .replace(/<web_search_result>[\s\S]*?<\/web_search_result>/gi, '')
       // 移除工具调用标签
       .replace(/<tool_call[^>]*>[\s\S]*?<\/tool_call>/gi, '')
       .replace(/<\w+_tool>[\s\S]*?<\/\w+_tool>/gi, '')
@@ -213,6 +250,7 @@ export const parseContentSegments = (content: string): IParsedSegment[] => {
     { type: 'todo_update' as const, regex: /<update_todo_list>[\s\S]*?<\/update_todo_list>/gi },
     { type: 'task_completion' as const, regex: /<attempt_completion>[\s\S]*?<\/attempt_completion>/gi },
     { type: 'followup_question' as const, regex: /<ask_followup_question>[\s\S]*?<\/ask_followup_question>/gi },
+    { type: 'web_search_result' as const, regex: /<web_search_result>[\s\S]*?<\/web_search_result>/gi },
   ];
 
   // 收集所有标签的匹配位置
@@ -261,6 +299,9 @@ export const parseContentSegments = (content: string): IParsedSegment[] => {
       case 'followup_question':
         parsedData = parseFollowupQuestion(tagMatch.match);
         break;
+      case 'web_search_result':
+        parsedData = parseWebSearchResult(tagMatch.match);
+        break;
     }
 
     segments.push({
@@ -307,6 +348,7 @@ export const parseAgentV2Response = (content: string): IParsedAgentResponse => {
   const followupQuestion = parseFollowupQuestion(content);
   const taskCompletion = parseTaskCompletion(content);
   const todoUpdate = parseTodoUpdate(content);
+  const webSearchResult = parseWebSearchResult(content);
   const toolCalls = parseToolCalls(content);
   const cleanedContent = cleanResponseText(content);
 
@@ -317,6 +359,7 @@ export const parseAgentV2Response = (content: string): IParsedAgentResponse => {
     followupQuestion,
     taskCompletion,
     todoUpdate,
+    webSearchResult,
     toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
   };
 };

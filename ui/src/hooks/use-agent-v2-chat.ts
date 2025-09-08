@@ -280,15 +280,91 @@ export const useAgentV2Chat = (
         });
         break;
 
-      case 'tool_use':
-        // 处理todo更新工具调用
-        if (data.name === 'update_todo_list' && data.params?.todos) {
-          // 将todo更新信息注入到当前的流式消息中
+      case 'tool_calls': {
+        // 处理工具调用开始
+        const toolCalls = data.toolCalls || [];
+        if (toolCalls.length > 0) {
           setMessages((prev) => {
             const lastMessage = prev[prev.length - 1];
 
             if (lastMessage?.role === 'assistant' && lastMessage.isStreaming) {
-              // 在现有消息内容中添加todo更新标签
+              return [
+                ...prev.slice(0, -1),
+                {
+                  ...lastMessage,
+                  toolCalls: [...(lastMessage.toolCalls || []), ...toolCalls],
+                },
+              ];
+            } else {
+              // 创建新的助手消息来持有工具调用
+              return [
+                ...prev,
+                {
+                  id: nanoIdLowerCase(),
+                  role: 'assistant',
+                  content: '',
+                  createdAt: new Date(),
+                  isStreaming: true,
+                  toolCalls: toolCalls,
+                },
+              ];
+            }
+          });
+        }
+        break;
+      }
+
+      case 'tool_result': {
+        // 处理工具执行结果
+        const { tool, result } = data;
+        if (tool && result) {
+          setMessages((prev) => {
+            const lastMessage = prev[prev.length - 1];
+
+            if (lastMessage?.role === 'assistant' && lastMessage.isStreaming) {
+              let contentToAdd = '';
+
+              // 根据工具类型生成相应的XML标签
+              switch (tool.name) {
+                case 'update_todo_list':
+                  contentToAdd = `<update_todo_list><todos>${result.output}</todos></update_todo_list>`;
+                  break;
+                case 'web_search':
+                  contentToAdd = `<web_search_result><query>${tool.params?.query || ''}</query><results>${result.output}</results></web_search_result>`;
+                  break;
+                case 'attempt_completion':
+                  contentToAdd = `<attempt_completion><result>${tool.params?.result || result.output}</result></attempt_completion>`;
+                  break;
+                default:
+                  contentToAdd = `<tool_result tool="${tool.name}">${result.output}</tool_result>`;
+              }
+
+              return [
+                ...prev.slice(0, -1),
+                {
+                  ...lastMessage,
+                  content: lastMessage.content + contentToAdd,
+                  // 更新工具调用结果
+                  toolCalls: (lastMessage.toolCalls || []).map((call) =>
+                    call.id === tool.id ? { ...call, result: result.output } : call,
+                  ),
+                },
+              ];
+            }
+
+            return prev;
+          });
+        }
+        break;
+      }
+
+      case 'tool_use':
+        // 保持对旧格式的兼容性
+        if (data.name === 'update_todo_list' && data.params?.todos) {
+          setMessages((prev) => {
+            const lastMessage = prev[prev.length - 1];
+
+            if (lastMessage?.role === 'assistant' && lastMessage.isStreaming) {
               const todoUpdateXml = `<update_todo_list><todos>${data.params.todos}</todos></update_todo_list>`;
 
               return [
@@ -296,7 +372,6 @@ export const useAgentV2Chat = (
                 {
                   ...lastMessage,
                   content: lastMessage.content + todoUpdateXml,
-                  // 添加工具调用信息到消息的元数据中
                   toolCalls: [
                     ...(lastMessage.toolCalls || []),
                     {
@@ -308,7 +383,6 @@ export const useAgentV2Chat = (
                 },
               ];
             } else {
-              // 如果没有流式消息，创建一个新的包含todo更新的消息
               const todoUpdateXml = `<update_todo_list><todos>${data.params.todos}</todos></update_todo_list>`;
 
               return [
@@ -331,13 +405,6 @@ export const useAgentV2Chat = (
             }
           });
         }
-        break;
-
-      case 'tool_calls':
-        // TODO: 在未来可以添加工具调用的 UI 显示
-        break;
-
-      case 'tool_result':
         break;
 
       case 'followup_question':

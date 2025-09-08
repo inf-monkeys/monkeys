@@ -8,6 +8,7 @@ import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/cha
 import { VirtuaChatBotMessages } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { AgentV2FollowupQuestion } from '@/components/ui/agent-v2-followup-question';
+import { AgentV2SearchResults } from '@/components/ui/agent-v2-search-results';
 import { AgentV2StreamingTodo } from '@/components/ui/agent-v2-streaming-todo';
 import { AgentV2TaskCompletion } from '@/components/ui/agent-v2-task-completion';
 import { AgentV2TodoList } from '@/components/ui/agent-v2-todo-list';
@@ -21,6 +22,7 @@ import { useLiveTodoTracker } from '@/hooks/use-live-todo-tracker';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useSubmitHandler } from '@/hooks/use-submit-handler.ts';
 import { IParsedTaskCompletion, IParsedTodoItem, parseAgentV2Response } from '@/utils/agent-v2-response-parser';
+import { IParsedWebSearchResult, parseWebSearchResult } from '@/utils/sse-event-parser';
 
 interface IAgentV2ChatModeProps {
   agentId: string;
@@ -30,17 +32,69 @@ interface IAgentV2ChatModeProps {
 }
 
 // 转换消息格式以适配现有的消息显示组件
-const convertToVinesMessage = (message: IAgentV2ChatMessage): IVinesMessage => {
-  // 如果是助手消息，解析其内容，但保持原有的显示方式
+const convertToVinesMessage = (message: IAgentV2ChatMessage): IVinesMessage | null => {
+  // 如果是助手消息，解析其内容
   if (message.role === 'assistant' && message.content) {
     const parsedResponse = parseAgentV2Response(message.content);
 
-    // 将分段内容重新组合为文本，只提取文本段落
+    // 检查是否有实际的文本内容
     const textSegments = parsedResponse.segments.filter((segment) => segment.type === 'text');
-    const combinedContent =
-      textSegments.length > 0
-        ? textSegments.map((segment) => segment.content).join('\n\n')
-        : parsedResponse.content || message.content;
+    const hasTextContent = textSegments.some((segment) => segment.content.trim().length > 0);
+
+    let combinedContent = '';
+
+    if (hasTextContent) {
+      // 如果有文本内容，使用文本内容
+      combinedContent = textSegments.map((segment) => segment.content).join('\n\n');
+    } else {
+      // 如果没有文本内容，但有工具调用，生成简短的描述
+      const toolDescriptions: string[] = [];
+
+      if (parsedResponse.todoUpdate) {
+        toolDescriptions.push('📝 更新了任务列表');
+      }
+      if (parsedResponse.webSearchResult) {
+        toolDescriptions.push(`🔍 搜索了: ${parsedResponse.webSearchResult.query || '相关信息'}`);
+      }
+      if (parsedResponse.taskCompletion) {
+        toolDescriptions.push('✅ 完成了任务');
+      }
+      if (parsedResponse.toolCalls && parsedResponse.toolCalls.length > 0) {
+        toolDescriptions.push(`🔧 执行了 ${parsedResponse.toolCalls.length} 个工具调用`);
+      }
+
+      // 检查工具调用中的具体工具类型
+      if (message.toolCalls && message.toolCalls.length > 0) {
+        message.toolCalls.forEach((toolCall) => {
+          if (toolCall.name === 'update_todo_list') {
+            toolDescriptions.push('📝 更新了任务列表');
+          } else if (toolCall.name === 'web_search') {
+            toolDescriptions.push(`🔍 搜索了: ${toolCall.params?.query || '相关信息'}`);
+          } else if (toolCall.name === 'attempt_completion') {
+            toolDescriptions.push('✅ 完成了任务');
+          }
+        });
+      }
+
+      if (toolDescriptions.length > 0) {
+        combinedContent = toolDescriptions.join('，');
+      } else {
+        // 完全没有内容，使用原始内容或过滤掉
+        const rawContent = parsedResponse.content || message.content;
+        combinedContent = typeof rawContent === 'string' ? rawContent : '';
+
+        // 如果内容包含 [object Object]，尝试从工具调用中提取信息
+        if (combinedContent.includes('[object Object]') && message.toolCalls) {
+          const toolInfo = message.toolCalls.map((call) => `${call.name}(${call.params?.query || ''})`).join(', ');
+          combinedContent = `执行了工具调用: ${toolInfo}`;
+        }
+      }
+    }
+
+    // 如果最终内容为空或只包含空白字符，过滤掉该消息
+    if (!combinedContent.trim()) {
+      return null;
+    }
 
     return {
       id: message.id,
@@ -92,11 +146,13 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
   // 解析后的结构化内容状态
   const [allTodoItems, setAllTodoItems] = useState<IParsedTodoItem[]>([]);
   const [allTaskCompletions, setAllTaskCompletions] = useState<IParsedTaskCompletion[]>([]);
+  const [allSearchResults, setAllSearchResults] = useState<IParsedWebSearchResult[]>([]);
   const [followupLoading, setFollowupLoading] = useState(false);
 
   // 展开状态控制
   const [todoExpanded, setTodoExpanded] = useState(false);
   const [completionExpanded, setCompletionExpanded] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
 
   // 动态高度测量 - 考虑动画延迟
   const [dynamicHeaderHeight, setDynamicHeaderHeight] = useState(0);
@@ -133,9 +189,11 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
       ? containerHeight - effectiveHeaderHeight - effectiveBottomHeight
       : height - effectiveHeaderHeight - (effectiveBottomHeight || 120);
 
-  // 转换消息格式
+  // 转换消息格式，过滤掉null消息
   const vinesMessages = useMemo(() => {
-    const converted = messages.map((msg) => convertToVinesMessage(msg));
+    const converted = messages
+      .map((msg) => convertToVinesMessage(msg))
+      .filter((msg): msg is IVinesMessage => msg !== null);
     return converted;
   }, [messages]);
 
@@ -167,8 +225,9 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
     const assistantMessages = messages.filter((msg) => msg.role === 'assistant' && msg.content);
     const allTodos: IParsedTodoItem[] = [];
     const allCompletions: IParsedTaskCompletion[] = [];
+    const allSearches: IParsedWebSearchResult[] = [];
 
-    // 解析所有助手消息，收集 todo 项目和任务完成
+    // 解析所有助手消息，收集 todo 项目、任务完成和搜索结果
     assistantMessages.forEach((msg) => {
       const parsed = parseAgentV2Response(msg.content);
 
@@ -181,10 +240,28 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
       if (parsed.taskCompletion) {
         allCompletions.push(parsed.taskCompletion);
       }
+
+      // 收集搜索结果
+      if (parsed.webSearchResult) {
+        // 使用sse-event-parser解析结构化搜索结果
+        const searchData = parseWebSearchResult(parsed.webSearchResult.results, parsed.webSearchResult.query);
+        allSearches.push(searchData);
+      }
+
+      // 额外检查工具调用中的搜索结果
+      if (msg.toolCalls) {
+        msg.toolCalls.forEach((toolCall) => {
+          if (toolCall.name === 'web_search' && toolCall.result) {
+            const searchData = parseWebSearchResult(toolCall.result, toolCall.params?.query);
+            allSearches.push(searchData);
+          }
+        });
+      }
     });
 
     setAllTodoItems(allTodos);
     setAllTaskCompletions(allCompletions);
+    setAllSearchResults(allSearches);
   }, [messages]);
 
   // 处理输入提交
@@ -323,6 +400,7 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
             <AnimatePresence mode="popLayout">
               {todoTracker.hasActiveTodos && (
                 <motion.div
+                  key="active-todos"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -344,6 +422,7 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
 
               {!todoTracker.hasActiveTodos && allTodoItems.length > 0 && (
                 <motion.div
+                  key="completed-todos"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -361,8 +440,27 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
                 </motion.div>
               )}
 
+              {allSearchResults.length > 0 && (
+                <motion.div
+                  key="search-results"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="cursor-pointer rounded-lg bg-green-50 px-3 py-1 transition-colors hover:bg-green-100"
+                  onClick={() => setSearchExpanded(!searchExpanded)}
+                >
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-green-700">🔍 搜索结果</span>
+                    <span className="text-xs text-green-600">({allSearchResults.length})</span>
+                    <span className="text-xs text-green-500">{searchExpanded ? '▼' : '▶'}</span>
+                  </div>
+                </motion.div>
+              )}
+
               {allTaskCompletions.length > 0 && (
                 <motion.div
+                  key="task-completions"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -384,7 +482,7 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
         </div>
 
         {/* 悬浮的任务组件容器 - 根据展开状态显示 */}
-        {(todoExpanded || completionExpanded) && (
+        {(todoExpanded || searchExpanded || completionExpanded) && (
           <motion.div
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -396,6 +494,7 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
             <AnimatePresence>
               {todoExpanded && todoTracker.hasActiveTodos && (
                 <motion.div
+                  key="expanded-active-todos"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -407,6 +506,7 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
 
               {todoExpanded && !todoTracker.hasActiveTodos && allTodoItems.length > 0 && (
                 <motion.div
+                  key="expanded-completed-todos"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -416,8 +516,28 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
                 </motion.div>
               )}
 
+              {searchExpanded && allSearchResults.length > 0 && (
+                <motion.div
+                  key="expanded-search-results"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-2"
+                >
+                  {allSearchResults.map((searchResult, index) => (
+                    <AgentV2SearchResults
+                      key={`search-result-${index}-${searchResult.query}`}
+                      searchResult={searchResult}
+                      className="compact-mode shadow-lg"
+                    />
+                  ))}
+                </motion.div>
+              )}
+
               {completionExpanded && allTaskCompletions.length > 0 && (
                 <motion.div
+                  key="expanded-task-completions"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -425,7 +545,10 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
                   className="space-y-2"
                 >
                   {allTaskCompletions.map((completion, index) => (
-                    <AgentV2TaskCompletion key={index} result={completion.result} />
+                    <AgentV2TaskCompletion
+                      key={`task-completion-${index}-${completion.result.substring(0, 20)}`}
+                      result={completion.result}
+                    />
                   ))}
                 </motion.div>
               )}

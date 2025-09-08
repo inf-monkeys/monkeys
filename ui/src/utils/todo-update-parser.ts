@@ -16,34 +16,41 @@ export const parseTodoUpdateContent = (todosText: string): ITodoUpdateItem[] => 
 
   lines.forEach((line) => {
     const trimmedLine = line.trim();
-    if (trimmedLine.startsWith('[') && trimmedLine.includes(']')) {
-      // 解析不同的状态标记
+
+    // 支持带横线前缀的格式: - [x] task 和直接的 [x] task 格式
+    const checkboxMatch = trimmedLine.match(/^(?:-\s*)?\[(.)\]\s*(.+)$/);
+
+    if (checkboxMatch) {
+      const [, statusChar, content] = checkboxMatch;
       let status: TodoStatus = 'pending';
       let completed = false;
 
-      if (trimmedLine.startsWith('[x]') || trimmedLine.startsWith('[X]')) {
-        status = 'completed';
-        completed = true;
-      } else if (trimmedLine.startsWith('[-]')) {
-        status = 'in_progress';
-        completed = false;
-      } else if (trimmedLine.startsWith('[ ]')) {
-        status = 'pending';
-        completed = false;
+      switch (statusChar.toLowerCase()) {
+        case 'x':
+          status = 'completed';
+          completed = true;
+          break;
+        case '-':
+          status = 'in_progress';
+          completed = false;
+          break;
+        default:
+          status = 'pending';
+          completed = false;
       }
 
-      const content = trimmedLine.replace(/^\[([ xX-])\]\s*/, '').trim();
+      const taskContent = content.trim();
 
-      if (content) {
+      if (taskContent) {
         // 使用内容作为稳定的ID，这样同一任务的不同状态会被识别为同一项
-        let contentHash = content
+        let contentHash = taskContent
           .toLowerCase()
           .replace(/\s+/g, '-')
           .replace(/[^\w-]/g, '');
 
         // 如果hash为空，使用内容长度和索引作为备用ID
         if (!contentHash) {
-          contentHash = `item-${content.length}-${items.length}`;
+          contentHash = `item-${taskContent.length}-${items.length}`;
         }
 
         // 确保ID唯一性，如果重复则添加索引
@@ -56,7 +63,7 @@ export const parseTodoUpdateContent = (todosText: string): ITodoUpdateItem[] => 
 
         items.push({
           id: finalId,
-          content,
+          content: taskContent,
           completed,
           status,
         });

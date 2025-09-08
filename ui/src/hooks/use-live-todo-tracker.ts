@@ -50,29 +50,56 @@ export const useLiveTodoTracker = (messages: IAgentV2ChatMessage[]) => {
       if (parsed.todoUpdate) {
         const todos = parseTodoUpdateContent(parsed.todoUpdate.todosText);
 
-        todoUpdates.push({
-          timestamp: message.createdAt.getTime(),
-          messageId: message.id,
-          todosText: parsed.todoUpdate.todosText,
-          todos,
-        });
+        // 只有解析出有效todo项时才添加
+        if (todos.length > 0) {
+          todoUpdates.push({
+            timestamp: message.createdAt.getTime(),
+            messageId: message.id,
+            todosText: parsed.todoUpdate.todosText,
+            todos,
+          });
+        }
       }
 
       // 额外检查工具调用中的todo更新
       if (message.toolCalls) {
         message.toolCalls.forEach((toolCall) => {
-          if (toolCall.name === 'update_todo_list' && toolCall.params?.todos) {
-            const todos = parseTodoUpdateContent(toolCall.params.todos);
+          if (toolCall.name === 'update_todo_list') {
+            let todosText = '';
 
-            // 避免重复添加（检查是否已经通过消息内容添加过）
-            const existingUpdate = todoUpdates.find((update) => update.messageId === message.id);
-            if (!existingUpdate) {
-              todoUpdates.push({
-                timestamp: message.createdAt.getTime(),
-                messageId: message.id,
-                todosText: toolCall.params.todos,
-                todos,
-              });
+            // 优先使用参数中的todos，因为result通常包含系统消息而不是纯粹的todo项
+            if (toolCall.params?.todos) {
+              todosText = toolCall.params.todos;
+            } else if (toolCall.result) {
+              // 如果结果中包含todo格式，尝试提取
+              const todoMatch = toolCall.result.match(/^\[[\sx-]\].*/gm);
+              if (todoMatch) {
+                todosText = todoMatch.join('\n');
+              } else {
+                todosText = toolCall.result;
+              }
+            }
+
+            if (todosText) {
+              const todos = parseTodoUpdateContent(todosText);
+
+              // 只有解析出有效todo项时才添加
+              if (todos.length > 0) {
+                // 避免重复添加（检查是否已经通过消息内容添加过）
+                const existingUpdate = todoUpdates.find((update) => update.messageId === message.id);
+                if (!existingUpdate) {
+                  todoUpdates.push({
+                    timestamp: message.createdAt.getTime(),
+                    messageId: message.id,
+                    todosText,
+                    todos,
+                  });
+                } else if (existingUpdate.todos.length === 0 && todos.length > 0) {
+                  // 如果现有更新是空的，但新的有内容，则替换
+                  existingUpdate.todos = todos;
+                  existingUpdate.todosText = todosText;
+                }
+              }
             }
           }
         });
