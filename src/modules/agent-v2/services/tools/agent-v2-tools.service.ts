@@ -1,4 +1,6 @@
+import { config } from '@/common/config';
 import { Injectable, Logger } from '@nestjs/common';
+import OpenAI from 'openai';
 import { AgentV2TaskStateManager } from '../agent-v2-task-state-manager.service';
 import { AgentV2McpService } from '../mcp/agent-v2-mcp.service';
 import { AskApproval, HandleError, PushToolResult, ToolResult, ToolUse } from '../types/tool-types';
@@ -7,10 +9,21 @@ import { AskApproval, HandleError, PushToolResult, ToolResult, ToolUse } from '.
 export class AgentV2ToolsService {
   private readonly logger = new Logger(AgentV2ToolsService.name);
 
+  private openaiClient: OpenAI;
+
   constructor(
     private readonly mcpService: AgentV2McpService,
     private readonly taskStateManager: AgentV2TaskStateManager,
-  ) {}
+  ) {
+    // Initialize OpenAI client for web search
+    const agentConfig = config.agentv2?.openaiCompatible;
+    if (agentConfig?.apiKey && agentConfig?.url) {
+      this.openaiClient = new OpenAI({
+        apiKey: agentConfig.apiKey,
+        baseURL: agentConfig.url,
+      });
+    }
+  }
 
   // Generic tool execution method
   async executeTool(toolName: string, params: any, sessionId: string, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<ToolResult> {
@@ -52,6 +65,11 @@ export class AgentV2ToolsService {
           const todoResult = await this.updateTodoListTool(toolCall, sessionId, askApproval, handleError, pushToolResult);
           result.output = todoResult.output;
           result.is_error = todoResult.is_error;
+          break;
+        case 'web_search':
+          const searchResult = await this.webSearchTool(toolCall, askApproval, handleError, pushToolResult);
+          result.output = searchResult.output;
+          result.is_error = searchResult.is_error;
           break;
         default:
           throw new Error(`Unknown tool: ${toolName}`);
@@ -459,5 +477,144 @@ export class AgentV2ToolsService {
     }
 
     return todoItems;
+  }
+
+  async webSearchTool(block: ToolUse, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<ToolResult> {
+    const query: string | undefined = block.input.query;
+    const scope: string | undefined = block.input.scope;
+
+    try {
+      if (!query) {
+        const errorResult: ToolResult = {
+          tool_call_id: block.id,
+          output: 'Error: Missing query parameter',
+          is_error: true,
+        };
+        pushToolResult(errorResult);
+        return errorResult;
+      }
+
+      // Check if web search is enabled
+      const webSearchConfig = config.agentv2?.webSearch;
+      if (!webSearchConfig?.enabled) {
+        const errorResult: ToolResult = {
+          tool_call_id: block.id,
+          output: 'Error: Web search is disabled in configuration',
+          is_error: true,
+        };
+        pushToolResult(errorResult);
+        return errorResult;
+      }
+
+      // Check if OpenAI client is initialized
+      if (!this.openaiClient) {
+        const errorResult: ToolResult = {
+          tool_call_id: block.id,
+          output: 'Error: OpenAI client not configured for web search',
+          is_error: true,
+        };
+        pushToolResult(errorResult);
+        return errorResult;
+      }
+
+      // Get approval for web search
+      const approvalMessage = JSON.stringify({
+        tool: 'web_search',
+        query: query,
+        scope: scope || 'general',
+      });
+
+      const didApprove = await askApproval('web_search', approvalMessage);
+      if (!didApprove) {
+        const declinedResult: ToolResult = {
+          tool_call_id: block.id,
+          output: 'User declined web search request',
+        };
+        pushToolResult(declinedResult);
+        return declinedResult;
+      }
+
+      // Prepare search query with scope context if provided
+      let searchQuery = query;
+      if (scope && scope !== 'general') {
+        switch (scope) {
+          case 'news':
+            searchQuery = `Latest news: ${query}`;
+            break;
+          case 'academic':
+            searchQuery = `Academic research papers: ${query}`;
+            break;
+          case 'local':
+            searchQuery = `Local information: ${query}`;
+            break;
+        }
+      }
+
+      this.logger.log(`🔍 [SEARCH] "${searchQuery}"`);
+
+      // Get search model from config
+      const searchModel = config.agentv2?.openaiCompatible?.webSearchModel || 'gpt-4o-search-preview-2025-03-11';
+      const maxTokens = webSearchConfig.maxTokensPerSearch || 2000;
+      const timeout = webSearchConfig.timeout || 60000;
+
+      // Perform the web search using the search-enabled model
+      const searchResponse = (await Promise.race([
+        this.openaiClient.chat.completions.create({
+          model: searchModel,
+          messages: [
+            {
+              role: 'user',
+              content: searchQuery,
+            },
+          ],
+          temperature: 0.3,
+          max_tokens: maxTokens,
+          stream: false,
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Search timeout')), timeout)),
+      ])) as OpenAI.Chat.ChatCompletion;
+
+      const searchContent = searchResponse.choices[0]?.message?.content;
+      if (!searchContent) {
+        const errorResult: ToolResult = {
+          tool_call_id: block.id,
+          output: 'Error: No search results returned',
+          is_error: true,
+        };
+        pushToolResult(errorResult);
+        return errorResult;
+      }
+
+      // Process the search result - remove <think> tags if present
+      let processedContent = searchContent;
+      if (searchContent.includes('<think>')) {
+        // Remove the <think> section but keep the actual search results
+        const thinkEndIndex = searchContent.indexOf('</think>');
+        if (thinkEndIndex !== -1) {
+          processedContent = searchContent.substring(thinkEndIndex + 8).trim();
+        }
+      }
+
+      // Log result summary for monitoring
+      this.logger.log(`📊 [SEARCH] ${processedContent.length} chars`);
+
+      // Create successful result
+      const successResult: ToolResult = {
+        tool_call_id: block.id,
+        output: `## Web Search Results\n\n**Query:** ${query}\n**Scope:** ${scope || 'general'}\n\n${processedContent}`,
+      };
+
+      pushToolResult(successResult);
+      return successResult;
+    } catch (error) {
+      await handleError('performing web search', error);
+      const errorResult: ToolResult = {
+        tool_call_id: block.id,
+        output: `Error performing web search: ${error.message}`,
+        is_error: true,
+      };
+      pushToolResult(errorResult);
+      return errorResult;
+    }
   }
 }
