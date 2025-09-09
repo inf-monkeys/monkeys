@@ -36,4 +36,10 @@ export class AgentV2Entity extends BaseEntity {
 
   @Column({ name: 'config', type: 'json', nullable: true })
   config?: Record<string, any>;
+
+  @Column({ name: 'available_tools', type: 'json', nullable: true })
+  availableTools?: {
+    enabled: boolean; // 是否启用外部工具
+    toolNames: string[]; // 允许使用的外部工具名称列表
+  };
 }
