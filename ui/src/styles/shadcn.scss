@@ -35,18 +35,18 @@
 
     --global-spacing: 0.5rem;
     --global-icon-size: 14px;
-    --history-result-image-size: 64px;
+    --history-result-image-size: 48px;
 
     @media (min-width: 1024px) {
       --global-spacing: 0.75rem;
       --global-icon-size: 16px;
-      --history-result-image-size: 72px;
+      --history-result-image-size: 64px;
     }
 
     @media (min-width: 1280px) {
       --global-spacing: 1rem;
       --global-icon-size: 20px;
-      --history-result-image-size: 96px;
+      --history-result-image-size: 72px;
     }
 
     --operation-bar-width: calc(var(--global-icon-size) + 8px + var(--global-spacing))
@@ -57,7 +57,7 @@
     --foreground: 210 40% 98%;
 
     --card: #111113;
-    --card-foreground:0, 0%, 93%;
+    --card-foreground: 0, 0%, 93%;
 
     --popover: 270deg 3.85% 10.2%;
     --popover-foreground: 210 40% 98%;

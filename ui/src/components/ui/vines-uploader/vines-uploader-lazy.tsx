@@ -393,7 +393,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                     onClick={open}
                   >
                     <LucideIconGradient icon={Upload} size={uploaderOrientation === 'horizontal' ? 50 : 25} />
-                    <div className="flex max-w-[80%] flex-col gap-1">
+                    <div className="flex max-w-[80%] flex-col gap-1 text-center">
                       <h1
                         className={cn(
                           'text-xl font-bold',
@@ -405,7 +405,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                           ? t('components.ui.updater.release-file')
                           : t('components.ui.updater.click-or-drag-area')}
                       </h1>
-                      <p className="text-sm text-muted-foreground text-opacity-85">
+                      <p className="text-xs text-muted-foreground text-opacity-85">
                         {accept
                           ? t('components.ui.updater.hint.accept.custom', {
                               acceptString: accept.map((it) => `.${it}`).join('、'),
@@ -415,7 +415,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                         {t('components.ui.updater.hint.max-size', { maxSize })}
                       </p>
                       {uploaderOrientation === 'horizontal' && (
-                        <p className="text-sm text-muted-foreground text-opacity-85">
+                        <p className="text-xs text-muted-foreground text-opacity-85">
                           {t('components.ui.updater.paste-hint')}
                         </p>
                       )}
