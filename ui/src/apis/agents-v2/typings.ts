@@ -71,3 +71,71 @@ export interface IAvailableModelsResponse {
   };
   error?: string;
 }
+
+// Tool related interfaces
+export interface IAgentV2BuiltinTool {
+  name: string;
+  displayName: string;
+  description: string;
+  builtin: true;
+}
+
+export interface IAgentV2ExternalTool {
+  name: string;
+  displayName: string | Record<string, string>;
+  description: string | Record<string, string>;
+  namespace: string;
+  categories?: string[];
+  icon?: string;
+}
+
+export interface IAvailableToolsResponse {
+  success: boolean;
+  data: {
+    builtin: IAgentV2BuiltinTool[];
+    external: {
+      enabled: string[];
+      available: IAgentV2ExternalTool[];
+    };
+  };
+  error?: string;
+}
+
+export interface IAgentV2ToolsConfigResponse {
+  success: boolean;
+  data: {
+    builtin: IAgentV2BuiltinTool[];
+    external: {
+      enabled: string[];
+      available: Array<{
+        name: string;
+        displayName: string;
+        description: string;
+        namespace: string;
+      }>;
+    };
+  };
+  error?: string;
+}
+
+export interface IUpdateAgentV2ToolsDto {
+  enabled: boolean;
+  toolNames: string[];
+}
+
+export interface IAgentV2ConfigResponse {
+  success: boolean;
+  data: IAgentV2Config;
+  error?: string;
+}
+
+export interface IUpdateAgentV2ConfigDto {
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  timeout?: number;
+  reasoningEffort?: {
+    enabled: boolean;
+    level: 'low' | 'medium' | 'high';
+  };
+}

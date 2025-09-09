@@ -7,7 +7,17 @@ import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { IAssetItem, IListUgcDto } from '@/apis/ugc/typings.ts';
 
-import { IAgentV2, IAgentV2DetailResponse, IAvailableModelsResponse, ICreateAgentV2Dto } from './typings';
+import {
+  IAgentV2,
+  IAgentV2ConfigResponse,
+  IAgentV2DetailResponse,
+  IAgentV2ToolsConfigResponse,
+  IAvailableModelsResponse,
+  IAvailableToolsResponse,
+  ICreateAgentV2Dto,
+  IUpdateAgentV2ConfigDto,
+  IUpdateAgentV2ToolsDto,
+} from './typings';
 
 // Data transformation functions
 export const transformAgentV2ToAssetItem = (agentV2: IAgentV2): IAssetItem<IAgent> => {
@@ -144,4 +154,35 @@ export const deleteAgentV2 = (_agentId: string) => {
 export const updateAgentV2 = (_agentId: string, _agent: Partial<ICreateAgentV2Dto>) => {
   // Agent V2 doesn't have update endpoint yet
   throw new Error('Agent V2 update operation is not yet supported');
+};
+
+// Tool management APIs
+export const useAvailableToolsV2 = () => {
+  return useSWR<IAvailableToolsResponse | undefined>('/api/agent-v2/tools/available', (url) =>
+    vinesFetcher<IAvailableToolsResponse>()(url),
+  );
+};
+
+export const useAgentV2Tools = (agentId?: string) => {
+  return useSWR<IAgentV2ToolsConfigResponse | undefined>(agentId ? `/api/agent-v2/${agentId}/tools` : null, (url) =>
+    vinesFetcher<IAgentV2ToolsConfigResponse>()(url),
+  );
+};
+
+export const updateAgentV2Tools = (agentId: string, dto: IUpdateAgentV2ToolsDto) => {
+  return vinesFetcher<IAgentV2ToolsConfigResponse>({ method: 'PUT', simple: true })(
+    `/api/agent-v2/${agentId}/tools`,
+    dto,
+  );
+};
+
+// Configuration management APIs
+export const useAgentV2Config = (agentId?: string) => {
+  return useSWR<IAgentV2ConfigResponse | undefined>(agentId ? `/api/agent-v2/${agentId}/config` : null, (url) =>
+    vinesFetcher<IAgentV2ConfigResponse>()(url),
+  );
+};
+
+export const updateAgentV2Config = (agentId: string, dto: IUpdateAgentV2ConfigDto) => {
+  return vinesFetcher<IAgentV2ConfigResponse>({ method: 'PUT', simple: true })(`/api/agent-v2/${agentId}/config`, dto);
 };

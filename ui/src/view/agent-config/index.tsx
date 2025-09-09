@@ -2,10 +2,10 @@ import React, { lazy, Suspense } from 'react';
 
 import { SkeletonWithFullscreenUseLoading } from '@/components/ui/skeleton.tsx';
 
-const AgentConfigViewLazy = lazy(() => import('./vines-agent-config-lazy.tsx'));
+const AgentV2ConfigView = lazy(() => import('@/view/agent-v2-config/vines-agent-v2-config-lazy.tsx'));
 
 export const AgentConfigView: React.FC = () => (
   <Suspense fallback={<SkeletonWithFullscreenUseLoading />}>
-    <AgentConfigViewLazy />
+    <AgentV2ConfigView />
   </Suspense>
 );
