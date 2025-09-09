@@ -88,6 +88,7 @@ export type CustomizationForm = {
 
 export type CustomizationUploader = {
   orientation: 'vertical' | 'horizontal';
+  pasteButton: boolean;
 };
 
 export type CustomizationFormView = {
@@ -538,6 +539,7 @@ export const config: Config = {
       },
       uploader: {
         orientation: readConfig('server.customization.uploader.orientation', 'horizontal'),
+        pasteButton: readConfig('server.customization.uploader.pasteButton', true),
       },
     },
   },

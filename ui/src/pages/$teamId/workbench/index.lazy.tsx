@@ -12,6 +12,7 @@ import { WorkbenchView } from '@/components/layout/workbench/view';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useGlobalViewSize, useSidebarCollapsed } from '@/store/useGlobalViewStore';
 import { usePageStore } from '@/store/usePageStore';
+import { cn } from '@/utils';
 
 export const Workbench: React.FC = () => {
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
@@ -52,7 +53,7 @@ export const Workbench: React.FC = () => {
   }, [temporaryWorkflowId]);
 
   return (
-    <main className="relative flex size-full gap-global">
+    <main className={cn('relative flex size-full', mode != 'mini' && 'gap-global')}>
       <WorkbenchSidebar mode={mode} showGroup={showGroup} collapsed={sidebarCollapsed} />
       <div className={`flex size-full flex-col gap-global ${sidebarCollapsed ? 'flex-1' : ''}`}>
         <WorkbenchView mode={mode} />

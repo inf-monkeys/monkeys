@@ -5,7 +5,7 @@ import ThumbnailGenerator from '@uppy/thumbnail-generator';
 import { useClickAway, useCreation, useDrop, useLatest, useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get, isEmpty } from 'lodash';
-import { Upload } from 'lucide-react';
+import { Clipboard, Upload } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import Dropzone from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,7 @@ import VinesUpload from '@/components/ui/vines-uploader/plugin/vines-upload.ts';
 import { addProtocolToURL, checkIfCorrectURL, getFileNameByOssUrl } from '@/components/ui/vines-uploader/utils.ts';
 import { cn } from '@/utils';
 
+import { Button } from '../button';
 import { LucideIconGradient } from '../vines-icon/lucide/gradient';
 
 const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
@@ -113,10 +114,12 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     // 确保 uploadURL 被设置
     if (response.uploadURL && !file.uploadURL) {
       const currentFile = uppy.getFile(file.id);
-      uppy.setFileState(file.id, {
-        ...currentFile,
-        uploadURL: response.uploadURL,
-      });
+      if (currentFile) {
+        uppy.setFileState(file.id, {
+          ...currentFile,
+          uploadURL: response.uploadURL,
+        });
+      }
     }
   });
 
@@ -190,6 +193,88 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setIsDraggingOver(false);
       setIsHovering(false);
+    }
+  });
+
+  // 处理点击粘贴
+  const handlePasteClick = useMemoizedFn(async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const clipboardItems = await navigator.clipboard.read();
+
+      for (const item of clipboardItems) {
+        // 处理图片文件
+        for (const type of item.types) {
+          if (type.startsWith('image/')) {
+            const blob = await item.getType(type);
+            const file = new File([blob], `pasted-image-${Date.now()}.${type.split('/')[1]}`, {
+              type,
+            });
+
+            if (max === 1 && !isEmpty(filesMapper)) {
+              const existingFiles = uppy.getFiles();
+              existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
+            }
+
+            uppy.addFile(handleConvertFile(file));
+            return;
+          }
+        }
+
+        // 处理文本内容（可能包含URL）
+        if (item.types.includes('text/plain')) {
+          const text = await (await item.getType('text/plain')).text();
+          const cleanUrl = addProtocolToURL(text.trim());
+
+          if (checkIfCorrectURL(cleanUrl)) {
+            try {
+              // 尝试获取图片数据
+              const response = await fetch(cleanUrl, {
+                mode: 'cors',
+                credentials: 'omit',
+                headers: {
+                  Accept: 'image/*,*/*;q=0.9',
+                },
+              });
+
+              if (response.ok) {
+                const blob = await response.blob();
+                if (blob.type.startsWith('image/') || blob.size > 0) {
+                  const filename = getFileNameByOssUrl(cleanUrl) || `image_${Date.now()}.png`;
+                  const file = new File([blob], filename, {
+                    type: blob.type || 'image/png',
+                  });
+
+                  if (max === 1 && !isEmpty(filesMapper)) {
+                    const existingFiles = uppy.getFiles();
+                    existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
+                  }
+
+                  uppy.addFile(handleConvertFile(file));
+                  return;
+                }
+              }
+            } catch (error) {
+              // 如果无法作为文件下载，作为远程URL处理
+              const file = new File([], getFileNameByOssUrl(cleanUrl), {
+                type: 'text/plain',
+              }) as File & { meta?: { remoteUrl: string } };
+              file.meta = { remoteUrl: cleanUrl };
+
+              if (max === 1 && !isEmpty(filesMapper)) {
+                const existingFiles = uppy.getFiles();
+                existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
+              }
+
+              uppy.addFile(handleConvertFile(file));
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to read from clipboard:', error);
     }
   });
 
@@ -330,6 +415,11 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     'theme.uploader.orientation',
     'horizontal',
   ) as ISystemConfig['theme']['uploader']['orientation'];
+  const uploaderPasteButton = get(
+    systemConfig,
+    'theme.uploader.pasteButton',
+    true,
+  ) as ISystemConfig['theme']['uploader']['pasteButton'];
 
   return (
     <Dropzone
@@ -419,6 +509,17 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                           {t('components.ui.updater.paste-hint')}
                         </p>
                       )}
+                      {uploaderPasteButton && (
+                        <Button
+                          variant="outline"
+                          size="small"
+                          icon={<Clipboard />}
+                          onClick={handlePasteClick}
+                          disabled={filesLength >= (max ?? Infinity)}
+                        >
+                          {t('components.ui.updater.hint.paste-from-clipboard')}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -426,7 +527,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
             </AnimatePresence>
             <div
               className={cn(
-                'vines-center absolute bottom-0 z-20 w-full gap-2 overflow-hidden rounded-md p-2 backdrop-blur-xl dark:bg-[#111113]/80',
+                'vines-center absolute bottom-0 z-20 w-full gap-2 overflow-hidden rounded-md',
                 filesLength <= 3 && 'pt-0',
               )}
             >

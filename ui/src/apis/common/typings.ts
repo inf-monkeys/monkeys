@@ -83,6 +83,7 @@ export type CustomizationForm = {
 
 export type CustomizationUploader = {
   orientation: 'vertical' | 'horizontal';
+  pasteButton: boolean;
 };
 
 export type CustomizationFormView = {

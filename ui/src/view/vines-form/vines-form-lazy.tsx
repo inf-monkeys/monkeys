@@ -54,6 +54,8 @@ const VinesForm: React.FC = () => {
 
   const onlyResult = oemOnlyResult && pageFrom === 'workbench';
 
+  const showViewTitle = !onlyResult && pageFrom === 'workbench' && !isMiniFrame;
+
   useEffect(() => {
     if (isMiniFrame) {
       setVisible(!!inViewport);
@@ -63,7 +65,7 @@ const VinesForm: React.FC = () => {
   return (
     <>
       {isMiniFrame && <IframeHeader historyVisible={historyVisible} setHistoryVisible={setHistoryVisible} />}
-      {!onlyResult && pageFrom === 'workbench' && (
+      {showViewTitle && (
         <ViewTitle displayName={getI18nContent(workflow?.displayName)} themeGradient={Boolean(themeGradient)} />
       )}
       <div
@@ -79,7 +81,7 @@ const VinesForm: React.FC = () => {
           <VinesTabular
             className={cn(
               'col-span-2 pr-global',
-              pageFrom === 'workbench' && 'mt-[32px]',
+              showViewTitle && 'mt-[32px]',
               isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-global px-2 transition-opacity',
               isMiniFrame && historyVisible && 'pointer-events-none opacity-0',
               vinesIFrameVisible && !isMiniFrame && 'pr-global',
@@ -89,7 +91,7 @@ const VinesForm: React.FC = () => {
               showPreviewViewExecutionResultGrid && setHistoryVisible(true);
             }}
             event$={event$}
-            height={height - (pageFrom === 'workbench' ? 32 : 0)}
+            height={height - (showViewTitle ? 32 : 0)}
           />
         )}
         <VinesExecutionResult

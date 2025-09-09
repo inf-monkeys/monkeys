@@ -276,7 +276,8 @@
             "any": "支持上传任意格式的文件"
           },
           "max-size": "，不超过 {{maxSize}}MB",
-          "limit": "，最多可上传 {{limit}} 个文件"
+          "limit": "，最多可上传 {{limit}} 个文件",
+          "paste-from-clipboard": "从剪贴板粘贴"
         },
         "file-list": {
           "toast": {
