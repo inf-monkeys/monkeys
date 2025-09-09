@@ -225,11 +225,22 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
     const systemPrompt = await this.getContextAwareSystemPrompt();
 
+    // 获取智能体可用的工具列表（包括内置和外部工具）
+    const availableToolsConfig = await this.agentToolsService.getAvailableToolsForAgent(this.agent.id);
+    const enabledTools: string[] = [
+      // 内置工具始终可用
+      ...availableToolsConfig.builtin.map((tool) => tool.name),
+      // 已启用的外部工具
+      ...availableToolsConfig.external.enabled,
+    ];
+
+    this.logger.log(`🛠️ [TOOLS] Available tools: ${enabledTools.join(', ')}`);
+
     const params: AgentV2ChatParams = {
       model: this.agent.config?.model || 'gpt-3.5-turbo',
       messages: [systemPrompt, ...conversationHistory],
       stream: true,
-      tools: ['ask_followup_question', 'attempt_completion', 'update_todo_list', 'web_search'], // 添加核心任务管理工具和网络搜索
+      tools: enabledTools,
       temperature: this.agent.config?.temperature || 0.7,
       max_tokens: this.agent.config?.maxTokens || 4096,
     };
@@ -237,7 +248,7 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
     this.logger.log(`🚀 [LLM] ${params.model} request`);
 
     try {
-      const llmResponse = await this.llmService.createChatCompletion(this.agent.teamId, params);
+      const llmResponse = await this.llmService.createChatCompletion(this.agent.teamId, params, this.agent.id);
 
       if (llmResponse && typeof llmResponse[Symbol.asyncIterator] === 'function') {
         // Handle streaming response
@@ -392,7 +403,7 @@ Please use one of these tools in your next response.`;
         if (tool.name === 'ask_followup_question' && this.onFollowupQuestion) {
           result = await this.executeAskFollowupQuestionTool(tool);
         } else {
-          result = await this.agentToolsService.executeTool(tool.name, tool.params, this.session.id, this.askApproval, this.handleError, this.pushToolResult);
+          result = await this.agentToolsService.executeTool(tool.name, tool.params, this.session.id, this.askApproval, this.handleError, this.pushToolResult, this.agent.id);
         }
 
         if (result.is_error) {

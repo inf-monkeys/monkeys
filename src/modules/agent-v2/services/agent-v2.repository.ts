@@ -173,4 +173,13 @@ export class AgentV2Repository {
 
     return result;
   }
+
+  async updateAgent(id: string, updates: Partial<AgentV2Entity>): Promise<AgentV2Entity> {
+    await this.agentRepo.update(id, updates);
+    const updatedAgent = await this.agentRepo.findOne({ where: { id } });
+    if (!updatedAgent) {
+      throw new Error(`Agent with ID ${id} not found`);
+    }
+    return updatedAgent;
+  }
 }

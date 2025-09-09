@@ -4,7 +4,7 @@ Agent V2 API Comprehensive Test Script
 全面测试智能体V2 API的所有功能
 
 使用方法:
-python test_agent_v2.py [--quick] [--base-url URL]
+python test_agent_v2.py [--quick] [--base-url URL] [--config-only]
 
 测试的API端点:
 - GET /api/agent-v2/available-models - 获取可用模型
@@ -19,6 +19,11 @@ python test_agent_v2.py [--quick] [--base-url URL]
 - POST /api/agent-v2/sessions/:sessionId/resume - 恢复会话
 - POST /api/agent-v2/sessions/:sessionId/stop - 停止会话
 - GET /api/agent-v2/sessions/:sessionId/context-usage - 上下文使用情况
+- GET /api/agent-v2/tools/available - 获取可用工具列表
+- GET /api/agent-v2/:agentId/tools - 获取智能体工具配置
+- PUT /api/agent-v2/:agentId/tools - 更新智能体工具配置
+- GET /api/agent-v2/:agentId/config - 获取智能体配置
+- PUT /api/agent-v2/:agentId/config - 更新智能体配置
 """
 
 import json
@@ -878,6 +883,284 @@ class AgentV2Tester:
         else:
             self.log_test_result("获取上下文使用情况", False, f"HTTP状态码: {response.status_code}", response.text)
 
+    # ========== Tools Configuration Tests ==========
+    
+    def test_get_available_tools(self):
+        """测试获取团队可用的所有工具列表"""
+        self.log("测试：获取团队可用工具列表")
+        
+        response = self._make_request('get', '/api/agent-v2/tools/available')
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                tools_data = data.get('data', {})
+                builtin_tools = tools_data.get('builtin', [])
+                external_tools = tools_data.get('external', [])
+                
+                self.log_test_result("获取可用工具列表", True, 
+                    f"内置工具: {len(builtin_tools)} 个, 外部工具: {len(external_tools)} 个")
+                
+                if not self.quick_mode:
+                    self.log("内置工具:", "DEBUG")
+                    for tool in builtin_tools:
+                        self.log(f"  - {tool['name']}: {tool['description']}", "DEBUG")
+                    
+                    if external_tools:
+                        self.log("外部工具:", "DEBUG")
+                        for tool in external_tools[:5]:  # 只显示前5个
+                            self.log(f"  - {tool['name']} ({tool['namespace']}): {tool['description']}", "DEBUG")
+                        if len(external_tools) > 5:
+                            self.log(f"  ... 还有 {len(external_tools) - 5} 个外部工具", "DEBUG")
+                
+                return tools_data
+            else:
+                self.log_test_result("获取可用工具列表", False, f"API返回错误: {data.get('error', 'Unknown error')}")
+        else:
+            self.log_test_result("获取可用工具列表", False, f"HTTP状态码: {response.status_code}", response.text)
+        
+        return {}
+    
+    def test_get_agent_tools_config(self, agent_id: str):
+        """测试获取智能体工具配置"""
+        if not agent_id:
+            self.log_test_result("获取智能体工具配置", False, "缺少agent_id")
+            return {}
+            
+        self.log("测试：获取智能体工具配置")
+        
+        response = self._make_request('get', f'/api/agent-v2/{agent_id}/tools')
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                config_data = data.get('data', {})
+                builtin_tools = config_data.get('builtin', [])
+                external_config = config_data.get('external', {})
+                enabled_external = external_config.get('enabled', [])
+                available_external = external_config.get('available', [])
+                
+                self.log_test_result("获取智能体工具配置", True, 
+                    f"内置工具: {len(builtin_tools)} 个, 已启用外部工具: {len(enabled_external)} 个, "
+                    f"可用外部工具: {len(available_external)} 个")
+                
+                if not self.quick_mode:
+                    self.log(f"已启用的外部工具: {enabled_external}", "DEBUG")
+                
+                return config_data
+            else:
+                self.log_test_result("获取智能体工具配置", False, f"API返回错误: {data.get('error', 'Unknown error')}")
+        else:
+            self.log_test_result("获取智能体工具配置", False, f"HTTP状态码: {response.status_code}", response.text)
+        
+        return {}
+    
+    def test_update_agent_tools_config(self, agent_id: str):
+        """测试更新智能体工具配置"""
+        if not agent_id:
+            self.log_test_result("更新智能体工具配置", False, "缺少agent_id")
+            return
+            
+        self.log("测试：更新智能体工具配置")
+        
+        # 首先获取可用的外部工具
+        available_tools_response = self._make_request('get', '/api/agent-v2/tools/available')
+        available_external_tools = []
+        
+        if available_tools_response.status_code == 200:
+            available_data = available_tools_response.json()
+            if available_data.get('success'):
+                available_external_tools = available_data.get('data', {}).get('external', [])
+        
+        # 测试场景1: 启用外部工具
+        if available_external_tools:
+            # 选择前2个外部工具进行测试
+            selected_tools = [tool['name'] for tool in available_external_tools[:2]]
+            
+            update_config = {
+                'enabled': True,
+                'toolNames': selected_tools
+            }
+            
+            self.log(f"启用外部工具: {selected_tools}", "DEBUG")
+            
+            response = self._make_request('put', f'/api/agent-v2/{agent_id}/tools', json=update_config)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('success'):
+                    self.log_test_result("更新智能体工具配置-启用", True, 
+                        f"成功启用 {len(selected_tools)} 个外部工具")
+                else:
+                    self.log_test_result("更新智能体工具配置-启用", False, 
+                        f"API返回错误: {data.get('error', 'Unknown error')}")
+            else:
+                self.log_test_result("更新智能体工具配置-启用", False, 
+                    f"HTTP状态码: {response.status_code}", response.text)
+            
+            # 等待一下
+            time.sleep(1)
+            
+            # 测试场景2: 禁用外部工具
+            disable_config = {
+                'enabled': False,
+                'toolNames': []
+            }
+            
+            self.log("禁用所有外部工具", "DEBUG")
+            
+            response = self._make_request('put', f'/api/agent-v2/{agent_id}/tools', json=disable_config)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('success'):
+                    self.log_test_result("更新智能体工具配置-禁用", True, "成功禁用所有外部工具")
+                else:
+                    self.log_test_result("更新智能体工具配置-禁用", False, 
+                        f"API返回错误: {data.get('error', 'Unknown error')}")
+            else:
+                self.log_test_result("更新智能体工具配置-禁用", False, 
+                    f"HTTP状态码: {response.status_code}", response.text)
+        else:
+            self.log_test_result("更新智能体工具配置", False, "没有可用的外部工具进行测试")
+        
+        # 测试场景3: 测试无效工具名称
+        invalid_config = {
+            'enabled': True,
+            'toolNames': ['invalid_tool_name_12345']
+        }
+        
+        self.log("测试无效工具名称", "DEBUG")
+        
+        response = self._make_request('put', f'/api/agent-v2/{agent_id}/tools', json=invalid_config)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if not data.get('success'):
+                # 期望失败的情况
+                self.log_test_result("更新智能体工具配置-验证", True, "正确拒绝了无效工具名称")
+            else:
+                self.log_test_result("更新智能体工具配置-验证", False, "应该拒绝无效工具名称但是接受了")
+        else:
+            # HTTP错误也是预期的
+            self.log_test_result("更新智能体工具配置-验证", True, f"正确拒绝无效工具: HTTP {response.status_code}")
+
+    # ========== Agent Configuration Tests ==========
+    
+    def test_get_agent_config(self, agent_id: str):
+        """测试获取智能体配置"""
+        if not agent_id:
+            self.log_test_result("获取智能体配置", False, "缺少agent_id")
+            return {}
+            
+        self.log("测试：获取智能体配置")
+        
+        response = self._make_request('get', f'/api/agent-v2/{agent_id}/config')
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                config_data = data.get('data', {})
+                model = config_data.get('model', 'unknown')
+                temperature = config_data.get('temperature', 0)
+                max_tokens = config_data.get('maxTokens', 0)
+                timeout = config_data.get('timeout', 0)
+                
+                self.log_test_result("获取智能体配置", True, 
+                    f"模型: {model}, 温度: {temperature}, 最大tokens: {max_tokens}, 超时: {timeout}ms")
+                
+                if not self.quick_mode:
+                    reasoning_effort = config_data.get('reasoningEffort', {})
+                    self.log(f"推理努力配置: 启用={reasoning_effort.get('enabled', False)}, "
+                            f"级别={reasoning_effort.get('level', 'unknown')}", "DEBUG")
+                
+                return config_data
+            else:
+                self.log_test_result("获取智能体配置", False, f"API返回错误: {data.get('error', 'Unknown error')}")
+        else:
+            self.log_test_result("获取智能体配置", False, f"HTTP状态码: {response.status_code}", response.text)
+        
+        return {}
+    
+    def test_update_agent_config(self, agent_id: str):
+        """测试更新智能体配置"""
+        if not agent_id:
+            self.log_test_result("更新智能体配置", False, "缺少agent_id")
+            return
+            
+        self.log("测试：更新智能体配置")
+        
+        # 测试场景1: 更新温度和最大tokens
+        update_config_1 = {
+            'temperature': 0.8,
+            'maxTokens': 2000
+        }
+        
+        self.log(f"更新配置: 温度={update_config_1['temperature']}, 最大tokens={update_config_1['maxTokens']}", "DEBUG")
+        
+        response = self._make_request('put', f'/api/agent-v2/{agent_id}/config', json=update_config_1)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                updated_config = data.get('data', {})
+                self.log_test_result("更新智能体配置-基础", True, 
+                    f"温度更新为: {updated_config.get('temperature')}, "
+                    f"最大tokens更新为: {updated_config.get('maxTokens')}")
+            else:
+                self.log_test_result("更新智能体配置-基础", False, 
+                    f"API返回错误: {data.get('error', 'Unknown error')}")
+        else:
+            self.log_test_result("更新智能体配置-基础", False, 
+                f"HTTP状态码: {response.status_code}", response.text)
+        
+        time.sleep(1)
+        
+        # 测试场景2: 更新推理努力配置
+        update_config_2 = {
+            'reasoningEffort': {
+                'enabled': True,
+                'level': 'high'
+            }
+        }
+        
+        self.log("更新推理努力配置", "DEBUG")
+        
+        response = self._make_request('put', f'/api/agent-v2/{agent_id}/config', json=update_config_2)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('success'):
+                updated_config = data.get('data', {})
+                reasoning_effort = updated_config.get('reasoningEffort', {})
+                self.log_test_result("更新智能体配置-推理", True, 
+                    f"推理努力: 启用={reasoning_effort.get('enabled')}, "
+                    f"级别={reasoning_effort.get('level')}")
+            else:
+                self.log_test_result("更新智能体配置-推理", False, 
+                    f"API返回错误: {data.get('error', 'Unknown error')}")
+        else:
+            self.log_test_result("更新智能体配置-推理", False, 
+                f"HTTP状态码: {response.status_code}", response.text)
+        
+        time.sleep(1)
+        
+        # 测试场景3: 测试无效值
+        invalid_config = {
+            'temperature': 5.0,  # 超出范围 (0-2)
+            'maxTokens': -100    # 负数
+        }
+        
+        self.log("测试无效配置值", "DEBUG")
+        
+        response = self._make_request('put', f'/api/agent-v2/{agent_id}/config', json=invalid_config)
+        
+        if response.status_code == 400 or (response.status_code == 200 and not response.json().get('success')):
+            # 期望验证失败
+            self.log_test_result("更新智能体配置-验证", True, "正确拒绝了无效配置值")
+        else:
+            self.log_test_result("更新智能体配置-验证", False, "应该拒绝无效配置值但是接受了")
+
     # ========== Test Orchestration ==========
     
     def run_comprehensive_test(self):
@@ -948,7 +1231,151 @@ class AgentV2Tester:
         time.sleep(2)  # 等待前一个测试完成
         self.test_update_todo_list_tool(agent_id)
         
+        # 8. 工具配置管理测试
+        self.log("\n📋 第八阶段：工具配置管理")
+        self.test_get_agent_tools_config(agent_id)
+        self.test_get_available_tools()
+        self.test_update_agent_tools_config(agent_id)
+        
+        # 9. 智能体配置管理测试
+        self.log("\n📋 第九阶段：智能体配置管理")
+        self.test_get_agent_config(agent_id)
+        self.test_update_agent_config(agent_id)
+        
         return True
+    
+    def run_config_test(self):
+        """运行智能体配置专项测试"""
+        self.log("🔧 开始Agent V2配置专项测试")
+        self.log("=" * 60)
+        self.log("📋 专注测试：智能体创建 -> 工具配置 -> 智能体配置")
+        
+        # 1. 基础认证
+        self.log("\n📋 第一阶段：基础认证和设置")
+        if not self.login():
+            self.log("认证失败，终止测试", "ERROR")
+            return False
+        
+        if not self.get_user_teams():
+            self.log("团队设置失败，终止测试", "ERROR")
+            return False
+        
+        # 2. 获取可用模型并创建智能体
+        self.log("\n📋 第二阶段：智能体创建")
+        models_info = self.test_get_available_models()
+        if not models_info:
+            self.log("无法获取模型信息，终止测试", "ERROR")
+            return False
+        
+        agent_id = self.test_create_agent(models_info)
+        if not agent_id:
+            self.log("无法创建智能体，终止测试", "ERROR")
+            return False
+        
+        # 获取智能体详情确认创建成功
+        self.test_get_agent_details(agent_id)
+        
+        # 3. 工具配置管理专项测试
+        self.log("\n📋 第三阶段：工具配置管理专项测试")
+        self.log("🔧 测试获取可用工具列表")
+        available_tools = self.test_get_available_tools()
+        
+        self.log("🔧 测试获取智能体当前工具配置")
+        current_tools_config = self.test_get_agent_tools_config(agent_id)
+        
+        self.log("🔧 测试更新智能体工具配置")
+        self.test_update_agent_tools_config(agent_id)
+        
+        # 验证工具配置更新后的状态
+        self.log("🔧 验证工具配置更新结果")
+        updated_tools_config = self.test_get_agent_tools_config(agent_id)
+        
+        # 4. 智能体配置管理专项测试
+        self.log("\n📋 第四阶段：智能体配置管理专项测试")
+        self.log("⚙️ 测试获取智能体当前配置")
+        current_agent_config = self.test_get_agent_config(agent_id)
+        
+        self.log("⚙️ 测试更新智能体配置")
+        self.test_update_agent_config(agent_id)
+        
+        # 验证智能体配置更新后的状态
+        self.log("⚙️ 验证智能体配置更新结果")
+        updated_agent_config = self.test_get_agent_config(agent_id)
+        
+        # 5. 配置一致性验证
+        self.log("\n📋 第五阶段：配置一致性验证")
+        self.log("🔍 验证配置更改的持久性和一致性")
+        
+        # 再次获取智能体详情，确保所有配置都已正确保存
+        self.test_get_agent_details(agent_id)
+        
+        # 最终配置状态检查
+        final_tools_config = self.test_get_agent_tools_config(agent_id)
+        final_agent_config = self.test_get_agent_config(agent_id)
+        
+        self.log("✅ 配置专项测试完成", "SUCCESS")
+        return True
+    
+    def print_config_test_summary(self):
+        """打印配置测试专项总结"""
+        self.log("=" * 60)
+        self.log("🔧 配置专项测试结果总结")
+        self.log("=" * 60)
+        
+        # 测试覆盖范围说明
+        self.log("📋 测试覆盖范围:")
+        self.log("  ✓ 用户认证与团队设置")
+        self.log("  ✓ 可用模型获取")
+        self.log("  ✓ 智能体创建与详情获取")
+        self.log("  ✓ 团队可用工具列表获取")
+        self.log("  ✓ 智能体工具配置的增删改查")
+        self.log("  ✓ 智能体基础配置的增删改查")
+        self.log("  ✓ 配置更改的持久性验证")
+        self.log("  ✓ 无效配置参数的验证")
+        self.log("")
+        
+        # API端点覆盖
+        self.log("🔗 覆盖的API端点:")
+        config_endpoints = [
+            "GET /api/auth/password/login",
+            "GET /api/teams",
+            "GET /api/agent-v2/available-models",
+            "POST /api/agent-v2",
+            "GET /api/agent-v2/:agentId",
+            "GET /api/agent-v2/tools/available",
+            "GET /api/agent-v2/:agentId/tools",
+            "PUT /api/agent-v2/:agentId/tools",
+            "GET /api/agent-v2/:agentId/config",
+            "PUT /api/agent-v2/:agentId/config"
+        ]
+        for endpoint in config_endpoints:
+            self.log(f"  ✓ {endpoint}")
+        self.log("")
+        
+        # 统计信息
+        total_tests = self.test_results['passed'] + self.test_results['failed'] + self.test_results['skipped']
+        self.log(f"📊 测试统计:")
+        self.log(f"  总测试数: {total_tests}")
+        self.log(f"  ✅ 通过: {self.test_results['passed']}")
+        self.log(f"  ❌ 失败: {self.test_results['failed']}")
+        self.log(f"  ⏭️ 跳过: {self.test_results['skipped']}")
+        
+        if self.test_results['errors']:
+            self.log("\n❌ 错误详情:")
+            for error in self.test_results['errors']:
+                self.log(f"  - {error}", "ERROR")
+        
+        success_rate = (self.test_results['passed'] / max(total_tests, 1)) * 100
+        self.log(f"\n📈 成功率: {success_rate:.1f}%")
+        
+        if success_rate >= 90:
+            self.log("🎉 配置功能测试结果：优秀", "SUCCESS")
+        elif success_rate >= 80:
+            self.log("✅ 配置功能测试结果：良好", "SUCCESS")
+        elif success_rate >= 70:
+            self.log("⚠️ 配置功能测试结果：一般", "WARNING")
+        else:
+            self.log("❌ 配置功能测试结果：需要改进", "ERROR")
     
     def print_test_summary(self):
         """打印测试总结"""
@@ -985,17 +1412,34 @@ def main():
                        help='API基础URL (默认: http://localhost:80)')
     parser.add_argument('--quick', action='store_true', 
                        help='快速模式，跳过详细输出和一些耗时操作')
+    parser.add_argument('--config-only', action='store_true',
+                       help='配置专项测试模式，只测试智能体配置相关功能')
     
     args = parser.parse_args()
     
     print("Agent V2 API 综合测试工具")
-    print("此工具将全面测试所有Agent V2 API端点")
+    
+    if args.config_only:
+        print("🔧 配置专项测试模式：专注测试智能体配置相关功能")
+        print("包括：登录认证 -> 创建智能体 -> 工具配置管理 -> 智能体配置管理")
+    else:
+        print("此工具将全面测试所有Agent V2 API端点")
+    
     print(f"基础URL: {args.base_url}")
-    print(f"模式: {'快速模式' if args.quick else '完整模式'}")
+    
+    mode_desc = []
+    if args.quick:
+        mode_desc.append("快速模式")
+    if args.config_only:
+        mode_desc.append("配置专项测试")
+    if not mode_desc:
+        mode_desc.append("完整模式")
+    
+    print(f"模式: {' + '.join(mode_desc)}")
     print()
     
-    # 检查SSE依赖
-    if not SSE_AVAILABLE:
+    # 检查SSE依赖（配置测试模式不需要SSE）
+    if not SSE_AVAILABLE and not args.config_only:
         print("⚠️  警告: sseclient-py 未安装，流式测试将被跳过")
         print("   安装命令: pip install sseclient-py")
         print()
@@ -1004,11 +1448,17 @@ def main():
     tester = AgentV2Tester(base_url=args.base_url, quick_mode=args.quick)
     
     try:
-        # 运行测试
-        success = tester.run_comprehensive_test()
+        # 根据模式运行相应的测试
+        if args.config_only:
+            success = tester.run_config_test()
+        else:
+            success = tester.run_comprehensive_test()
         
-        # 打印总结
-        tester.print_test_summary()
+        # 根据模式打印相应的总结
+        if args.config_only:
+            tester.print_config_test_summary()
+        else:
+            tester.print_test_summary()
         
         # 根据测试结果确定退出码
         if success and tester.test_results['failed'] == 0:

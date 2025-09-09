@@ -1,7 +1,12 @@
 import { config } from '@/common/config';
 import { Injectable, Logger } from '@nestjs/common';
 import OpenAI from 'openai';
+import { SYSTEM_NAMESPACE } from '../../../../database/entities/tools/tools-server.entity';
+import { ToolsForwardService } from '../../../tools/tools.forward.service';
+import { ToolsRegistryService } from '../../../tools/tools.registry.service';
+import { AGENT_V2_BUILTIN_TOOLS, isAgentV2BuiltinTool } from '../../constants/tools.constants';
 import { AgentV2TaskStateManager } from '../agent-v2-task-state-manager.service';
+import { AgentV2Repository } from '../agent-v2.repository';
 import { AgentV2McpService } from '../mcp/agent-v2-mcp.service';
 import { AskApproval, HandleError, PushToolResult, ToolResult, ToolUse } from '../types/tool-types';
 
@@ -14,6 +19,9 @@ export class AgentV2ToolsService {
   constructor(
     private readonly mcpService: AgentV2McpService,
     private readonly taskStateManager: AgentV2TaskStateManager,
+    private readonly toolsForwardService: ToolsForwardService,
+    private readonly toolsRegistryService: ToolsRegistryService,
+    private readonly agentRepository: AgentV2Repository,
   ) {
     // Initialize OpenAI client for web search
     const agentConfig = config.agentv2?.openaiCompatible;
@@ -25,8 +33,8 @@ export class AgentV2ToolsService {
     }
   }
 
-  // Generic tool execution method
-  async executeTool(toolName: string, params: any, sessionId: string, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<ToolResult> {
+  // Generic tool execution method with agent permission check
+  async executeTool(toolName: string, params: any, sessionId: string, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult, agentId?: string): Promise<ToolResult> {
     const toolCall: ToolUse = {
       id: `tool_${Date.now()}`,
       name: toolName,
@@ -38,41 +46,24 @@ export class AgentV2ToolsService {
       output: '',
     };
 
-    // Route to appropriate tool handler
+    // Check if it's a builtin tool (always allowed) or external tool (requires permission)
     try {
-      switch (toolName) {
-        case 'use_mcp_tool':
-          await this.useMcpToolTool(toolCall, askApproval, handleError, pushToolResult);
-          result.output = 'MCP tool executed successfully';
-          break;
-        case 'access_mcp_resource':
-          await this.accessMcpResourceTool(toolCall, askApproval, handleError, pushToolResult);
-          result.output = 'MCP resource accessed successfully';
-          break;
-        case 'ask_followup_question':
-          await this.askFollowupQuestionTool(toolCall, askApproval, handleError, pushToolResult);
-          result.output = 'Followup question asked successfully';
-          break;
-        case 'attempt_completion':
-          await this.attemptCompletionTool(toolCall, askApproval, handleError, pushToolResult);
-          result.output = 'Task completion attempted successfully';
-          break;
-        case 'new_task':
-          await this.newTaskTool(toolCall, askApproval, handleError, pushToolResult);
-          result.output = 'New task created successfully';
-          break;
-        case 'update_todo_list':
-          const todoResult = await this.updateTodoListTool(toolCall, sessionId, askApproval, handleError, pushToolResult);
-          result.output = todoResult.output;
-          result.is_error = todoResult.is_error;
-          break;
-        case 'web_search':
-          const searchResult = await this.webSearchTool(toolCall, askApproval, handleError, pushToolResult);
-          result.output = searchResult.output;
-          result.is_error = searchResult.is_error;
-          break;
-        default:
-          throw new Error(`Unknown tool: ${toolName}`);
+      if (isAgentV2BuiltinTool(toolName)) {
+        // Execute builtin tools
+        await this.executeBuiltinTool(toolCall, toolName, sessionId, askApproval, handleError, pushToolResult);
+        result.output = `Builtin tool ${toolName} executed successfully`;
+      } else {
+        // Check permission for external tools
+        if (agentId && !(await this.checkExternalToolPermission(agentId, toolName))) {
+          result.is_error = true;
+          result.output = `工具 ${toolName} 未被授权使用`;
+          return result;
+        }
+
+        // Execute external tool
+        const externalResult = await this.executeExternalTool(toolName, params, sessionId);
+        result.output = externalResult.output;
+        result.is_error = externalResult.is_error;
       }
     } catch (error) {
       result.is_error = true;
@@ -81,6 +72,123 @@ export class AgentV2ToolsService {
     }
 
     return result;
+  }
+
+  // Execute builtin tools
+  private async executeBuiltinTool(toolCall: ToolUse, toolName: string, sessionId: string, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<void> {
+    switch (toolName) {
+      case 'use_mcp_tool':
+        await this.useMcpToolTool(toolCall, askApproval, handleError, pushToolResult);
+        break;
+      case 'access_mcp_resource':
+        await this.accessMcpResourceTool(toolCall, askApproval, handleError, pushToolResult);
+        break;
+      case 'ask_followup_question':
+        await this.askFollowupQuestionTool(toolCall, askApproval, handleError, pushToolResult);
+        break;
+      case 'attempt_completion':
+        await this.attemptCompletionTool(toolCall, askApproval, handleError, pushToolResult);
+        break;
+      case 'new_task':
+        await this.newTaskTool(toolCall, askApproval, handleError, pushToolResult);
+        break;
+      case 'update_todo_list':
+        await this.updateTodoListTool(toolCall, sessionId, askApproval, handleError, pushToolResult);
+        break;
+      case 'web_search':
+        await this.webSearchTool(toolCall, askApproval, handleError, pushToolResult);
+        break;
+      default:
+        throw new Error(`Unknown builtin tool: ${toolName}`);
+    }
+  }
+
+  // Check external tool permission
+  private async checkExternalToolPermission(agentId: string, toolName: string): Promise<boolean> {
+    try {
+      const agent = await this.agentRepository.findAgentById(agentId);
+      if (!agent?.availableTools?.enabled) {
+        return false; // 未启用外部工具
+      }
+
+      return agent.availableTools.toolNames.includes(toolName);
+    } catch (error) {
+      this.logger.error(`Error checking tool permission: ${error.message}`);
+      return false;
+    }
+  }
+
+  // Execute external tool
+  private async executeExternalTool(toolName: string, params: any, sessionId: string): Promise<ToolResult> {
+    try {
+      const result = await this.toolsForwardService.invoke(toolName, params, { sessionId });
+      return {
+        tool_call_id: `tool_${Date.now()}`,
+        output: typeof result === 'string' ? result : JSON.stringify(result),
+      };
+    } catch (error) {
+      this.logger.error(`External tool execution failed: ${error.message}`);
+      return {
+        tool_call_id: `tool_${Date.now()}`,
+        output: `执行外部工具 ${toolName} 失败: ${error.message}`,
+        is_error: true,
+      };
+    }
+  }
+
+  // Helper method to extract localized text
+  private extractLocalizedText(text: string | object | undefined, fallback: string): string {
+    if (typeof text === 'string') {
+      return text;
+    }
+
+    if (typeof text === 'object' && text !== null) {
+      const obj = text as any;
+      // 优先级：zh-CN > en-US > zh > en > 第一个可用值
+      return obj['zh-CN'] || obj['en-US'] || obj['zh'] || obj['en'] || (Object.values(obj)[0] as string) || fallback;
+    }
+
+    return fallback;
+  }
+
+  // Get available tools for agent
+  async getAvailableToolsForAgent(agentId: string): Promise<{
+    builtin: Array<{ name: string; displayName: string; description: string; builtin: boolean }>;
+    external: {
+      enabled: string[];
+      available: Array<{ name: string; displayName: string; description: string; namespace: string }>;
+    };
+  }> {
+    const agent = await this.agentRepository.findAgentById(agentId);
+
+    // Get all external tools from tools registry
+    const allExternalTools = await this.toolsRegistryService.listTools(agent.teamId);
+    const externalToolsInfo = allExternalTools
+      .filter(
+        (tool) => !isAgentV2BuiltinTool(tool.name) && tool.namespace !== SYSTEM_NAMESPACE, // 排除系统工具
+      )
+      .map((tool) => ({
+        name: tool.name,
+        displayName: this.extractLocalizedText(tool.displayName, tool.name),
+        description: this.extractLocalizedText(tool.description, ''),
+        namespace: tool.namespace,
+      }));
+
+    // Format builtin tools info
+    const builtinToolsInfo = AGENT_V2_BUILTIN_TOOLS.map((name) => ({
+      name,
+      displayName: name.replace(/_/g, ' ').toUpperCase(),
+      description: `内置${name}工具`,
+      builtin: true,
+    }));
+
+    return {
+      builtin: builtinToolsInfo,
+      external: {
+        enabled: agent?.availableTools?.enabled ? agent.availableTools.toolNames : [],
+        available: externalToolsInfo,
+      },
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -451,32 +559,6 @@ export class AgentV2ToolsService {
     }
 
     return suggestions;
-  }
-
-  private parseMarkdownTodoList(todos: string): Array<{ id: string; content: string; status: string }> {
-    const lines = todos
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean);
-    const todoItems: Array<{ id: string; content: string; status: string }> = [];
-
-    for (const line of lines) {
-      const match = line.match(/^\[\s*([ xX\-~])\s*\]\s+(.+)$/);
-      if (!match) continue;
-
-      let status = 'pending';
-      if (match[1] === 'x' || match[1] === 'X') status = 'completed';
-      else if (match[1] === '-' || match[1] === '~') status = 'in_progress';
-
-      const id = `todo_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-      todoItems.push({
-        id,
-        content: match[2],
-        status,
-      });
-    }
-
-    return todoItems;
   }
 
   async webSearchTool(block: ToolUse, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<ToolResult> {

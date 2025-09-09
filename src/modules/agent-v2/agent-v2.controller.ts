@@ -1,11 +1,17 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Param, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { config } from '../../common/config';
+import { SYSTEM_NAMESPACE } from '../../database/entities/tools/tools-server.entity';
+import { ToolsRegistryService } from '../tools/tools.registry.service';
+import { AGENT_V2_BUILTIN_TOOLS, isAgentV2BuiltinTool } from './constants/tools.constants';
+import { UpdateAgentConfigDto } from './dto/agent-config.dto';
+import { UpdateAgentToolsDto } from './dto/agent-tools.dto';
 import { AgentV2Repository } from './services/agent-v2.repository';
 import { AgentV2Service } from './services/agent-v2.service';
+import { AgentV2ToolsService } from './services/tools/agent-v2-tools.service';
 import { AgentV2ConfigValidator, AgentV2CreationConfig } from './types/agent-creation-config.types';
 
 export class CreateAgentV2Dto {
@@ -39,6 +45,8 @@ export class AgentV2Controller {
   constructor(
     private readonly agentService: AgentV2Service,
     private readonly agentRepository: AgentV2Repository,
+    private readonly agentToolsService: AgentV2ToolsService,
+    private readonly toolsRegistryService: ToolsRegistryService,
   ) {}
 
   @Post()
@@ -746,6 +754,166 @@ export class AgentV2Controller {
           error: 'Failed to submit followup answer',
         };
       }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // === 工具配置相关 API ===
+
+  @Get(':agentId/tools')
+  @ApiOperation({ summary: '获取智能体工具配置' })
+  @ApiResponse({ status: 200, description: '获取工具配置成功' })
+  async getAgentTools(@Request() req: IRequest, @Param('agentId') agentId: string) {
+    try {
+      const { teamId } = req;
+      const agent = await this.agentRepository.findAgentById(agentId);
+
+      if (!agent || agent.teamId !== teamId) {
+        return {
+          success: false,
+          error: 'Agent not found or access denied',
+        };
+      }
+
+      const toolsInfo = await this.agentToolsService.getAvailableToolsForAgent(agentId);
+
+      return {
+        success: true,
+        data: toolsInfo,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @Put(':agentId/tools')
+  @ApiOperation({ summary: '更新智能体工具配置' })
+  @ApiResponse({ status: 200, description: '更新工具配置成功' })
+  async updateAgentTools(@Request() req: IRequest, @Param('agentId') agentId: string, @Body() updateDto: UpdateAgentToolsDto) {
+    try {
+      const { teamId } = req;
+      const result = await this.agentService.updateAgentTools(agentId, teamId, updateDto);
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+
+      // 返回更新后的工具配置信息
+      const toolsInfo = await this.agentToolsService.getAvailableToolsForAgent(agentId);
+
+      return {
+        success: true,
+        data: toolsInfo,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @Get('tools/available')
+  @ApiOperation({ summary: '获取团队可用的所有工具列表' })
+  @ApiResponse({ status: 200, description: '获取可用工具成功' })
+  async getAvailableTools(@Request() req: IRequest) {
+    try {
+      const { teamId } = req;
+      const tools = await this.toolsRegistryService.listTools(teamId);
+
+      // 过滤掉内置工具和系统工具
+      const externalTools = tools
+        .filter((tool) => !isAgentV2BuiltinTool(tool.name) && tool.namespace !== SYSTEM_NAMESPACE)
+        .map((tool) => ({
+          name: tool.name,
+          displayName: tool.displayName,
+          description: tool.description,
+          namespace: tool.namespace,
+          categories: tool.categories,
+          icon: tool.icon,
+        }));
+
+      // 内置工具信息
+      const builtinTools = AGENT_V2_BUILTIN_TOOLS.map((name) => ({
+        name,
+        displayName: name.replace(/_/g, ' ').toUpperCase(),
+        description: `内置${name}工具`,
+        builtin: true,
+      }));
+
+      return {
+        success: true,
+        data: {
+          builtin: builtinTools,
+          external: externalTools,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // === 智能体配置管理 API ===
+
+  @Get(':agentId/config')
+  @ApiOperation({ summary: '获取智能体配置' })
+  @ApiResponse({ status: 200, description: '获取配置成功' })
+  async getAgentConfig(@Request() req: IRequest, @Param('agentId') agentId: string) {
+    try {
+      const { teamId } = req;
+      const agent = await this.agentRepository.findAgentById(agentId);
+
+      if (!agent || agent.teamId !== teamId) {
+        return {
+          success: false,
+          error: 'Agent not found or access denied',
+        };
+      }
+
+      return {
+        success: true,
+        data: agent.config || {},
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @Put(':agentId/config')
+  @ApiOperation({ summary: '更新智能体配置' })
+  @ApiResponse({ status: 200, description: '更新配置成功' })
+  async updateAgentConfig(@Request() req: IRequest, @Param('agentId') agentId: string, @Body() updateDto: UpdateAgentConfigDto) {
+    try {
+      const { teamId } = req;
+      const result = await this.agentService.updateAgentConfig(agentId, teamId, updateDto);
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
     } catch (error) {
       return {
         success: false,

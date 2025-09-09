@@ -1,4 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ToolsRegistryService } from '../../tools/tools.registry.service';
+import { UpdateAgentConfigDto } from '../dto/agent-config.dto';
+import { UpdateAgentToolsDto } from '../dto/agent-tools.dto';
 import { AgentV2LlmService } from './agent-v2-llm.service';
 import { AgentV2PersistentExecutionContext } from './agent-v2-persistent-execution-context.service';
 import { AgentV2PersistentTaskManager } from './agent-v2-persistent-task-manager.service';
@@ -23,6 +26,7 @@ export class AgentV2Service {
     private readonly agentToolsService: AgentV2ToolsService,
     private readonly taskManager: AgentV2PersistentTaskManager,
     private readonly taskStateManager: AgentV2TaskStateManager,
+    private readonly toolsRegistryService: ToolsRegistryService,
   ) {}
 
   public async startNewSession(
@@ -345,5 +349,139 @@ export class AgentV2Service {
   // Check if session is waiting for followup answer
   public isWaitingForFollowup(sessionId: string): boolean {
     return this.followupQuestionResolvers.has(sessionId);
+  }
+
+  // === 工具管理业务逻辑 ===
+
+  /**
+   * 更新智能体工具配置
+   */
+  public async updateAgentTools(agentId: string, teamId: string, config: UpdateAgentToolsDto): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const agent = await this.repository.findAgentById(agentId);
+
+      if (!agent || agent.teamId !== teamId) {
+        return { success: false, error: 'Agent not found or access denied' };
+      }
+
+      // 验证工具名称有效性
+      if (config.enabled && config.toolNames.length > 0) {
+        const availableTools = await this.toolsRegistryService.listTools(teamId);
+        const validToolNames = availableTools.map((t) => t.name);
+        const invalidTools = config.toolNames.filter((name) => !validToolNames.includes(name));
+
+        if (invalidTools.length > 0) {
+          return { success: false, error: `Invalid tools: ${invalidTools.join(', ')}` };
+        }
+      }
+
+      // 更新智能体工具配置
+      const updatedAgent = await this.repository.updateAgent(agentId, {
+        availableTools: {
+          enabled: config.enabled,
+          toolNames: config.enabled ? config.toolNames : [],
+        },
+      });
+
+      this.logger.log(`Updated agent ${agentId} tools config: enabled=${config.enabled}, tools=${config.toolNames.length}`);
+
+      return { success: true, data: updatedAgent };
+    } catch (error) {
+      this.logger.error(`Error updating agent tools: ${error.message}`, error.stack);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * 获取智能体工具配置
+   */
+  public async getAgentToolsConfig(agentId: string) {
+    return this.agentToolsService.getAvailableToolsForAgent(agentId);
+  }
+
+  // === 智能体配置管理 ===
+
+  /**
+   * 更新智能体配置
+   */
+  public async updateAgentConfig(agentId: string, teamId: string, configUpdates: UpdateAgentConfigDto): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const agent = await this.repository.findAgentById(agentId);
+
+      if (!agent || agent.teamId !== teamId) {
+        return { success: false, error: 'Agent not found or access denied' };
+      }
+
+      // 获取当前配置
+      const currentConfig = agent.config || {};
+
+      // 构建更新后的配置
+      const updatedConfig = { ...currentConfig };
+
+      if (configUpdates.model !== undefined) {
+        updatedConfig.model = configUpdates.model;
+      }
+
+      if (configUpdates.temperature !== undefined) {
+        updatedConfig.temperature = configUpdates.temperature;
+      }
+
+      if (configUpdates.maxTokens !== undefined) {
+        updatedConfig.maxTokens = configUpdates.maxTokens;
+      }
+
+      if (configUpdates.timeout !== undefined) {
+        updatedConfig.timeout = configUpdates.timeout;
+      }
+
+      if (configUpdates.reasoningEffort !== undefined) {
+        updatedConfig.reasoningEffort = {
+          ...currentConfig.reasoningEffort,
+          ...configUpdates.reasoningEffort,
+        };
+      }
+
+      // 验证配置有效性
+      // 验证temperature范围 (0-2)
+      if (configUpdates.temperature !== undefined) {
+        if (configUpdates.temperature < 0 || configUpdates.temperature > 2) {
+          return { success: false, error: 'Temperature must be between 0 and 2' };
+        }
+      }
+
+      // 验证maxTokens范围 (1-100000)
+      if (configUpdates.maxTokens !== undefined) {
+        if (configUpdates.maxTokens < 1 || configUpdates.maxTokens > 100000) {
+          return { success: false, error: 'MaxTokens must be between 1 and 100000' };
+        }
+      }
+
+      // 验证timeout范围 (1000-300000ms)
+      if (configUpdates.timeout !== undefined) {
+        if (configUpdates.timeout < 1000 || configUpdates.timeout > 300000) {
+          return { success: false, error: 'Timeout must be between 1000 and 300000 milliseconds' };
+        }
+      }
+
+      // 验证reasoningEffort级别
+      if (configUpdates.reasoningEffort?.level !== undefined) {
+        const validLevels = ['low', 'medium', 'high'];
+        if (!validLevels.includes(configUpdates.reasoningEffort.level)) {
+          return { success: false, error: 'ReasoningEffort level must be one of: low, medium, high' };
+        }
+      }
+
+      // 更新智能体配置
+      await this.repository.updateAgent(agentId, {
+        config: updatedConfig,
+      });
+
+      this.logger.log(`Updated agent ${agentId} config: model=${updatedConfig.model}, temperature=${updatedConfig.temperature}`);
+
+      return { success: true, data: updatedConfig };
+    } catch (error) {
+      this.logger.error(`Error updating agent config: ${error.message}`, error.stack);
+      return { success: false, error: error.message };
+    }
   }
 }
