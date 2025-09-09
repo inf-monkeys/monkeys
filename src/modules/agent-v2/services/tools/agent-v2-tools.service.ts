@@ -111,7 +111,12 @@ export class AgentV2ToolsService {
         return false; // 未启用外部工具
       }
 
-      return agent.availableTools.toolNames.includes(toolName);
+      // Convert tool name back to original format (double underscore -> colon)
+      // This is needed because LLM service converts ":" to "__" for function names
+      const originalToolName = toolName.replaceAll('__', ':');
+
+      // Check both formats for backward compatibility
+      return agent.availableTools.toolNames.includes(toolName) || agent.availableTools.toolNames.includes(originalToolName);
     } catch (error) {
       this.logger.error(`Error checking tool permission: ${error.message}`);
       return false;
@@ -121,7 +126,10 @@ export class AgentV2ToolsService {
   // Execute external tool
   private async executeExternalTool(toolName: string, params: any, sessionId: string): Promise<ToolResult> {
     try {
-      const result = await this.toolsForwardService.invoke(toolName, params, { sessionId });
+      // Convert tool name back to original format for execution
+      // This is needed because LLM service converts ":" to "__" for function names
+      const originalToolName = toolName.replaceAll('__', ':');
+      const result = await this.toolsForwardService.invoke(originalToolName, params, { sessionId });
       return {
         tool_call_id: `tool_${Date.now()}`,
         output: typeof result === 'string' ? result : JSON.stringify(result),
