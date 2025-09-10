@@ -34,7 +34,17 @@ export class AgentV2ToolsService {
   }
 
   // Generic tool execution method with agent permission check
-  async executeTool(toolName: string, params: any, sessionId: string, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult, agentId?: string): Promise<ToolResult> {
+  async executeTool(
+    toolName: string,
+    params: any,
+    sessionId: string,
+    askApproval: AskApproval,
+    handleError: HandleError,
+    pushToolResult: PushToolResult,
+    agentId?: string,
+    teamId?: string,
+    userId?: string,
+  ): Promise<ToolResult> {
     const toolCall: ToolUse = {
       id: `tool_${Date.now()}`,
       name: toolName,
@@ -61,7 +71,7 @@ export class AgentV2ToolsService {
         }
 
         // Execute external tool
-        const externalResult = await this.executeExternalTool(toolName, params, sessionId);
+        const externalResult = await this.executeExternalTool(toolName, params, sessionId, teamId, userId);
         result.output = externalResult.output;
         result.is_error = externalResult.is_error;
       }
@@ -124,12 +134,13 @@ export class AgentV2ToolsService {
   }
 
   // Execute external tool
-  private async executeExternalTool(toolName: string, params: any, sessionId: string): Promise<ToolResult> {
+  private async executeExternalTool(toolName: string, params: any, sessionId: string, teamId?: string, userId?: string): Promise<ToolResult> {
     try {
       // Convert tool name back to original format for execution
       // This is needed because LLM service converts ":" to "__" for function names
       const originalToolName = toolName.replaceAll('__', ':');
-      const result = await this.toolsForwardService.invoke(originalToolName, params, { sessionId });
+
+      const result = await this.toolsForwardService.invoke(originalToolName, params, { sessionId, teamId, userId });
       return {
         tool_call_id: `tool_${Date.now()}`,
         output: typeof result === 'string' ? result : JSON.stringify(result),

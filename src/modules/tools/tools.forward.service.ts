@@ -106,7 +106,7 @@ export class ToolsForwardService {
     return data;
   }
 
-  public async invoke<T>(toolName: string, reqData: { [x: string]: any }, context?: { sessionId?: string; maxSteps?: number }) {
+  public async invoke<T>(toolName: string, reqData: { [x: string]: any }, context?: { sessionId?: string; maxSteps?: number; teamId?: string; userId?: string }) {
     const tool = await this.toolsRepository.getToolByName(toolName);
     const namespace = toolName.split(':')[0];
 
@@ -180,6 +180,14 @@ export class ToolsForwardService {
         'x-monkeys-appid': config.server.appId,
         'content-type': 'application/json',
       };
+
+      // Add team and user context headers if provided
+      if (context?.teamId) {
+        headers['x-monkeys-teamid'] = context.teamId;
+      }
+      if (context?.userId) {
+        headers['x-monkeys-userid'] = context.userId;
+      }
       switch (authType) {
         case AuthType.none:
           break;

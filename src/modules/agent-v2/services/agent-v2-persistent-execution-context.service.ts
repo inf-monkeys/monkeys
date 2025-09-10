@@ -403,7 +403,17 @@ Please use one of these tools in your next response.`;
         if (tool.name === 'ask_followup_question' && this.onFollowupQuestion) {
           result = await this.executeAskFollowupQuestionTool(tool);
         } else {
-          result = await this.agentToolsService.executeTool(tool.name, tool.params, this.session.id, this.askApproval, this.handleError, this.pushToolResult, this.agent.id);
+          result = await this.agentToolsService.executeTool(
+            tool.name,
+            tool.params,
+            this.session.id,
+            this.askApproval,
+            this.handleError,
+            this.pushToolResult,
+            this.agent.id,
+            this.agent.teamId,
+            this.session.userId,
+          );
         }
 
         if (result.is_error) {
