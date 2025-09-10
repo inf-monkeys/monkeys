@@ -14,6 +14,8 @@ import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
+import { VinesPanelSidebar } from './sidebar';
+
 interface IWorkbenchPanelLayoutProps {
   layoutId: string;
 }
@@ -29,6 +31,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   const isStoreRoute = layoutId === 'vines-outlet-main-$teamId-store';
   const isWorkspaceRoute = layoutId.startsWith('vines-outlet-main-$teamId-') && !isStoreRoute;
   const isDesignRoute = layoutId === 'vines-outlet-main-$teamId-design-$designProjectId-$designBoardId';
+
   const pathName = useRouterState({
     select: (state) => {
       return state.location.pathname;
@@ -62,7 +65,11 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
           isWorkspaceRoute && !isSettingRoute && `w-full rounded-lg border border-input p-global`,
           isSettingRoute && `w-full rounded-lg border border-input px-global py-1`,
         )}
-        // sidebar={isWorkspaceRoute && !isDesignRoute && <VinesPanelSidebar />}
+        sidebar={
+          isWorkspaceRoute &&
+          !isDesignRoute &&
+          layoutId != 'vines-outlet-main-$teamId-nav-$navId' && <VinesPanelSidebar />
+        }
       >
         <Outlet />
       </VinesSpace>

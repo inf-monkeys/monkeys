@@ -95,7 +95,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
           <VinesLogo description="" height={'2rem'} className={cn('ml-2', hasToken && 'cursor-pointer')} />
         </Link>
         {navPosition === 'right' && <div className="flex-1" />}
-        <div className="z-20 flex h-8 items-center gap-6">
+        <div className="relative z-20 flex h-8 items-center gap-6">
           {children && navPosition === 'center' ? (
             <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 items-center justify-center">
               {children}
