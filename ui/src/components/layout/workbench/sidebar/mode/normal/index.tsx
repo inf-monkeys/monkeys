@@ -86,13 +86,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const navigate = useNavigate();
 
-  const { data: oem } = useSystemConfig();
+  const { data: oem, isLoading: isOemLoading } = useSystemConfig();
 
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
 
   const workbenchSidebarApart = get(oem, 'theme.workbenchSidebarApart', false) as boolean;
 
   const workbenchSidebarFormViewEmbed = get(oem, 'theme.workbenchSidebarFormViewEmbed', false) as boolean;
+
+  const newTabOpenBoard = get(oem, 'theme.designProjects.newTabOpenBoard', true) as boolean;
 
   const density = oem?.theme.density ?? 'default';
 
@@ -119,11 +121,13 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   // const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const originalPages: IPinPage[] = useMemo(() => {
     const pages = [...(data?.pages ?? [])];
-    if (!pages.some((page) => page.id === 'global-design-board')) {
+    console.log();
+
+    if (!pages.some((page) => page.id === 'global-design-board') && !isOemLoading && newTabOpenBoard) {
       pages.unshift(GLOBAL_DESIGN_BOARD_PAGE);
     }
     return pages;
-  }, [data?.pages]);
+  }, [data?.pages, isOemLoading, newTabOpenBoard]);
   const originalGroups = useMemo(() => {
     return [
       {
