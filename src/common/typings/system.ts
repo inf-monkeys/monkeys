@@ -1,6 +1,7 @@
 import {
   AuthMethod,
   CustomizationDensity,
+  CustomizationDesignProjects,
   CustomizationForm,
   CustomizationFormView,
   CustomizationHeadbar,
@@ -72,6 +73,7 @@ export interface ISystemConfig {
     };
     historyResult: CustomizationHistoryResult;
     uploader: CustomizationUploader;
+    designProjects: CustomizationDesignProjects;
   };
   auth: {
     enabled: AuthMethod[];

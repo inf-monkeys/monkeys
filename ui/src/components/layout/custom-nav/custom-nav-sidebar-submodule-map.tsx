@@ -6,6 +6,8 @@ import { MediaData } from '@/pages/$teamId/media-data/index.lazy';
 import { TextModels } from '@/pages/$teamId/text-models/index.lazy';
 import { Tools } from '@/pages/$teamId/tools/index.lazy';
 
+import { NewDesignProject } from '../design-project/new';
+
 export type INavListSubModuleMap = Record<string, React.FC | Record<string, React.FC>>;
 
 export const CUSTOM_NAV_SUB_MODULE_MAP: INavListSubModuleMap = {
@@ -22,4 +24,6 @@ export const CUSTOM_NAV_SUB_MODULE_MAP: INavListSubModuleMap = {
   'concept-design:design-evaluations': {
     'ai-evaluation': EvaluationModules,
   },
+  designs: NewDesignProject,
+  'artist:asset-library': MediaData,
 };

@@ -1,5 +1,6 @@
 import { BotIcon } from 'lucide-react';
 
+import { DesignProjectList } from '../main/sidebar/design-project-list';
 import { INavListSidebar } from './common-sidebar';
 
 export const CUSTOM_NAV_LIST_MAP: Record<string, INavListSidebar> = {
@@ -46,4 +47,6 @@ export const CUSTOM_NAV_LIST_MAP: Record<string, INavListSidebar> = {
       to: '/$teamId/nav/concept-design:design-evaluations/ai-evaluation',
     },
   ],
+  designs: DesignProjectList,
+  'artist:asset-library': null,
 };

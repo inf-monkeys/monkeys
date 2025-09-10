@@ -29,6 +29,7 @@ export type VinesSpaceSidebarModules = '*' | VinesSpaceSidebarModule[];
 export type VinesSpaceHeadBarIdType = 'workbench' | 'app-store' | 'workspace';
 export type VinesSpaceHeadbarModule = {
   id: VinesSpaceHeadBarIdType | string;
+  extraInfo?: boolean;
   displayName?: string | I18nValue;
   visible?: boolean;
   disabled?: boolean;
@@ -98,6 +99,11 @@ export type CustomizationFormView = {
   };
 };
 
+export type CustomizationDesignProjects = {
+  oneOnOne: boolean;
+  newTabOpenBoard: boolean;
+};
+
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
 
 export interface ISystemConfig {
@@ -160,6 +166,7 @@ export interface ISystemConfig {
     };
     historyResult: CustomizationHistoryResult;
     uploader: CustomizationUploader;
+    designProjects: CustomizationDesignProjects;
   };
   auth: {
     enabled: AuthMethod[];

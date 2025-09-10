@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-router';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
 import { WorkbenchPanelLayout } from 'src/components/layout-wrapper/workbench/panel';
@@ -34,6 +35,8 @@ import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {
   const { t } = useTranslation();
+
+  const { data: oem } = useSystemConfig();
 
   const {
     routeIds,
@@ -109,8 +112,6 @@ const RootComponent: React.FC = () => {
     return cleanup;
   }, []);
 
-  const { data: oem } = useSystemConfig();
-
   useEffect(() => {
     if (oem?.theme.extraLanguageURL) {
       const extraLanguage = oem.theme.extraLanguageURL[i18n.language];
@@ -125,6 +126,8 @@ const RootComponent: React.FC = () => {
       }
     }
   }, [oem, i18n.language]);
+
+  const designNewTabOpenBoard = get(oem, 'theme.designProjects.newTabOpenBoard', true);
 
   return (
     <>
@@ -146,9 +149,11 @@ const RootComponent: React.FC = () => {
                   {isUseOutside && <Outlet />}
                   {isUseWorkSpace && <WorkspaceLayout />}
                   {isUseAgent && <AgentLayout />}
-                  {isUseDesign && <DesignLayout />}
+                  {isUseDesign && designNewTabOpenBoard && <DesignLayout />}
                   {isUseEvaluation && <EvaluationLayout />}
-                  {isUsePanel && mode !== 'mini' && <WorkbenchPanelLayout layoutId={layoutId} />}
+                  {(isUsePanel || (isUseDesign && !designNewTabOpenBoard)) && mode !== 'mini' && (
+                    <WorkbenchPanelLayout layoutId={layoutId} />
+                  )}
                   {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
                   {(isUseDefault || isUseCustomNav) && <MainWrapper layoutId={layoutId} />}
                 </motion.div>

@@ -21,7 +21,7 @@ import { cn } from '@/utils';
 
 export const WorkspaceLayout: React.FC = () => {
   // 获取路由信息，判断是否是图片详情页
-  const { isImageDetailPage } = useVinesRoute();
+  const { isImageDetailPage, isUseDesign } = useVinesRoute();
   // const { t } = useTranslation();
   // const { teamId } = useVinesTeam();
 
@@ -31,6 +31,8 @@ export const WorkspaceLayout: React.FC = () => {
   //     return state.location.pathname;
   //   },
   // });
+
+  const showNav = isImageDetailPage;
 
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
@@ -45,8 +47,7 @@ export const WorkspaceLayout: React.FC = () => {
 
   return (
     <ViewGuard className={cn('flex flex-col gap-global', backgroundClass)}>
-      {isImageDetailPage ? (
-        // 图片详情页使用与工作台、应用市场相同的header
+      {showNav ? (
         <SpaceHeader tail={showTeamSelector ? <TeamSelector /> : undefined} disableSeparator>
           <SpaceHeaderTabs />
         </SpaceHeader>

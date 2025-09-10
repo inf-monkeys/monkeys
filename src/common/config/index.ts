@@ -40,6 +40,7 @@ export type VinesSpaceSidebarModules = '*' | VinesSpaceSidebarModule[];
 export type VinesSpaceHeadBarIdType = 'workbench' | 'app-store' | 'workspace';
 export type VinesSpaceHeadbarModule = {
   id: VinesSpaceHeadBarIdType | string;
+  extraInfo?: boolean;
   displayName?: string | I18nValue;
   visible?: boolean;
   disabled?: boolean;
@@ -101,6 +102,11 @@ export type CustomizationFormView = {
   tabular: {
     theme: 'tentiary' | 'primary';
   };
+};
+
+export type CustomizationDesignProjects = {
+  oneOnOne: boolean;
+  newTabOpenBoard: boolean;
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
@@ -174,6 +180,7 @@ export interface ServerConfig {
     historyResult: CustomizationHistoryResult;
     form: CustomizationForm;
     uploader: CustomizationUploader;
+    designProjects: CustomizationDesignProjects;
   };
 }
 
@@ -540,6 +547,10 @@ export const config: Config = {
       uploader: {
         orientation: readConfig('server.customization.uploader.orientation', 'horizontal'),
         pasteButton: readConfig('server.customization.uploader.pasteButton', true),
+      },
+      designProjects: {
+        oneOnOne: readConfig('server.customization.designProjects.oneOnOne', false),
+        newTabOpenBoard: readConfig('server.customization.designProjects.newTabOpenBoard', true),
       },
     },
   },

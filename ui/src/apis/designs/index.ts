@@ -3,7 +3,7 @@ import useSWR from 'swr';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { ICreateDesignProject } from '@/schema/workspace/create-design-project.ts';
-import { ICreateDesignAssociation } from '@/schema/workspace/design-association';
+import { IDesignAssociationForEditor } from '@/schema/workspace/design-association';
 
 import { IDesignAssociation, IDesignBoardItem, IDesignBoardMetadata, IDesignProject } from './typings';
 
@@ -48,7 +48,7 @@ export const updateDesignBoardMetadata = (designBoardId: string, metadata: Parti
     simple: true,
   })(`/api/design/metadata/${designBoardId}`, metadata);
 
-export const createDesignAssociation = (createDesignAssociationDto: ICreateDesignAssociation) =>
+export const createDesignAssociation = (createDesignAssociationDto: IDesignAssociationForEditor) =>
   vinesFetcher<IDesignAssociation>({
     method: 'POST',
     simple: true,

@@ -36,7 +36,7 @@ const TabsList = React.forwardRef<
     ghost:
       'bg-transparent data-[orientation=horizontal]:h-10 data-[orientation=vertical]:flex-col data-[orientation=vertical]:gap-1 p-1 ',
     rounded:
-      'bg-transparent data-[orientation=horizontal]:h-12 data-[orientation=vertical]:flex-col data-[orientation=vertical]:gap-1',
+      'backdrop-blur-lg data-[orientation=horizontal]:h-12 data-[orientation=vertical]:flex-col data-[orientation=vertical]:gap-1 p-[1px] transition-all',
   };
 
   return (
@@ -63,7 +63,8 @@ const TabsTrigger = React.forwardRef<
   const variantStyles = {
     default: 'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
     ghost: 'data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:font-semibold',
-    rounded: 'data-[state=active]:bg-vines-500 data-[state=active]:text-white rounded-3xl px-4 h-full glassy-border',
+    rounded:
+      'data-[state=active]:bg-vines-500 data-[state=active]:text-white rounded-3xl px-4 h-full glassy-border text-vines-500',
   };
 
   return (
@@ -75,14 +76,6 @@ const TabsTrigger = React.forwardRef<
         variantStyles[variant],
         className,
       )}
-      style={
-        variant === 'rounded'
-          ? {
-              border: '1.5px solid rgba(255, 255, 255, 0.5)',
-              boxShadow: 'inset 0px 0px 0px 0px rgba(0, 0, 0, 0.1)',
-            }
-          : {}
-      }
       {...props}
     />
   );

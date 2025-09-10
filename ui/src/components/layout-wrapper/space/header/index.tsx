@@ -67,7 +67,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
       <header
         ref={ref}
         className={cn(
-          `flex w-full items-center justify-between gap-4 rounded-lg bg-slate-1 p-global`,
+          `flex h-[72px] w-full items-center justify-between gap-4 rounded-lg bg-slate-1 p-global`,
           theme === 'fixed' &&
             'shadow-b-lg fixed left-0 top-0 border-b-[1px] border-t-[3px] border-t-[rgb(var(--vines-500))]',
           !['fixed', 'glassy'].includes(theme) && `border border-input`,
@@ -96,10 +96,14 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
         </Link>
         {navPosition === 'right' && <div className="flex-1" />}
         <div className="z-20 flex h-8 items-center gap-6">
-          {children && (
+          {children && navPosition === 'center' ? (
+            <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+              {children}
+            </div>
+          ) : (
             <>
               {!disableSeparator && <Separator orientation="vertical" className="h-1/2" />}
-              <div className={cn(navPosition === 'center' && 'flex-1')}>{children}</div>
+              <div>{children}</div>
             </>
           )}
         </div>

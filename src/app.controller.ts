@@ -156,6 +156,7 @@ export class AppController {
         workflow: config.server.customization.workflow,
         historyResult: config.server.customization.historyResult,
         uploader: config.server.customization.uploader,
+        designProjects: config.server.customization.designProjects,
       },
       auth: {
         enabled: config.auth.enabled,

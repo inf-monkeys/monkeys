@@ -131,72 +131,7 @@ export const Designs: React.FC = () => {
                   </DropdownMenuShortcut>
                   {t('ugc-page.design-project.ugc-view.operate-area.options.copy-link')}
                 </DropdownMenuItem>
-                {/*<DropdownMenuSeparator />*/}
-                {/*<DropdownMenuItem onSelect={() => void handleCloneWorkflow(item.workflowId)}>*/}
-                {/*  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">*/}
-                {/*    <Copy size={15} />*/}
-                {/*  </DropdownMenuShortcut>*/}
-                {/*  {t('ugc-page.design-project.ugc-view.operate-area.options.create-a-copy')}*/}
-                {/*</DropdownMenuItem>*/}
-                {/*<DropdownMenuSub>*/}
-                {/*  <DropdownMenuSubTrigger>*/}
-                {/*    <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">*/}
-                {/*      <Download size={15} />*/}
-                {/*    </DropdownMenuShortcut>*/}
-                {/*    {t('settings.account.team.import-export.export.button')}*/}
-                {/*  </DropdownMenuSubTrigger>*/}
-                {/*  <DropdownMenuPortal>*/}
-                {/*    <DropdownMenuSubContent>*/}
-                {/*      <DropdownMenuItem*/}
-                {/*        onSelect={() => {*/}
-                {/*          setExportAssetContext({*/}
-                {/*            workflowId: item.workflowId,*/}
-                {/*            displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),*/}
-                {/*            version: item.version,*/}
-                {/*          });*/}
-                {/*          setExportDialogVisible(true);*/}
-                {/*        }}*/}
-                {/*      >*/}
-                {/*        <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">*/}
-                {/*          <FileUp size={15} />*/}
-                {/*        </DropdownMenuShortcut>*/}
-                {/*        {t('ugc-page.design-project.ugc-view.operate-area.options.export-current-version')}*/}
-                {/*      </DropdownMenuItem>*/}
-                {/*      <DropdownMenuItem*/}
-                {/*        onSelect={() => {*/}
-                {/*          setExportAssetContext({*/}
-                {/*            workflowId: item.workflowId,*/}
-                {/*            displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),*/}
-                {/*          });*/}
-                {/*          setExportDialogVisible(true);*/}
-                {/*        }}*/}
-                {/*      >*/}
-                {/*        <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">*/}
-                {/*          <FolderUp size={15} />*/}
-                {/*        </DropdownMenuShortcut>*/}
-                {/*        {t('ugc-page.design-project.ugc-view.operate-area.options.export-all-versions')}*/}
-                {/*      </DropdownMenuItem>*/}
-                {/*    </DropdownMenuSubContent>*/}
-                {/*  </DropdownMenuPortal>*/}
-                {/*</DropdownMenuSub>*/}
-                {/*<DropdownMenuSeparator />*/}
-                {/*<DropdownMenuItem*/}
-                {/*  onSelect={() => {*/}
-                {/*    setPublishToMarketContext({*/}
-                {/*      id: item.workflowId,*/}
-                {/*      displayName: getI18nContent(item.displayName),*/}
-                {/*      description: getI18nContent(item.description),*/}
-                {/*      iconUrl: item.iconUrl,*/}
-                {/*    });*/}
-                {/*    setPublishToMarketVisible(true);*/}
-                {/*  }}*/}
-                {/*>*/}
-                {/*  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">*/}
-                {/*    <Share size={15} />*/}
-                {/*  </DropdownMenuShortcut>*/}
-                {/*  {t('components.layout.ugc.publish-dialog.title')}*/}
-                {/*</DropdownMenuItem>*/}
-                {/*<DropdownMenuSeparator />*/}
+
                 <DropdownMenuItem
                   className="text-red-10"
                   onSelect={() => {
@@ -216,35 +151,6 @@ export const Designs: React.FC = () => {
         onItemClick={(item) => open(`/${item.teamId}/design/${item.id}`, '_blank')}
         subtitle={
           <>
-            {/*<DropdownMenu>*/}
-            {/*  <DropdownMenuTrigger asChild>*/}
-            {/*    <Button variant="outline" size="small" icon={<Import />}>*/}
-            {/*      {t('common.utils.import')}*/}
-            {/*    </Button>*/}
-            {/*  </DropdownMenuTrigger>*/}
-            {/*  <DropdownMenuContent*/}
-            {/*    onClick={(e) => {*/}
-            {/*      e.stopPropagation();*/}
-            {/*      e.preventDefault();*/}
-            {/*    }}*/}
-            {/*  >*/}
-            {/*    <DropdownMenuGroup>*/}
-            {/*      <DropdownMenuItem disabled>*/}
-            {/*        {t('ugc-page.design-project.ugc-view.subtitle.import.options.local-import')}*/}
-            {/*      </DropdownMenuItem>*/}
-            {/*      <DropdownMenuItem*/}
-            {/*        onSelect={() => {*/}
-            {/*          void navigate({*/}
-            {/*            to: '/$teamId/application-store/',*/}
-            {/*            params: { teamId },*/}
-            {/*          });*/}
-            {/*        }}*/}
-            {/*      >*/}
-            {/*        {t('ugc-page.design-project.ugc-view.subtitle.import.options.market-import')}*/}
-            {/*      </DropdownMenuItem>*/}
-            {/*    </DropdownMenuGroup>*/}
-            {/*  </DropdownMenuContent>*/}
-            {/*</DropdownMenu>*/}
             <DesignAssociationEditorDialog />
             <CreateDesignProjectDialog />
           </>

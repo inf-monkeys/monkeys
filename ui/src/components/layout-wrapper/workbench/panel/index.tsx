@@ -29,6 +29,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   const isWorkbenchRoute = layoutId === 'vines-outlet-main-$teamId';
   const isStoreRoute = layoutId === 'vines-outlet-main-$teamId-store';
   const isWorkspaceRoute = layoutId.startsWith('vines-outlet-main-$teamId-') && !isStoreRoute;
+  const isDesignRoute = layoutId === 'vines-outlet-main-$teamId-design-$designProjectId-$designBoardId';
   const pathName = useRouterState({
     select: (state) => {
       return state.location.pathname;
@@ -62,7 +63,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
           isWorkspaceRoute && !isSettingRoute && `w-full rounded-lg border border-input p-global`,
           isSettingRoute && `w-full rounded-lg border border-input px-global py-1`,
         )}
-        sidebar={isWorkspaceRoute && <VinesPanelSidebar />}
+        sidebar={isWorkspaceRoute && !isDesignRoute && <VinesPanelSidebar />}
       >
         <Outlet />
       </VinesSpace>
