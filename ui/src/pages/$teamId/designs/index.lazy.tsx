@@ -3,10 +3,12 @@ import React, { useState } from 'react';
 import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
+import { get } from 'lodash';
 import { Link, Pencil, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { deleteDesignProject } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
@@ -45,6 +47,8 @@ import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const Designs: React.FC = () => {
   const { t } = useTranslation();
+  const { data: oem } = useSystemConfig();
+  const newTabOpenBoard = get(oem, 'theme.designProjects.newTabOpenBoard', true) as boolean;
 
   const navigate = useNavigate();
   const { copy } = useCopy({ timeout: 500 });
@@ -75,6 +79,16 @@ export const Designs: React.FC = () => {
     });
   };
 
+  console.log(newTabOpenBoard);
+
+  const navigateHelper = (item: IAssetItem<IDesignProject>) => {
+    if (newTabOpenBoard) {
+      open(`/${item.teamId}/design/${item.id}`, '_blank');
+    } else {
+      navigate({ to: `/$teamId/design/$designProjectId`, params: { teamId, designProjectId: item.id } });
+    }
+  };
+
   return (
     <main className="size-full">
       <UgcView
@@ -84,7 +98,7 @@ export const Designs: React.FC = () => {
         assetName={t('components.layout.main.sidebar.list.apps.designs.label')}
         useUgcFetcher={useUgcDesignProjects}
         preloadUgcFetcher={preloadUgcDesignProjects}
-        createColumns={createDesignProjectsColumns}
+        createColumns={() => createDesignProjectsColumns(navigateHelper)}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
@@ -148,7 +162,7 @@ export const Designs: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        onItemClick={(item) => open(`/${item.teamId}/design/${item.id}`, '_blank')}
+        onItemClick={(item) => navigateHelper(item)}
         subtitle={
           <>
             <DesignAssociationEditorDialog />

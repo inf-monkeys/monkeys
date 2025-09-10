@@ -11,7 +11,6 @@ import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
 import { SpaceHeaderTabs } from '@/components/layout-wrapper/space/header/tabs';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
-import { VinesPanelSidebar } from '@/components/layout-wrapper/workbench/panel/sidebar.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
@@ -63,7 +62,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
           isWorkspaceRoute && !isSettingRoute && `w-full rounded-lg border border-input p-global`,
           isSettingRoute && `w-full rounded-lg border border-input px-global py-1`,
         )}
-        sidebar={isWorkspaceRoute && !isDesignRoute && <VinesPanelSidebar />}
+        // sidebar={isWorkspaceRoute && !isDesignRoute && <VinesPanelSidebar />}
       >
         <Outlet />
       </VinesSpace>

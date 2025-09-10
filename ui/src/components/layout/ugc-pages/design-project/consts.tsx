@@ -10,7 +10,7 @@ import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IDesignProject>>();
 
-export const createDesignProjectsColumns = () => [
+export const createDesignProjectsColumns = (navigateHelper: (item: IAssetItem<IDesignProject>) => void) => [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     cell: ({ getValue }) =>
@@ -20,14 +20,9 @@ export const createDesignProjectsColumns = () => [
   columnHelper.accessor('displayName', {
     id: 'title',
     cell: ({ row, getValue }) => (
-      <a
-        className="hover:text-primary-500 transition-colors"
-        href={`/${row.original.teamId}/design/${row.original.id}`}
-        target="_blank"
-        rel="noreferrer"
-      >
+      <span className="hover:text-primary-500 transition-colors" onClick={() => navigateHelper(row.original)}>
         {getI18nContent(getValue() as string | I18nValue)}
-      </a>
+      </span>
     ),
   }),
   columnHelper.accessor('description', {
