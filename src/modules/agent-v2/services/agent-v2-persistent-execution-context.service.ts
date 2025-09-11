@@ -205,21 +205,62 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
 
     // Load conversation history from database
     const messages = await this.repository.findMessagesBySession(this.session.id);
-    const conversationHistory: ChatCompletionMessageParam[] = messages.messages.map((m) => {
+    const conversationHistory: ChatCompletionMessageParam[] = [];
+
+    for (const m of messages.messages) {
       // Special handling for continuation messages - they should be system messages
       if (m.isSystem && m.content.startsWith('SYSTEM:')) {
         this.logger.log(`📋 [CONVERSATION] Converting continuation message to system role: ${m.content.substring(0, 100)}...`);
-        return {
+        conversationHistory.push({
           role: 'system' as const,
           content: m.content.replace(/^SYSTEM:\s*/, ''), // Remove "SYSTEM:" prefix
-        };
+        });
+        continue;
       }
+
+      // Handle messages with tool calls (assistant messages that triggered tools)
+      if (m.isSystem && m.toolCalls && Array.isArray(m.toolCalls) && m.toolCalls.length > 0) {
+        // This is an assistant message with tool calls
+        const toolCalls = m.toolCalls.map((tc: any) => ({
+          id: tc.id || `call_${Date.now()}`,
+          type: 'function' as const,
+          function: {
+            name: tc.name,
+            arguments: JSON.stringify(tc.params || tc.input || {}),
+          },
+        }));
+
+        conversationHistory.push({
+          role: 'assistant' as const,
+          content: m.content || null,
+          tool_calls: toolCalls,
+        });
+
+        // Add tool result messages
+        for (const tc of m.toolCalls) {
+          if (tc.result) {
+            conversationHistory.push({
+              role: 'tool' as const,
+              tool_call_id: tc.id || `call_${Date.now()}`,
+              content: tc.result.success ? tc.result.output : `Error: ${tc.result.output}`,
+            });
+          }
+        }
+        continue;
+      }
+
+      // Handle tool result summary messages (created by executeTools method)
+      if (m.isSystem && m.content.includes('[') && m.content.includes(']') && (m.content.includes('web_search') || m.content.includes('ask_followup_question'))) {
+        // This looks like a tool result summary message, skip it as we already handled results above
+        continue;
+      }
+
       // Regular message mapping
-      return {
+      conversationHistory.push({
         role: m.isSystem ? 'assistant' : 'user',
         content: m.content,
-      };
-    });
+      });
+    }
 
     this.logger.log(`📝 [CONVERSATION] ${conversationHistory.length} messages`);
 
@@ -305,6 +346,26 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
           const toolCalls = this.streamDetectedToolCalls.length > 0 ? this.streamDetectedToolCalls : parsedContent.filter((c) => c.type === 'tool_use').map((c) => c as any as ToolCall);
 
           this.logger.log(`📝 [RESPONSE] ${toolCalls.length} tools, text: ${textContent ? 'yes' : 'no'}`);
+
+          // Check for multiple tool calls - only allow exactly one
+          if (toolCalls.length > 1) {
+            const multipleToolsMessage = `[ERROR] You called ${toolCalls.length} tools in one response! You MUST call exactly ONE tool per response. 
+
+Tools you attempted to call: ${toolCalls.map((t) => t.name).join(', ')}
+
+Please retry with only ONE tool call.`;
+
+            // Queue error message for processing as system message
+            await this.queueSystemMessage(multipleToolsMessage);
+
+            // Update mistake count
+            const currentState = await this.taskManager.getTaskState(this.session.id);
+            await this.taskManager.updateTaskState(this.session.id, {
+              consecutiveMistakeCount: (currentState?.consecutiveMistakeCount || 0) + 1,
+            });
+
+            return; // Exit early, don't process any tools
+          }
 
           // Save assistant response to database with tool calls
           if (textContent || toolCalls.length > 0) {

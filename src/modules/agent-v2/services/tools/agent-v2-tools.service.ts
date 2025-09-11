@@ -59,9 +59,10 @@ export class AgentV2ToolsService {
     // Check if it's a builtin tool (always allowed) or external tool (requires permission)
     try {
       if (isAgentV2BuiltinTool(toolName)) {
-        // Execute builtin tools
-        await this.executeBuiltinTool(toolCall, toolName, sessionId, askApproval, handleError, pushToolResult);
-        result.output = `Builtin tool ${toolName} executed successfully`;
+        // Execute builtin tools and get the actual result
+        const builtinResult = await this.executeBuiltinToolWithResult(toolCall, toolName, sessionId, askApproval, handleError, pushToolResult);
+        result.output = builtinResult.output;
+        result.is_error = builtinResult.is_error;
       } else {
         // Check permission for external tools
         if (agentId && !(await this.checkExternalToolPermission(agentId, toolName))) {
@@ -84,30 +85,56 @@ export class AgentV2ToolsService {
     return result;
   }
 
-  // Execute builtin tools
-  private async executeBuiltinTool(toolCall: ToolUse, toolName: string, sessionId: string, askApproval: AskApproval, handleError: HandleError, pushToolResult: PushToolResult): Promise<void> {
+  // Execute builtin tools and return result
+  private async executeBuiltinToolWithResult(
+    toolCall: ToolUse,
+    toolName: string,
+    sessionId: string,
+    askApproval: AskApproval,
+    handleError: HandleError,
+    pushToolResult: PushToolResult,
+  ): Promise<ToolResult> {
     switch (toolName) {
       case 'use_mcp_tool':
-        await this.useMcpToolTool(toolCall, askApproval, handleError, pushToolResult);
-        break;
+        // Create a result collector for MCP tool
+        let mcpResult: ToolResult = { tool_call_id: toolCall.id, output: '' };
+        const mcpPushResult = (result: ToolResult) => {
+          mcpResult = result;
+        };
+        await this.useMcpToolTool(toolCall, askApproval, handleError, mcpPushResult);
+        return mcpResult;
       case 'access_mcp_resource':
-        await this.accessMcpResourceTool(toolCall, askApproval, handleError, pushToolResult);
-        break;
+        let resourceResult: ToolResult = { tool_call_id: toolCall.id, output: '' };
+        const resourcePushResult = (result: ToolResult) => {
+          resourceResult = result;
+        };
+        await this.accessMcpResourceTool(toolCall, askApproval, handleError, resourcePushResult);
+        return resourceResult;
       case 'ask_followup_question':
-        await this.askFollowupQuestionTool(toolCall, askApproval, handleError, pushToolResult);
-        break;
+        let followupResult: ToolResult = { tool_call_id: toolCall.id, output: '' };
+        const followupPushResult = (result: ToolResult) => {
+          followupResult = result;
+        };
+        await this.askFollowupQuestionTool(toolCall, askApproval, handleError, followupPushResult);
+        return followupResult;
       case 'attempt_completion':
-        await this.attemptCompletionTool(toolCall, askApproval, handleError, pushToolResult);
-        break;
+        let completionResult: ToolResult = { tool_call_id: toolCall.id, output: '' };
+        const completionPushResult = (result: ToolResult) => {
+          completionResult = result;
+        };
+        await this.attemptCompletionTool(toolCall, askApproval, handleError, completionPushResult);
+        return completionResult;
       case 'new_task':
-        await this.newTaskTool(toolCall, askApproval, handleError, pushToolResult);
-        break;
+        let taskResult: ToolResult = { tool_call_id: toolCall.id, output: '' };
+        const taskPushResult = (result: ToolResult) => {
+          taskResult = result;
+        };
+        await this.newTaskTool(toolCall, askApproval, handleError, taskPushResult);
+        return taskResult;
       case 'update_todo_list':
-        await this.updateTodoListTool(toolCall, sessionId, askApproval, handleError, pushToolResult);
-        break;
+        return await this.updateTodoListTool(toolCall, sessionId, askApproval, handleError, pushToolResult);
       case 'web_search':
-        await this.webSearchTool(toolCall, askApproval, handleError, pushToolResult);
-        break;
+        return await this.webSearchTool(toolCall, askApproval, handleError, pushToolResult);
       default:
         throw new Error(`Unknown builtin tool: ${toolName}`);
     }
