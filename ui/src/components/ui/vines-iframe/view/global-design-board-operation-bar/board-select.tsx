@@ -2,12 +2,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { useSearch } from '@tanstack/react-router';
 
-import { Check, ChevronsUpDown, Pencil, Plus, Trash, ExternalLink } from 'lucide-react';
+import { Check, ChevronsUpDown, ExternalLink, Pencil, Plus, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useDesignProjectMetadataList, useGetDesignProjectList, deleteDesignProject } from '@/apis/designs';
+import { useSystemConfig } from '@/apis/common';
+import { createDesignMetadata, deleteDesignProject, useDesignProjectMetadataList, useGetDesignProjectList } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor';
+import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
+import { useVinesTeam } from '@/components/router/guard/team';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandSeparator } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -17,11 +21,9 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { DEFAULT_DESIGN_PROJECT_ICON_URL, DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { cn, getI18nContent } from '@/utils';
-import { toast } from 'sonner';
-import { useVinesTeam } from '@/components/router/guard/team';
 import { useNavigate } from '@tanstack/react-router';
-import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { get } from 'lodash';
+import { toast } from 'sonner';
 
 const getDesignProjectDisplayName = (designProject?: IDesignProject) => {
   if (!designProject) return '';
@@ -51,6 +53,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
   const { setDesignBoardId } = useDesignBoardStore();
 
   const { data: designProjectList, isLoading, mutate: mutateDesignProjectList } = useGetDesignProjectList();
+  const { data: oem } = useSystemConfig();
 
   const [currentDesignProjectId, setCurrentDesignProjectId] = useState<string | null>(
     designProjectIdFromSearch ?? null,
@@ -147,6 +150,32 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
     setDesignProjectVisible(false);
   };
 
+  const handleCreateDesignBoard = async () => {
+    if (!selectedDesignProject) return;
+    try {
+      const res = await createDesignMetadata(selectedDesignProject.id, {
+        displayName: t('common.type.design-board') as string,
+        snapshot: {},
+        pinned: false,
+        teamId,
+      });
+      const newBoardId = res.data?.data?.id ?? (res as any)?.data?.id ?? (res as any)?.id; // 兼容不同 fetcher 返回结构
+      await mutateDesignProjectMetadataList();
+      if (newBoardId) {
+        setCurrentDesignBoardId(newBoardId);
+        setDesignBoardId(newBoardId);
+        navigate({
+          to: '/$teamId/design/$designProjectId/$designBoardId/',
+          params: { teamId, designProjectId: selectedDesignProject.id, designBoardId: newBoardId },
+        });
+      }
+      setDesignProjectVisible(false);
+      toast.success(t('common.create.success'));
+    } catch (e) {
+      toast.error(t('common.create.error'));
+    }
+  };
+
   return (
     <>
       <div className="flex w-full flex-col gap-global">
@@ -227,6 +256,13 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
                       <Plus className="mr-2 h-4 w-4" />
                       <span>{t('ugc-page.design-project.dropdown.create')}</span>
                     </CommandItem>
+                    {/* 多画板模式下显示“新建画板” */}
+                    {get(oem, 'theme.designProjects.oneOnOne', false) === false && selectedDesignProject && (
+                      <CommandItem onSelect={handleCreateDesignBoard}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        <span>{t('workspace.global-design-board.operation-bar.design-board.create', { defaultValue: '新建画板' })}</span>
+                      </CommandItem>
+                    )}
                     
                     {selectedDesignProject && (
                       <CommandItem onSelect={handleShowDeleteConfirm} className="text-red-600">

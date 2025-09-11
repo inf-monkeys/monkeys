@@ -107,6 +107,11 @@ export type CustomizationFormView = {
 export type CustomizationDesignProjects = {
   oneOnOne: boolean;
   newTabOpenBoard: boolean;
+  showPageMenu: boolean;
+  showMainMenu: boolean;
+  showStylePanel: boolean;
+  showToolbar: boolean;
+  showContextMenu: boolean;
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
@@ -551,6 +556,11 @@ export const config: Config = {
       designProjects: {
         oneOnOne: readConfig('server.customization.designProjects.oneOnOne', false),
         newTabOpenBoard: readConfig('server.customization.designProjects.newTabOpenBoard', true),
+        showPageMenu: readConfig('server.customization.designProjects.showPageMenu', false),
+        showMainMenu: readConfig('server.customization.designProjects.showMainMenu', true),
+        showStylePanel: readConfig('server.customization.designProjects.showStylePanel', true),
+        showToolbar: readConfig('server.customization.designProjects.showToolbar', true),
+        showContextMenu: readConfig('server.customization.designProjects.showContextMenu', true),
       },
     },
   },

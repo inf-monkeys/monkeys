@@ -7,6 +7,23 @@ import { IDesignAssociationForEditor } from '@/schema/workspace/design-associati
 
 import { IDesignAssociation, IDesignBoardItem, IDesignBoardMetadata, IDesignProject } from './typings';
 
+export const createDesignMetadata = (
+  designProjectId: string,
+  payload: {
+    displayName: string;
+    snapshot: any;
+    pinned: boolean;
+    teamId: string;
+  },
+) =>
+  vinesFetcher<IAssetItem<IDesignBoardMetadata>>({
+    method: 'POST',
+    simple: true,
+  })(`/api/design/project/${designProjectId}/metadata`, {
+    designProjectId,
+    ...payload,
+  });
+
 export const createDesignProject = (createDesignProjectDto: ICreateDesignProject) =>
   vinesFetcher<IAssetItem<IDesignProject>>({
     method: 'POST',

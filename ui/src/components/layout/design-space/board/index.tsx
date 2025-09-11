@@ -25,9 +25,11 @@ import {
   useToasts,
 } from 'tldraw';
 
+import { useSystemConfig } from '@/apis/common';
 import { useUniImagePreview } from '@/components/layout-wrapper/main/uni-image-preview';
 import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
 import { getImageSize } from '@/utils/file';
+import { get } from 'lodash';
 
 import 'tldraw/tldraw.css';
 
@@ -116,8 +118,12 @@ export const Board: React.FC<BoardProps> = ({
   persistenceKey,
 }) => {
   const frameShapeId = instance?.frameShapeId || createShapeId();
+  const { data: oem } = useSystemConfig();
 
   const { setBoardCanvasSize, width, height } = useBoardCanvasSizeStore();
+  
+  // 获取当前模式
+  const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
 
   const createFrame = useCallback((editor: Editor, width: number, height: number) => {
     editor.createShape({
@@ -137,8 +143,39 @@ export const Board: React.FC<BoardProps> = ({
     editor.zoomToFit();
   }, []);
 
+  // 监听选中画板变化（多画板模式）
   useEffect(() => {
-    if (width && height && editor) {
+    if (!editor || oneOnOne === true) return;
+
+    const handleSelectionChange = () => {
+      const selectedShapes = editor.getSelectedShapes();
+      const frameShape = selectedShapes.find(shape => shape.type === 'frame');
+      
+      if (frameShape && 'w' in frameShape.props && 'h' in frameShape.props) {
+        const frameWidth = frameShape.props.w as number;
+        const frameHeight = frameShape.props.h as number;
+        
+        // 更新显示的宽高
+        startTransition(() => {
+          setBoardCanvasSize(frameWidth, frameHeight);
+        });
+      }
+    };
+
+    // 监听选择变化
+    editor.addListener('change', handleSelectionChange);
+    
+    // 初始检查
+    handleSelectionChange();
+
+    return () => {
+      editor.removeListener('change', handleSelectionChange);
+    };
+  }, [editor, oneOnOne, setBoardCanvasSize]);
+
+  // 单画板模式：更新固定画板尺寸
+  useEffect(() => {
+    if (width && height && editor && oneOnOne === true) {
       editor.updateShape({
         id: frameShapeId,
         type: 'frame',
@@ -148,16 +185,36 @@ export const Board: React.FC<BoardProps> = ({
         },
       });
     }
-  }, [width, height]);
+  }, [width, height, editor, oneOnOne, frameShapeId]);
 
   // 定义自定义组件配置
-  const components: TLComponents = {
-    PageMenu: () => null,
-    MainMenu: () => null,
-    StylePanel: () => null,
-    Toolbar: () => null,
-    ContextMenu: CustomContextMenu, // 添加自定义右键菜单
-  };
+  const components: TLComponents = {};
+  
+  // 根据 OEM 配置控制组件显示
+  if (!get(oem, 'theme.designProjects.showPageMenu', false)) {
+    components.PageMenu = () => null;
+  }
+  
+  if (!get(oem, 'theme.designProjects.showMainMenu', false)) {
+    components.MainMenu = () => null;
+  }
+  
+  if (!get(oem, 'theme.designProjects.showStylePanel', false)) {
+    components.StylePanel = () => null;
+  }
+  
+  if (!get(oem, 'theme.designProjects.showToolbar', false)) {
+    components.Toolbar = () => null;
+  }
+  
+  if (get(oem, 'theme.designProjects.showContextMenu', true)) {
+    components.ContextMenu = CustomContextMenu;
+  } 
+  // else {
+  //   // components.ContextMenu = () => null;
+  // }
+  
+  console.log('Components config:', components);
 
   return (
     <div className="h-full w-full">
@@ -245,7 +302,16 @@ export const Board: React.FC<BoardProps> = ({
         overrides={{
           tools: (_editor, tools) => {
             // Remove the text tool
-            delete tools.frame;
+            delete tools.text;
+            
+            // 根据 OEM 配置控制 frame 工具（新建画板）
+            const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
+            if (oneOnOne === true) {
+              // 单画板模式：隐藏 frame 工具
+              delete tools.frame;
+            }
+            // 多画板模式：保留 frame 工具（默认行为）
+            
             return tools;
           },
         }}

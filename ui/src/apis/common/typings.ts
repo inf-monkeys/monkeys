@@ -102,6 +102,11 @@ export type CustomizationFormView = {
 export type CustomizationDesignProjects = {
   oneOnOne: boolean;
   newTabOpenBoard: boolean;
+  showPageMenu: boolean;
+  showMainMenu: boolean;
+  showStylePanel: boolean;
+  showToolbar: boolean;
+  showContextMenu: boolean;
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
