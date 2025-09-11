@@ -151,7 +151,7 @@ const RootComponent: React.FC = () => {
                   {isUseAgent && <AgentLayout />}
                   {isUseDesign && designNewTabOpenBoard && <DesignLayout />}
                   {isUseEvaluation && <EvaluationLayout />}
-                  {(isUsePanel || (isUseDesign && !designNewTabOpenBoard)) && mode !== 'mini' && (
+                  {((isUsePanel && !isUseIFrame) || (isUseDesign && !designNewTabOpenBoard)) && mode !== 'mini' && (
                     <WorkbenchPanelLayout layoutId={layoutId} />
                   )}
                   {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
