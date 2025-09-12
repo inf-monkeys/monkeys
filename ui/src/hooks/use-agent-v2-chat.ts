@@ -89,20 +89,132 @@ export const useAgentV2Chat = (
     // 检查两种可能的响应格式
     const messages = (messagesResponse as any)?.messages || messagesResponse?.data?.messages;
 
+    // 调试：打印API返回的消息数据
+    console.log('=== API返回的历史消息数据 ===');
+    console.log('完整响应:', messagesResponse);
+    console.log('解析后的消息:', messages);
+    if (messages && messages.length > 0) {
+      console.log('第一条消息详情:', messages[0]);
+      console.log('第一条消息content类型:', typeof messages[0].content);
+      console.log('第一条消息content内容:', messages[0].content);
+
+      // 查看有toolCalls的消息
+      const messagesWithTools = messages.filter((msg) => msg.toolCalls && msg.toolCalls.length > 0);
+      if (messagesWithTools.length > 0) {
+        console.log('有工具调用的消息:', messagesWithTools[0]);
+        console.log('工具调用详情:', messagesWithTools[0].toolCalls);
+        if (messagesWithTools[0].toolCalls[0].params) {
+          console.log('第一个工具调用的参数:', messagesWithTools[0].toolCalls[0].params);
+        }
+      }
+
+      // 查看所有消息的content类型和内容
+      messages.forEach((msg, index) => {
+        console.log(`消息 ${index + 1}:`, {
+          id: msg.id,
+          content: msg.content,
+          contentType: typeof msg.content,
+          isSystem: msg.isSystem,
+          hasToolCalls: !!(msg.toolCalls && msg.toolCalls.length > 0),
+        });
+      });
+    }
+
     if (messages && messages.length > 0) {
       const historicalMessages: IAgentV2ChatMessage[] = messages.map((msg) => {
         // 根据API返回数据，isSystem为true表示助手消息，false表示用户消息
         const role = msg.isSystem ? 'assistant' : 'user';
 
-        return {
+        // 处理content字段，确保它是字符串
+        let content = '';
+        if (typeof msg.content === 'string') {
+          // 如果是 "[Tool Calls Only]" 或 "[object Object]"，尝试从工具调用中提取内容
+          if (msg.content === '[Tool Calls Only]' || msg.content === '[object Object]') {
+            if (msg.toolCalls && msg.toolCalls.length > 0) {
+              // 尝试从工具调用中提取有用信息
+              const toolResults = msg.toolCalls.map((toolCall) => {
+                if (toolCall.params && typeof toolCall.params === 'object') {
+                  // 从工具参数中提取内容
+                  if (toolCall.params.result) {
+                    return toolCall.params.result;
+                  }
+                  if (toolCall.params.query) {
+                    return `搜索: ${toolCall.params.query}`;
+                  }
+                  if (toolCall.params.message) {
+                    return toolCall.params.message;
+                  }
+                  // 如果没有特定字段，返回整个params对象
+                  return JSON.stringify(toolCall.params, null, 2);
+                }
+                return `工具调用: ${toolCall.name}`;
+              });
+              content = toolResults.join('\n\n');
+            } else {
+              content = msg.content; // 保持原样显示
+            }
+          } else {
+            content = msg.content;
+          }
+        } else if (msg.content && typeof msg.content === 'object') {
+          // 如果content是对象，首先尝试从工具调用中提取内容
+          if (msg.toolCalls && msg.toolCalls.length > 0) {
+            const toolResults = msg.toolCalls.map((toolCall) => {
+              if (toolCall.params && typeof toolCall.params === 'object') {
+                if (toolCall.params.result) {
+                  return toolCall.params.result;
+                }
+                if (toolCall.params.query) {
+                  return `搜索: ${toolCall.params.query}`;
+                }
+                if (toolCall.params.message) {
+                  return toolCall.params.message;
+                }
+                return JSON.stringify(toolCall.params, null, 2);
+              }
+              return `工具调用: ${toolCall.name}`;
+            });
+            content = toolResults.join('\n\n');
+          } else {
+            // 如果没有工具调用，尝试序列化对象或提取特定字段
+            try {
+              // 检查对象是否有特定的字段
+              if (msg.content.result) {
+                content = msg.content.result;
+              } else if (msg.content.message) {
+                content = msg.content.message;
+              } else if (msg.content.text) {
+                content = msg.content.text;
+              } else {
+                content = JSON.stringify(msg.content, null, 2);
+              }
+            } catch {
+              content = '[复杂对象内容]';
+            }
+          }
+        } else {
+          content = msg.content ? String(msg.content) : '';
+        }
+
+        const processedMessage = {
           id: msg.id,
           role,
-          content: msg.content || '',
+          content,
           toolCalls: msg.toolCalls,
           createdAt: new Date(msg.createdTimestamp),
           senderId: msg.senderId,
           isSystem: msg.isSystem,
         };
+
+        // 调试：打印转换后的消息
+        console.log(`转换消息 ${msg.id}:`, {
+          原始content: msg.content,
+          原始content类型: typeof msg.content,
+          转换后content: content,
+          role: role,
+        });
+
+        return processedMessage;
       });
 
       setMessages((prev) => {

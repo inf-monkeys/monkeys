@@ -3,7 +3,6 @@ import React from 'react';
 import _, { isEmpty } from 'lodash';
 
 import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
-import { ToolDisplay } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/tool-display.tsx';
 import { MessageToolbar } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/toolbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card } from '@/components/ui/card.tsx';
@@ -39,21 +38,25 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
   const isUser = data.role === 'user';
   const content = data.content ?? '';
   const isTextContent = _.isString(content);
-  const isEmptyMessage = isEmpty(isTextContent ? content.trim() : content.length);
+
   const textContent = isTextContent
     ? content
-    : content
-        .map((item) => {
-          switch (item.type) {
-            case 'text':
-              return item.text;
-            case 'image_url':
-              return `![${item.image_url.url}](${item.image_url.url})`;
-          }
-        })
-        .join('\n');
+    : Array.isArray(content)
+      ? content
+          .map((item) => {
+            switch (item.type) {
+              case 'text':
+                return item.text;
+              case 'image_url':
+                return `![${item.image_url.url}](${item.image_url.url})`;
+              default:
+                return '';
+            }
+          })
+          .join('\n')
+      : String(content); // 如果不是字符串也不是数组，强制转换为字符串
 
-  const extra = data.extra;
+  const isEmptyMessage = isEmpty(isTextContent ? content.trim() : content.length);
 
   return (
     <div className="flex flex-col gap-6 py-global">
@@ -81,11 +84,13 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
           <VinesIcon size="sm">{botPhoto}</VinesIcon>
           <div className="flex w-full max-w-[calc(100%-5rem)] items-end">
             <Card className="relative p-global text-sm">
-              <ToolDisplay data={extra} />
+              {/* ToolDisplay组件有问题，暂时不显示 */}
+              {/* <ToolDisplay data={extra} /> */}
+
               <VinesMarkdown
                 className={cn('max-w-full', isLoading && LastItemIndex === index ? 'vines-result-streaming' : '')}
               >
-                {content + (isEmptyMessage ? EMPTY_CONTENT : '')}
+                {textContent + (isEmptyMessage ? EMPTY_CONTENT : '')}
               </VinesMarkdown>
             </Card>
             <MessageToolbar

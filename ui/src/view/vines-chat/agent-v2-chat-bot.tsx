@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, MessageSquareDashed, Send, Wifi, WifiOff } from 'lucide-react';
 
 import { IAgentV2ChatMessage } from '@/apis/agents-v2/chat';
@@ -8,21 +7,15 @@ import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/cha
 import { VirtuaChatBotMessages } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { AgentV2FollowupQuestion } from '@/components/ui/agent-v2-followup-question';
-import { AgentV2SearchResults } from '@/components/ui/agent-v2-search-results';
-import { AgentV2StreamingTodo } from '@/components/ui/agent-v2-streaming-todo';
-import { AgentV2TaskCompletion } from '@/components/ui/agent-v2-task-completion';
-import { AgentV2TodoList } from '@/components/ui/agent-v2-todo-list';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesLoading } from '@/components/ui/loading';
 import { DEFAULT_AGENT_ICON_URL } from '@/consts/icons.ts';
 import { useAgentV2Chat } from '@/hooks/use-agent-v2-chat';
-import { useLiveTodoTracker } from '@/hooks/use-live-todo-tracker';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useSubmitHandler } from '@/hooks/use-submit-handler.ts';
-import { IParsedTaskCompletion, IParsedTodoItem, parseAgentV2Response } from '@/utils/agent-v2-response-parser';
-import { IParsedWebSearchResult, parseWebSearchResult } from '@/utils/sse-event-parser';
+import { parseAgentV2Response } from '@/utils/agent-v2-response-parser';
 
 interface IAgentV2ChatModeProps {
   agentId: string;
@@ -31,88 +24,25 @@ interface IAgentV2ChatModeProps {
   height: number;
 }
 
-// 转换消息格式以适配现有的消息显示组件
+// 转换消息格式以适配现有的消息显示组件 - 简化版本，直接显示原始内容
 const convertToVinesMessage = (message: IAgentV2ChatMessage): IVinesMessage | null => {
-  // 如果是助手消息，解析其内容
-  if (message.role === 'assistant' && message.content) {
-    const parsedResponse = parseAgentV2Response(message.content);
-
-    // 检查是否有实际的文本内容
-    const textSegments = parsedResponse.segments.filter((segment) => segment.type === 'text');
-    const hasTextContent = textSegments.some((segment) => segment.content.trim().length > 0);
-
-    let combinedContent = '';
-
-    if (hasTextContent) {
-      // 如果有文本内容，使用文本内容
-      combinedContent = textSegments.map((segment) => segment.content).join('\n\n');
-    } else {
-      // 如果没有文本内容，但有工具调用，生成简短的描述
-      const toolDescriptions: string[] = [];
-
-      if (parsedResponse.todoUpdate) {
-        toolDescriptions.push('📝 更新了任务列表');
-      }
-      if (parsedResponse.webSearchResult) {
-        toolDescriptions.push(`🔍 搜索了: ${parsedResponse.webSearchResult.query || '相关信息'}`);
-      }
-      if (parsedResponse.taskCompletion) {
-        toolDescriptions.push('✅ 完成了任务');
-      }
-      if (parsedResponse.toolCalls && parsedResponse.toolCalls.length > 0) {
-        toolDescriptions.push(`🔧 执行了 ${parsedResponse.toolCalls.length} 个工具调用`);
-      }
-
-      // 检查工具调用中的具体工具类型
-      if (message.toolCalls && message.toolCalls.length > 0) {
-        message.toolCalls.forEach((toolCall) => {
-          if (toolCall.name === 'update_todo_list') {
-            toolDescriptions.push('📝 更新了任务列表');
-          } else if (toolCall.name === 'web_search') {
-            toolDescriptions.push(`🔍 搜索了: ${toolCall.params?.query || '相关信息'}`);
-          } else if (toolCall.name === 'attempt_completion') {
-            toolDescriptions.push('✅ 完成了任务');
-          }
-        });
-      }
-
-      if (toolDescriptions.length > 0) {
-        combinedContent = toolDescriptions.join('，');
-      } else {
-        // 完全没有内容，使用原始内容或过滤掉
-        const rawContent = parsedResponse.content || message.content;
-        combinedContent = typeof rawContent === 'string' ? rawContent : '';
-
-        // 如果内容包含 [object Object]，尝试从工具调用中提取信息
-        if (combinedContent.includes('[object Object]') && message.toolCalls) {
-          const toolInfo = message.toolCalls.map((call) => `${call.name}(${call.params?.query || ''})`).join(', ');
-          combinedContent = `执行了工具调用: ${toolInfo}`;
-        }
-      }
-    }
-
-    // 如果最终内容为空或只包含空白字符，过滤掉该消息
-    if (!combinedContent.trim()) {
-      return null;
-    }
-
-    return {
-      id: message.id,
-      content: combinedContent,
-      role: message.role as 'user' | 'assistant',
-      createdAt: message.createdAt,
-      extra: message.toolCalls || [],
-    };
-  }
-
-  // 用户消息或系统消息直接转换
-  return {
+  // 调试：打印转换前后的内容
+  const result = {
     id: message.id,
-    content: message.content,
+    content: message.content || '',
     role: message.role as 'user' | 'assistant',
     createdAt: message.createdAt,
     extra: message.toolCalls || [],
   };
+
+  console.log(`convertToVinesMessage ${message.id}:`, {
+    原始消息: message,
+    转换结果: result,
+    content类型: typeof result.content,
+    content内容: result.content,
+  });
+
+  return result;
 };
 
 export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
@@ -140,54 +70,13 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
   const { ref: headerRef, height: headerHeight } = useElementSize();
   const { ref: bottomRef, height: bottomHeight } = useElementSize();
 
-  // 使用实时todo追踪器
-  const todoTracker = useLiveTodoTracker(messages);
-
-  // 解析后的结构化内容状态
-  const [allTodoItems, setAllTodoItems] = useState<IParsedTodoItem[]>([]);
-  const [allTaskCompletions, setAllTaskCompletions] = useState<IParsedTaskCompletion[]>([]);
-  const [allSearchResults, setAllSearchResults] = useState<IParsedWebSearchResult[]>([]);
   const [followupLoading, setFollowupLoading] = useState(false);
 
-  // 展开状态控制
-  const [todoExpanded, setTodoExpanded] = useState(false);
-  const [completionExpanded, setCompletionExpanded] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
-
-  // 动态高度测量 - 考虑动画延迟
-  const [dynamicHeaderHeight, setDynamicHeaderHeight] = useState(0);
-  const [dynamicBottomHeight, setDynamicBottomHeight] = useState(0);
-
-  // 监听动画状态变化，重新测量高度
-  useEffect(() => {
-    const measureHeights = () => {
-      if (headerRef.current) {
-        const headerRect = headerRef.current.getBoundingClientRect();
-        setDynamicHeaderHeight(headerRect.height);
-      }
-      if (bottomRef.current) {
-        const bottomRect = bottomRef.current.getBoundingClientRect();
-        setDynamicBottomHeight(bottomRect.height);
-      }
-    };
-
-    // 立即测量一次
-    measureHeights();
-
-    // 在组件状态变化后延迟测量，确保动画完成
-    const timer = setTimeout(measureHeights, 500);
-
-    return () => clearTimeout(timer);
-  }, [todoTracker.hasActiveTodos, allTodoItems.length, followupQuestion]);
-
-  // 使用动态测量的高度进行计算
-  const effectiveHeaderHeight = Math.max(headerHeight || 0, dynamicHeaderHeight);
-  const effectiveBottomHeight = Math.max(bottomHeight || 0, dynamicBottomHeight);
-
+  // 计算聊天区域高度
   const calculatedChatHeight =
-    containerHeight && effectiveHeaderHeight && effectiveBottomHeight
-      ? containerHeight - effectiveHeaderHeight - effectiveBottomHeight
-      : height - effectiveHeaderHeight - (effectiveBottomHeight || 120);
+    containerHeight && headerHeight && bottomHeight
+      ? containerHeight - headerHeight - bottomHeight
+      : height - (headerHeight || 60) - (bottomHeight || 120);
 
   // 转换消息格式，过滤掉null消息
   const vinesMessages = useMemo(() => {
@@ -220,49 +109,6 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
       suggestions: followupQuestion.suggestions?.map((s) => (typeof s === 'string' ? s : s.answer)) || [],
     };
   }, [followupQuestion, messages]);
-
-  useMemo(() => {
-    const assistantMessages = messages.filter((msg) => msg.role === 'assistant' && msg.content);
-    const allTodos: IParsedTodoItem[] = [];
-    const allCompletions: IParsedTaskCompletion[] = [];
-    const allSearches: IParsedWebSearchResult[] = [];
-
-    // 解析所有助手消息，收集 todo 项目、任务完成和搜索结果
-    assistantMessages.forEach((msg) => {
-      const parsed = parseAgentV2Response(msg.content);
-
-      // 收集所有 todo 项目
-      if (parsed.todoItems.length > 0) {
-        allTodos.push(...parsed.todoItems);
-      }
-
-      // 收集任务完成
-      if (parsed.taskCompletion) {
-        allCompletions.push(parsed.taskCompletion);
-      }
-
-      // 收集搜索结果
-      if (parsed.webSearchResult) {
-        // 使用sse-event-parser解析结构化搜索结果
-        const searchData = parseWebSearchResult(parsed.webSearchResult.results, parsed.webSearchResult.query);
-        allSearches.push(searchData);
-      }
-
-      // 额外检查工具调用中的搜索结果
-      if (msg.toolCalls) {
-        msg.toolCalls.forEach((toolCall) => {
-          if (toolCall.name === 'web_search' && toolCall.result) {
-            const searchData = parseWebSearchResult(toolCall.result, toolCall.params?.query);
-            allSearches.push(searchData);
-          }
-        });
-      }
-    });
-
-    setAllTodoItems(allTodos);
-    setAllTaskCompletions(allCompletions);
-    setAllSearchResults(allSearches);
-  }, [messages]);
 
   // 处理输入提交
   const handleSubmit = useCallback(async () => {
@@ -391,170 +237,11 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
   return (
     <div ref={containerRef} className="flex h-full flex-col" style={{ height }}>
       {/* Header */}
-      <div ref={headerRef} className="relative mb-4 border-b pb-2">
-        <div className="flex items-center justify-between gap-4">
+      <div ref={headerRef} className="mb-4 border-b pb-2">
+        <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Agent V2 对话</h3>
-
-          {/* 中间的简化组件区域 - 并排显示 */}
-          <div className="flex flex-1 items-center justify-center gap-4">
-            <AnimatePresence mode="popLayout">
-              {todoTracker.hasActiveTodos && (
-                <motion.div
-                  key="active-todos"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className="cursor-pointer rounded-lg bg-blue-50 px-3 py-1 transition-colors hover:bg-blue-100"
-                  onClick={() => setTodoExpanded(!todoExpanded)}
-                >
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-blue-700">📝 任务规划</span>
-                    {todoTracker.isStreaming && <span className="text-xs text-blue-600">(实时更新中)</span>}
-                    <span className="text-xs text-blue-600">
-                      ({todoTracker.currentTodos?.filter((t) => t.status === 'completed').length || 0}/
-                      {todoTracker.currentTodos?.length || 0})
-                    </span>
-                    <span className="text-xs text-blue-500">{todoExpanded ? '▼' : '▶'}</span>
-                  </div>
-                </motion.div>
-              )}
-
-              {!todoTracker.hasActiveTodos && allTodoItems.length > 0 && (
-                <motion.div
-                  key="completed-todos"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className="cursor-pointer rounded-lg bg-green-50 px-3 py-1 transition-colors hover:bg-green-100"
-                  onClick={() => setTodoExpanded(!todoExpanded)}
-                >
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-700">📝 任务清单</span>
-                    <span className="text-xs text-green-600">
-                      ({allTodoItems.filter((t) => t.status === 'completed').length}/{allTodoItems.length})
-                    </span>
-                    <span className="text-xs text-green-500">{todoExpanded ? '▼' : '▶'}</span>
-                  </div>
-                </motion.div>
-              )}
-
-              {allSearchResults.length > 0 && (
-                <motion.div
-                  key="search-results"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className="cursor-pointer rounded-lg bg-green-50 px-3 py-1 transition-colors hover:bg-green-100"
-                  onClick={() => setSearchExpanded(!searchExpanded)}
-                >
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-700">🔍 搜索结果</span>
-                    <span className="text-xs text-green-600">({allSearchResults.length})</span>
-                    <span className="text-xs text-green-500">{searchExpanded ? '▼' : '▶'}</span>
-                  </div>
-                </motion.div>
-              )}
-
-              {allTaskCompletions.length > 0 && (
-                <motion.div
-                  key="task-completions"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className="cursor-pointer rounded-lg bg-emerald-50 px-3 py-1 transition-colors hover:bg-emerald-100"
-                  onClick={() => setCompletionExpanded(!completionExpanded)}
-                >
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-emerald-700">✅ 任务完成</span>
-                    <span className="text-xs text-emerald-600">({allTaskCompletions.length})</span>
-                    <span className="text-xs text-emerald-500">{completionExpanded ? '▼' : '▶'}</span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
           <ConnectionStatus />
         </div>
-
-        {/* 悬浮的任务组件容器 - 根据展开状态显示 */}
-        {(todoExpanded || searchExpanded || completionExpanded) && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="absolute left-0 right-0 top-full z-50 mt-2 space-y-3"
-            style={{ position: 'absolute' }}
-          >
-            <AnimatePresence>
-              {todoExpanded && todoTracker.hasActiveTodos && (
-                <motion.div
-                  key="expanded-active-todos"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <AgentV2StreamingTodo todoState={todoTracker} className="compact-mode shadow-lg" />
-                </motion.div>
-              )}
-
-              {todoExpanded && !todoTracker.hasActiveTodos && allTodoItems.length > 0 && (
-                <motion.div
-                  key="expanded-completed-todos"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <AgentV2TodoList todoItems={allTodoItems} className="compact-mode shadow-lg" />
-                </motion.div>
-              )}
-
-              {searchExpanded && allSearchResults.length > 0 && (
-                <motion.div
-                  key="expanded-search-results"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-2"
-                >
-                  {allSearchResults.map((searchResult, index) => (
-                    <AgentV2SearchResults
-                      key={`search-result-${index}-${searchResult.query}`}
-                      searchResult={searchResult}
-                      className="compact-mode shadow-lg"
-                    />
-                  ))}
-                </motion.div>
-              )}
-
-              {completionExpanded && allTaskCompletions.length > 0 && (
-                <motion.div
-                  key="expanded-task-completions"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-2"
-                >
-                  {allTaskCompletions.map((completion, index) => (
-                    <AgentV2TaskCompletion
-                      key={`task-completion-${index}-${completion.result.substring(0, 20)}`}
-                      result={completion.result}
-                    />
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )}
       </div>
 
       <ErrorAlert />
@@ -579,17 +266,15 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
       {/* Bottom Area - Followup Questions + Loading + Input */}
       <div ref={bottomRef}>
         {/* Followup Questions */}
-        <AnimatePresence>
-          {parsedFollowupQuestion && (
-            <div className="mx-4 mb-4">
-              <AgentV2FollowupQuestion
-                followupQuestion={parsedFollowupQuestion}
-                onAnswer={handleFollowupAnswer}
-                isLoading={followupLoading}
-              />
-            </div>
-          )}
-        </AnimatePresence>
+        {parsedFollowupQuestion && (
+          <div className="mx-4 mb-4">
+            <AgentV2FollowupQuestion
+              followupQuestion={parsedFollowupQuestion}
+              onAnswer={handleFollowupAnswer}
+              isLoading={followupLoading}
+            />
+          </div>
+        )}
 
         {/* Loading Indicator */}
         {isLoading && (
