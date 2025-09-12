@@ -42,7 +42,7 @@ export const ExportAssetSelect: React.FC<IExportAssetSelectProps> = ({ onSelect 
   const [designAssociations, setDesignAssociations] = useState<ISelectionItem[]>([]);
 
   // 获取数据
-  const { data: workflowList } = useWorkflowList();
+  const { data: workflowList } = useWorkflowList({ page: 1, limit: 9999 });
   const { data: workflowAssociationList } = useAllWorkflowAssociationList();
   const { data: designAssociationList } = useGetDesignAssociationList();
 
