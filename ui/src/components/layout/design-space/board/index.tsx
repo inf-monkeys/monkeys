@@ -25,6 +25,8 @@ import {
   useToasts,
 } from 'tldraw';
 
+import { VerticalToolbar } from './vertical-toolbar.tsx';
+
 import { useSystemConfig } from '@/apis/common';
 import { useUniImagePreview } from '@/components/layout-wrapper/main/uni-image-preview';
 import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
@@ -190,7 +192,7 @@ export const Board: React.FC<BoardProps> = ({
   // 定义自定义组件配置
   const components: TLComponents = {};
   
-  // 根据 OEM 配置控制组件显示
+  // 根据 OEM 配置控制组件显示（未配置时隐藏）
   if (!get(oem, 'theme.designProjects.showPageMenu', false)) {
     components.PageMenu = () => null;
   }
@@ -203,8 +205,11 @@ export const Board: React.FC<BoardProps> = ({
     components.StylePanel = () => null;
   }
   
+  // 使用自定义的竖向工具栏
   if (!get(oem, 'theme.designProjects.showToolbar', false)) {
     components.Toolbar = () => null;
+  } else {
+    components.Toolbar = VerticalToolbar;
   }
   
   if (get(oem, 'theme.designProjects.showContextMenu', true)) {
