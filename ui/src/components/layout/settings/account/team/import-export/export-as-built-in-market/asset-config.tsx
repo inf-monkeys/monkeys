@@ -1,6 +1,9 @@
+import { useState } from 'react';
+
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -18,13 +21,41 @@ interface IExportAssetConfigProps {
 export const ExportAssetConfig: React.FC<IExportAssetConfigProps> = ({ selectedAssets, form }) => {
   const { t } = useTranslation();
 
+  const [universalVersion, setUniversalVersion] = useState<string | undefined>(undefined);
+
+  const handleUpdateUniversalVersion = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (universalVersion) {
+      selectedAssets.forEach((asset, index) => {
+        form.setValue(`assets.${index}.version`, universalVersion);
+      });
+    }
+  };
+
   return (
     <Form {...form}>
       <form>
         <div className="flex w-full justify-between gap-global">
           <Card className="flex-1 p-global">
-            <ScrollArea className="h-[400px] pr-4">
+            <ScrollArea className="h-[70vh] pr-4">
               <div className="space-y-global">
+                <div className="flex items-center gap-global">
+                  <h3 className="text-sm font-medium">一键填写版本号</h3>
+                  <div className="flex-1">
+                    <Input
+                      placeholder={t(
+                        'settings.account.team.import-export.export-as-built-in-market.form.version.placeholder',
+                      )}
+                      type="text"
+                      value={universalVersion}
+                      onChange={setUniversalVersion}
+                    />
+                  </div>
+                  <Button variant="outline" onClick={handleUpdateUniversalVersion}>
+                    {t('common.utils.update')}
+                  </Button>
+                </div>
                 {selectedAssets.map((asset, index) => (
                   <div key={asset.id} className="space-y-global-1/2">
                     <h3 className="text-sm font-medium">

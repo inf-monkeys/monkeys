@@ -12,8 +12,10 @@ export const exportAssetSchema = z.object({
 
 export type IExportAsset = z.infer<typeof exportAssetSchema>;
 
+export const exportAssetsDataSchema = z.array(exportAssetSchema);
+
 export const exportAssetsSchema = z.object({
-  assets: z.array(exportAssetSchema),
+  assets: exportAssetsDataSchema,
 });
 
 export type IExportAssets = z.infer<typeof exportAssetsSchema>;

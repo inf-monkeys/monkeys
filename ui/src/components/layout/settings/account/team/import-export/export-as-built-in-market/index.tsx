@@ -84,7 +84,7 @@ export const ExportTeamAsBuiltInMarket: React.FC<IExportTeamAsBuiltInMarketProps
           },
           error: (error) => {
             console.error(error);
-            return t('common.operate.error');
+            return error.message;
           },
           finally: () => {
             setIsLoading(false);
