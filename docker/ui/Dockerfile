@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY ["package.json", "yarn.lock", "./"]
 
-ENV NODE_OPTIONS=--max_old_space_size=4096
+ENV NODE_OPTIONS=--max_old_space_size=8192
 
 RUN yarn
 
