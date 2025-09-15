@@ -110,6 +110,7 @@ export const createTask = (tool: VinesToolDef, extendObject = {}): VinesTask => 
         switchTrue: [createFakeNode()],
         switchFalse: [createFakeNode()],
       };
+      (newTask as unknown as SwitchTaskDef).defaultCase = [createFakeNode()];
       break;
     case 'FORK_JOIN':
       (newTask as unknown as ForkJoinTaskDef).forkTasks = [[createFakeNode()], [createFakeNode()]];

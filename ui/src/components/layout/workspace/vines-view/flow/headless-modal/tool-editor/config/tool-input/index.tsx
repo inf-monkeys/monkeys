@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ToolCredentialItem } from '@inf-monkeys/monkeys';
 import equal from 'fast-deep-equal/es6';
@@ -7,6 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { VinesInputCredentials } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-credentials';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { VinesInputProperty } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import {
   calculateDisplayInputs,
@@ -38,11 +42,20 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
     const input = tool?.input;
 
     const inputParams = get(task, 'inputParameters', {});
-    const finalInputs = calculateDisplayInputs(input ?? [], inputParams);
+    // 将顶层字段合入显隐判断，修复修改 evaluatorType/expression 等后界面不刷新的问题
+    const visibilityValues = {
+      ...inputParams,
+      evaluatorType: get(task, 'evaluatorType'),
+      expression: get(task, 'expression'),
+      loopCondition: get(task, 'loopCondition'),
+    } as Record<string, unknown>;
+    const finalInputs = calculateDisplayInputs(input ?? [], visibilityValues);
 
     const isSpecialNode = ['DO_WHILE', 'SWITCH'].includes(task?.type ?? '');
+    const isSwitchNode = (task?.type ?? '') === 'SWITCH';
 
     const taskRef = useRef<VinesTask | null>(null);
+    const [branchTick, setBranchTick] = useState(0);
     useEffect(() => {
       const newTask = cloneDeep(task);
       if (!newTask) {
@@ -50,7 +63,8 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
         return;
       }
       taskRef.current = newTask;
-    }, [nodeId]);
+      setBranchTick((n) => n + 1);
+    }, [nodeId, task]);
 
     const forceUpdate = useForceUpdate();
     const handleUpdate = (value: unknown, name: string, needForceUpdate = true) => {
@@ -114,8 +128,129 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
 
     const credentials = get(tool, 'credentials', []) as ToolCredentialItem[];
 
+    // 分支名列表（仅 SWITCH）
+    const decisionNames = useMemo(
+      () => Object.keys(get(taskRef.current || task || {}, 'decisionCases', {})),
+      [refresh, task, branchTick],
+    );
+
     return (
       <div className={cn('flex flex-col gap-global px-1 py-2', className)}>
+        {isSwitchNode && (
+          <div className="flex flex-col gap-2 rounded-md border border-gray-6/40 bg-dialog p-2">
+            <div className="flex items-center justify-between">
+              <div className="text-xxs font-medium text-muted-foreground">分支管理</div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="xs"
+                  variant="outline"
+                  icon={<Plus className="h-3 w-3" />}
+                  onClick={() => {
+                    // 通过原生节点能力新增分支：增量命名 branchN
+                    const vinesCore: any = (window as any)?.vinesCoreRef; // 兜底：但主要依赖 updateRaw 触发后的渲染
+                    void vinesCore;
+                    // 直接修改 taskRef.current 的 decisionCases 结构，按现有命名规则追加
+                    const taskObj: any = taskRef.current;
+                    if (!taskObj) return;
+                    const cases = taskObj.decisionCases ?? {};
+                    const names = Object.keys(cases);
+                    let index = names.length + 1;
+                    let name = `branch${index}`;
+                    while (names.includes(name)) name = `branch${++index}`;
+                    cases[name] = cases[name] || [
+                      {
+                        name: 'fake_node',
+                        type: 'SIMPLE',
+                        taskReferenceName: `fake_node_${Date.now()}`,
+                        inputParameters: {},
+                      },
+                    ];
+                    taskObj.decisionCases = { ...cases };
+                    updateRaw?.(nodeId, taskObj, false);
+                    forceUpdate();
+                    setBranchTick((n) => n + 1);
+                  }}
+                >
+                  新增分支
+                </Button>
+              </div>
+            </div>
+            <Separator />
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap gap-1">
+                {decisionNames.map((name) => (
+                  <div
+                    key={name}
+                    className="group flex items-center gap-1 rounded-full border bg-background/50 px-2 py-0.5 text-xxs hover:border-gray-8"
+                  >
+                    <span className="font-medium">{name}</span>
+                    <SimpleInputDialog
+                      title="重命名分支"
+                      description="只能以字母开头，包含字母和数字"
+                      initialValue={name}
+                      onFinished={(newName) => {
+                        const taskObj: any = taskRef.current;
+                        if (!taskObj) return;
+                        if (!/^[a-zA-Z][a-zA-Z0-9]*$/.test(newName)) return;
+                        const cases = { ...(taskObj.decisionCases ?? {}) } as Record<string, any>;
+                        if (newName in cases) return;
+                        cases[newName] = cases[name];
+                        delete cases[name];
+                        taskObj.decisionCases = cases as any;
+                        updateRaw?.(nodeId, taskObj, false);
+                        forceUpdate();
+                        setBranchTick((n) => n + 1);
+                      }}
+                    >
+                      <Button
+                        size="xs"
+                        variant="borderless"
+                        className="opacity-60 group-hover:opacity-100"
+                        icon={<Pencil className="h-3 w-3" />}
+                      />
+                    </SimpleInputDialog>
+                    <Button
+                      size="xs"
+                      variant="borderless"
+                      className="opacity-60 group-hover:opacity-100 [&_svg]:stroke-red-10 text-red-10"
+                      icon={<Trash2 className="h-3 w-3" />}
+                      onClick={() => {
+                        const taskObj: any = taskRef.current;
+                        if (!taskObj) return;
+                        const cases = { ...(taskObj.decisionCases ?? {}) } as Record<string, unknown>;
+                        if (Object.keys(cases).length <= 2) return; // 至少保留双分支
+                        delete cases[name];
+                        taskObj.decisionCases = cases as any;
+                        updateRaw?.(nodeId, taskObj, false);
+                        forceUpdate();
+                        setBranchTick((n) => n + 1);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-muted-foreground">默认分支：</span>
+                <Button
+                  size="xs"
+                  variant="borderless"
+                  className="opacity-80 hover:opacity-100"
+                  icon={<Trash2 className="h-3 w-3" />}
+                  onClick={() => {
+                    const taskObj: any = taskRef.current;
+                    if (!taskObj) return;
+                    taskObj.defaultCase = [];
+                    updateRaw?.(nodeId, taskObj, false);
+                    forceUpdate();
+                    setBranchTick((n) => n + 1);
+                  }}
+                >
+                  清空默认
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
         {credentials?.length ? (
           <VinesInputCredentials
             credentials={credentials}
