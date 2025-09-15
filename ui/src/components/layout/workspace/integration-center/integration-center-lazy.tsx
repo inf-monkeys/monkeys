@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { useTranslation } from 'react-i18next';
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
@@ -9,6 +10,7 @@ import { curl } from '@/components/layout/workspace/integration-center/utils.ts'
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { usePageStore } from '@/store/usePageStore';
+import { getI18nContent } from '@/utils';
 
 // @ts-ignore
 import ChatCompletionsTemplateZH from './templates/chat-completions.mdx';
@@ -30,13 +32,24 @@ const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
   const { workflow } = useVinesPage();
 
   const workflowId = workflow?.workflowId;
-  const workflowInputs = workflow?.variables;
+  const originWorkflowInputs = workflow?.variables;
+  const [workflowInputs, setWorkflowInputs] = useState<ToolProperty[]>([]);
   const openaiModelName = workflow?.openaiModelName;
   const model = openaiModelName || workflowId;
 
   const [executeWorkflowSyncCurl, setExecuteWorkflowSyncCurl] = React.useState<string | null>(null);
   const [executeWorkflowCurl, setExecuteWorkflowCurl] = React.useState<string | null>(null);
   const [getExecutionStatusCurl, setGetExecutionStatusCurl] = React.useState<string | null>(null);
+
+  useEffect(() => {
+    setWorkflowInputs(
+      (originWorkflowInputs || []).map((item) => ({
+        ...item,
+        displayName: getI18nContent(item.displayName) || 'unknown',
+        description: getI18nContent(item.description),
+      })),
+    );
+  }, [originWorkflowInputs]);
 
   useEffect(() => {
     const data: { [x: string]: any } = {
@@ -98,7 +111,7 @@ const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
         <span className="text-sm text-muted-foreground">{t('workspace.wrapper.integration-center.desc')}</span>
       </div>
       <ScrollArea style={{ height: containerHeight - 107 }}>
-        <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 max-w-full px-3">
+        <div className="prose max-w-full px-3 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
           {enabledOpenAIInterface ? (
             <>
               {workflow?.variables?.find((variable) => variable.name === 'messages') ? (

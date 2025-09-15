@@ -23,8 +23,8 @@ dayjs.extend(utc);
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { Toaster } from '@/components/ui/toaster';
 
-import './polyfill';
 import './i18n';
+import './polyfill';
 
 const router = createRouter({
   routeTree,
