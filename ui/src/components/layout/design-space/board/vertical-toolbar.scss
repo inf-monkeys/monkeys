@@ -64,9 +64,17 @@
 
       &.selected {
         background: var(--color-selected);
-        border-color: var(--color-selected-border);
-        color: var(--color-selected-text);
-        box-shadow: 0 0 0 2px var(--color-selected-border);
+        /* 去除外侧描边/黑色轮廓 */
+        border-color: transparent;
+        /* 选中时图标反白 */
+        color: #fff !important;
+        box-shadow: none;
+
+        svg {
+          color: #fff !important;
+          fill: currentColor;
+          stroke: currentColor;
+        }
       }
 
       svg {

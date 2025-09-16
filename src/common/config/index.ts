@@ -112,6 +112,7 @@ export type CustomizationDesignProjects = {
   showStylePanel: boolean;
   showToolbar: boolean;
   showContextMenu: boolean;
+  showPageAndLayerSidebar?: boolean; // 是否显示左侧页面+图层侧边栏
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
@@ -561,6 +562,7 @@ export const config: Config = {
         showStylePanel: readConfig('server.customization.designProjects.showStylePanel', false),
         showToolbar: readConfig('server.customization.designProjects.showToolbar', false),
         showContextMenu: readConfig('server.customization.designProjects.showContextMenu', true),
+        showPageAndLayerSidebar: readConfig('server.customization.designProjects.showPageAndLayerSidebar', false),
       },
     },
   },

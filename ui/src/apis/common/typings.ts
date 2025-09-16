@@ -107,6 +107,7 @@ export type CustomizationDesignProjects = {
   showStylePanel: boolean;
   showToolbar: boolean;
   showContextMenu: boolean;
+  showPageAndLayerSidebar?: boolean; // 是否显示左侧 页面+图层 sidebar，默认 false
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;

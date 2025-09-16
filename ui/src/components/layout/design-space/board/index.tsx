@@ -1,6 +1,7 @@
 import React, { startTransition, useCallback, useEffect } from 'react';
 
 import './index.scss';
+import './layer-panel.css';
 
 import {
   AssetRecordType,
@@ -22,9 +23,10 @@ import {
   TLShapeId,
   TLUiContextMenuProps,
   useEditor,
-  useToasts,
+  useToasts
 } from 'tldraw';
 
+import { ExternalLayerPanel } from './ExternalLayerPanel';
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 
 import { useSystemConfig } from '@/apis/common';
@@ -126,6 +128,8 @@ export const Board: React.FC<BoardProps> = ({
   
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
+  // 是否展示左侧 页面+图层 sidebar（默认 false）
+  const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false);
 
   const createFrame = useCallback((editor: Editor, width: number, height: number) => {
     editor.createShape({
@@ -189,41 +193,61 @@ export const Board: React.FC<BoardProps> = ({
     }
   }, [width, height, editor, oneOnOne, frameShapeId]);
 
-  // 定义自定义组件配置
-  const components: TLComponents = {};
-  
-  // 根据 OEM 配置控制组件显示（未配置时隐藏）
-  if (!get(oem, 'theme.designProjects.showPageMenu', false)) {
-    components.PageMenu = () => null;
-  }
-  
-  if (!get(oem, 'theme.designProjects.showMainMenu', false)) {
-    components.MainMenu = () => null;
-  }
-  
-  if (!get(oem, 'theme.designProjects.showStylePanel', false)) {
-    components.StylePanel = () => null;
-  }
-  
-  // 使用自定义的竖向工具栏
-  if (!get(oem, 'theme.designProjects.showToolbar', false)) {
-    components.Toolbar = () => null;
-  } else {
-    components.Toolbar = VerticalToolbar;
-  }
-  
-  if (get(oem, 'theme.designProjects.showContextMenu', true)) {
-    components.ContextMenu = CustomContextMenu;
-  } 
-  // else {
-  //   // components.ContextMenu = () => null;
-  // }
+  // 定义自定义组件配置 - 使用useMemo稳定引用
+  const components: TLComponents = React.useMemo(() => {
+    const comps: TLComponents = {};
+    
+    // 根据 OEM 配置控制组件显示（未配置时隐藏）
+    if (!get(oem, 'theme.designProjects.showPageMenu', false)) {
+      comps.PageMenu = () => null;
+    }
+    
+    if (!get(oem, 'theme.designProjects.showMainMenu', false)) {
+      comps.MainMenu = () => null;
+    }
+    
+    if (!get(oem, 'theme.designProjects.showStylePanel', false)) {
+      comps.StylePanel = () => null;
+    }
+    
+    // 使用自定义的竖向工具栏
+    if (!get(oem, 'theme.designProjects.showToolbar', false)) {
+      comps.Toolbar = () => null;
+    } else {
+      comps.Toolbar = VerticalToolbar;
+    }
+    
+    if (get(oem, 'theme.designProjects.showContextMenu', true)) {
+      comps.ContextMenu = CustomContextMenu;
+    }
+    
+    return comps;
+  }, [oem]); // 只有当oem发生变化时才重新创建
   
   console.log('Components config:', components);
 
   return (
-    <div className="h-full w-full">
-      <Tldraw
+    <div className="h-full w-full" style={{ position: 'relative' }}>
+      {/* Layer Panel - 固定在左侧（可配置） */}
+      {showPageAndLayerSidebar && (
+        <div 
+          className="layer-panel"
+          style={{ 
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '200px',
+            height: '100%',
+            zIndex: 1000
+          }}
+        >
+          {editor && <ExternalLayerPanel editor={editor} />}
+        </div>
+      )}
+      
+      {/* tldraw容器，根据 sidebar 是否开启留出空间 */}
+      <div style={{ marginLeft: showPageAndLayerSidebar ? '200px' : 0, height: '100%' }}>
+        <Tldraw
         persistenceKey={persistenceKey}
         onMount={(editor: Editor) => {
           setEditor(editor);
@@ -320,7 +344,8 @@ export const Board: React.FC<BoardProps> = ({
             return tools;
           },
         }}
-      ></Tldraw>
+        />
+      </div>
     </div>
   );
 };

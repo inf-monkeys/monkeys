@@ -1,0 +1,246 @@
+.layer-panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 200px;
+	height: 100%;
+	background: white;
+	display: flex;
+	flex-direction: column;
+	z-index: 10;
+	border-right: 1px solid #e1e1e1;
+}
+
+.shape-tree {
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+	flex: 1;
+}
+
+.shape-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 6px 10px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.shape-item:hover {
+	background-color: #f8f9fa;
+}
+
+.shape-visibility-toggle {
+	padding: 3px 6px;
+	border-radius: 3px;
+	outline: none;
+	border: none;
+	background: none;
+	flex-shrink: 0;
+}
+.shape-visibility-toggle:hover {
+	cursor: pointer;
+	background-color: #0000000b;
+}
+
+.layer-panel-title {
+	padding: 10px;
+	font-size: smaller;
+	font-weight: bolder;
+	border-bottom: 1px solid #e1e1e1;
+	background: white;
+	flex-shrink: 0;
+}
+
+.shape-name-input {
+	border: none;
+	background: none;
+	width: 0;
+	flex-grow: 1;
+	padding: 0;
+	outline: none;
+}
+
+.shape-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-wrap: nowrap;
+	flex-grow: 1;
+	font-size: 13px;
+}
+
+/* Layer Panel样式 - 现在在外层容器中 */
+.layer-panel {
+	background: white;
+	display: flex;
+	flex-direction: column;
+	border-right: 1px solid #e1e1e1;
+	height: 100%;
+}
+
+/* 页面列表部分 */
+.pages-section {
+	flex-shrink: 0;
+}
+
+.pages-list {
+	/* max-height 已移除，现在由 JavaScript 动态控制高度 */
+	overflow-y: auto;
+}
+
+/* 页面标题栏按钮 */
+.page-header-button {
+	width: 20px;
+	height: 20px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 3px;
+	transition: background-color 0.2s;
+}
+
+.page-header-button:hover {
+	background-color: #f0f0f0;
+}
+
+/* 页面搜索输入框 */
+.page-search-input {
+	transition: border-color 0.2s;
+}
+
+.page-search-input:focus {
+	border-color: #2563eb !important;
+}
+
+.page-item {
+	user-select: none;
+}
+
+.page-item:hover {
+	background-color: #f8f9fa;
+}
+
+.page-name-input {
+	border: none;
+	background: none;
+	outline: none;
+	font-size: 13px;
+	width: 100%;
+}
+
+/* 图层列表部分 */
+.shapes-section {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0; /* 确保可以滚动 */
+}
+
+/* 拖拽手柄 */
+.resize-handle {
+	position: relative;
+	user-select: none;
+}
+
+.resize-handle:hover {
+	background-color: #e2e8f0 !important;
+}
+
+.resize-handle:active {
+	background-color: #2563eb !important;
+}
+
+.resize-handle:active .resize-indicator {
+	background-color: white !important;
+}
+
+/* Dark mode support */
+.dark .layer-panel {
+	background: #1e1e1e;
+	border-right-color: #383838;
+	color: #e0e0e0;
+}
+
+.dark .layer-panel-title {
+	background: #1e1e1e;
+	border-bottom-color: #383838;
+	color: #e0e0e0;
+}
+
+.dark .shape-item:hover {
+	background-color: #2a2a2a;
+}
+
+.dark .shape-name {
+	color: #e0e0e0;
+}
+
+.dark .shape-visibility-toggle:hover {
+	background-color: #2a2a2a;
+}
+
+.dark .page-item:hover {
+	background-color: #2a2a2a;
+}
+
+.dark .page-name-input {
+	color: #e0e0e0;
+}
+
+.dark .resize-handle {
+	background-color: #2a2a2a;
+	border-top-color: #383838;
+	border-bottom-color: #383838;
+}
+
+.dark .resize-handle:hover {
+	background-color: #383838 !important;
+}
+
+.dark .resize-handle:active {
+	background-color: #3b82f6 !important;
+}
+
+.dark .page-header-button:hover {
+	background-color: #2a2a2a;
+}
+
+.dark .page-search-input {
+	background-color: #1e1e1e;
+	border-color: #383838;
+	color: #e0e0e0;
+}
+
+.dark .page-search-input:focus {
+	border-color: #3b82f6 !important;
+}
+
+/* 画板区域背景：通过 tldraw 的背景变量统一设置 */
+.tldraw__editor {
+	--color-background: rgb(237, 237, 237) !important;
+}
+
+/* 兜底：直接给画布/背景容器设色（不同版本类名） */
+.tl-canvas,
+.tl-background {
+	background-color: rgb(237, 237, 237) !important;
+}
+
+/* 隐藏 tldraw 右下角的水印图标 - 多种选择器 */
+.tl-watermark,
+div[class*="watermark"],
+div[class*="tl-watermark"],
+[data-testid*="watermark"],
+.tlui-watermark,
+.tldraw-watermark {
+	display: none !important;
+	visibility: hidden !important;
+	opacity: 0 !important;
+	width: 0 !important;
+	height: 0 !important;
+	overflow: hidden !important;
+}
