@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useSystemConfig } from '@/apis/common';
+
 import { useUniImagePreview } from './context';
 
 interface UniImagePreviewWrapperProps {
@@ -16,6 +18,8 @@ export const UniImagePreviewWrapper: React.FC<UniImagePreviewWrapperProps> = ({
   className,
 }) => {
   const { openPreview } = useUniImagePreview();
+  const { data: oem } = useSystemConfig();
+  const enableUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
   const handleClick = (e: React.MouseEvent) => {
     onClick?.(e);
@@ -28,6 +32,10 @@ export const UniImagePreviewWrapper: React.FC<UniImagePreviewWrapperProps> = ({
       openPreview(imageUrl || img.src);
     }
   };
+
+  if (!enableUniImagePreview) {
+    return children;
+  }
 
   return React.cloneElement(React.Children.only(children) as React.ReactElement, {
     onClick: handleClick,
