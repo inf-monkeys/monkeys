@@ -58,6 +58,7 @@ const TeamIdComfyuiIndexLazyImport = createFileRoute('/$teamId/comfyui/')()
 const TeamIdComfyuiStoreIndexLazyImport = createFileRoute(
   '/$teamId/comfyui-store/',
 )()
+const TeamIdChatV2IndexLazyImport = createFileRoute('/$teamId/chat-v2/')()
 const TeamIdApplicationStoreIndexLazyImport = createFileRoute(
   '/$teamId/application-store/',
 )()
@@ -295,6 +296,13 @@ const TeamIdComfyuiStoreIndexLazyRoute =
   } as any).lazy(() =>
     import('./pages/$teamId/comfyui-store/index.lazy').then((d) => d.Route),
   )
+
+const TeamIdChatV2IndexLazyRoute = TeamIdChatV2IndexLazyImport.update({
+  path: '/$teamId/chat-v2/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./pages/$teamId/chat-v2/index.lazy').then((d) => d.Route),
+)
 
 const TeamIdApplicationStoreIndexLazyRoute =
   TeamIdApplicationStoreIndexLazyImport.update({
@@ -552,6 +560,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdApplicationStoreIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/chat-v2/': {
+      preLoaderRoute: typeof TeamIdChatV2IndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/comfyui-store/': {
       preLoaderRoute: typeof TeamIdComfyuiStoreIndexLazyImport
       parentRoute: typeof rootRoute
@@ -718,6 +730,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdAgentIndexLazyRoute,
   TeamIdAgentsIndexLazyRoute,
   TeamIdApplicationStoreIndexLazyRoute,
+  TeamIdChatV2IndexLazyRoute,
   TeamIdComfyuiStoreIndexLazyRoute,
   TeamIdComfyuiIndexLazyRoute,
   TeamIdDesignsIndexLazyRoute,

@@ -13,6 +13,7 @@ export const AgentSpaceSidebar: React.FC<IAgentSpaceSidebarProps> = () => {
   return (
     <SpaceSidebarTabsList>
       <AgentSpaceTab value="chat" icon="square-play" displayName={t('agent.space.tab.chat-view')} />
+      <AgentSpaceTab value="chat-v2" icon="message-square" displayName={t('agent.space.tab.chat-v2-view')} />
       <AgentSpaceTab value="config" icon="bolt" displayName={t('agent.space.tab.config-view')} />
       <AgentSpaceTab value="logs" icon="square-kanban" displayName={t('agent.space.tab.logs-view')} />
     </SpaceSidebarTabsList>

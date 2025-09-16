@@ -3972,6 +3972,7 @@
       "tab": {
         "config-view": "配置视图",
         "chat-view": "对话视图",
+        "chat-v2-view": "对话视图v2",
         "logs-view": "日志视图"
       }
     },
