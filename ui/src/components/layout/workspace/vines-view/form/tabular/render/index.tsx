@@ -369,7 +369,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
           ) : null}
         </AnimatePresence>
         <ScrollArea className={scrollAreaClassName} style={{ height }} disabledOverflowMask>
-          <div className={cn('grid grid-cols-2 items-start gap-global', formClassName)}>
+          <div className={cn('grid grid-cols-2 items-start gap-global px-3', formClassName)}>
             {defInputs?.map((it, i) => (
               <VinesFormFieldItem
                 it={it}

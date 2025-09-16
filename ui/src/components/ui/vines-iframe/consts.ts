@@ -5,6 +5,7 @@ import { VinesLogView } from 'src/view/vines-log';
 import { withProviders } from '@/components/ui/vines-iframe/utils.ts';
 import { CanvasInteractionStoreProvider, createCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { AgentChatView } from '@/view/agent-chat';
+import { AgentChatV2View } from '@/view/agent-chat-v2';
 import { AgentConfigView } from '@/view/agent-config';
 import { DesignBoardView } from '@/view/design-board';
 import { GlobalDesignBoardView } from '@/view/global-design-board';
@@ -17,6 +18,7 @@ export const IFRAME_MAP = {
   preview: VinesForm,
   chat: VinesChatView,
   'agent-chat': AgentChatView,
+  'agent-chat-v2': AgentChatV2View,
   'agent-config': AgentConfigView,
   'agent-logs': AgentLogsView,
   'agentv2-chat': AgentChatView,

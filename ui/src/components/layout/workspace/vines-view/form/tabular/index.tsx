@@ -59,7 +59,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   useThrottleEffect(
     () => {
       if (!wrapperHeight) return;
-      setInputHeight(wrapperHeight + 8);
+      setInputHeight(wrapperHeight);
     },
     [wrapperHeight],
     { wait: 64 },
@@ -137,7 +137,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   );
 
   return (
-    <div className={cn('flex flex-col gap-global', className)} style={style}>
+    <div className={cn('flex flex-col', className)} style={style}>
       <div className="flex-1">
         <TabularRender
           formClassName={''}
@@ -149,7 +149,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
           workflowId={vines.workflowId}
         ></TabularRender>
       </div>
-      <div ref={inputRef} className="flex items-stretch gap-2">
+      <div ref={inputRef} className="flex items-stretch gap-2 px-global">
         {isInputNotEmpty && (
           <>
             <Tooltip>

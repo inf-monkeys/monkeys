@@ -29,9 +29,14 @@ export const UniImagePreviewWrapper: React.FC<UniImagePreviewWrapperProps> = ({
     }
   };
 
-  return (
-    <div className={className} onClick={handleClick} style={{ cursor: 'pointer' }}>
-      {children}
-    </div>
-  );
+  return React.cloneElement(React.Children.only(children) as React.ReactElement, {
+    onClick: handleClick,
+    className: className
+      ? `${(children as React.ReactElement).props.className || ''} ${className}`.trim()
+      : (children as React.ReactElement).props.className,
+    style: {
+      ...(children as React.ReactElement).props.style,
+      cursor: 'pointer',
+    },
+  });
 };

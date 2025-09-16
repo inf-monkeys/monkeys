@@ -439,14 +439,14 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                     <CanvasStoreProvider createStore={createCanvasStore}>
                       <VinesViewWrapper workflowId={currentPage?.[teamId]?.workflowId}>
                         <ExecutionStoreProvider createStore={createExecutionStore}>
-                          <div className="relative w-[320px] p-global">
+                          <div className="relative w-[320px] pb-global">
                             <ViewTitle
                               displayName={getI18nContent(currentPage?.[teamId]?.workflow?.displayName)}
                               themeGradient={Boolean(oem?.theme.gradient)}
                             />
                             <VinesTabular
                               theme={tabularTheme}
-                              className="mt-[42px] w-full"
+                              className="mt-[42px] h-[calc(100%-42px)] w-full"
                               isMiniFrame={false}
                               event$={event$}
                               height={height}

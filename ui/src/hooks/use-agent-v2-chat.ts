@@ -54,9 +54,9 @@ export const useAgentV2Chat = (
   // 获取会话状态
   const { data: sessionStatus } = useAgentV2SessionStatus(effectiveSessionId);
 
-  // 获取历史消息 - 只在有实际sessionId时才获取
+  // 获取历史消息 - 只在有实际sessionId且不是新创建的session时才获取
   const { data: messagesResponse } = useAgentV2Messages(
-    effectiveSessionId && effectiveSessionId !== '' ? effectiveSessionId : undefined,
+    effectiveSessionId && effectiveSessionId !== '' && externalSessionId ? effectiveSessionId : undefined,
   );
 
   // 当外部sessionId变化时，清空消息并重置状态
@@ -76,49 +76,23 @@ export const useAgentV2Chat = (
 
       // 更新sessionId为外部提供的ID
       setSessionId(externalSessionId);
+
+      // 如果是新建对话（空字符串），重置内部session引用
+      if (externalSessionId === '') {
+        currentSessionIdRef.current = undefined;
+      }
     }
   }, [externalSessionId, sessionId]);
 
   // 更新消息列表
   useEffect(() => {
-    // 新建对话时（externalSessionId为空字符串）不加载历史消息
-    if (externalSessionId === '') {
+    // 如果没有消息响应，直接返回
+    if (!messagesResponse) {
       return;
     }
 
     // 检查两种可能的响应格式
     const messages = (messagesResponse as any)?.messages || messagesResponse?.data?.messages;
-
-    // 调试：打印API返回的消息数据
-    console.log('=== API返回的历史消息数据 ===');
-    console.log('完整响应:', messagesResponse);
-    console.log('解析后的消息:', messages);
-    if (messages && messages.length > 0) {
-      console.log('第一条消息详情:', messages[0]);
-      console.log('第一条消息content类型:', typeof messages[0].content);
-      console.log('第一条消息content内容:', messages[0].content);
-
-      // 查看有toolCalls的消息
-      const messagesWithTools = messages.filter((msg) => msg.toolCalls && msg.toolCalls.length > 0);
-      if (messagesWithTools.length > 0) {
-        console.log('有工具调用的消息:', messagesWithTools[0]);
-        console.log('工具调用详情:', messagesWithTools[0].toolCalls);
-        if (messagesWithTools[0].toolCalls[0].params) {
-          console.log('第一个工具调用的参数:', messagesWithTools[0].toolCalls[0].params);
-        }
-      }
-
-      // 查看所有消息的content类型和内容
-      messages.forEach((msg, index) => {
-        console.log(`消息 ${index + 1}:`, {
-          id: msg.id,
-          content: msg.content,
-          contentType: typeof msg.content,
-          isSystem: msg.isSystem,
-          hasToolCalls: !!(msg.toolCalls && msg.toolCalls.length > 0),
-        });
-      });
-    }
 
     if (messages && messages.length > 0) {
       const historicalMessages: IAgentV2ChatMessage[] = messages.map((msg) => {
@@ -206,43 +180,16 @@ export const useAgentV2Chat = (
           isSystem: msg.isSystem,
         };
 
-        // 调试：打印转换后的消息
-        console.log(`转换消息 ${msg.id}:`, {
-          原始content: msg.content,
-          原始content类型: typeof msg.content,
-          转换后content: content,
-          role: role,
-        });
-
         return processedMessage;
       });
 
       setMessages((prev) => {
-        // 改进的去重逻辑：同时基于ID和内容进行去重
+        // 简化的去重逻辑：只基于ID去重
         const existingIds = new Set(prev.map((m) => m.id));
-        const existingContents = new Map(prev.map((m) => [`${m.role}:${m.content.trim()}`, m]));
 
         const newMessages = historicalMessages.filter((m) => {
-          // 首先检查ID去重
-          if (existingIds.has(m.id)) {
-            return false;
-          }
-
-          // 然后检查内容去重：相同角色+相同内容的消息
-          const contentKey = `${m.role}:${m.content.trim()}`;
-          const existingMsg = existingContents.get(contentKey);
-
-          if (existingMsg) {
-            // 如果存在相同内容的消息，检查时间差
-            const timeDiff = Math.abs(m.createdAt.getTime() - existingMsg.createdAt.getTime());
-
-            // 如果时间差小于10秒，认为是重复消息
-            if (timeDiff < 10000) {
-              return false;
-            }
-          }
-
-          return true;
+          // 只检查ID去重
+          return !existingIds.has(m.id);
         });
 
         if (newMessages.length > 0) {
@@ -252,7 +199,7 @@ export const useAgentV2Chat = (
         return prev;
       });
     }
-  }, [messagesResponse, externalSessionId]);
+  }, [messagesResponse]);
 
   // 建立 SSE 连接
   const establishConnection = useCallback(async (agentId: string, initialMessage: string) => {
@@ -599,15 +546,16 @@ export const useAgentV2Chat = (
       // 清除任何现有的 followup 问题
       setFollowupQuestion(undefined);
 
-      if (!isConnected) {
-        // 没有SSE连接时：建立连接（新会话或历史会话都用这个逻辑）
-        if (externalSessionId) {
+      if (!isConnected || externalSessionId === '') {
+        // 没有SSE连接时，或者是新建对话时：建立新连接
+        if (externalSessionId && externalSessionId !== '') {
           await establishConnectionForExistingSession(externalSessionId, content);
         } else {
+          // 新建对话或无session：创建全新连接
           await establishConnection(agentId, content);
         }
       } else {
-        // 已有SSE连接：发送到当前活跃会话
+        // 已有SSE连接且是已存在的会话：发送到当前活跃会话
         const targetSessionId = externalSessionId || currentSessionIdRef.current;
         if (!targetSessionId) {
           setIsLoading(false);
