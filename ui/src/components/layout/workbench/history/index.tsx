@@ -233,12 +233,13 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
         size="icon"
         className="absolute left-global top-1/2 z-20 -translate-y-1/2"
         onClick={() => setExpanded((s) => !s)}
-      ></Button>
+        disabled={images.length === 0}
+      />
 
       {images.length > 0 ? (
         <div
           key="vines-history-content"
-          className="flex size-full items-center justify-center gap-global-1/2 overflow-hidden p-global pl-[calc(var(--global-spacing)*2+16px)]"
+          className="flex size-full items-center justify-center gap-global-1/2 overflow-hidden p-global pl-[calc(var(--global-spacing)*2+2.25rem)]"
         >
           {!isUniImagePreview && (
             <ImagePreview
@@ -335,12 +336,17 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
       {expanded && (
         <div
           className={cn(
-            'absolute bottom-[calc(100%+var(--global-spacing))] left-0 right-0 z-[1000] rounded-lg bg-slate-1',
+            'absolute bottom-0 left-0 right-0 z-[1000] rounded-lg bg-slate-1',
             themeMode === 'border' && 'border border-input',
             themeMode === 'shadow' && 'shadow-around',
           )}
         >
-          <div ref={popupScrollRef} className="max-h-[60vh] overflow-y-auto p-global" onScroll={onGridScroll}>
+          <div
+            ref={popupScrollRef}
+            className="max-h-[60vh] overflow-y-auto p-global"
+            style={{ marginBottom: ITEM_SIZE }}
+            onScroll={onGridScroll}
+          >
             <div style={{ height: gridTopSpacer }} />
             <div
               className="grid"
@@ -381,6 +387,18 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
             </div>
             <div style={{ height: gridBottomSpacer }} />
             <div ref={gridSentinelRef} className="h-2 w-full" />
+          </div>
+          <div
+            className="absolute bottom-0 left-global flex items-center"
+            style={{ height: `calc(${ITEM_SIZE}px + (var(--global-spacing)*2))` }}
+          >
+            <Button
+              icon={expanded ? <Minimize2 /> : <Maximize2 />}
+              variant="outline"
+              size="icon"
+              onClick={() => setExpanded((s) => !s)}
+              disabled={images.length === 0}
+            />
           </div>
         </div>
       )}
