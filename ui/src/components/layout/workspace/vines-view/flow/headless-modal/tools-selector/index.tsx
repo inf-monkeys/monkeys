@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { get } from 'lodash';
 import { ChevronLeft, ChevronRight, Inbox, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { ToolLists } from '@/components/layout/workspace/vines-view/flow/headless-modal/tools-selector/list.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -20,6 +22,9 @@ interface IToolsSelectorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
   const { t } = useTranslation();
+
+  const { data: oem } = useSystemConfig();
+  const oemId = get(oem, ['theme', 'id'], undefined);
 
   const workflowId = useFlowStore((s) => s.workflowId);
 
@@ -120,10 +125,10 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
       <DialogContent className="max-w-[51.6rem]">
         <DialogTitle>{t('workspace.flow-view.headless-modal.tool-selector.title')}</DialogTitle>
         <div className="relative w-full">
-          <div className="relative flex w-full items-center">
+          <div className="relative flex w-full items-center [&>div]:w-full">
             <Search className="absolute ml-3 size-4 shrink-0 opacity-50" />
             <Input
-              className="pl-9"
+              className="pl-[calc(var(--global-spacing)+1rem)]"
               placeholder={t('workspace.flow-view.headless-modal.tool-selector.placeholder')}
               value={searchValue}
               onChange={handleSearchChange}
@@ -183,11 +188,20 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
             </div>
           </div>
 
-          {list.map(([list, length, category], index) => (
-            <TabsContent value={category} key={index}>
-              <ToolLists list={list} length={length} category={category} onClick={handleOnClick} />
-            </TabsContent>
-          ))}
+          {list.map(([list, length, category], index) => {
+            if (oemId === 'concept-design' && category === 'all') {
+              list = list.sort((a, b) => {
+                const aIsConcept = a.namespace === 'monkeys_tool_concept_design' ? 0 : 1;
+                const bIsConcept = b.namespace === 'monkeys_tool_concept_design' ? 0 : 1;
+                return aIsConcept - bIsConcept;
+              });
+            }
+            return (
+              <TabsContent value={category} key={index}>
+                <ToolLists list={list} length={length} category={category} onClick={handleOnClick} />
+              </TabsContent>
+            );
+          })}
           {!listLength && (
             <TabsContent value="all">
               <div className="vines-center h-[28.125rem] flex-col gap-2">
