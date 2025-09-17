@@ -1,7 +1,7 @@
 import useSWR, { preload } from 'swr';
 
 import { AssetType, MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import _ from 'lodash';
+import _, { get } from 'lodash';
 import qs from 'qs';
 import { undefined } from 'zod';
 
@@ -22,6 +22,7 @@ import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
+import { useSystemConfig } from '../common';
 import { IAssetItem, IAssetPublicCategory, IAssetTag, IListUgcDto, IUgcFilterRules } from './typings';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
@@ -66,6 +67,10 @@ export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>
 
 export const useUgcTools = (dto: IListUgcDto) => {
   const { page, limit } = dto;
+
+  const { data: oem } = useSystemConfig();
+
+  const oemId = get(oem, ['theme', 'id'], undefined);
 
   const {
     data: actionToolsData,
@@ -161,13 +166,16 @@ export const useUgcTools = (dto: IListUgcDto) => {
     ...Object.keys(EXTERNAL_TOOLS_CATEGORIES_MAP),
   ];
 
-  const totalList = [
-    ...processInternalToolList,
-    ...processSubWorkflowList,
-    ...processComfyuiWorkflowList,
-    ...processApiToolList,
-    ...processServiceToolList,
-  ];
+  const totalList =
+    oemId === 'concept-design'
+      ? processServiceToolList.filter((item) => get(item, 'namespace') === 'monkeys_tool_concept_design')
+      : [
+          ...processInternalToolList,
+          ...processSubWorkflowList,
+          ...processComfyuiWorkflowList,
+          ...processApiToolList,
+          ...processServiceToolList,
+        ];
   const sortedList = totalList.sort(
     (a, b) => (orderList.indexOf(a.categories?.[0] ?? '') ?? 999) - (orderList.indexOf(b.categories?.[0] ?? '') ?? 0),
   );
