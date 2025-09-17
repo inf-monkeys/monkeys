@@ -24,9 +24,11 @@ export const WorkflowInfoCard: React.FC<IWorkflowInfoCardProps> = () => {
       <WorkflowInfoEditor disabled={!enabled}>
         <TooltipTrigger asChild>
           <div className={cn('group flex cursor-default items-center gap-2.5', enabled && 'cursor-pointer')}>
-            <VinesIcon size="sm">{workflow?.iconUrl || DEFAULT_WORKFLOW_ICON_URL}</VinesIcon>
+            <div className="size-full">
+              <VinesIcon size="sm">{workflow?.iconUrl || DEFAULT_WORKFLOW_ICON_URL}</VinesIcon>
+            </div>
             <div className="flex flex-col gap-0.5">
-              <h1 className="font-bold leading-tight">{getI18nContent(workflow?.displayName)}</h1>
+              <h1 className="whitespace-nowrap font-bold leading-tight">{getI18nContent(workflow?.displayName)}</h1>
               <div className="flex items-center gap-1">
                 {!enabled && (
                   <div className="vines-center gap-2">
