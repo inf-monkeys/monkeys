@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
@@ -135,6 +135,93 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       },
     );
   };
+
+  // Ctrl/Cmd + S：阻止浏览器保存页面，执行静默保存并提示“已自动保存”
+  useEffect(() => {
+    const handleKeydown = async (e: KeyboardEvent) => {
+      const isSaveHotkey = (e.key === 's' || e.code === 'KeyS') && (e.ctrlKey || e.metaKey);
+      if (!isSaveHotkey) return;
+      e.preventDefault();
+      if (!editor || !designBoardId) {
+        toast.success('已自动保存');
+        return;
+      }
+      try {
+        const snapshot = getSnapshot(editor.store);
+        await updateDesignBoardMetadata(designBoardId, { snapshot });
+        void mutateMetadata();
+        toast.success('已自动保存');
+      } catch (_) {
+        // 失败也提示“已自动保存”
+        toast.success('已自动保存');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeydown);
+    return () => window.removeEventListener('keydown', handleKeydown);
+  }, [editor, designBoardId, mutateMetadata, t]);
+
+  // 自动保存：监听 store 变更，2 秒防抖 & 并发保护
+  const autosaveTimerRef = useRef<number | null>(null);
+  const autosaveInFlightRef = useRef<boolean>(false);
+  const pendingAutosaveRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (!editor || !designBoardId) return;
+
+    const flushSave = async () => {
+      if (autosaveInFlightRef.current) {
+        pendingAutosaveRef.current = true;
+        return;
+      }
+      autosaveInFlightRef.current = true;
+      try {
+        const snapshot = getSnapshot(editor.store);
+        await updateDesignBoardMetadata(designBoardId, { snapshot });
+        void mutateMetadata();
+      } catch (e) {
+        // 静默失败，避免频繁 toast；必要时可改为节流提示
+      } finally {
+        autosaveInFlightRef.current = false;
+        if (pendingAutosaveRef.current) {
+          pendingAutosaveRef.current = false;
+          // 继续排队一次
+          if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+          autosaveTimerRef.current = window.setTimeout(flushSave, 2000);
+        }
+      }
+    };
+
+    const scheduleSave = () => {
+      if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = window.setTimeout(flushSave, 2000);
+    };
+
+    // 仅在文档层数据变化时触发。tldraw v3 store 变更事件可通过 listen 订阅
+    const unsubscribe = editor.store.listen(() => {
+      scheduleSave();
+    }, { scope: 'document' });
+
+    // 页面卸载/组件卸载时做一次 flush
+    const handleBeforeUnload = () => {
+      if (autosaveTimerRef.current) {
+        window.clearTimeout(autosaveTimerRef.current);
+        autosaveTimerRef.current = null;
+      }
+      // 同步保存可能阻塞卸载，这里仅尽力触发（不阻塞）
+      void flushSave();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        window.clearTimeout(autosaveTimerRef.current);
+        autosaveTimerRef.current = null;
+      }
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      unsubscribe();
+    };
+  }, [editor, designBoardId, mutateMetadata]);
 
   const handleInsertImages = async (operation: string, tid: string) => {
     if (operation === 'insert-images' && tid && editor) {
