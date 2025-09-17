@@ -47,7 +47,7 @@ export type ICommonTool =
     })
   | (Omit<IWorkflowTool, 'categories'> & {
       toolType: 'service';
-      categories: ['service'];
+      categories: ['service', ...string[]];
     })
   | (IAssetItem<MonkeyWorkflow> & {
       toolType: 'sub-workflow';

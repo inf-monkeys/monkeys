@@ -156,7 +156,7 @@ export const useUgcTools = (dto: IListUgcDto) => {
         return {
           ...serviceTool,
           toolType: 'service',
-          categories: ['service'],
+          categories: ['service', ...(serviceTool.categories ?? [])],
         };
       }) ?? [];
 
