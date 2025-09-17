@@ -1,16 +1,7 @@
 import z from 'zod';
 
 export const inputType = z.enum(['string', 'number', 'boolean', 'file'], {
-  errorMap: (issue) => {
-    switch (issue.code) {
-      case 'invalid_type':
-        return { message: 'Unsupported type' };
-      case 'invalid_enum_value':
-        return { message: 'Type must be one of string, number, boolean, file' };
-      default:
-        return { message: 'Unknown error' };
-    }
-  },
+  error: 'Type must be one of string, number, boolean, file',
 });
 
 // 单个可见性条件
@@ -57,49 +48,37 @@ export const workflowInputSelectListLinkageSchema = z.array(
 
 export const workflowInputSchema = z.object({
   displayName: z.union([
-    z.string().min(1, 'Display name cannot be empty'),
-    z
-      .record(z.string())
-      .refine(
-        (val) => Object.values(val).some((v) => v && v.trim().length > 0),
-        'At least one language must have a display name',
-      ),
+    z.string().min(1, { error: 'Display name cannot be empty' }),
+    z.record(z.string(), z.string()).refine((val) => Object.values(val).some((v) => v && v.trim().length > 0), {
+      error: 'At least one language must have a display name',
+    }),
   ]),
   name: z
     .string()
-    .min(1, 'Field cannot be less than one characters')
-    .max(20, 'Field cannot be more than twenty characters'),
+    .min(1, { error: 'Field cannot be less than one characters' })
+    .max(20, { error: 'Field cannot be more than twenty characters' }),
   description: z
     .union([
       z.string(),
-      z
-        .record(z.string())
-        .refine(
-          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
-          'At least one language must have a description',
-        ),
+      z.record(z.string(), z.string()).refine((val) => Object.values(val).some((v) => v && v.trim().length > 0), {
+        error: 'At least one language must have a description',
+      }),
     ])
     .optional(),
   placeholder: z
     .union([
       z.string(),
-      z
-        .record(z.string())
-        .refine(
-          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
-          'At least one language must have a placeholder',
-        ),
+      z.record(z.string(), z.string()).refine((val) => Object.values(val).some((v) => v && v.trim().length > 0), {
+        error: 'At least one language must have a placeholder',
+      }),
     ])
     .optional(),
   tips: z
     .union([
       z.string(),
-      z
-        .record(z.string())
-        .refine(
-          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
-          'At least one language must have tips',
-        ),
+      z.record(z.string(), z.string()).refine((val) => Object.values(val).some((v) => v && v.trim().length > 0), {
+        error: 'At least one language must have tips',
+      }),
     ])
     .optional(),
   type: inputType,
@@ -122,13 +101,10 @@ export const workflowInputSchema = z.object({
       z.object({
         value: z.union([z.string(), z.number()]),
         label: z.union([
-          z.string().min(1, 'Label cannot be empty'),
-          z
-            .record(z.string())
-            .refine(
-              (val) => Object.values(val).some((v) => v && v.trim().length > 0),
-              'At least one language must have a label',
-            ),
+          z.string().min(1, { error: 'Label cannot be empty' }),
+          z.record(z.string(), z.string()).refine((val) => Object.values(val).some((v) => v && v.trim().length > 0), {
+            error: 'At least one language must have a label',
+          }),
         ]),
         linkage: workflowInputSelectListLinkageSchema.optional(),
       }),

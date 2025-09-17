@@ -3,23 +3,17 @@ import z from 'zod';
 const baseWorkflowAssociationSchema = z.object({
   preferAppId: z.string().optional(),
   displayName: z.union([
-    z.string().min(1, 'Display name cannot be empty'),
-    z
-      .record(z.string())
-      .refine(
-        (val) => Object.values(val).some((v) => v && v.trim().length > 0),
-        'At least one language must have a display name',
-      ),
+    z.string().min(1, { error: 'Display name cannot be empty' }),
+    z.record(z.string(), z.string()).refine((val) => Object.values(val).some((v) => v && v.trim().length > 0), {
+      error: 'At least one language must have a display name',
+    }),
   ]),
   description: z
     .union([
       z.string(),
-      z
-        .record(z.string())
-        .refine(
-          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
-          'At least one language must have a display name',
-        ),
+      z.record(z.string(), z.string()).refine((val) => Object.values(val).some((v) => v && v.trim().length > 0), {
+        error: 'At least one language must have a description',
+      }),
     ])
     .optional(),
   iconUrl: z.string().optional(),
@@ -49,11 +43,10 @@ export const workflowAssociationSchema = z.discriminatedUnion('type', [
     type: z.literal('new-design'),
     extraData: z.object({
       newDesignDisplayName: z
-        .record(z.string())
-        .refine(
-          (val) => Object.values(val).some((v) => v && v.trim().length > 0),
-          'At least one language must have a display name',
-        )
+        .record(z.string(), z.string())
+        .refine((val) => Object.values(val).some((v) => v && v.trim().length > 0), {
+          error: 'At least one language must have a display name',
+        })
         .optional(),
     }),
   }),

@@ -51,6 +51,7 @@
     "@tailwindcss/typography": "^0.5.12",
     "@tanstack/react-router": "1.21.0",
     "@tanstack/react-table": "^8.15.3",
+    "@tanstack/router-generator": "^1.131.44",
     "@tanstack/table-core": "^8.15.3",
     "@uppy/core": "^4.2.3",
     "@uppy/thumbnail-generator": "^4.0.1",
@@ -182,6 +183,10 @@
     "typescript": "^5.4.4",
     "vite": "5.4.6",
     "vite-plugin-svgr": "^4.2.0",
-    "vite-tsconfig-paths": "^4.3.2"
+    "vite-tsconfig-paths": "^4.3.2",
+    "zod-v3-to-v4": "1.4.0"
+  },
+  "resolutions": {
+    "zod": "^4.1.8"
   }
 }
