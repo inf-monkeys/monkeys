@@ -59,7 +59,7 @@ if (!servers.length) {
 const serverHostToPortMap = {};
 const startPort = 8000;
 const serverConfigYamls = servers.map((server, index) => {
-  const { appId, host, hosts, auth, paymentServer, ...rest } = server;
+  const { appId, host, hosts, auth, paymentServer, tools, ...rest } = server;
   const port = startPort + index;
   
   // 处理hosts配置
@@ -100,13 +100,17 @@ const serverConfigYamls = servers.map((server, index) => {
     servers: undefined,
   };
 
-  // Override auth configuration
+  // Override
   if (auth) {
     serverConfig.auth = auth;
   }
 
   if (paymentServer) {
     serverConfig.paymentServer = paymentServer;
+  }
+
+  if (tools) {
+    serverConfig.tools = tools;
   }
 
   return yaml.stringify(serverConfig);
