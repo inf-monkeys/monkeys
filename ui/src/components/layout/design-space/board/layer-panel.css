@@ -1,14 +1,106 @@
 .layer-panel {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 200px;
-	height: 100%;
-	background: white;
-	display: flex;
-	flex-direction: column;
-	z-index: 10;
-	border-right: 1px solid #e1e1e1;
+  position: absolute !important;
+  left: 10px !important;
+  top: 10px !important;
+  bottom: 10px !important;
+  width: 260px !important;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  overflow: visible; /* 允许内部的弹出层超出容器显示 */
+}
+
+.layer-panel-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: visible; /* 允许子元素弹出菜单不被裁剪 */
+  border-radius: 20px;
+}
+
+/* 折叠时：只保留顶栏高度 */
+.layer-panel-content.collapsed {
+  height: auto !important;
+}
+
+/* 顶部按钮栏 */
+.top-button-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e1e1e1;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.top-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f8f9fa;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.top-button:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.top-button.active {
+  background: #e9ecef;
+  color: #333;
+}
+
+/* 更多菜单下拉 */
+.more-menu-dropdown {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  background: white;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10000;
+  min-width: 200px;
+  padding: 4px 0;
+}
+
+.menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.2s ease;
+}
+
+.menu-item:hover {
+  background-color: #f8f9fa;
+}
+
+.menu-item.disabled {
+  color: #999 !important;
+  opacity: 0.55 !important; /* 明显的置灰效果 */
+  filter: grayscale(0.2);
+}
+
+.menu-item.disabled:hover {
+  background-color: transparent !important;
+  cursor: default !important; /* 光标不变 */
 }
 
 .shape-tree {
@@ -45,12 +137,13 @@
 }
 
 .layer-panel-title {
-	padding: 10px;
-	font-size: smaller;
-	font-weight: bolder;
-	border-bottom: 1px solid #e1e1e1;
-	background: white;
-	flex-shrink: 0;
+  padding: 10px;
+  font-size: smaller;
+  font-weight: bolder;
+  border-bottom: 1px solid #e1e1e1;
+  background: white;
+  flex-shrink: 0;
+  border-radius: 20px 20px 0 0;
 }
 
 .shape-name-input {
@@ -160,15 +253,51 @@
 
 /* Dark mode support */
 .dark .layer-panel {
-	background: #1e1e1e;
-	border-right-color: #383838;
-	color: #e0e0e0;
+  background: rgba(30, 30, 30, 0.95);
+  color: #e0e0e0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
 }
 
-.dark .layer-panel-title {
-	background: #1e1e1e;
-	border-bottom-color: #383838;
-	color: #e0e0e0;
+.dark .top-button-bar {
+  border-bottom-color: #383838;
+}
+
+.dark .top-button {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+.dark .top-button:hover {
+  background: #383838;
+  color: #ffffff;
+}
+
+.dark .top-button.active {
+  background: #383838;
+  color: #ffffff;
+}
+
+.dark .more-menu-dropdown {
+  background: #1e1e1e;
+  border-color: #383838;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dark .menu-item {
+  color: #e0e0e0;
+}
+
+.dark .menu-item:hover {
+  background-color: #2a2a2a;
+}
+
+.dark .menu-item.disabled {
+  color: #666 !important;
+}
+
+.dark .menu-item.disabled:hover {
+  background-color: transparent !important;
 }
 
 .dark .shape-item:hover {

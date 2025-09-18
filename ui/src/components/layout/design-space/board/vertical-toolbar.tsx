@@ -21,6 +21,17 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   const plusGroupRef = useRef<HTMLDivElement | null>(null);
   const plusCloseTimerRef = useRef<number | undefined>(undefined);
   
+  // 检查是否显示 sidebar
+  const showPageAndLayerSidebar = oem?.theme?.designProjects?.showPageAndLayerSidebar || false;
+  const [leftCollapsed, setLeftCollapsed] = useState(false);
+  useEffect(() => {
+    const handler = (e: any) => setLeftCollapsed(Boolean(e?.detail?.collapsed));
+    window.addEventListener('vines:toggle-left-sidebar-body', handler as any);
+    return () => window.removeEventListener('vines:toggle-left-sidebar-body', handler as any);
+  }, []);
+  // 折叠时贴近画布左边 10px；展开时= 260(面板宽) + 10(间距) + 10(容器内边距约) ≈ 280px
+  const toolbarLeft = leftCollapsed ? '10px' : (showPageAndLayerSidebar ? '280px' : '16px');
+  
   // 监听工具变化
   useEffect(() => {
     const handleToolChange = () => {
@@ -76,7 +87,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
       className="vertical-toolbar"
       style={{ 
         position: 'fixed', 
-        left: '16px', 
+        left: toolbarLeft, 
         top: '50%', 
         transform: 'translateY(-50%)', 
         zIndex: 9999,

@@ -125,6 +125,7 @@ export const Board: React.FC<BoardProps> = ({
   const { data: oem } = useSystemConfig();
 
   const { setBoardCanvasSize, width, height } = useBoardCanvasSizeStore();
+  const [leftCollapsed, setLeftCollapsed] = React.useState(false);
   
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
@@ -210,6 +211,13 @@ export const Board: React.FC<BoardProps> = ({
       comps.StylePanel = () => null;
     }
     
+    // 控制 tldraw 左上角原生操作条（撤销/重做/删除/重复/更多）
+    if (!get(oem, 'theme.designProjects.showActionsMenu', false)) {
+      comps.ActionsMenu = () => null;
+      comps.QuickActions = () => null;
+    }
+    
+
     // 使用自定义的竖向工具栏
     if (!get(oem, 'theme.designProjects.showToolbar', false)) {
       comps.Toolbar = () => null;
@@ -221,32 +229,49 @@ export const Board: React.FC<BoardProps> = ({
       comps.ContextMenu = CustomContextMenu;
     }
     
+    
     return comps;
   }, [oem]); // 只有当oem发生变化时才重新创建
   
   console.log('Components config:', components);
 
+  // 监听左侧面板折叠事件以调整外层容器高度
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const collapsed = Boolean(e?.detail?.collapsed);
+      setLeftCollapsed(collapsed);
+    };
+    window.addEventListener('vines:toggle-left-sidebar-body', handler as any);
+    return () => window.removeEventListener('vines:toggle-left-sidebar-body', handler as any);
+  }, []);
+
   return (
-    <div className="h-full w-full" style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', height: '100%', width: '100%', flex: 1 }}>
       {/* Layer Panel - 固定在左侧（可配置） */}
       {showPageAndLayerSidebar && (
         <div 
           className="layer-panel"
-          style={{ 
+          style={{
             position: 'absolute',
-            left: 0,
-            top: 0,
-            width: '200px',
-            height: '100%',
-            zIndex: 1000
+            left: '10px',
+            top: '10px',
+            // 折叠时仅保留顶栏高度，去掉 bottom 以避免强制撑满
+            height: leftCollapsed ? '48px' : 'calc(100% - 20px)',
+            width: '260px',
+            background: 'white',
+            borderRadius: '20px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+            zIndex: 1000,
+            overflow: 'visible',
+            ...(leftCollapsed ? {} : { })
           }}
         >
           {editor && <ExternalLayerPanel editor={editor} />}
         </div>
       )}
       
-      {/* tldraw容器，根据 sidebar 是否开启留出空间 */}
-      <div style={{ marginLeft: showPageAndLayerSidebar ? '200px' : 0, height: '100%' }}>
+      {/* tldraw容器 - 全屏显示 */}
+      <div style={{ height: '100%' }}>
         <Tldraw
         persistenceKey={persistenceKey}
         onMount={(editor: Editor) => {

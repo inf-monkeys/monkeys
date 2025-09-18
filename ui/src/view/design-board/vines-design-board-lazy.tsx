@@ -9,9 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { AssetRecordType, createShapeId, getSnapshot, TLShapeId } from 'tldraw';
 
+import { useSystemConfig } from '@/apis/common';
 import { updateDesignBoardMetadata, useDesignBoardMetadata } from '@/apis/designs';
 import { useWorkspacePages } from '@/apis/pages';
 import { Board } from '@/components/layout/design-space/board';
+import { DesignBoardRightSidebar } from '@/components/layout/design-space/board/right-sidebar';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -26,6 +28,7 @@ import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 import { IVinesExecutionResultItem } from '@/utils/execution';
 import { downloadFile, getImageSize } from '@/utils/file.ts';
+import { get } from 'lodash';
 
 interface DesignBoardViewProps {
   embed?: boolean;
@@ -57,6 +60,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   const [themeMode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
 
   const { data: metadata, mutate: mutateMetadata } = useDesignBoardMetadata(designBoardId);
+  const { data: oem } = useSystemConfig();
 
   const containerHeight = usePageStore((s) => s.containerHeight);
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
@@ -110,6 +114,16 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
     });
   }, [editor]);
 
+  // 监听来自左侧布局切换按钮的事件，联动右侧侧栏显示/隐藏
+  useEffect(() => {
+    const handler = (e: any) => {
+      const visible = e?.detail?.visible;
+      if (typeof visible === 'boolean') setSidebarVisible(visible);
+    };
+    window.addEventListener('vines:toggle-right-sidebar', handler as any);
+    return () => window.removeEventListener('vines:toggle-right-sidebar', handler as any);
+  }, []);
+
   const handleExport = async () => {
     if (!editor) return;
     const ids = [frameShapeId];
@@ -135,6 +149,9 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       },
     );
   };
+
+  // OEM：是否显示左右侧边栏，统一由 showPageAndLayerSidebar 控制
+  const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false);
 
   // Ctrl/Cmd + S：阻止浏览器保存页面，执行静默保存并提示“已自动保存”
   useEffect(() => {
@@ -308,7 +325,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   return (
     <div className={cn('relative flex h-full max-h-full')}>
       <div className="flex h-full max-w-64">
-        {!embed && (
+        {!embed && get(oem, 'theme.designProjects.showBoardOperationSidebar', true) && (
           <>
             <motion.div
               className="flex flex-col gap-global overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
@@ -369,6 +386,15 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         setEditor={setEditor}
         instance={{ frameShapeId }}
       />
+      {/* 右侧属性侧边栏（按 OEM 同开关控制） */}
+      {showPageAndLayerSidebar && (
+        <DesignBoardRightSidebar
+          className="ml-2"
+          visible={sidebarVisible}
+          onToggle={() => setSidebarVisible(!sidebarVisible)}
+          editor={editor}
+        />
+      )}
     </div>
   );
 };
