@@ -29,6 +29,7 @@ export interface IAgentV2ChatMessage {
   isStreaming?: boolean;
   senderId?: string;
   isSystem?: boolean;
+  messageType?: 'thinking' | 'tool_call' | 'tool_result' | 'summary' | 'final_response'; // 新增消息类型标识
 }
 
 export interface IAgentV2SessionStatus {
