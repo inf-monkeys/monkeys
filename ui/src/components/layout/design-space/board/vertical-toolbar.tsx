@@ -1,4 +1,8 @@
 import { useSystemConfig } from '@/apis/common';
+import { useWorkspacePages } from '@/apis/pages';
+import type { IPinPage } from '@/apis/pages/typings.ts';
+import { VinesIcon } from '@/components/ui/vines-icon';
+import { getI18nContent } from '@/utils';
 import { GeoShapeGeoStyle } from '@tldraw/editor';
 import { useEffect, useRef, useState } from 'react';
 import { TLComponents, TldrawUiIcon, useEditor } from 'tldraw';
@@ -20,6 +24,21 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const plusGroupRef = useRef<HTMLDivElement | null>(null);
   const plusCloseTimerRef = useRef<number | undefined>(undefined);
+  // 工作台被 pin 的应用
+  const { data: pinnedPages } = useWorkspacePages();
+  // 选中的快速应用（展示在 Plus 工具栏下方）
+  const [quickPinned, setQuickPinned] = useState<IPinPage[]>([]);
+
+  // 提取应用图标
+  const getPageIcon = (page: IPinPage): string | undefined => {
+    return (
+      (page as any)?.designProject?.iconUrl ||
+      (page as any)?.workflow?.iconUrl ||
+      (page as any)?.agent?.iconUrl ||
+      (page as any)?.instance?.icon ||
+      undefined
+    );
+  };
   
   // 检查是否显示 sidebar
   const showPageAndLayerSidebar = oem?.theme?.designProjects?.showPageAndLayerSidebar || false;
@@ -29,8 +48,28 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     window.addEventListener('vines:toggle-left-sidebar-body', handler as any);
     return () => window.removeEventListener('vines:toggle-left-sidebar-body', handler as any);
   }, []);
-  // 折叠时贴近画布左边 10px；展开时= 260(面板宽) + 10(间距) + 10(容器内边距约) ≈ 280px
-  const toolbarLeft = leftCollapsed ? '10px' : (showPageAndLayerSidebar ? '280px' : '16px');
+  // 是否显示了 mini 应用（用于定位 toolbar）
+  const [miniActive, setMiniActive] = useState(false);
+  useEffect(() => {
+    const onOpenMini = () => setMiniActive(true);
+    const onToggleLeft = (e: any) => {
+      const collapsed = Boolean(e?.detail?.collapsed);
+      if (!collapsed) setMiniActive(false);
+    };
+    window.addEventListener('vines:open-pinned-page-mini', onOpenMini as any);
+    window.addEventListener('vines:toggle-left-sidebar-body', onToggleLeft as any);
+    return () => {
+      window.removeEventListener('vines:open-pinned-page-mini', onOpenMini as any);
+      window.removeEventListener('vines:toggle-left-sidebar-body', onToggleLeft as any);
+    };
+  }, []);
+  // 工具栏位置：
+  // - 展开：280px
+  // - 收起且 mini 显示：420px（10 + 400 + 10）
+  // - 收起且无 mini：16px
+  const toolbarLeft = showPageAndLayerSidebar
+    ? (leftCollapsed ? (miniActive ? '420px' : '16px') : '280px')
+    : '16px';
   
   // 监听工具变化
   useEffect(() => {
@@ -94,6 +133,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
         pointerEvents: 'auto'
       }}
     >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div className="custom-toolbar">
         {toolbarTools.map((tool) => {
           if (tool.id === 'shape') {
@@ -325,7 +365,10 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
             </button>
           );
         })}
-        {/* Plus menu at bottom */}
+      </div>
+
+      {/* 下方独立 Plus 工具栏，距离上方 20px */}
+      <div className="custom-toolbar">
         <div key="plus-group" className={`tool-group ${isPlusMenuOpen ? 'selected' : ''}`} ref={plusGroupRef}>
           <button
             className={`tool-button ${isPlusMenuOpen ? 'menu-open' : ''}`}
@@ -357,9 +400,50 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
               }}
             />
           </button>
+          {/* 快速项：展示在加号按钮下方 */}
+          {quickPinned.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+              {quickPinned.map((page) => {
+                const label =
+                  (page as any)?.workflow?.displayName
+                    ? (getI18nContent((page as any).workflow.displayName) as string)
+                    : (page as any)?.designProject?.displayName
+                      ? (getI18nContent((page as any).designProject.displayName) as string)
+                      : (page as any)?.agent?.displayName
+                        ? (getI18nContent((page as any).agent.displayName) as string)
+                        : (getI18nContent(page.displayName as any) as string) || (page as any)?.instance?.name || page.id;
+                const icon = getPageIcon(page) || 'lucide:app-window';
+                return (
+                  <button
+                    key={`quick-${page.id}`}
+                    className="tool-button"
+                    title={label}
+                    style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // 1) 折叠左侧面板
+                      window.dispatchEvent(new CustomEvent('vines:toggle-left-sidebar-body', { detail: { collapsed: true } }));
+                      window.dispatchEvent(new CustomEvent('vines:toggle-right-sidebar', { detail: { visible: false } }));
+                      // 2) 打开 mini 模式的嵌入视图（外层监听此事件，渲染 iframe）
+                      window.dispatchEvent(
+                        new CustomEvent('vines:open-pinned-page-mini', { detail: { pageId: page.id, page } }),
+                      );
+                      window.dispatchEvent(
+                        new CustomEvent('vines:open-pinned-page', { detail: { pageId: page.id, page } }),
+                      );
+                    }}
+                  >
+                    <VinesIcon size="xs">{icon}</VinesIcon>
+                  </button>
+                );
+              })}
+            </div>
+          )}
           {isPlusMenuOpen && (
             <div
               className="dropdown-menu"
+              style={{ maxHeight: 200, overflowY: 'auto', overscrollBehavior: 'contain', minWidth: 220 }}
               onMouseEnter={() => {
                 if (plusCloseTimerRef.current !== undefined) {
                   window.clearTimeout(plusCloseTimerRef.current);
@@ -371,18 +455,53 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                 setIsPlusMenuOpen(false);
               }}
             >
-              <div className="dropdown-item" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                <span>智能体</span>
-              </div>
-              <div className="dropdown-item" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                <span>灵感生成</span>
-              </div>
-              <div className="dropdown-item" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                <span>融合生成</span>
-              </div>
+                {(pinnedPages?.pages ?? []).map((page) => {
+                  // 参照工作台：优先展示“应用/项目/Agent”的名称，而非视图名
+                  const label =
+                    (page as any)?.workflow?.displayName
+                      ? (getI18nContent((page as any).workflow.displayName) as string)
+                      : (page as any)?.designProject?.displayName
+                        ? (getI18nContent((page as any).designProject.displayName) as string)
+                        : (page as any)?.agent?.displayName
+                          ? (getI18nContent((page as any).agent.displayName) as string)
+                          : (getI18nContent(page.displayName as any) as string) || (page as any)?.instance?.name || page.id;
+                  const exists = quickPinned.some((p) => p.id === page.id);
+                  const icon = getPageIcon(page) || 'lucide:app-window';
+                  return (
+                    <div
+                      key={page.id}
+                      className="dropdown-item"
+                      title={label}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
+                    >
+                      <span style={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <VinesIcon size="xs" className="shrink-0">{icon}</VinesIcon>
+                        <span className="truncate">{label}</span>
+                      </span>
+                      <button
+                        className="tool-button"
+                        style={{ width: 28, height: 28, minWidth: 28 }}
+                        title={exists ? '移除快捷' : '添加到快捷'}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setQuickPinned((prev) => (exists ? prev.filter((p) => p.id !== page.id) : [...prev, page]));
+                        }}
+                      >
+                        <TldrawUiIcon icon={exists ? 'minus' : 'plus'} />
+                      </button>
+                    </div>
+                  );
+                })}
+                {(!pinnedPages?.pages || pinnedPages.pages.length === 0) && (
+                  <div className="dropdown-item" style={{ opacity: 0.6 }}>
+                    <span>暂无置顶应用</span>
+                  </div>
+                )}
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

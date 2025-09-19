@@ -359,6 +359,16 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
   // 折叠：左侧除顶栏外的区域
   const [isLeftBodyCollapsed, setIsLeftBodyCollapsed] = useState(false);
 
+  // 监听全局折叠事件（来自快捷按钮点击时的外部触发）
+  useEffect(() => {
+    const handler = (e: any) => {
+      const collapsed = Boolean(e?.detail?.collapsed);
+      setIsLeftBodyCollapsed(collapsed);
+    };
+    window.addEventListener('vines:toggle-left-sidebar-body', handler as any);
+    return () => window.removeEventListener('vines:toggle-left-sidebar-body', handler as any);
+  }, []);
+
   const supportedLocales = useMemo(() => (
     [
       { code: 'en', label: 'English' },
