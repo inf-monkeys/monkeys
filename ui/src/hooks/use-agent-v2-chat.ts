@@ -99,76 +99,8 @@ export const useAgentV2Chat = (
         // 根据API返回数据，isSystem为true表示助手消息，false表示用户消息
         const role = msg.isSystem ? 'assistant' : 'user';
 
-        // 处理content字段，确保它是字符串
-        let content = '';
-        if (typeof msg.content === 'string') {
-          // 如果是 "[Tool Calls Only]" 或 "[object Object]"，尝试从工具调用中提取内容
-          if (msg.content === '[Tool Calls Only]' || msg.content === '[object Object]') {
-            if (msg.toolCalls && msg.toolCalls.length > 0) {
-              // 尝试从工具调用中提取有用信息
-              const toolResults = msg.toolCalls.map((toolCall) => {
-                if (toolCall.params && typeof toolCall.params === 'object') {
-                  // 从工具参数中提取内容
-                  if (toolCall.params.result) {
-                    return toolCall.params.result;
-                  }
-                  if (toolCall.params.query) {
-                    return `搜索: ${toolCall.params.query}`;
-                  }
-                  if (toolCall.params.message) {
-                    return toolCall.params.message;
-                  }
-                  // 如果没有特定字段，返回整个params对象
-                  return JSON.stringify(toolCall.params, null, 2);
-                }
-                return `工具调用: ${toolCall.name}`;
-              });
-              content = toolResults.join('\n\n');
-            } else {
-              content = msg.content; // 保持原样显示
-            }
-          } else {
-            content = msg.content;
-          }
-        } else if (msg.content && typeof msg.content === 'object') {
-          // 如果content是对象，首先尝试从工具调用中提取内容
-          if (msg.toolCalls && msg.toolCalls.length > 0) {
-            const toolResults = msg.toolCalls.map((toolCall) => {
-              if (toolCall.params && typeof toolCall.params === 'object') {
-                if (toolCall.params.result) {
-                  return toolCall.params.result;
-                }
-                if (toolCall.params.query) {
-                  return `搜索: ${toolCall.params.query}`;
-                }
-                if (toolCall.params.message) {
-                  return toolCall.params.message;
-                }
-                return JSON.stringify(toolCall.params, null, 2);
-              }
-              return `工具调用: ${toolCall.name}`;
-            });
-            content = toolResults.join('\n\n');
-          } else {
-            // 如果没有工具调用，尝试序列化对象或提取特定字段
-            try {
-              // 检查对象是否有特定的字段
-              if (msg.content.result) {
-                content = msg.content.result;
-              } else if (msg.content.message) {
-                content = msg.content.message;
-              } else if (msg.content.text) {
-                content = msg.content.text;
-              } else {
-                content = JSON.stringify(msg.content, null, 2);
-              }
-            } catch {
-              content = '[复杂对象内容]';
-            }
-          }
-        } else {
-          content = msg.content ? String(msg.content) : '';
-        }
+        // 直接使用原始content，不做复杂转换
+        const content = msg.content || '';
 
         const processedMessage = {
           id: msg.id,
@@ -184,19 +116,8 @@ export const useAgentV2Chat = (
       });
 
       setMessages((prev) => {
-        // 简化的去重逻辑：只基于ID去重
-        const existingIds = new Set(prev.map((m) => m.id));
-
-        const newMessages = historicalMessages.filter((m) => {
-          // 只检查ID去重
-          return !existingIds.has(m.id);
-        });
-
-        if (newMessages.length > 0) {
-          return [...prev, ...newMessages].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-        }
-
-        return prev;
+        // 直接添加所有历史消息，不做去重过滤
+        return [...prev, ...historicalMessages].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
       });
     }
   }, [messagesResponse]);
@@ -275,7 +196,7 @@ export const useAgentV2Chat = (
                   const data = JSON.parse(dataStr);
                   handleSSEEvent(data);
                 } catch (parseError) {
-                  // 忽略JSON解析错误的SSE数据行
+                  /* empty */
                 }
               }
             }
@@ -316,15 +237,16 @@ export const useAgentV2Chat = (
         break;
 
       case 'message_chunk':
-        // 实时更新助手消息
+        // 为思考内容创建独立的消息气泡
         setMessages((prev) => {
           const lastMessage = prev[prev.length - 1];
 
-          if (lastMessage?.role === 'assistant' && lastMessage.isStreaming) {
-            // 更新现有的流式消息
+          // 检查最后一条消息是否是思考类型的流式消息
+          if (lastMessage?.role === 'assistant' && lastMessage.isStreaming && lastMessage.messageType === 'thinking') {
+            // 更新现有的思考消息
             return [...prev.slice(0, -1), { ...lastMessage, content: lastMessage.content + data.content }];
           } else {
-            // 创建新的助手消息
+            // 创建新的思考消息气泡
             return [
               ...prev,
               {
@@ -333,6 +255,7 @@ export const useAgentV2Chat = (
                 content: data.content,
                 createdAt: new Date(),
                 isStreaming: true,
+                messageType: 'thinking', // 标记为思考类型
               },
             ];
           }
@@ -340,78 +263,70 @@ export const useAgentV2Chat = (
         break;
 
       case 'tool_calls': {
-        // 处理工具调用开始
+        // 为每个工具调用创建独立的消息气泡
         const toolCalls = data.toolCalls || [];
         if (toolCalls.length > 0) {
           setMessages((prev) => {
-            const lastMessage = prev[prev.length - 1];
+            const newMessages: IAgentV2ChatMessage[] = [];
 
-            if (lastMessage?.role === 'assistant' && lastMessage.isStreaming) {
-              return [
-                ...prev.slice(0, -1),
-                {
-                  ...lastMessage,
-                  toolCalls: [...(lastMessage.toolCalls || []), ...toolCalls],
-                },
-              ];
-            } else {
-              // 创建新的助手消息来持有工具调用
-              return [
-                ...prev,
-                {
-                  id: nanoIdLowerCase(),
-                  role: 'assistant',
-                  content: '',
-                  createdAt: new Date(),
-                  isStreaming: true,
-                  toolCalls: toolCalls,
-                },
-              ];
-            }
+            // 为每个工具调用创建独立的消息气泡
+            toolCalls.forEach((toolCall) => {
+              const newMessage: IAgentV2ChatMessage = {
+                id: nanoIdLowerCase(),
+                role: 'assistant' as const,
+                content: '', // 移除前端添加的文字，让ai-elements组件处理显示
+                createdAt: new Date(),
+                isStreaming: true,
+                messageType: 'tool_call', // 标记为工具调用类型
+                toolCalls: [toolCall],
+              };
+              newMessages.push(newMessage);
+            });
+
+            return [...prev, ...newMessages];
           });
         }
         break;
       }
 
       case 'tool_result': {
-        // 处理工具执行结果
+        // 为工具执行结果创建独立的消息气泡
         const { tool, result } = data;
         if (tool && result) {
           setMessages((prev) => {
-            const lastMessage = prev[prev.length - 1];
+            // 对于 attempt_completion 工具，直接创建最终回复消息
+            if (tool.name === 'attempt_completion' && result.output) {
+              const finalMessage: IAgentV2ChatMessage = {
+                id: nanoIdLowerCase(),
+                role: 'assistant' as const,
+                content: result.output, // 直接使用 result 作为消息内容
+                createdAt: new Date(),
+                isStreaming: false,
+                messageType: 'final_response', // 标记为最终回复类型
+              };
 
-            if (lastMessage?.role === 'assistant' && lastMessage.isStreaming) {
-              let contentToAdd = '';
-
-              // 根据工具类型生成相应的XML标签
-              switch (tool.name) {
-                case 'update_todo_list':
-                  contentToAdd = `<update_todo_list><todos>${result.output}</todos></update_todo_list>`;
-                  break;
-                case 'web_search':
-                  contentToAdd = `<web_search_result><query>${tool.params?.query || ''}</query><results>${result.output}</results></web_search_result>`;
-                  break;
-                case 'attempt_completion':
-                  contentToAdd = `<attempt_completion><result>${tool.params?.result || result.output}</result></attempt_completion>`;
-                  break;
-                default:
-                  contentToAdd = `<tool_result tool="${tool.name}">${result.output}</tool_result>`;
-              }
-
-              return [
-                ...prev.slice(0, -1),
-                {
-                  ...lastMessage,
-                  content: lastMessage.content + contentToAdd,
-                  // 更新工具调用结果
-                  toolCalls: (lastMessage.toolCalls || []).map((call) =>
-                    call.id === tool.id ? { ...call, result: result.output } : call,
-                  ),
-                },
-              ];
+              return [...prev, finalMessage];
             }
 
-            return prev;
+            // 对于其他工具，创建工具结果消息气泡
+            const newMessage: IAgentV2ChatMessage = {
+              id: nanoIdLowerCase(),
+              role: 'assistant' as const,
+              content: '', // 移除前端添加的文字，让ai-elements组件处理显示
+              createdAt: new Date(),
+              isStreaming: false, // 工具结果是完整的，不需要流式更新
+              messageType: 'tool_result', // 标记为工具结果类型
+              toolCalls: [
+                {
+                  id: tool.id,
+                  name: tool.name,
+                  params: tool.params,
+                  result: result.output,
+                },
+              ],
+            };
+
+            return [...prev, newMessage];
           });
         }
         break;
@@ -476,8 +391,26 @@ export const useAgentV2Chat = (
       case 'response_complete':
         setIsLoading(false);
 
-        // 标记流式消息完成
-        setMessages((prev) => prev.map((msg) => (msg.isStreaming ? { ...msg, isStreaming: false } : msg)));
+        // 标记所有流式消息完成，并创建最终总结消息气泡（如果有内容的话）
+        setMessages((prev) => {
+          const updatedMessages = prev.map((msg) => (msg.isStreaming ? { ...msg, isStreaming: false } : msg));
+
+          // 如果有最终的总结内容，创建总结消息气泡
+          if (data.finalContent) {
+            const summaryMessage: IAgentV2ChatMessage = {
+              id: nanoIdLowerCase(),
+              role: 'assistant' as const,
+              content: data.finalContent,
+              createdAt: new Date(),
+              isStreaming: false,
+              messageType: 'summary', // 标记为总结类型
+            };
+
+            return [...updatedMessages, summaryMessage];
+          }
+
+          return updatedMessages;
+        });
         break;
 
       case 'complete':
@@ -492,7 +425,8 @@ export const useAgentV2Chat = (
         break;
 
       case 'heartbeat':
-        // 心跳，不需要处理
+        // 显示心跳事件，不过滤
+        console.log('收到心跳事件:', data);
         break;
 
       default:

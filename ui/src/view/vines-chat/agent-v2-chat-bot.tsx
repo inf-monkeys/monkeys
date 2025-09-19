@@ -35,13 +35,6 @@ const convertToVinesMessage = (message: IAgentV2ChatMessage): IVinesMessage | nu
     extra: message.toolCalls || [],
   };
 
-  console.log(`convertToVinesMessage ${message.id}:`, {
-    原始消息: message,
-    转换结果: result,
-    content类型: typeof result.content,
-    content内容: result.content,
-  });
-
   return result;
 };
 
@@ -78,7 +71,7 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
       ? containerHeight - headerHeight - bottomHeight
       : height - (headerHeight || 60) - (bottomHeight || 120);
 
-  // 转换消息格式，过滤掉null消息
+  // 转换消息格式，不过滤任何消息
   const vinesMessages = useMemo(() => {
     const converted = messages
       .map((msg) => convertToVinesMessage(msg))
@@ -103,10 +96,10 @@ export const AgentV2ChatMode: React.FC<IAgentV2ChatModeProps> = ({
       }
     }
 
-    // 如果解析不到，使用 SSE 提供的基本信息
+    // 如果解析不到，直接使用 SSE 提供的原始信息，转换格式匹配接口
     return {
       question: followupQuestion.question,
-      suggestions: followupQuestion.suggestions?.map((s) => (typeof s === 'string' ? s : s.answer)) || [],
+      suggestions: followupQuestion.suggestions?.map((s) => s.answer) || [],
     };
   }, [followupQuestion, messages]);
 
