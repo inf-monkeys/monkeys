@@ -391,9 +391,9 @@ Please retry with only ONE tool call.`;
                 return true; // Always continue after web_search to process results
               }
               if (tool.name === 'update_todo_list') {
-                // Continue if there are pending tasks or in-progress tasks to execute
+                // Continue if there are pending tasks, in-progress tasks to execute, or all tasks completed
                 const taskState = this.taskStateManager.getSessionTaskState(this.session.id);
-                return taskState?.nextAction === 'start_next_task' || taskState?.nextAction === 'continue_task';
+                return taskState?.nextAction === 'start_next_task' || taskState?.nextAction === 'continue_task' || taskState?.nextAction === 'all_completed';
               }
               // Never continue after attempt_completion to prevent loops
               return false;
@@ -619,6 +619,14 @@ Continue working on your in-progress task:
 Use the appropriate tool to complete this task:
 - If it involves searching/research → use web_search
 - If you need user clarification → use ask_followup_question`;
+      } else if (nextAction === 'all_completed') {
+        contextualGuidance = `
+
+ALL TASKS COMPLETED GUIDANCE:
+All tasks in your todo list are now completed! You MUST now use the attempt_completion tool to present the final result to the user.
+
+CRITICAL: Use attempt_completion immediately with a comprehensive summary of all completed work.
+DO NOT update the todo list or use any other tools. Your next action MUST be attempt_completion.`;
       } else if (recentlyUpdatedTodos > 0 && (pendingTasks.length > 0 || inProgressTasks.length > 0)) {
         contextualGuidance = `
 
