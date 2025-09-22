@@ -429,18 +429,18 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     e.preventDefault();
                     e.stopPropagation();
                     // 切换逻辑：
-                    // - 当前显示 page&layer（mini 关闭）→ 打开 iframe（该page）
-                    // - 当前显示 iframe（任意page）→ 关闭 iframe，回到 page&layer
-                    if (miniActive) {
+                    // - 若当前已显示 iframe，且就是此按钮对应的页面 → 关闭 iframe，回到 Page&Layer
+                    // - 否则 → 打开（或切换到）对应页面的 iframe
+                    if (miniActive && currentMiniPageId === page.id) {
                       window.dispatchEvent(new CustomEvent('vines:close-pinned-page-mini'));
-                    } else {
-                      window.dispatchEvent(
-                        new CustomEvent('vines:open-pinned-page-mini', { detail: { pageId: page.id, page } }),
-                      );
-                      window.dispatchEvent(
-                        new CustomEvent('vines:open-pinned-page', { detail: { pageId: page.id, page } }),
-                      );
+                      return;
                     }
+                    window.dispatchEvent(
+                      new CustomEvent('vines:open-pinned-page-mini', { detail: { pageId: page.id, page } }),
+                    );
+                    window.dispatchEvent(
+                      new CustomEvent('vines:open-pinned-page', { detail: { pageId: page.id, page } }),
+                    );
                   }}
                   >
                     <VinesIcon size="xs">{icon}</VinesIcon>
