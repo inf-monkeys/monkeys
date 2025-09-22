@@ -87,10 +87,6 @@ export class WorkflowExecutionService {
       const executionRecords = await this.workflowRepository.findExecutionsByWorkflowInstanceIds(workflowInstanceIds);
       for (const execution of executions) {
         const executionRecord = executionRecords.find((x) => x.workflowInstanceId === execution.workflowId);
-        // 过滤掉临时工作流的执行记录
-        if (executionRecord && executionRecord.isTemporary) {
-          continue;
-        }
         if (executionRecord) {
           result.push({
             ...execution,
