@@ -4,26 +4,26 @@ import './index.scss';
 import './layer-panel.css';
 
 import {
-  AssetRecordType,
-  createShapeId,
-  defaultBindingUtils,
-  DefaultContextMenu,
-  DefaultContextMenuContent,
-  defaultEditorAssetUrls,
-  defaultShapeTools,
-  defaultTools,
-  Editor,
-  FrameShapeUtil,
-  TLComponents,
-  Tldraw,
-  TldrawUiMenuGroup,
-  TldrawUiMenuItem,
-  TLImageShape,
-  TLShape,
-  TLShapeId,
-  TLUiContextMenuProps,
-  useEditor,
-  useToasts
+    AssetRecordType,
+    createShapeId,
+    defaultBindingUtils,
+    DefaultContextMenu,
+    DefaultContextMenuContent,
+    defaultEditorAssetUrls,
+    defaultShapeTools,
+    defaultTools,
+    Editor,
+    FrameShapeUtil,
+    TLComponents,
+    Tldraw,
+    TldrawUiMenuGroup,
+    TldrawUiMenuItem,
+    TLImageShape,
+    TLShape,
+    TLShapeId,
+    TLUiContextMenuProps,
+    useEditor,
+    useToasts
 } from 'tldraw';
 
 import { ExternalLayerPanel } from './ExternalLayerPanel';
@@ -36,13 +36,7 @@ import { getImageSize } from '@/utils/file';
 import { get } from 'lodash';
 
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
-import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
-import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
-import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import type { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
-import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
-import { createExecutionStore, ExecutionStoreProvider } from '@/store/useExecutionStore';
-import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { newConvertExecutionResultToItemList } from '@/utils/execution';
 import { useEventEmitter } from 'ahooks';
 import 'tldraw/tldraw.css';
@@ -137,6 +131,8 @@ export const Board: React.FC<BoardProps> = ({
   const { setBoardCanvasSize, width, height } = useBoardCanvasSizeStore();
   const [leftCollapsed, setLeftCollapsed] = React.useState(false);
   const [miniPage, setMiniPage] = React.useState<any | null>(null);
+  const [leftSidebarWidth, setLeftSidebarWidth] = React.useState<number>(300);
+  const [resizing, setResizing] = React.useState<boolean>(false);
   const miniEvent$ = useEventEmitter<any>();
   const insertedUrlSetRef = React.useRef<Set<string>>(new Set());
   const miniStartTimeRef = React.useRef<number>(0);
@@ -264,6 +260,39 @@ export const Board: React.FC<BoardProps> = ({
     return () => window.removeEventListener('vines:toggle-left-sidebar-body', handler as any);
   }, []);
 
+  // 监听并限制侧栏宽度变化（200-400px）
+  const onStartResize = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setResizing(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (!resizing) return;
+    const handleMove = (e: MouseEvent) => {
+      const container = (document.querySelector('.layer-panel') as HTMLElement) || null;
+      if (!container) return;
+      const left = container.getBoundingClientRect().left;
+      const next = Math.max(200, Math.min(400, e.clientX - left));
+      setLeftSidebarWidth(next);
+      // 通知其他组件（如工具栏）更新定位
+      window.dispatchEvent(new CustomEvent('vines:left-sidebar-width-change', { detail: { width: next } }));
+    };
+    const handleUp = () => setResizing(false);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleUp, { once: true });
+    return () => {
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleUp as any);
+    };
+  }, [resizing]);
+
+  // 广播初始宽度，保证工具栏初次定位
+  React.useEffect(() => {
+    // 初始化时广播一次，确保 toolbar 不被遮挡
+    window.dispatchEvent(new CustomEvent('vines:left-sidebar-width-change', { detail: { width: leftSidebarWidth } }));
+  }, [leftSidebarWidth]);
+
   // 监听打开 mini 模式应用事件，记录当前 page 信息
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -292,8 +321,17 @@ export const Board: React.FC<BoardProps> = ({
 
   // 拉取执行输出并将图片直接插入画板
   const { data: allOutputsPages } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
+  const historyOpenRef = React.useRef(false);
+  React.useEffect(() => {
+    const onToggle = (e: any) => {
+      historyOpenRef.current = Boolean(e?.detail?.open);
+    };
+    window.addEventListener('vines:mini-history-toggle', onToggle as any);
+    return () => window.removeEventListener('vines:mini-history-toggle', onToggle as any);
+  }, []);
   React.useEffect(() => {
     if (!editor || !miniPage) return;
+    if (historyOpenRef.current) return; // 历史面板打开时，不向画板插图
     const flat = (allOutputsPages?.flat() ?? []) as VinesWorkflowExecutionOutputListItem[];
     if (!flat?.length) return;
     const items = newConvertExecutionResultToItemList(flat);
@@ -364,71 +402,47 @@ export const Board: React.FC<BoardProps> = ({
             top: '10px',
             // 折叠时仅保留顶栏高度，去掉 bottom 以避免强制撑满
             height: leftCollapsed ? '48px' : 'calc(100% - 20px)',
-            width: '400px',
+            width: `${leftSidebarWidth}px`,
             background: 'white',
             borderRadius: '20px',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
             zIndex: 1000,
-            overflow: 'visible',
+            overflow: leftCollapsed ? 'hidden' : 'visible',
             ...(leftCollapsed ? {} : { })
           }}
         >
           {editor && <ExternalLayerPanel editor={editor} />}
+          {/* 右侧拖拽调宽手柄 */}
+          {!leftCollapsed && (
+            <div
+              onMouseDown={onStartResize}
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: -6,
+                width: 12,
+                height: '100%',
+                cursor: 'col-resize',
+                zIndex: 1001,
+                // 命中区域更宽，视觉细线
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 6,
+                  width: 1,
+                  height: '100%',
+                  background: '#e5e7eb',
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
 
-      {/* 折叠时：在左侧菜单下方 10px 显示一个嵌入 iframe 容器（暂不加载实际页面） */}
-      {showPageAndLayerSidebar && leftCollapsed && miniPage && (
-        <div
-          style={{
-            position: 'absolute',
-            left: '10px',
-            top: '68px', // 10(top) + 48(menu) + 10(gap)
-            width: '400px',
-            // 高度与 page sidebar 一致：占据剩余空间到底部
-            // 总高度(100%) - 顶部10 - 菜单48 - 间距10 - 底部10 = 100% - 78px
-            height: 'calc(100% - 78px)',
-            background: 'white',
-            borderRadius: '20px',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-            zIndex: 999,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-            {miniPage ? (
-              <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
-                {/* 缩放容器：整体缩小为 90%，并保持可滚动 */}
-                <div style={{
-                  transform: 'scale(0.9)',
-                  transformOrigin: 'top left',
-                  width: '111.111111%', /* 1 / 0.9，铺满容器 */
-                }}>
-                  <VinesFlowProvider workflowId={miniPage?.workflowId || miniPage?.workflow?.id || ''}>
-                    <FlowStoreProvider createStore={createFlowStore}>
-                      <CanvasStoreProvider createStore={createCanvasStore}>
-                        <VinesViewWrapper workflowId={miniPage?.workflowId || miniPage?.workflow?.id}>
-                          <ExecutionStoreProvider createStore={createExecutionStore}>
-                            <VinesTabular className="h-full w-full" event$={miniEvent$} height={'100%'} />
-                          </ExecutionStoreProvider>
-                        </VinesViewWrapper>
-                      </CanvasStoreProvider>
-                    </FlowStoreProvider>
-                  </VinesFlowProvider>
-                </div>
-              </div>
-            ) : (
-              <div style={{ flex: 1, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: 12 }}>
-                请选择一个应用
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* mini iframe 现已整合进 ExternalLayerPanel 内部渲染 */}
       
       {/* tldraw容器 - 全屏显示 */}
       <div style={{ height: '100%' }}>

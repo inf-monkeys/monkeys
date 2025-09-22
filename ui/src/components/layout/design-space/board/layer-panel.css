@@ -3,7 +3,7 @@
   left: 10px !important;
   top: 10px !important;
   bottom: 10px !important;
-  width: 260px !important;
+  /* 宽度由内联样式控制以支持拖拽调整 */
   background: white;
   display: flex;
   flex-direction: column;
@@ -31,11 +31,16 @@
 .top-button-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   padding: 8px 12px;
   border-bottom: 1px solid #e1e1e1;
   flex-shrink: 0;
   gap: 8px;
+}
+
+/* 确保切换布局按钮在最右侧 */
+.top-button-bar .layout-toggle {
+  margin-left: auto;
 }
 
 .top-button {
@@ -110,6 +115,15 @@
 	flex: 1;
 }
 
+/* 隐藏滚动条但允许滚动 - 兼容 Webkit / Firefox / 旧版 Edge */
+.shape-tree::-webkit-scrollbar {
+	display: none;
+}
+.shape-tree {
+	-ms-overflow-style: none; /* IE and old Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
 .shape-item {
 	display: flex;
 	align-items: center;
@@ -180,6 +194,15 @@
 .pages-list {
 	/* max-height 已移除，现在由 JavaScript 动态控制高度 */
 	overflow-y: auto;
+}
+
+/* 隐藏滚动条但允许滚动 - 兼容 Webkit / Firefox / 旧版 Edge */
+.pages-list::-webkit-scrollbar {
+	display: none;
+}
+.pages-list {
+	-ms-overflow-style: none; /* IE and old Edge */
+	scrollbar-width: none; /* Firefox */
 }
 
 /* 页面标题栏按钮 */
@@ -372,4 +395,15 @@ div[class*="tl-watermark"],
 	width: 0 !important;
 	height: 0 !important;
 	overflow: hidden !important;
+}
+
+/* 通用：隐藏左侧 layer-panel 内所有滚动条，但保留滚动功能 */
+.layer-panel,
+.layer-panel * {
+	-ms-overflow-style: none; /* IE and old Edge */
+	scrollbar-width: none; /* Firefox */
+}
+.layer-panel::-webkit-scrollbar,
+.layer-panel *::-webkit-scrollbar {
+	display: none; /* WebKit */
 }

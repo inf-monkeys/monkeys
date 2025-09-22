@@ -1,5 +1,18 @@
+import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
+import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
+import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
+import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
+import { VinesIcon } from '@/components/ui/vines-icon';
+import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons';
+import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
+import { ExecutionStoreProvider, createExecutionStore } from '@/store/useExecutionStore';
+import { FlowStoreProvider, createFlowStore } from '@/store/useFlowStore';
+import { newConvertExecutionResultToItemList } from '@/utils/execution';
+import { useEventEmitter } from 'ahooks';
 import { capitalize } from 'lodash';
-import { Copy, Redo2, Trash2, Undo2 } from 'lucide-react';
+import { History } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Editor, TLShapeId } from 'tldraw';
 import { VisibilityOff, VisibilityOn } from './icons';
@@ -355,6 +368,47 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
   const prefsCloseTimerRef = useRef<number | undefined>(undefined);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false); // 语言菜单
   const langCloseTimerRef = useRef<number | undefined>(undefined);
+
+  // mini iframe 集成：折叠时显示
+  const [miniPage, setMiniPage] = useState<any | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const miniEvent$ = useEventEmitter<any>();
+  // 获取执行历史（用于历史记录视图）
+  const { data: allOutputsPages } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
+  // 文本归一化：支持多语言对象 { 'zh-CN': '...', en: '...' }
+  const normalizeText = useCallback((val: any): string => {
+    if (typeof val === 'string') return val;
+    if (val && typeof val === 'object') {
+      try {
+        const lang = (navigator?.language || 'en').toLowerCase();
+        const candidates = [lang, lang.replace('-', '_'), 'zh-CN', 'zh_cn', 'zh', 'en'];
+        for (const key of candidates) {
+          const v = (val as any)[key];
+          if (typeof v === 'string' && v.trim()) return v;
+        }
+        const first = Object.values(val).find((v) => typeof v === 'string' && (v as string).trim());
+        if (typeof first === 'string') return first;
+      } catch {}
+    }
+    return '';
+  }, []);
+  useEffect(() => {
+    const openHandler = (e: any) => {
+      const next = e?.detail?.page || e?.detail || null;
+      setMiniPage(next);
+      window.dispatchEvent(new CustomEvent('vines:mini-state', { detail: { pageId: next?.id || null } }));
+    };
+    const closeHandler = () => {
+      setMiniPage(null);
+      window.dispatchEvent(new CustomEvent('vines:mini-state', { detail: { pageId: null } }));
+    };
+    window.addEventListener('vines:open-pinned-page-mini', openHandler as any);
+    window.addEventListener('vines:close-pinned-page-mini', closeHandler as any);
+    return () => {
+      window.removeEventListener('vines:open-pinned-page-mini', openHandler as any);
+      window.removeEventListener('vines:close-pinned-page-mini', closeHandler as any);
+    };
+  }, []);
 
   // 折叠：左侧除顶栏外的区域
   const [isLeftBodyCollapsed, setIsLeftBodyCollapsed] = useState(false);
@@ -1100,13 +1154,14 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-start',
+          justifyContent: 'space-between',
           padding: '8px 12px',
           borderBottom: '1px solid #e1e1e1',
           flexShrink: 0,
           gap: '8px'
         }}
       >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
         {/* 更多菜单按钮 */}
         <div style={{ position: 'relative' }}>
           <button
@@ -1949,7 +2004,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
 
         {/* 顶部快捷按钮：撤销 / 取消撤销 / 删除 / 复制（重复） */}
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
+          {/* <button
             className="top-button"
             style={{
               width: '32px', height: '32px', border: '1px solid #e5e7eb',
@@ -2023,10 +2078,11 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
             disabled={!hasSelection}
           >
             <Copy size={16} />
-          </button>
-          {/* 布局切换按钮 */}
+          </button> */}
+        </div>
+        {/* 布局切换按钮（最右侧） */}
         <button
-          className="top-button"
+          className="top-button layout-toggle"
           style={{
             width: '32px', height: '32px', border: '1px solid #e5e7eb', background: '#fff',
             borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#111'
@@ -2047,6 +2103,159 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
         </div>
       </div>
 
+      {/* 当 miniPage 存在时，显示 iframe；否则显示页面+图层面板 */}
+      {miniPage && !isLeftBodyCollapsed ? (
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
+            {/* 迷你应用顶部信息栏：显示当前工作流名称与描述 */}
+            <div
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 1,
+                background: '#fff',
+                padding: '10px 12px',
+                borderBottom: '1px solid #e5e7eb',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              {(() => {
+                const title =
+                  normalizeText(miniPage?.workflow?.displayName) ||
+                  normalizeText(miniPage?.workflow?.name) ||
+                  normalizeText(miniPage?.name) ||
+                  '未命名工作流';
+                const desc = normalizeText(miniPage?.workflow?.description);
+                return (
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '32px 1fr',
+                      columnGap: 10,
+                      rowGap: 0,
+                      alignItems: 'center',
+                      minWidth: 0,
+                    }}
+                  >
+                    {/* 行1：图标（包裹底板） + 名称 */}
+                    <div style={{ gridColumn: '1 / 2', gridRow: '1 / 2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        background: '#f2f4f7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.04)'
+                      }}>
+                        <VinesIcon size="sm" className="pointer-events-none select-none" disabledPreview>
+                          {miniPage?.workflow?.iconUrl || DEFAULT_WORKFLOW_ICON_URL}
+                        </VinesIcon>
+                      </div>
+                    </div>
+                    <div style={{ gridColumn: '2 / 3', gridRow: '1 / 2', minWidth: 0, fontSize: 15, fontWeight: 700, color: '#2b2f36', lineHeight: '20px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {title}
+                    </div>
+                    {/* 行2：对齐到名称左边，展示描述（带小图标，标签样式） */}
+                    <div style={{ gridColumn: '2 / 3', gridRow: '2 / 3', display: 'flex', alignItems: 'center', gap: 6, color: '#6b7280', minWidth: 0, marginTop: -2 }}>
+                      {desc ? (
+                        <>
+                          <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            padding: '0',
+                            maxWidth: '100%'
+                          }}>
+                            <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[miniPage?.instance?.icon] ?? (miniPage?.instance?.icon || 'lucide:file-text')} />
+                            <div style={{ fontSize: 12, lineHeight: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {desc}
+                            </div>
+                          </div>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })()}
+              <button
+                title={historyOpen ? '隐藏历史' : '显示历史'}
+                onClick={() => setHistoryOpen(!historyOpen)}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 6,
+                  border: '1px solid #e5e7eb',
+                  background: historyOpen ? '#f3f4f6' : '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <History size={14} />
+              </button>
+              </div>
+            </div>
+            {!historyOpen && (
+              <div style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '111.111111%' }}>
+              <VinesFlowProvider workflowId={miniPage?.workflowId || miniPage?.workflow?.id || ''}>
+                <FlowStoreProvider createStore={createFlowStore}>
+                  <CanvasStoreProvider createStore={createCanvasStore}>
+                    <VinesViewWrapper workflowId={miniPage?.workflowId || miniPage?.workflow?.id}>
+                      <ExecutionStoreProvider createStore={createExecutionStore}>
+                        <VinesTabular className="h-full w-full" event$={miniEvent$} height={'100%'} />
+                      </ExecutionStoreProvider>
+                    </VinesViewWrapper>
+                  </CanvasStoreProvider>
+                </FlowStoreProvider>
+              </VinesFlowProvider>
+              </div>
+            )}
+            {historyOpen && (
+              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ fontSize: 12, color: '#6b7280' }}>历史记录</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+                  {(() => {
+                    try {
+                      const flat = (allOutputsPages?.flat?.() ?? []) as any[];
+                      const items = newConvertExecutionResultToItemList(flat);
+                      const workflowId = miniPage?.workflowId || miniPage?.workflow?.id;
+                      const list = items.filter((it: any) => it?.workflowId === workflowId).slice(0, 12);
+                      if (list.length === 0) return (
+                        <div style={{ gridColumn: '1 / -1', color: '#9ca3af', fontSize: 12 }}>暂无历史</div>
+                      );
+                      return list.map((it: any, idx: number) => {
+                        const type = String(it?.render?.type || '').toLowerCase();
+                        const data = it?.render?.data;
+                        if (type === 'image' && typeof data === 'string') {
+                          return (
+                            <div key={idx} style={{ position: 'relative', overflow: 'hidden', border: '1px solid #e5e7eb', borderRadius: 8 }}>
+                              {/* 这里可替换为 thumbUrl */}
+                              <img src={data} style={{ width: '100%', height: 90, objectFit: 'cover' }} />
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key={idx} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 8, fontSize: 12, maxHeight: 90, overflow: 'auto' }}>
+                            <pre style={{ margin: 0, fontSize: 11 }}>{typeof data === 'string' ? data : JSON.stringify(data, null, 2)}</pre>
+                          </div>
+                        );
+                      });
+                    } catch {
+                      return (
+                        <div style={{ gridColumn: '1 / -1', color: '#9ca3af', fontSize: 12 }}>历史加载失败</div>
+                      );
+                    }
+                  })()}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+      <>
       {/* 页面列表部分 - 可调节高度（可折叠） */}
       {!isLeftBodyCollapsed && (
         <div 
@@ -2273,6 +2482,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
           ))}
         </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );

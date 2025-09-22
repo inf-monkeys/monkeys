@@ -48,27 +48,33 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     window.addEventListener('vines:toggle-left-sidebar-body', handler as any);
     return () => window.removeEventListener('vines:toggle-left-sidebar-body', handler as any);
   }, []);
-  // 是否显示了 mini 应用（用于定位 toolbar）
+  // mini 开关状态（不影响 toolbar 定位，仅用于样式或激活态）
   const [miniActive, setMiniActive] = useState(false);
+  const [currentMiniPageId, setCurrentMiniPageId] = useState<string | null>(null);
   useEffect(() => {
-    const onOpenMini = () => setMiniActive(true);
-    const onToggleLeft = (e: any) => {
-      const collapsed = Boolean(e?.detail?.collapsed);
-      if (!collapsed) setMiniActive(false);
+    const onMini = (e: any) => {
+      const pid = e?.detail?.pageId ?? null;
+      setMiniActive(Boolean(pid));
+      setCurrentMiniPageId(pid);
     };
-    window.addEventListener('vines:open-pinned-page-mini', onOpenMini as any);
-    window.addEventListener('vines:toggle-left-sidebar-body', onToggleLeft as any);
-    return () => {
-      window.removeEventListener('vines:open-pinned-page-mini', onOpenMini as any);
-      window.removeEventListener('vines:toggle-left-sidebar-body', onToggleLeft as any);
+    window.addEventListener('vines:mini-state', onMini as any);
+    return () => window.removeEventListener('vines:mini-state', onMini as any);
+  }, []);
+  // 工具栏位置：跟随左侧栏实际宽度
+  const [leftSidebarWidth, setLeftSidebarWidth] = useState<number>(300);
+  useEffect(() => {
+    const handler = (e: any) => {
+      const w = Number(e?.detail?.width);
+      if (!Number.isNaN(w)) setLeftSidebarWidth(w);
     };
+    window.addEventListener('vines:left-sidebar-width-change', handler as any);
+    return () => window.removeEventListener('vines:left-sidebar-width-change', handler as any);
   }, []);
   // 工具栏位置：
-  // - 展开：280px
-  // - 收起且 mini 显示：420px（10 + 400 + 10）
-  // - 收起且无 mini：16px
+  // - 侧栏展开：始终在 sidebar 右边 10px（左边距10 + 宽度 + 10）
+  // - 侧栏收起：回到最左边 16px
   const toolbarLeft = showPageAndLayerSidebar
-    ? (leftCollapsed ? (miniActive ? '420px' : '16px') : '280px')
+    ? (leftCollapsed ? '16px' : `${leftSidebarWidth + 20}px`)
     : '16px';
   
   // 监听工具变化
@@ -419,20 +425,23 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     className="tool-button"
                     title={label}
                     style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      // 1) 折叠左侧面板
-                      window.dispatchEvent(new CustomEvent('vines:toggle-left-sidebar-body', { detail: { collapsed: true } }));
-                      window.dispatchEvent(new CustomEvent('vines:toggle-right-sidebar', { detail: { visible: false } }));
-                      // 2) 打开 mini 模式的嵌入视图（外层监听此事件，渲染 iframe）
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // 切换逻辑：
+                    // - 当前显示 page&layer（mini 关闭）→ 打开 iframe（该page）
+                    // - 当前显示 iframe（任意page）→ 关闭 iframe，回到 page&layer
+                    if (miniActive) {
+                      window.dispatchEvent(new CustomEvent('vines:close-pinned-page-mini'));
+                    } else {
                       window.dispatchEvent(
                         new CustomEvent('vines:open-pinned-page-mini', { detail: { pageId: page.id, page } }),
                       );
                       window.dispatchEvent(
                         new CustomEvent('vines:open-pinned-page', { detail: { pageId: page.id, page } }),
                       );
-                    }}
+                    }
+                  }}
                   >
                     <VinesIcon size="xs">{icon}</VinesIcon>
                   </button>
