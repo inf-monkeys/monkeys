@@ -19,6 +19,7 @@ import { DesignModule } from './modules/design/design.module';
 import { EvaluationModule } from './modules/evaluation/evaluation.module';
 import { ExportModule } from './modules/export/export.module';
 import { MarketplaceModule } from './modules/marketplace/marketplace.module';
+import { ModelTrainingModule } from './modules/model-training/model-training.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { TemporaryWorkflowModule } from './modules/temporary-workflow/temporary-workflow.module';
 import { TenantModule } from './modules/tenant/tenant.module';
@@ -63,6 +64,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     TemporaryWorkflowModule,
     MarketplaceModule,
     EvaluationModule,
+    ModelTrainingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

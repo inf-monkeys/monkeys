@@ -1799,10 +1799,10 @@
     local-pkg "^1.1.1"
     mlly "^1.7.4"
 
-"@inf-monkeys/monkeys@0.0.15":
-  version "0.0.15"
-  resolved "https://registry.npmjs.org/@inf-monkeys/monkeys/-/monkeys-0.0.15.tgz#49c7852ddb159c96d7d61bdf6dcd7ec0bbc6f7ea"
-  integrity sha512-jTYcai1sOK6aBJyNdgOhpe6FiXSpAMyT5QcTn97dOuUABUsv++cruCRqO+kaFJEKVcBssK1l8dGXoLsxbCRfPA==
+"@inf-monkeys/monkeys@0.0.16":
+  version "0.0.16"
+  resolved "https://registry.npmmirror.com/@inf-monkeys/monkeys/-/monkeys-0.0.16.tgz#ba08ef7766cdf9cabed6cafee3a7be8387746b54"
+  integrity sha512-r4vivXmPWCwDnxTaQx07B8ZliKaGgG5DrbqamLwkG6HEl2WOGEDMRF/OBrtELOCfGGt5dxjMMxS1wtDDuLaNYg==
   dependencies:
     "@io-orkes/conductor-javascript" "^2.1.0"
 

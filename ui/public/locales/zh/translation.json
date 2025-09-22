@@ -106,6 +106,7 @@
       "comfyui-workflow": "ComfyUI 工作流",
       "image-model": "图像模型",
       "image-model-type": "图像模型类型",
+      "model-training": "模型训练",
       "comfyui-server": "ComfyUI 服务",
       "filter-group": "筛选分组",
       "text-data": "文本数据",
@@ -459,6 +460,9 @@
               },
               "image-models": {
                 "label": "图像模型"
+              },
+              "model-training": {
+                "label": "模型训练"
               }
             },
             "media": {
@@ -2186,6 +2190,49 @@
       "detail": {
         "title": "图像模型详情"
       }
+    },
+    "model-training": {
+      "create": {
+        "dialog": {
+          "title": "创建模型训练",
+          "info": {
+            "label": "模型训练名称",
+            "placeholder": "请输入模型训练名称"
+          },
+          "description": {
+            "label": "模型训练描述",
+            "placeholder": "请输入模型训练描述"
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "status": {
+            "label": "状态",
+            "options": {
+              "idle": "空闲",
+              "pending": "等待中",
+              "running": "训练中",
+              "completed": "已完成",
+              "failed": "失败"
+            }
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
+        },
+        "operate-area": {}
+      },
+      "detail": {}
     },
     "text-data": {
       "ugc-view": {
