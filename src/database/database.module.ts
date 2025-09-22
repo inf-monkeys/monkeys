@@ -15,6 +15,10 @@ import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-tr
 import { TimestampSubscriber } from '@/timestamp.subscriber';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+import { AgentV2MessageEntity } from './entities/agent-v2/agent-v2-message.entity';
+import { AgentV2SessionEntity } from './entities/agent-v2/agent-v2-session.entity';
+import { AgentV2MessageQueueEntity, AgentV2TaskStateEntity } from './entities/agent-v2/agent-v2-task-state.entity';
+import { AgentV2Entity } from './entities/agent-v2/agent-v2.entity';
 import { ApiKeyEntity } from './entities/apikey/apikey';
 import { AssetsAuthorizationEntity } from './entities/assets/asset-authorization';
 import { AssetFilterEntity } from './entities/assets/asset-filter';
@@ -55,6 +59,7 @@ import { TeamMembersEntity } from './entities/identity/user-team-relationship';
 import { InstalledAppEntity } from './entities/marketplace/installed-app.entity';
 import { MarketplaceAppVersionEntity } from './entities/marketplace/marketplace-app-version.entity';
 import { MarketplaceAppEntity } from './entities/marketplace/marketplace-app.entity';
+import { ModelTrainingEntity } from './entities/model-training/model-training';
 import { WorkflowObservabilityEntity } from './entities/observability/workflow-observability';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
@@ -62,10 +67,6 @@ import { TemporaryWorkflowEntity } from './entities/workflow/temporary-workflow.
 import { WorkflowArtifactEntity } from './entities/workflow/workflow-artifact.entity';
 import { WorkflowAssociationsEntity } from './entities/workflow/workflow-association';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
-import { AgentV2Entity } from './entities/agent-v2/agent-v2.entity';
-import { AgentV2SessionEntity } from './entities/agent-v2/agent-v2-session.entity';
-import { AgentV2MessageEntity } from './entities/agent-v2/agent-v2-message.entity';
-import { AgentV2TaskStateEntity, AgentV2MessageQueueEntity } from './entities/agent-v2/agent-v2-task-state.entity';
 
 export const entities: EntityClassOrSchema[] = [
   ThemeEntity,
@@ -133,6 +134,7 @@ export const entities: EntityClassOrSchema[] = [
   AgentV2MessageEntity,
   AgentV2TaskStateEntity,
   AgentV2MessageQueueEntity,
+  ModelTrainingEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

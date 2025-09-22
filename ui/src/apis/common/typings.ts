@@ -24,7 +24,8 @@ export type VinesSpaceSidebarModule =
   | 'media'
   | 'text-data'
   | 'table-data'
-  | 'chat-v2';
+  | 'chat-v2'
+  | 'model-training';
 export type VinesSpaceSidebarModules = '*' | VinesSpaceSidebarModule[];
 
 export type VinesSpaceHeadBarIdType = 'workbench' | 'app-store' | 'workspace';

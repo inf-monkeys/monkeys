@@ -23,6 +23,7 @@ import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
 import { useSystemConfig } from '../common';
+import { IModelTraining } from '../model-training/typings';
 import { IAssetItem, IAssetPublicCategory, IAssetTag, IListUgcDto, IUgcFilterRules } from './typings';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
@@ -60,6 +61,10 @@ export const preloadUgcAgents = (dto: IListUgcDto) => preloadUgcAgentsV2(dto);
 export const useUgcDesignProjects = (dto: IListUgcDto) => useUgcItems<IDesignProject>(dto, '/api/design/project');
 export const preloadUgcDesignProjects = (dto: IListUgcDto) =>
   preloadUgcItems<IDesignProject>(dto, '/api/design/project');
+
+export const useUgcModelTraining = (dto: IListUgcDto) => useUgcItems<IModelTraining>(dto, '/api/model-training');
+export const preloadUgcModelTraining = (dto: IListUgcDto) =>
+  preloadUgcItems<IModelTraining>(dto, '/api/model-training');
 
 export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowTool>(dto, '/api/tools');
 export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>

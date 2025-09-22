@@ -106,6 +106,7 @@
       "comfyui-workflow": "ComfyUI workflow",
       "image-model": "image model",
       "image-model-type": "image model type",
+      "model-training": "model training",
       "comfyui-server": "ComfyUI server",
       "filter-group": "filter group",
       "text-data": "text data"
@@ -465,6 +466,9 @@
               },
               "image-models": {
                 "label": "Image Models"
+              },
+              "model-training": {
+                "label": "Model Training"
               }
             },
             "media": {
@@ -2162,6 +2166,49 @@
       "detail": {
         "title": "Image Model Detail"
       }
+    },
+    "model-training": {
+      "create": {
+        "dialog": {
+          "title": "Create Model Training",
+          "info": {
+            "label": "Model Training Name",
+            "placeholder": "Enter model training name"
+          },
+          "description": {
+            "label": "Model Training Description",
+            "placeholder": "Enter model training description"
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "status": {
+            "label": "Status",
+            "options": {
+              "idle": "Idle",
+              "pending": "Pending",
+              "running": "Running",
+              "completed": "Completed",
+              "failed": "Failed"
+            }
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {}
+      },
+      "detail": {}
     },
     "text-data": {
       "ugc-view": {
