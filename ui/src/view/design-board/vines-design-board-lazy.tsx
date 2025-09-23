@@ -66,6 +66,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
+  const [rightSidebarWidth, setRightSidebarWidth] = useState<number>(220);
 
   const [frameShapeId, setFrameShapeId] = useState<TLShapeId>(createShapeId('shape:parentFrame'));
 
@@ -392,6 +393,8 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
           className="ml-2"
           visible={sidebarVisible}
           onToggle={() => setSidebarVisible(!sidebarVisible)}
+          width={rightSidebarWidth}
+          onResizeWidth={(w) => setRightSidebarWidth(w)}
           editor={editor}
         />
       )}
