@@ -1,3 +1,4 @@
+import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { logger } from '../logger';
@@ -87,8 +88,6 @@ export function getFileExtensionFromUrl(url: string): string {
 
 export async function downloadImageAsBase64(imageUrl: string): Promise<string> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const axios = require('axios');
     const response = await axios.get(imageUrl, {
       responseType: 'arraybuffer',
     });
@@ -100,5 +99,19 @@ export async function downloadImageAsBase64(imageUrl: string): Promise<string> {
   } catch (error) {
     logger.error('Image download failed:', error);
     throw new Error('Image download failed');
+  }
+}
+
+// 从远程URL下载文件内容
+export async function downloadFileContent(url: string): Promise<string | null> {
+  try {
+    const response = await axios.get(url);
+    if (response.status === 200) {
+      return typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+    }
+    return null;
+  } catch (error) {
+    console.error(`Failed to download file from ${url}:`, error);
+    return null;
   }
 }

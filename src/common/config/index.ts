@@ -189,6 +189,10 @@ export interface ServerConfig {
     form: CustomizationForm;
     uploader: CustomizationUploader;
     designProjects: CustomizationDesignProjects;
+    marketplace: {
+      presetAppSortFileUrl?: string;
+      presetAppFileUrl?: string;
+    };
   };
 }
 
@@ -567,6 +571,10 @@ export const config: Config = {
         showPageAndLayerSidebar: readConfig('server.customization.designProjects.showPageAndLayerSidebar', false),
         showBoardOperationSidebar: readConfig('server.customization.designProjects.showBoardOperationSidebar', true),
         showActionsMenu: readConfig('server.customization.designProjects.showActionsMenu', true),
+      },
+      marketplace: {
+        presetAppSortFileUrl: readConfig('server.customization.marketplace.presetAppSortFileUrl', undefined),
+        presetAppFileUrl: readConfig('server.customization.marketplace.presetAppFileUrl', undefined),
       },
     },
   },
