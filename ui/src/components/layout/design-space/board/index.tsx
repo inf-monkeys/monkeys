@@ -61,10 +61,11 @@ interface BoardProps {
 }
 
 // 创建自定义右键菜单组件
-function CustomContextMenu(props: TLUiContextMenuProps) {
+function CustomContextMenu(props: TLUiContextMenuProps & { miniPage?: any }) {
   const editor = useEditor();
   const { addToast } = useToasts();
   const { openPreview } = useUniImagePreview();
+  const { miniPage } = props;
 
   const handleViewDetails = () => {
     const selectedShapes = editor.getSelectedShapes();
@@ -101,16 +102,108 @@ function CustomContextMenu(props: TLUiContextMenuProps) {
     openPreview(imageUrl);
   };
 
+  // 检测当前应用是否有图片输入字段
+  const getImageInputFields = () => {
+    if (!miniPage) return [];
+    
+    // 尝试不同的路径来获取输入字段
+    const inputs = 
+      miniPage?.workflow?.variables ||        // 主要路径：workflow.variables
+      miniPage?.workflow?.input || 
+      miniPage?.workflow?.data?.input ||
+      miniPage?.workflow?.definition?.input ||
+      miniPage?.agent?.workflow?.variables ||
+      miniPage?.agent?.workflow?.input ||
+      miniPage?.agent?.workflow?.data?.input ||
+      miniPage?.agent?.data?.workflow?.input ||
+      [];
+    
+    return inputs.filter((input: any) => input.type === 'file');
+  };
+
+  // 获取当前选中的图片URL
+  const getSelectedImageUrl = () => {
+    const selectedShapes = editor.getSelectedShapes();
+    if (selectedShapes.length !== 1 || selectedShapes[0].type !== 'image') {
+      return null;
+    }
+
+    const imageShape = selectedShapes[0] as TLImageShape;
+    const assetId = imageShape.props.assetId;
+    if (!assetId) return null;
+
+    const asset = editor.getAsset(assetId);
+    if (asset?.type !== 'image' || !asset.props.src) return null;
+
+    return asset.props.src;
+  };
+
+  // 处理添加图片到应用
+  const handleAddToApp = (fieldName: string, appDisplayName: string) => {
+    const imageUrl = getSelectedImageUrl();
+    if (!imageUrl) {
+      addToast({
+        title: '请选择一张图片',
+        severity: 'error',
+      });
+      return;
+    }
+
+    // 通过自定义事件通知应用更新图片字段
+    window.dispatchEvent(new CustomEvent('vines:add-image-to-field', {
+      detail: {
+        pageId: miniPage.id,
+        fieldName,
+        imageUrl,
+        appDisplayName
+      }
+    }));
+
+    addToast({
+      title: `图片已添加到 ${appDisplayName} - ${fieldName}`,
+      severity: 'success',
+    });
+  };
+
+  const imageInputFields = getImageInputFields();
+  const selectedImageUrl = getSelectedImageUrl();
+  const hasSelectedImage = !!selectedImageUrl;
+
+
   return (
     <DefaultContextMenu {...props}>
       <TldrawUiMenuGroup id="custom-actions">
         <TldrawUiMenuItem
           id="view-details"
-          label="Show Image Detail"
+          label="显示图片详情"
           icon="info"
           readonlyOk
           onSelect={handleViewDetails}
         />
+        {/* 当有应用打开且有图片输入字段时，显示添加到应用的选项 */}
+        {hasSelectedImage && imageInputFields.length > 0 && imageInputFields.map((field: any) => {
+          // 处理应用名称（可能是对象）
+          const rawAppName = miniPage?.workflow?.displayName || miniPage?.agent?.displayName || '应用';
+          const appName = typeof rawAppName === 'string' 
+            ? rawAppName 
+            : rawAppName?.['zh-CN'] || rawAppName?.['zh'] || rawAppName?.['en'] || '应用';
+          
+          // 处理字段显示名称（可能是对象）
+          const fieldDisplayName = typeof field.displayName === 'string' 
+            ? field.displayName 
+            : field.displayName?.['zh-CN'] || field.displayName?.['zh'] || field.displayName?.['en'] || field.name;
+          
+          return (
+            <TldrawUiMenuItem
+              key={`add-to-${field.name}`}
+              id={`add-to-${field.name}`}
+              label={`添加到 ${appName} - ${fieldDisplayName}（图片输入）`}
+              icon="plus"
+              readonlyOk
+              onSelect={() => handleAddToApp(field.name, appName)}
+            />
+          );
+        })}
       </TldrawUiMenuGroup>
       <DefaultContextMenuContent />
     </DefaultContextMenu>
@@ -239,15 +332,15 @@ export const Board: React.FC<BoardProps> = ({
       comps.Toolbar = VerticalToolbar;
     }
     
-    if (get(oem, 'theme.designProjects.showContextMenu', true)) {
-      comps.ContextMenu = CustomContextMenu;
+    const showContextMenu = get(oem, 'theme.designProjects.showContextMenu', true);
+    
+    if (showContextMenu) {
+      comps.ContextMenu = (props: TLUiContextMenuProps) => <CustomContextMenu {...props} miniPage={miniPage} />;
     }
     
     
     return comps;
-  }, [oem]); // 只有当oem发生变化时才重新创建
-  
-  console.log('Components config:', components);
+  }, [oem, miniPage]); // 当oem或miniPage发生变化时重新创建
 
   // 监听左侧面板折叠事件以调整外层容器高度
   React.useEffect(() => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { isArray, isString } from 'lodash';
 import { UseFormReturn } from 'react-hook-form';
@@ -33,6 +33,34 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
   const { t } = useTranslation();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+
+  // 监听从画板添加图片的事件
+  useEffect(() => {
+    const handleAddImageToField = (event: any) => {
+      const { fieldName, imageUrl } = event.detail || {};
+      
+      // 检查是否是针对当前字段的事件
+      if (fieldName === name && imageUrl) {
+        const isMultiple = typeOptions?.multipleValues;
+        
+        if (isMultiple) {
+          // 多选模式：将新图片添加到现有数组中
+          const currentValues = isArray(value) ? value : (value ? [value] : []);
+          const newValues = [...currentValues, imageUrl];
+          form.setValue(name, newValues);
+        } else {
+          // 单选模式：直接替换现有值
+          form.setValue(name, imageUrl);
+        }
+      }
+    };
+
+    window.addEventListener('vines:add-image-to-field', handleAddImageToField);
+    
+    return () => {
+      window.removeEventListener('vines:add-image-to-field', handleAddImageToField);
+    };
+  }, [name, form, typeOptions?.multipleValues, value]);
 
   // 获取typeOptions中的原始文件
   const typeOptionsOriginalFiles = typeOptions?.originalFiles as string[] | undefined;
