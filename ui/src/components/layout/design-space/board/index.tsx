@@ -4,26 +4,26 @@ import './index.scss';
 import './layer-panel.css';
 
 import {
-    AssetRecordType,
-    createShapeId,
-    defaultBindingUtils,
-    DefaultContextMenu,
-    DefaultContextMenuContent,
-    defaultEditorAssetUrls,
-    defaultShapeTools,
-    defaultTools,
-    Editor,
-    FrameShapeUtil,
-    TLComponents,
-    Tldraw,
-    TldrawUiMenuGroup,
-    TldrawUiMenuItem,
-    TLImageShape,
-    TLShape,
-    TLShapeId,
-    TLUiContextMenuProps,
-    useEditor,
-    useToasts
+  AssetRecordType,
+  createShapeId,
+  defaultBindingUtils,
+  DefaultContextMenu,
+  DefaultContextMenuContent,
+  defaultEditorAssetUrls,
+  defaultShapeTools,
+  defaultTools,
+  Editor,
+  FrameShapeUtil,
+  TLComponents,
+  Tldraw,
+  TldrawUiMenuGroup,
+  TldrawUiMenuItem,
+  TLImageShape,
+  TLShape,
+  TLShapeId,
+  TLUiContextMenuProps,
+  useEditor,
+  useToasts
 } from 'tldraw';
 
 import { ExternalLayerPanel } from './ExternalLayerPanel';
@@ -146,6 +146,7 @@ export const Board: React.FC<BoardProps> = ({
   const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false);
 
   const createFrame = useCallback((editor: Editor, width: number, height: number) => {
+    const defaultName = showPageAndLayerSidebar ? '默认画板' : 'Design Board';
     editor.createShape({
       type: 'frame',
       id: frameShapeId,
@@ -155,13 +156,13 @@ export const Board: React.FC<BoardProps> = ({
         w: width,
         h: height,
         color: 'white',
-        name: 'Design Board',
+        name: defaultName,
       },
     });
 
     // 设置视图以适应画板
     editor.zoomToFit();
-  }, []);
+  }, [showPageAndLayerSidebar]);
 
   // 监听选中画板变化（多画板模式）
   useEffect(() => {
@@ -466,6 +467,18 @@ export const Board: React.FC<BoardProps> = ({
               }
               return nextShape;
             }
+            // 若是新创建或默认名仍为英文 Frame 的画板，自动改成中文“画板”
+            try {
+              if (nextShape.type === 'frame') {
+                const name = (nextShape as any)?.props?.name;
+                if (!name || String(name).toLowerCase() === 'frame') {
+                  return {
+                    ...nextShape,
+                    props: { ...(nextShape as any).props, name: '画板' }
+                  } as TLShape;
+                }
+              }
+            } catch {}
             return nextShape;
           });
 
@@ -473,6 +486,25 @@ export const Board: React.FC<BoardProps> = ({
           if (canvasWidth && canvasHeight) {
             createFrame(editor, canvasWidth, canvasHeight);
           }
+
+          // 将默认英文页面名（如 Page 1 / Page1）改为中文“页面1”
+          const renameDefaultPages = () => {
+            try {
+              const pages = (editor as any).getPages?.() || [];
+              pages.forEach((p: any, idx: number) => {
+                const name: string = String(p?.name || '');
+                const m = name.match(/^Page\s*(\d+)$/i) || name.match(/^Page(\d+)$/i);
+                if (m && m[1]) {
+                  const num = Number(m[1]);
+                  const cn = `页面 ${Number.isFinite(num) ? num : idx + 1}`;
+                  try { (editor as any).renamePage?.(p.id, cn); } catch {}
+                }
+              });
+            } catch {}
+          };
+          // 立即执行一次，并在下一个宏任务再执行一次，避免初次渲染时覆盖
+          renameDefaultPages();
+          setTimeout(renameDefaultPages, 0);
           editor.registerExternalContentHandler('url', async ({ url }) => {
             // 检查是否是图片 URL
             try {

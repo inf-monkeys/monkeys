@@ -390,7 +390,6 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       {/* 右侧属性侧边栏（按 OEM 同开关控制） */}
       {showPageAndLayerSidebar && (
         <DesignBoardRightSidebar
-          className="ml-2"
           visible={sidebarVisible}
           onToggle={() => setSidebarVisible(!sidebarVisible)}
           width={rightSidebarWidth}

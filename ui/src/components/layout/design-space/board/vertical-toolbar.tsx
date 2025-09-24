@@ -117,14 +117,14 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   // 定义工具栏中要显示的工具列表 - 使用正确的工具ID
   const oneOnOne = (oem as any)?.theme?.designProjects?.oneOnOne === true;
   const toolbarTools = [
-    { id: 'select', label: 'Select', icon: 'tool-pointer' },
-    { id: 'hand', label: 'Hand', icon: 'tool-hand' },
-    ...(!oneOnOne ? ([{ id: 'frame', label: 'Frame', icon: 'tool-frame' }]) : []),
-    { id: 'shape', label: 'Shape', icon: 'geo-rectangle' },
-    { id: 'draw', label: 'Draw', icon: 'tool-pencil' },
-    { id: 'eraser', label: 'Eraser', icon: 'tool-eraser' },
-    { id: 'text', label: 'Text', icon: 'tool-text' },
-    { id: 'note', label: 'Note', icon: 'tool-note' },
+    { id: 'select', label: '选择', icon: 'tool-pointer' },
+    { id: 'hand', label: '拖动', icon: 'tool-hand' },
+    ...(!oneOnOne ? ([{ id: 'frame', label: '画板', icon: 'tool-frame' }]) : []),
+    { id: 'shape', label: '形状', icon: 'geo-rectangle' },
+    { id: 'draw', label: '绘制', icon: 'tool-pencil' },
+    { id: 'eraser', label: '橡皮擦', icon: 'tool-eraser' },
+    { id: 'text', label: '文本', icon: 'tool-text' },
+    { id: 'note', label: '便签', icon: 'tool-note' },
   ];
   
   return (
@@ -158,7 +158,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                       setCurrentToolId('geo');
                     });
                   }}
-                  title={`Shape: ${String(activeId)}`}
+                  title={`形状: ${String(activeId)}`}
                   style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                 >
                   <TldrawUiIcon icon={`geo-${String(activeId)}` as any} />
@@ -263,14 +263,14 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     setCurrentToolId(activeId);
                     setIsDrawMenuOpen(false);
                   }}
-                  title={activeId === 'draw' ? 'Pen' : activeId === 'highlight' ? 'Highlight' : 'Laser'}
+                  title={activeId === 'draw' ? '铅笔' : activeId === 'highlight' ? '荧光笔' : '激光笔'}
                   style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                 >
                   <TldrawUiIcon icon={activeId === 'draw' ? 'tool-pencil' : activeId === 'highlight' ? 'tool-highlight' : 'tool-laser'} />
                   <span className="caret" />
                   <span
                     className="caret-hit"
-                    title="More pens"
+                    title="更多画笔"
                     onMouseEnter={() => {
                       if (drawCloseTimerRef.current !== undefined) {
                         window.clearTimeout(drawCloseTimerRef.current);
@@ -317,7 +317,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                       }}
                     >
                       <TldrawUiIcon icon="tool-pencil" />
-                      <span>Pen</span>
+                      <span>铅笔</span>
                     </div>
                     <div
                       className={`dropdown-item ${drawVariant === 'highlight' ? 'active' : ''}`}
@@ -331,7 +331,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                       }}
                     >
                       <TldrawUiIcon icon="tool-highlight" />
-                      <span>Highlight</span>
+                      <span>荧光笔</span>
                     </div>
                     <div
                       className={`dropdown-item ${drawVariant === 'laser' ? 'active' : ''}`}
@@ -345,7 +345,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                       }}
                     >
                       <TldrawUiIcon icon="tool-laser" />
-                      <span>Laser</span>
+                      <span>激光笔</span>
                     </div>
                   </div>
                 )}

@@ -17,6 +17,49 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Editor, TLShapeId } from 'tldraw';
 import { VisibilityOff, VisibilityOn } from './icons';
 
+// 形状类型中文映射
+const getShapeTypeInChinese = (type: string, geoKind?: string): string => {
+  // 几何形状的中文映射
+  const geoShapeMap: { [key: string]: string } = {
+    'rectangle': '矩形',
+    'ellipse': '椭圆',
+    'triangle': '三角形',
+    'diamond': '菱形',
+    'pentagon': '五边形',
+    'hexagon': '六边形',
+    'octagon': '八边形',
+    'star': '星形',
+    'rhombus': '菱形',
+    'trapezoid': '梯形',
+    'arrow-right': '右箭头',
+    'arrow-left': '左箭头',
+    'arrow-up': '上箭头',
+    'arrow-down': '下箭头',
+    'x-box': 'X形状',
+    'check-box': '勾选框',
+    'cloud': '云形',
+    'heart': '心形'
+  };
+
+  // 基础形状类型的中文映射
+  const shapeTypeMap: { [key: string]: string } = {
+    'frame': '画板',
+    'geo': geoKind ? (geoShapeMap[geoKind] || capitalize(geoKind)) : '几何图形',
+    'text': '文本',
+    'draw': '手绘',
+    'line': '线条',
+    'arrow': '箭头',
+    'note': '便签',
+    'image': '图片',
+    'video': '视频',
+    'embed': '嵌入',
+    'bookmark': '书签',
+    'highlight': '荧光笔'
+  };
+
+  return shapeTypeMap[type] || capitalize(type);
+};
+
 interface ExternalLayerPanelProps {
   editor: Editor;
 }
@@ -43,36 +86,38 @@ const ShapeItem: React.FC<{
   // 其余：props.text / props.name；再退化为 util.getText 或类型名。
   const getShapeName = (editor: Editor, shapeId: TLShapeId): string => {
     const shape = editor.getShape(shapeId);
-    if (!shape) return 'Unknown shape';
+    if (!shape) return '未知形状';
     const metaName = (shape as any).meta?.name as string | undefined;
     const propsText = (shape as any).props?.text as string | undefined;
     const propsName = (shape as any).props?.name as string | undefined;
     const type = (shape as any).type as string;
     const geoKind = (shape as any).props?.geo as string | undefined;
-    // 对 frame 优先读取 props.name（tldraw 默认即为“Frame”且可编辑），避免回退到“Frame shape”
+    
+    // 对 frame 优先读取 props.name（tldraw 默认即为"Frame"且可编辑），避免回退到"Frame shape"
     if (type === 'frame' && (propsName?.trim() || metaName?.trim())) {
       return (metaName?.trim() || propsName?.trim()) as string;
     }
+    
     // 对 geo 使用具体图形名（如 Rectangle / Ellipse），避免统一显示为 Geo
     if (type === 'geo') {
       if (metaName?.trim()) return metaName.trim();
       if (propsName?.trim()) return propsName.trim();
       if (propsText?.trim()) return propsText.trim();
       if (geoKind) {
-        const label = geoKind.replace(/[-_]+/g, ' ');
-        return capitalize(label);
+        return getShapeTypeInChinese('geo', geoKind);
       }
       return (
         editor.getShapeUtil(shape).getText(shape) ||
-        capitalize(type)
+        getShapeTypeInChinese(type)
       );
     }
+    
     return (
       (metaName && metaName.trim()) ||
       (propsText && propsText.trim()) ||
       (propsName && propsName.trim()) ||
       editor.getShapeUtil(shape).getText(shape) ||
-      capitalize(type)
+      getShapeTypeInChinese(type)
     );
   };
 
@@ -83,7 +128,7 @@ const ShapeItem: React.FC<{
     try {
       const currentShape = editor.getShape(shapeId);
       const currentChildren = editor.getSortedChildIdsForParent(shapeId);
-      const currentIsHidden = editor.isShapeHidden(shapeId);
+      const currentIsHidden = (currentShape?.opacity ?? 1) === 0;
       const currentIsSelected = editor.getSelectedShapeIds().includes(shapeId);
       const currentShapeName = getShapeName(editor, shapeId);
       
@@ -135,12 +180,13 @@ const ShapeItem: React.FC<{
     if (!editor || !shape) return;
     
     try {
+      // 通过更新形状的opacity来控制可见性
+      const currentOpacity = shape.opacity ?? 1;
+      const targetOpacity = currentOpacity > 0 ? 0 : 1;
+      
       editor.updateShape({
         ...shape,
-        meta: {
-          ...shape.meta,
-          hidden: !shape.meta.hidden,
-        },
+        opacity: targetOpacity
       });
     } catch (error) {
       console.warn('Error toggling visibility:', error);
@@ -222,7 +268,7 @@ const ShapeItem: React.FC<{
           className="shape-visibility-toggle"
           onClick={handleToggleVisibility}
         >
-          {shape.meta.hidden ? <VisibilityOff /> : <VisibilityOn />}
+          {isHidden ? <VisibilityOff /> : <VisibilityOn />}
         </button>
       </div>
       
@@ -257,9 +303,9 @@ const PageItem: React.FC<{
   const getPageName = () => {
     try {
       const page = editor.getPage(pageId as any);
-      return page?.name || 'Untitled Page';
+      return page?.name || '未命名页面';
     } catch (error) {
-      return 'Untitled Page';
+      return '未命名页面';
     }
   };
 
@@ -518,7 +564,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
       const allPages = editor.getPages();
       const pageList = allPages.map(page => ({
         id: page.id,
-        name: page.name || 'Untitled Page'
+        name: page.name || '未命名页面'
       }));
       setPages(pageList);
       setCurrentPageId(editor.getCurrentPageId());

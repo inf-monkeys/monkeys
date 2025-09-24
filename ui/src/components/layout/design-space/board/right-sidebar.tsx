@@ -2,6 +2,36 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import './layer-panel.css';
 
+/* 添加样式来处理滚动条显示/隐藏 */
+const rightSidebarStyles = `
+  .right-sidebar-content {
+    /* WebKit浏览器隐藏滚动条 */
+    -webkit-scrollbar: none;
+  }
+  
+  .right-sidebar-content:hover {
+    /* 悬停时显示滚动条 */
+    -webkit-scrollbar: thin;
+    -webkit-scrollbar-track: transparent;
+    -webkit-scrollbar-thumb: rgba(156, 163, 175, 0.5);
+    -webkit-scrollbar-thumb:hover: rgba(156, 163, 175, 0.8);
+  }
+  
+  /* 确保内容不被滚动条覆盖 */
+  .right-sidebar-content:hover {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+`;
+
+/* 将样式插入到页面头部 */
+if (typeof document !== 'undefined' && !document.getElementById('right-sidebar-styles')) {
+  const styleElement = document.createElement('style');
+  styleElement.id = 'right-sidebar-styles';
+  styleElement.textContent = rightSidebarStyles;
+  document.head.appendChild(styleElement);
+}
+
 // 移除 framer-motion 的宽度动画以降低拖拽抖动
 
 import { Button } from '@/components/ui/button';
@@ -65,6 +95,83 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
   const [fillPickerOpen, setFillPickerOpen] = React.useState<boolean>(false);
   const [tempFillColor, setTempFillColor] = React.useState<string>('#000000');
   const [fills, setFills] = React.useState<string[]>([]);
+  const [canShowFill, setCanShowFill] = React.useState<boolean>(true);
+  
+  // 将十六进制颜色映射到tldraw支持的颜色名称
+  const mapHexToTldrawColor = (hex: string): string => {
+    const colorMap: Record<string, string> = {
+      '#000000': 'black',
+      '#808080': 'grey',
+      '#800080': 'violet',
+      '#0000FF': 'blue',
+      '#87CEEB': 'light-blue',
+      '#FFFF00': 'yellow',
+      '#FFA500': 'orange',
+      '#008000': 'green',
+      '#90EE90': 'light-green',
+      '#FFB6C1': 'light-red',
+      '#FF0000': 'red',
+      '#FFFFFF': 'white',
+    };
+    
+    // 尝试精确匹配
+    if (colorMap[hex.toLowerCase()]) {
+      return colorMap[hex.toLowerCase()];
+    }
+    
+    // 如果没有精确匹配，根据颜色相似度选择最接近的颜色
+    const rgb = hexToRgb(hex);
+    if (!rgb) return 'black';
+    
+    const { r, g, b } = rgb;
+    
+    // 计算与预定义颜色的距离
+    const distances = Object.entries(colorMap).map(([hexColor, colorName]) => {
+      const colorRgb = hexToRgb(hexColor);
+      if (!colorRgb) return { colorName, distance: Infinity };
+      
+      const distance = Math.sqrt(
+        Math.pow(r - colorRgb.r, 2) + 
+        Math.pow(g - colorRgb.g, 2) + 
+        Math.pow(b - colorRgb.b, 2)
+      );
+      return { colorName, distance };
+    });
+    
+    // 返回距离最小的颜色
+    return distances.reduce((min, current) => 
+      current.distance < min.distance ? current : min
+    ).colorName;
+  };
+
+  // 应用填充颜色到选中的形状
+  const applyFillToSelection = React.useCallback((fillColor: string) => {
+    if (!editor) return;
+    const selectedShapes = editor.getSelectedShapes();
+    if (selectedShapes.length === 0) return;
+    
+    selectedShapes.forEach(shape => {
+      try {
+        const tldrawColor = mapHexToTldrawColor(fillColor);
+        const updateProps: any = { ...shape.props };
+
+        // 如果形状支持填充模式，开启实心填充
+        if ('fill' in shape.props) updateProps.fill = 'solid';
+
+        // 无论何种类型，尽可能设置可用的颜色相关属性
+        if ('backgroundColor' in shape.props) updateProps.backgroundColor = tldrawColor;
+        if ('fillColor' in shape.props) updateProps.fillColor = tldrawColor;
+        if ('color' in shape.props) updateProps.color = tldrawColor; // geo 等用调色板名
+        if ('textColor' in shape.props) updateProps.textColor = tldrawColor;
+        if ('stroke' in shape.props) updateProps.stroke = tldrawColor;
+
+        editor.updateShape({ id: shape.id, type: shape.type, props: updateProps });
+      } catch (error) {
+        console.warn('Failed to apply fill color:', error);
+      }
+    });
+  }, [editor]);
+  
   const [posX, setPosX] = React.useState<string>('0');
   const [posY, setPosY] = React.useState<string>('0');
   const [sizeW, setSizeW] = React.useState<string>('0');
@@ -82,8 +189,31 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
   const [pickerS, setPickerS] = React.useState<number>(1); // 0-1
   const [pickerV, setPickerV] = React.useState<number>(1); // 0-1
   const [pickerA, setPickerA] = React.useState<number>(1); // 0-1
+  const [colorFormat, setColorFormat] = React.useState<'hex' | 'rgb' | 'css' | 'hsl' | 'hsb'>('hex');
 
   const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
+  
+  // 颜色格式转换函数
+  const getColorValue = () => {
+    const { r, g, b } = hsvToRgb(pickerHue, pickerS, pickerV);
+    const alpha = Math.round(pickerA * 100);
+    
+    switch (colorFormat) {
+      case 'hex':
+        return rgbToHex({ r, g, b }).slice(1);
+      case 'rgb':
+        return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+      case 'css':
+        return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${pickerA.toFixed(2)})`;
+      case 'hsl':
+        const hsl = rgbToHsl({ r, g, b });
+        return `hsl(${Math.round(hsl.h)}, ${Math.round(hsl.s * 100)}%, ${Math.round(hsl.l * 100)}%)`;
+      case 'hsb':
+        return `hsb(${Math.round(pickerHue)}, ${Math.round(pickerS * 100)}%, ${Math.round(pickerV * 100)}%)`;
+      default:
+        return rgbToHex({ r, g, b }).slice(1);
+    }
+  };
   const hsvToRgb = (h: number, s: number, v: number) => {
     const c = v * s;
     const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
@@ -102,6 +232,26 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
     };
   };
   const rgbToHex = ({ r, g, b }: { r: number; g: number; b: number }) => '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('');
+  
+  const rgbToHsl = ({ r, g, b }: { r: number; g: number; b: number }) => {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    
+    return { h: h * 360, s, l };
+  };
   const hexToRgb = (hex: string) => {
     const m = hex.replace('#', '').trim();
     if (![3, 6].includes(m.length)) return null;
@@ -143,12 +293,14 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
       if (!btn || !container) return;
       const btnRect = btn.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
-      const panelWidth = 200;
-      const panelHeight = 500;
-      const gap = 10; // 与 sidebar 左边保持 10px 间距 / 与底部保持 10px
-      const left = Math.max(10, containerRect.left - panelWidth - gap);
-      const maxTop = window.innerHeight - panelHeight - gap;
-      const top = Math.max(10, Math.min(maxTop, btnRect.top));
+      const panelWidth = 240;
+      const panelHeight = 420;
+      const gap = 10; // 与 sidebar 左边保持 10px 间距
+      const left = containerRect.left - panelWidth - gap;
+      // 计算画布底部位置（sidebar底部）
+      const canvasBottom = containerRect.bottom;
+      const maxTop = canvasBottom - panelHeight - gap; // 底部距离画布10px
+      const top = Math.min(maxTop, btnRect.top);
       setFillPanelPos({ top, left });
     };
     updatePos();
@@ -186,6 +338,24 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
       }
       setHasSelection(ids.length > 0);
       setSelectedCount(ids.length);
+      // 决定是否显示“填充”分区：选中 frame / image 时隐藏
+      try {
+        if (ids.length === 1) {
+          const s = editor.getShape(ids[0]) as any;
+          const type = String(s?.type || '');
+          setCanShowFill(!(type === 'frame' || type === 'image'));
+        } else if (ids.length > 1) {
+          const hasFrameOrImage = ids.some((id: any) => {
+            const s = editor.getShape(id) as any;
+            return s && (s.type === 'frame' || s.type === 'image');
+          });
+          setCanShowFill(!hasFrameOrImage);
+        } else {
+          setCanShowFill(true);
+        }
+      } catch {
+        setCanShowFill(true);
+      }
       // 同步 X / Y 显示（使用选区外接框）
       try {
         const e: any = editor as any;
@@ -404,6 +574,7 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
     else exec();
   };
 
+
   return (
     <div
       className={cn('pointer-events-none z-10', className)}
@@ -412,8 +583,14 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
     >
       <div
         ref={containerRef}
-        className="pointer-events-auto m-2 flex h-[calc(100%-16px)] flex-row overflow-hidden rounded-lg border border-neutral-200 bg-white/95 shadow-lg backdrop-blur-sm"
-        style={{ width: width + 12, transition: resizing ? 'none' : 'width 160ms ease', position: 'relative' }}
+        className="pointer-events-auto flex flex-row overflow-hidden rounded-lg border border-neutral-200 bg-white/95 shadow-lg backdrop-blur-sm"
+        style={{ 
+          width: width + 12, 
+          transition: resizing ? 'none' : 'width 160ms ease', 
+          position: 'relative',
+          margin: '10px',
+          height: 'calc(100% - 20px)'
+        }}
       >
       {/* 移除开合按钮 */}
       {/* 左侧拖拽调宽手柄 */}
@@ -452,13 +629,24 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
                   <div style={{ display: 'flex', gap: 8 }}>
                     <TabsList>
                     <TabsTrigger value="design">设计</TabsTrigger>
-                    <TabsTrigger value="comment">注释</TabsTrigger>
-                    <TabsTrigger value="history">历史</TabsTrigger>
+                    {/* <TabsTrigger value="comment">注释</TabsTrigger>
+                    <TabsTrigger value="history">历史</TabsTrigger> */}
                   </TabsList>
                   </div>
                 </div>
 
-                <div className="right-sidebar-scroll px-global pb-global" style={{ height: 'calc(100% - 48px)' }}>
+                <div 
+                  className="right-sidebar-content" 
+                  style={{ 
+                    height: 'calc(100% - 48px)',
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    scrollbarWidth: 'none', /* Firefox */
+                    msOverflowStyle: 'none', /* IE and Edge */
+                    /* 内容居中且与左侧保持对称的间距 */
+                    padding: '10px 0 12px 12px'
+                  }}
+                >
                   {!hasSelection ? (
                     <div className="flex h-full flex-col">
                       <div className="flex-1" />
@@ -706,10 +894,21 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
 
                       <Separator className="my-1" />
 
+                      {canShowFill && (
                       <section>
                         <div className="mb-2 flex items-center justify-between">
                           <h1 className="text-sm font-semibold">填充</h1>
-                          <Button ref={fillBtnRef} size="icon" variant="ghost" title="添加填充" onClick={() => setFillPickerOpen((v) => !v)}>
+                          <Button
+                            ref={fillBtnRef}
+                            size="icon"
+                            variant="ghost"
+                            title={fills.length >= 1 ? '仅支持一个填充颜色，删除后可再添加' : '添加填充'}
+                            disabled={fills.length >= 1}
+                            onClick={() => {
+                              if (fills.length >= 1) return;
+                              setFillPickerOpen((v) => !v);
+                            }}
+                          >
                             <Plus size={16} />
                           </Button>
                         </div>
@@ -717,117 +916,200 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
                           (
                             <div
                               ref={fillPanelRef}
-                              style={{ position: 'fixed', top: fillPanelPos.top, left: fillPanelPos.left, width: 200, height: 500, zIndex: 9999, padding: 8 }}
-                              className="rounded-lg border bg-white shadow-lg dark:bg-neutral-900"
+                              style={{ position: 'fixed', top: fillPanelPos.top, left: fillPanelPos.left, width: 240, height: 420, zIndex: 9999 }}
+                              className="rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-800"
                             >
-                              <div className="mb-2 border-b pb-1 text-xs font-semibold text-neutral-700 dark:text-neutral-200">颜色</div>
-                              {/* SV 面板 */}
-                              <div
-                                style={{ position: 'relative', width: 184, height: 184, background: `hsl(${pickerHue} 100% 50%)`, borderRadius: 6, cursor: 'crosshair' }}
-                                onMouseDown={(e) => {
-                                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                                  const update = (clientX: number, clientY: number) => {
-                                    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                                    const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-                                    setPickerS(x);
-                                    setPickerV(1 - y);
-                                  };
-                                  update(e.clientX, e.clientY);
-                                  const move = (ev: MouseEvent) => update(ev.clientX, ev.clientY);
-                                  const up = () => {
-                                    document.removeEventListener('mousemove', move);
-                                    document.removeEventListener('mouseup', up);
-                                  };
-                                  document.addEventListener('mousemove', move);
-                                  document.addEventListener('mouseup', up, { once: true });
-                                }}
-                              >
-                                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #fff, rgba(255,255,255,0))', borderRadius: 6 }} />
-                                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #000, rgba(0,0,0,0))', borderRadius: 6 }} />
-                                <div style={{ position: 'absolute', left: pickerS * 184 - 6, top: (1 - pickerV) * 184 - 6, width: 12, height: 12, borderRadius: '50%', border: '2px solid #fff', boxShadow: '0 0 0 1px #0003' }} />
+                              {/* 标题区域 */}
+                              <div className="border-b border-neutral-100 px-4 py-3 dark:border-neutral-700">
+                                <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">颜色</h3>
                               </div>
-                              {/* Hue 滑条 */}
-                              <div
-                                style={{ position: 'relative', marginTop: 8, width: 184, height: 12, borderRadius: 6, cursor: 'pointer', background: 'linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)' }}
-                                onMouseDown={(e) => {
-                                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                                  const update = (clientX: number) => {
-                                    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                                    setPickerHue(x * 360);
-                                  };
-                                  update(e.clientX);
-                                  const move = (ev: MouseEvent) => update(ev.clientX);
-                                  const up = () => {
-                                    document.removeEventListener('mousemove', move);
-                                    document.removeEventListener('mouseup', up);
-                                  };
-                                  document.addEventListener('mousemove', move);
-                                  document.addEventListener('mouseup', up, { once: true });
-                                }}
-                              >
-                                <div style={{ position: 'absolute', left: (pickerHue / 360) * 184 - 6, top: -2, width: 12, height: 16, borderRadius: 6, background: '#fff', boxShadow: '0 0 0 1px #0003' }} />
-                              </div>
-                              {/* Alpha 滑条（棋盘格背景） */}
-                              <div
-                                style={{ position: 'relative', marginTop: 8, width: 184, height: 12, borderRadius: 6, cursor: 'pointer', backgroundImage: 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)', backgroundSize: '12px 12px', backgroundPosition: '0 0, 0 6px, 6px -6px, -6px 0px' }}
-                                onMouseDown={(e) => {
-                                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-                                  const update = (clientX: number) => {
-                                    const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-                                    setPickerA(x);
-                                  };
-                                  update(e.clientX);
-                                  const move = (ev: MouseEvent) => update(ev.clientX);
-                                  const up = () => {
-                                    document.removeEventListener('mousemove', move);
-                                    document.removeEventListener('mouseup', up);
-                                  };
-                                  document.addEventListener('mousemove', move);
-                                  document.addEventListener('mouseup', up, { once: true });
-                                }}
-                              >
-                                <div style={{ position: 'absolute', inset: 0, borderRadius: 6, background: (() => { const { r, g, b } = hsvToRgb(pickerHue, 1, 1); return `linear-gradient(to right, rgba(${r},${g},${b},0), rgba(${r},${g},${b},1))`; })() }} />
-                                <div style={{ position: 'absolute', left: pickerA * 184 - 6, top: -2, width: 12, height: 16, borderRadius: 6, background: '#fff', boxShadow: '0 0 0 1px #0003' }} />
-                              </div>
-                              {/* 底部：模式、HEX、Alpha% */}
-                              <div className="mt-3 flex w-[184px] items-center gap-2 overflow-hidden">
-                                <span className="shrink-0 rounded border px-1.5 py-0.5 text-xs">Hex</span>
-                                <input
-                                  className="h-7 w-16 rounded border bg-background px-2 text-xs"
-                                  value={(() => { const { r, g, b } = hsvToRgb(pickerHue, pickerS, pickerV); return rgbToHex({ r, g, b }).slice(1); })()}
-                                  onChange={(e) => {
-                                    const hex = `#${e.currentTarget.value.replace(/[^0-9a-fA-F]/g, '').slice(0, 6)}`;
-                                    const rgb = hexToRgb(hex);
-                                    if (rgb) {
-                                      const { h, s, v } = rgbToHsv(rgb);
-                                      setPickerHue(h); setPickerS(s); setPickerV(v);
-                                    }
+                              
+                              {/* 内容区域 */}
+                              <div className="p-4">
+                                {/* SV 面板 */}
+                                <div
+                                  style={{ 
+                                    position: 'relative', 
+                                    width: 208, 
+                                    height: 140, 
+                                    background: `hsl(${pickerHue} 100% 50%)`, 
+                                    borderRadius: 8, 
+                                    cursor: 'crosshair',
+                                    boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)',
                                   }}
-                                />
-                                <input
-                                  className="h-7 w-10 rounded border bg-background px-1 text-center text-xs"
-                                  value={Math.round(pickerA * 100)}
-                                  onChange={(e) => {
-                                    const n = Number(e.currentTarget.value.replace(/[^0-9]/g, ''));
-                                    const clamped = isNaN(n) ? 0 : Math.max(0, Math.min(100, n));
-                                    setPickerA(clamped / 100);
+                                  onMouseDown={(e) => {
+                                    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                                    const update = (clientX: number, clientY: number) => {
+                                      const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                                      const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+                                      setPickerS(x);
+                                      setPickerV(1 - y);
+                                    };
+                                    update(e.clientX, e.clientY);
+                                    const move = (ev: MouseEvent) => update(ev.clientX, ev.clientY);
+                                    const up = () => {
+                                      document.removeEventListener('mousemove', move);
+                                      document.removeEventListener('mouseup', up);
+                                    };
+                                    document.addEventListener('mousemove', move);
+                                    document.addEventListener('mouseup', up, { once: true });
                                   }}
-                                />
-                                <span className="text-xs">%</span>
-                              </div>
-                              {/* 确认按钮行 */}
-                              <div className="mt-2 flex w-[184px] justify-end">
-                                <Button
-                                  size="small"
-                                  variant="outline"
-                                  onClick={() => {
-                                    const { r, g, b } = hsvToRgb(pickerHue, pickerS, pickerV);
-                                    const hex = rgbToHex({ r, g, b });
-                                    setTempFillColor(hex);
-                                    setFills((list) => [hex, ...list]);
-                                    setFillPickerOpen(false);
+                                >
+                                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #fff, rgba(255,255,255,0))', borderRadius: 8 }} />
+                                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #000, rgba(0,0,0,0))', borderRadius: 8 }} />
+                                  <div style={{ 
+                                    position: 'absolute', 
+                                    left: pickerS * 208 - 8, 
+                                    top: (1 - pickerV) * 140 - 8, 
+                                    width: 16, 
+                                    height: 16, 
+                                    borderRadius: '50%', 
+                                    border: '3px solid #fff', 
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.1)' 
+                                  }} />
+                                </div>
+                                {/* Hue 滑条 */}
+                                <div
+                                  style={{ 
+                                    position: 'relative', 
+                                    marginTop: 12, 
+                                    width: 208, 
+                                    height: 16, 
+                                    borderRadius: 8, 
+                                    cursor: 'pointer', 
+                                    background: 'linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)',
+                                    boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)',
                                   }}
-                                >添加</Button>
+                                  onMouseDown={(e) => {
+                                    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                                    const update = (clientX: number) => {
+                                      const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                                      setPickerHue(x * 360);
+                                    };
+                                    update(e.clientX);
+                                    const move = (ev: MouseEvent) => update(ev.clientX);
+                                    const up = () => {
+                                      document.removeEventListener('mousemove', move);
+                                      document.removeEventListener('mouseup', up);
+                                    };
+                                    document.addEventListener('mousemove', move);
+                                    document.addEventListener('mouseup', up, { once: true });
+                                  }}
+                                >
+                                  <div style={{ 
+                                    position: 'absolute', 
+                                    left: (pickerHue / 360) * 208 - 8, 
+                                    top: -2, 
+                                    width: 16, 
+                                    height: 20, 
+                                    borderRadius: 8, 
+                                    background: '#fff', 
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.1)' 
+                                  }} />
+                                </div>
+                                {/* Alpha 滑条 */}
+                                <div
+                                  style={{ 
+                                    position: 'relative', 
+                                    marginTop: 12, 
+                                    width: 208, 
+                                    height: 16, 
+                                    borderRadius: 8, 
+                                    cursor: 'pointer', 
+                                    backgroundImage: 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)', 
+                                    backgroundSize: '12px 12px', 
+                                    backgroundPosition: '0 0, 0 6px, 6px -6px, -6px 0px',
+                                    boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)',
+                                  }}
+                                  onMouseDown={(e) => {
+                                    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                                    const update = (clientX: number) => {
+                                      const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                                      setPickerA(x);
+                                    };
+                                    update(e.clientX);
+                                    const move = (ev: MouseEvent) => update(ev.clientX);
+                                    const up = () => {
+                                      document.removeEventListener('mousemove', move);
+                                      document.removeEventListener('mouseup', up);
+                                    };
+                                    document.addEventListener('mousemove', move);
+                                    document.addEventListener('mouseup', up, { once: true });
+                                  }}
+                                >
+                                  <div style={{ 
+                                    position: 'absolute', 
+                                    inset: 0, 
+                                    borderRadius: 8, 
+                                    background: (() => { 
+                                      const { r, g, b } = hsvToRgb(pickerHue, pickerS, pickerV); 
+                                      return `linear-gradient(to right, rgba(${r},${g},${b},0), rgba(${r},${g},${b},1))`; 
+                                    })() 
+                                  }} />
+                                  <div style={{ 
+                                    position: 'absolute', 
+                                    left: pickerA * 208 - 8, 
+                                    top: -2, 
+                                    width: 16, 
+                                    height: 20, 
+                                    borderRadius: 8, 
+                                    background: '#fff', 
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.1)' 
+                                  }} />
+                                </div>
+                                {/* 底部控制区域 */}
+                                <div className="mt-4 space-y-3">
+                                  <div className="flex items-center gap-1">
+                                    <div className="relative">
+                                      <select
+                                        className="h-8 w-10 appearance-none border border-neutral-200 bg-white px-1 text-xs dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                                        style={{ borderRadius: '5px' }}
+                                        value={colorFormat}
+                                        onChange={(e) => setColorFormat(e.target.value as any)}
+                                      >
+                                        <option value="hex">Hex</option>
+                                        <option value="rgb">RGB</option>
+                                        <option value="css">CSS</option>
+                                        <option value="hsl">HSL</option>
+                                        <option value="hsb">HSB</option>
+                                      </select>
+                                      <ChevronDown className="absolute right-0.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 pointer-events-none text-neutral-500" />
+                                    </div>
+                                    <input
+                                      className="h-8 w-24 border border-neutral-200 bg-white px-1.5 text-xs font-mono dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                                      style={{ borderRadius: '5px' }}
+                                      value={getColorValue()}
+                                      readOnly
+                                    />
+                                    <input
+                                      className="h-8 w-8 border border-neutral-200 bg-white px-1 text-center text-xs dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                                      style={{ borderRadius: '5px' }}
+                                      value={Math.round(pickerA * 100)}
+                                      onChange={(e) => {
+                                        const n = Number(e.currentTarget.value.replace(/[^0-9]/g, ''));
+                                        const clamped = isNaN(n) ? 0 : Math.max(0, Math.min(100, n));
+                                        setPickerA(clamped / 100);
+                                      }}
+                                    />
+                                    <span className="text-xs font-medium text-neutral-600 dark:text-neutral-400">%</span>
+                                  </div>
+                                  
+                                  <Button
+                                    size="small"
+                                    className="w-full bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                                    onClick={() => {
+                                      const { r, g, b } = hsvToRgb(pickerHue, pickerS, pickerV);
+                                      const hex = rgbToHex({ r, g, b });
+                                      setTempFillColor(hex);
+                                      setFills((list) => [hex, ...list]);
+                                      // 应用填充颜色到选中的形状
+                                      applyFillToSelection(hex);
+                                      setFillPickerOpen(false);
+                                    }}
+                                  >
+                                    添加
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           ),
@@ -839,7 +1121,12 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
                           )}
                           {fills.map((c, idx) => (
                             <div key={idx} className="flex items-center gap-2 rounded border p-2">
-                              <div className="h-4 w-4 rounded-sm border" style={{ background: c }} />
+                              <div 
+                                className="h-4 w-4 rounded-sm border cursor-pointer hover:scale-110 transition-transform" 
+                                style={{ background: c }}
+                                onClick={() => applyFillToSelection(c)}
+                                title="点击应用此颜色"
+                              />
                               <span className="text-xs">{c}</span>
                               <div className="ml-auto" />
                               <Button size="small" variant="ghost" onClick={() => setFills((l) => l.filter((_, i) => i !== idx))}>删除</Button>
@@ -847,24 +1134,8 @@ export const DesignBoardRightSidebar: React.FC<RightSidebarProps> = ({
                           ))}
                         </div>
                       </section>
+                      )}
 
-                      <Separator className="my-1" />
-
-                      <section>
-                        <h1 className="mb-2 text-sm font-semibold">描边</h1>
-                        <div className="flex items-center gap-2 text-xs">
-                          <div className="h-4 w-4 rounded-sm border bg-white" />
-                          <span>颜色</span>
-                          <input className="ml-auto h-7 w-20 rounded border bg-background px-2 text-right" defaultValue="1px" />
-                        </div>
-                      </section>
-
-                      <Separator className="my-1" />
-
-                      <section>
-                        <h1 className="mb-2 text-sm font-semibold">导出</h1>
-                        <div className="text-xs text-muted-foreground">PNG / JPG / SVG</div>
-                      </section>
                     </div>
                   </TabsContent>
 
