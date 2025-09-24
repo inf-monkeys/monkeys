@@ -1,8 +1,9 @@
 import { TenantStatisticsAuthGuard } from '@/common/guards/tenant-statistics.guard';
 import { SuccessResponse } from '@/common/response';
-import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, InternalServerErrorException, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { reloadMarketplaceData } from '../marketplace/services/marketplace.data';
 import { TenantManageService } from './tenant.manage.service';
 
 @Controller('tenant/manage')
@@ -130,5 +131,19 @@ export class TenantManageController {
     req.on('close', () => {
       unsubscribe();
     });
+  }
+
+  @Post('/reloadMarketplaceData')
+  @ApiOperation({
+    summary: '重新加载市场数据',
+    description: '重新加载市场数据',
+  })
+  async reloadMarketplaceData() {
+    const result = await reloadMarketplaceData();
+    return result
+      ? new SuccessResponse({
+          data: result,
+        })
+      : new InternalServerErrorException('重新加载市场数据失败');
   }
 }
