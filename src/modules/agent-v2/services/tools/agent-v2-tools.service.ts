@@ -1,4 +1,5 @@
 import { config } from '@/common/config';
+import { CredentialsRepository } from '@/database/repositories/credential.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import OpenAI from 'openai';
 import { SYSTEM_NAMESPACE } from '../../../../database/entities/tools/tools-server.entity';
@@ -24,6 +25,7 @@ export class AgentV2ToolsService {
     private readonly toolsRegistryService: ToolsRegistryService,
     private readonly agentRepository: AgentV2Repository,
     private readonly conductorBridge: AgentV2ConductorBridgeService,
+    private readonly credentialsRepository: CredentialsRepository,
   ) {
     // Initialize OpenAI client for web search
     const agentConfig = config.agentv2?.openaiCompatible;
@@ -172,6 +174,10 @@ export class AgentV2ToolsService {
       // If tool belongs to SYSTEM namespace or direct call fails (likely due to missing context/auth),
       // fallback to run via a minimal Conductor workflow to gain full context.
       const toolDef = await this.toolsRegistryService.getToolByName(originalToolName);
+      // Auto inject credential.id if missing (align with workflow behavior)
+      if (teamId) {
+        params = await this.ensureCredentialParam(toolDef, params, teamId);
+      }
       const shouldUseConductor = toolDef?.namespace === SYSTEM_NAMESPACE;
       if (shouldUseConductor && teamId && userId) {
         return await this.conductorBridge.executeViaWorkflow(originalToolName, params, teamId, userId);
@@ -198,6 +204,29 @@ export class AgentV2ToolsService {
         output: `执行外部工具 ${toolName} 失败: ${error.message}`,
         is_error: true,
       };
+    }
+  }
+
+  private async ensureCredentialParam(toolDef: any, params: any, teamId: string) {
+    try {
+      if (!toolDef) return params;
+      if (params?.credential?.id) return params;
+      const credTypes = await this.credentialsRepository.getCredentialTypes();
+      const allowedTypes = credTypes.filter((t) => t.namespace === toolDef.namespace).map((t) => t.name);
+      if (!allowedTypes.length) return params;
+      const teamCreds = await this.credentialsRepository.listCredentials(teamId);
+      const matched = teamCreds.find((c) => allowedTypes.includes(c.type));
+      if (!matched) return params;
+      return {
+        ...params,
+        credential: {
+          id: matched.id,
+          type: matched.type,
+        },
+      };
+    } catch (e) {
+      this.logger.warn(`ensureCredentialParam failed: ${e.message}`);
+      return params;
     }
   }
 
