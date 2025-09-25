@@ -387,16 +387,21 @@ Please retry with only ONE tool call.`;
             // Add selective continuation for tools that should trigger follow-up actions
             // Only continue after web_search and specific update_todo_list cases to avoid infinite loops
             const shouldContinue = toolCalls.some((tool) => {
+              // Never continue after attempt_completion to prevent loops
+              if (tool.name === 'attempt_completion') {
+                return false;
+              }
+              // Always continue after web_search to process results
               if (tool.name === 'web_search') {
-                return true; // Always continue after web_search to process results
+                return true;
               }
               if (tool.name === 'update_todo_list') {
                 // Continue if there are pending tasks, in-progress tasks to execute, or all tasks completed
                 const taskState = this.taskStateManager.getSessionTaskState(this.session.id);
                 return taskState?.nextAction === 'start_next_task' || taskState?.nextAction === 'continue_task' || taskState?.nextAction === 'all_completed';
               }
-              // Never continue after attempt_completion to prevent loops
-              return false;
+              // For any other external tool, continue to drive the next action
+              return true;
             });
 
             if (shouldContinue) {
