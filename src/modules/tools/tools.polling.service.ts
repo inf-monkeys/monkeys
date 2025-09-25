@@ -344,6 +344,8 @@ export class ToolsPollingService {
         'x-monkeys-workflow-taskid': task.taskId,
         'x-monkeys-workflow-id': task.workflowType,
       };
+      const normalizeBase = (u?: string) => (u ? u.replace(/\/?$/, '').replace(/\/api$/, '') : u);
+      const isInternal = normalizeBase(baseURL) === normalizeBase(config.server.appUrl);
       switch (authType) {
         case AuthType.none:
           break;
@@ -357,17 +359,23 @@ export class ToolsPollingService {
               status: 'FAILED',
             };
           }
-          const token = verification_tokens['monkeys'];
-          if (!token) {
-            return {
-              outputData: {
-                success: false,
-                errMsg: `Failed to execute tool "${__toolName}": monkeys verification_token is empty`,
-              },
-              status: 'FAILED',
-            };
+          // Prefer privileged token for internal endpoints to satisfy CompatibleAuthGuard
+          const privileged = config.auth.privilegedToken;
+          if (isInternal && privileged) {
+            headers['authorization'] = `Bearer ${privileged}`;
+          } else {
+            const token = verification_tokens['monkeys'];
+            if (!token) {
+              return {
+                outputData: {
+                  success: false,
+                  errMsg: `Failed to execute tool "${__toolName}": monkeys verification_token is empty`,
+                },
+                status: 'FAILED',
+              };
+            }
+            headers['authorization'] = `Bearer ${token}`;
           }
-          headers['authorization'] = `Bearer ${token}`;
           break;
         default:
           break;

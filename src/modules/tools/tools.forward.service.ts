@@ -2,7 +2,7 @@ import { config } from '@/common/config';
 import { IRequest } from '@/common/typings/request';
 import { API_NAMESPACE, SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import { AuthType } from '../../common/typings/tools';
 import { REACT_TOOL_NAMES, ReActToolsService } from './builtin/react-tools';
@@ -10,6 +10,7 @@ import { ToolsRegistryService } from './tools.registry.service';
 
 @Injectable()
 export class ToolsForwardService {
+  private readonly logger = new Logger(ToolsForwardService.name);
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
@@ -188,31 +189,68 @@ export class ToolsForwardService {
       if (context?.userId) {
         headers['x-monkeys-userid'] = context.userId;
       }
+
+      // If the tool request contains workflow identifiers, forward them for auth compatibility
+      const wfId = (reqData?.workflowId || reqData?.workflow_id) as string | undefined;
+      const wfInstanceId = (reqData?.workflowInstanceId || reqData?.workflow_instance_id) as string | undefined;
+      if (wfId) {
+        headers['x-monkeys-workflow-id'] = wfId;
+      }
+      if (wfInstanceId) {
+        headers['x-monkeys-workflow-instanceid'] = wfInstanceId;
+      }
+      const normalizeBase = (u?: string) => (u ? u.replace(/\/?$/, '').replace(/\/api$/, '') : u);
+      const isInternal = normalizeBase(server.baseUrl) === normalizeBase(config.server.appUrl);
+      this.logger.debug(
+        `Invoke tool ${toolName} -> ${method} ${server.baseUrl}${path} | internal=${isInternal} | ctx(team=${context?.teamId}, user=${context?.userId}) | wf(id=${wfId}, inst=${wfInstanceId})`,
+      );
       switch (authType) {
         case AuthType.none:
           break;
-        case AuthType.service_http:
+        case AuthType.service_http: {
           if (authorization_type !== 'bearer') {
             throw new Error(`Unsupported authorization_type: ${authorization_type}`);
           }
-          const token = verification_tokens['monkeys'];
-          if (!token) {
-            throw new Error(`monkeys verification_token is empty`);
+          // Prefer privileged token when calling internal endpoints to satisfy CompatibleAuthGuard
+          const privileged = config.auth.privilegedToken;
+          if (isInternal && privileged) {
+            headers['authorization'] = `Bearer ${privileged}`;
+            this.logger.debug(`Using privileged token for internal call to ${server.baseUrl}`);
+          } else {
+            const token = verification_tokens['monkeys'];
+            if (!token) {
+              throw new Error(`monkeys verification_token is empty`);
+            }
+            headers['authorization'] = `Bearer ${token}`;
+            if (isInternal && !privileged) {
+              this.logger.warn(`Internal tool call without privilegedToken configured. Falling back to service token may fail auth. server.baseUrl=${server.baseUrl}`);
+            }
           }
-          headers['authorization'] = `Bearer ${token}`;
           break;
+        }
         default:
           break;
       }
-      const { data } = await axios<T>({
-        method: method,
-        url: this.replaceUrlParams(path, reqData || {}),
-        headers: headers,
-        data: method.toLowerCase() === 'get' ? undefined : reqData,
-        params: method.toLowerCase() === 'get' ? reqData : undefined,
-        baseURL: server.baseUrl,
-      });
-      return data;
+      try {
+        const { data } = await axios<T>({
+          method: method,
+          url: this.replaceUrlParams(path, reqData || {}),
+          headers: headers,
+          data: method.toLowerCase() === 'get' ? undefined : reqData,
+          params: method.toLowerCase() === 'get' ? reqData : undefined,
+          baseURL: server.baseUrl,
+        });
+        return data;
+      } catch (error) {
+        const status = error?.response?.status;
+        const errBody = error?.response?.data;
+        this.logger.error(
+          `Invoke tool failed ${toolName} -> ${method} ${server.baseUrl}${path} | status=${status} | message=${error?.message} | body=${
+            typeof errBody === 'object' ? JSON.stringify(errBody) : errBody
+          }`,
+        );
+        throw error;
+      }
     }
   }
 }

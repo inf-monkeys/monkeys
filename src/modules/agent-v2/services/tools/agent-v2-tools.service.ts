@@ -9,6 +9,7 @@ import { AgentV2TaskStateManager } from '../agent-v2-task-state-manager.service'
 import { AgentV2Repository } from '../agent-v2.repository';
 import { AgentV2McpService } from '../mcp/agent-v2-mcp.service';
 import { AskApproval, HandleError, PushToolResult, ToolResult, ToolUse } from '../types/tool-types';
+import { AgentV2ConductorBridgeService } from './agent-v2-conductor-bridge.service';
 
 @Injectable()
 export class AgentV2ToolsService {
@@ -22,6 +23,7 @@ export class AgentV2ToolsService {
     private readonly toolsForwardService: ToolsForwardService,
     private readonly toolsRegistryService: ToolsRegistryService,
     private readonly agentRepository: AgentV2Repository,
+    private readonly conductorBridge: AgentV2ConductorBridgeService,
   ) {
     // Initialize OpenAI client for web search
     const agentConfig = config.agentv2?.openaiCompatible;
@@ -166,12 +168,29 @@ export class AgentV2ToolsService {
       // Convert tool name back to original format for execution
       // This is needed because LLM service converts ":" to "__" for function names
       const originalToolName = toolName.replaceAll('__', ':');
+      // Prefer direct invoke first for simple HTTP tools
+      // If tool belongs to SYSTEM namespace or direct call fails (likely due to missing context/auth),
+      // fallback to run via a minimal Conductor workflow to gain full context.
+      const toolDef = await this.toolsRegistryService.getToolByName(originalToolName);
+      const shouldUseConductor = toolDef?.namespace === SYSTEM_NAMESPACE;
+      if (shouldUseConductor && teamId && userId) {
+        return await this.conductorBridge.executeViaWorkflow(originalToolName, params, teamId, userId);
+      }
 
-      const result = await this.toolsForwardService.invoke(originalToolName, params, { sessionId, teamId, userId });
-      return {
-        tool_call_id: `tool_${Date.now()}`,
-        output: typeof result === 'string' ? result : JSON.stringify(result),
-      };
+      try {
+        const result = await this.toolsForwardService.invoke(originalToolName, params, { sessionId, teamId, userId });
+        return {
+          tool_call_id: `tool_${Date.now()}`,
+          output: typeof result === 'string' ? result : JSON.stringify(result),
+        };
+      } catch (err) {
+        // Fallback to Conductor execution when direct call fails and we have team/user context
+        if (teamId && userId) {
+          this.logger.warn(`Direct tool invoke failed for ${originalToolName}, fallback to Conductor. Reason: ${err?.message}`);
+          return await this.conductorBridge.executeViaWorkflow(originalToolName, params, teamId, userId);
+        }
+        throw err;
+      }
     } catch (error) {
       this.logger.error(`External tool execution failed: ${error.message}`);
       return {
