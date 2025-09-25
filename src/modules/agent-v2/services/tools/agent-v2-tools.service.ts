@@ -114,13 +114,7 @@ export class AgentV2ToolsService {
         };
         await this.accessMcpResourceTool(toolCall, askApproval, handleError, resourcePushResult);
         return resourceResult;
-      case 'ask_followup_question':
-        let followupResult: ToolResult = { tool_call_id: toolCall.id, output: '' };
-        const followupPushResult = (result: ToolResult) => {
-          followupResult = result;
-        };
-        await this.askFollowupQuestionTool(toolCall, askApproval, handleError, followupPushResult);
-        return followupResult;
+      // ask_followup_question removed in AgentV2
       case 'attempt_completion':
         let completionResult: ToolResult = { tool_call_id: toolCall.id, output: '' };
         const completionPushResult = (result: ToolResult) => {

@@ -158,22 +158,7 @@ export class AgentV2LlmService {
             },
           },
         };
-      case 'ask_followup_question':
-        return {
-          type: 'function',
-          function: {
-            name: 'ask_followup_question',
-            description: 'Ask the user a question to gather additional information.',
-            parameters: {
-              type: 'object',
-              properties: {
-                question: { type: 'string', description: 'A clear, specific question' },
-                follow_up: { type: 'string', description: 'List of suggested answers' },
-              },
-              required: ['question'],
-            },
-          },
-        };
+      // ask_followup_question removed from AgentV2
       case 'attempt_completion':
         return {
           type: 'function',

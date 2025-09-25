@@ -250,7 +250,7 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
       }
 
       // Handle tool result summary messages (created by executeTools method)
-      if (m.isSystem && m.content.includes('[') && m.content.includes(']') && (m.content.includes('web_search') || m.content.includes('ask_followup_question'))) {
+      if (m.isSystem && m.content.includes('[') && m.content.includes(']') && m.content.includes('web_search')) {
         // This looks like a tool result summary message, skip it as we already handled results above
         continue;
       }
@@ -413,7 +413,7 @@ Please retry with only ONE tool call.`;
 
 You MUST use a tool in every response. Available tools:
 - attempt_completion: If you have completed the task
-- ask_followup_question: If you need more information
+- web_search: To search and gather information
 - use_mcp_tool: To execute MCP tools
 - access_mcp_resource: To access MCP resources
 - new_task: To create a new task

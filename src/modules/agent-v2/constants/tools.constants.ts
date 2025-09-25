@@ -3,7 +3,7 @@
  */
 
 // Agent V2 内置工具列表 - 这些工具不受配置控制，始终可用
-export const AGENT_V2_BUILTIN_TOOLS = ['ask_followup_question', 'attempt_completion', 'update_todo_list', 'web_search'] as const;
+export const AGENT_V2_BUILTIN_TOOLS = ['attempt_completion', 'update_todo_list', 'web_search'] as const;
 
 // 工具分类定义
 export const AGENT_V2_TOOL_CATEGORIES = {
@@ -18,11 +18,6 @@ export type AgentV2ToolCategory = (typeof AGENT_V2_TOOL_CATEGORIES)[keyof typeof
 
 // 内置工具的显示信息
 export const AGENT_V2_BUILTIN_TOOL_INFO = {
-  ask_followup_question: {
-    displayName: 'Ask Followup Question',
-    description: '询问用户获取更多信息',
-    category: AGENT_V2_TOOL_CATEGORIES.BUILTIN,
-  },
   attempt_completion: {
     displayName: 'Attempt Completion',
     description: '完成任务并提供最终结果',

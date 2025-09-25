@@ -129,10 +129,10 @@ export class AgentV2TaskStateManager {
   public generateContinuationMessage(taskState: TaskExecutionState): string {
     switch (taskState.nextAction) {
       case 'continue_task':
-        return `SYSTEM: You must continue working on the current in-progress task: "${taskState.todos[taskState.currentTaskIndex].content}". You MUST use the appropriate tool (web_search for research/information, ask_followup_question for user input, or attempt_completion for final results) to make progress on this specific task. Do not just update the todo list - execute the task using the right tool immediately.`;
+        return `SYSTEM: You must continue working on the current in-progress task: "${taskState.todos[taskState.currentTaskIndex].content}". You MUST use the appropriate tool (web_search for research/information, or attempt_completion for final results) to make progress on this specific task. Do not just update the todo list - execute the task using the right tool immediately.`;
 
       case 'start_next_task':
-        return `SYSTEM: You have updated the todo list. Now you must immediately start the next pending task: "${taskState.todos[taskState.currentTaskIndex].content}". You MUST use the appropriate tool (web_search for research/information, ask_followup_question for user input) to begin executing this task. Do not stop after updating - take concrete action on this task immediately.`;
+        return `SYSTEM: You have updated the todo list. Now you must immediately start the next pending task: "${taskState.todos[taskState.currentTaskIndex].content}". You MUST use the appropriate tool (web_search for research/information) to begin executing this task. Do not stop after updating - take concrete action on this task immediately.`;
 
       case 'all_completed':
         return `SYSTEM: All tasks are completed! You must now use the attempt_completion tool to present the final result to the user. Include a comprehensive summary of all completed work.`;
