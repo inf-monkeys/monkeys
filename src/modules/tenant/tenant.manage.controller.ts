@@ -1,16 +1,19 @@
 import { TenantStatisticsAuthGuard } from '@/common/guards/tenant-statistics.guard';
 import { SuccessResponse } from '@/common/response';
-import { Body, Controller, Get, InternalServerErrorException, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { reloadMarketplaceData } from '../marketplace/services/marketplace.data';
 import { TenantManageService } from './tenant.manage.service';
 
 @Controller('tenant/manage')
 @ApiTags('Tenant Manage')
 @UseGuards(TenantStatisticsAuthGuard)
 export class TenantManageController {
-  constructor(private readonly tenantManageService: TenantManageService) {}
+  constructor(
+    private readonly tenantManageService: TenantManageService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @Post('/deleteAllTeamsExceptDefault')
   @ApiOperation({
@@ -139,11 +142,9 @@ export class TenantManageController {
     description: '重新加载市场数据',
   })
   async reloadMarketplaceData() {
-    const result = await reloadMarketplaceData();
-    return result
-      ? new SuccessResponse({
-          data: result,
-        })
-      : new InternalServerErrorException('重新加载市场数据失败');
+    const result = await this.eventEmitter.emitAsync('marketplace.initPreset');
+    return new SuccessResponse({
+      data: result,
+    });
   }
 }

@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { AssetsMarketplaceService } from '../assets/assets.marketplace.service';
 import { PasswordService } from '../auth/password/password.service';
+import { marketplaceDataManager } from '../marketplace/services/marketplace.data';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { ToolsRegistryService } from '../tools/tools.registry.service';
 
@@ -184,6 +185,10 @@ export class BootstrapService {
       logger.info('Initializing built-in marketplace (assets)...');
       await this.assetsMarketplaceService.initBuiltInMarketplace();
       logger.info('Built-in marketplace (assets) initialized successfully.');
+
+      // 确保预设市场数据（可能包含远程下载）已加载完成
+      logger.info('Preloading marketplace preset data...');
+      await marketplaceDataManager.reload();
 
       logger.info('Initializing preset app marketplace (new)...');
       await this.marketplaceService.initPresetAppMarketplace();

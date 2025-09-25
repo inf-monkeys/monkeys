@@ -1,6 +1,6 @@
 import { generateDbId } from '@/common/utils';
-import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { AgentV2Entity } from '@/database/entities/agent-v2/agent-v2.entity';
+import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
@@ -10,7 +10,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isEmpty, keyBy, pick, pickBy, set, uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
-import { presetAppSort } from '../marketplace/services/marketplace.data';
+import { marketplaceDataManager } from '../marketplace/services/marketplace.data';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageJson, WorkflowPageUpdateJson } from './interfaces';
@@ -637,7 +637,7 @@ export class WorkflowPageService {
       },
     });
     if (!pageGroup) {
-      const presetAppSortGroup = presetAppSort.find((it) => it.id === presetId);
+      const presetAppSortGroup = marketplaceDataManager.presetAppSort.find((it) => it.id === presetId);
       if (!presetAppSortGroup) {
         throw new NotFoundException('Preset app sort group not found');
       }

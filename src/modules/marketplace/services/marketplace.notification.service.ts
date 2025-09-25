@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { marketplaceDataManager } from './marketplace.data';
 import { MarketplaceService } from './marketplace.service';
 
 @Injectable()
@@ -17,6 +18,19 @@ export class MarketplaceNotificationService {
       await this.marketplaceService.upgradeInstalledApp(appId, newVersionId);
     } catch (error) {
       this.logger.error(`Failed to handle 'marketplace.app.version.approved' event for appId: ${appId}`, error.stack);
+    }
+  }
+
+  @OnEvent('marketplace.initPreset', { async: true })
+  async handleInitPresetEvent() {
+    this.logger.log('Received marketplace.initPreset event, reloading data and initializing preset apps...');
+    try {
+      await marketplaceDataManager.reload();
+      await this.marketplaceService.initPresetAppMarketplace();
+      this.logger.log('Preset apps initialized successfully after data reload.');
+    } catch (error) {
+      this.logger.error('Failed to initialize preset apps on event marketplace.initPreset', error.stack);
+      throw error;
     }
   }
 }

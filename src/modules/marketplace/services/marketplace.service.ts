@@ -18,7 +18,7 @@ import { EntityManager, In, Repository } from 'typeorm';
 import { CreateMarketplaceAppWithVersionDto } from '../dto/create-app.dto';
 import { UpdateMarketplaceAppDto } from '../dto/update-app.dto';
 import { InstalledAssetInfo, IStagedAsset, IStagedAssets, IStagedAssetWithSnapshot, MarketplaceAssetSnapshot, SourceAssetReference } from '../types';
-import { presetAppLocalDataList, presetAppSort } from './marketplace.data';
+import { marketplaceDataManager } from './marketplace.data';
 
 @Injectable()
 export class MarketplaceService {
@@ -439,7 +439,7 @@ export class MarketplaceService {
     const presetPageGroupMapper = new Map<string, string>();
 
     // 遍历 preset app sort 的 page group
-    for (const presetPageGroup of presetAppSort) {
+    for (const presetPageGroup of marketplaceDataManager.presetAppSort) {
       // 获取当前团队下的 group id
       const pageGroup = await this.workflowPageService.getPageGroupByPresetId(teamId, presetPageGroup.id);
 
@@ -458,7 +458,7 @@ export class MarketplaceService {
       const originPageGroupIds = (await this.workflowPageService.getPageGroups(teamId)).map((it) => it.id);
 
       // 然后 sort page group
-      const presetMapToPageGroupIds = presetAppSort.map((it) => presetPageGroupMapper.get(it.id)).filter(Boolean);
+      const presetMapToPageGroupIds = marketplaceDataManager.presetAppSort.map((it) => presetPageGroupMapper.get(it.id)).filter(Boolean);
 
       // 在 preset 中的排前面，不在的保持原顺序
       const pageGroupIds = originPageGroupIds.sort((a, b) => presetMapToPageGroupIds.indexOf(a) - presetMapToPageGroupIds.indexOf(b));
@@ -678,12 +678,12 @@ export class MarketplaceService {
   }
 
   public async initPresetAppMarketplace() {
-    if (presetAppLocalDataList.length === 0) {
+    if (marketplaceDataManager.presetAppLocalDataList.length === 0) {
       this.logger.log('No internal preset apps need to be initialized.');
       return;
     }
 
-    this.logger.log(`${presetAppLocalDataList.length} apps need to be initialized.`);
+    this.logger.log(`${marketplaceDataManager.presetAppLocalDataList.length} apps need to be initialized.`);
 
     // 进入事务
     return this.entityManager.transaction(async (transactionalEntityManager) => {
@@ -694,8 +694,8 @@ export class MarketplaceService {
 
       // 从文件 snapshot 更新数据库 snapshot & approve
       this.logger.log('Update all preset apps from local data');
-      for (const [index, presetAppLocalData] of presetAppLocalDataList.entries()) {
-        this.logger.log(`${index + 1}/${presetAppLocalDataList.length}`);
+      for (const [index, presetAppLocalData] of marketplaceDataManager.presetAppLocalDataList.entries()) {
+        this.logger.log(`${index + 1}/${marketplaceDataManager.presetAppLocalDataList.length}`);
         await this.createAppWithSnapshot('system', 'system', presetAppLocalData, transactionalEntityManager);
         await this.approveSubmission(presetAppLocalData.appId, true, transactionalEntityManager);
       }

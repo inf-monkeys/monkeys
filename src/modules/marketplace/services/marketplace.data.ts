@@ -94,7 +94,7 @@ class MarketplaceDataManager {
       // 解析预设应用本地数据
       this._presetAppLocalDataList = JSON.parse(presetAppLocalDataContent);
 
-      this._logger.log('Marketplace data reloaded successfully.');
+      this._logger.log('Marketplace data reloaded successfully. App ID List: ' + this._presetAllAppIds.join(', '));
       return true;
     } catch (error) {
       this._logger.error('Failed to reload marketplace data:', error);
@@ -116,10 +116,4 @@ class MarketplaceDataManager {
   }
 }
 
-const marketplaceDataManager = new MarketplaceDataManager();
-
-export const presetAppSort = marketplaceDataManager.presetAppSort;
-export const presetAllAppIds = marketplaceDataManager.presetAllAppIds;
-export const presetAppLocalDataList = marketplaceDataManager.presetAppLocalDataList;
-
-export const reloadMarketplaceData = () => marketplaceDataManager.reload();
+export const marketplaceDataManager = new MarketplaceDataManager();
