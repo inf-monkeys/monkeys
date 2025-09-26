@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
+import { ExectuionResultGridDisplayType } from '@/apis/common/typings';
 import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
 import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
@@ -34,6 +35,7 @@ interface IVirtuaExecutionResultGridWrapperProps {
   isSelected?: boolean;
   selectionModeDisplayType?: ISelectionModeDisplayType;
   onClick?: (e: React.MouseEvent) => void;
+  displayType?: ExectuionResultGridDisplayType;
 }
 
 export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGridWrapperProps> = ({
@@ -47,6 +49,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   isSelected,
   selectionModeDisplayType = 'dropdown-menu',
   onClick,
+  displayType = 'masonry',
 }) => {
   // const { mutate } = useSWRConfig();
 
@@ -132,9 +135,12 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   });
 
   return (
-    <div className="group/vgi relative flex h-full flex-1 flex-col" onClick={onClick}>
+    <div
+      className={`group/vgi relative ${displayType === 'grid' ? 'h-full w-full' : 'flex h-full flex-1 flex-col'}`}
+      onClick={onClick}
+    >
       {/* 图片内容区域，保持点击可以触发预览 */}
-      <div className="z-10 flex-1">{children}</div>
+      <div className={`z-10 ${displayType === 'grid' ? 'h-full w-full' : 'flex-1'}`}>{children}</div>
 
       {/* 操作按钮区域 - 提高z-index确保在最上层可点击 */}
       <div className="absolute right-4 top-4 z-30 flex gap-1 opacity-0 transition-opacity group-hover/vgi:opacity-100">

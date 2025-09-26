@@ -8,6 +8,7 @@ import { Check, CirclePause, FileMinus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
+import { ExectuionResultGridDisplayType } from '@/apis/common/typings';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid/index.tsx';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ interface IExecutionResultItemProps {
   selectionModeDisplayType?: ISelectionModeDisplayType;
   workflowId?: string;
   estimatedTime?: number;
+  displayType?: ExectuionResultGridDisplayType;
 }
 
 export type IClickBehavior = 'preview' | 'select' | 'fill-form' | 'none';
@@ -50,6 +52,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   selectionModeDisplayType = 'dropdown-menu',
   workflowId,
   estimatedTime = 180,
+  displayType = 'masonry',
 }) => {
   const { render, startTime } = result;
   const { type, data, status } = render;
@@ -78,7 +81,11 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
 
   if (isDeleted)
     return (
-      <div className="flex h-10 items-center justify-center gap-1 rounded-lg border border-input shadow-sm">
+      <div
+        className={`flex items-center justify-center gap-1 rounded-lg border border-input shadow-sm ${
+          displayType === 'grid' ? 'aspect-square h-full' : 'h-10'
+        }`}
+      >
         <FileMinus className="stroke-gray-11" size={16} />
         <span className="text-sm font-bold text-gray-11">{t('common.utils.deleted')}</span>
       </div>
@@ -90,7 +97,9 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
       return (
         <div
           key={render.key}
-          className="relative flex h-40 flex-col items-center justify-center gap-4 rounded-lg border border-input p-4 shadow-sm"
+          className={`relative flex flex-col items-center justify-center gap-4 rounded-lg border border-input p-4 shadow-sm ${
+            displayType === 'grid' ? 'aspect-square h-full' : 'h-40'
+          }`}
         >
           {progressType === 'estimate' ? (
             <ExecutionResultItemLoading startTime={startTime} estimatedTime={estimatedTime} status={status} />
@@ -103,7 +112,9 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
       return (
         <div
           key={render.key}
-          className="relative flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border border-input shadow-sm"
+          className={`relative flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-input shadow-sm ${
+            displayType === 'grid' ? 'aspect-square h-full' : 'h-40'
+          }`}
         >
           <CirclePause className="stroke-yellow-10" size={36} />
           <h1 className="text-sm font-bold">{t('common.workflow.status.PAUSED')}</h1>
@@ -114,7 +125,11 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   switch (type) {
     case 'image':
       return (
-        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
+        <div
+          className={`relative overflow-hidden rounded-lg border border-input shadow-sm ${
+            displayType === 'grid' ? 'aspect-square h-full' : ''
+          }`}
+        >
           <VirtuaExecutionResultGridWrapper
             data={result}
             src={data as string}
@@ -124,6 +139,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
             onSelect={onSelect}
             isSelected={isSelected}
             selectionModeDisplayType={selectionModeDisplayType}
+            displayType={displayType}
           >
             <div className="h-full w-full">
               <VirtuaExecutionResultGridImageItem
@@ -137,6 +153,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
                 event$={event$}
                 data={result}
                 workflowId={workflowId}
+                displayType={displayType}
               />
               {renderSelectionOverlay()}
             </div>
@@ -145,7 +162,12 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
       );
     default:
       return (
-        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm" onClick={handleSelect}>
+        <div
+          className={`relative overflow-hidden rounded-lg border border-input shadow-sm ${
+            displayType === 'grid' ? 'aspect-square h-full' : ''
+          }`}
+          onClick={handleSelect}
+        >
           <VirtuaExecutionResultGridWrapper
             data={result}
             event$={event$}
@@ -154,8 +176,9 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
             onSelect={onSelect}
             isSelected={isSelected}
             selectionModeDisplayType={selectionModeDisplayType}
+            displayType={displayType}
           >
-            <div className="max-h-96 min-h-40 overflow-auto p-2">
+            <div className={`overflow-auto p-2 ${displayType === 'grid' ? 'h-full' : 'max-h-96 min-h-40'}`}>
               {renderSelectionOverlay()}
               <VinesAbstractDataPreview data={data} className="h-full" />
             </div>

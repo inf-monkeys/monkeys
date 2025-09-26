@@ -68,6 +68,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const showErrorFilter = oem?.theme?.workflowPreviewExecutionGrid?.showErrorFilter ?? true;
   const isUniImagePreview = oem?.theme?.uniImagePreview ?? false;
   const oemOnlyResult = get(oem, 'theme.views.form.onlyResult', false);
+  const displayType = get(oem, ['theme', 'workflowPreviewExecutionGrid', 'displayType'], 'masonry');
   const onlyResult = oemOnlyResult && pageFrom === 'workbench';
 
   const executionResultFilterHeight =
@@ -109,7 +110,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       rowGutter: 8,
       columnCount: isMiniFrame ? 2 : void 0,
     },
-    [data.length, workflowId, shouldFilterError],
+    [data.length, workflowId, shouldFilterError, displayType],
   );
 
   const resizeObserver = useResizeObserver(positioner);
@@ -152,6 +153,41 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     };
   }, [lastScrollTop]);
 
+  // 渲染执行结果项的通用组件
+  const renderItem = useCallback(
+    (item: IVinesExecutionResultItem) => (
+      <ExecutionResultItem
+        result={item}
+        event$={event$}
+        isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.render.key)}
+        addDeletedInstanceId={addDeletedInstanceId}
+        mutate={mutate}
+        isSelectionMode={isSelectionMode || clickBehavior === 'select'}
+        isSelected={selectedOutputs.has(item.render.key)}
+        onSelect={(id) => toggleOutputSelection(id, item)}
+        clickBehavior={isUniImagePreview ? 'none' : clickBehavior}
+        selectionModeDisplayType={selectionModeDisplayType}
+        workflowId={workflowId ?? undefined}
+        displayType={displayType}
+      />
+    ),
+    [
+      event$,
+      deletedInstanceIdList,
+      addDeletedInstanceId,
+      mutate,
+      isSelectionMode,
+      clickBehavior,
+      selectedOutputs,
+      toggleOutputSelection,
+      isUniImagePreview,
+      selectionModeDisplayType,
+      workflowId,
+      displayType,
+    ],
+  );
+
+  // 瀑布流布局
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
     scrollTop,
@@ -160,29 +196,56 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     containerRef,
     items: data,
     overscanBy: 3,
-    render: useCallback(
-      ({ data: item }) => (
-        <ExecutionResultItem
-          result={item}
-          event$={event$}
-          isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.render.key)}
-          addDeletedInstanceId={addDeletedInstanceId}
-          mutate={mutate}
-          isSelectionMode={isSelectionMode || clickBehavior === 'select'}
-          isSelected={selectedOutputs.has(item.render.key)}
-          onSelect={(id) => toggleOutputSelection(id, item)}
-          clickBehavior={isUniImagePreview ? 'none' : clickBehavior}
-          selectionModeDisplayType={selectionModeDisplayType}
-          workflowId={workflowId ?? undefined}
-        />
-      ),
-      [data, deletedInstanceIdList, isSelectionMode, selectedOutputs, toggleOutputSelection],
-    ),
+    render: useCallback(({ data: item }) => renderItem(item), [renderItem]),
     itemKey: (item, index) => `${index}-${item.render.key}`,
     onRender: loadMore,
-    itemHeightEstimate: 400,
-    resizeObserver,
+    itemHeightEstimate: displayType === 'grid' ? 300 : 400,
+    resizeObserver: displayType === 'masonry' ? resizeObserver : undefined,
   });
+
+  // 为网格布局添加滚动监听，实现无限加载
+  const handleGridScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const target = e.currentTarget;
+      const { scrollTop, scrollHeight, clientHeight } = target;
+      const threshold = 200; // 距离底部200px时开始加载
+
+      if (scrollHeight - scrollTop - clientHeight < threshold && hasMore) {
+        loadMore(data.length - 1, data.length - 1, data);
+      }
+    },
+    [hasMore, loadMore, data],
+  );
+
+  // 方形网格布局
+  const renderGridLayout = useCallback(() => {
+    const containerWidthValue =
+      isUseWorkbench && (associations?.filter((it) => it.enabled).length ?? 0) > 0
+        ? containerWidth - 80
+        : containerWidth;
+
+    const itemSize = 200;
+    const gap = 8;
+    const columnsCount = Math.floor((containerWidthValue + gap) / (itemSize + gap));
+
+    return (
+      <div
+        className="grid gap-2 overflow-auto"
+        style={{
+          gridTemplateColumns: `repeat(${Math.max(1, columnsCount)}, 1fr)`,
+          padding: '8px',
+          height: '100%',
+        }}
+        onScroll={handleGridScroll}
+      >
+        {data.map((item, index) => (
+          <div key={`${index}-${item.render.key}`} className="aspect-square" style={{ minHeight: '200px' }}>
+            {renderItem(item)}
+          </div>
+        ))}
+      </div>
+    );
+  }, [data, containerWidth, isUseWorkbench, associations, renderItem, handleGridScroll]);
 
   return (
     <div className="flex flex-col gap-2 p-2">
@@ -200,14 +263,19 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         )}
       </div>
       <ScrollArea
-        className={cn('z-20 mr-0.5 bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2')}
+        className={cn(
+          'z-20 mr-0.5 bg-neocard',
+          displayType === 'grid'
+            ? '[&>[data-radix-scroll-area-viewport]]:p-0'
+            : '[&>[data-radix-scroll-area-viewport]]:p-2',
+        )}
         ref={scrollRef}
         style={{
           height: height === Infinity ? 800 - executionResultFilterHeight : height - executionResultFilterHeight,
         }}
         disabledOverflowMask
       >
-        {masonryGrid}
+        {displayType === 'grid' ? renderGridLayout() : masonryGrid}
       </ScrollArea>
     </div>
   );

@@ -9,6 +9,7 @@ import { Copy } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 
+import { ExectuionResultGridDisplayType } from '@/apis/common/typings';
 import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-image-preview';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -41,6 +42,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   event$?: EventEmitter<void>;
   data: IVinesExecutionResultItem;
   workflowId?: string;
+  displayType?: ExectuionResultGridDisplayType;
 }
 
 export function getThumbUrl(url: string) {
@@ -52,15 +54,16 @@ export function getThumbUrl(url: string) {
 export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResultGridImageItemProps> = ({
   src,
   alt,
-  instanceId,
+  instanceId: _instanceId,
   outputIndex = 0,
   renderKey,
   isSelectionMode = false,
   onSelect,
   clickBehavior,
   event$,
-  data,
+  data: _data,
   workflowId,
+  displayType = 'masonry',
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -98,7 +101,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
         } as any,
         search: {
           // imageUrl: src,
-          // instanceId: instanceId || '',
+          // instanceId: _instanceId || '',
           outputIndex,
           mode: isMiniFrame ? 'mini' : '',
         },
@@ -108,10 +111,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
       onSelect(e);
     }
     if (clickBehavior === 'fill-form' && event$) {
-      event$?.emit?.({
-        type: 'set',
-        data: data.input,
-      });
+      event$?.emit?.();
     }
   };
 
@@ -124,22 +124,43 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   );
 
   return (
-    <div className="vines-center relative overflow-hidden rounded-lg">
+    <div
+      className={`relative overflow-hidden ${displayType === 'grid' ? 'flex h-full w-full items-center justify-center rounded-lg' : 'vines-center rounded-lg'}`}
+    >
       <UniImagePreviewWrapper imageUrl={src}>
-        <Image
-          className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
-          src={previewSrc}
-          alt="image"
-          style={{
-            objectFit: 'cover',
-            width: '100%',
-            height: '100%',
-          }}
-          preview={false}
-          onDragStart={handleDragStart}
-          draggable
-          onClick={handleImageClick}
-        />
+        {displayType === 'grid' ? (
+          <img
+            className="border border-input shadow-sm"
+            src={previewSrc}
+            alt="image"
+            style={{
+              objectFit: 'contain',
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              display: 'block',
+            }}
+            onDragStart={handleDragStart}
+            draggable
+            onClick={handleImageClick}
+          />
+        ) : (
+          <Image
+            className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
+            src={previewSrc}
+            alt="image"
+            style={{
+              objectFit: 'cover',
+              width: '100%',
+              height: '100%',
+            }}
+            preview={false}
+            onDragStart={handleDragStart}
+            draggable
+            onClick={handleImageClick}
+          />
+        )}
       </UniImagePreviewWrapper>
 
       {altLabel.trim() !== '' && (

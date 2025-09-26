@@ -70,10 +70,13 @@ export type CustomizationDensity = 'compact' | 'default';
 export type SelectionModeDisplayType = 'operation-button' | 'dropdown-menu';
 export type ClickBehavior = 'preview' | 'select' | 'fill-form';
 
+export type ExectuionResultGridDisplayType = 'grid' | 'masonry';
+
 export type WorkflowPreviewExecutionGrid = {
   selectionModeDisplayType?: SelectionModeDisplayType;
   clickBehavior?: ClickBehavior;
   showErrorFilter?: boolean;
+  displayType?: ExectuionResultGridDisplayType;
 };
 
 export type CustomizationHistoryResult = {

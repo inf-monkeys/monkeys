@@ -73,10 +73,13 @@ export type CustomizationHeadbar = {
 export type SelectionModeDisplayType = 'operation-button' | 'dropdown-menu';
 export type ClickBehavior = 'preview' | 'select' | 'fill-form';
 
+export type ExectuionResultGridDisplayType = 'grid' | 'masonry';
+
 export type WorkflowPreviewExecutionGrid = {
   selectionModeDisplayType?: SelectionModeDisplayType;
   clickBehavior?: ClickBehavior;
   showErrorFilter?: boolean;
+  displayType?: ExectuionResultGridDisplayType;
 };
 
 export type CustomizationHistoryResult = {
@@ -535,6 +538,7 @@ export const config: Config = {
         selectionModeDisplayType: readConfig('server.customization.workflowPreviewExecutionGrid.selectionModeDisplayType', 'dropdown-menu'),
         clickBehavior: readConfig('server.customization.workflowPreviewExecutionGrid.clickBehavior', 'preview'),
         showErrorFilter: readConfig('server.customization.workflowPreviewExecutionGrid.showErrorFilter', true),
+        displayType: readConfig('server.customization.workflowPreviewExecutionGrid.displayType', 'masonry'),
       },
       workbenchSidebarDefaultOpen: readConfig('server.customization.workbenchSidebarDefaultOpen', true),
       workbenchSidebarMoreAction: readConfig('server.customization.workbenchSidebarMoreAction', true),
