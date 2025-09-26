@@ -3,7 +3,9 @@ import { useEffect } from 'react';
 
 import { useCreation } from 'ahooks';
 import { motion } from 'framer-motion';
+import { get } from 'lodash';
 
+import { useSystemConfig } from '@/apis/common';
 import { Page404 } from '@/components/layout/workspace/404.tsx';
 import { VinesAgentViewWrapper } from '@/components/layout-wrapper/agent/view-wrapper.tsx';
 import { VinesDesignBoardViewWrapper } from '@/components/layout-wrapper/design/view-wrapper.tsx';
@@ -14,6 +16,7 @@ import useUrlState from '@/hooks/use-url-state';
 import { AgentStoreProvider, createAgentStore } from '@/store/useAgentStore';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { createDesignBoardStore, DesignBoardProvider } from '@/store/useDesignBoardStore';
+import { getGlobalDesignBoardStore } from '@/store/useDesignBoardStore/shared';
 import { createExecutionStore, ExecutionStoreProvider } from '@/store/useExecutionStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { createOutputSelectionStore, OutputSelectionStoreProvider } from '@/store/useOutputSelectionStore';
@@ -38,6 +41,10 @@ interface IVinesViewProps {
 export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type, from }: IVinesViewProps) {
   const setVisible = useViewStore((s) => s.setVisible);
   const setFrom = useViewStore((s) => s.setFrom);
+
+  const { data: oem } = useSystemConfig();
+
+  const showFormEmbed = get(oem, 'theme.workbenchSidebarFormViewEmbed', false) as boolean;
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
@@ -76,11 +83,13 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
 
     if (type === 'global-design-board' || type === 'design-board') {
       return (
-        <DesignBoardProvider createStore={createDesignBoardStore}>
+        <DesignBoardProvider
+          createStore={type === 'global-design-board' ? getGlobalDesignBoardStore : createDesignBoardStore}
+        >
           <VinesDesignBoardViewWrapper designBoardId={designBoardId}>
             {type === 'global-design-board' ? (
               <div className={cn('flex size-full gap-global')}>
-                <GlobalDesignBoardOperationBar />
+                {!showFormEmbed && <GlobalDesignBoardOperationBar />}
                 <VinesViewFrame>
                   <View />
                 </VinesViewFrame>

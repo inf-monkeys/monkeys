@@ -16,13 +16,13 @@ import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
 import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
-import { ViewTitle } from '@/components/layout/workspace/vines-view/form/tabular/view-title';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { GlobalDesignBoardOperationBarArea } from '@/components/ui/vines-iframe/view/global-design-board-operation-bar/area';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { useElementSize } from '@/hooks/use-resize-observer';
@@ -34,12 +34,15 @@ import {
 } from '@/store/showWorkbenchIcon';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
+import { DesignBoardProvider } from '@/store/useDesignBoardStore';
+import { getGlobalDesignBoardStore } from '@/store/useDesignBoardStore/shared';
 import { createExecutionStore, ExecutionStoreProvider } from '@/store/useExecutionStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { useGlobalViewSize, useSetEmbedSidebar } from '@/store/useGlobalViewStore';
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cloneDeep, cn, getI18nContent } from '@/utils';
 
+import { WorkbenchSidebarNormalModeEmbedContent } from './embed-content';
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
 import { IWorkbenchViewItemPage, WorkbenchViewItemCurrentData } from './virtua/item';
 
@@ -70,6 +73,8 @@ export const GLOBAL_DESIGN_BOARD_PAGE: IPinPage = {
     updatedTimestamp: 0,
   },
 };
+
+const EMBED_TYPE_LIST = ['preview', 'global-design-board'];
 
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   showGroup?: boolean;
@@ -297,7 +302,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   useThrottleEffect(
     () => {
       if (!wrapperHeight) return;
-      setHeight(globalViewSize != 'sm' ? wrapperHeight - 74 : `calc(${wrapperHeight}px - 1.5rem - 2px)`);
+      setHeight(globalViewSize != 'sm' ? wrapperHeight - 56 : `calc(${wrapperHeight}px - 1.5rem - 2px)`);
     },
     [wrapperHeight, globalViewSize],
     { wait: 64 },
@@ -359,7 +364,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const event$ = useEventEmitter();
 
   const showFormEmbed =
-    workbenchSidebarFormViewEmbed && currentPage?.[teamId]?.type === 'preview' && currentPage?.[teamId]?.workflowId;
+    workbenchSidebarFormViewEmbed &&
+    EMBED_TYPE_LIST.includes(currentPage?.[teamId]?.type ?? '') &&
+    currentPage?.[teamId]?.workflowId;
 
   const setEmbedSidebar = useSetEmbedSidebar();
 
@@ -434,29 +441,32 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             {showFormEmbed ? (
               <>
                 <Separator orientation="vertical" />
-                <VinesFlowProvider workflowId={currentPage?.[teamId]?.workflowId}>
-                  <FlowStoreProvider createStore={createFlowStore}>
-                    <CanvasStoreProvider createStore={createCanvasStore}>
-                      <VinesViewWrapper workflowId={currentPage?.[teamId]?.workflowId}>
-                        <ExecutionStoreProvider createStore={createExecutionStore}>
-                          <div className="relative w-[320px] pb-global">
-                            <ViewTitle
-                              displayName={getI18nContent(currentPage?.[teamId]?.workflow?.displayName)}
-                              themeGradient={Boolean(oem?.theme.gradient)}
-                            />
-                            <VinesTabular
-                              theme={tabularTheme}
-                              className="mt-[42px] h-[calc(100%-42px)] w-full"
-                              isMiniFrame={false}
-                              event$={event$}
-                              height={height}
-                            />
-                          </div>
-                        </ExecutionStoreProvider>
-                      </VinesViewWrapper>
-                    </CanvasStoreProvider>
-                  </FlowStoreProvider>
-                </VinesFlowProvider>
+                {currentPage?.[teamId]?.type === 'preview' && (
+                  <VinesFlowProvider workflowId={currentPage?.[teamId]?.workflowId}>
+                    <FlowStoreProvider createStore={createFlowStore}>
+                      <CanvasStoreProvider createStore={createCanvasStore}>
+                        <VinesViewWrapper workflowId={currentPage?.[teamId]?.workflowId}>
+                          <ExecutionStoreProvider createStore={createExecutionStore}>
+                            <WorkbenchSidebarNormalModeEmbedContent
+                              displayName={currentPage?.[teamId]?.workflow?.displayName}
+                            >
+                              <VinesTabular theme={tabularTheme} isMiniFrame={false} event$={event$} height={height} />
+                            </WorkbenchSidebarNormalModeEmbedContent>
+                          </ExecutionStoreProvider>
+                        </VinesViewWrapper>
+                      </CanvasStoreProvider>
+                    </FlowStoreProvider>
+                  </VinesFlowProvider>
+                )}
+                {currentPage?.[teamId]?.type === 'global-design-board' && (
+                  <DesignBoardProvider createStore={getGlobalDesignBoardStore}>
+                    <WorkbenchSidebarNormalModeEmbedContent displayName={currentPage?.[teamId]?.displayName}>
+                      <div className="h-full p-global pt-0">
+                        <GlobalDesignBoardOperationBarArea />
+                      </div>
+                    </WorkbenchSidebarNormalModeEmbedContent>
+                  </DesignBoardProvider>
+                )}
               </>
             ) : (
               <div

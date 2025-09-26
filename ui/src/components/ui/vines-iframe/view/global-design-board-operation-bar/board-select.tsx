@@ -1,19 +1,42 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useSearch } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 
+import { get } from 'lodash';
 import { Check, ChevronsUpDown, ExternalLink, Pencil, Plus, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
-import { createDesignMetadata, deleteDesignProject, useDesignProjectMetadataList, useGetDesignProjectList } from '@/apis/designs';
+import {
+  createDesignMetadata,
+  deleteDesignProject,
+  useDesignProjectMetadataList,
+  useGetDesignProjectList,
+} from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { useVinesTeam } from '@/components/router/guard/team';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandSeparator } from '@/components/ui/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandSeparator,
+} from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -21,18 +44,15 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { DEFAULT_DESIGN_PROJECT_ICON_URL, DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { cn, getI18nContent } from '@/utils';
-import { useNavigate } from '@tanstack/react-router';
-import { get } from 'lodash';
-import { toast } from 'sonner';
 
 const getDesignProjectDisplayName = (designProject?: IDesignProject) => {
   if (!designProject) return '';
   const displayName = getI18nContent(designProject.displayName ?? '');
   return (
-    <span className="flex items-center gap-2">
+    <div className="flex items-center gap-2">
       <VinesIcon src={designProject.iconUrl ?? DEFAULT_DESIGN_PROJECT_ICON_URL} size="xs" />
       <span className="max-w-[7.6rem] truncate">{displayName}</span>
-    </span>
+    </div>
   );
 };
 
@@ -124,7 +144,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
 
   const handleDeleteDesignProject = async () => {
     if (!selectedDesignProject) return;
-    
+
     try {
       await deleteDesignProject(selectedDesignProject.id);
       toast.success(t('common.delete.success'));
@@ -248,7 +268,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
                       </CommandItem>
                     ))}
                   </CommandGroup>
-                  
+
                   {/* 添加分隔线和操作按钮 */}
                   <CommandSeparator />
                   <CommandGroup>
@@ -260,17 +280,21 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
                     {get(oem, 'theme.designProjects.oneOnOne', false) === false && selectedDesignProject && (
                       <CommandItem onSelect={handleCreateDesignBoard}>
                         <Plus className="mr-2 h-4 w-4" />
-                        <span>{t('workspace.global-design-board.operation-bar.design-board.create', { defaultValue: '新建画板' })}</span>
+                        <span>
+                          {t('workspace.global-design-board.operation-bar.design-board.create', {
+                            defaultValue: '新建画板',
+                          })}
+                        </span>
                       </CommandItem>
                     )}
-                    
+
                     {selectedDesignProject && (
                       <CommandItem onSelect={handleShowDeleteConfirm} className="text-red-600">
                         <Trash className="mr-2 h-4 w-4" />
                         <span>{t('ugc-page.design-project.dropdown.delete')}</span>
                       </CommandItem>
                     )}
-                    
+
                     <CommandItem onSelect={handleGoToWorkspace}>
                       <ExternalLink className="mr-2 h-4 w-4" />
                       <span>{t('ugc-page.design-project.dropdown.manage-workspace')}</span>
@@ -281,64 +305,6 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
             </PopoverContent>
           </Popover>
         </div>
-        {/* <div className="flex w-full flex-col gap-2">
-        <span className="text-xs font-semibold">{t('common.type.design-board')}</span>
-        <Popover open={designBoardVisible} onOpenChange={setDesignBoardVisible}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              className={cn('w-full justify-between', !currentDesignBoardId && 'text-muted-foreground')}
-            >
-              {currentDesignBoardId
-                ? getI18nContent(selectedDesignBoard!.displayName ?? '')
-                : isLoading
-                  ? t('common.load.loading')
-                  : t('workspace.global-design-board.operation-bar.design-board.placeholder')}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="p-0">
-            <Command>
-              <CommandInput
-                placeholder={t('workspace.global-design-board.operation-bar.design-board.search-placeholder')}
-              />
-              <CommandEmpty>{t('workspace.global-design-board.operation-bar.design-board.search-empty')}</CommandEmpty>
-              <ScrollArea className="h-64">
-                <CommandGroup>
-                  {(designBoardList ?? []).map((designBoard) => (
-                    <CommandItem
-                      value={designBoard.id}
-                      key={designBoard.id}
-                      onSelect={() => {
-                        setCurrentDesignBoardId(designBoard.id);
-                        setDesignBoardVisible(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          'mr-2 h-4 w-4',
-                          designBoard.id === currentDesignBoardId ? 'opacity-100' : 'opacity-0',
-                        )}
-                      />
-                      <div className="flex items-center gap-2">
-                        <div className="flex flex-col">
-                          <span className="font-medium">{getI18nContent(designBoard.displayName)}</span>
-                          {designBoard.description && (
-                            <span className="text-xs text-muted-foreground">
-                              {getI18nContent(designBoard.description)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </ScrollArea>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div> */}
       </div>
       <DesignProjectInfoEditor
         visible={designProjectEditorVisible}
@@ -347,13 +313,13 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
         afterUpdate={handleAfterUpdateDesignProject}
       />
       {createDesignProjectVisible && (
-        <CreateDesignProjectDialog 
+        <CreateDesignProjectDialog
           visible={createDesignProjectVisible}
           setVisible={setCreateDesignProjectVisible}
           afterCreate={handleAfterCreateDesignProject}
         />
       )}
-      
+
       <AlertDialog open={deleteConfirmVisible} onOpenChange={setDeleteConfirmVisible}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -361,17 +327,17 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
               {t('common.dialog.delete-confirm.title', { type: t('common.type.design-project') })}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t('common.dialog.delete-confirm.content', { 
-                type: t('common.type.design-project'), 
-                name: selectedDesignProject ? getI18nContent(selectedDesignProject.displayName) : t('common.utils.unknown') 
+              {t('common.dialog.delete-confirm.content', {
+                type: t('common.type.design-project'),
+                name: selectedDesignProject
+                  ? getI18nContent(selectedDesignProject.displayName)
+                  : t('common.utils.unknown'),
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteDesignProject}>
-              {t('common.utils.confirm')}
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteDesignProject}>{t('common.utils.confirm')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
