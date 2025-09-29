@@ -173,6 +173,7 @@ export class AppController {
       },
       endpoints: {
         clientUrl: 'https://ai.infmonkeys.com',
+        serverUrl: config.server.appUrl,
       },
       module,
     };

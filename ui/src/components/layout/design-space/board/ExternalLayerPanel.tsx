@@ -16,6 +16,7 @@ import { History } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Editor, TLShapeId } from 'tldraw';
 import { VisibilityOff, VisibilityOn } from './icons';
+import { AgentEmbeddedPanel } from './panel-agent-embedded';
 
 // 形状类型中文映射
 const getShapeTypeInChinese = (type: string, geoKind?: string): string => {
@@ -419,6 +420,13 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
   const [miniPage, setMiniPage] = useState<any | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const miniEvent$ = useEventEmitter<any>();
+  // agent 嵌入：在左侧 sidebar 内显示
+  const [agentVisible, setAgentVisible] = useState(false);
+  useEffect(() => {
+    const toggle = () => setAgentVisible((v) => !v);
+    window.addEventListener('vines:toggle-agent-embed', toggle as any);
+    return () => window.removeEventListener('vines:toggle-agent-embed', toggle as any);
+  }, []);
   // 获取执行历史（用于历史记录视图）
   const { data: allOutputsPages } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
   // 文本归一化：支持多语言对象 { 'zh-CN': '...', en: '...' }
@@ -2149,8 +2157,12 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
         </div>
       </div>
 
-      {/* 当 miniPage 存在时，显示 iframe；否则显示页面+图层面板 */}
-      {miniPage && !isLeftBodyCollapsed ? (
+      {/* 当 agentVisible 时，显示 Agent 嵌入；其次是 mini 应用；否则显示页面+图层面板 */}
+      {agentVisible && !isLeftBodyCollapsed ? (
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
+          <AgentEmbeddedPanel editor={editor} onClose={() => setAgentVisible(false)} />
+        </div>
+      ) : miniPage && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
           <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
             {/* 迷你应用顶部信息栏：显示当前工作流名称与描述 */}

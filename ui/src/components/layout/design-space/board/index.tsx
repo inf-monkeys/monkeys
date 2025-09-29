@@ -4,29 +4,30 @@ import './index.scss';
 import './layer-panel.css';
 
 import {
-  AssetRecordType,
-  createShapeId,
-  defaultBindingUtils,
-  DefaultContextMenu,
-  DefaultContextMenuContent,
-  defaultEditorAssetUrls,
-  defaultShapeTools,
-  defaultTools,
-  Editor,
-  FrameShapeUtil,
-  TLComponents,
-  Tldraw,
-  TldrawUiMenuGroup,
-  TldrawUiMenuItem,
-  TLImageShape,
-  TLShape,
-  TLShapeId,
-  TLUiContextMenuProps,
-  useEditor,
-  useToasts
+    AssetRecordType,
+    createShapeId,
+    defaultBindingUtils,
+    DefaultContextMenu,
+    DefaultContextMenuContent,
+    defaultEditorAssetUrls,
+    defaultShapeTools,
+    defaultTools,
+    Editor,
+    FrameShapeUtil,
+    TLComponents,
+    Tldraw,
+    TldrawUiMenuGroup,
+    TldrawUiMenuItem,
+    TLImageShape,
+    TLShape,
+    TLShapeId,
+    TLUiContextMenuProps,
+    useEditor,
+    useToasts
 } from 'tldraw';
 
 import { ExternalLayerPanel } from './ExternalLayerPanel';
+// Agent 嵌入由 ExternalLayerPanel 控制
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 
 import { useSystemConfig } from '@/apis/common';
@@ -387,6 +388,8 @@ export const Board: React.FC<BoardProps> = ({
     window.dispatchEvent(new CustomEvent('vines:left-sidebar-width-change', { detail: { width: leftSidebarWidth } }));
   }, [leftSidebarWidth]);
 
+  // Agent 嵌入由 ExternalLayerPanel 控制
+
   // 监听打开 mini 模式应用事件，记录当前 page 信息
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -670,6 +673,8 @@ export const Board: React.FC<BoardProps> = ({
         }}
         />
       </div>
+
+      {/* Agent 面板已迁移至左侧 ExternalLayerPanel */}
     </div>
   );
 };

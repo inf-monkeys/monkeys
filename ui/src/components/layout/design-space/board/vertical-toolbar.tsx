@@ -373,6 +373,24 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
         })}
       </div>
 
+        {/* Agent toggle button */}
+        <div className="custom-toolbar" style={{ marginTop: 20 }}>
+          <div className="tool-group">
+            <button
+              className={`tool-button`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent('vines:toggle-agent-embed'));
+              }}
+              title={'Agent'}
+              style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+            >
+              <VinesIcon size="xs">lucide:bot</VinesIcon>
+            </button>
+          </div>
+        </div>
+
       {/* 下方独立 Plus 工具栏，距离上方 20px */}
       <div className="custom-toolbar">
         <div key="plus-group" className={`tool-group ${isPlusMenuOpen ? 'selected' : ''}`} ref={plusGroupRef}>
