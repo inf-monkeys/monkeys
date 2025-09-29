@@ -82,7 +82,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
   };
 
   const list = vines
-    .getToolsByCategory(searchValue)
+    .getToolsByCategory(searchValue, oemId)
     .map(([tools, ...it]) => [
       tools.filter(({ name }) => !name.endsWith(workflowId)),
       ...it,

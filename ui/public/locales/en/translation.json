@@ -3014,7 +3014,11 @@
             "extra": "Extra",
             "train-model": "Training Model",
             "bio": "Bio",
-            "human": "Human"
+            "human": "Human",
+            "feature": "Feature",
+            "logic": "Logic",
+            "prototype": "Prototype",
+            "demand": "Demand"
           }
         },
         "variable-selector": {

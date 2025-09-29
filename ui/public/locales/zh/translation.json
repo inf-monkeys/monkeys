@@ -3038,7 +3038,11 @@
             "extra": "扩展能力",
             "train-model": "模型训练",
             "bio": "生命科学",
-            "human": "用户交互"
+            "human": "用户交互",
+            "feature": "功能",
+            "logic": "逻辑",
+            "prototype": "原型",
+            "demand": "需求"
           }
         },
         "variable-selector": {
