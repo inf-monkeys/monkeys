@@ -39,7 +39,8 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
   const displayName = getI18nContent(inputDisplayName);
 
   const placeholder =
-    typeOptions?.placeholder ?? t('workspace.pre-view.actuator.execution-form.string', { displayName });
+    typeOptions?.placeholder ??
+    t('workspace.pre-view.actuator.execution-form.string', { displayName: getI18nContent(displayName) });
 
   // 智能优化处理函数
   const handleSmartOptimize = () => {

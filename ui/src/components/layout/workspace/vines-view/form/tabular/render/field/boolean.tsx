@@ -8,7 +8,7 @@ import { BOOLEAN_VALUES } from '@/components/layout/workspace/vines-view/form/ta
 import { TagInput } from '@/components/ui/input/tag';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IFieldBooleanProps {
   input: VinesWorkflowVariable;
@@ -40,7 +40,9 @@ export const FieldBoolean: React.FC<IFieldBooleanProps> = ({
                 value.filter((it) => BOOLEAN_VALUES.includes(it)),
               )
             }
-            placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
+            placeholder={t('workspace.pre-view.actuator.execution-form.string', {
+              displayName: getI18nContent(displayName),
+            })}
           />
         ) : (
           <div className="flex w-full gap-2">

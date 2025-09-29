@@ -74,7 +74,7 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
       }}
       value={finalValue || []}
       options={selectList.map((item) => ({ ...item, label: getI18nContent(item.label) || '' }))}
-      placeholder={t('workspace.pre-view.actuator.execution-form.select', { displayName })}
+      placeholder={t('workspace.pre-view.actuator.execution-form.select', { displayName: getI18nContent(displayName) })}
     />
   ) : (
     <Select
@@ -85,7 +85,11 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
       value={finalValue}
     >
       <SelectTrigger>
-        <SelectValue placeholder={t('workspace.pre-view.actuator.execution-form.select', { displayName })} />
+        <SelectValue
+          placeholder={t('workspace.pre-view.actuator.execution-form.select', {
+            displayName: getI18nContent(displayName),
+          })}
+        />
       </SelectTrigger>
       <SelectContent>
         {selectList.map((it, i) => (
