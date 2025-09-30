@@ -31,7 +31,8 @@ type AgentServerToClient = {
     origin: true,
     credentials: true
   },
-  transports: ['websocket', 'polling']
+  transports: ['websocket', 'polling'],
+  allowEIO3: true
 })
 export class TldrawAgentGateway implements OnGatewayConnection, OnGatewayDisconnect {
   
@@ -53,6 +54,8 @@ export class TldrawAgentGateway implements OnGatewayConnection, OnGatewayDisconn
     this.logger.log(`[DEBUG] Client user-agent:`, client.handshake.headers['user-agent']);
     this.logger.log(`[DEBUG] Client address:`, client.handshake.address);
     this.logger.log(`[DEBUG] Client query:`, client.handshake.query);
+    this.logger.log(`[DEBUG] Client transport:`, client.conn.transport.name);
+    this.logger.log(`[DEBUG] Client upgrade:`, client.conn.upgraded);
   }
 
   handleDisconnect(client: Socket) {
