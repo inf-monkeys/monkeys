@@ -108,6 +108,9 @@ const TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport = createFileRoute(
 const TeamIdNavNavIdSubModuleIdIndexLazyImport = createFileRoute(
   '/$teamId/nav/$navId/$subModuleId/',
 )()
+const TeamIdNavNavIdAssetIdIndexLazyImport = createFileRoute(
+  '/$teamId/nav/$navId/$assetId/',
+)()
 const TeamIdEvaluationsModuleIdTabIndexLazyImport = createFileRoute(
   '/$teamId/evaluations/$moduleId/$tab/',
 )()
@@ -484,6 +487,16 @@ const TeamIdNavNavIdSubModuleIdIndexLazyRoute =
     ),
   )
 
+const TeamIdNavNavIdAssetIdIndexLazyRoute =
+  TeamIdNavNavIdAssetIdIndexLazyImport.update({
+    path: '/$teamId/nav/$navId/$assetId/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./pages/$teamId/nav/$navId/$assetId/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 const TeamIdEvaluationsModuleIdTabIndexLazyRoute =
   TeamIdEvaluationsModuleIdTabIndexLazyImport.update({
     path: '/$teamId/evaluations/$moduleId/$tab/',
@@ -710,6 +723,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdEvaluationsModuleIdTabIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/nav/$navId/$assetId/': {
+      preLoaderRoute: typeof TeamIdNavNavIdAssetIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/nav/$navId/$subModuleId/': {
       preLoaderRoute: typeof TeamIdNavNavIdSubModuleIdIndexLazyImport
       parentRoute: typeof rootRoute
@@ -776,6 +793,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyRoute,
   TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyRoute,
   TeamIdEvaluationsModuleIdTabIndexLazyRoute,
+  TeamIdNavNavIdAssetIdIndexLazyRoute,
   TeamIdNavNavIdSubModuleIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute,

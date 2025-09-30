@@ -676,7 +676,8 @@
               "options": {
                 "table": "Table View",
                 "card": "Card View",
-                "gallery": "Gallery View"
+                "gallery": "Gallery View",
+                "folder": "Folder View"
               }
             },
             "sort": {

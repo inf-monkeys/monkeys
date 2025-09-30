@@ -32,7 +32,7 @@ export type IUgcCustomProps = {
 
 export type IRenderKey = 'title' | 'subtitle' | 'description' | 'tags' | 'time' | 'logo' | 'cover' | 'assetTags';
 
-export type IDisplayMode = 'table' | 'gallery' | 'card' | null;
+export type IDisplayMode = 'table' | 'gallery' | 'card' | 'folder' | null;
 export type ISortConditionOrderBy = 'DESC' | 'ASC';
 export type ISortConditionOrderColumn = 'createdTimestamp' | 'updatedTimestamp';
 export type ISortCondition = {

@@ -670,7 +670,8 @@
               "options": {
                 "table": "表格视图",
                 "card": "卡片视图",
-                "gallery": "画廊视图"
+                "gallery": "画廊视图",
+                "folder": "文件夹视图"
               }
             },
             "sort": {

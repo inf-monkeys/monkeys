@@ -14,12 +14,13 @@ import { cn } from '@/utils';
 interface IUgcSidebarProps extends IUgcCustomProps {
   title: string;
   filterListProps: Omit<IUgcViewFilterListProps, keyof IUgcCustomProps>;
+  defaultCollapsed?: boolean; // 新增：默认收缩
 }
 
-export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, isMarket, title, filterListProps }) => {
+export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, isMarket, title, filterListProps, defaultCollapsed }) => {
   const { t } = useTranslation();
 
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(!(defaultCollapsed ?? false));
 
   return (
     <div className="flex h-full max-w-64">

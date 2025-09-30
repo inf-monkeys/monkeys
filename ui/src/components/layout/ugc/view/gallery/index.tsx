@@ -3,10 +3,10 @@ import React from 'react';
 import { flexRender } from '@tanstack/react-table';
 import { CircleEllipsis, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from '@tanstack/react-router';
 
 import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { useColumnRenderer } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
@@ -18,6 +18,7 @@ export const UgcViewGalleryItem = <E extends object>({
   onItemClick,
 }: IUgcViewItemProps<E>) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const cells = row.getAllCells();
 
@@ -26,6 +27,12 @@ export const UgcViewGalleryItem = <E extends object>({
   const cover = render('cover');
   const title = render('title');
   const subtitle = render('subtitle');
+
+  const handleInfoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // 跳转到资产详情页面
+    navigate({ to: `/$teamId/nav/concept-design:design-assets/${row.original.id}` as any });
+  };
 
   return (
     <div
@@ -44,39 +51,13 @@ export const UgcViewGalleryItem = <E extends object>({
       <div className="relative flex items-end justify-end">
         {cover}
         <div className="absolute flex translate-x-[-0.5rem] translate-y-[-0.5rem] cursor-pointer gap-1 opacity-0 transition-all group-hover:opacity-100">
-          <Popover>
-            <Tooltip content={t('common.utils.info')}>
-              <TooltipTrigger asChild>
-                <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Info className="stroke-vines-500 opacity-80 drop-shadow-[0_1px_1px_rgb(var(--vines-500)/0.7)]" />
-                </PopoverTrigger>
-              </TooltipTrigger>
-            </Tooltip>
-            <PopoverContent
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              className="w-64"
-            >
-              <div className="flex flex-col gap-3">
-                {row
-                  .getAllCells()
-                  .filter((c) => c.column.columnDef.id != 'operate')
-                  .map((cell, index) => {
-                    return (
-                      <div className="grid grid-cols-5 text-sm" key={index}>
-                        <span className="col-span-2 flex justify-start font-bold">
-                          {cell.column.columnDef.header?.toString() ?? ''}
-                        </span>
-                        <span className="col-span-3 flex flex-wrap justify-end">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </span>
-                      </div>
-                    );
-                  })}
+          <Tooltip content={t('common.utils.info')}>
+            <TooltipTrigger asChild>
+              <div onClick={handleInfoClick}>
+                <Info className="stroke-vines-500 opacity-80 drop-shadow-[0_1px_1px_rgb(var(--vines-500)/0.7)]" />
               </div>
-            </PopoverContent>
-          </Popover>
+            </TooltipTrigger>
+          </Tooltip>
 
           {operateArea &&
             operateArea(
