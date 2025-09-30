@@ -52,6 +52,7 @@ import { EvaluatorEntity } from './entities/evaluation/evaluator.entity';
 import { LeaderboardScoreEntity } from './entities/evaluation/leaderboard-score.entity';
 import { LeaderboardEntity } from './entities/evaluation/leaderboard.entity';
 import { ModuleEvaluatorEntity } from './entities/evaluation/module-evaluator.entity';
+import { VREvaluationTaskEntity } from './entities/evaluation/vr-evaluation-task.entity';
 import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
@@ -128,6 +129,7 @@ export const entities: EntityClassOrSchema[] = [
   BattleGroupEntity,
   EvaluationRatingHistoryEntity,
   EvaluationTaskEntity,
+  VREvaluationTaskEntity,
   TemporaryWorkflowEntity,
   AgentV2Entity,
   AgentV2SessionEntity,

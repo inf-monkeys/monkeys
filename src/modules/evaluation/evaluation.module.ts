@@ -5,6 +5,7 @@ import { EvaluationRatingHistoryEntity } from '@/database/entities/evaluation/ev
 import { EvaluationTaskEntity } from '@/database/entities/evaluation/evaluation-task.entity';
 import { LeaderboardScoreEntity } from '@/database/entities/evaluation/leaderboard-score.entity';
 import { LeaderboardEntity } from '@/database/entities/evaluation/leaderboard.entity';
+import { VREvaluationTaskEntity } from '@/database/entities/evaluation/vr-evaluation-task.entity';
 import { RepositoryMoule } from '@/database/repositories.module';
 import { MediaFileService } from '@/modules/assets/media/media.service';
 import { LlmService } from '@/modules/tools/llm/llm.service';
@@ -22,12 +23,34 @@ import { OpenSkillService } from './services/openskill.service';
 import { PgTaskProcessorService } from './services/pg-task-processor.service';
 import { PgTaskQueueService } from './services/pg-task-queue.service';
 import { SmartConvergenceService } from './services/smart-convergence.service';
+import { VREvaluationController } from './vr-evaluation.controller';
+import { VREvaluationService } from './vr-evaluation.service';
 
 @Module({
-  controllers: [EvaluationController],
-  providers: [EvaluationService, BattleStrategyService, LlmService, MediaFileService, PgTaskQueueService, PgTaskProcessorService, OpenSkillService, AutoEvaluationService, SmartConvergenceService],
+  controllers: [EvaluationController, VREvaluationController],
+  providers: [
+    EvaluationService,
+    BattleStrategyService,
+    LlmService,
+    MediaFileService,
+    PgTaskQueueService,
+    PgTaskProcessorService,
+    OpenSkillService,
+    AutoEvaluationService,
+    SmartConvergenceService,
+    VREvaluationService,
+  ],
   imports: [
-    TypeOrmModule.forFeature([LeaderboardEntity, EvaluationBattleEntity, BattleGroupEntity, LeaderboardScoreEntity, EvaluationRatingHistoryEntity, EvaluationModuleEntity, EvaluationTaskEntity]),
+    TypeOrmModule.forFeature([
+      LeaderboardEntity,
+      EvaluationBattleEntity,
+      BattleGroupEntity,
+      LeaderboardScoreEntity,
+      EvaluationRatingHistoryEntity,
+      EvaluationModuleEntity,
+      EvaluationTaskEntity,
+      VREvaluationTaskEntity,
+    ]),
     RepositoryMoule,
     ToolsModule,
     KnowledgeBaseModule,

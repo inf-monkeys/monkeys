@@ -5,6 +5,7 @@ import { ImageModels } from '@/pages/$teamId/image-models/index.lazy';
 import { MediaData } from '@/pages/$teamId/media-data/index.lazy';
 import { TextModels } from '@/pages/$teamId/text-models/index.lazy';
 import { Tools } from '@/pages/$teamId/tools/index.lazy';
+import { VREvaluations } from '@/pages/$teamId/vr-evaluations/index';
 import { Workflows } from '@/pages/$teamId/workflows/index.lazy';
 
 export type INavListSubModuleMap = Record<string, React.FC | Record<string, React.FC>>;
@@ -22,6 +23,7 @@ export const CUSTOM_NAV_SUB_MODULE_MAP: INavListSubModuleMap = {
   },
   'concept-design:design-evaluations': {
     'ai-evaluation': EvaluationModules,
+    'vr-evaluation': VREvaluations,
   },
   designs: Designs,
   'artist:asset-library': MediaData,

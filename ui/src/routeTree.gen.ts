@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './pages/__root'
+import { Route as TeamIdVrEvaluationsIndexImport } from './pages/$teamId/vr-evaluations/index'
 import { Route as TeamIdModelTrainingIndexImport } from './pages/$teamId/model-training/index'
 import { Route as TeamIdEvaluationsIndexImport } from './pages/$teamId/evaluations/index'
 import { Route as TeamIdEvaluationsDetailImport } from './pages/$teamId/evaluations/detail'
@@ -336,6 +337,11 @@ const TeamIdActionToolsIndexLazyRoute = TeamIdActionToolsIndexLazyImport.update(
   import('./pages/$teamId/action-tools/index.lazy').then((d) => d.Route),
 )
 
+const TeamIdVrEvaluationsIndexRoute = TeamIdVrEvaluationsIndexImport.update({
+  path: '/$teamId/vr-evaluations/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TeamIdModelTrainingIndexRoute = TeamIdModelTrainingIndexImport.update({
   path: '/$teamId/model-training/',
   getParentRoute: () => rootRoute,
@@ -554,6 +560,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdModelTrainingIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/vr-evaluations/': {
+      preLoaderRoute: typeof TeamIdVrEvaluationsIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/action-tools/': {
       preLoaderRoute: typeof TeamIdActionToolsIndexLazyImport
       parentRoute: typeof rootRoute
@@ -737,6 +747,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdEvaluationsDetailRoute,
   TeamIdEvaluationsIndexRoute,
   TeamIdModelTrainingIndexRoute,
+  TeamIdVrEvaluationsIndexRoute,
   TeamIdActionToolsIndexLazyRoute,
   TeamIdAgentIndexLazyRoute,
   TeamIdAgentsIndexLazyRoute,

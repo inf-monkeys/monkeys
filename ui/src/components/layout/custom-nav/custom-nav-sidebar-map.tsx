@@ -46,6 +46,12 @@ export const CUSTOM_NAV_LIST_MAP: Record<string, INavListSidebar> = {
       icon: <BotIcon />,
       to: '/$teamId/nav/concept-design:design-evaluations/ai-evaluation',
     },
+    {
+      id: 'vr-evaluation',
+      name: '虚拟现实测评',
+      icon: <BotIcon />,
+      to: '/$teamId/nav/concept-design:design-evaluations/vr-evaluation',
+    },
   ],
   designs: DesignProjectList,
   'artist:asset-library': null,
