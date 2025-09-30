@@ -207,6 +207,7 @@ export function useTldrawAgent(editor: Editor | null): AgentAPI | null {
       if (!base) {
         throw new Error('无法获取服务器地址')
       }
+      // base = 'http://127.0.0.1:33002'
       const url = `${base}/tldraw-agent`
       const s = io(url, { transports: ['websocket'], withCredentials: true })
       socketRef.current = s

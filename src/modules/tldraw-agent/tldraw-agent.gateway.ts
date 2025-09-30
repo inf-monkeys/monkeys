@@ -25,22 +25,38 @@ type AgentServerToClient = {
 };
 
 @Injectable()
-@WebSocketGateway({ namespace: '/tldraw-agent' })
+@WebSocketGateway({ 
+  namespace: '/tldraw-agent',
+  cors: {
+    origin: true,
+    credentials: true
+  },
+  transports: ['websocket', 'polling']
+})
 export class TldrawAgentGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  
+  constructor() {
+    this.logger.log('[DEBUG] TldrawAgentGateway initialized');
+  }
+  private readonly logger = new Logger(TldrawAgentGateway.name);
+  
   @WebSocketServer()
   public server!: Server<AgentClientToServer, AgentServerToClient>;
-
-  private readonly logger = new Logger(TldrawAgentGateway.name);
   private readonly abortControllers = new Map<string, AbortController>();
   // 临时存储：每个 client 的工具增量 JSON 缓冲 { clientId -> { toolCallId -> { name, jsonText } } }
   private readonly toolBuffers = new Map<string, Map<string, { name: string; jsonText: string }>>();
 
   handleConnection(client: Socket) {
-    this.logger.log(`client connected: ${client.id}`);
+    this.logger.log(`[DEBUG] WebSocket client connected: ${client.id}`);
+    this.logger.log(`[DEBUG] Client headers:`, client.handshake.headers);
+    this.logger.log(`[DEBUG] Client origin:`, client.handshake.headers.origin);
+    this.logger.log(`[DEBUG] Client user-agent:`, client.handshake.headers['user-agent']);
+    this.logger.log(`[DEBUG] Client address:`, client.handshake.address);
+    this.logger.log(`[DEBUG] Client query:`, client.handshake.query);
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`client disconnected: ${client.id}`);
+    this.logger.log(`[DEBUG] WebSocket client disconnected: ${client.id}`);
     const ac = this.abortControllers.get(client.id);
     if (ac) ac.abort();
     this.abortControllers.delete(client.id);
@@ -53,7 +69,10 @@ export class TldrawAgentGateway implements OnGatewayConnection, OnGatewayDisconn
     @MessageBody()
     body: { message: string; bounds?: { x: number; y: number; w: number; h: number }; modelName?: string; context?: any },
   ) {
+    this.logger.log(`[DEBUG] Received prompt from client ${client.id}:`, body);
+    
     if (!body?.message) {
+      this.logger.warn(`[DEBUG] Empty message from client ${client.id}`);
       client.emit('error', { message: 'message 不能为空' });
       return;
     }
@@ -302,6 +321,7 @@ Available tools:
 
   @SubscribeMessage('cancel')
   onCancel(@ConnectedSocket() client: Socket) {
+    this.logger.log(`[DEBUG] Cancel request from client ${client.id}`);
     const ac = this.abortControllers.get(client.id);
     if (ac && !ac.signal.aborted) ac.abort();
     this.abortControllers.delete(client.id);
@@ -309,6 +329,7 @@ Available tools:
 
   @SubscribeMessage('reset')
   onReset(@ConnectedSocket() client: Socket) {
+    this.logger.log(`[DEBUG] Reset request from client ${client.id}`);
     this.onCancel(client);
     client.emit('info', { message: '会话已重置' });
   }
