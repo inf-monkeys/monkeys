@@ -212,6 +212,159 @@ export class AgentV2LlmService {
             },
           },
         };
+      case 'workflow_list':
+        return {
+          type: 'function',
+          function: {
+            name: 'workflow_list',
+            description: 'List workflows in current team with pagination, search and sorting.',
+            parameters: {
+              type: 'object',
+              properties: {
+                page: { type: 'number', description: 'Page number (default 1)' },
+                limit: { type: 'number', description: 'Page size (default 10)' },
+                search: { type: 'string', description: 'Search keyword' },
+                order_by: { type: 'string', enum: ['ASC', 'DESC'], description: 'Order direction' },
+                order_column: { type: 'string', enum: ['createdTimestamp', 'updatedTimestamp'], description: 'Order column' },
+              },
+            },
+          },
+        };
+      case 'workflow_detail':
+        return {
+          type: 'function',
+          function: {
+            name: 'workflow_detail',
+            description: 'Get workflow definition by workflow_id and optional version.',
+            parameters: {
+              type: 'object',
+              properties: {
+                workflow_id: { type: 'string', description: 'Workflow ID' },
+                version: { type: 'number', description: 'Workflow version (optional)' },
+              },
+              required: ['workflow_id'],
+            },
+          },
+        };
+      case 'workflow_start':
+        return {
+          type: 'function',
+          function: {
+            name: 'workflow_start',
+            description: 'Start a workflow execution with optional inputs, and optionally wait for completion to return results.',
+            parameters: {
+              type: 'object',
+              properties: {
+                workflow_id: { type: 'string', description: 'Workflow ID' },
+                version: { type: 'number', description: 'Workflow version (optional)' },
+                input_data: { type: 'object', description: 'Execution inputs (key-value)' },
+                wait: { type: 'boolean', description: 'If true, wait for completion and return results (default false)' },
+              },
+              required: ['workflow_id'],
+            },
+          },
+        };
+      case 'workflow_executions':
+        return {
+          type: 'function',
+          function: {
+            name: 'workflow_executions',
+            description: 'Search workflow executions of current team with filters and pagination.',
+            parameters: {
+              type: 'object',
+              properties: {
+                page: { type: 'number', description: 'Page number (default 1)' },
+                limit: { type: 'number', description: 'Page size (default 10)' },
+                workflow_id: { type: 'string', description: 'Filter by workflow ID' },
+                status: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Statuses to filter (e.g., RUNNING, COMPLETED, FAILED)',
+                },
+                start_time_from: { type: 'number', description: 'Start time >= (epoch millis)' },
+                start_time_to: { type: 'number', description: 'Start time <= (epoch millis)' },
+                order_field: { type: 'string', enum: ['startTime', 'endTime', 'workflowId', 'workflowType', 'status'] },
+                order: { type: 'string', enum: ['ASC', 'DESC'] },
+              },
+            },
+          },
+        };
+      case 'workflow_execution_detail':
+        return {
+          type: 'function',
+          function: {
+            name: 'workflow_execution_detail',
+            description: 'Get workflow execution detail by workflow_instance_id.',
+            parameters: {
+              type: 'object',
+              properties: {
+                workflow_instance_id: { type: 'string', description: 'Workflow execution instance ID' },
+                simple: { type: 'boolean', description: 'If true, return simplified detail (default true)' },
+              },
+              required: ['workflow_instance_id'],
+            },
+          },
+        };
+      case 'workflow_pause':
+        return {
+          type: 'function',
+          function: {
+            name: 'workflow_pause',
+            description: 'Pause a workflow execution.',
+            parameters: {
+              type: 'object',
+              properties: {
+                workflow_instance_id: { type: 'string', description: 'Workflow execution instance ID' },
+              },
+              required: ['workflow_instance_id'],
+            },
+          },
+        };
+      case 'workflow_resume':
+        return {
+          type: 'function',
+          function: {
+            name: 'workflow_resume',
+            description: 'Resume a paused workflow execution.',
+            parameters: {
+              type: 'object',
+              properties: {
+                workflow_instance_id: { type: 'string', description: 'Workflow execution instance ID' },
+              },
+              required: ['workflow_instance_id'],
+            },
+          },
+        };
+      case 'workflow_terminate':
+        return {
+          type: 'function',
+          function: {
+            name: 'workflow_terminate',
+            description: 'Terminate a workflow execution.',
+            parameters: {
+              type: 'object',
+              properties: {
+                workflow_instance_id: { type: 'string', description: 'Workflow execution instance ID' },
+              },
+              required: ['workflow_instance_id'],
+            },
+          },
+        };
+      case 'workflow_retry':
+        return {
+          type: 'function',
+          function: {
+            name: 'workflow_retry',
+            description: 'Retry a failed workflow execution.',
+            parameters: {
+              type: 'object',
+              properties: {
+                workflow_instance_id: { type: 'string', description: 'Workflow execution instance ID' },
+              },
+              required: ['workflow_instance_id'],
+            },
+          },
+        };
       default:
         return null;
     }

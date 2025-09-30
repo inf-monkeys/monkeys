@@ -1,4 +1,7 @@
 import { config } from '@/common/config';
+import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
+import { WorkflowCrudService } from '@/modules/workflow/workflow.curd.service';
+import { WorkflowExecutionService } from '@/modules/workflow/workflow.execution.service';
 import { Injectable, Logger } from '@nestjs/common';
 import OpenAI from 'openai';
 import { SYSTEM_NAMESPACE } from '../../../../database/entities/tools/tools-server.entity';
@@ -24,6 +27,8 @@ export class AgentV2ToolsService {
     private readonly toolsRegistryService: ToolsRegistryService,
     private readonly agentRepository: AgentV2Repository,
     private readonly conductorBridge: AgentV2ConductorBridgeService,
+    private readonly workflowCrudService: WorkflowCrudService,
+    private readonly workflowExecutionService: WorkflowExecutionService,
   ) {
     // Initialize OpenAI client for web search
     const agentConfig = config.agentv2?.openaiCompatible;
@@ -131,6 +136,130 @@ export class AgentV2ToolsService {
         return await this.updateTodoListTool(toolCall, sessionId, askApproval, handleError, pushToolResult);
       case 'web_search':
         return await this.webSearchTool(toolCall, askApproval, handleError, pushToolResult);
+      // === Workflow builtin tools ===
+      case 'workflow_list': {
+        const session = await this.agentRepository.findSessionById(sessionId);
+        const agent = await this.agentRepository.findAgentById(session.agentId);
+        const page = Number(toolCall.input?.page || 1);
+        const limit = Number(toolCall.input?.limit || 10);
+        const search = toolCall.input?.search;
+        const order_by = toolCall.input?.order_by || 'DESC';
+        const order_column = toolCall.input?.order_column || 'createdTimestamp';
+        const { totalCount, list } = await this.workflowCrudService.listWorkflows(agent.teamId, {
+          page,
+          limit,
+          search,
+          orderBy: order_by,
+          orderColumn: order_column,
+          filter: {},
+        } as any);
+        const items = (list || []).map((w: any) => ({
+          workflowId: w.workflowId,
+          version: w.version,
+          displayName: w.displayName,
+          description: w.description,
+          validated: w.validated,
+          exposeOpenaiCompatibleInterface: w.exposeOpenaiCompatibleInterface,
+          shortcutsFlow: w.shortcutsFlow,
+          updatedTimestamp: w.updatedTimestamp,
+        }));
+        return { tool_call_id: toolCall.id, output: JSON.stringify({ total: totalCount, page, limit, items }) };
+      }
+      case 'workflow_detail': {
+        const session = await this.agentRepository.findSessionById(sessionId);
+        const agent = await this.agentRepository.findAgentById(session.agentId);
+        const workflowId = toolCall.input?.workflow_id as string;
+        const version = toolCall.input?.version ? Number(toolCall.input.version) : undefined;
+        if (!workflowId) throw new Error('workflow_id 不能为空');
+        const def = await this.workflowCrudService.getWorkflowDef(workflowId, version, false);
+        if (!def || def.teamId !== agent.teamId) {
+          return { tool_call_id: toolCall.id, output: '工作流不存在或无权访问', is_error: true };
+        }
+        return { tool_call_id: toolCall.id, output: JSON.stringify(def) };
+      }
+      case 'workflow_start': {
+        const session = await this.agentRepository.findSessionById(sessionId);
+        const agent = await this.agentRepository.findAgentById(session.agentId);
+        const workflowId = toolCall.input?.workflow_id as string;
+        const version = toolCall.input?.version ? Number(toolCall.input.version) : undefined;
+        const inputData = (toolCall.input?.input_data as any) || {};
+        const wait = !!toolCall.input?.wait;
+        if (!workflowId) throw new Error('workflow_id 不能为空');
+        const instanceId = await this.workflowExecutionService.startWorkflow(
+          {
+            teamId: agent.teamId,
+            userId: session.userId,
+            workflowId,
+            version,
+            inputData,
+            triggerType: WorkflowTriggerType.MANUALLY,
+            group: 'agentv2',
+            extraMetadata: { source: 'agentv2' },
+          },
+          false,
+        );
+        if (wait) {
+          const result = await this.workflowExecutionService.waitForWorkflowResult(agent.teamId, instanceId);
+          return { tool_call_id: toolCall.id, output: JSON.stringify({ workflow_instance_id: instanceId, result }) };
+        }
+        return { tool_call_id: toolCall.id, output: JSON.stringify({ workflow_instance_id: instanceId }) };
+      }
+      case 'workflow_executions': {
+        const session = await this.agentRepository.findSessionById(sessionId);
+        const agent = await this.agentRepository.findAgentById(session.agentId);
+        const page = Number(toolCall.input?.page || 1);
+        const limit = Number(toolCall.input?.limit || 10);
+        const workflowId = toolCall.input?.workflow_id as string | undefined;
+        const status = (toolCall.input?.status as string[]) || undefined;
+        const startTimeFrom = toolCall.input?.start_time_from ? Number(toolCall.input.start_time_from) : undefined;
+        const startTimeTo = toolCall.input?.start_time_to ? Number(toolCall.input.start_time_to) : undefined;
+        const orderField = toolCall.input?.order_field as any;
+        const order = toolCall.input?.order as any;
+        const result = await this.workflowExecutionService.searchWorkflowExecutions(agent.teamId, {
+          pagination: { page, limit },
+          workflowId,
+          status,
+          startTimeFrom,
+          startTimeTo,
+          orderBy: orderField || order ? { field: orderField, order } : undefined,
+        } as any);
+        return { tool_call_id: toolCall.id, output: JSON.stringify(result) };
+      }
+      case 'workflow_execution_detail': {
+        const session = await this.agentRepository.findSessionById(sessionId);
+        const agent = await this.agentRepository.findAgentById(session.agentId);
+        const instanceId = toolCall.input?.workflow_instance_id as string;
+        const simple = toolCall.input?.simple !== false; // default true
+        if (!instanceId) throw new Error('workflow_instance_id 不能为空');
+        const data = simple
+          ? await this.workflowExecutionService.getWorkflowExecutionSimpleDetail(agent.teamId, instanceId)
+          : await this.workflowExecutionService.getWorkflowExecutionDetail(agent.teamId, instanceId);
+        return { tool_call_id: toolCall.id, output: JSON.stringify(data) };
+      }
+      case 'workflow_pause': {
+        const instanceId = toolCall.input?.workflow_instance_id as string;
+        if (!instanceId) throw new Error('workflow_instance_id 不能为空');
+        const data = await this.workflowExecutionService.pauseWorkflow(instanceId);
+        return { tool_call_id: toolCall.id, output: JSON.stringify({ success: true, data }) };
+      }
+      case 'workflow_resume': {
+        const instanceId = toolCall.input?.workflow_instance_id as string;
+        if (!instanceId) throw new Error('workflow_instance_id 不能为空');
+        const data = await this.workflowExecutionService.resumeWorkflow(instanceId);
+        return { tool_call_id: toolCall.id, output: JSON.stringify({ success: true, data }) };
+      }
+      case 'workflow_terminate': {
+        const instanceId = toolCall.input?.workflow_instance_id as string;
+        if (!instanceId) throw new Error('workflow_instance_id 不能为空');
+        const data = await this.workflowExecutionService.terminateWorkflow(instanceId);
+        return { tool_call_id: toolCall.id, output: JSON.stringify({ success: true, data }) };
+      }
+      case 'workflow_retry': {
+        const instanceId = toolCall.input?.workflow_instance_id as string;
+        if (!instanceId) throw new Error('workflow_instance_id 不能为空');
+        const data = await this.workflowExecutionService.retryWorkflow(instanceId);
+        return { tool_call_id: toolCall.id, output: JSON.stringify({ success: true, data }) };
+      }
       default:
         throw new Error(`Unknown builtin tool: ${toolName}`);
     }
