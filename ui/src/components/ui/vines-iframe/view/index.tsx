@@ -22,6 +22,7 @@ import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { createOutputSelectionStore, OutputSelectionStoreProvider } from '@/store/useOutputSelectionStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
+import { IframeWrapper } from '@/view/iframe-wrapper';
 
 import { VinesViewFrame } from './frame';
 import { GlobalDesignBoardAssociationBar } from './global-design-board-association-bar';
@@ -36,9 +37,10 @@ interface IVinesViewProps {
   pageId?: string;
   type?: string;
   from?: string;
+  iframeUrl?: string;
 }
 
-export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type, from }: IVinesViewProps) {
+export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type, from, iframeUrl }: IVinesViewProps) {
   const setVisible = useViewStore((s) => s.setVisible);
   const setFrom = useViewStore((s) => s.setFrom);
 
@@ -80,6 +82,10 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
 
   const content = useCreation(() => {
     if (!id) return <Page404 />;
+
+    if (type === 'iframe') {
+      return <IframeWrapper iframeUrl={iframeUrl} />;
+    }
 
     if (type === 'global-design-board' || type === 'design-board') {
       return (
