@@ -293,6 +293,24 @@ const runPorxyServer = (port) => {
     });
   });
   
+  // 处理 WebSocket 升级（用于按租户转发 Socket.IO/WebSocket）
+  httpServer.on('upgrade', (req, socket, head) => {
+    const host = req.headers.host;
+    const targetServerPort = serverHostToPortMap[host];
+    
+    if (!targetServerPort) {
+      logger.warn(`WS domain not found in configuration: ${host}`);
+      try { socket.destroy(); } catch (e) {}
+      return;
+    }
+    
+    const serverUrl = `ws://127.0.0.1:${targetServerPort}`;
+    proxy.ws(req, socket, head, { target: serverUrl }, (err) => {
+      logger.error(`Proxy WS error for ${host} to ${serverUrl}:`, err);
+      try { socket.destroy(); } catch (e) {}
+    });
+  });
+  
   httpServer.listen(port, () => {
     logger.info(`Proxy server listening on port ${port}`);
     logger.info(`Configured host mappings:`);
