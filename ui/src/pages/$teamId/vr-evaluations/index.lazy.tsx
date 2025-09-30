@@ -1,0 +1,242 @@
+import React, { useState } from 'react';
+
+import { mutate } from 'swr';
+import { createLazyFileRoute } from '@tanstack/react-router';
+
+import { Eye, Plus, Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+
+import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { preloadUgcVREvaluationTasks, useUgcVREvaluationTasks, VRTask } from '@/apis/ugc/vr-evaluation';
+import { UgcView } from '@/components/layout/ugc/view';
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
+import { createVREvaluationTasksColumns } from '@/components/layout/ugc-pages/vr-evaluations/consts';
+import { CreateVRTaskDialog } from '@/components/layout/ugc-pages/vr-evaluations/create-vr-task-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog.tsx';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu.tsx';
+import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatTimeDiffPrevious } from '@/utils/time.ts';
+
+export const VREvaluations: React.FC = () => {
+  const { t } = useTranslation();
+
+  const [currentTask, setCurrentTask] = useState<IAssetItem<VRTask>>();
+  const [deleteAlertDialogVisible, setDeleteAlertDialogVisible] = useState(false);
+  const [createDialogVisible, setCreateDialogVisible] = useState(false);
+  const [detailDialogVisible, setDetailDialogVisible] = useState(false);
+
+  const mutateVRTasks = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/vr-evaluation/tasks'));
+
+  const handleDeleteTask = async () => {
+    if (!currentTask) return;
+
+    try {
+      const response = await fetch(`/api/vr-evaluation/tasks/${currentTask.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('删除失败');
+
+      toast.success('删除成功');
+      setDeleteAlertDialogVisible(false);
+      setCurrentTask(undefined);
+      mutateVRTasks();
+    } catch (error) {
+      toast.error('删除失败');
+    }
+  };
+
+  const scoreLabels = [
+    '外观美观度',
+    '材质/做工质量',
+    '使用舒适度',
+    '操作便利性',
+    '功能满足需求',
+    '功能使用高效',
+    '结实耐用性',
+    '使用安全性',
+    '模型几何质量',
+    '模型纹理质量',
+  ];
+
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
+
+  return (
+    <main className="size-full">
+      <UgcView
+        assetKey="vr-evaluation-task"
+        assetType="workflow"
+        assetIdKey="id"
+        assetName="VR 评测任务"
+        useUgcFetcher={useUgcVREvaluationTasks}
+        preloadUgcFetcher={preloadUgcVREvaluationTasks}
+        createColumns={createVREvaluationTasksColumns}
+        renderOptions={{
+          subtitle: (item) => (
+            <span className="line-clamp-1">
+              {`${item.user?.name ?? t('common.utils.unknown-user')} ${t('common.utils.created-at', { time: formatTimeDiffPrevious(item.createdTimestamp || 0) })}`}
+            </span>
+          ),
+          cover: (item) => {
+            if (item.thumbnailUrl) {
+              return <img src={item.thumbnailUrl} alt={item.taskName} className="h-12 w-12 rounded object-cover" />;
+            }
+            return (
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 text-lg font-bold text-white">
+                VR
+                {item.status === 'completed' && (
+                  <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-green-500"></div>
+                )}
+              </div>
+            );
+          },
+        }}
+        operateArea={(item, trigger, tooltipTriggerContent) => (
+          <DropdownMenu>
+            {tooltipTriggerContent ? (
+              <Tooltip content={tooltipTriggerContent}>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+                </TooltipTrigger>
+              </Tooltip>
+            ) : (
+              <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+            )}
+            {/* @ts-expect-error - DropdownMenuContent does accept onClick but type definition is incomplete */}
+            <DropdownMenuContent
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
+              <DropdownMenuLabel>操作</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                {item.status === 'completed' && (
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setCurrentTask(item);
+                      setDetailDialogVisible(true);
+                    }}
+                  >
+                    <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                      <Eye size={15} />
+                    </DropdownMenuShortcut>
+                    查看评测结果
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-10"
+                  onSelect={() => {
+                    setCurrentTask(item);
+                    setDeleteAlertDialogVisible(true);
+                  }}
+                >
+                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                    <Trash size={15} />
+                  </DropdownMenuShortcut>
+                  {t('common.utils.delete')}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        onItemClick={(item) => {
+          if (item.status === 'completed') {
+            setCurrentTask(item);
+            setDetailDialogVisible(true);
+          }
+        }}
+        subtitle={
+          <Button variant="outline" size="small" icon={<Plus />} onClick={() => setCreateDialogVisible(true)}>
+            {iconOnlyMode ? null : '创建任务'}
+          </Button>
+        }
+      />
+
+      {/* 删除确认对话框 */}
+      <AlertDialog open={deleteAlertDialogVisible} onOpenChange={setDeleteAlertDialogVisible}>
+        <AlertDialogContent
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定要删除评测任务「{currentTask?.taskName}」吗？此操作无法撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTask}>{t('common.utils.confirm')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 创建对话框 */}
+      <CreateVRTaskDialog open={createDialogVisible} onOpenChange={setCreateDialogVisible} onSuccess={mutateVRTasks} />
+
+      {/* 评测结果详情对话框 */}
+      <Dialog open={detailDialogVisible} onOpenChange={setDetailDialogVisible}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{currentTask?.taskName}</DialogTitle>
+            <DialogDescription>评测结果详情</DialogDescription>
+          </DialogHeader>
+
+          {currentTask?.evaluationResult && (
+            <div className="grid grid-cols-2 gap-4 py-4">
+              {Object.entries(currentTask.evaluationResult).map(([key, value], index) => (
+                <div key={key} className="flex items-center justify-between rounded-lg border p-3">
+                  <span className="text-sm">{scoreLabels[index]}</span>
+                  <span className="font-semibold">
+                    {value} <span className="text-xs text-muted-foreground">/ 5</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button onClick={() => setDetailDialogVisible(false)}>关闭</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </main>
+  );
+};
+
+export const Route = createLazyFileRoute('/$teamId/vr-evaluations/')({
+  component: VREvaluations,
+});
