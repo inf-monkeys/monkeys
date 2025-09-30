@@ -194,7 +194,8 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
       }
     }
 
-    public getToolsByCategory(search?: string) {
+    public getToolsByCategory(search?: string, oemId?: string) {
+
       // 当前分类下的工具、数量、分类 ID、分类名称
       const tools: VinesToolWithCategory[] = [];
 
@@ -269,7 +270,14 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         }
       }
 
-      return tools.sort(
+      // 根据 oemId 过滤分类
+      let filteredTools = tools;
+      if (oemId === 'concept-design') {
+        const allowedCategories = ['all', 'feature', 'logic', 'prototype', 'demand'];
+        filteredTools = tools.filter(([, , categoryKey]) => allowedCategories.includes(categoryKey));
+      }
+
+      return filteredTools.sort(
         (a, b) => TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(a[2]) - TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(b[2]),
       );
     }

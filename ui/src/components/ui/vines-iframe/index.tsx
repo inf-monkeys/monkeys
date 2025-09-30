@@ -14,6 +14,7 @@ export interface IVinesIFramePropsRequired {
   agentId?: string;
   designMetadataId?: string;
   type?: string;
+  iframeUrl?: string;
 }
 
 interface IVinesIFrameProps<P extends IVinesIFramePropsRequired> extends React.ComponentPropsWithoutRef<'div'> {
@@ -44,29 +45,34 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages, 
 
   const currentPageId = page?.id;
 
-  const { globalGroups, agents, workflows, designBoards } = useMemo(() => {
+  const { globalGroups, agents, workflows, designBoards, iframeGroups } = useMemo(() => {
     const mixinGroups = groupBy(renderer, (it) => it?.type ?? '');
-    const { globalGroups, agentGroups, workflowGroups, designBoardGroups } = reduce(
+
+    const { globalGroups, agentGroups, workflowGroups, designBoardGroups, iframeGroups } = reduce(
       mixinGroups,
       (acc, group, type) => {
         if (type.startsWith('agent')) {
           acc.agentGroups[type] = group;
-        } else if (group.some((item) => item.workflowId)) {
-          acc.workflowGroups[type] = group;
         } else if (type === 'design-board') {
           acc.designBoardGroups[type] = group;
         } else if (type.startsWith('global-')) {
           acc.globalGroups[type] = group;
+        } else if (type === 'iframe') {
+          acc.iframeGroups[type] = group;
+        } else if (group.some((item) => item.workflowId)) {
+          acc.workflowGroups[type] = group;
         }
         return acc;
       },
-      { globalGroups: {}, agentGroups: {}, workflowGroups: {}, designBoardGroups: {} },
+      { globalGroups: {}, agentGroups: {}, workflowGroups: {}, designBoardGroups: {}, iframeGroups: {} },
     );
+
     return {
       globalGroups: Object.entries(globalGroups) as [string, P[]][],
       agents: Object.entries(agentGroups) as [string, P[]][],
       workflows: Object.entries(workflowGroups) as [string, P[]][],
       designBoards: Object.entries(designBoardGroups) as [string, P[]][],
+      iframeGroups: Object.entries(iframeGroups) as [string, P[]][],
     };
   }, [renderer]);
 
@@ -83,6 +89,13 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages, 
             return pages.map(({ id, type }) => (
               <ViewStoreProvider key={id} createStore={createViewStore}>
                 <VinesView id={id} pageId={currentPageId} type={type} from={from} />
+              </ViewStoreProvider>
+            ));
+          })}
+          {iframeGroups.map(([_, pages]) => {
+            return pages.map(({ id, type, iframeUrl }) => (
+              <ViewStoreProvider key={id} createStore={createViewStore}>
+                <VinesView id={id} pageId={currentPageId} type={type} from={from} iframeUrl={iframeUrl} />
               </ViewStoreProvider>
             ));
           })}

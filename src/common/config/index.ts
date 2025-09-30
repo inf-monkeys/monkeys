@@ -1,3 +1,4 @@
+import { IPageGroup, IPinPage } from '@/modules/workflow/interfaces/page';
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { ClusterNode, RedisOptions, SentinelAddress } from 'ioredis';
 import { ClientAuthMethod } from 'openid-client';
@@ -122,6 +123,11 @@ export type CustomizationDesignProjects = {
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
 
+export type CustomizationWorkbench = {
+  pages: IPinPage[];
+  pageGroups: IPageGroup[];
+};
+
 export interface ServerConfig {
   port: number;
   appId: string;
@@ -196,6 +202,7 @@ export interface ServerConfig {
       presetAppSortFileUrl?: string;
       presetAppFileUrl?: string;
     };
+    workbench: CustomizationWorkbench;
   };
 }
 
@@ -579,6 +586,10 @@ export const config: Config = {
       marketplace: {
         presetAppSortFileUrl: readConfig('server.customization.marketplace.presetAppSortFileUrl', undefined),
         presetAppFileUrl: readConfig('server.customization.marketplace.presetAppFileUrl', undefined),
+      },
+      workbench: {
+        pages: readConfig('server.customization.workbench.pages', []),
+        pageGroups: readConfig('server.customization.workbench.pageGroups', []),
       },
     },
   },

@@ -109,7 +109,7 @@ export const SelectFilter: React.FC<ISelectFilterProps> = ({ input, selectFilter
                     <SelectTrigger>
                       <SelectValue
                         placeholder={t('workspace.pre-view.actuator.execution-form.select', {
-                          displayName: input.displayName,
+                          displayName: getI18nContent(input.displayName),
                         })}
                       />
                     </SelectTrigger>

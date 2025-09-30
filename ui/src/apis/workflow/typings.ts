@@ -74,6 +74,22 @@ export const ACTION_TOOLS_CATEGORIES_MAP: Record<string, I18nValue> = {
     'zh-CN': '扩展能力',
     'en-US': 'Extended Capabilities',
   },
+  feature: {
+    'zh-CN': '功能',
+    'en-US': 'Feature',
+  },
+  logic: {
+    'zh-CN': '逻辑',
+    'en-US': 'Logic',
+  },
+  prototype: {
+    'zh-CN': '原型',
+    'en-US': 'Prototype',
+  },
+  demand: {
+    'zh-CN': '需求',
+    'en-US': 'Demand',
+  },
 };
 
 export interface IVinesWorkflowRateLimiter {

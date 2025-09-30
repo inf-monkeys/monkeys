@@ -24,7 +24,6 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { GlobalDesignBoardOperationBarArea } from '@/components/ui/vines-iframe/view/global-design-board-operation-bar/area';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
-import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import {
@@ -42,37 +41,10 @@ import { useGlobalViewSize, useSetEmbedSidebar } from '@/store/useGlobalViewStor
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cloneDeep, cn, getI18nContent } from '@/utils';
 
+import { GLOBAL_DESIGN_BOARD_PAGE, GLOBAL_DESIGN_BOARD_PAGE_GROUP } from './consts';
 import { WorkbenchSidebarNormalModeEmbedContent } from './embed-content';
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
 import { IWorkbenchViewItemPage, WorkbenchViewItemCurrentData } from './virtua/item';
-
-export const GLOBAL_DESIGN_BOARD_PAGE: IPinPage = {
-  id: 'global-design-board',
-  displayName: JSON.stringify({
-    'zh-CN': '全局画板',
-    'en-US': 'Global Board',
-  }),
-  type: 'global-design-board',
-  workflowId: 'global-design-board',
-  isBuiltIn: true,
-  instance: {
-    name: 'Global Board',
-    icon: 'pencil-ruler',
-    type: 'global-design-board',
-    allowedPermissions: [],
-  },
-  designProject: {
-    id: 'global-design-board',
-    name: 'Global Board',
-    displayName: JSON.stringify({
-      'zh-CN': '全局画板',
-      'en-US': 'Global Board',
-    }),
-    iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
-    createdTimestamp: 0,
-    updatedTimestamp: 0,
-  },
-};
 
 const EMBED_TYPE_LIST = ['preview', 'global-design-board'];
 
@@ -105,6 +77,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const workbenchSidebarDefaultOpen = oem?.theme.workbenchSidebarDefaultOpen ?? true;
 
+  const extraWorkbenchPages = get(oem, ['theme', 'workbench', 'pages'], []) as IPinPage[];
+  const extraWorkbenchPageGroups = get(oem, ['theme', 'workbench', 'pageGroups'], []) as IPageGroup[];
+
   const { data, isLoading, mutate } = useWorkspacePages();
 
   const { trigger: updateGroupSortTrigger } = useUpdateGroupSort();
@@ -126,26 +101,18 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   // const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const originalPages: IPinPage[] = useMemo(() => {
     const pages = [...(data?.pages ?? [])];
-    console.log();
 
+    pages.unshift(...extraWorkbenchPages);
     if (!pages.some((page) => page.id === 'global-design-board') && !isOemLoading && newTabOpenBoard) {
       pages.unshift(GLOBAL_DESIGN_BOARD_PAGE);
     }
+
     return pages;
   }, [data?.pages, isOemLoading, newTabOpenBoard]);
   const originalGroups = useMemo(() => {
     return [
-      {
-        id: 'global-design-board',
-        pageIds: ['global-design-board'],
-        displayName: {
-          'zh-CN': '画板',
-          'en-US': 'Board',
-        },
-        isBuiltIn: false,
-        iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
-        sortIndex: 0,
-      },
+      GLOBAL_DESIGN_BOARD_PAGE_GROUP,
+      ...extraWorkbenchPageGroups,
       ...(data?.groups
         ?.map((group) => ({
           ...group,
@@ -161,7 +128,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     //       : group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId)),
     //   }))
     //   ?.filter((group) => group.pageIds.length) ?? []
-  }, [data?.groups, originalPages, data]);
+  }, [data?.groups, originalPages, data, extraWorkbenchPageGroups, extraWorkbenchPages]);
 
   const { trigger: updateGroupPageSortTrigger } = useUpdateGroupPageSort(groupId);
 

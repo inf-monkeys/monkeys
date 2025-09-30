@@ -1,24 +1,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { I18nValue, MonkeyWorkflow } from '@inf-monkeys/monkeys';
-
-import { IAgent } from '@/apis/agents/typings.ts';
-import { IDesignProject } from '@/apis/designs/typings.ts';
-import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { AssetType, I18nValue, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 export type IPagePermission = 'read' | 'write' | 'exec' | 'permission';
 
-export type IPageInstanceType =
-  | 'process'
-  | 'log'
-  | 'chat'
-  | 'preview'
-  | 'api'
-  | 'agent-chat'
-  | 'agent-config'
-  | 'agent-log'
-  | 'design-board'
-  | 'global-design-board'
-  | 'iframe';
+export type IPageInstanceType = 'process' | 'log' | 'chat' | 'preview' | 'api' | 'agent-chat' | 'agent-config' | 'agent-log' | 'design-board' | 'global-design-board' | 'iframe';
 
 export interface IPageInstance {
   name: string;
@@ -54,8 +39,48 @@ export type IPinPage = IPageType & {
   workflow?: MonkeyWorkflow & {
     id?: string;
   };
-  agent?: IAssetItem<IAgent>;
-  designProject?: IAssetItem<IDesignProject>;
+  agent?: {
+    displayName: string | Record<string, string>;
+    description?: string | Record<string, string>;
+    customModelName?: string;
+    model: string;
+    systemPrompt?: string;
+    knowledgeBase?: string;
+    sqlKnowledgeBase?: string;
+    tools?: string[];
+    temperature?: number;
+    presence_penalty?: number;
+    frequency_penalty?: number;
+    createdTimestamp?: string;
+    updatedTimestamp?: string;
+    id: string;
+    name: string;
+    iconUrl?: string;
+    teamId?: string;
+    creatorUserId?: string;
+    assetType?: AssetType;
+    isDeleted?: boolean;
+    isPreset?: boolean;
+    isPublished?: boolean;
+    isActive?: boolean;
+  };
+  designProject?: {
+    id: string;
+    name: string;
+    description?: string | I18nValue;
+    teamId?: string;
+    creatorUserId?: string;
+    assetType?: AssetType;
+    isDeleted?: boolean;
+    isPreset?: boolean;
+    isPublished?: boolean;
+    isActive?: boolean;
+    displayName: string | Record<string, string>;
+    createdTimestamp: number;
+    updatedTimestamp: number;
+    boardIds?: string[];
+    iconUrl?: string;
+  };
   iframeUrl?: string;
   info?: {
     displayName?: string | I18nValue;

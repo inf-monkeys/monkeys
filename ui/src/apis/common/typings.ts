@@ -1,5 +1,7 @@
 import { I18nValue } from '@inf-monkeys/monkeys';
 
+import { IPageGroup, IPinPage } from '../pages/typings';
+
 export type SystemModule = 'payment' | 'vines-ai';
 
 export enum AuthMethod {
@@ -117,6 +119,11 @@ export type CustomizationDesignProjects = {
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
 
+export type CustomizationWorkbench = {
+  pages: IPinPage[];
+  pageGroups: IPageGroup[];
+};
+
 export interface ISystemConfig {
   theme: {
     id?: string;
@@ -178,6 +185,7 @@ export interface ISystemConfig {
     historyResult: CustomizationHistoryResult;
     uploader: CustomizationUploader;
     designProjects: CustomizationDesignProjects;
+    workbench: CustomizationWorkbench;
   };
   auth: {
     enabled: AuthMethod[];

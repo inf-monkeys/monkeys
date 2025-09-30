@@ -8,6 +8,7 @@ import {
   CustomizationHistoryResult,
   CustomizationModules,
   CustomizationUploader,
+  CustomizationWorkbench,
   ExtraLanguageURL,
   WorkflowPreviewExecutionGrid,
 } from '../config';
@@ -74,6 +75,7 @@ export interface ISystemConfig {
     historyResult: CustomizationHistoryResult;
     uploader: CustomizationUploader;
     designProjects: CustomizationDesignProjects;
+    workbench: CustomizationWorkbench;
   };
   auth: {
     enabled: AuthMethod[];

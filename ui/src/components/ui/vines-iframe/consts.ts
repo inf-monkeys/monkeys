@@ -9,6 +9,7 @@ import { AgentChatV2View } from '@/view/agent-chat-v2';
 import { AgentConfigView } from '@/view/agent-config';
 import { DesignBoardView } from '@/view/design-board';
 import { GlobalDesignBoardView } from '@/view/global-design-board';
+import { IframeWrapper } from '@/view/iframe-wrapper';
 import { VinesFlow } from '@/view/vines-flow';
 import { VinesForm } from '@/view/vines-form';
 
@@ -26,6 +27,7 @@ export const IFRAME_MAP = {
   'agentv2-logs': AgentLogsView,
   'design-board': DesignBoardView,
   'global-design-board': GlobalDesignBoardView,
+  iframe: IframeWrapper,
 };
 
 export const VINES_VIEW_ID_MAPPER: Record<string, string> = {

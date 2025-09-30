@@ -55,6 +55,10 @@ export enum TOOL_CATEGORY {
   'train-model' = 'train-model',
   bio = 'bio',
   human = 'human',
+  feature = 'feature',
+  logic = 'logic',
+  prototype = 'prototype',
+  demand = 'demand',
 }
 
 export const IGNORE_TOOLS = ['fake_node', 'notification_join'];

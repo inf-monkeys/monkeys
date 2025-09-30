@@ -38,7 +38,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
 
     const showMoreAction = oem?.theme.workbenchSidebarMoreAction ?? true;
 
-    const info = page?.workflow || page?.agent || page?.designProject;
+    const info = page?.workflow || page?.agent || page?.designProject || page?.info;
     const viewIcon = page?.instance?.icon ?? '';
     const pageId = page?.id ?? '';
 

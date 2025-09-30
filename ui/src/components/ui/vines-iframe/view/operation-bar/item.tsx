@@ -13,7 +13,7 @@ import { IDesignProject } from '@/apis/designs/typings';
 import { useWorkspacePages } from '@/apis/pages';
 import { IAssetItem } from '@/apis/ugc/typings';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
-import { GLOBAL_DESIGN_BOARD_PAGE } from '@/components/layout/workbench/sidebar/mode/normal';
+import { GLOBAL_DESIGN_BOARD_PAGE } from '@/components/layout/workbench/sidebar/mode/normal/consts';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
