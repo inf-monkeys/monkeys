@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useGetDesignAssociationList } from '@/apis/designs';
-import { useWorkflowList } from '@/apis/workflow';
+import { useAllWorkflowList } from '@/apis/workflow';
 import { useAllWorkflowAssociationList } from '@/apis/workflow/association';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { Button } from '@/components/ui/button';
@@ -116,7 +116,7 @@ export const ExportAssetSelect: React.FC<IExportAssetSelectProps> = ({ onSelect 
   };
 
   // 获取数据
-  const { data: workflowList } = useWorkflowList({ page: 1, limit: 9999 });
+  const { data: workflowList } = useAllWorkflowList();
   const { data: workflowAssociationList } = useAllWorkflowAssociationList();
   const { data: designAssociationList } = useGetDesignAssociationList();
 

@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 
 import { useToolLists } from '@/apis/tools';
 import { useUgcComfyuiWorkflows } from '@/apis/ugc';
-import { updateWorkflow, useUpdateWorkflow, useWorkflowList } from '@/apis/workflow';
+import { updateWorkflow, useAllWorkflowList, useUpdateWorkflow } from '@/apis/workflow';
 import { useRetimer } from '@/hooks/use-retimer.ts';
 import { VinesCore } from '@/package/vines-flow/core';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
@@ -158,7 +158,7 @@ export const createVinesCore = (workflowId: string, t?: i18n) => {
     }, []);
 
     const { data: tools } = useToolLists();
-    const { data: workflows } = useWorkflowList({ page: 1, limit: 9999 });
+    const { data: workflows } = useAllWorkflowList();
     const { data: comfyUIWorkflows, error: comfyUIWorkflowsError } = useUgcComfyuiWorkflows({ page: 1, limit: 9999 });
 
     useEffect(() => {

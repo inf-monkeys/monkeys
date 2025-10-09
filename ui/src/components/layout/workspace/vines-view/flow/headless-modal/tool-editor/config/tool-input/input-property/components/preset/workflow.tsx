@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { isString } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { useWorkflowList } from '@/apis/workflow';
+import { useAllWorkflowList } from '@/apis/workflow';
 import { IVinesInputPropertyProps } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { IVinesInputPresetProps } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
 import { StringInput } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
@@ -21,7 +21,7 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
 
   const { componentMode, setComponentMode, value, onChange, disabled, ...childProps } = props;
 
-  const { data: workflowList, isLoading } = useWorkflowList();
+  const { data: workflowList, isLoading } = useAllWorkflowList();
 
   const [options, setOptions] = useState<IVinesToolPropertiesOption[]>([]);
   const [optionsVariableMapper, setOptionsVariableMapper] = useState<Record<string, VinesToolDefProperties>>({});

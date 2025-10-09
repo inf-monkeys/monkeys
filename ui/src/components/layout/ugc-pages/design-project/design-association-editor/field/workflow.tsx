@@ -5,7 +5,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { useWorkflowList } from '@/apis/workflow';
+import { useAllWorkflowList } from '@/apis/workflow';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -34,7 +34,7 @@ const getWorkflowDisplayName = (workflow?: MonkeyWorkflow) => {
 export const FieldWorkflow: React.FC<IFieldWorkflowProps> = ({ form }) => {
   const { t } = useTranslation();
 
-  const { data: workflowList, isLoading } = useWorkflowList();
+  const { data: workflowList, isLoading } = useAllWorkflowList();
   const [visible, setVisible] = useState(false);
 
   const filteredWorkflows = workflowList ?? [];

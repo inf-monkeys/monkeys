@@ -95,3 +95,5 @@ export const workflowPermission = (workflowId: string) =>
   vinesFetcher<{
     notAuthorized: boolean;
   }>({ method: 'GET', simple: true })(`/api/workflow/metadata/${workflowId}/permissions`);
+
+export const useAllWorkflowList = () => useWorkflowList({ page: 1, limit: 9999 });
