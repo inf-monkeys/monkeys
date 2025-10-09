@@ -23,7 +23,7 @@ interface IAgentSpaceTabProps {
 }
 
 export const AgentSpaceTab: React.FC<IAgentSpaceTabProps> = ({ value, icon, displayName }) => {
-  const [state, setState] = useUrlState({ tab: 'chat' });
+  const [state, setState] = useUrlState({ tab: 'chat-v2' });
 
   const { agentId } = useParams({ from: '/$teamId/agent/$agentId/' });
 

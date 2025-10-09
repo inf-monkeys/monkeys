@@ -13,7 +13,6 @@ export type IPageInstanceType =
   | 'chat'
   | 'preview'
   | 'api'
-  | 'agent-chat'
   | 'agent-config'
   | 'agent-log'
   | 'design-board'

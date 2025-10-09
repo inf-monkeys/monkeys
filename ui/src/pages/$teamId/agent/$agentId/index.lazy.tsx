@@ -9,7 +9,7 @@ import { createViewStore, ViewStoreProvider } from '@/store/useViewStore';
 const AgentPage: React.FC = () => {
   const { agentId } = useParams({ from: '/$teamId/agent/$agentId/' });
 
-  const [{ tab }] = useUrlState({ tab: 'chat' });
+  const [{ tab }] = useUrlState({ tab: 'chat-v2' });
 
   const pageId = `agent-${agentId}-${tab}`;
 
