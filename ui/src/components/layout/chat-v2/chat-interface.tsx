@@ -10,7 +10,9 @@ import { Response } from '@/components/ai-elements/response';
 import { Task, TaskContent, TaskItem, TaskTrigger } from '@/components/ai-elements/task';
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/components/ai-elements/tool';
 import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { useAgentV2Chat } from '@/hooks/use-agent-v2-chat';
 
 // 转换消息格式以适配AI Elements组件
@@ -61,50 +63,6 @@ export function ChatInterface({ agentId, sessionId, botPhoto, height }: ChatInte
   const displayMessages = useMemo(() => {
     return messages.map((msg) => convertToVinesMessage(msg)).filter((msg): msg is IVinesMessage => msg !== null);
   }, [messages]);
-
-  // 添加滚动条样式控制
-  React.useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      .chat-textarea {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-      }
-      .chat-textarea::-webkit-scrollbar {
-        display: none;
-      }
-
-      .chat-textarea.show-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-        -ms-overflow-style: scrollbar;
-      }
-      .chat-textarea.show-scrollbar::-webkit-scrollbar {
-        display: block;
-        width: 6px;
-      }
-      .chat-textarea.show-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .chat-textarea.show-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(156, 163, 175, 0.5);
-        border-radius: 3px;
-      }
-      .chat-textarea.show-scrollbar::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(156, 163, 175, 0.7);
-      }
-      .chat-textarea.show-scrollbar::-webkit-scrollbar-button {
-        display: none;
-      }
-      .chat-textarea.show-scrollbar::-webkit-scrollbar-corner {
-        background: transparent;
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -253,43 +211,38 @@ export function ChatInterface({ agentId, sessionId, botPhoto, height }: ChatInte
       <Separator />
 
       {/* 输入区域 */}
-      <div className="w-full border-t px-4 py-6">
+      <div className="w-full border-t px-4 py-4">
         <form onSubmit={handleSubmit} className="flex w-full items-end gap-3">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={!agentId ? '请先选择智能体...' : '输入您的消息...（Shift+Enter 换行）'}
-            disabled={isLoading || !agentId}
-            rows={1}
-            className="chat-textarea max-h-32 min-h-[48px] flex-1 resize-none overflow-y-hidden rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-            style={{
-              height: 'auto',
-              minHeight: '48px',
-            }}
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = 'auto';
-              const newHeight = Math.min(target.scrollHeight, 128);
-              target.style.height = newHeight + 'px';
-
-              // 当内容超过最大高度时显示滚动条
-              if (target.scrollHeight > 128) {
-                target.style.overflowY = 'auto';
-                target.classList.add('show-scrollbar');
-              } else {
-                target.style.overflowY = 'hidden';
-                target.classList.remove('show-scrollbar');
-              }
-            }}
-          />
-          <button
+          <div className="flex-1 [&>div]:!p-0">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={!agentId ? '请先选择智能体...' : '输入您的消息...（Shift+Enter 换行）'}
+              disabled={isLoading || !agentId}
+              rows={1}
+              className="max-h-32 min-h-[48px] resize-none overflow-y-auto"
+              style={{
+                height: 'auto',
+                minHeight: '48px',
+              }}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = 'auto';
+                const newHeight = Math.min(target.scrollHeight, 128);
+                target.style.height = newHeight + 'px';
+                target.style.overflowY = target.scrollHeight > 128 ? 'auto' : 'hidden';
+              }}
+            />
+          </div>
+          <Button
             type="submit"
             disabled={isLoading || !input.trim() || !agentId}
-            className="flex h-12 items-center justify-center rounded-lg bg-blue-500 px-6 text-white transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-          </button>
+            variant="solid"
+            theme="primary"
+            size="large"
+            icon={isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+          />
         </form>
       </div>
     </div>
