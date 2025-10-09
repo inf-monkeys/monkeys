@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
-import { RotateCcw, Palette, Image } from 'lucide-react';
+import { Image, Palette, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { VinesEmojiSelector } from 'src/components/ui/emoji-selector';
-import { VinesIconSelector } from '@/components/ui/icon-selector';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { VinesIconSelector } from '@/components/ui/icon-selector';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesIconSize, VinesIcon } from '@/components/ui/vines-icon/index.tsx';
 import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
@@ -63,7 +63,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
   const handleReset = () => {
     const resetValue = defaultValue || (onlyEmoji ? '🍀' : DEFAULT_WORKFLOW_ICON_URL);
     onChange?.(resetValue);
-    
+
     // 根据重置值设置图标类型
     if (resetValue.startsWith('emoji:')) {
       setIconType('emoji');
@@ -86,7 +86,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex gap-global">
       {/* 图标类型切换按钮 */}
       <div className="flex items-center gap-2">
         <Button
@@ -114,10 +114,10 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
       {/* 图标编辑器 */}
       <div className="flex">
         {iconType === 'emoji' ? (
-          <VinesEmojiSelector 
-            emojiLink={isEmojiIcon ? value : undefined} 
-            onChange={handleEmojiSelect} 
-            onFinished={onFinished} 
+          <VinesEmojiSelector
+            emojiLink={isEmojiIcon ? value : undefined}
+            onChange={handleEmojiSelect}
+            onFinished={onFinished}
             onlyEmoji={onlyEmoji}
           >
             <div className="relative cursor-pointer">
@@ -144,9 +144,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
           <Dialog open={iconDialogOpen} onOpenChange={setIconDialogOpen}>
             <DialogTrigger asChild>
               <div className="relative cursor-pointer">
-                <VinesIcon size={size}>
-                  {getDisplayIconValue()}
-                </VinesIcon>
+                <VinesIcon size={size}>{getDisplayIconValue()}</VinesIcon>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div
