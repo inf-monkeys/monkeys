@@ -1,3 +1,4 @@
+import { ConversationApps } from '@/pages/$teamId/agents/index.lazy';
 import { ApplicationStore } from '@/pages/$teamId/application-store/index.lazy';
 import { Designs } from '@/pages/$teamId/designs/index.lazy';
 import { EvaluationModules } from '@/pages/$teamId/evaluations';
@@ -27,4 +28,5 @@ export const CUSTOM_NAV_SUB_MODULE_MAP: INavListSubModuleMap = {
   },
   designs: Designs,
   'artist:asset-library': MediaData,
+  'ai-sessions': ConversationApps,
 };
