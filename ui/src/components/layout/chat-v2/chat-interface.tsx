@@ -215,7 +215,7 @@ export function ChatInterface({ agentId, sessionId, botPhoto, height }: ChatInte
           <MessageSquare className="h-4 w-4 text-primary" />
         </div>
         <div>
-          <h1 className="text-lg font-semibold">对话视图 v2</h1>
+          <h1 className="text-lg font-semibold">ReAct Agent</h1>
         </div>
       </div>
 
