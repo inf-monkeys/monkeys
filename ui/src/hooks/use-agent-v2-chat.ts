@@ -60,29 +60,47 @@ export const useAgentV2Chat = (
   );
 
   // 当外部sessionId变化时，清空消息并重置状态
-  useEffect(() => {
-    if (externalSessionId !== undefined && externalSessionId !== sessionId) {
-      // 关闭现有连接
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        setIsConnected(false);
-      }
+  const prevExternalSessionIdRef = useRef<string | undefined>();
 
-      // 清空消息和状态
+  useEffect(() => {
+    // 只在 externalSessionId 真正改变时才处理（排除初始化和相同值）
+    if (externalSessionId === prevExternalSessionIdRef.current) {
+      return;
+    }
+
+    const prevSessionId = prevExternalSessionIdRef.current;
+    prevExternalSessionIdRef.current = externalSessionId;
+
+    // 如果是初始化（undefined -> ''），不做任何处理
+    if (prevSessionId === undefined && externalSessionId === '') {
+      setSessionId(externalSessionId);
+      return;
+    }
+
+    // 关闭现有连接
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      setIsConnected(false);
+    }
+
+    // 判断是否切换了session（任何情况的切换都需要清空消息）
+    const isSessionChanged = prevSessionId !== externalSessionId;
+
+    // 切换session时清空消息和状态
+    if (isSessionChanged && prevSessionId !== undefined) {
       setMessages([]);
       setFollowupQuestion(undefined);
       setConnectionError(undefined);
-      setIsLoading(false);
-
-      // 更新sessionId为外部提供的ID
-      setSessionId(externalSessionId);
-
-      // 如果是新建对话（空字符串），重置内部session引用
-      if (externalSessionId === '') {
-        currentSessionIdRef.current = undefined;
-      }
     }
-  }, [externalSessionId, sessionId]);
+
+    // 更新sessionId为外部提供的ID
+    setSessionId(externalSessionId);
+
+    // 如果是新建对话（空字符串），重置内部session引用
+    if (externalSessionId === '') {
+      currentSessionIdRef.current = undefined;
+    }
+  }, [externalSessionId]);
 
   // 更新消息列表
   useEffect(() => {
@@ -115,10 +133,8 @@ export const useAgentV2Chat = (
         return processedMessage;
       });
 
-      setMessages((prev) => {
-        // 直接添加所有历史消息，不做去重过滤
-        return [...prev, ...historicalMessages].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-      });
+      // 直接替换消息列表为历史消息（不追加到现有消息）
+      setMessages(historicalMessages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()));
     }
   }, [messagesResponse]);
 
@@ -434,26 +450,6 @@ export const useAgentV2Chat = (
     }
   }, []);
 
-  // 为现有session发送消息（临时方案：直接使用message API）
-  const establishConnectionForExistingSession = useCallback(async (sessionId: string, message: string) => {
-    try {
-      setConnectionError(undefined);
-      setIsLoading(true);
-
-      // 直接发送消息到session，不建立SSE连接
-      const success = await sendMessageToSession(sessionId, message);
-
-      if (!success) {
-        throw new Error('Failed to send message to existing session');
-      }
-
-      setIsLoading(false);
-    } catch (error) {
-      setConnectionError(error as Error);
-      setIsLoading(false);
-    }
-  }, []);
-
   // 发送消息
   const sendMessage = useCallback(
     async (content: string) => {
@@ -480,30 +476,24 @@ export const useAgentV2Chat = (
       // 清除任何现有的 followup 问题
       setFollowupQuestion(undefined);
 
-      if (!isConnected || externalSessionId === '') {
-        // 没有SSE连接时，或者是新建对话时：建立新连接
-        if (externalSessionId && externalSessionId !== '') {
-          await establishConnectionForExistingSession(externalSessionId, content);
-        } else {
-          // 新建对话或无session：创建全新连接
-          await establishConnection(agentId, content);
-        }
+      // 判断当前使用哪个 session 或是否需要创建新 session
+      // 逻辑：
+      // 1. 如果有外部 session（非空字符串），使用外部 session
+      // 2. 如果有内部 session，继续使用内部 session
+      // 3. 否则创建新 session
+
+      if (externalSessionId && externalSessionId !== '') {
+        // 情况1: 有明确的外部 session（从列表点击的）
+        await sendMessageToSession(externalSessionId, content);
+      } else if (currentSessionIdRef.current) {
+        // 情况2: 有内部创建的 session，继续使用
+        await sendMessageToSession(currentSessionIdRef.current, content);
       } else {
-        // 已有SSE连接且是已存在的会话：发送到当前活跃会话
-        const targetSessionId = externalSessionId || currentSessionIdRef.current;
-        if (!targetSessionId) {
-          setIsLoading(false);
-          return;
-        }
-
-        const success = await sendMessageToSession(targetSessionId, content);
-
-        if (!success) {
-          setIsLoading(false);
-        }
+        // 情况3: 创建新 session（首次对话或用户点击新建对话后）
+        await establishConnection(agentId, content);
       }
     },
-    [agentId, externalSessionId, isConnected, establishConnection, establishConnectionForExistingSession],
+    [agentId, externalSessionId, establishConnection],
   );
 
   // 回答 followup 问题
