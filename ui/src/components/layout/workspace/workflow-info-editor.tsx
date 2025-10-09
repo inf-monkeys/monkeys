@@ -11,9 +11,9 @@ import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/ut
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
+import { FieldPreferAppIdInput } from '@/components/ui/functional-input/field-prefer-app-id-input';
 import { I18nInput } from '@/components/ui/i18n-input';
 import { I18nTextarea } from '@/components/ui/i18n-textarea';
-import { Input } from '@/components/ui/input';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
@@ -168,23 +168,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
                 )}
               />
 
-              <FormField
-                name="preferAppId"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('workspace.wrapper.workflow-info-card.form.prefer-app-id')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        value={field.value as string | undefined}
-                        onChange={field.onChange}
-                        placeholder={t('workspace.wrapper.workflow-info-card.form.prefer-app-id-placeholder')}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FieldPreferAppIdInput form={form} assetType="workflow" />
             </div>
 
             <DialogFooter>

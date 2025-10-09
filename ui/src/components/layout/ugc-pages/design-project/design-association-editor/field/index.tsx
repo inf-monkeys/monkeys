@@ -2,6 +2,7 @@ import React from 'react';
 
 import { UseFormReturn } from 'react-hook-form';
 
+import { FieldPreferAppIdInput } from '@/components/ui/functional-input/field-prefer-app-id-input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { IDesignAssociationForEditor } from '@/schema/workspace/design-association';
 
@@ -9,7 +10,6 @@ import { FieldDescription } from './description';
 import { FieldDisplayName } from './display-name';
 import { FieldEnabled } from './enabled';
 import { FieldIconUrl } from './icon-url';
-import { FieldPreferAppId } from './prefer-app-id';
 import { FieldTargetInputId } from './target-input-id';
 import { FieldWorkflow } from './workflow';
 
@@ -25,7 +25,7 @@ export const DesignAssociationEditorFields: React.FC<IDesignAssociationEditorFie
           <FieldEnabled form={form} />
           <div className="flex justify-between gap-global">
             <FieldIconUrl form={form} />
-            <FieldPreferAppId form={form} />
+            <FieldPreferAppIdInput form={form} assetType="design-association" />
           </div>
           <FieldDisplayName form={form} />
           <FieldDescription form={form} />

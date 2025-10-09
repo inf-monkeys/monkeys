@@ -9,11 +9,11 @@ import { FieldIconUrl } from '@/components/layout/workspace/vines-view/flow/tool
 import { FieldMapper } from '@/components/layout/workspace/vines-view/flow/toolbar/more/association-editor/field/mapper.tsx';
 import { FieldType } from '@/components/layout/workspace/vines-view/flow/toolbar/more/association-editor/field/type.tsx';
 import { FieldWorkflow } from '@/components/layout/workspace/vines-view/flow/toolbar/more/association-editor/field/workflow.tsx';
+import { FieldPreferAppIdInput } from '@/components/ui/functional-input/field-prefer-app-id-input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { IWorkflowAssociationForEditor } from '@/schema/workspace/workflow-association.ts';
 
 import { FieldNewDesignDisplayName } from './new-design-display-name';
-import { FieldPreferAppId } from './prefer-app-id';
 
 interface IAssociationEditorFieldsProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowAssociationForEditor>;
@@ -28,7 +28,7 @@ export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = 
           <FieldEnabled form={form} />
           <div className="flex justify-between gap-global">
             <FieldIconUrl form={form} />
-            <FieldPreferAppId form={form} />
+            <FieldPreferAppIdInput form={form} assetType="workflow-association" />
           </div>
           <FieldDisplayName form={form} />
           <FieldDescription form={form} />

@@ -30,6 +30,7 @@ export const LANGUAGE = {
 export const getI18nContent = (
   content: string | I18nValue | null | undefined,
   fallback?: string,
+  specificLanguage?: string,
 ): string | undefined => {
   if (!content) return fallback;
   const contentType = typeof content;
@@ -37,7 +38,7 @@ export const getI18nContent = (
     try {
       const parseContent = JSON.parse(content.toString());
       return (
-        parseContent[I18N_MAPPER[i18n.language]] ??
+        parseContent[I18N_MAPPER[specificLanguage ?? i18n.language]] ??
         parseContent['zh-CN'] ??
         parseContent['en-US'] ??
         fallback ??
@@ -47,7 +48,11 @@ export const getI18nContent = (
       return content.toString();
     }
   }
-  return content[I18N_MAPPER[i18n.language]] ?? content['zh-CN'] ?? content['en-US'] ?? fallback;
+  if (specificLanguage) {
+    console.log(content, specificLanguage, content[I18N_MAPPER[specificLanguage ?? i18n.language]]);
+  }
+
+  return content[I18N_MAPPER[specificLanguage ?? i18n.language]] ?? content['zh-CN'] ?? content['en-US'] ?? fallback;
 };
 
 export const I18nAllContent = (content: string | I18nValue | undefined): string | undefined => {

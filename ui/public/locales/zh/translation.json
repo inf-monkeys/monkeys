@@ -2748,8 +2748,6 @@
           "workflow-desc": "工作流描述",
           "workflow-desc-placeholder": "请输入工作流描述，不超过 200 字",
           "workflow-icon": "工作流图标",
-          "prefer-app-id": "偏好应用 ID",
-          "prefer-app-id-placeholder": "请输入偏好应用 ID",
           "submit": "保存"
         },
         "workflow-id-empty": "工作流 ID 不存在",
@@ -3098,10 +3096,6 @@
                 "enabled": {
                   "label": "启用",
                   "description": "启用后，关联将展示在该工作流的「工作台」固定「表单视图」右侧"
-                },
-                "prefer-app-id": {
-                  "label": "偏好应用 ID",
-                  "placeholder": "请输入偏好应用 ID"
                 },
                 "display-name": {
                   "label": "显示名称",
@@ -4309,5 +4303,19 @@
       "normalOnly": "成功上传 {{count}} 张图片"
     },
     "uploadErrors": "{{count}} 个文件上传失败"
+  },
+  "asset": {
+    "prefer-app-id-input": {
+      "label": "偏好应用 ID",
+      "placeholder": "请输入偏好应用 ID",
+      "auto-generate": {
+        "tooltip": "生成偏好应用 ID",
+        "toast": {
+          "success": "偏好应用 ID 生成成功",
+          "error": "生成偏好应用 ID 失败",
+          "loading": "生成偏好应用 ID..."
+        }
+      }
+    }
   }
 }

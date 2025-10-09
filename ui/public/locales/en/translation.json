@@ -2724,8 +2724,6 @@
           "workflow-desc": "Workflow description",
           "workflow-desc-placeholder": "Please enter a description of the workflow in no more than 200 characters.",
           "workflow-icon": "Workflow Icons",
-          "prefer-app-id": "Prefer App ID",
-          "prefer-app-id-placeholder": "Please enter a prefer app id",
           "submit": "Submit"
         },
         "workflow-id-empty": "Workflow ID does not exist",
@@ -3074,10 +3072,6 @@
                 "enabled": {
                   "label": "Enabled",
                   "description": "After enabling, the association will be displayed on the right side of the \"Workspace\" fixed \"Form View\" in the workflow"
-                },
-                "prefer-app-id": {
-                  "label": "Prefer App ID",
-                  "placeholder": "Please enter the prefer app ID"
                 },
                 "display-name": {
                   "label": "Display Name",
@@ -4330,5 +4324,19 @@
       "normalOnly": "Successfully uploaded {{count}} images"
     },
     "uploadErrors": "{{count}} files failed to upload"
+  },
+  "asset": {
+    "prefer-app-id-input": {
+      "label": "Prefer App ID",
+      "placeholder": "Please enter the prefer app ID",
+      "auto-generate": {
+        "tooltip": "Generate Prefer App ID",
+        "toast": {
+          "success": "Prefer App ID generated successfully",
+          "error": "Failed to generate prefer app ID",
+          "loading": "Generating Prefer App ID..."
+        }
+      }
+    }
   }
 }
