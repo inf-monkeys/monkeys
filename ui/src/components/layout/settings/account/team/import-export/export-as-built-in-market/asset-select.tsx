@@ -238,40 +238,51 @@ export const ExportAssetSelect: React.FC<IExportAssetSelectProps> = ({ onSelect 
     title: string,
     items: ISelectionItem[],
     onSelect: (id: string, checked: boolean) => void,
-  ) => (
-    <div className="flex-1 space-y-global-1/2">
-      <h3 className="text-sm font-medium">{title}</h3>
-      <Card className="p-global">
-        <ScrollArea className="flex h-[60vh] flex-col pr-4">
-          {items.map((item) => (
-            <Tooltip key={item.id}>
-              <TooltipTrigger>
-                <div className="flex w-full items-center gap-global-1/2">
-                  <Checkbox
-                    id={item.id}
-                    checked={item.selected}
-                    onCheckedChange={(checked) => onSelect(item.id, checked as boolean)}
-                  />
-                  <label htmlFor={item.id} className="text-sm">
-                    {getI18nContent(item.displayName)}
-                  </label>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="flex flex-col">
-                  <span>
-                    {item.assetType} - {getI18nContent(item.displayName)}
-                  </span>
-                  <span>{item.id}</span>
-                  <span>{item.preferAppId || 'no prefer app id'}</span>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </ScrollArea>
-      </Card>
-    </div>
-  );
+  ) => {
+    const allSelected = items.length > 0 && items.every((item) => item.selected);
+
+    const handleSelectAll = (checked: boolean) => {
+      items.forEach((item) => onSelect(item.id, checked));
+    };
+
+    return (
+      <div className="flex-1 space-y-global-1/2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium">{title}</h3>
+          <Checkbox checked={allSelected} onCheckedChange={handleSelectAll} />
+        </div>
+        <Card className="p-global">
+          <ScrollArea className="flex h-[60vh] flex-col pr-4">
+            {items.map((item) => (
+              <Tooltip key={item.id}>
+                <TooltipTrigger>
+                  <div className="flex w-full items-center gap-global-1/2">
+                    <Checkbox
+                      id={item.id}
+                      checked={item.selected}
+                      onCheckedChange={(checked) => onSelect(item.id, checked as boolean)}
+                    />
+                    <label htmlFor={item.id} className="text-sm">
+                      {getI18nContent(item.displayName)}
+                    </label>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="flex flex-col">
+                    <span>
+                      {item.assetType} - {getI18nContent(item.displayName)}
+                    </span>
+                    <span>{item.id}</span>
+                    <span>{item.preferAppId || 'no prefer app id'}</span>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </ScrollArea>
+        </Card>
+      </div>
+    );
+  };
 
   return (
     <>
