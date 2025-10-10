@@ -48,9 +48,6 @@ export const getI18nContent = (
       return content.toString();
     }
   }
-  if (specificLanguage) {
-    console.log(content, specificLanguage, content[I18N_MAPPER[specificLanguage ?? i18n.language]]);
-  }
 
   return content[I18N_MAPPER[specificLanguage ?? i18n.language]] ?? content['zh-CN'] ?? content['en-US'] ?? fallback;
 };

@@ -18,7 +18,7 @@ interface IFieldPreferAppIdPropsBase {
   displayName?: string | I18nValue;
   preferAppId?: string;
   originWorkflowId?: string;
-  targetType?: IWorkflowAssociationType;
+  type?: IWorkflowAssociationType;
   targetWorkflowId?: string;
 }
 
@@ -40,7 +40,7 @@ export const FieldPreferAppIdInput = <T extends IFieldPreferAppIdPropsBase>({
       enDisplayName = getI18nContent(form.getValues('displayName' as Path<T>), '', 'en') ?? '';
     } else if (assetType === 'workflow-association') {
       const originWorkflow = await getWorkflow(form.getValues('originWorkflowId' as Path<T>) as string);
-      if (form.getValues('targetType' as Path<T>) === 'to-workflow') {
+      if (form.getValues('type' as Path<T>) === 'to-workflow') {
         const targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
         enDisplayName =
           getI18nContent(originWorkflow?.displayName, '', 'en') +
