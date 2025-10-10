@@ -1,5 +1,5 @@
 import { IPageGroup, IPinPage } from '@/apis/pages/typings';
-import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
+import { DEFAULT_GLOBAL_DESIGN_BOARD_ICON_URL } from '@/consts/icons';
 
 export const GLOBAL_DESIGN_BOARD_PAGE_GROUP: IPageGroup = {
   id: 'global-design-board',
@@ -9,7 +9,7 @@ export const GLOBAL_DESIGN_BOARD_PAGE_GROUP: IPageGroup = {
     'en-US': 'Board',
   },
   isBuiltIn: false,
-  iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
+  iconUrl: DEFAULT_GLOBAL_DESIGN_BOARD_ICON_URL,
   sortIndex: 0,
 };
 
@@ -35,7 +35,7 @@ export const GLOBAL_DESIGN_BOARD_PAGE: IPinPage = {
       'zh-CN': '全局画板',
       'en-US': 'Global Board',
     }),
-    iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
+    iconUrl: DEFAULT_GLOBAL_DESIGN_BOARD_ICON_URL,
     createdTimestamp: 0,
     updatedTimestamp: 0,
   },
