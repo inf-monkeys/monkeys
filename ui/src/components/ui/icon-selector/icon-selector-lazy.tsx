@@ -90,27 +90,51 @@ const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(({ onIconSelec
   }, [initialized, searchValue, customIcons]);
 
   const [activeTab, setActiveTab] = useState('all');
+  const [uploadedNormalIcon, setUploadedNormalIcon] = useState<string>('');
+  const [uploadedActiveIcon, setUploadedActiveIcon] = useState<string>('');
 
   const tabsNode = useRef<HTMLDivElement>(null);
 
   // 处理自定义上传的图标
-  const handleCustomIconUpload = (urls: string[], files?: UppyFile<Meta, Record<string, never>>[]) => {
-    console.log('handleCustomIconUpload called with:', { urls, files });
+  const handleCustomIconUpload = (
+    urls: string[],
+    files?: UppyFile<Meta, Record<string, never>>[],
+    isActive?: boolean,
+  ) => {
     if (urls.length > 0) {
-      const iconUrl = urls[0];
-      console.log('Selected icon URL:', iconUrl);
+      const iconUrl = `custom-icon:${urls[0]}`;
 
-      // 将新上传的图标添加到自定义图标列表中
-      setCustomIcons((prev) => {
-        if (!prev.includes(iconUrl)) {
-          return [...prev, iconUrl];
+      if (isActive) {
+        setUploadedActiveIcon(iconUrl);
+      } else {
+        setUploadedNormalIcon(iconUrl);
+      }
+
+      // 如果两个图标都上传了，则合并它们
+      if (isActive && uploadedNormalIcon) {
+        const combinedIconUrl = `${uploadedNormalIcon}|${iconUrl}`;
+        setCustomIcons((prev) => {
+          if (!prev.includes(combinedIconUrl)) {
+            return [...prev, combinedIconUrl];
+          }
+          return prev;
+        });
+        onIconSelect?.(combinedIconUrl);
+        // 重置状态
+        setUploadedNormalIcon('');
+        setUploadedActiveIcon('');
+      } else if (!isActive) {
+        // 如果只上传了普通图标
+        if (!uploadedActiveIcon) {
+          setCustomIcons((prev) => {
+            if (!prev.includes(iconUrl)) {
+              return [...prev, iconUrl];
+            }
+            return prev;
+          });
+          onIconSelect?.(iconUrl);
         }
-        return prev;
-      });
-
-      onIconSelect?.(iconUrl);
-    } else {
-      console.log('No URLs provided to handleCustomIconUpload');
+      }
     }
   };
 
@@ -179,23 +203,32 @@ const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(({ onIconSelec
         ))}
         <TabsContent value="custom">
           <div className="flex h-72 flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-muted-foreground/25 p-6">
-            <div className="text-center">
-              <Upload className="mx-auto mb-2 size-8 text-muted-foreground" />
-              <h3 className="mb-1 text-sm font-medium">{t('components.ui.icon-selector.custom.title')}</h3>
-              <p className="text-xs text-muted-foreground">{t('components.ui.icon-selector.custom.description')}</p>
+            <div className="flex w-full flex-col gap-2 overflow-y-auto">
+              <VinesUploader
+                accept={['png', 'jpg', 'jpeg', 'webp', 'svg']}
+                maxSize={5}
+                max={1}
+                onChange={(urls, files) => handleCustomIconUpload(urls, files, false)}
+                basePath="user-files/icons"
+                className="w-full"
+              >
+                <Button variant="outline" className="w-full">
+                  {t('components.ui.icon-selector.custom.select-normal-icon')}
+                </Button>
+              </VinesUploader>
+              <VinesUploader
+                accept={['png', 'jpg', 'jpeg', 'webp', 'svg']}
+                maxSize={5}
+                max={1}
+                onChange={(urls, files) => handleCustomIconUpload(urls, files, true)}
+                basePath="user-files/icons"
+                className="w-full"
+              >
+                <Button variant="outline" className="w-full">
+                  {t('components.ui.icon-selector.custom.select-active-icon')}
+                </Button>
+              </VinesUploader>
             </div>
-            <VinesUploader
-              accept={['png', 'jpg', 'jpeg', 'webp', 'svg']}
-              maxSize={5}
-              max={1}
-              onChange={handleCustomIconUpload}
-              basePath="user-files/icons"
-              className="w-full"
-            >
-              <Button variant="outline" className="w-full">
-                {t('components.ui.icon-selector.custom.select-file')}
-              </Button>
-            </VinesUploader>
           </div>
         </TabsContent>
       </Tabs>

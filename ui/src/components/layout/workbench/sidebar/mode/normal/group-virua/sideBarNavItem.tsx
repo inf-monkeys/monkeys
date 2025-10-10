@@ -8,7 +8,7 @@ import { LucideIcon } from 'lucide-react';
 import { useSystemConfig } from '@/apis/common';
 import { WorkbenchViewItemCurrentData } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn, getI18nContent } from '@/utils';
 
 interface ISpaceSidebarTabProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -59,13 +59,24 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
       )}
       {...attr}
     >
-      {typeof icon === 'string' ? (
-        <VinesLucideIcon className="size-icon shrink-0" size={20} src={icon} active={isActive} />
+      {typeof icon === 'string' || !icon ? (
+        <VinesIcon
+          className="!size-[calc(var(--global-icon-size)+var(--global-spacing)/2)]"
+          fallbackColor="#eeeef1"
+          size="md"
+          disabledPreview
+          active={isActive}
+          showBackground={false}
+        >
+          {icon}
+        </VinesIcon>
       ) : (
         React.createElement(icon, { className: 'size-icon shrink-0', size: 20 })
       )}
       {!onlyShowWorkbenchIcon && (
-        <h1 className="line-clamp-1 max-w-20 text-ellipsis whitespace-nowrap text-sm">{getI18nContent(displayName)}</h1>
+        <h1 className="line-clamp-1 max-w-20 text-ellipsis whitespace-nowrap text-sm font-bold">
+          {getI18nContent(displayName)}
+        </h1>
       )}
       {!onlyShowWorkbenchIcon && children}
     </div>

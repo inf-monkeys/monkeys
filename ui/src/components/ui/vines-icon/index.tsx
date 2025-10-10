@@ -23,6 +23,7 @@ export interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
   disabledPreview?: boolean;
   fallbackColor?: string;
   active?: boolean;
+  showBackground?: boolean;
 }
 
 export const VinesIcon: React.FC<IVinesIconProps> = ({
@@ -35,8 +36,13 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
   disabledPreview,
   fallbackColor,
   active,
+  showBackground = true,
 }) => {
   const src = (propSrc ?? children ?? '').toString().trim();
+
+  const iconSrc = src.split('|');
+  const defaultIconSrc = iconSrc[0];
+  const activeIconSrc = iconSrc[1] || defaultIconSrc;
 
   const initialized = useAppStore((s) => s.iconInitialized);
   const iconNames = useAppStore((s) => s.iconNames);
@@ -56,7 +62,13 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
   }, [src, iconNames]);
 
   const { text, backgroundColor } = splitEmojiLink(
-    src,
+    defaultIconSrc,
+    fallbackColor,
+    iconType as 'emoji' | 'lucide' | 'img' | 'custom-icon',
+  );
+
+  const { text: activeText, backgroundColor: activeBackgroundColor } = splitEmojiLink(
+    activeIconSrc,
     fallbackColor,
     iconType as 'emoji' | 'lucide' | 'img' | 'custom-icon',
   );
@@ -85,7 +97,10 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
       {isUndefined(src) ? (
         <div className="h-full w-full" />
       ) : (
-        <div className="flex h-full w-full items-center justify-center" style={{ backgroundColor }}>
+        <div
+          className="flex h-full w-full items-center justify-center"
+          style={showBackground ? { backgroundColor } : {}}
+        >
           {iconType === 'img' && <VinesImage src={src} alt={alt} disabled={disabledPreview} />}
           {iconType === 'emoji' && emojiRenderer(text, { protocol: 'https', ext: '.png' })}
           {iconType === 'lucide' && (
@@ -111,7 +126,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
                 size === 'xs' && 'size-3',
               )}
             >
-              <VinesCustomIcon src={text} className={cn('size-full stroke-current text-black')} />
+              <VinesCustomIcon src={active ? activeText : text} className={cn('size-full stroke-current text-black')} />
             </div>
           )}
         </div>
