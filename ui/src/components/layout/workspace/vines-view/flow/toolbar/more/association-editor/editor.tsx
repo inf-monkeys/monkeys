@@ -138,7 +138,7 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
               }
             }}
           >
-            <AssociationEditorFields form={form} />
+            <AssociationEditorFields form={form} workflowId={workflowId} />
             <DialogFooter>
               <div className="flex items-center gap-2">
                 <Button ref={submitButtonRef} type="submit" variant="outline">

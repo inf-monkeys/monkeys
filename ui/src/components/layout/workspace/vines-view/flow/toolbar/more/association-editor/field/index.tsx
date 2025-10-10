@@ -17,9 +17,10 @@ import { FieldNewDesignDisplayName } from './new-design-display-name';
 
 interface IAssociationEditorFieldsProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowAssociationForEditor>;
+  workflowId: string;
 }
 
-export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = ({ form }) => {
+export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = ({ form, workflowId }) => {
   const type = form.watch('type');
   return (
     <div className="flex gap-global">
@@ -28,7 +29,7 @@ export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = 
           <FieldEnabled form={form} />
           <div className="flex justify-between gap-global">
             <FieldIconUrl form={form} />
-            <FieldPreferAppIdInput form={form} assetType="workflow-association" />
+            <FieldPreferAppIdInput form={form} assetType="workflow-association" workflowId={workflowId} />
           </div>
           <FieldDisplayName form={form} />
           <FieldDescription form={form} />

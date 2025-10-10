@@ -17,7 +17,6 @@ import { getI18nContent } from '@/utils';
 interface IFieldPreferAppIdPropsBase {
   displayName?: string | I18nValue;
   preferAppId?: string;
-  originWorkflowId?: string;
   type?: IWorkflowAssociationType;
   targetWorkflowId?: string;
 }
@@ -25,11 +24,13 @@ interface IFieldPreferAppIdPropsBase {
 interface IFieldPreferAppIdProps<T extends IFieldPreferAppIdPropsBase> extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<T>;
   assetType: AssetType;
+  workflowId?: string;
 }
 
 export const FieldPreferAppIdInput = <T extends IFieldPreferAppIdPropsBase>({
   form,
   assetType,
+  workflowId,
 }: IFieldPreferAppIdProps<T>) => {
   const { t } = useTranslation();
 
@@ -38,8 +39,8 @@ export const FieldPreferAppIdInput = <T extends IFieldPreferAppIdPropsBase>({
 
     if (assetType === 'workflow') {
       enDisplayName = getI18nContent(form.getValues('displayName' as Path<T>), '', 'en') ?? '';
-    } else if (assetType === 'workflow-association') {
-      const originWorkflow = await getWorkflow(form.getValues('originWorkflowId' as Path<T>) as string);
+    } else if (assetType === 'workflow-association' && workflowId) {
+      const originWorkflow = await getWorkflow(workflowId);
       if (form.getValues('type' as Path<T>) === 'to-workflow') {
         const targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
         enDisplayName =
