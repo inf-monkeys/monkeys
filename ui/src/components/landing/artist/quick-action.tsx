@@ -55,37 +55,18 @@ const RemoteSvg: React.FC<{
 
 // 在 QuickAction 组件中使用
 export const QuickAction: React.FC<{
-  iconUrl: string;
-  titleUrl: string;
-  subtitleUrl: string;
+  svgPath: string;
   key: string;
   onClick?: () => void;
-}> = ({ iconUrl, titleUrl, subtitleUrl, key, onClick }) => {
+}> = ({ svgPath, key, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  // 定义图标的颜色模式（使用正则替换）
-  const iconColorMode: ColorMode = {
+  // 定义SVG的颜色模式（使用正则替换）
+  const svgColorMode: ColorMode = {
     mode: 'regex',
     colors: {
       primary: isHovered ? '#B71E1E' : '#575757',
       secondary: isHovered ? '#8B0000' : '#151515',
-    },
-  };
-
-  // 定义文本的颜色模式（使用 fill 替换）
-  const titleColorMode: ColorMode = {
-    mode: 'fill',
-    colors: {
-      primary: isHovered ? '#8B0000' : 'white',
-      secondary: isHovered ? '#8B0000' : 'white',
-    },
-  };
-
-  const subtitleColorMode: ColorMode = {
-    mode: 'fill',
-    colors: {
-      primary: isHovered ? 'black' : 'white',
-      secondary: isHovered ? 'black' : 'white',
     },
   };
 
@@ -107,29 +88,13 @@ export const QuickAction: React.FC<{
         <ArrowUpRight size={40} color="#ffffff80" />
       </motion.div>
 
-      {/* 中间大图标 */}
-      <motion.div className="pointer-events-none absolute bottom-[80px] right-0 size-[150px]">
+      {/* 整个SVG内容 */}
+      <div className="pointer-events-none absolute inset-0">
         <RemoteSvg
-          url={iconUrl}
+          url={svgPath}
           className="h-full w-full"
-          colorMode={iconColorMode}
-          uniqueKey={key} // 传入唯一标识
-        />
-      </motion.div>
-
-      {/* 文本 */}
-      <div className="flex flex-col gap-3">
-        <RemoteSvg
-          url={titleUrl}
-          className="h-6"
-          colorMode={titleColorMode}
-          uniqueKey={`${key}-title`} // 为标题添加唯一标识
-        />
-        <RemoteSvg
-          url={subtitleUrl}
-          className="h-4"
-          colorMode={subtitleColorMode}
-          uniqueKey={`${key}-subtitle`} // 为副标题添加唯一标识
+          colorMode={svgColorMode}
+          uniqueKey={key}
         />
       </div>
     </motion.div>

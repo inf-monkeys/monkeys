@@ -39,6 +39,55 @@
     box-shadow: 0px 1.5px 0px 0px rgba(255, 255, 255, 0.5);
   }
 
+  .login-section {
+    display: flex;
+    align-items: center;
+  }
+
+  .login-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 500;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .user-avatar {
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    img {
+      transition: all 0.3s ease;
+    }
+
+    &:hover img {
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+  }
+
   .content-container {
     position: absolute;
     top: $head-bar-height;
@@ -102,12 +151,31 @@
     color: #FFFFFF;
     font-size: 26px;
     font-weight: 600;
-    box-shadow: inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25);
+    box-shadow:
+      inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25),
+      0 0 20px rgba(255, 255, 255, 0.3),
+      0 0 40px rgba(255, 255, 255, 0.2),
+      0 0 60px rgba(255, 255, 255, 0.1);
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 12px; // 图标和文字之间的间距
     margin-left: 10px; // 相对于slogan向右偏移10px (40px - 30px)
+    position: relative;
+
+    .button-icon-left {
+      color: #FFFFFF;
+      flex-shrink: 0; // 防止图标被压缩
+    }
+
+    .button-icon-right {
+      color: #FFFFFF;
+      flex-shrink: 0; // 防止图标被压缩
+      margin-left: 8px; // 增加右边图标与文字的距离
+      position: relative;
+      z-index: 1;
+    }
 
     // 响应式设计
     @media (max-width: 768px) {
@@ -115,12 +183,14 @@
       height: 70px;
       font-size: 24px;
       margin-left: 0;
+      gap: 10px;
     }
 
     @media (max-width: 480px) {
       width: 250px;
       height: 65px;
       font-size: 22px;
+      gap: 8px;
     }
   }
 
