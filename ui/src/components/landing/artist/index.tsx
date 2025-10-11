@@ -6,9 +6,9 @@ import '@/styles/landing/artist.scss';
 
 import { isAuthed } from '@/components/router/guard/auth';
 
+import { DynamicBackground } from './dynamic-background';
 import { HeadBar } from './headbar';
 import { QuickAction } from './quick-action';
-import { Rect } from './rect';
 
 export const ArtistLandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,26 +25,26 @@ export const ArtistLandingPage: React.FC = () => {
 
   return (
     <div className="artist-main-container">
+      {/* 全屏动态背景 */}
+      <DynamicBackground />
+      
       <HeadBar />
 
       <div className="content-container">
-        <div className="content-bg z-0">
-          <Rect />
-          <div className="absolute bottom-[220px] right-[130px]">
-            <Rect />
-          </div>
-        </div>
-
         <div className="content-content fixed z-10 flex flex-col">
-          <div className="center-content flex flex-1 flex-col items-center justify-center">
-            <div className="slogan cursor-default">Imagine it. Create it.</div>
+          <div className="slogan-section">
+            <img 
+              src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/icons/artist/home.svg" 
+              alt="slogan" 
+              className="slogan-icon"
+            />
             <div className="enter-button" onClick={handleToWorkbench}>
-              进入工作台
+              进入设计项目
             </div>
-            <div className="group">
-              <div className="rectangle"></div>
-              <div className="rectangle-1"></div>
-            </div>
+          </div>
+          
+          <div className="center-content flex flex-1 flex-col items-center justify-center">
+            {/* 内容区域 */}
           </div>
 
           <div className="flex h-[410px] w-full justify-between gap-[30px] p-[30px]">

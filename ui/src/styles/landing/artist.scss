@@ -2,8 +2,9 @@
 
   width: 100%;
   height: 100%;
-  background: url('https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/bg.jpg') no-repeat center center;
-  background-size: cover;
+  // 移除静态背景图片，使用动态背景
+  // background: url('https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/bg.jpg') no-repeat center center;
+  // background-size: cover;
 
   $head-bar-height: 100px;
 
@@ -23,24 +24,15 @@
     font-display: swap;
   }
 
-  .rect-group {
-    display: flex;
-    height: 483px;
-  }
-
-  .rect {
-    mix-blend-mode: overlay;
-    opacity: 0.8;
-    width: 45px;
-    height: 100%;
-    background: linear-gradient(90deg, #FFFFFF 1%, rgba(0, 0, 0, 0.35) 38%, #FFFFFF 100%);
-    background-blend-mode: overlay;
-    backdrop-filter: blur(45.5px);
-    box-shadow: inset 0px 0px 0px 0px rgba(0, 0, 0, 0.1);
-  }
+  // 移除Rect组件相关样式（毛玻璃效果已删除）
 
   .head-bar {
     height: $head-bar-height;
+    position: relative;
+    z-index: 20; // 确保headbar在背景之上
+    box-shadow: inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
   .head-bar-line {
@@ -66,6 +58,7 @@
     left: 0;
     right: 0;
     bottom: 0;
+    z-index: 10; // 确保内容在背景之上
   }
 
   .slogan {
@@ -76,54 +69,70 @@
     text-align: center;
   }
 
-  .quick-action {
-    background-color: rgba(255, 255, 255, 0.01);
-    backdrop-filter: blur(10px);
-    position: relative; // 添加相对定位
+  .slogan-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 50px 0 0 30px; // 顶部30px，左边30px
+    gap: 30px; // slogan和按钮之间的间距
 
-    &:hover {
-      background-color: rgba(255, 255, 255, 1);
+    // 响应式设计
+    @media (max-width: 768px) {
+      padding: 20px 0 0 20px;
+      gap: 25px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 15px 0 0 15px;
+      gap: 20px;
     }
   }
 
+  .slogan-icon {
+    max-width: none;
+    height: auto;
+    width: auto;
+  }
+
   .enter-button {
-    width: 200px;
-    height: 80px;
+    width: 308.26px;
+    height: 77px;
     border-radius: 15px;
-    background: linear-gradient(rgba(40, 82, 173, 0.08)), rgba(139, 0, 0, 1);
+    background: linear-gradient(103deg, #4D8F9D 0%, #416887 100%);
     color: #FFFFFF;
     font-size: 26px;
     font-weight: 600;
-    z-index: 10;
-    box-shadow: inset 4px 4px 4px 4px rgba(255, 255, 255, 0.1);
+    box-shadow: inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25);
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-  }
+    margin-left: 10px; // 相对于slogan向右偏移10px (40px - 30px)
 
-  .group {
-
-    .rectangle,
-    .rectangle-1 {
-      position: absolute;
-      translate: -50% -100%;
-      width: 200px;
-      height: 80px;
-      mix-blend-mode: plus-darker;
-      border-radius: 15px;
-      z-index: 1;
+    // 响应式设计
+    @media (max-width: 768px) {
+      width: 280px;
+      height: 70px;
+      font-size: 24px;
+      margin-left: 0;
     }
 
-    .rectangle {
-      filter: blur(15px);
-      background: linear-gradient(150deg, rgba(191, 131, 114, 1) 0%, rgba(107, 86, 50, 0.74) 50%, rgba(183, 66, 48, 1) 100%);
-    }
-
-    .rectangle-1 {
-      filter: blur(5px);
-      background: linear-gradient(172deg, rgba(254, 188, 169, 1) 0%, rgba(235, 172, 114, 0.38) 95%);
+    @media (max-width: 480px) {
+      width: 250px;
+      height: 65px;
+      font-size: 22px;
     }
   }
+
+  .quick-action {
+    background-color: transparent;
+    position: relative; // 添加相对定位
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  // 移除按钮装饰性毛玻璃效果
 
 }
