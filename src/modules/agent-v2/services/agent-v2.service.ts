@@ -81,6 +81,81 @@ export class AgentV2Service {
     return context;
   }
 
+  // Attach SSE callbacks to an existing session and ensure processing is active
+  public async attachToSessionStream(
+    sessionId: string,
+    userId: string,
+    onMessage: (chunk: string) => void,
+    onToolCall: (toolCalls: any[]) => void,
+    onToolResult: (tool: any, result: any) => void,
+    onComplete: (finalMessage: string) => void,
+    onError: (error: Error) => void,
+    onFollowupQuestion?: (question: string, suggestions?: Array<{ answer: string; mode?: string }>) => Promise<string>,
+    initialMessage?: string,
+  ): Promise<AgentV2PersistentExecutionContext> {
+    // If already active, just rebind callbacks
+    const existing = this.activeContexts.get(sessionId);
+    if (existing) {
+      existing.onMessage = onMessage;
+      existing.onToolCall = onToolCall;
+      existing.onToolResult = onToolResult;
+      existing.onFollowupQuestion = onFollowupQuestion;
+      existing.onComplete = (finalMessage: string) => {
+        onComplete(finalMessage);
+      };
+      existing.onError = (error: Error) => {
+        this.activeContexts.delete(sessionId);
+        onError(error);
+      };
+
+      // Optionally queue an initial message
+      if (initialMessage) {
+        await this.submitUserMessage(sessionId, initialMessage, userId);
+      }
+
+      return existing;
+    }
+
+    // Need to construct a new execution context for this session
+    const session = await this.repository.findSessionById(sessionId);
+    if (!session) {
+      throw new Error(`Session ${sessionId} not found`);
+    }
+    const agent = await this.repository.findAgentById(session.agentId);
+    if (!agent) {
+      throw new Error(`Agent ${session.agentId} not found`);
+    }
+
+    const context = new AgentV2PersistentExecutionContext(agent, session, this.repository, this.llmService, this.agentToolsService, this.taskManager, this.taskStateManager);
+
+    this.activeContexts.set(session.id, context);
+
+    context.onMessage = onMessage;
+    context.onToolCall = onToolCall;
+    context.onToolResult = onToolResult;
+    context.onFollowupQuestion = onFollowupQuestion;
+    context.onComplete = (finalMessage: string) => {
+      onComplete(finalMessage);
+    };
+    context.onError = (error: Error) => {
+      this.activeContexts.delete(session.id);
+      onError(error);
+    };
+
+    // Start/resume processing loop
+    await context.resumeProcessing();
+
+    // Optionally queue an initial message for this attached stream
+    if (initialMessage) {
+      await this.submitUserMessage(sessionId, initialMessage, userId);
+    }
+
+    // Log attach event
+    this.logger.log(`Attached streaming to session ${sessionId}`);
+
+    return context;
+  }
+
   // Single message submission method - works for any session state
   public async submitUserMessage(sessionId: string, message: string, senderId: string = 'user'): Promise<void> {
     // Check if there's an active context

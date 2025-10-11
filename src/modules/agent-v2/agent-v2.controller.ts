@@ -31,6 +31,11 @@ export class ContinueSessionDto {
   message: string;
 }
 
+// Continue SSE streaming for an existing session (optional first message)
+export class StreamSessionDto {
+  message?: string;
+}
+
 export class ListAgentsQuery {
   page?: number = 1;
   limit?: number = 10;
@@ -408,47 +413,291 @@ export class AgentV2Controller {
 
     try {
       // Set SSE headers with proper encoding
+      res.status(200);
       res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
 
-      // TODO: Implement continue session logic in service
-      // For now, we'll simulate a response
-      res.write(`event: session_continue\n`);
+      // Send initial connection confirmation
+      res.write(`event: session_start\n`);
       res.write(
         `data: ${JSON.stringify({
-          type: 'session_continue',
-          sessionId: sessionId,
-          message: 'Session continuation started',
+          type: 'session_start',
+          message: 'SSE connection established',
+          timestamp: new Date().toISOString(),
         })}\n\n`,
+        'utf8',
       );
 
-      // Simulate processing the message
-      res.write(`event: message\n`);
-      res.write(
-        `data: ${JSON.stringify({
-          type: 'message_chunk',
-          content: `Processing your message: "${continueSessionDto.message}"...`,
-        })}\n\n`,
+      let isConnected = true;
+      const cleanup = () => {
+        isConnected = false;
+      };
+      res.on('close', cleanup);
+      res.on('finish', cleanup);
+      res.on('error', cleanup);
+
+      const context = await this.agentService.attachToSessionStream(
+        sessionId,
+        userId,
+        (chunk: string) => {
+          if (isConnected) {
+            const data = JSON.stringify({ type: 'message_chunk', content: chunk, timestamp: new Date().toISOString() });
+            res.write(`event: message\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+          }
+        },
+        (toolCalls: any[]) => {
+          if (isConnected) {
+            const data = JSON.stringify({ type: 'tool_calls', toolCalls, timestamp: new Date().toISOString() });
+            res.write(`event: tool_calls\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+          }
+        },
+        (tool: any, result: any) => {
+          if (isConnected) {
+            const data = JSON.stringify({
+              type: 'tool_result',
+              tool: { id: tool.id, name: tool.name, params: tool.params },
+              result: { success: result.success, output: result.output, error: result.error },
+              timestamp: new Date().toISOString(),
+            });
+            res.write(`event: tool_result\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+          }
+        },
+        (finalMessage: string) => {
+          if (isConnected) {
+            const data = JSON.stringify({
+              type: 'response_complete',
+              message: finalMessage,
+              sessionId: context.session.id,
+              timestamp: new Date().toISOString(),
+            });
+            res.write(`event: response_complete\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+          }
+        },
+        (error: Error) => {
+          if (isConnected) {
+            const data = JSON.stringify({ type: 'error', error: error.message, timestamp: new Date().toISOString() });
+            res.write(`event: error\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+            res.end();
+          }
+        },
+        async (question: string, suggestions?: Array<{ answer: string; mode?: string }>) => {
+          return new Promise<string>((resolve, reject) => {
+            if (!isConnected) {
+              reject(new Error('Connection lost'));
+              return;
+            }
+            const questionData = JSON.stringify({
+              type: 'followup_question',
+              question,
+              suggestions,
+              sessionId: context.session.id,
+              timestamp: new Date().toISOString(),
+            });
+            res.write(`event: followup_question\n`);
+            res.write(`data: ${questionData}\n\n`, 'utf8');
+            this.agentService.storeFollowupQuestionResolver(context.session.id, resolve);
+          });
+        },
+        continueSessionDto?.message,
       );
 
-      // Complete the stream
-      setTimeout(() => {
-        res.write(`event: complete\n`);
-        res.write(
-          `data: ${JSON.stringify({
-            type: 'complete',
-            message: `Response to: ${continueSessionDto.message}`,
-            sessionId: sessionId,
-          })}\n\n`,
-        );
-        res.end();
-      }, 1000);
+      // Send session metadata
+      if (isConnected) {
+        const sessionMetaData = JSON.stringify({
+          type: 'session_metadata',
+          sessionId: context.session.id,
+          agentId: context.agent.id,
+          message: 'Attached to existing session stream',
+          timestamp: new Date().toISOString(),
+        });
+        res.write(`event: session_metadata\n`);
+        res.write(`data: ${sessionMetaData}\n\n`, 'utf8');
+      }
+
+      const heartbeat = setInterval(() => {
+        if (isConnected) {
+          try {
+            res.write(`event: heartbeat\n`);
+            res.write(`data: ${JSON.stringify({ type: 'heartbeat', timestamp: new Date().toISOString() })}\n\n`, 'utf8');
+          } catch (error) {
+            clearInterval(heartbeat);
+            isConnected = false;
+          }
+        } else {
+          clearInterval(heartbeat);
+        }
+      }, 30000);
+
+      res.on('close', () => {
+        clearInterval(heartbeat);
+        isConnected = false;
+      });
     } catch (error) {
       res.write(`event: error\n`);
-      res.write(`data: ${JSON.stringify({ type: 'error', error: error.message })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'error', error: error.message, timestamp: new Date().toISOString() })}\n\n`, 'utf8');
+      res.end();
+    }
+  }
+
+  @Post('sessions/:sessionId/stream')
+  @ApiOperation({ summary: 'Continue an existing session with streaming response' })
+  @ApiResponse({ status: 200, description: 'Streaming attached to existing session' })
+  async streamExistingSession(@Request() req: IRequest, @Param('sessionId') sessionId: string, @Body() body: StreamSessionDto, @Res() res: Response) {
+    const { teamId, userId } = req;
+
+    const session = await this.agentRepository.findSessionById(sessionId);
+    if (!session) {
+      return res.status(404).json({ success: false, error: 'Session not found' });
+    }
+
+    // Check session belongs to user and agent belongs to team
+    const agent = await this.agentRepository.findAgentById(session.agentId);
+    if (!agent || agent.teamId !== teamId || session.userId !== userId) {
+      return res.status(403).json({ success: false, error: 'Access denied: Session not accessible' });
+    }
+
+    try {
+      // Set SSE headers
+      res.status(200);
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
+
+      // Initial event
+      res.write(`event: session_start\n`);
+      res.write(
+        `data: ${JSON.stringify({
+          type: 'session_start',
+          message: 'SSE connection established',
+          timestamp: new Date().toISOString(),
+        })}\n\n`,
+        'utf8',
+      );
+
+      let isConnected = true;
+      const cleanup = () => {
+        isConnected = false;
+      };
+      res.on('close', cleanup);
+      res.on('finish', cleanup);
+      res.on('error', cleanup);
+
+      // Attach stream to existing session (and optionally queue first message)
+      const context = await this.agentService.attachToSessionStream(
+        sessionId,
+        userId,
+        (chunk: string) => {
+          if (isConnected) {
+            const data = JSON.stringify({ type: 'message_chunk', content: chunk, timestamp: new Date().toISOString() });
+            res.write(`event: message\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+          }
+        },
+        (toolCalls: any[]) => {
+          if (isConnected) {
+            const data = JSON.stringify({ type: 'tool_calls', toolCalls, timestamp: new Date().toISOString() });
+            res.write(`event: tool_calls\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+          }
+        },
+        (tool: any, result: any) => {
+          if (isConnected) {
+            const data = JSON.stringify({
+              type: 'tool_result',
+              tool: { id: tool.id, name: tool.name, params: tool.params },
+              result: { success: result.success, output: result.output, error: result.error },
+              timestamp: new Date().toISOString(),
+            });
+            res.write(`event: tool_result\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+          }
+        },
+        (finalMessage: string) => {
+          if (isConnected) {
+            const data = JSON.stringify({
+              type: 'response_complete',
+              message: finalMessage,
+              sessionId: context.session.id,
+              timestamp: new Date().toISOString(),
+            });
+            res.write(`event: response_complete\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+          }
+        },
+        (error: Error) => {
+          if (isConnected) {
+            const data = JSON.stringify({ type: 'error', error: error.message, timestamp: new Date().toISOString() });
+            res.write(`event: error\n`);
+            res.write(`data: ${data}\n\n`, 'utf8');
+            res.end();
+          }
+        },
+        async (question: string, suggestions?: Array<{ answer: string; mode?: string }>) => {
+          return new Promise<string>((resolve, reject) => {
+            if (!isConnected) {
+              reject(new Error('Connection lost'));
+              return;
+            }
+            const questionData = JSON.stringify({
+              type: 'followup_question',
+              question,
+              suggestions,
+              sessionId: context.session.id,
+              timestamp: new Date().toISOString(),
+            });
+            res.write(`event: followup_question\n`);
+            res.write(`data: ${questionData}\n\n`, 'utf8');
+            this.agentService.storeFollowupQuestionResolver(context.session.id, resolve);
+          });
+        },
+        body?.message,
+      );
+
+      // Session metadata
+      if (isConnected) {
+        const sessionMetaData = JSON.stringify({
+          type: 'session_metadata',
+          sessionId: context.session.id,
+          agentId: context.agent.id,
+          message: 'Attached to existing session stream',
+          timestamp: new Date().toISOString(),
+        });
+        res.write(`event: session_metadata\n`);
+        res.write(`data: ${sessionMetaData}\n\n`, 'utf8');
+      }
+
+      // Heartbeat
+      const heartbeat = setInterval(() => {
+        if (isConnected) {
+          try {
+            res.write(`event: heartbeat\n`);
+            res.write(`data: ${JSON.stringify({ type: 'heartbeat', timestamp: new Date().toISOString() })}\n\n`, 'utf8');
+          } catch (error) {
+            clearInterval(heartbeat);
+            isConnected = false;
+          }
+        } else {
+          clearInterval(heartbeat);
+        }
+      }, 30000);
+
+      res.on('close', () => {
+        clearInterval(heartbeat);
+        isConnected = false;
+      });
+    } catch (error) {
+      res.write(`event: error\n`);
+      res.write(`data: ${JSON.stringify({ type: 'error', error: error.message, timestamp: new Date().toISOString() })}\n\n`, 'utf8');
       res.end();
     }
   }
