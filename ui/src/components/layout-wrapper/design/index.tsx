@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Outlet } from '@tanstack/react-router';
 
-import { get } from 'lodash';
+import { get, isString } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
@@ -16,10 +16,16 @@ export const DesignLayout: React.FC = () => {
 
   const background = get(oem, 'theme.background', undefined) as ISystemConfig['theme']['background'];
 
+  const isBackgroundUrl = isString(background) && background.startsWith('http');
+
   return (
     <main
       className={cn('flex size-full flex-col gap-global p-global')}
-      style={background ? { background: `url(${background}) no-repeat center center / cover` } : {}}
+      style={
+        background
+          ? { background: isBackgroundUrl ? `url(${background}) no-repeat center center / cover` : background }
+          : {}
+      }
     >
       <SpaceHeader>
         <DesignProjectInfoCard />

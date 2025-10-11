@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react';
 
 import { Outlet, useRouterState } from '@tanstack/react-router';
 
-import { get } from 'lodash';
+import { get, isString } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
@@ -51,10 +51,16 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
     oem &&
     (!oem.theme.headbar || oem.theme.headbar.actions === '*' || oem.theme.headbar.actions?.includes('team-selector'));
 
+  const isBackgroundUrl = isString(background) && background.startsWith('http');
+
   return (
     <ViewGuard
       className={cn('flex flex-col gap-global', backgroundClass)}
-      style={background ? { background: `url(${background}) no-repeat center center / cover` } : {}}
+      style={
+        background
+          ? { background: isBackgroundUrl ? `url(${background}) no-repeat center center / cover` : background }
+          : {}
+      }
     >
       <SpaceHeader tail={showTeamSelector ? <TeamSelector /> : undefined} disableSeparator>
         <SpaceHeaderTabs />
