@@ -108,15 +108,19 @@ export interface IAgentV2ContextUsageResponse {
 
 // API functions
 export const useAgentV2SessionStatus = (sessionId?: string) => {
+  const key = sessionId ? `/api/agent-v2/sessions/${sessionId}/status` : 'agentv2-session-status:disabled';
   return useSWR<IAgentV2SessionStatus | undefined>(
-    sessionId ? `/api/agent-v2/sessions/${sessionId}/status` : null,
+    key,
     (url) =>
-      vinesFetcher<{ success: boolean; data: IAgentV2SessionStatus }>()(url).then((response) =>
-        response?.success ? response.data : undefined,
-      ),
+      sessionId
+        ? vinesFetcher<{ success: boolean; data: IAgentV2SessionStatus }>()(url).then((response) =>
+            response?.success ? response.data : undefined,
+          )
+        : Promise.resolve(undefined),
     {
-      refreshInterval: 10000, // 每10秒轮询一次
-      revalidateOnFocus: true,
+      refreshInterval: sessionId ? 10000 : 0, // 每10秒轮询一次，仅在有sessionId时
+      revalidateOnFocus: !!sessionId,
+      isPaused: () => !sessionId, // 明确暂停
     },
   );
 };

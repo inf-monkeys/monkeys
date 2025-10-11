@@ -43,10 +43,13 @@ export const useAgentV2Chat = (
   const [followupQuestion, setFollowupQuestion] = useState<IFollowupQuestion>();
   const [messages, setMessages] = useState<IAgentV2ChatMessage[]>([]);
 
-  // EventSource reference
+  // EventSource reference (legacy, kept for compatibility)
   const eventSourceRef = useRef<EventSource>();
+  // Abort controller for current fetch stream
+  const streamAbortRef = useRef<AbortController>();
   const messageQueueRef = useRef<string[]>([]);
   const currentSessionIdRef = useRef<string>();
+  const creatingSessionRef = useRef<boolean>(false);
 
   // 确定要使用的sessionId：优先使用外部传入的，否则使用内部创建的
   const effectiveSessionId = externalSessionId || sessionId;
@@ -61,46 +64,117 @@ export const useAgentV2Chat = (
 
   // 当外部sessionId变化时，清空消息并重置状态
   const prevExternalSessionIdRef = useRef<string | undefined>();
+  const lastStorageValueRef = useRef<any>();
 
   useEffect(() => {
-    // 只在 externalSessionId 真正改变时才处理（排除初始化和相同值）
-    if (externalSessionId === prevExternalSessionIdRef.current) {
-      return;
-    }
-
     const prevSessionId = prevExternalSessionIdRef.current;
     prevExternalSessionIdRef.current = externalSessionId;
 
-    // 如果是初始化（undefined -> ''），不做任何处理
-    if (prevSessionId === undefined && externalSessionId === '') {
-      setSessionId(externalSessionId);
+    // 新建对话：每次点击“新建对话”都会把 externalSessionId 设为 ''。
+    // 即使与上一次相同（都是 ''），也需要重置内部会话状态，
+    // 以便下一条消息创建全新的会话。
+    if (externalSessionId === '') {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+      if (streamAbortRef.current) {
+        streamAbortRef.current.abort();
+        streamAbortRef.current = undefined;
+      }
+      setIsConnected(false);
+      setIsLoading(false);
+      setConnectionError(undefined);
+
+      setMessages([]);
+      setFollowupQuestion(undefined);
+      setSessionId(undefined);
+      currentSessionIdRef.current = undefined;
+      creatingSessionRef.current = false;
       return;
     }
 
-    // 关闭现有连接
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      setIsConnected(false);
+    // 其余情况：仅在外部 session 确实发生变化时处理
+    if (externalSessionId === prevSessionId) {
+      return;
     }
 
-    // 判断是否切换了session（任何情况的切换都需要清空消息）
-    const isSessionChanged = prevSessionId !== externalSessionId;
+    // 关闭现有连接并重置连接状态
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+    if (streamAbortRef.current) {
+      streamAbortRef.current.abort();
+      streamAbortRef.current = undefined;
+    }
+    setIsConnected(false);
 
-    // 切换session时清空消息和状态
-    if (isSessionChanged && prevSessionId !== undefined) {
+    // 切换 session 时清空消息和状态
+    if (prevSessionId !== undefined) {
       setMessages([]);
       setFollowupQuestion(undefined);
       setConnectionError(undefined);
     }
 
-    // 更新sessionId为外部提供的ID
+    // 更新内部 sessionId 显示（用于历史消息加载）
     setSessionId(externalSessionId);
-
-    // 如果是新建对话（空字符串），重置内部session引用
-    if (externalSessionId === '') {
-      currentSessionIdRef.current = undefined;
-    }
   }, [externalSessionId]);
+
+  // 监听全局 localStorage 事件，确保“新建对话”即使重复点击也会触发重置
+  useEffect(() => {
+    const handler = (event: any) => {
+      try {
+        if (!event?.detail) return;
+        const { key, value } = event.detail || {};
+        if (key !== 'vines-ui-chat-session') return;
+
+        // 仅当该 agentId 相关的会话选择被更新时处理
+        const mapped = value || {};
+        const target = mapped[agentId];
+        lastStorageValueRef.current = mapped;
+
+        if (target === '') {
+          // 明确“新建对话”：无论 externalSessionId 是否变化，都强制重置一次
+          if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+          }
+          if (streamAbortRef.current) {
+            streamAbortRef.current.abort();
+            streamAbortRef.current = undefined;
+          }
+          setIsConnected(false);
+          setIsLoading(false);
+          setConnectionError(undefined);
+          setMessages([]);
+          setFollowupQuestion(undefined);
+          setSessionId(undefined);
+          currentSessionIdRef.current = undefined;
+          creatingSessionRef.current = false;
+        } else if (typeof target === 'string' && target) {
+          // 切换到指定历史会话：清理流并设置内部 sessionId（用于加载历史）
+          if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+          }
+          if (streamAbortRef.current) {
+            streamAbortRef.current.abort();
+            streamAbortRef.current = undefined;
+          }
+          setIsConnected(false);
+          setIsLoading(false);
+          setConnectionError(undefined);
+          setMessages([]);
+          setFollowupQuestion(undefined);
+          setSessionId(target);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    window.addEventListener('mantine-local-storage', handler as any);
+    return () => window.removeEventListener('mantine-local-storage', handler as any);
+  }, [agentId]);
+
+  // 不在选择会话时自动建立 SSE，等待用户发送消息再建立。
 
   // 更新消息列表
   useEffect(() => {
@@ -138,101 +212,11 @@ export const useAgentV2Chat = (
     }
   }, [messagesResponse]);
 
-  // 建立 SSE 连接
-  const establishConnection = useCallback(async (agentId: string, initialMessage: string) => {
-    try {
-      setConnectionError(undefined);
-      setIsLoading(true);
-
-      // 关闭现有连接
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
-
-      const teamId = getVinesTeamId();
-      const token = getVinesToken();
-
-      if (!token) {
-        throw new Error('No authentication token available');
-      }
-
-      // 使用 fetch 来发起 POST 请求，然后处理 SSE 响应
-      const response = await fetch(`/api/agent-v2/${agentId}/sessions/stream`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-          ...(teamId && { 'x-monkeys-teamid': teamId }),
-          Accept: 'text/event-stream',
-          'Cache-Control': 'no-cache',
-        },
-        body: JSON.stringify({ initialMessage }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      // 创建 EventSource 来处理流式响应
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (!reader) {
-        throw new Error('No response body available');
-      }
-
-      setIsConnected(true);
-
-      // 处理流式数据
-      const processStream = async () => {
-        try {
-          // eslint-disable-next-line no-constant-condition
-          while (true) {
-            const { done, value } = await reader.read();
-
-            if (done) {
-              break;
-            }
-
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
-
-            for (const line of lines) {
-              if (line.trim() === '') continue;
-
-              if (line.startsWith('event:')) {
-                // Skip event type lines
-                continue;
-              }
-
-              if (line.startsWith('data:')) {
-                const dataStr = line.substring(5).trim();
-
-                try {
-                  const data = JSON.parse(dataStr);
-                  handleSSEEvent(data);
-                } catch (parseError) {
-                  /* empty */
-                }
-              }
-            }
-          }
-        } catch (streamError) {
-          setConnectionError(streamError instanceof Error ? streamError : new Error('Stream error'));
-          setIsConnected(false);
-        }
-      };
-
-      processStream();
-    } catch (error) {
-      setConnectionError(error instanceof Error ? error : new Error('Connection failed'));
-      setIsConnected(false);
-      setIsLoading(false);
-    }
-  }, []);
-
-  // 处理 SSE 事件
+  // 处理 SSE 事件（放在前面，供下方回调依赖）
   const handleSSEEvent = useCallback((data: any) => {
+    if (!data || !data.type) {
+      return;
+    }
     switch (data.type) {
       case 'session_start':
         break;
@@ -240,6 +224,7 @@ export const useAgentV2Chat = (
       case 'session_metadata':
         setSessionId(data.sessionId);
         currentSessionIdRef.current = data.sessionId;
+        creatingSessionRef.current = false;
 
         // 处理排队的消息
         if (messageQueueRef.current.length > 0) {
@@ -258,9 +243,13 @@ export const useAgentV2Chat = (
           const lastMessage = prev[prev.length - 1];
 
           // 检查最后一条消息是否是思考类型的流式消息
-          if (lastMessage?.role === 'assistant' && lastMessage.isStreaming && lastMessage.messageType === 'thinking') {
+          if (
+            lastMessage?.role === 'assistant' &&
+            lastMessage.isStreaming &&
+            (lastMessage as any).messageType === 'thinking'
+          ) {
             // 更新现有的思考消息
-            return [...prev.slice(0, -1), { ...lastMessage, content: lastMessage.content + data.content }];
+            return [...prev.slice(0, -1), { ...lastMessage, content: (lastMessage.content || '') + data.content }];
           } else {
             // 创建新的思考消息气泡
             return [
@@ -286,14 +275,14 @@ export const useAgentV2Chat = (
             const newMessages: IAgentV2ChatMessage[] = [];
 
             // 为每个工具调用创建独立的消息气泡
-            toolCalls.forEach((toolCall) => {
+            toolCalls.forEach((toolCall: any) => {
               const newMessage: IAgentV2ChatMessage = {
                 id: nanoIdLowerCase(),
                 role: 'assistant' as const,
-                content: '', // 移除前端添加的文字，让ai-elements组件处理显示
+                content: '', // 交由 ai-elements 组件处理显示
                 createdAt: new Date(),
                 isStreaming: true,
-                messageType: 'tool_call', // 标记为工具调用类型
+                messageType: 'tool_call',
                 toolCalls: [toolCall],
               };
               newMessages.push(newMessage);
@@ -315,10 +304,10 @@ export const useAgentV2Chat = (
               const finalMessage: IAgentV2ChatMessage = {
                 id: nanoIdLowerCase(),
                 role: 'assistant' as const,
-                content: result.output, // 直接使用 result 作为消息内容
+                content: result.output,
                 createdAt: new Date(),
                 isStreaming: false,
-                messageType: 'final_response', // 标记为最终回复类型
+                messageType: 'final_response',
               };
 
               return [...prev, finalMessage];
@@ -328,10 +317,10 @@ export const useAgentV2Chat = (
             const newMessage: IAgentV2ChatMessage = {
               id: nanoIdLowerCase(),
               role: 'assistant' as const,
-              content: '', // 移除前端添加的文字，让ai-elements组件处理显示
+              content: '',
               createdAt: new Date(),
-              isStreaming: false, // 工具结果是完整的，不需要流式更新
-              messageType: 'tool_result', // 标记为工具结果类型
+              isStreaming: false,
+              messageType: 'tool_result',
               toolCalls: [
                 {
                   id: tool.id,
@@ -349,19 +338,18 @@ export const useAgentV2Chat = (
       }
 
       case 'tool_use':
-        // 保持对旧格式的兼容性
+        // 兼容旧格式（如果有）
         if (data.name === 'update_todo_list' && data.params?.todos) {
           setMessages((prev) => {
             const lastMessage = prev[prev.length - 1];
+            const todoUpdateXml = `<update_todo_list><todos>${data.params.todos}</todos></update_todo_list>`;
 
             if (lastMessage?.role === 'assistant' && lastMessage.isStreaming) {
-              const todoUpdateXml = `<update_todo_list><todos>${data.params.todos}</todos></update_todo_list>`;
-
               return [
                 ...prev.slice(0, -1),
                 {
                   ...lastMessage,
-                  content: lastMessage.content + todoUpdateXml,
+                  content: (lastMessage.content || '') + todoUpdateXml,
                   toolCalls: [
                     ...(lastMessage.toolCalls || []),
                     {
@@ -373,8 +361,6 @@ export const useAgentV2Chat = (
                 },
               ];
             } else {
-              const todoUpdateXml = `<update_todo_list><todos>${data.params.todos}</todos></update_todo_list>`;
-
               return [
                 ...prev,
                 {
@@ -406,12 +392,8 @@ export const useAgentV2Chat = (
 
       case 'response_complete':
         setIsLoading(false);
-
-        // 标记所有流式消息完成，并创建最终总结消息气泡（如果有内容的话）
         setMessages((prev) => {
-          const updatedMessages = prev.map((msg) => (msg.isStreaming ? { ...msg, isStreaming: false } : msg));
-
-          // 如果有最终的总结内容，创建总结消息气泡
+          const updated = prev.map((msg) => (msg.isStreaming ? { ...msg, isStreaming: false } : msg));
           if (data.finalContent) {
             const summaryMessage: IAgentV2ChatMessage = {
               id: nanoIdLowerCase(),
@@ -419,13 +401,11 @@ export const useAgentV2Chat = (
               content: data.finalContent,
               createdAt: new Date(),
               isStreaming: false,
-              messageType: 'summary', // 标记为总结类型
+              messageType: 'summary',
             };
-
-            return [...updatedMessages, summaryMessage];
+            return [...updated, summaryMessage];
           }
-
-          return updatedMessages;
+          return updated;
         });
         break;
 
@@ -441,14 +421,192 @@ export const useAgentV2Chat = (
         break;
 
       case 'heartbeat':
-        // 显示心跳事件，不过滤
-        console.log('收到心跳事件:', data);
         break;
 
       default:
         break;
     }
   }, []);
+
+  // 建立新会话的 SSE 连接（创建会话并流式响应）
+  const establishConnection = useCallback(
+    async (agentId: string, initialMessage: string) => {
+      try {
+        setConnectionError(undefined);
+        setIsLoading(true);
+        creatingSessionRef.current = true;
+
+        // 关闭现有连接
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+        }
+
+        const teamId = getVinesTeamId();
+        const token = getVinesToken();
+
+        if (!token) {
+          throw new Error('No authentication token available');
+        }
+
+        // 使用 fetch 来发起 POST 请求，然后处理 SSE 响应
+        // Start new fetch stream with abort support
+        const controller = new AbortController();
+        streamAbortRef.current = controller;
+        const response = await fetch(`/api/agent-v2/${agentId}/sessions/stream`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            ...(teamId && { 'x-monkeys-teamid': teamId }),
+            Accept: 'text/event-stream',
+            'Cache-Control': 'no-cache',
+          },
+          body: JSON.stringify({ initialMessage }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        // 创建 EventSource 来处理流式响应
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) {
+          throw new Error('No response body available');
+        }
+
+        setIsConnected(true);
+
+        // 处理流式数据
+        const processStream = async () => {
+          try {
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+              const { done, value } = await reader.read();
+
+              if (done) {
+                break;
+              }
+
+              const chunk = decoder.decode(value);
+              const lines = chunk.split('\n');
+
+              for (const line of lines) {
+                if (line.trim() === '') continue;
+
+                if (line.startsWith('event:')) {
+                  // Skip event type lines
+                  continue;
+                }
+
+                if (line.startsWith('data:')) {
+                  const dataStr = line.substring(5).trim();
+
+                  try {
+                    const data = JSON.parse(dataStr);
+                    handleSSEEvent(data);
+                  } catch (parseError) {
+                    /* empty */
+                  }
+                }
+              }
+            }
+          } catch (streamError) {
+            setConnectionError(streamError instanceof Error ? streamError : new Error('Stream error'));
+            setIsConnected(false);
+          }
+        };
+
+        processStream();
+      } catch (error) {
+        setConnectionError(error instanceof Error ? error : new Error('Connection failed'));
+        setIsConnected(false);
+        setIsLoading(false);
+      }
+    },
+    [handleSSEEvent],
+  );
+
+  // 连接到已有会话的 SSE（可选：携带一条首消息）
+  const attachSessionStream = useCallback(
+    async (sessionId: string, firstMessage?: string) => {
+      try {
+        setConnectionError(undefined);
+        if (firstMessage) setIsLoading(true);
+
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+        }
+
+        const teamId = getVinesTeamId();
+        const token = getVinesToken();
+        if (!token) throw new Error('No authentication token available');
+
+        // Start continuation fetch stream with abort support
+        const controller = new AbortController();
+        streamAbortRef.current = controller;
+        const response = await fetch(`/api/agent-v2/sessions/${sessionId}/continue/stream`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            ...(teamId && { 'x-monkeys-teamid': teamId }),
+            Accept: 'text/event-stream',
+            'Cache-Control': 'no-cache',
+          },
+          body: JSON.stringify(firstMessage ? { message: firstMessage } : {}),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        if (!reader) throw new Error('No response body available');
+
+        setIsConnected(true);
+
+        const processStream = async () => {
+          try {
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              const chunk = decoder.decode(value);
+              const lines = chunk.split('\n');
+              for (const line of lines) {
+                if (line.trim() === '') continue;
+                if (line.startsWith('event:')) continue;
+                if (line.startsWith('data:')) {
+                  const dataStr = line.substring(5).trim();
+                  try {
+                    const data = JSON.parse(dataStr);
+                    handleSSEEvent(data);
+                  } catch {
+                    /* empty */
+                  }
+                }
+              }
+            }
+          } catch (streamError) {
+            setConnectionError(streamError instanceof Error ? streamError : new Error('Stream error'));
+            setIsConnected(false);
+          }
+        };
+
+        processStream();
+      } catch (error) {
+        setConnectionError(error instanceof Error ? error : new Error('Connection failed'));
+        setIsConnected(false);
+        setIsLoading(false);
+      }
+    },
+    [handleSSEEvent],
+  );
 
   // 发送消息
   const sendMessage = useCallback(
@@ -478,22 +636,42 @@ export const useAgentV2Chat = (
 
       // 判断当前使用哪个 session 或是否需要创建新 session
       // 逻辑：
-      // 1. 如果有外部 session（非空字符串），使用外部 session
-      // 2. 如果有内部 session，继续使用内部 session
-      // 3. 否则创建新 session
+      // 1. externalSessionId === '' 明确为“新建对话” → 强制创建新会话
+      // 2. 如果有外部 session（非空字符串），使用外部 session
+      // 3. 如果有内部 session，继续使用内部 session
+      // 4. 否则创建新 session
 
-      if (externalSessionId && externalSessionId !== '') {
+      if (externalSessionId === '') {
+        // 明确新建对话：忽略任何现有的内部会话引用
+        creatingSessionRef.current = creatingSessionRef.current || false;
+        currentSessionIdRef.current = undefined;
+        if (!creatingSessionRef.current) {
+          await establishConnection(agentId, content);
+        } else {
+          messageQueueRef.current.push(content);
+        }
+      } else if (externalSessionId && externalSessionId !== '') {
         // 情况1: 有明确的外部 session（从列表点击的）
-        await sendMessageToSession(externalSessionId, content);
+        // 如果尚未连接SSE，则使用续接SSE接口并携带首条消息；否则走消息接口
+        if (!isConnected) {
+          await attachSessionStream(externalSessionId, content);
+        } else {
+          await sendMessageToSession(externalSessionId, content);
+        }
       } else if (currentSessionIdRef.current) {
         // 情况2: 有内部创建的 session，继续使用
         await sendMessageToSession(currentSessionIdRef.current, content);
       } else {
         // 情况3: 创建新 session（首次对话或用户点击新建对话后）
-        await establishConnection(agentId, content);
+        if (!creatingSessionRef.current) {
+          await establishConnection(agentId, content);
+        } else {
+          // 正在创建会话，排队消息等待 session_metadata 到达后发送
+          messageQueueRef.current.push(content);
+        }
       }
     },
-    [agentId, externalSessionId, establishConnection],
+    [agentId, externalSessionId, establishConnection, isConnected, attachSessionStream],
   );
 
   // 回答 followup 问题
@@ -518,6 +696,10 @@ export const useAgentV2Chat = (
       eventSourceRef.current.close();
       eventSourceRef.current = undefined;
     }
+    if (streamAbortRef.current) {
+      streamAbortRef.current.abort();
+      streamAbortRef.current = undefined;
+    }
 
     setIsConnected(false);
     setIsLoading(false);
@@ -539,6 +721,10 @@ export const useAgentV2Chat = (
     return () => {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
+      }
+      if (streamAbortRef.current) {
+        streamAbortRef.current.abort();
+        streamAbortRef.current = undefined;
       }
     };
   }, []);
