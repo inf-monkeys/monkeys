@@ -120,6 +120,9 @@ const TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyImport = createFileRoute(
 const TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyImport = createFileRoute(
   '/$teamId/workspace/$workflowId/$pageId/view-iframe',
 )()
+const TeamIdNavNavIdAssetAssetIdIndexLazyImport = createFileRoute(
+  '/$teamId/nav/$navId/asset/$assetId/',
+)()
 
 // Create/Update Routes
 
@@ -525,6 +528,16 @@ const TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyRoute =
     ).then((d) => d.Route),
   )
 
+const TeamIdNavNavIdAssetAssetIdIndexLazyRoute =
+  TeamIdNavNavIdAssetAssetIdIndexLazyImport.update({
+    path: '/$teamId/nav/$navId/asset/$assetId/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./pages/$teamId/nav/$navId/asset.$assetId/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -737,6 +750,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/nav/$navId/asset/$assetId/': {
+      preLoaderRoute: typeof TeamIdNavNavIdAssetAssetIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -795,6 +812,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdNavNavIdSubModuleIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute,
+  TeamIdNavNavIdAssetAssetIdIndexLazyRoute,
 ])
 
 /* prettier-ignore-end */

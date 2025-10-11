@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 
 import _ from 'lodash';
-import { CreditCard, Images, Table2 } from 'lucide-react';
+import { CreditCard, Images, Table2, Folder } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { IDisplayMode, IDisplayModeStorage } from '@/components/layout/ugc/typings.ts';
@@ -45,6 +45,8 @@ export const UgcHeaderDisplayModeButton: React.FC<IUgcHeaderDisplayModeButtonPro
           <Table2 />
         ) : displayMode === 'gallery' ? (
           <Images />
+        ) : displayMode === 'folder' ? (
+          <Folder />
         ) : (
           <CreditCard />
         )
@@ -88,6 +90,9 @@ export const UgcHeaderDisplayModeButton: React.FC<IUgcHeaderDisplayModeButtonPro
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="card">
             {t('components.layout.ugc.view.header.display-mode.options.card')}
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="folder">
+            {t('components.layout.ugc.view.header.display-mode.options.folder')}
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>

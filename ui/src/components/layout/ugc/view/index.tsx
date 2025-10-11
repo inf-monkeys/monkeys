@@ -28,6 +28,7 @@ import {
   IUgcRenderOptions,
 } from '@/components/layout/ugc/typings.ts';
 import { UgcViewCard } from '@/components/layout/ugc/view/card';
+import { UgcViewFolderView } from '@/components/layout/ugc/view/folder-view';
 import { UgcViewGalleryItem } from '@/components/layout/ugc/view/gallery';
 import { UgcViewHeader } from '@/components/layout/ugc/view/header';
 import { DEFAULT_SORT_CONDITION } from '@/components/layout/ugc/view/header/consts.ts';
@@ -40,6 +41,7 @@ import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn, getI18nContent } from '@/utils';
+import { useAssetFilterRuleList } from '@/apis/ugc';
 
 interface IUgcViewProps<E extends object> {
   assetKey: string;
@@ -49,7 +51,7 @@ interface IUgcViewProps<E extends object> {
   showPagination?: boolean;
   isMarket?: boolean;
   useUgcFetcher: IListUgcItemsFnType<E>;
-  preloadUgcFetcher?: IPreloadUgcItemsFnType<E>;
+  preloadUgcFetcher?: IPreloadUgcItemsFnType;
   createColumns: () => ColumnDef<IAssetItem<E>, any>[];
   renderOptions: IUgcRenderOptions<IAssetItem<E>>;
   operateArea?: IOperateAreaProps<E>;
@@ -129,6 +131,17 @@ export const UgcView = <E extends object>({
   } = useUgcFetcher({
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
+    filter,
+    orderBy: sortCondition.orderBy,
+    orderColumn: sortCondition.orderColumn,
+  });
+
+  // 获取所有数据用于文件夹视图
+  const {
+    data: allDataRaw,
+  } = useUgcFetcher({
+    page: 1,
+    limit: 100000, // 获取大量数据
     filter,
     orderBy: sortCondition.orderBy,
     orderColumn: sortCondition.orderColumn,
@@ -253,8 +266,10 @@ export const UgcView = <E extends object>({
 
   const rows = table.getRowModel().rows;
 
+
   const { data: oem } = useSystemConfig();
   const paginationPosition = oem?.theme.paginationPosition ?? 'left';
+  const { data: assetFilterRules } = useAssetFilterRuleList(assetType as any, isMarket);
   return (
     <div className="flex size-full">
       <UgcSidebar
@@ -353,10 +368,17 @@ export const UgcView = <E extends object>({
                       ))}
                     </div>
                   )}
+                  {displayMode === 'folder' && (
+                    <UgcViewFolderView
+                      allData={allDataRaw?.data || []}
+                      filter={filter}
+                      assetFilterRules={assetFilterRules || []}
+                    />
+                  )}
                 </>
               )}
             </ScrollArea>
-            {showPagination && (
+            {showPagination && displayMode !== 'folder' && (
               <TablePagination
                 className={cn('py-0', paginationPosition === 'right' ? 'justify-end gap-global' : '')}
                 pagination={table.getState().pagination}
