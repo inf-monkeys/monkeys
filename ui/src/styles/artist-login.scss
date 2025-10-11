@@ -1,0 +1,213 @@
+.artist-login-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 5%;
+}
+
+/* 动态背景由DynamicBackground组件处理 */
+
+.artist-logo {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+
+  .logo-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .logo-title {
+    height: 36px;
+    width: auto;
+  }
+}
+
+.login-form-container {
+  position: relative;
+  width: 400px;
+  max-width: 90vw;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 5;
+}
+
+.back-to-home {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #333;
+  }
+
+  .back-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.form-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+
+  .tab-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #f5f5f5;
+    color: #666;
+
+    &.active {
+      background: #4D8F9D;
+      color: white;
+    }
+
+    &:hover:not(.active) {
+      background: #e0e0e0;
+    }
+
+    .tab-icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-field {
+  .form-input {
+    width: 100%;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #f8f9fa;
+    font-size: 16px;
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none;
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(77, 143, 157, 0.2);
+    }
+
+    &::placeholder {
+      color: #999;
+    }
+  }
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+
+  .remember-password {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .forgot-password {
+    background: none;
+    border: none;
+    color: #4D8F9D;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover {
+      color: #416887;
+    }
+  }
+}
+
+.submit-button {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #4D8F9D 0%, #416887 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(77, 143, 157, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .artist-login-container {
+    padding-right: 0;
+    justify-content: center;
+  }
+
+  .login-form-container {
+    width: 90vw;
+    max-width: 400px;
+    padding: 30px 20px;
+  }
+
+  .artist-logo {
+    bottom: 20px;
+    left: 20px;
+
+    .logo-text {
+      font-size: 20px;
+    }
+  }
+}

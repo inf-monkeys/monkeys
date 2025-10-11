@@ -6,6 +6,7 @@ import { get } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
 import { VinesUserLogin } from '@/components/layout/login';
+import { ArtistLogin } from '@/components/layout/login/artist-login';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { AppLogo } from '@/components/ui/logo';
@@ -21,26 +22,33 @@ const Login: React.FC = () => {
   const hideLogin = get(oem, 'auth.hideAuthToast', false);
 
   const isServerError = error instanceof Error;
+  const isArtistTheme = oem?.theme.id === 'artist';
 
   return (
     <>
-      <div className="flex flex-col items-center gap-8">
-        {hideLogin ? (
+      {isArtistTheme ? (
+        <ArtistLogin />
+      ) : (
+        <>
           <div className="flex flex-col items-center gap-8">
-            <img src="/Iframe404.webp" alt="遇到网络错误，请刷新整个页面重试" />
-            <span>遇到网络错误，请刷新整个页面重试</span>
+            {hideLogin ? (
+              <div className="flex flex-col items-center gap-8">
+                <img src="/Iframe404.webp" alt="遇到网络错误，请刷新整个页面重试" />
+                <span>遇到网络错误，请刷新整个页面重试</span>
+              </div>
+            ) : (
+              <>
+                {!isServerError && <AppLogo url={logoUrl} alt={appName} height={36} />}
+                <VinesUserLogin />
+              </>
+            )}
           </div>
-        ) : (
-          <>
-            {!isServerError && <AppLogo url={logoUrl} alt={appName} height={36} />}
-            <VinesUserLogin />
-          </>
-        )}
-      </div>
-      <div className="absolute bottom-6 left-6 flex items-center gap-2">
-        <VinesDarkMode />
-        <I18nSelector />
-      </div>
+          <div className="absolute bottom-6 left-6 flex items-center gap-2">
+            <VinesDarkMode />
+            <I18nSelector />
+          </div>
+        </>
+      )}
     </>
   );
 };
