@@ -147,7 +147,7 @@ export const QuickAction: React.FC<{
       <motion.div
         className={cn(
           'absolute right-3 top-3 flex size-[40px] items-center justify-center rounded-full z-10',
-          isHovered ? '!bg-[#416887ff]' : '!bg-[#ffffff00]',
+          isHovered ? '!bg-[#000000]' : '!bg-[#ffffff00]',
         )}
       >
         <ArrowUpRight size={40} color="#ffffff80" />
