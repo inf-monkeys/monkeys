@@ -17,6 +17,26 @@ type ColorMode = {
   };
 };
 
+// 针对不同按钮的图标位置和尺寸映射（可按需微调）
+const ICON_CLASS_MAP: Record<string, string> = {
+  '意图表达': 'bottom-[40px] right-[190px] size-[210px]',
+  '一键生成': 'bottom-[100px] right-[120px] size-[130px]',
+  '智能修改': 'bottom-[120px] right-[210px] size-[120px]',
+};
+
+// 从资源路径中解析出按钮名称（quick-actions/名称/icon.svg）
+function getActionNameFromUrl(url: string): string | undefined {
+  try {
+    const decoded = decodeURIComponent(url);
+    const parts = decoded.split('/');
+    const idx = parts.findIndex((p) => p === 'quick-actions');
+    if (idx !== -1 && parts[idx + 1]) {
+      return parts[idx + 1];
+    }
+  } catch {}
+  return undefined;
+}
+
 // 创建一个通用的 RemoteSvg 组件
 const RemoteSvg: React.FC<{
   url: string;
@@ -117,8 +137,13 @@ export const QuickAction: React.FC<{
         <ArrowUpRight size={40} color="#ffffff80" />
       </motion.div>
 
-      {/* 右下角大图标 */}
-      <motion.div className="pointer-events-none absolute bottom-[120px] right-[200px] size-[120px] z-10">
+      {/* 右下角大图标（根据按钮类型动态定位与尺寸） */}
+      <motion.div
+        className={cn(
+          'pointer-events-none absolute z-10',
+          ICON_CLASS_MAP[getActionNameFromUrl(iconUrl) || '意图表达'] || 'bottom-[120px] right-[200px] size-[120px]'
+        )}
+      >
         <RemoteSvg
           url={iconUrl}
           className="h-full w-full"
