@@ -48,6 +48,18 @@ const RemoteSvg: React.FC<{
   const cacheKey = `${url}-${uniqueKey}`;
   const [svgContent, setSvgContent] = useState<string>('');
 
+  // 为 SVG 内部 id 及其引用加命名空间，避免多个实例之间的 id 冲突
+  const namespaceSvgIds = (text: string, ns: string | undefined) => {
+    if (!ns) return text;
+    // 先替换 id="xxx"
+    let result = text.replace(/id="([^"]+)"/g, (_m, id) => `id="${ns}-${id}"`);
+    // 再替换 url(#xxx)
+    result = result.replace(/url\(#([^\)]+)\)/g, (_m, id) => `url(#${ns}-${id})`);
+    // 再替换 xlink:href="#xxx" 或 href="#xxx"
+    result = result.replace(/(xlink:href|href)="#([^"]+)"/g, (_m, attr, id) => `${attr}="#${ns}-${id}"`);
+    return result;
+  };
+
   useEffect(() => {
     fetch(url)
       .then((res) => res.text())
@@ -67,7 +79,9 @@ const RemoteSvg: React.FC<{
             .replace(/#151515/g, colorMode.colors.secondary);
         }
 
-        setSvgContent(modifiedSvg);
+        // 给 id 加命名空间，防止多个按钮间互相引用导致联动
+        const namespaced = namespaceSvgIds(modifiedSvg, uniqueKey);
+        setSvgContent(namespaced);
       });
   }, [url, colorMode, cacheKey]); // 添加 cacheKey 作为依赖
 
@@ -83,13 +97,15 @@ export const QuickAction: React.FC<{
   onClick?: () => void;
 }> = ({ iconUrl, titleUrl, subtitleUrl, key, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const actionName = getActionNameFromUrl(iconUrl) || '意图表达';
+  const uniqueBase = `qa-${actionName}`;
 
   // 定义图标的颜色模式（使用正则替换）
   const iconColorMode: ColorMode = {
     mode: 'regex',
     colors: {
-      primary: isHovered ? '#B71E1E' : '#575757',
-      secondary: isHovered ? '#8B0000' : '#151515',
+      primary: isHovered ? '#4D8F9D' : '#575757',
+      secondary: isHovered ? '#416887' : '#151515',
     },
   };
 
@@ -97,8 +113,8 @@ export const QuickAction: React.FC<{
   const titleColorMode: ColorMode = {
     mode: 'fill',
     colors: {
-      primary: isHovered ? '#8B0000' : 'white',
-      secondary: isHovered ? '#8B0000' : 'white',
+      primary: isHovered ? '#416887' : 'white',
+      secondary: isHovered ? '#416887' : 'white',
     },
   };
 
@@ -115,7 +131,7 @@ export const QuickAction: React.FC<{
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onClick={onClick}
-      className="quick-action relative flex size-full cursor-pointer flex-col justify-end overflow-hidden rounded-2xl px-[20px] py-[26px]"
+      className="quick-action isolate relative flex size-full cursor-pointer flex-col justify-end overflow-hidden rounded-2xl px-[20px] py-[26px]"
       key={`landing-artist-quick-action-${key}`}
     >
       {/* 背景 SVG */}
@@ -131,7 +147,7 @@ export const QuickAction: React.FC<{
       <motion.div
         className={cn(
           'absolute right-3 top-3 flex size-[40px] items-center justify-center rounded-full z-10',
-          isHovered ? '!bg-[#8B0000ff]' : '!bg-[#ffffff00]',
+          isHovered ? '!bg-[#416887ff]' : '!bg-[#ffffff00]',
         )}
       >
         <ArrowUpRight size={40} color="#ffffff80" />
@@ -140,31 +156,31 @@ export const QuickAction: React.FC<{
       {/* 右下角大图标（根据按钮类型动态定位与尺寸） */}
       <motion.div
         className={cn(
-          'pointer-events-none absolute z-10',
-          ICON_CLASS_MAP[getActionNameFromUrl(iconUrl) || '意图表达'] || 'bottom-[120px] right-[200px] size-[120px]'
+          'pointer-events-none absolute z-10 mix-blend-normal',
+          ICON_CLASS_MAP[actionName] || 'bottom-[120px] right-[200px] size-[120px]'
         )}
       >
         <RemoteSvg
           url={iconUrl}
           className="h-full w-full"
           colorMode={iconColorMode}
-          uniqueKey={key} // 传入唯一标识
+          uniqueKey={`${uniqueBase}-icon`} // 传入唯一标识
         />
       </motion.div>
 
       {/* 文本 */}
-      <div className="flex flex-col gap-6 z-10">
+      <div className="flex flex-col gap-6 z-10 mix-blend-normal">
         <RemoteSvg
           url={titleUrl}
           className="h-6"
           colorMode={titleColorMode}
-          uniqueKey={`${key}-title`} // 为标题添加唯一标识
+          uniqueKey={`${uniqueBase}-title`} // 为标题添加唯一标识
         />
         <RemoteSvg
           url={subtitleUrl}
           className="h-4"
           colorMode={subtitleColorMode}
-          uniqueKey={`${key}-subtitle`} // 为副标题添加唯一标识
+          uniqueKey={`${uniqueBase}-subtitle`} // 为副标题添加唯一标识
         />
       </div>
     </motion.div>

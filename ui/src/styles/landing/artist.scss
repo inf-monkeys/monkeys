@@ -200,11 +200,14 @@
     border: 1.76px solid rgba(255, 255, 255, 0.5);
     box-shadow: inset 0px 0px 0px 0px rgba(0, 0, 0, 0.1);
     position: relative; // 添加相对定位
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 
-    // &:hover {
-    //   // 移除原有的 hover 背景色，因为现在使用 SVG 背景
-    //   // background-color: rgba(255, 255, 255, 0.1);
-    // }
+    &:hover {
+      background: #F5F5F5;
+      box-shadow: 0px 36.96px 22.88px 0px rgba(192, 192, 192, 0.16),
+        0px 3.52px 8.8px 0px rgba(183, 181, 203, 0.31),
+        inset 0px 1.76px 42.24px 0px rgba(255, 255, 255, 0.96);
+    }
   }
 
   // 移除按钮装饰性毛玻璃效果
