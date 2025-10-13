@@ -13,7 +13,7 @@
     -khtml-user-drag: none;
     -moz-user-drag: none;
     -o-user-drag: none;
-    user-drag: none;
+    user-drag: none; // stylelint-disable-line property-no-unknown
   }
 
   @font-face {
@@ -195,12 +195,16 @@
   }
 
   .quick-action {
-    background-color: transparent;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5625) 2%, rgba(90, 87, 83, 0.75) 80%);
+    background-blend-mode: overlay;
+    border: 1.76px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0px 0px 0px 0px rgba(0, 0, 0, 0.1);
     position: relative; // 添加相对定位
 
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
+    // &:hover {
+    //   // 移除原有的 hover 背景色，因为现在使用 SVG 背景
+    //   // background-color: rgba(255, 255, 255, 0.1);
+    // }
   }
 
   // 移除按钮装饰性毛玻璃效果
