@@ -61,6 +61,7 @@ import { InstalledAppEntity } from './entities/marketplace/installed-app.entity'
 import { MarketplaceAppVersionEntity } from './entities/marketplace/marketplace-app-version.entity';
 import { MarketplaceAppEntity } from './entities/marketplace/marketplace-app.entity';
 import { ModelTrainingEntity } from './entities/model-training/model-training';
+import { ModelTrainingConfigEntity } from './entities/model-training/model-training-config';
 import { WorkflowObservabilityEntity } from './entities/observability/workflow-observability';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
@@ -137,6 +138,7 @@ export const entities: EntityClassOrSchema[] = [
   AgentV2TaskStateEntity,
   AgentV2MessageQueueEntity,
   ModelTrainingEntity,
+  ModelTrainingConfigEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
