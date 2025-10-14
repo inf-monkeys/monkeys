@@ -2666,6 +2666,13 @@
         "operate-area": {
           "dropdown-label": "Operations",
           "options": {
+            "pin": "Pin",
+            "unpin": "Unpin",
+            "pin-success": "Pinned successfully",
+            "unpin-success": "Unpinned successfully",
+            "pin-error": "Failed to toggle pin",
+            "pinning": "Pinning...",
+            "unpinning": "Unpinning...",
             "copy-link": "Copy File Link"
           }
         },

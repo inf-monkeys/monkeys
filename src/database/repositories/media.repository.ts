@@ -144,4 +144,33 @@ export class MediaFileRepository {
     await this.preprocess([data]);
     return data;
   }
+
+  public async togglePin(mediaId: string, teamId: string, pinned: boolean) {
+    if (pinned) {
+      // 置顶：找到当前最大的 sort 值，然后设置为比它更大的值
+      const maxSortMedia = await this.mediaFileRepository.findOne({
+        where: {
+          teamId,
+          isDeleted: false,
+        },
+        order: {
+          sort: 'DESC',
+        },
+      });
+
+      // 获取当前最大值，如果存在则 +1，否则设置为 1（因为默认是0）
+      const newSort = maxSortMedia?.sort != null ? maxSortMedia.sort + 1 : 1;
+
+      await this.mediaFileRepository.update(mediaId, {
+        sort: newSort,
+        updatedTimestamp: Date.now(),
+      });
+    } else {
+      // 取消置顶：将 sort 设置为 0（默认值）
+      await this.mediaFileRepository.update(mediaId, {
+        sort: 0,
+        updatedTimestamp: Date.now(),
+      });
+    }
+  }
 }

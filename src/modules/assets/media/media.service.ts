@@ -105,4 +105,8 @@ export class MediaFileService {
   public async getMediaByIdAndTeamId(id: string, teamId: string) {
     return await this.mediaRepository.getMediaByIdAndTeamId(id, teamId);
   }
+
+  public async togglePin(mediaId: string, teamId: string, pinned: boolean) {
+    return await this.mediaRepository.togglePin(mediaId, teamId, pinned);
+  }
 }

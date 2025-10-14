@@ -129,6 +129,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     let list = await this.repository.find({
       where: whereClauses,
       order: {
+        sort: 'DESC', // 按 sort 字段降序排序（数值大的排在前面，置顶的在最上面）
         [orderColumn]: orderBy,
       } as FindOptionsOrder<E>,
       take: +limit,

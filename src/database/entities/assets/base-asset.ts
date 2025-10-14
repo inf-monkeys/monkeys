@@ -77,6 +77,15 @@ export class BaseAssetEntity extends BaseEntity {
   })
   preferAppId?: string;
 
+  @Column({
+    name: 'sort',
+    type: 'integer',
+    nullable: true,
+    default: 0,
+  })
+  sort?: number;
+  
+
   @AfterLoad()
   afterLoad?() {
     try {

@@ -46,4 +46,5 @@ export interface IMediaData {
   updatedTimestamp: number;
   isDeleted: boolean;
   user?: Partial<IVinesUser>;
+  sort?: number;
 }
