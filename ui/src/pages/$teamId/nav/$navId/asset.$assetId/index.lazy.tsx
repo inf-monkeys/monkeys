@@ -4,8 +4,8 @@ import { createLazyFileRoute, useNavigate, useParams } from '@tanstack/react-rou
 
 import { useTranslation } from 'react-i18next';
 
-import { AssetDetailPage } from '@/components/layout/ugc/detail/asset-detail-page';
 import { useUgcMediaData } from '@/apis/ugc';
+import { AssetDetailPage } from '@/components/layout/ugc/detail/asset-detail-page';
 import { Button } from '@/components/ui/button';
 
 export const AssetDetail: React.FC = () => {
@@ -16,7 +16,7 @@ export const AssetDetail: React.FC = () => {
   // 获取资产数据
   const { data: assetsData, mutate } = useUgcMediaData({
     page: 1,
-    limit: 1000,
+    // limit: 1000,
     filter: {},
   });
 
