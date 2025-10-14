@@ -16,7 +16,7 @@ export const AssetDetail: React.FC = () => {
   // 获取资产数据
   const { data: assetsData, mutate } = useUgcMediaData({
     page: 1,
-    // limit: 1000,
+    limit: 10000,
     filter: {},
   });
 
