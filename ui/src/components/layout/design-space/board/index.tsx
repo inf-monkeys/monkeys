@@ -1,29 +1,29 @@
-import React, { startTransition, useCallback, useEffect } from 'react';
+import React, { ErrorInfo, startTransition, useCallback, useEffect } from 'react';
 
 import './index.scss';
 import './layer-panel.css';
 
 import {
-    AssetRecordType,
-    createShapeId,
-    defaultBindingUtils,
-    DefaultContextMenu,
-    DefaultContextMenuContent,
-    defaultEditorAssetUrls,
-    defaultShapeTools,
-    defaultTools,
-    Editor,
-    FrameShapeUtil,
-    TLComponents,
-    Tldraw,
-    TldrawUiMenuGroup,
-    TldrawUiMenuItem,
-    TLImageShape,
-    TLShape,
-    TLShapeId,
-    TLUiContextMenuProps,
-    useEditor,
-    useToasts
+  AssetRecordType,
+  createShapeId,
+  defaultBindingUtils,
+  DefaultContextMenu,
+  DefaultContextMenuContent,
+  defaultEditorAssetUrls,
+  defaultShapeTools,
+  defaultTools,
+  Editor,
+  FrameShapeUtil,
+  TLComponents,
+  Tldraw,
+  TldrawUiMenuGroup,
+  TldrawUiMenuItem,
+  TLImageShape,
+  TLShape,
+  TLShapeId,
+  TLUiContextMenuProps,
+  useEditor,
+  useToasts
 } from 'tldraw';
 
 import { ExternalLayerPanel } from './ExternalLayerPanel';
@@ -46,6 +46,84 @@ class FixedFrameShapeUtil extends FrameShapeUtil {
   // override canResize() {
   //   return true;
   // }
+  
+  // 重写getGeometry方法以防止文本测量错误
+  getGeometry(shape: any) {
+    try {
+      return super.getGeometry(shape);
+    } catch (error) {
+      console.warn('FrameShapeUtil geometry calculation error:', error);
+      // 返回默认几何形状，使用super.getGeometry的默认实现
+      try {
+        return super.getGeometry({ ...shape, props: { ...shape.props, w: 100, h: 100 } });
+      } catch (fallbackError) {
+        console.warn('Fallback geometry calculation also failed:', fallbackError);
+        // 如果还是失败，返回一个简单的矩形几何
+        return {
+          x: 0,
+          y: 0,
+          w: 100,
+          h: 100,
+          isFilled: false,
+          isClosed: true,
+          isLabel: false,
+          isInternal: false,
+        } as any;
+      }
+    }
+  }
+}
+
+// 错误边界组件
+class TldrawErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Tldraw Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          height: '100%',
+          flexDirection: 'column',
+          gap: '16px',
+          color: '#666'
+        }}>
+          <div>画板加载出现问题</div>
+          <button 
+            onClick={() => this.setState({ hasError: false, error: undefined })}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#4D8F9D',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            重试
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 type BoardInstance = {
@@ -543,7 +621,8 @@ export const Board: React.FC<BoardProps> = ({
       
       {/* tldraw容器 - 全屏显示 */}
       <div style={{ height: '100%' }}>
-        <Tldraw
+        <TldrawErrorBoundary>
+          <Tldraw
         persistenceKey={persistenceKey}
         onMount={(editor: Editor) => {
           setEditor(editor);
@@ -672,6 +751,7 @@ export const Board: React.FC<BoardProps> = ({
           },
         }}
         />
+        </TldrawErrorBoundary>
       </div>
 
       {/* Agent 面板已迁移至左侧 ExternalLayerPanel */}

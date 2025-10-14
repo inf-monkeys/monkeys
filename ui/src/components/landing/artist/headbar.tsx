@@ -8,7 +8,7 @@ import { isAuthed } from '@/components/router/guard/auth';
 import { useVinesUser } from '@/components/router/guard/user';
 
 const ICON_URL = 'https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/icon.svg';
-const ICON_TITLE_URL = 'https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/title.svg';
+const ICON_TITLE_URL = 'https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/title%E8%89%BA%E6%9C%AF%E5%AE%B6.svg';
 
 export const HeadBar: React.FC = () => {
   const navigate = useNavigate();

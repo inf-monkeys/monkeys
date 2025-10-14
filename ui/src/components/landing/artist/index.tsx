@@ -93,13 +93,13 @@ export const ArtistLandingPage: React.FC = () => {
             {['意图表达', '一键生成', '智能修改'].map((item, index) => (
               <QuickAction
                 key={`${index}`}
-                // iconUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/quick-actions/${item}/icon.svg`}
-                // titleUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/quick-actions/${item}/title.svg`}
-                // subtitleUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/quick-actions/${item}/subtitle.svg`}
-                iconUrl={`/src/components/landing/artist/quick-actions/${item}/icon.svg`}
-                titleUrl={`/src/components/landing/artist/quick-actions/${item}/title.svg`}
-                subtitleUrl={`/src/components/landing/artist/quick-actions/${item}/subtitle.svg`}
-                onClick={handleToWorkbench}
+                iconUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/quick-actions/${item}/icon.svg`}
+                titleUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/quick-actions/${item}/title.svg`}
+                subtitleUrl={`https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/quick-actions/${item}/subtitle.svg`}
+                // iconUrl={`/src/components/landing/artist/quick-actions/${item}/icon.svg`}
+                // titleUrl={`/src/components/landing/artist/quick-actions/${item}/title.svg`}
+                // subtitleUrl={`/src/components/landing/artist/quick-actions/${item}/subtitle.svg`}
+                // onClick={handleToWorkbench}
               />
             ))}
           </div>
