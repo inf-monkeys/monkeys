@@ -83,7 +83,7 @@ export const UgcView = <E extends object>({
   const team = useVinesTeam();
 
   // local storage
-  const [displayModeStorage] = useLocalStorage<IDisplayModeStorage>(`vines-ui-asset-display-mode`, {});
+  const [displayModeStorage, setDisplayModeStorage] = useLocalStorage<IDisplayModeStorage>(`vines-ui-asset-display-mode`, {});
   const displayMode = useMemo(
     () => (!team || !assetKey ? null : _.get(displayModeStorage, [team.teamId, assetKey], 'card')),
     [displayModeStorage, team.teamId, assetKey],
@@ -122,6 +122,36 @@ export const UgcView = <E extends object>({
 
   // filter
   const [filter, setFilter] = useState<Partial<IListUgcDto['filter']>>({});
+  
+  // 左侧分组选中状态
+  const [selectedRuleId, setSelectedRuleId] = useState<string>();
+
+  // 处理文件夹点击
+  const handleFolderClick = (folderId: string, folderFilter: Partial<IListUgcDto['filter']>) => {
+    // 设置左侧分组选中状态
+    setSelectedRuleId(folderId);
+    
+    // 应用筛选条件
+    setFilter(folderFilter);
+    
+    // 重置分页到第一页
+    setPagination((prev) => ({
+      ...prev,
+      pageIndex: 0,
+    }));
+    
+    // 切换到画廊视图
+    setDisplayModeStorage((prev) => {
+      const newStorage = {
+        ...prev,
+        [team.teamId]: {
+          ...prev[team.teamId],
+          [assetKey]: 'gallery',
+        },
+      };
+      return newStorage;
+    });
+  };
 
   // fetch data
   const {
@@ -285,6 +315,8 @@ export const UgcView = <E extends object>({
           },
           toolsData:
             assetType === 'tools' ? ((originData?.data ?? []) as unknown as IAssetItem<ICommonTool>[]) : undefined,
+          selectedRuleId,
+          onSelectedRuleIdChange: setSelectedRuleId,
         }}
       />
       <div className="relative w-full flex-1 overflow-x-clip">
@@ -310,7 +342,14 @@ export const UgcView = <E extends object>({
               )}
               disabledOverflowMask
             >
-              {rows.length === 0 ? (
+              {displayMode === 'folder' ? (
+                <UgcViewFolderView
+                  allData={allDataRaw?.data || []}
+                  filter={filter}
+                  assetFilterRules={assetFilterRules || []}
+                  onFolderClick={handleFolderClick}
+                />
+              ) : rows.length === 0 ? (
                 !isLoading && (
                   <motion.div
                     className="vines-center size-full h-[calc(100vh-12rem)] flex-col"
@@ -367,13 +406,6 @@ export const UgcView = <E extends object>({
                         />
                       ))}
                     </div>
-                  )}
-                  {displayMode === 'folder' && (
-                    <UgcViewFolderView
-                      allData={allDataRaw?.data || []}
-                      filter={filter}
-                      assetFilterRules={assetFilterRules || []}
-                    />
                   )}
                 </>
               )}

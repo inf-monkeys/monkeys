@@ -9,6 +9,7 @@ interface IFolderViewProps<E extends object> {
   renderOptions?: any; // optional
   currentRuleId?: string; // 添加当前规则ID
   assetFilterRules?: any[]; // 添加筛选规则列表
+  onFolderClick?: (folderId: string, folderFilter: Partial<IListUgcDto['filter']>) => void;
 }
 
 export const UgcViewFolderView = <E extends object>({
@@ -16,6 +17,7 @@ export const UgcViewFolderView = <E extends object>({
   filter,
   currentRuleId,
   assetFilterRules = [],
+  onFolderClick,
 }: IFolderViewProps<E>) => {
   // 生成文件夹数据
   const generateFolderData = useMemo(() => {
@@ -25,6 +27,7 @@ export const UgcViewFolderView = <E extends object>({
       assetCount: number;
       lastUpdated: string;
       previewImages: string[];
+      filterRules: Partial<IListUgcDto['filter']>; // 保存对应的筛选条件
     }> = [];
 
     const hasSpecificFilter =
@@ -139,6 +142,7 @@ export const UgcViewFolderView = <E extends object>({
         assetCount: items.length,
         lastUpdated: lastUpdatedText,
         previewImages,
+        filterRules: filter, // 保存当前筛选条件
       });
     } else {
       // 无具体筛选：按筛选规则分组生成文件夹
@@ -176,6 +180,7 @@ export const UgcViewFolderView = <E extends object>({
           assetCount: items.length,
           lastUpdated: t ? new Date(t).toLocaleDateString('zh-CN') : '无',
           previewImages,
+          filterRules: r, // 保存对应的筛选规则
         });
       });
     }
@@ -193,7 +198,8 @@ export const UgcViewFolderView = <E extends object>({
           lastUpdated={folder.lastUpdated}
           previewImages={folder.previewImages}
           onClick={() => {
-            // 后续新增点击事件
+            // 点击文件夹时切换到画廊视图并应用筛选条件
+            onFolderClick?.(folder.id, folder.filterRules);
           }}
         />
       ))}
