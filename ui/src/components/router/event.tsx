@@ -45,16 +45,20 @@ export const RouteEvent: React.FC = () => {
           }),
         });
       } else {
+        const mergedSearch = {
+          ...routeMetadata.current.search,
+          ...search,
+        } as Record<string, any>;
+        // 清除一次性入口标记，防止在项目间切换遗留 ?from=home/login
+        if ('from' in mergedSearch) delete mergedSearch['from'];
+
         return navigate({
           to: to.endsWith('/') && !to.endsWith('$teamId/') ? to.slice(0, -1) : (to as any),
           params: {
             ...routeMetadata.current.params,
             ...params,
           },
-          search: {
-            ...routeMetadata.current.search,
-            ...search,
-          },
+          search: mergedSearch as any,
         });
       }
     };

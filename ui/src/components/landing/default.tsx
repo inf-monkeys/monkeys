@@ -32,6 +32,9 @@ export const DefaultLandingPage: React.FC = () => {
       params: {
         teamId: finalTeamId,
       },
+      search: {
+        from: 'home',
+      } as any,
     });
   }, [teamId, teams]);
 
