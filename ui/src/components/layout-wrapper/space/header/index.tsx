@@ -9,9 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { useSystemConfig } from '@/apis/common';
 import { CustomizationHeadbarNavPosition, CustomizationHeadbarTheme } from '@/apis/common/typings';
 import { getVinesToken } from '@/apis/utils.ts';
+import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { HeaderInvite } from '@/components/layout-wrapper/space/header/expand/header-invite';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
-import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -40,11 +40,10 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
 
   const { teamId } = useVinesTeam();
 
-  const [mode, setMode] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>();
-
-  const [{ hideSpaceHeader: urlHideSpaceHeader }] = useUrlState<{ hideSpaceHeader: boolean }>({
-    hideSpaceHeader: false,
-  });
+  const [{ mode, hideSpaceHeader: urlHideSpaceHeader }, setSearch] = useUrlState<{
+    mode: 'normal' | 'fast' | 'mini';
+    hideSpaceHeader: boolean;
+  }>();
 
   const hideSpaceHeader = urlHideSpaceHeader || oem?.theme.hideSpaceHeader || false;
 
@@ -89,7 +88,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
           to="/$teamId"
           params={{ teamId }}
           disabled={!hasToken}
-          onClick={() => Object.keys(mode).length && setMode({ mode: 'normal' })}
+          onClick={() => Object.keys(mode).length && setSearch({ mode: 'normal' })}
         >
           <VinesLogo description="" height={'2rem'} className={cn('ml-2', hasToken && 'cursor-pointer')} />
         </Link>

@@ -29,13 +29,10 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
 
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
 
-  const [{ hideSpaceHeader: urlHideSpaceHeader, mode }] = useUrlState<{
-    hideSpaceHeader: boolean;
+  const [{ mode, hideSpaceHeader: urlHideSpaceHeader }] = useUrlState<{
     mode: 'normal' | 'fast' | 'mini';
-  }>({
-    hideSpaceHeader: false,
-    mode: 'normal',
-  });
+    hideSpaceHeader: boolean;
+  }>();
 
   const isMiniFrame = mode === 'mini';
 
