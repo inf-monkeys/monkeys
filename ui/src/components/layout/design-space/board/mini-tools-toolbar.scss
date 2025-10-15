@@ -1,0 +1,100 @@
+.mini-tools-toolbar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 20px;
+  z-index: 9999;
+  pointer-events: auto;
+
+  .custom-toolbar {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 12px;
+    background: var(--color-panel);
+    box-shadow: var(--shadow-l);
+    border: 1px solid var(--color-panel-border);
+    backdrop-filter: blur(8px);
+
+    .tool-button {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--color-text);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      outline: none;
+      pointer-events: auto;
+      z-index: 10000;
+      position: relative;
+
+      &:hover {
+        background: #f2f3f5;
+        /* 浅灰背景 */
+        border-color: transparent;
+        /* 悬浮仅变更背景，不显示边框 */
+        transform: none;
+        /* 不放大，保持稳态 */
+      }
+
+      /* 深色外观覆盖：使用站点主题标记，避免误判系统偏好导致浅色也变化 */
+      /* 1) data-theme='dark' 容器 */
+      :root[data-theme='dark'] & {
+        &:hover {
+          background: #2b2f33;
+        }
+      }
+
+      /* 2) 常见 .dark 容器 */
+      .dark & {
+        &:hover {
+          background: #2b2f33;
+        }
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      &.selected {
+        background: var(--color-selected);
+        /* 去除外侧描边/黑色轮廓 */
+        border-color: transparent;
+        /* 选中时图标反白 */
+        color: #fff !important;
+        box-shadow: none;
+
+        svg {
+          color: #fff !important;
+          fill: currentColor;
+          stroke: currentColor;
+        }
+      }
+
+      svg {
+        width: 18px;
+        height: 18px;
+        pointer-events: none;
+        display: block;
+        margin: 0;
+        padding: 0;
+      }
+
+      // 确保VinesIcon组件内部也居中
+      .vines-icon {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+    }
+
+  }
+}

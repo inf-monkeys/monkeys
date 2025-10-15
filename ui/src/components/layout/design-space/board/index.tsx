@@ -4,30 +4,31 @@ import './index.scss';
 import './layer-panel.css';
 
 import {
-  AssetRecordType,
-  createShapeId,
-  defaultBindingUtils,
-  DefaultContextMenu,
-  DefaultContextMenuContent,
-  defaultEditorAssetUrls,
-  defaultShapeTools,
-  defaultTools,
-  Editor,
-  FrameShapeUtil,
-  TLComponents,
-  Tldraw,
-  TldrawUiMenuGroup,
-  TldrawUiMenuItem,
-  TLImageShape,
-  TLShape,
-  TLShapeId,
-  TLUiContextMenuProps,
-  useEditor,
-  useToasts
+    AssetRecordType,
+    createShapeId,
+    defaultBindingUtils,
+    DefaultContextMenu,
+    DefaultContextMenuContent,
+    defaultEditorAssetUrls,
+    defaultShapeTools,
+    defaultTools,
+    Editor,
+    FrameShapeUtil,
+    TLComponents,
+    Tldraw,
+    TldrawUiMenuGroup,
+    TldrawUiMenuItem,
+    TLImageShape,
+    TLShape,
+    TLShapeId,
+    TLUiContextMenuProps,
+    useEditor,
+    useToasts
 } from 'tldraw';
 
 import { ExternalLayerPanel } from './ExternalLayerPanel';
 // Agent 嵌入由 ExternalLayerPanel 控制
+import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 
 import { useSystemConfig } from '@/apis/common';
@@ -750,7 +751,10 @@ export const Board: React.FC<BoardProps> = ({
             return tools;
           },
         }}
-        />
+        >
+          {/* 小工具工具栏 */}
+          <MiniToolsToolbar />
+        </Tldraw>
         </TldrawErrorBoundary>
       </div>
 
