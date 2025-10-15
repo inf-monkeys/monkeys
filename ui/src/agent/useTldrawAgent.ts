@@ -1,6 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
-import { io, Socket } from 'socket.io-client'
-import type { Editor } from 'tldraw'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { createShapeId, type Editor } from 'tldraw'
 
 export type AgentInput = {
   message: string
@@ -31,14 +30,184 @@ type AgentVisualContext = {
    | { _type: 'resize'; ids: string[]; scaleX?: number; scaleY?: number; w?: number; h?: number }
    | { _type: 'pen_draw'; points: Array<{ x: number; y: number }>; color?: string; size?: number }
 
+type PenPoint = { x: number; y: number }
+type FreeSegmentPoint = { x: number; y: number; z: number }
+type FreeSegment = { type: 'free'; points: FreeSegmentPoint[] }
+
+const DRAW_COLOR_ALLOWED = new Set(['black', 'grey', 'red', 'orange', 'yellow', 'green', 'blue', 'cyan'])
+const DRAW_COLOR_ALIASES: Record<string, string> = {
+  '#000': 'black',
+  '#000000': 'black',
+  '#fff': 'grey',
+  '#ffffff': 'grey',
+  '#ff0000': 'red',
+  '#ff4d4d': 'red',
+  '#ff4500': 'orange',
+  '#ffa500': 'orange',
+  '#ffff00': 'yellow',
+  '#ffd700': 'yellow',
+  '#00ff00': 'green',
+  '#008000': 'green',
+  '#0000ff': 'blue',
+  '#1e90ff': 'blue',
+  '#00ffff': 'cyan',
+  '#008b8b': 'cyan',
+  'white': 'grey',
+  'gray': 'grey',
+  'purple': 'blue',
+  'violet': 'blue',
+  'teal': 'cyan',
+  'navy': 'blue',
+  'turquoise': 'cyan',
+  'pink': 'red',
+}
+const MAX_DRAW_SEGMENT_POINTS = 600
+const MIN_POINT_DISTANCE = 0.1
+const FUNCTION_CALL_OPEN_PREFIX = '<function_calls'
+const FUNCTION_CALL_OPEN = '<function_calls>'
+const FUNCTION_CALL_CLOSE = '</function_calls>'
+
+function parseFunctionCallValue(raw: string): any {
+  const trimmed = raw.trim()
+  if (!trimmed) return ''
+  if (trimmed === 'true') return true
+  if (trimmed === 'false') return false
+  if (!Number.isNaN(Number(trimmed))) {
+    const num = Number(trimmed)
+    if (Number.isFinite(num)) return num
+  }
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    try {
+      return JSON.parse(trimmed)
+    } catch {}
+  }
+  return trimmed
+}
+
+function parseFunctionCalls(xml: string): AgentAction[] {
+  const actions: AgentAction[] = []
+  const invokeRe = /<invoke\s+name="([^"]+)"\s*>([\s\S]*?)(?:<\/invoke>|$)/gi
+  let match: RegExpExecArray | null
+  while ((match = invokeRe.exec(xml))) {
+    const [, name, body] = match
+    const params: Record<string, any> = {}
+    const paramRe = /<parameter\s+name="([^"]+)">([\s\S]*?)<\/parameter>/gi
+    let pm: RegExpExecArray | null
+    while ((pm = paramRe.exec(body))) {
+      const [, paramName, rawValue] = pm
+      params[paramName] = parseFunctionCallValue(rawValue)
+    }
+    if (name) {
+      actions.push({ _type: name, ...(params as any) } as AgentAction)
+    }
+  }
+  return actions
+}
+
+function normalizeStrokeColor(raw?: string): string {
+  if (!raw) return 'black'
+  const key = raw.trim().toLowerCase()
+  const alias = DRAW_COLOR_ALIASES[key]
+  if (alias && DRAW_COLOR_ALLOWED.has(alias)) return alias
+  if (DRAW_COLOR_ALLOWED.has(key)) return key
+  return 'black'
+}
+
+function normalizeStrokeSize(raw?: number | string): 's' | 'm' | 'l' {
+  if (typeof raw === 'string') {
+    const key = raw.trim().toLowerCase()
+    if (key === 's' || key === 'small' || key === 'thin') return 's'
+    if (key === 'l' || key === 'xl' || key === 'large' || key === 'thick') return 'l'
+    if (key === 'm' || key === 'medium') return 'm'
+  }
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    if (raw <= 1.25) return 's'
+    if (raw >= 3) return 'l'
+    return 'm'
+  }
+  return 'm'
+}
+
+function sanitizePenPoints(points: PenPoint[]): PenPoint[] {
+  const filtered: PenPoint[] = []
+  for (const pt of points) {
+    const x = Number(pt?.x)
+    const y = Number(pt?.y)
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue
+    if (!filtered.length) {
+      filtered.push({ x, y })
+      continue
+    }
+    const last = filtered[filtered.length - 1]
+    if (Math.hypot(x - last.x, y - last.y) >= MIN_POINT_DISTANCE) {
+      filtered.push({ x, y })
+    }
+  }
+  if (!filtered.length) return filtered
+  if (filtered.length <= MAX_DRAW_SEGMENT_POINTS) return filtered
+
+  const result: PenPoint[] = []
+  const step = (filtered.length - 1) / (MAX_DRAW_SEGMENT_POINTS - 1)
+  for (let i = 0; i < MAX_DRAW_SEGMENT_POINTS; i++) {
+    const idx = Math.round(i * step)
+    result.push(filtered[idx])
+  }
+  return result
+}
+
+function preparePenStroke(points: PenPoint[]): { origin: PenPoint; segment: FreeSegment } | null {
+  const cleaned = sanitizePenPoints(points)
+  if (!cleaned.length) return null
+
+  const base = cleaned[0]
+  const origin = {
+    x: Number(base.x.toFixed(2)),
+    y: Number(base.y.toFixed(2)),
+  }
+
+  const segmentPoints: FreeSegmentPoint[] = cleaned.map((pt) => ({
+    x: Number((pt.x - base.x).toFixed(2)),
+    y: Number((pt.y - base.y).toFixed(2)),
+    z: 0.5,
+  }))
+
+  if (segmentPoints.length === 1) {
+    segmentPoints.push({ x: 0.1, y: 0.1, z: 0.5 })
+  }
+
+  return {
+    origin,
+    segment: { type: 'free', points: segmentPoints },
+  }
+}
+
+function ensureShapeId(editor: Editor): string {
+  const tldrawEditor: any = editor
+  if (typeof tldrawEditor.createShapeId === 'function') {
+    try {
+      const id = tldrawEditor.createShapeId()
+      if (id) return id
+    } catch {}
+  }
+  return createShapeId()
+}
+
 function applyAgentAction(editor: Editor, action: AgentAction) {
   try {
     switch (action._type) {
       case 'create_shape':
         // 支持两种格式：{shape: {...}} 或直接 {type, x, y, props}
-        const shapeData = action.shape || { type: action.type, x: action.x, y: action.y, props: action.props }
-        console.log('[DEBUG] create_shape:', shapeData)
-        editor.createShape(shapeData)
+        const baseShape = action.shape || { type: action.type, x: action.x, y: action.y, props: action.props }
+        if (!baseShape) return
+        const shapeWithId = {
+          id: baseShape.id ?? ensureShapeId(editor),
+          ...baseShape,
+        }
+        if (typeof (editor as any).createShapes === 'function') {
+          ;(editor as any).createShapes([shapeWithId])
+        } else {
+          editor.createShape(shapeWithId as any)
+        }
         return
       case 'update_shape':
         editor.updateShapes([{ id: action.id as any, type: undefined as any, props: action.props } as any])
@@ -47,7 +216,12 @@ function applyAgentAction(editor: Editor, action: AgentAction) {
         editor.deleteShapes(action.ids as any)
         return
       case 'select_shapes':
-        editor.select(action.ids as any)
+        if (!Array.isArray(action.ids)) return
+        {
+          const ids = action.ids.filter((id): id is string => typeof id === 'string' && id.length > 0)
+          if (!ids.length) return
+          editor.select(...(ids as any))
+        }
         return
       case 'align': {
         const bounds: any = (editor as any).getSelectionPageBounds?.()
@@ -150,9 +324,38 @@ function applyAgentAction(editor: Editor, action: AgentAction) {
         return
       }
       case 'pen_draw': {
-        const pts = action.points?.map((p) => ({ x: p.x, y: p.y })) || []
-        if (!pts.length) return
-        ;(editor as any).createShape?.({ type: 'draw', x: pts[0].x, y: pts[0].y, props: { points: pts, color: action.color, size: action.size } })
+        const prepared = preparePenStroke(action.points ?? [])
+        if (!prepared) return
+
+        const color = normalizeStrokeColor(action.color)
+        const size = normalizeStrokeSize(action.size)
+
+        const shapeId = typeof (editor as any).createShapeId === 'function'
+          ? (editor as any).createShapeId()
+          : createShapeId()
+
+        const shape = {
+          id: shapeId,
+          type: 'draw',
+          x: prepared.origin.x,
+          y: prepared.origin.y,
+          props: {
+            segments: [prepared.segment],
+            color,
+            size,
+            isComplete: true,
+            isPen: true,
+            dash: 'draw',
+            fill: 'none',
+            scale: 1,
+          },
+        }
+
+        if (typeof (editor as any).createShapes === 'function') {
+          ;(editor as any).createShapes([shape])
+        } else {
+          ;(editor as any).createShape?.(shape)
+        }
         return
       }
       case 'viewport_move': {
@@ -163,7 +366,9 @@ function applyAgentAction(editor: Editor, action: AgentAction) {
       default:
         return
     }
-  } catch {}
+  } catch (error) {
+    // suppress unexpected action errors
+  }
 }
 
 export type AgentAPI = {
@@ -178,72 +383,48 @@ export type AgentAPI = {
 export function useTldrawAgent(editor: Editor | null): AgentAPI | null {
   const [history, setHistory] = useState<AgentAPI['history']>([])
   const abortRef = useRef<AbortController | null>(null)
-  const socketRef = useRef<Socket | null>(null)
   const streamingIdxRef = useRef<number | null>(null)
   const [isStreaming, setIsStreaming] = useState(false)
+  const serverBaseRef = useRef<string | null>(null)
+  const sessionIdRef = useRef<string | null>(null)
+  const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null)
+  const historyRef = useRef(history)
+  const skipFunctionBlockRef = useRef(false)
+  const functionBlockBufferRef = useRef('')
 
-  return useMemo<AgentAPI | null>(() => {
+  useEffect(() => {
+    historyRef.current = history
+  }, [history])
+
+  const agentApi = useMemo(() => {
     if (!editor) return null
 
     const push = (role: 'user' | 'assistant' | 'system', content: string) =>
       setHistory((h) => [...h, { role, content, timestamp: Date.now() }])
 
-    const connectSocket = async () => {
-      if (socketRef.current?.connected) return socketRef.current
-      
-      // 从后端配置获取服务器地址
-      let base = '' // 默认值
+    const resolveServerBase = async (): Promise<string | null> => {
+      if (serverBaseRef.current) return serverBaseRef.current
+
       try {
         const response = await fetch('/api/configs')
         const data = await response.json()
-        const serverUrl = data?.data?.endpoints?.serverUrl
+        const serverUrl = data?.data?.endpoints?.serverUrl + '/api'
+        // const serverUrl = 'http://localhost:22052/api'
+        
         if (serverUrl) {
-          base = String(serverUrl).replace(/\/$/, '')
+          serverBaseRef.current = String(serverUrl).replace(/\/$/, '')
         }
       } catch (e) {
-        console.warn('Failed to get server config, using default:', e)
       }
-      
-      if (!base) {
-        throw new Error('无法获取服务器地址')
+
+      return serverBaseRef.current
+    }
+
+    const generateSessionId = () => {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID()
       }
-      // base = 'http://127.0.0.1:33002'
-      const url = `${base}/tldraw-agent`
-      const s = io(url, { transports: ['websocket'], withCredentials: true })
-      socketRef.current = s
-
-      // 忽略 info 系统提示，不显示到对话列表
-      s.on('info', (_payload: { message: string }) => {})
-      s.on('delta', (payload: { content?: string; action?: AgentAction }) => {
-        setIsStreaming(true)
-        if (!payload?.content && !payload?.action) return
-        if (payload?.content) {
-          const content = payload.content as string
-          setHistory((h) => {
-            // 将增量合并到最新的流式 assistant 消息
-            const idx = streamingIdxRef.current
-            if (idx == null || idx < 0 || idx >= h.length || h[idx]?.role !== 'assistant') {
-              return [...h, { role: 'assistant', content, timestamp: Date.now() }]
-            }
-            const next = h.slice()
-            const prev = next[idx]
-            next[idx] = { ...prev, content: (prev.content || '') + content, timestamp: Date.now() }
-            return next
-          })
-        }
-        if (payload.action) applyAgentAction(editor, payload.action)
-      })
-      s.on('done', (_payload: { message: string }) => {
-        streamingIdxRef.current = null
-        setIsStreaming(false)
-      })
-      s.on('error', (payload: { message: string }) => {
-        streamingIdxRef.current = null
-        setIsStreaming(false)
-        setHistory((h) => [...h, { role: 'assistant', content: payload.message, timestamp: Date.now() }])
-      })
-
-      return s
+      return `${Date.now()}-${Math.random().toString(16).slice(2)}`
     }
 
     const toSimpleShape = (s: any): Record<string, any> => {
@@ -285,7 +466,7 @@ export function useTldrawAgent(editor: Editor | null): AgentAPI | null {
           h: typeof s?.props?.h === 'number' ? s.props.h : undefined,
         }))
         const simpleShapes = shapes.map(toSimpleShape)
-        const chatHistory = history.slice(-10).map((m) => ({ role: m.role, content: m.content }))
+        const chatHistory = historyRef.current.slice(-10).map((m) => ({ role: m.role, content: m.content }))
         return {
           viewport: viewportBounds
             ? { x: viewportBounds.x, y: viewportBounds.y, w: viewportBounds.w, h: viewportBounds.h }
@@ -302,51 +483,268 @@ export function useTldrawAgent(editor: Editor | null): AgentAPI | null {
     }
 
     const request = async (input: AgentInput): Promise<string> => {
-      // 先把用户消息即时追加到历史
       push('user', input.message)
+      let resultMessage = '已发送到 Agent（流式）'
+
+      const finalize = () => {
+        streamingIdxRef.current = null
+        setIsStreaming(false)
+        abortRef.current = null
+      }
+
       try {
-        const s = await connectSocket()
-        const send = async () => {
-          const context = getVisualContext()
-          // 异步补充截图（可选）
-          context.screenshot = await captureViewportImage()
-          s.emit('prompt', { ...input, context })
-          // 创建一个占位的 assistant 流式消息
+        const base = await resolveServerBase()
+        if (!base) {
+          const msg = '无法获取服务器地址'
+          push('assistant', msg)
+          finalize()
+          return msg
+        }
+
+        const context = getVisualContext()
+        context.screenshot = await captureViewportImage()
+
+        const sessionId = generateSessionId()
+        sessionIdRef.current = sessionId
+  skipFunctionBlockRef.current = false
+  functionBlockBufferRef.current = ''
+
+        setHistory((h) => {
+          streamingIdxRef.current = h.length
+          setIsStreaming(true)
+          return [...h, { role: 'assistant' as const, content: '', timestamp: Date.now() }]
+        })
+
+        const controller = new AbortController()
+        abortRef.current = controller
+
+        const response = await fetch(`${base}/tldraw-agent/stream`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ ...input, context, sessionId }),
+          signal: controller.signal,
+        })
+
+        const upsertAssistantMessage = (message: string, options?: { append?: boolean; newline?: boolean }) => {
+          const { append = false, newline = true } = options ?? {}
           setHistory((h) => {
-            streamingIdxRef.current = h.length
-            setIsStreaming(true)
-            return [...h, { role: 'assistant', content: '', timestamp: Date.now() }]
+            const idx = streamingIdxRef.current
+            if (idx == null || idx < 0 || idx >= h.length || h[idx]?.role !== 'assistant') {
+              return [...h, { role: 'assistant' as const, content: message, timestamp: Date.now() }]
+            }
+            const next = h.slice()
+            const prev = next[idx]
+            const prevContent = prev.content || ''
+            const content = append
+              ? prevContent + (prevContent && newline ? '\n' : '') + message
+              : message
+            next[idx] = { ...prev, content, timestamp: Date.now() }
+            return next
           })
         }
-        if (s && s.connected) {
-          await send()
-          return '已发送到 Agent（流式）'
+
+        if (!response.ok || !response.body) {
+          const text = await response.text().catch(() => '')
+          const failure = `请求失败：${text || response.statusText}`
+          setHistory((h) => [...h, { role: 'assistant' as const, content: failure, timestamp: Date.now() }])
+          finalize()
+          sessionIdRef.current = null
+          return failure
         }
-        if (s) {
-          await new Promise<void>((resolve) => {
-            const onConnect = () => {
-              s.off('connect_error', onError)
-              send()
-              resolve()
+
+        const reader = response.body.getReader()
+        readerRef.current = reader
+        const decoder = new TextDecoder('utf-8')
+        let buffer = ''
+        let stopped = false
+
+        const appendAssistantContent = (chunk: string) => {
+          if (!chunk) return
+
+          const actions: AgentAction[] = []
+          let data = skipFunctionBlockRef.current ? functionBlockBufferRef.current + chunk : chunk
+          skipFunctionBlockRef.current = false
+          functionBlockBufferRef.current = ''
+
+          let textPortion = ''
+          let cursor = 0
+
+          while (cursor < data.length) {
+            const openIdx = data.indexOf(FUNCTION_CALL_OPEN_PREFIX, cursor)
+            if (openIdx === -1) {
+              const partialIdx = data.indexOf('<function', cursor)
+              if (partialIdx !== -1) {
+                textPortion += data.slice(cursor, partialIdx)
+                skipFunctionBlockRef.current = true
+                functionBlockBufferRef.current = data.slice(partialIdx)
+              } else {
+                textPortion += data.slice(cursor)
+              }
+              break
             }
-            const onError = () => {
-              s.off('connect', onConnect)
-              resolve()
+
+            // text before the function call
+            textPortion += data.slice(cursor, openIdx)
+
+            // we have detected the start of <function_calls...
+            const gtIdx = data.indexOf('>', openIdx)
+            if (gtIdx === -1) {
+              skipFunctionBlockRef.current = true
+              functionBlockBufferRef.current = data.slice(openIdx)
+              break
             }
-            s.once('connect', onConnect)
-            s.once('connect_error', onError)
-          })
-          if (s.connected) {
-            return '已发送到 Agent（流式）'
+
+            const closeIdx = data.indexOf(FUNCTION_CALL_CLOSE, gtIdx + 1)
+            if (closeIdx === -1) {
+              skipFunctionBlockRef.current = true
+              functionBlockBufferRef.current = data.slice(openIdx)
+              break
+            }
+
+            const inner = data.slice(gtIdx + 1, closeIdx)
+            const parsed = parseFunctionCalls(inner)
+            if (parsed.length) actions.push(...parsed)
+
+            cursor = closeIdx + FUNCTION_CALL_CLOSE.length
+          }
+
+          if (actions.length) actions.forEach((action) => applyAgentAction(editor, action))
+
+          const sanitized = textPortion.replace(/\s+$/, '')
+          if (!sanitized) return
+          upsertAssistantMessage(sanitized, { append: true, newline: false })
+        }
+
+        const flushFunctionBuffer = () => {
+          if (functionBlockBufferRef.current) {
+            let pending = functionBlockBufferRef.current
+            if (!pending.includes(FUNCTION_CALL_CLOSE)) {
+              pending += FUNCTION_CALL_CLOSE
+            }
+            const gtIdx = pending.indexOf('>')
+            const closeIdx = pending.indexOf(FUNCTION_CALL_CLOSE, gtIdx + 1)
+            let parsed: AgentAction[] = []
+            if (gtIdx !== -1 && closeIdx !== -1 && closeIdx > gtIdx) {
+              const inner = pending.slice(gtIdx + 1, closeIdx)
+              parsed = parseFunctionCalls(inner)
+            }
+            if (parsed.length) parsed.forEach((action) => applyAgentAction(editor, action))
+            functionBlockBufferRef.current = ''
+            skipFunctionBlockRef.current = false
           }
         }
-        const msg = 'WebSocket 未连接，无法发送请求'
-        push('assistant', msg)
-        return msg
+
+        const handleDone = () => {
+          flushFunctionBuffer()
+          streamingIdxRef.current = null
+          setIsStreaming(false)
+        }
+
+        const handleError = (message: string) => {
+          resultMessage = message
+          upsertAssistantMessage(message, { append: true })
+          stopped = true
+          handleDone()
+        }
+
+        while (!stopped) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+
+          let delimiter
+          while ((delimiter = buffer.indexOf('\n\n')) !== -1) {
+            const rawChunk = buffer.slice(0, delimiter)
+            buffer = buffer.slice(delimiter + 2)
+            if (!rawChunk) continue
+
+            const lines = rawChunk.split('\n')
+            let eventName = 'message'
+            const dataLines: string[] = []
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                eventName = line.slice(6).trim()
+              } else if (line.startsWith('data:')) {
+                let valueLine = line.slice(5)
+                if (valueLine.startsWith(' ')) valueLine = valueLine.slice(1)
+                dataLines.push(valueLine)
+              }
+            }
+
+            const dataRaw = dataLines.join('\n')
+            let payload: any = undefined
+            if (dataRaw) {
+              try {
+                payload = JSON.parse(dataRaw)
+              } catch {
+                payload = dataRaw
+              }
+            }
+
+            switch (eventName) {
+              case 'session_start':
+                if (payload?.sessionId) {
+                  sessionIdRef.current = payload.sessionId
+                }
+                break
+              case 'info':
+              case 'heartbeat':
+                break
+              case 'delta':
+                if (typeof payload?.content === 'string') {
+                  appendAssistantContent(payload.content)
+                }
+                if (payload?.action) {
+                  applyAgentAction(editor, payload.action as AgentAction)
+                }
+                break
+              case 'action':
+                if (payload?.action) {
+                  applyAgentAction(editor, payload.action as AgentAction)
+                }
+                break
+              case 'done':
+                flushFunctionBuffer()
+                handleDone()
+                stopped = true
+                break
+              case 'error':
+                handleError(typeof payload?.message === 'string' ? payload.message : '请求失败')
+                break
+              default:
+                if (typeof payload === 'string') {
+                  appendAssistantContent(payload)
+                } else if (payload?.content) {
+                  appendAssistantContent(String(payload.content))
+                }
+            }
+
+            if (stopped) break
+          }
+        }
+
+        sessionIdRef.current = null
+  flushFunctionBuffer()
+  finalize()
+        return resultMessage
       } catch (e: any) {
-        const msg = e?.name === 'AbortError' ? '已取消' : '请求失败'
-        push('assistant', msg)
-        return msg
+        const aborted = e?.name === 'AbortError'
+        finalize()
+        if (aborted) {
+          return '已取消'
+        }
+  const failure = '请求失败'
+  sessionIdRef.current = null
+  setHistory((h) => [...h, { role: 'assistant' as const, content: failure, timestamp: Date.now() }])
+  return failure
+      } finally {
+        if (readerRef.current) {
+          try {
+            await readerRef.current.cancel()
+          } catch {}
+        }
+        readerRef.current = null
       }
     }
 
@@ -357,17 +755,45 @@ export function useTldrawAgent(editor: Editor | null): AgentAPI | null {
 
     const cancel = () => {
       abortRef.current?.abort()
-      socketRef.current?.emit('cancel')
+      abortRef.current = null
+      if (readerRef.current) {
+        readerRef.current.cancel().catch(() => undefined)
+      }
+      readerRef.current = null
+      const sessionId = sessionIdRef.current
+      sessionIdRef.current = null
+  skipFunctionBlockRef.current = false
+      streamingIdxRef.current = null
+      setIsStreaming(false)
+      if (sessionId) {
+        resolveServerBase()
+          .then((base) => {
+            if (!base) return
+            return fetch(`${base}/tldraw-agent/cancel`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ sessionId }),
+            })
+          })
+          .catch(() => undefined)
+      }
+      functionBlockBufferRef.current = ''
     }
 
     const reset = () => {
       setHistory([])
-      abortRef.current?.abort()
-      socketRef.current?.emit('reset')
+      cancel()
     }
 
-    return { prompt, request, cancel, reset, history, isStreaming }
-  }, [editor, history, isStreaming])
+    return { prompt, request, cancel, reset }
+  }, [editor])
+
+  if (!editor || !agentApi) {
+    return null
+  }
+
+  return { ...agentApi, history, isStreaming }
 }
 
 
