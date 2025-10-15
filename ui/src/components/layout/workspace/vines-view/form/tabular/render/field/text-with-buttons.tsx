@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Toggle } from '@/components/ui/toggle';
 import { useShouldShowFormButton } from '@/store/useShouldShowFormButton';
 import { cn } from '@/utils';
 
@@ -41,6 +42,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
 
   const [open, setOpen] = React.useState(false);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const [selected, setSelected] = React.useState<Record<string, boolean>>({});
 
   const insertText = (text: string) => {
     const el = textareaRef.current;
@@ -58,6 +60,19 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
         el.selectionStart = el.selectionEnd = start + text.length;
       } catch {}
     }, 0);
+  };
+
+  const keyOf = (l1: string, l2: string, label: string) => `${l1}|||${l2}|||${label}`;
+  const labelOf = (key: string) => key.split('|||')[2] || '';
+
+  const applyFromSelected = (nextSelected: Record<string, boolean>) => {
+    const chosen = Object.entries(nextSelected)
+      .filter(([, on]) => on)
+      .map(([k]) => labelOf(k));
+    // 用空格拼接并去重（以插入顺序为准）
+    const uniq: string[] = [];
+    for (const s of chosen) if (!uniq.includes(s)) uniq.push(s);
+    onChange((uniq || []).join(' '));
   };
 
   // 归一化到 { 一级: { 二级: [三级...] } }
@@ -158,11 +173,11 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                   </TabsTrigger>
                 ))}
               </TabsList>
-              {level1Keys.map((k) => {
-                const entries = Object.entries(normalizedDict[k] || {});
+              {level1Keys.map((k2) => {
+                const entries = Object.entries(normalizedDict[k2] || {});
                 const hideDefaultHeader = entries.length === 1 && entries[0][0] === '默认';
                 return (
-                  <TabsContent key={k} value={k}>
+                  <TabsContent key={k2} value={k2}>
                     <div className="max-h-[60vh] overflow-auto pr-1">
                       {entries.map(([l2, items]) => (
                         <div key={l2} className="mb-4">
@@ -170,17 +185,24 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                             <div className="mb-2 text-[13px] text-muted-foreground">{l2}</div>
                           )}
                           <div className="flex flex-wrap gap-2">
-                            {(items || []).map((it) => (
-                              <Button
-                                key={it}
-                                size="small"
-                                variant="outline"
-                                className="rounded-full px-3 py-1 text-sm"
-                                onClick={() => insertText(it)}
-                              >
-                                {it}
-                              </Button>
-                            ))}
+                            {(items || []).map((it) => {
+                              const k = keyOf(k2, l2, it);
+                              const on = !!selected[k];
+                              return (
+                                <Toggle
+                                  key={k}
+                                  pressed={on}
+                                  onPressedChange={(v) => {
+                                    const ns = { ...selected, [k]: v };
+                                    setSelected(ns);
+                                    applyFromSelected(ns);
+                                  }}
+                                  className="rounded-full border px-3 py-1 text-sm data-[state=on]:bg-vines-500 data-[state=on]:text-white"
+                                >
+                                  {it}
+                                </Toggle>
+                              );
+                            })}
                           </div>
                         </div>
                       ))}
