@@ -108,6 +108,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       comfyuiModelServerId: get(currentVariable, 'typeOptions.comfyuiModelServerId', undefined),
       comfyuiModelTypeName: get(currentVariable, 'typeOptions.comfyuiModelTypeName', undefined),
       visibility: get(currentVariable, 'typeOptions.visibility', undefined),
+      promptDictionary: get(currentVariable, 'typeOptions.promptDictionary', undefined),
       flag: get(currentVariable, 'flag', undefined),
     };
 
@@ -177,6 +178,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'comfyuiModelServerId',
       'comfyuiModelTypeName',
       'visibility',
+      'promptDictionary',
     ]);
 
     const setOption = (key: string, value: unknown) => {
