@@ -158,30 +158,36 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                   </TabsTrigger>
                 ))}
               </TabsList>
-              {level1Keys.map((k) => (
-                <TabsContent key={k} value={k}>
-                  <div className="max-h-[60vh] overflow-auto pr-1">
-                    {Object.entries(normalizedDict[k] || {}).map(([l2, items]) => (
-                      <div key={l2} className="mb-4">
-                        <div className="mb-2 text-[13px] text-muted-foreground">{l2}</div>
-                        <div className="flex flex-wrap gap-2">
-                          {(items || []).map((it) => (
-                            <Button
-                              key={it}
-                              size="small"
-                              variant="outline"
-                              className="rounded-full px-3 py-1 text-sm"
-                              onClick={() => insertText(it)}
-                            >
-                              {it}
-                            </Button>
-                          ))}
+              {level1Keys.map((k) => {
+                const entries = Object.entries(normalizedDict[k] || {});
+                const hideDefaultHeader = entries.length === 1 && entries[0][0] === '默认';
+                return (
+                  <TabsContent key={k} value={k}>
+                    <div className="max-h-[60vh] overflow-auto pr-1">
+                      {entries.map(([l2, items]) => (
+                        <div key={l2} className="mb-4">
+                          {!hideDefaultHeader && (
+                            <div className="mb-2 text-[13px] text-muted-foreground">{l2}</div>
+                          )}
+                          <div className="flex flex-wrap gap-2">
+                            {(items || []).map((it) => (
+                              <Button
+                                key={it}
+                                size="small"
+                                variant="outline"
+                                className="rounded-full px-3 py-1 text-sm"
+                                onClick={() => insertText(it)}
+                              >
+                                {it}
+                              </Button>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-              ))}
+                      ))}
+                    </div>
+                  </TabsContent>
+                );
+              })}
             </Tabs>
           </DialogContent>
         </Dialog>

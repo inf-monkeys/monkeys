@@ -122,6 +122,9 @@ export const workflowInputSchema = z.object({
   // 字段可见性配置
   visibility: visibilityConfigSchema.optional(),
 
+  // 提示词字典（支持多种结构，前端做归一化处理）
+  promptDictionary: z.any().optional(),
+
   flag: z.boolean().optional(),
 });
 

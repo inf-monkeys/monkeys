@@ -134,6 +134,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       comfyuiModelServerId,
       comfyuiModelTypeName,
       visibility,
+      promptDictionary,
     } = pick(data, [
       'multipleValues',
       'assetType',
@@ -153,6 +154,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'comfyuiModelServerId',
       'comfyuiModelTypeName',
       'visibility',
+      'promptDictionary',
       'flag',
     ]);
 
@@ -200,6 +202,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOption('placeholder', placeholder);
     setOption('textareaMiniHeight', textareaMiniHeight);
     setOption('visibility', visibility);
+    setOption('promptDictionary', promptDictionary);
     if (Default) {
       set(finalVariable, 'default', Default);
     }
