@@ -40,11 +40,10 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
 
   const { teamId } = useVinesTeam();
 
-  const [mode, setMode] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>();
-
-  const [{ hideSpaceHeader: urlHideSpaceHeader }] = useUrlState<{ hideSpaceHeader: boolean }>({
-    hideSpaceHeader: false,
-  });
+  const [{ mode, hideSpaceHeader: urlHideSpaceHeader }, setSearch] = useUrlState<{
+    mode: 'normal' | 'fast' | 'mini';
+    hideSpaceHeader: boolean;
+  }>();
 
   const hideSpaceHeader = urlHideSpaceHeader || oem?.theme.hideSpaceHeader || false;
 
@@ -75,8 +74,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
         style={
           theme === 'glassy'
             ? {
-                background:
-                  'linear-gradient(90deg, rgb(244, 219, 190) 1%, rgba(255, 182, 172, 0.58) 38%, rgba(255, 255, 255, 0.6) 100%)',
+                background: '#ebefef',
                 backgroundBlendMode: 'overlay',
                 boxSizing: 'border-box',
                 border: '1.5px solid rgba(255, 255, 255, 0.5)',
@@ -90,7 +88,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
           to="/$teamId"
           params={{ teamId }}
           disabled={!hasToken}
-          onClick={() => Object.keys(mode).length && setMode({ mode: 'normal' })}
+          onClick={() => Object.keys(mode).length && setSearch({ mode: 'normal' })}
         >
           <VinesLogo description="" height={'2rem'} className={cn('ml-2', hasToken && 'cursor-pointer')} />
         </Link>

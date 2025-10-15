@@ -652,12 +652,8 @@ export const useAgentV2Chat = (
         }
       } else if (externalSessionId && externalSessionId !== '') {
         // 情况1: 有明确的外部 session（从列表点击的）
-        // 如果尚未连接SSE，则使用续接SSE接口并携带首条消息；否则走消息接口
-        if (!isConnected) {
-          await attachSessionStream(externalSessionId, content);
-        } else {
-          await sendMessageToSession(externalSessionId, content);
-        }
+        // 直接使用 continue/stream API，在请求体中携带消息
+        await attachSessionStream(externalSessionId, content);
       } else if (currentSessionIdRef.current) {
         // 情况2: 有内部创建的 session，继续使用
         await sendMessageToSession(currentSessionIdRef.current, content);
