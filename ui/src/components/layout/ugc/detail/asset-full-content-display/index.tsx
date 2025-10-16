@@ -229,9 +229,19 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
           </div>
         ) : content ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-2 flex-shrink-0">
-              <TabsTrigger value="content">格式化内容</TabsTrigger>
-              <TabsTrigger value="raw">原始内容</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 flex-shrink-0 bg-gray-100 dark:bg-gray-800">
+              <TabsTrigger 
+                value="content"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:data-[state=active]:shadow-md"
+              >
+                格式化内容
+              </TabsTrigger>
+              <TabsTrigger 
+                value="raw"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:data-[state=active]:shadow-md"
+              >
+                原始内容
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="content" className="mt-0 flex-1 overflow-hidden">

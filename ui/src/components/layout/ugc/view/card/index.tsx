@@ -48,7 +48,7 @@ export const UgcViewCard = <E extends object>({
 
   return (
     <Card
-      className={cn(isTextFile() ? 'h-52' : 'h-44', {
+      className={cn('h-52', {
         'cursor-pointer transition-colors hover:bg-neocard active:bg-neocard': !!onItemClick,
         'cursor-default': !onItemClick,
       })}
