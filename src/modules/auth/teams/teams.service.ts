@@ -1,6 +1,7 @@
+import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { ComfyuiWorkflowEntity } from '@/database/entities/comfyui/comfyui-workflow.entity';
-import { CustomConfigs, CustomTheme, TeamEntity } from '@/database/entities/identity/team';
+import { CustomConfigs, CustomTheme, TeamEntity, TeamInitStatusEnum } from '@/database/entities/identity/team';
 import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-marketplace.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { ComfyuiModelService } from '@/modules/assets/comfyui-model/comfyui-model.service';
@@ -10,14 +11,16 @@ import { MarketplaceService } from '@/modules/marketplace/services/marketplace.s
 import { ConductorService } from '@/modules/workflow/conductor/conductor.service';
 import { WorkflowCrudService } from '@/modules/workflow/workflow.curd.service';
 import { WorkflowPageService } from '@/modules/workflow/workflow.page.service';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import axios from 'axios';
+import { EventEmitter } from 'events';
 import { pick } from 'lodash';
 
 export const DEFAULT_TEAM_DESCRIPTION = '用户很懒，还没留下描述';
 export const DEFAULT_TEAM_PHOTO = 'https://static.aside.fun/upload/cnMh7q.jpg';
 
 @Injectable()
-export class TeamsService {
+export class TeamsService extends EventEmitter {
   constructor(
     private readonly teamRepository: TeamRepository,
     private readonly marketPlaceRepository: AssetsMarketPlaceRepository,
@@ -28,7 +31,9 @@ export class TeamsService {
     private readonly pageService: WorkflowPageService,
     private readonly marketplaceService: MarketplaceService,
     private readonly workflowCrudService: WorkflowCrudService,
-  ) {}
+  ) {
+    super();
+  }
 
   public async forkAssetsFromMarketPlace(teamId: string, userId: string) {
     const clonedComfyuiWorkflows = (await this.marketPlaceRepository.forkBuiltInComfyuiWorkflowAssetsFromMarketPlace(teamId, userId)) as (ComfyuiWorkflowEntity & { forkFromId: string })[];
@@ -53,27 +58,56 @@ export class TeamsService {
   }
 
   public async initTeam(teamId: string, userId: string, deleteAllAssets = false) {
-    // 先清空页面组和固定页面
-    await this.pageService.clearTeamPageGroupsAndPinnedPages(teamId);
+    await this.updateTeamInitStatus(teamId, TeamInitStatusEnum.PENDING);
 
-    if (deleteAllAssets) {
-      await this.workflowCrudService.deleteWorkflowDef(teamId, '*');
+    try {
+      // 先清空页面组和固定页面
+      await this.pageService.clearTeamPageGroupsAndPinnedPages(teamId);
+
+      if (deleteAllAssets) {
+        await this.workflowCrudService.deleteWorkflowDef(teamId, '*');
+      }
+
+      // Init assets from built-in marketplace
+      await this.marketplaceService.installPresetApps(teamId, userId);
+
+      // Check if the default server can connect
+      const isDefaultServerCanConnect = await this.comfyuiModelService.isDefaultServerCanConnect();
+      if (isDefaultServerCanConnect) {
+        // 初始化内置图像模型类型
+        await this.comfyuiModelService.updateTypesFromInternals(teamId);
+        // 自动更新内置图像模型列表
+        await this.comfyuiModelService.updateModelsByTeamIdAndServerId(teamId, 'default');
+        // 自动更新图像模型列表类型
+        await this.comfyuiModelService.updateModelsFromInternals(teamId);
+      }
+
+      setTimeout(() => {
+        this.updateTeamInitStatus(teamId, TeamInitStatusEnum.SUCCESS);
+      }, 10000);
+
+      // initTeam webhook
+      const webhookUrl = config.server.webhook.initTeam;
+      if (webhookUrl) {
+        const result = await axios.post(
+          webhookUrl,
+          {
+            teamId,
+            userId,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${config.server.webhook.token}`,
+            },
+          },
+        );
+        return result.data;
+      }
+      return null;
+    } catch (error) {
+      await this.updateTeamInitStatus(teamId, TeamInitStatusEnum.FAILED);
+      throw error;
     }
-
-    // Init assets from built-in marketplace
-    await this.marketplaceService.installPresetApps(teamId, userId);
-
-    // Check if the default server can connect
-    const isDefaultServerCanConnect = await this.comfyuiModelService.isDefaultServerCanConnect();
-    if (isDefaultServerCanConnect) {
-      // 初始化内置图像模型类型
-      await this.comfyuiModelService.updateTypesFromInternals(teamId);
-      // 自动更新内置图像模型列表
-      await this.comfyuiModelService.updateModelsByTeamIdAndServerId(teamId, 'default');
-      // 自动更新图像模型列表类型
-      await this.comfyuiModelService.updateModelsFromInternals(teamId);
-    }
-    return;
   }
 
   public async createTeam(
@@ -177,5 +211,58 @@ export class TeamsService {
     } else {
       throw new Error('你不是团队拥有者，无法移除团队成员');
     }
+  }
+
+  /**
+   * 获取团队初始化状态
+   */
+  public async getTeamInitStatus(teamId: string, userId: string): Promise<TeamInitStatusEnum | undefined> {
+    const team = await this.teamRepository.getTeamById(teamId);
+    if (!team) {
+      throw new NotFoundException('团队不存在');
+    }
+
+    // 检查用户是否有权限查看该团队
+    const userTeams = await this.getUserTeams(userId);
+    if (!userTeams.some((t) => t.id === teamId)) {
+      throw new ForbiddenException('您没有权限查看该团队状态');
+    }
+
+    return team.initStatus;
+  }
+
+  /**
+   * 订阅团队状态变化
+   */
+  public async subscribeToTeamStatus(teamId: string, userId: string, callback: (status: TeamInitStatusEnum | undefined) => void): Promise<() => void> {
+    // 检查权限
+    const userTeams = await this.getUserTeams(userId);
+    if (!userTeams.some((t) => t.id === teamId)) {
+      throw new Error('您没有权限查看该团队状态');
+    }
+
+    const eventName = `team-status-${teamId}`;
+
+    // 添加监听器
+    this.on(eventName, callback);
+
+    // 发送当前状态
+    const currentStatus = await this.getTeamInitStatus(teamId, userId);
+    callback(currentStatus);
+
+    // 返回取消订阅函数
+    return () => {
+      this.removeListener(eventName, callback);
+    };
+  }
+
+  /**
+   * 更新团队初始化状态
+   */
+  public async updateTeamInitStatus(teamId: string, status: TeamInitStatusEnum): Promise<void> {
+    await this.teamRepository.updateTeamInitStatus(teamId, status);
+
+    // 发送状态变化事件
+    this.emit(`team-status-${teamId}`, status);
   }
 }

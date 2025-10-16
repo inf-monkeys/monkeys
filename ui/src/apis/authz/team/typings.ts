@@ -106,3 +106,9 @@ export interface IInviteTeamData {
   alreadyJoined?: boolean;
   teamId?: string;
 }
+
+export enum ITeamInitStatusEnum {
+  PENDING = 'PENDING',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+}

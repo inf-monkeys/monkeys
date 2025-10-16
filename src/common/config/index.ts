@@ -204,6 +204,10 @@ export interface ServerConfig {
     };
     workbench: CustomizationWorkbench;
   };
+  webhook: {
+    token?: string;
+    initTeam?: string;
+  };
 }
 
 export enum RedisMode {
@@ -591,6 +595,10 @@ export const config: Config = {
         pages: readConfig('server.customization.workbench.pages', []),
         pageGroups: readConfig('server.customization.workbench.pageGroups', []),
       },
+    },
+    webhook: {
+      token: readConfig('server.webhook.token', undefined),
+      initTeam: readConfig('server.webhook.initTeam', undefined),
     },
   },
   conductor: {
