@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { ITeamInitStatusEnum } from '@/apis/authz/team/typings.ts';
+import { EventSourcePolyfill } from 'event-source-polyfill';
 
+import { ITeamInitStatusEnum } from '@/apis/authz/team/typings.ts';
+import { vinesHeader } from '@/apis/utils';
+
+/**
+ * SSE 事件结构
+ */
 interface TeamStatusSSEEvent {
   type: 'connected' | 'status_update' | 'heartbeat' | 'complete';
   teamId: string;
@@ -9,6 +15,9 @@ interface TeamStatusSSEEvent {
   timestamp: string;
 }
 
+/**
+ * Hook 外部可传入的选项
+ */
 interface UseTeamStatusSSEOptions {
   enabled?: boolean;
   onStatusChange?: (status: ITeamInitStatusEnum | undefined) => void;
@@ -17,6 +26,9 @@ interface UseTeamStatusSSEOptions {
   onDisconnect?: () => void;
 }
 
+/**
+ * Hook 返回值
+ */
 interface UseTeamStatusSSEReturn {
   status: ITeamInitStatusEnum | undefined;
   isConnected: boolean;
@@ -26,6 +38,18 @@ interface UseTeamStatusSSEReturn {
   disconnect: () => void;
 }
 
+const SSE_INTERNAL_CONFIG = {
+  reconnectDelay: 3000, // 初始重连延时
+  maxReconnectAttempts: 5, // 最大重连次数
+};
+
+// 全局连接跟踪，防止重复连接
+const activeConnections = new Map<string, EventSourcePolyfill>();
+
+/**
+ * Hook: useTeamStatusSSE
+ * 自动区分普通响应和 SSE 流，内置鉴权与重连逻辑。
+ */
 export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOptions = {}): UseTeamStatusSSEReturn => {
   const { enabled = true, onStatusChange, onError, onConnect, onDisconnect } = options;
 
@@ -34,68 +58,67 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const eventSourceRef = useRef<EventSource | null>(null);
+  const eventSourceRef = useRef<EventSourcePolyfill | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 5;
-  const reconnectDelay = 3000;
+  const manualCloseRef = useRef(false);
 
-  // 获取团队状态（可能是普通响应或 SSE 流）
-  const fetchTeamStatus = useCallback(async () => {
-    if (!teamId || !enabled) return;
+  // ---- 内部通用断开逻辑 ----
+  const disconnect = useCallback(() => {
+    manualCloseRef.current = true;
 
-    try {
-      setIsLoading(true);
-      setError(null);
+    if (eventSourceRef.current) {
+      // 从全局跟踪中移除连接
+      const statusUrl = `/api/teams/${teamId}/init-status`;
+      activeConnections.delete(statusUrl);
 
-      // 构建请求 URL
-      const statusUrl = `/api/teams/${teamId}/status`;
-
-      // 先尝试普通请求
-      const response = await fetch(statusUrl, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-        },
-      });
-
-      // 检查响应类型
-      const contentType = response.headers.get('content-type');
-
-      if (contentType?.includes('application/json')) {
-        // 普通 JSON 响应（状态为 null 或 SUCCESS）
-        const data = await response.json();
-        if (data?.success) {
-          setStatus(data.data);
-          onStatusChange?.(data.data);
-        }
-        setIsLoading(false);
-      } else if (contentType?.includes('text/event-stream')) {
-        // SSE 流响应（状态为 PENDING 或 FAILED）
-        handleSSEStream(statusUrl);
-      } else {
-        throw new Error('未知的响应类型');
-      }
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('获取团队状态失败');
-      setError(error);
-      onError?.(error);
-      setIsLoading(false);
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
     }
-  }, [teamId, enabled, onStatusChange, onError]);
 
-  // 处理 SSE 流
-  const handleSSEStream = useCallback(
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    setIsConnected(false);
+    setIsLoading(false);
+    reconnectAttemptsRef.current = 0;
+
+    onDisconnect?.();
+  }, [onDisconnect, teamId]);
+
+  // ---- 建立 SSE 连接 ----
+  const connectSSE = useCallback(
     (sseUrl: string) => {
-      if (eventSourceRef.current) return;
+      // 检查是否已有相同 URL 的活跃连接
+      const existingConnection = activeConnections.get(sseUrl);
+      if (existingConnection) {
+        console.warn(`SSE 连接已存在，跳过重复连接: ${sseUrl}`);
+        return;
+      }
+
+      // 检查当前实例是否已有连接
+      if (eventSourceRef.current) {
+        console.warn('当前实例已有 SSE 连接，跳过重复连接');
+        return;
+      }
+
+      manualCloseRef.current = false;
 
       try {
-        // 创建 EventSource
-        const eventSource = new EventSource(sseUrl);
-        eventSourceRef.current = eventSource;
+        const headers = vinesHeader({});
 
-        // 连接成功
-        eventSource.onopen = () => {
+        const es = new EventSourcePolyfill(sseUrl, {
+          headers,
+          withCredentials: false,
+        });
+
+        // 将连接添加到全局跟踪
+        activeConnections.set(sseUrl, es);
+        eventSourceRef.current = es;
+
+        es.onopen = () => {
           setIsConnected(true);
           setIsLoading(false);
           setError(null);
@@ -103,8 +126,7 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
           onConnect?.();
         };
 
-        // 处理消息
-        eventSource.onmessage = (event) => {
+        const handleEvent = (_: string) => (event: MessageEvent) => {
           try {
             const data: TeamStatusSSEEvent = JSON.parse(event.data);
 
@@ -121,7 +143,6 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
                 break;
 
               case 'complete':
-                // 流完成，断开连接
                 if (data.status !== undefined) {
                   setStatus(data.status);
                   onStatusChange?.(data.status);
@@ -130,7 +151,7 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
                 break;
 
               case 'heartbeat':
-                // 心跳消息，保持连接活跃
+                // 心跳包，不做处理
                 break;
             }
           } catch (err) {
@@ -138,78 +159,98 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
           }
         };
 
-        // 处理错误
-        eventSource.onerror = (event) => {
-          console.error('SSE 连接错误:', event);
+        const eventTypes = ['connected', 'status_update', 'heartbeat', 'complete'];
+        eventTypes.forEach((type) => es.addEventListener(type as any, handleEvent(type)));
+
+        es.onerror = () => {
+          if (manualCloseRef.current) return;
+
+          // 从全局跟踪中移除连接
+          activeConnections.delete(sseUrl);
+
           setIsConnected(false);
           setIsLoading(false);
+          const err = new Error('SSE 连接中断');
+          setError(err);
+          onError?.(err);
 
-          const error = new Error('SSE 连接失败');
-          setError(error);
-          onError?.(error);
-
-          // 尝试重连
+          // 自动重连
+          const { reconnectDelay, maxReconnectAttempts } = SSE_INTERNAL_CONFIG;
           if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+            const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current);
             reconnectAttemptsRef.current++;
             reconnectTimeoutRef.current = setTimeout(() => {
-              handleSSEStream(sseUrl);
-            }, reconnectDelay);
+              connectSSE(sseUrl);
+            }, delay);
           } else {
             onDisconnect?.();
           }
         };
       } catch (err) {
+        // 从全局跟踪中移除连接（如果已添加）
+        activeConnections.delete(sseUrl);
+
         const error = err instanceof Error ? err : new Error('创建 SSE 连接失败');
         setError(error);
-        onError?.(error);
         setIsLoading(false);
+        onError?.(error);
       }
     },
-    [onStatusChange, onError, onConnect, onDisconnect],
+    [onConnect, onDisconnect, onError, onStatusChange, disconnect],
   );
 
-  // 断开连接
-  const disconnect = useCallback(() => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
+  // ---- 普通请求（探测响应类型） ----
+  const fetchTeamStatus = useCallback(async () => {
+    if (!teamId || !enabled) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    const statusUrl = `/api/teams/${teamId}/init-status`;
+
+    try {
+      const response = await fetch(statusUrl, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          ...vinesHeader({}),
+        },
+      });
+
+      const contentType = response.headers.get('content-type') || '';
+
+      if (contentType.includes('application/json')) {
+        const data = await response.json();
+        if (data?.success) {
+          setStatus(data.data);
+          onStatusChange?.(data.data);
+        }
+        setIsLoading(false);
+      } else if (contentType.includes('text/event-stream')) {
+        connectSSE(statusUrl);
+      } else {
+        throw new Error('未知响应类型');
+      }
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('获取团队状态失败');
+      setError(error);
+      setIsLoading(false);
+      onError?.(error);
     }
+  }, [teamId, enabled, connectSSE, onStatusChange, onError]);
 
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-
-    setIsConnected(false);
-    setIsLoading(false);
-    reconnectAttemptsRef.current = 0;
-    onDisconnect?.();
-  }, [onDisconnect]);
-
-  // 重连
+  // ---- 手动重连 ----
   const reconnect = useCallback(() => {
     disconnect();
     reconnectAttemptsRef.current = 0;
     fetchTeamStatus();
   }, [disconnect, fetchTeamStatus]);
 
-  // 初始化
+  // ---- 初始化与清理 ----
   useEffect(() => {
-    if (enabled && teamId) {
-      fetchTeamStatus();
-    }
-
-    return () => {
-      disconnect();
-    };
+    if (enabled && teamId) fetchTeamStatus();
+    return disconnect;
   }, [enabled, teamId, fetchTeamStatus, disconnect]);
-
-  // 清理
-  useEffect(() => {
-    return () => {
-      disconnect();
-    };
-  }, [disconnect]);
 
   return {
     status,

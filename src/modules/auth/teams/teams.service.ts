@@ -82,28 +82,33 @@ export class TeamsService extends EventEmitter {
         await this.comfyuiModelService.updateModelsFromInternals(teamId);
       }
 
-      setTimeout(() => {
-        this.updateTeamInitStatus(teamId, TeamInitStatusEnum.SUCCESS);
-      }, 10000);
-
       // initTeam webhook
       const webhookUrl = config.server.webhook.initTeam;
       if (webhookUrl) {
-        const result = await axios.post(
-          webhookUrl,
-          {
-            teamId,
-            userId,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${config.server.webhook.token}`,
+        axios
+          .post(
+            webhookUrl,
+            {
+              teamId,
+              userId,
             },
-          },
-        );
-        return result.data;
+            {
+              headers: {
+                Authorization: `Bearer ${config.server.webhook.token}`,
+              },
+              timeout: 15 * 60 * 1000,
+            },
+          )
+          .then(async (result) => {
+            if (result.status === 200 && result.data.code === 200) {
+              await this.updateTeamInitStatus(teamId, TeamInitStatusEnum.SUCCESS);
+            }
+          });
+        return null;
+      } else {
+        await this.updateTeamInitStatus(teamId, TeamInitStatusEnum.SUCCESS);
+        return null;
       }
-      return null;
     } catch (error) {
       await this.updateTeamInitStatus(teamId, TeamInitStatusEnum.FAILED);
       throw error;
