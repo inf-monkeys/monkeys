@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx';
 import { UgcTagSelector } from '@/components/layout/ugc/view/tag-selector';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
+import { AssetFullContentDisplay } from '@/components/layout/ugc/detail/asset-full-content-display';
 import { cn } from '@/utils';
 
 interface IAssetDetailPageProps<E extends object> {
@@ -36,6 +38,25 @@ export const AssetDetailPage = <E extends object>({
     updateTime: asset.updatedTimestamp ? new Date(asset.updatedTimestamp).toLocaleDateString('zh-CN') : '未知时间',
   };
 
+  // 获取文件类型
+  const getFileType = () => {
+    const fileName = assetInfo.name;
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    return extension;
+  };
+
+  // 判断是否为文本文件
+  const isTextFile = () => {
+    const fileType = getFileType();
+    return ['txt', 'json', 'md', 'csv', 'log', 'xml', 'yaml', 'yml'].includes(fileType || '');
+  };
+
+  // 判断是否为图片文件
+  const isImageFile = () => {
+    const fileType = getFileType();
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(fileType || '');
+  };
+
   // 获取预览图片URL
   const previewImageUrl = (asset as any).url || (asset as any).cover || asset.iconUrl || '';
 
@@ -58,21 +79,31 @@ export const AssetDetailPage = <E extends object>({
       <div className="flex flex-1 gap-6 p-6 overflow-hidden">
         {/* 左侧预览区域 */}
         <div className="flex-1">
-          <Card className="h-full flex flex-col">
-            <CardContent className="flex-1 flex items-center justify-center p-8 overflow-auto">
-              {previewImageUrl ? (
-                <img
-                  src={previewImageUrl}
-                  alt={assetInfo.name}
-                  className="max-w-[80%] object-contain"
-                />
-              ) : (
-                <div className="flex h-64 w-full items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
-                  暂无预览图片
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {isTextFile() ? (
+            // 文本文件显示完整内容
+            <AssetFullContentDisplay 
+              asset={asset} 
+              className="w-full h-full"
+            />
+          ) : isImageFile() && previewImageUrl ? (
+            // 图片文件显示图片预览
+            <div className="h-full flex items-center justify-center p-4 bg-white dark:bg-black rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+              <img
+                src={previewImageUrl}
+                alt={assetInfo.name}
+                className="max-w-full max-h-full w-auto h-auto object-contain"
+                style={{ maxWidth: 'calc(100% - 2rem)', maxHeight: 'calc(100% - 2rem)' }}
+              />
+            </div>
+          ) : (
+            // 其他文件类型显示默认预览
+            <div className="h-full flex items-center justify-center p-8 bg-white dark:bg-black rounded-lg border border-gray-200 dark:border-gray-800">
+              <div className="text-center">
+                <div className="text-lg font-medium mb-2 text-gray-500 dark:text-gray-400">{assetInfo.fileFormat}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">暂不支持预览</div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 右侧信息区域 */}
@@ -156,36 +187,38 @@ export const AssetDetailPage = <E extends object>({
               </div>
             </CardContent>
 
-            {/* 转换功能区域 - 固定在右侧栏最底部 */}
-            <div className="border-t border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-black">
-              <div className="flex flex-col gap-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">转换</label>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded whitespace-nowrap">图片</span>
-                  <span className="text-gray-400 dark:text-gray-500">→</span>
-                  <Select value={conversionType} onValueChange={setConversionType}>
-                    <SelectTrigger className="w-24 h-8 border-gray-300 dark:border-gray-700">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="text">文本</SelectItem>
-                      <SelectItem value="symbol-summary">符号概括</SelectItem>
-                      <SelectItem value="3d-model">3D模型</SelectItem>
-                      <SelectItem value="neural-model">神经模型</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    size="small"
-                    className="ml-auto bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 px-4 py-2 rounded-md font-medium"
-                    onClick={() => {
-                      console.log('开始转换:', conversionType);
-                    }}
-                  >
-                    开始转换
-                  </Button>
+            {/* 转换功能区域 - 只在非文本文件时显示 */}
+            {!isTextFile() && (
+              <div className="border-t border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-black">
+                <div className="flex flex-col gap-3">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">转换</label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded whitespace-nowrap">图片</span>
+                    <span className="text-gray-400 dark:text-gray-500">→</span>
+                    <Select value={conversionType} onValueChange={setConversionType}>
+                      <SelectTrigger className="w-24 h-8 border-gray-300 dark:border-gray-700">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">文本</SelectItem>
+                        <SelectItem value="symbol-summary">符号概括</SelectItem>
+                        <SelectItem value="3d-model">3D模型</SelectItem>
+                        <SelectItem value="neural-model">神经模型</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      size="small"
+                      className="ml-auto bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 px-4 py-2 rounded-md font-medium"
+                      onClick={() => {
+                        console.log('开始转换:', conversionType);
+                      }}
+                    >
+                      开始转换
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
           </Card>
         </div>

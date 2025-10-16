@@ -52,7 +52,7 @@ function RemoteDataTable<TData, TValue>({
   const paginationPosition = oem?.theme.paginationPosition ?? 'left';
 
   return (
-    <div className="max-w-[calc(100vw-213px-255px-120px)] overflow-x-auto">
+    <div className="w-full overflow-x-auto">
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -73,7 +73,7 @@ function RemoteDataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className="h-64 overflow-y-auto">
+          <TableBody className="max-h-[calc(100vh-300px)] overflow-y-auto">
             {hastData ? (
               rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
