@@ -115,6 +115,7 @@ export type CustomizationDesignProjects = {
   showToolbar: boolean;
   showContextMenu: boolean;
   showPageAndLayerSidebar?: boolean; // 是否显示左侧 页面+图层 sidebar，默认 false
+  showMiniToolsToolbar?: boolean; // 是否显示小工具工具栏，默认 false
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;

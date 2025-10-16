@@ -4,26 +4,26 @@ import './index.scss';
 import './layer-panel.css';
 
 import {
-    AssetRecordType,
-    createShapeId,
-    defaultBindingUtils,
-    DefaultContextMenu,
-    DefaultContextMenuContent,
-    defaultEditorAssetUrls,
-    defaultShapeTools,
-    defaultTools,
-    Editor,
-    FrameShapeUtil,
-    TLComponents,
-    Tldraw,
-    TldrawUiMenuGroup,
-    TldrawUiMenuItem,
-    TLImageShape,
-    TLShape,
-    TLShapeId,
-    TLUiContextMenuProps,
-    useEditor,
-    useToasts
+  AssetRecordType,
+  createShapeId,
+  defaultBindingUtils,
+  DefaultContextMenu,
+  DefaultContextMenuContent,
+  defaultEditorAssetUrls,
+  defaultShapeTools,
+  defaultTools,
+  Editor,
+  FrameShapeUtil,
+  TLComponents,
+  Tldraw,
+  TldrawUiMenuGroup,
+  TldrawUiMenuItem,
+  TLImageShape,
+  TLShape,
+  TLShapeId,
+  TLUiContextMenuProps,
+  useEditor,
+  useToasts
 } from 'tldraw';
 
 import { ExternalLayerPanel } from './ExternalLayerPanel';
@@ -752,8 +752,8 @@ export const Board: React.FC<BoardProps> = ({
           },
         }}
         >
-          {/* 小工具工具栏 */}
-          <MiniToolsToolbar />
+          {/* 小工具工具栏 - 根据 OEM 配置控制显示 */}
+          {get(oem, 'theme.designProjects.showMiniToolsToolbar', false) && <MiniToolsToolbar />}
         </Tldraw>
         </TldrawErrorBoundary>
       </div>

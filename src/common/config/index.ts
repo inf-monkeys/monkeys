@@ -119,6 +119,7 @@ export type CustomizationDesignProjects = {
   showActionsMenu: boolean; // 是否显示 tldraw 左上角原生操作条（撤销/重做/删除/重复/更多）
   showPageAndLayerSidebar?: boolean; // 是否显示左侧页面+图层侧边栏
   showBoardOperationSidebar?: boolean; // 是否显示画板操作侧边栏（宽/高、导出、保存）
+  showMiniToolsToolbar?: boolean; // 是否显示小工具工具栏
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
@@ -586,6 +587,7 @@ export const config: Config = {
         showPageAndLayerSidebar: readConfig('server.customization.designProjects.showPageAndLayerSidebar', false),
         showBoardOperationSidebar: readConfig('server.customization.designProjects.showBoardOperationSidebar', true),
         showActionsMenu: readConfig('server.customization.designProjects.showActionsMenu', true),
+        showMiniToolsToolbar: readConfig('server.customization.designProjects.showMiniToolsToolbar', false),
       },
       marketplace: {
         presetAppSortFileUrl: readConfig('server.customization.marketplace.presetAppSortFileUrl', undefined),
