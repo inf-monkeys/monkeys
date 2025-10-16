@@ -116,8 +116,9 @@ export const useWorkflowExecutionListInfinite = (workflowId?: string | null, lim
     },
     vinesFetcher({ method: 'GET', wrapper: paginationWrapper }),
     {
-      revalidateFirstPage: false,
+      revalidateFirstPage: true,
       revalidateOnFocus: false,
+      refreshInterval: 500,
     },
   );
 

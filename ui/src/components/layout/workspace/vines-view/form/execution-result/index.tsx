@@ -118,8 +118,23 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
         }
       }
 
-      // 合并：新增项目在前 + 更新后的现有项目
-      finalRawData = [...newItems, ...Array.from(existingMap.values())];
+      // 合并并按时间排序：将所有项目按 startTime 降序排列（最新的在前）
+      // 同时将 RUNNING 和 SCHEDULED 状态的项目排在最前面
+      const allItems = Array.from(existingMap.values());
+      finalRawData = allItems.sort((a, b) => {
+        // 首先按状态排序：RUNNING/SCHEDULED 优先
+        const statusPriorityA = ['RUNNING', 'SCHEDULED'].includes(a.status) ? 0 : 1;
+        const statusPriorityB = ['RUNNING', 'SCHEDULED'].includes(b.status) ? 0 : 1;
+
+        if (statusPriorityA !== statusPriorityB) {
+          return statusPriorityA - statusPriorityB;
+        }
+
+        // 相同状态优先级时，按时间降序排列
+        const timeA = a.startTime || 0;
+        const timeB = b.startTime || 0;
+        return timeB - timeA; // 降序：新的在前
+      });
       setUpdateExecutionResultList([...updateItems, ...newItems]);
     }
 
