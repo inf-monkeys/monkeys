@@ -11,6 +11,9 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
   const agent = useTldrawAgent(editor);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
 
   const renderContent = (content: string) => {
     // 将 <think>...</think> 与正文拆分渲染
@@ -69,6 +72,51 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
   const reset = () => {
     agent?.reset();
     setTimeout(() => scrollRef.current?.scrollTo({ top: 0 }), 0);
+  };
+
+  const toggleRecord = async () => {
+    if (isRecording) {
+      try {
+        mediaRecorderRef.current?.stop();
+      } catch {}
+      setIsRecording(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      recordedChunksRef.current = [];
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        try {
+          const blob = new Blob(recordedChunksRef.current, { type: 'audio/webm' });
+          if (!blob.size) return;
+          const form = new FormData();
+          form.append('file', blob, 'audio.webm');
+          const resp = await fetch('/api/tldraw-agent/transcribe', { method: 'POST', body: form, credentials: 'include' });
+          const data = await resp.json().catch(() => ({ text: '' }));
+          const text = String(data?.text || '').trim();
+          if (text) {
+            setInput(text);
+            // 直接发送
+            agent?.prompt({ message: text });
+            setInput('');
+            setTimeout(() => scrollRef.current?.scrollTo({ top: 1e9, behavior: 'smooth' }), 0);
+          }
+        } catch (e) {
+          // ignore
+        } finally {
+          recordedChunksRef.current = [];
+        }
+      };
+      mediaRecorderRef.current = mr;
+      mr.start();
+      setIsRecording(true);
+    } catch (e) {
+      setIsRecording(false);
+    }
   };
 
   return (
@@ -163,9 +211,9 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
             >
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
             </button>
-            {/* 右侧语音图标（占位） */}
+            {/* 右侧语音图标，点击开始/结束录音 */}
             <button
-              title="语音"
+              title={isRecording ? '停止' : '语音'}
               style={{
                 position: 'absolute',
                 right: 52,
@@ -174,11 +222,11 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
                 height: 24,
                 borderRadius: '50%',
                 border: '1px solid #e5e7eb',
-                background: '#fff',
-                color: '#6b7280',
+                background: isRecording ? '#fde68a' : '#fff',
+                color: isRecording ? '#b45309' : '#6b7280',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
               }}
-              onClick={() => { /* 预留：语音输入 */ }}
+              onClick={toggleRecord}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
             </button>
