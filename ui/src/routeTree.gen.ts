@@ -16,6 +16,7 @@ import { Route as rootRoute } from './pages/__root'
 import { Route as TeamIdModelTrainingIndexImport } from './pages/$teamId/model-training/index'
 import { Route as TeamIdEvaluationsIndexImport } from './pages/$teamId/evaluations/index'
 import { Route as TeamIdEvaluationsDetailImport } from './pages/$teamId/evaluations/detail'
+import { Route as TeamIdModelTrainingModelTrainingIdIndexImport } from './pages/$teamId/model-training/$modelTrainingId/index'
 
 // Create Virtual Routes
 
@@ -468,6 +469,12 @@ const TeamIdActionToolsActionToolNameIndexLazyRoute =
     ),
   )
 
+const TeamIdModelTrainingModelTrainingIdIndexRoute =
+  TeamIdModelTrainingModelTrainingIdIndexImport.update({
+    path: '/$teamId/model-training/$modelTrainingId/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute =
   TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport.update({
     path: '/$teamId/workspace/$workflowId/image-detail/',
@@ -682,6 +689,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/model-training/$modelTrainingId/': {
+      preLoaderRoute: typeof TeamIdModelTrainingModelTrainingIdIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/action-tools/$actionToolName/': {
       preLoaderRoute: typeof TeamIdActionToolsActionToolNameIndexLazyImport
       parentRoute: typeof rootRoute
@@ -795,6 +806,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkbenchIndexLazyRoute,
   TeamIdWorkflowsIndexLazyRoute,
   TeamIdWorkspaceIndexLazyRoute,
+  TeamIdModelTrainingModelTrainingIdIndexRoute,
   TeamIdActionToolsActionToolNameIndexLazyRoute,
   TeamIdAgentAgentIdIndexLazyRoute,
   TeamIdComfyuiComfyuiWorkflowIdIndexLazyRoute,

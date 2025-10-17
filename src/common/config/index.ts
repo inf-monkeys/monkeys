@@ -450,6 +450,10 @@ export interface AgentV2Config {
   };
 }
 
+export interface ModelTrainingConfig {
+  endpoint: string; // Model training service endpoint
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -470,6 +474,7 @@ export interface Config {
   admin: AdminConfig;
   evaluation: EvaluationConfig;
   agentv2: AgentV2Config;
+  modelTraining: ModelTrainingConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -791,6 +796,9 @@ When answer to user:
       maxTokensPerSearch: readConfig('agentv2.webSearch.maxTokensPerSearch', 2000),
       timeout: readConfig('agentv2.webSearch.timeout', 60000),
     },
+  },
+  modelTraining: {
+    endpoint: readConfig('models-training.endpoint', 'http://localhost:30025'),
   },
 };
 
