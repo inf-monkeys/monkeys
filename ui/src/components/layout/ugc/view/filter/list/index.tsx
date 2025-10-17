@@ -33,6 +33,10 @@ export interface IUgcViewFilterListProps extends IUgcCustomProps {
 
   // special for tools
   toolsData?: IAssetItem<ICommonTool>[];
+  
+  // 外部控制的选中规则ID
+  selectedRuleId?: string;
+  onSelectedRuleIdChange?: (ruleId: string) => void;
 }
 
 export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
@@ -42,6 +46,8 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   onChange,
   filterButtonProps,
   toolsData: rawToolsData,
+  selectedRuleId,
+  onSelectedRuleIdChange,
 }) => {
   const { t } = useTranslation();
 
@@ -52,8 +58,18 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   const { data: assetPublicCategories } = useAssetPublicCategories(assetType, isMarket);
 
   const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType) && !isMarket;
-  const [currentRuleId, setCurrentRuleId] = useState('all');
+  const [internalRuleId, setInternalRuleId] = useState('all');
   const [searchValue, setSearchValue] = useState('');
+  
+  // 使用外部传入的 selectedRuleId 或内部状态
+  const currentRuleId = selectedRuleId !== undefined ? selectedRuleId : internalRuleId;
+  const setCurrentRuleId = (ruleId: string) => {
+    if (onSelectedRuleIdChange) {
+      onSelectedRuleIdChange(ruleId);
+    } else {
+      setInternalRuleId(ruleId);
+    }
+  };
 
   const [activeIndex, setActiveIndex] = useState<string[]>([]);
 

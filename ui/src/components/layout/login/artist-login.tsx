@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Mail, Search } from 'lucide-react';
+import { ArrowLeft, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useLoginByPassword } from '@/apis/authz';
@@ -125,13 +125,13 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
             <Mail className="tab-icon" />
             邮箱登录
           </button>
-          <button
+          {/* <button
             className={`tab-button ${!isLogin ? 'active' : ''}`}
             onClick={() => setIsLogin(false)}
           >
             <Search className="tab-icon" />
             注册账号
-          </button>
+          </button> */}
         </div>
 
         {/* 表单 */}
@@ -170,19 +170,29 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
 
           {/* 辅助选项 */}
           <div className="form-options">
-             <div className="remember-password">
-               <Checkbox
-                 id="remember"
-                 checked={rememberPassword}
-                 onCheckedChange={(checked) => setRememberPassword(checked === true)}
-               />
-               <Label htmlFor="remember">记住密码</Label>
-             </div>
-            {isLogin && (
+            <div className="remember-section">
+              <div className="remember-password">
+                <Checkbox
+                  id="remember"
+                  checked={rememberPassword}
+                  onCheckedChange={(checked) => setRememberPassword(checked === true)}
+                />
+                <Label htmlFor="remember">记住密码</Label>
+              </div>
+              <div className="remember-hint">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-info" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 16v-4"></path>
+                  <path d="M12 8h.01"></path>
+                </svg>
+                <span className="hint-text">未注册用户将自动注册</span>
+              </div>
+            </div>
+            {/* {isLogin && (
               <button type="button" className="forgot-password">
                 忘记密码?
               </button>
-            )}
+            )} */}
           </div>
 
           {/* 提交按钮 */}

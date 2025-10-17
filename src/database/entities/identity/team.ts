@@ -16,6 +16,12 @@ export interface CustomTheme {
   configs?: CustomConfigs;
 }
 
+export enum TeamInitStatusEnum {
+  PENDING = 'PENDING',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+}
+
 @Entity({ name: 'teams' })
 export class TeamEntity extends BaseEntity {
   @Column()
@@ -76,4 +82,12 @@ export class TeamEntity extends BaseEntity {
     default: false,
   })
   enableJoinRequest?: boolean;
+
+  @Column({
+    name: 'init_status',
+    nullable: true,
+    type: 'enum',
+    enum: TeamInitStatusEnum,
+  })
+  initStatus?: TeamInitStatusEnum;
 }

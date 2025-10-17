@@ -3,12 +3,23 @@ import React, { useMemo } from 'react';
 import { IAssetItem, IListUgcDto } from '@/apis/ugc/typings.ts';
 import { UgcViewFolderCard } from '@/components/layout/ugc/view/folder';
 
+interface IFolderData {
+  id: string;
+  name: string;
+  assetCount: number;
+  lastUpdated: string;
+  previewImages: string[];
+  previewAssets?: any[];
+  filterRules: Partial<IListUgcDto['filter']>;
+}
+
 interface IFolderViewProps<E extends object> {
   allData: IAssetItem<E>[];
   filter: Partial<IListUgcDto['filter']>;
   renderOptions?: any; // optional
   currentRuleId?: string; // 添加当前规则ID
   assetFilterRules?: any[]; // 添加筛选规则列表
+  onFolderClick?: (folderId: string, folderFilter: Partial<IListUgcDto['filter']>) => void;
 }
 
 export const UgcViewFolderView = <E extends object>({
@@ -16,16 +27,11 @@ export const UgcViewFolderView = <E extends object>({
   filter,
   currentRuleId,
   assetFilterRules = [],
+  onFolderClick,
 }: IFolderViewProps<E>) => {
   // 生成文件夹数据
-  const generateFolderData = useMemo(() => {
-    const folders: Array<{
-      id: string;
-      name: string;
-      assetCount: number;
-      lastUpdated: string;
-      previewImages: string[];
-    }> = [];
+  const generateFolderData = useMemo((): IFolderData[] => {
+    const folders: IFolderData[] = [];
 
     const hasSpecificFilter =
       filter &&
@@ -105,6 +111,24 @@ export const UgcViewFolderView = <E extends object>({
         .filter(Boolean);
     };
 
+    const pickPreviewAssets = (items: any[]): any[] => {
+      // 优先选择图片文件，然后选择其他文件
+      const imageItems = items.filter((it) => {
+        const type = (it?.type || it?.mimeType || '') as string;
+        return typeof type === 'string' && type.startsWith('image/');
+      });
+      
+      const nonImageItems = items.filter((it) => {
+        const type = (it?.type || it?.mimeType || '') as string;
+        return !(typeof type === 'string' && type.startsWith('image/'));
+      });
+      
+      // 先取图片，再取非图片文件
+      const candidates = [...imageItems, ...nonImageItems];
+      
+      return candidates.slice(0, 4);
+    };
+
     if (hasSpecificFilter) {
       // 有具体筛选：先确定名称
       let folderName = '筛选结果';
@@ -129,6 +153,7 @@ export const UgcViewFolderView = <E extends object>({
       // 应用筛选条件到数据集
       const items = allData.filter((x: any) => matchByRule(x, filter));
       const previewImages = pickPreviewImages(items);
+      const previewAssets = pickPreviewAssets(items);
 
       const lastUpdatedTime = items.length > 0 ? Math.max(...items.map((item) => item.updatedTimestamp || 0)) : 0;
       const lastUpdatedText = lastUpdatedTime > 0 ? new Date(lastUpdatedTime).toLocaleDateString('zh-CN') : '无';
@@ -139,6 +164,8 @@ export const UgcViewFolderView = <E extends object>({
         assetCount: items.length,
         lastUpdated: lastUpdatedText,
         previewImages,
+        previewAssets,
+        filterRules: filter, // 保存当前筛选条件
       });
     } else {
       // 无具体筛选：按筛选规则分组生成文件夹
@@ -169,6 +196,7 @@ export const UgcViewFolderView = <E extends object>({
         });
         
         const previewImages = pickPreviewImages(items);
+        const previewAssets = pickPreviewAssets(items);
         const t = items.length ? Math.max(...items.map((i) => i.updatedTimestamp || 0)) : 0;
         folders.push({
           id: rule.id,
@@ -176,6 +204,8 @@ export const UgcViewFolderView = <E extends object>({
           assetCount: items.length,
           lastUpdated: t ? new Date(t).toLocaleDateString('zh-CN') : '无',
           previewImages,
+          previewAssets,
+          filterRules: r, // 保存对应的筛选规则
         });
       });
     }
@@ -192,8 +222,10 @@ export const UgcViewFolderView = <E extends object>({
           assetCount={folder.assetCount}
           lastUpdated={folder.lastUpdated}
           previewImages={folder.previewImages}
+          previewAssets={folder.previewAssets}
           onClick={() => {
-            // 后续新增点击事件
+            // 点击文件夹时切换到画廊视图并应用筛选条件
+            onFolderClick?.(folder.id, folder.filterRules);
           }}
         />
       ))}

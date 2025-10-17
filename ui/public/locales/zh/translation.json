@@ -27,6 +27,7 @@
       "unknown-user": "未知用户",
       "all": "全部",
       "info": "信息",
+      "pinned": "置顶",
       "confirm": "确定",
       "continue": "继续",
       "save": "保存",
@@ -2690,6 +2691,13 @@
         "operate-area": {
           "dropdown-label": "设计资产操作",
           "options": {
+            "pin": "置顶",
+            "unpin": "取消置顶",
+            "pin-success": "置顶成功",
+            "unpin-success": "取消置顶成功",
+            "pin-error": "置顶操作失败",
+            "pinning": "正在置顶...",
+            "unpinning": "正在取消置顶...",
             "copy-link": "复制文件直链"
           }
         },

@@ -11,6 +11,7 @@ import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
 import { SpaceHeaderTabs } from '@/components/layout-wrapper/space/header/tabs';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
+import useUrlState from '@/hooks/use-url-state';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
@@ -21,6 +22,10 @@ interface IWorkbenchPanelLayoutProps {
 }
 
 export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ layoutId }) => {
+  const [{ hideSidebar }] = useUrlState<{
+    hideSidebar: boolean;
+  }>();
+
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
 
   useLayoutEffect(() => {
@@ -73,6 +78,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
         )}
         sidebar={
           isWorkspaceRoute &&
+          !hideSidebar &&
           !isDesignRoute &&
           layoutId != 'vines-outlet-main-$teamId-nav-$navId' && <VinesPanelSidebar />
         }

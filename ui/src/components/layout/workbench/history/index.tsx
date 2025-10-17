@@ -495,7 +495,7 @@ function CarouselItemImage({
       onDragStart={(e) => handleDragStart(e, image, image.render.origin as string)}
       src={shouldUseThumbnail ? (image.render.data as string) : (image.render.origin as string)}
       alt={typeof image.render.alt === 'string' ? image.render.alt : `Image ${index + 1}`}
-      className="h-full w-full select-none object-cover"
+      className="h-full w-full select-none object-contain"
       onClick={onClick}
     />
   );

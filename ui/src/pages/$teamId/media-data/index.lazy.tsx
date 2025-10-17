@@ -10,6 +10,7 @@ import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createMediaDataColumns } from '@/components/layout/ugc-pages/media-data/consts.tsx';
 import { OperateArea } from '@/components/layout/ugc-pages/media-data/operate-area';
 import { UploadMedia } from '@/components/layout/ugc-pages/media-data/upload';
+import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const MediaData: React.FC = () => {
@@ -32,7 +33,33 @@ export const MediaData: React.FC = () => {
               })}`}
             </span>
           ),
-          cover: (item) => RenderIcon({ iconUrl: item.type.startsWith('image') ? item.url : '', size: 'gallery' }),
+          cover: (item) => {
+            // 判断文件类型
+            const fileName = String(item.name || item.displayName || '');
+            const parts = fileName.split('.');
+            const extension = parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
+            const isTextFile = ['txt', 'json', 'md', 'csv', 'log', 'xml', 'yaml', 'yml'].includes(extension);
+            const isImageFile = item.type?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension);
+            
+            if (isTextFile) {
+              // 文本文件显示内容预览 - 与图片尺寸保持一致
+              return (
+                <div className="h-36 w-36 rounded overflow-hidden">
+                  <AssetContentPreview 
+                    asset={item} 
+                    isThumbnail={true}
+                    className="h-full w-full"
+                  />
+                </div>
+              );
+            } else if (isImageFile && item.url) {
+              // 图片文件显示图片预览
+              return RenderIcon({ iconUrl: item.url, size: 'gallery' });
+            } else {
+              // 其他文件类型显示默认图标
+              return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
+            }
+          },
         }}
         subtitle={<UploadMedia />}
         operateArea={(item, trigger, tooltipTriggerContent) => (

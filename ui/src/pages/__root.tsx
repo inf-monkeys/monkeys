@@ -22,6 +22,7 @@ import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-
 import { AuthWithRouteSearch } from '@/components/router/auth-with-route-search.tsx';
 import { RouteEvent } from '@/components/router/event.tsx';
 import { TeamsGuard, useVinesTeam } from '@/components/router/guard/team.tsx';
+import { TeamStatusGuard } from '@/components/router/guard/team-status.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -164,11 +165,13 @@ const RootComponent: React.FC = () => {
       </TooltipProvider>
       <OEM />
       <TeamsGuard />
-      <UserGuard />
-      <IconGuard />
-      <RouteEvent />
-      <AuthWithRouteSearch />
-      <VinesImageOptimizeManage />
+      <TeamStatusGuard>
+        <UserGuard />
+        <IconGuard />
+        <RouteEvent />
+        <AuthWithRouteSearch />
+        <VinesImageOptimizeManage />
+      </TeamStatusGuard>
     </>
   );
 };

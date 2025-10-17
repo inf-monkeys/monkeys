@@ -1,10 +1,11 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { CustomTheme } from '@/database/entities/identity/team';
+import { CustomTheme, TeamInitStatusEnum } from '@/database/entities/identity/team';
 import { InviteUser2TeamDto } from '@/modules/auth/teams/dto';
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { omit } from 'lodash';
 import { DEFAULT_TEAM_DESCRIPTION, DEFAULT_TEAM_PHOTO, TeamsService } from './teams.service';
 
@@ -283,5 +284,123 @@ export class TeamsController {
     return new SuccessResponse({
       data: res,
     });
+  }
+
+  @Get('/:teamId/init-status')
+  @ApiOperation({
+    description: '获取团队初始化状态，如果状态为 PENDING 或 FAILED 则通过 SSE 实时推送',
+    summary: '获取团队初始化状态',
+  })
+  public async getTeamInitStatus(@Req() req: IRequest, @Param('teamId') teamId: string, @Res() res: Response) {
+    const { userId } = req;
+    const status = await this.service.getTeamInitStatus(teamId, userId);
+
+    console.log('status', status);
+
+    // 如果状态为 null 或者 SUCCESS，直接返回结果
+    if (!status || status === TeamInitStatusEnum.SUCCESS) {
+      console.log('return status', status);
+
+      return res.json(
+        new SuccessResponse({
+          data: status,
+        }),
+      );
+    }
+
+    // 如果状态为 PENDING 或 FAILED，进入 SSE 流式流程
+    if (status === TeamInitStatusEnum.PENDING || status === TeamInitStatusEnum.FAILED) {
+      console.log('enter SSE stream');
+
+      // 设置 SSE 响应头
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
+
+      let isConnected = true;
+
+      // 发送初始连接事件和当前状态
+      res.write(`event: connected\n`);
+      res.write(
+        `data: ${JSON.stringify({
+          type: 'connected',
+          teamId,
+          timestamp: new Date().toISOString(),
+        })}\n\n`,
+      );
+
+      // 发送当前状态
+      res.write(`event: status_update\n`);
+      res.write(
+        `data: ${JSON.stringify({
+          type: 'status_update',
+          teamId,
+          status,
+          timestamp: new Date().toISOString(),
+        })}\n\n`,
+      );
+
+      // 处理客户端断开连接
+      req.on('close', () => {
+        isConnected = false;
+      });
+
+      // 订阅团队状态变化
+      const unsubscribe = await this.service.subscribeToTeamStatus(teamId, userId, (newStatus) => {
+        if (isConnected) {
+          res.write(`event: status_update\n`);
+          res.write(
+            `data: ${JSON.stringify({
+              type: 'status_update',
+              teamId,
+              status: newStatus,
+              timestamp: new Date().toISOString(),
+            })}\n\n`,
+          );
+
+          // 如果状态变为 SUCCESS 或 null，结束流
+          if (!newStatus || newStatus === TeamInitStatusEnum.SUCCESS) {
+            res.write(`event: complete\n`);
+            res.write(
+              `data: ${JSON.stringify({
+                type: 'complete',
+                teamId,
+                status: newStatus,
+                timestamp: new Date().toISOString(),
+              })}\n\n`,
+            );
+            res.end();
+            unsubscribe();
+          }
+        }
+      });
+
+      // 监听连接关闭
+      req.on('close', () => {
+        unsubscribe();
+      });
+
+      // 发送心跳
+      const heartbeat = setInterval(() => {
+        if (isConnected) {
+          res.write(`event: heartbeat\n`);
+          res.write(
+            `data: ${JSON.stringify({
+              type: 'heartbeat',
+              timestamp: new Date().toISOString(),
+            })}\n\n`,
+          );
+        } else {
+          clearInterval(heartbeat);
+        }
+      }, 30000);
+
+      // 清理心跳定时器
+      req.on('close', () => {
+        clearInterval(heartbeat);
+      });
+    }
   }
 }

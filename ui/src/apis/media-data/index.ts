@@ -12,3 +12,9 @@ export const getMediaAsset = (assetId: string): Promise<MediaAsset> => {
     simple: true,
   })(`/api/media-files/${assetId}`).then((result) => result as MediaAsset);
 };
+
+export const togglePinMedia = (id: string, pinned: boolean) =>
+  vinesFetcher<{ success: boolean }>({
+    method: 'PUT',
+    simple: true,
+  })(`/api/media-files/${id}/pin`, { pinned });

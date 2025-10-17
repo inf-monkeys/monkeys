@@ -13,8 +13,8 @@ export interface SliderProps extends Omit<React.ComponentPropsWithoutRef<typeof 
 
 const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
   ({ className, value, ...props }, ref) => (
-    <div className="flex items-center gap-2">
-      <div className="flex-1">
+    <div className="flex items-center gap-2 [&_span]:flex">
+      <div className="flex min-h-6 flex-1">
         <SliderPrimitive.Root
           ref={ref}
           className={cn('relative flex w-full touch-none select-none items-center', className)}

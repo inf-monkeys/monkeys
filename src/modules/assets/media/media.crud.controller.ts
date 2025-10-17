@@ -4,10 +4,11 @@ import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { EvaluationService } from '@/modules/evaluation/evaluation.service';
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BulkCreateMediaDto } from './dto/req/bulk-create-media.dto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
+import { TogglePinMediaDto } from './dto/req/toggle-pin-media.dto';
 import { MediaFileService } from './media.service';
 
 @ApiTags('Resources')
@@ -123,5 +124,23 @@ export class MediaFileCrudController {
     }
 
     return new SuccessResponse({ data });
+  }
+
+  @Put(':id/pin')
+  @ApiOperation({
+    summary: '置顶/取消置顶媒体文件',
+    description: '切换媒体文件的置顶状态。置顶时会自动设置 sort 值，取消置顶时会重置 sort 值。',
+  })
+  public async togglePinMedia(@Req() request: IRequest, @Param('id') id: string, @Body() togglePinDto: TogglePinMediaDto) {
+    const { teamId } = request;
+
+    // 验证媒体文件是否存在且属于当前团队
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    await this.service.togglePin(id, teamId, togglePinDto.pinned);
+    return new SuccessResponse({ data: { success: true } });
   }
 }

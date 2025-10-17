@@ -1,7 +1,7 @@
 import { S3Helpers } from '@/common/s3';
 import { generateDbId, isValidObjectId } from '@/common/utils';
 import { getMap } from '@/common/utils/map';
-import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
+import { CustomTheme, TeamEntity, TeamInitStatusEnum } from '@/database/entities/identity/team';
 import { TeamInviteLinkOutdateType, TeamInviteStatus, TeamInviteType, TeamInvitesRequestsEntity } from '@/database/entities/identity/team-invites';
 import { TeamMembersEntity } from '@/database/entities/identity/user-team-relationship';
 import { Injectable } from '@nestjs/common';
@@ -474,6 +474,21 @@ export class TeamRepository {
       },
       {
         acceptedUserIds: invite.acceptedUserIds,
+      },
+    );
+  }
+
+  /**
+   * 更新团队初始化状态
+   */
+  public async updateTeamInitStatus(teamId: string, status: TeamInitStatusEnum): Promise<void> {
+    await this.teamRepository.update(
+      {
+        id: teamId,
+      },
+      {
+        initStatus: status,
+        updatedTimestamp: Date.now(),
       },
     );
   }

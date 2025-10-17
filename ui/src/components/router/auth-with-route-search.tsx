@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
-import { useSWRConfig } from 'swr';
 import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useSWRConfig } from 'swr';
 
 import { has } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -53,7 +53,7 @@ export const AuthWithRouteSearch: React.FC = () => {
         VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
       } else {
         if (teamId) {
-          VinesEvent.emit('vines-nav', '/$teamId/', { teamId });
+          VinesEvent.emit('vines-nav', '/$teamId/', { teamId }, { from: 'login' });
         } else {
           void navigate({ to: '/' });
         }

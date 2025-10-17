@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { useColumnRenderer } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
+import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -27,6 +28,18 @@ export const UgcViewCard = <E extends object>({
   const assetTags = render('assetTags');
   const description = render('description');
 
+  // 判断文件类型的函数
+  const getFileType = (): string => {
+    const fileName = String(row.original?.name || (row.original as any)?.displayName || '');
+    const parts = fileName.split('.');
+    return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
+  };
+
+  const isTextFile = (): boolean => {
+    const fileType = getFileType();
+    return ['txt', 'json', 'md', 'csv', 'log', 'xml', 'yaml', 'yml'].includes(fileType);
+  };
+
   const operateAreaNode = operateArea?.(
     row.original,
     <Button icon={<MoreHorizontal />} size="small" variant="outline" className="scale-80 -m-1" />,
@@ -35,7 +48,7 @@ export const UgcViewCard = <E extends object>({
 
   return (
     <Card
-      className={cn('h-44', {
+      className={cn('h-52', {
         'cursor-pointer transition-colors hover:bg-neocard active:bg-neocard': !!onItemClick,
         'cursor-default': !onItemClick,
       })}
@@ -69,9 +82,21 @@ export const UgcViewCard = <E extends object>({
       </CardHeader>
       <CardContent className="flex flex-col gap-2 p-global pt-0">
         {assetTags}
-        <div className="flex flex-col gap-1 text-xs text-opacity-70">
-          {description || t('components.layout.ugc.utils.no-description')}
-        </div>
+        {isTextFile() ? (
+          // 文本文件显示内容预览
+          <div className="h-20 overflow-hidden">
+            <AssetContentPreview
+              asset={row.original}
+              isThumbnail={true}
+              className="h-full w-full"
+            />
+          </div>
+        ) : (
+          // 其他文件显示描述
+          <div className="flex flex-col gap-1 text-xs text-opacity-70">
+            {description || t('components.layout.ugc.utils.no-description')}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
