@@ -14,6 +14,8 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
+  const recordStartRef = useRef<number | null>(null);
+  const [voiceList, setVoiceList] = useState<Array<{ text: string; duration: number; timestamp: number }>>([]);
 
   const renderContent = (content: string) => {
     // 将 <think>...</think> 与正文拆分渲染
@@ -80,6 +82,7 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
         mediaRecorderRef.current?.stop();
       } catch {}
       setIsRecording(false);
+      recordStartRef.current = recordStartRef.current;
       return;
     }
     try {
@@ -98,7 +101,11 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
           const resp = await fetch('/api/tldraw-agent/transcribe', { method: 'POST', body: form, credentials: 'include' });
           const data = await resp.json().catch(() => ({ text: '' }));
           const text = String(data?.text || '').trim();
+          const durationSec = recordStartRef.current ? Math.max(1, Math.round((Date.now() - recordStartRef.current) / 1000)) : 0;
+          const voiceTs = Date.now();
+          recordStartRef.current = null;
           if (text) {
+            setVoiceList((list) => [...list, { text, duration: durationSec, timestamp: voiceTs }]);
             setInput(text);
             // 直接发送
             agent?.prompt({ message: text });
@@ -114,6 +121,7 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
       mediaRecorderRef.current = mr;
       mr.start();
       setIsRecording(true);
+      recordStartRef.current = Date.now();
     } catch (e) {
       setIsRecording(false);
     }
@@ -138,36 +146,66 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
           {(agent?.history ?? []).length === 0 && (
             <div style={{ color: '#9ca3af', fontSize: 12 }}>开始与 Agent 对话，它会理解画布并执行操作。</div>
           )}
-          {(agent?.history ?? []).map((m, idx) => (
-            <div key={idx} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
-              <div style={{
-                maxWidth: '80%',
-                padding: '8px 10px',
-                borderRadius: 10,
-                background: m.role === 'user' ? '#111' : '#f3f4f6',
-                color: m.role === 'user' ? '#fff' : '#111',
-                fontSize: 13,
-                whiteSpace: 'pre-wrap'
-              }}>
-                {m.role === 'assistant' ? renderContent(m.content) : m.content}
-                {m.role === 'assistant' && agent?.isStreaming && idx === (agent?.history?.length ?? 1) - 1 && (
-                  <span
+          {(agent?.history ?? []).map((m, idx) => {
+            const matchedVoice =
+              m.role === 'user'
+                ? voiceList.find((v) => v.text === m.content && Math.abs((m as any).timestamp - v.timestamp) < 8000)
+                : undefined;
+            const isVoice = !!matchedVoice;
+            return (
+              <div key={idx} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                {isVoice ? (
+                  <div
                     style={{
-                      display: 'inline-block',
-                      marginLeft: 6,
-                      width: 12,
-                      height: 12,
-                      border: '2px solid #d1d5db',
-                      borderTopColor: '#6b7280',
-                      borderRadius: '50%',
-                      animation: 'agent-spinner 0.9s linear infinite',
-                      verticalAlign: 'middle',
+                      maxWidth: '80%',
+                      padding: '10px 12px',
+                      borderRadius: 10,
+                      background: 'rgb(65,104,135)',
+                      color: '#fff',
+                      fontSize: 13,
+                      whiteSpace: 'pre-wrap',
                     }}
-                  />
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.5438301421875,1.20522402375C10.2612226621875,0.9127117917500001,9.7924292421875,0.9127117917500001,9.5098224121875,1.20522402375C9.2496899361875,1.48194375375,9.2496899361875,1.91327315375,9.5098224121875,2.18999294375C12.6789412421875,5.36530444375,12.6789412421875,10.50693514375,9.5098224121875,13.68224584375C9.2218237221875,13.97060384375,9.2218237221875,14.43774284375,9.5098224121875,14.72610184375C9.7981799821875,15.01410084375,10.2653193521875,15.01410084375,10.5536774421875,14.72610184375C14.2622752421875,10.98047544375,14.2578797421875,4.94544484375,10.5438301421875,1.20522402375Z" fill="#FFFFFF" fillOpacity="0.8"/>
+                        <path d="M7.303897421875,3.79500763375C7.023533321875,3.54424224075,6.599493021875,3.54424224075,6.319128721875,3.79500763375C6.063781021875,4.07360598375,6.063781021875,4.50117868375,6.319128721875,4.77977669375C8.134398421875,6.60452369375,8.134398421875,9.55298229375,6.319128721875,11.37772849375C6.068363621875,11.65809349375,6.068363621875,12.08213429375,6.319128721875,12.36249829375C6.597726821875,12.61784649375,7.025298621875,12.61784649375,7.303897421875,12.36249829375C9.617761121874999,9.97535519375,9.617761121874999,6.18215129375,7.303897421875,3.79500763375ZM2.970914001875,7.15306969375C2.489838561875,7.63065289375,2.489838561875,8.40867949375,2.970914001875,8.88626389375C3.450511451875,9.37008429375,4.231873521875,9.37236829375,4.714290821875,8.891358893749999C5.196708221874999,8.410348893750001,5.196708221874999,7.62898399375,4.714290821875,7.14797399375C4.231873121875,6.66696449375,3.450511871875,6.66924829375,2.970914001875,7.15306969375Z" fill="#FFFFFF" fillOpacity="0.8"/>
+                      </svg>
+                      <span style={{ opacity: 0.9, color: '#fff' }}>{((matchedVoice?.duration ?? 0)) + '”'}</span>
+                    </div>
+                    <div style={{ opacity: 0.95, color: '#fff' }}>{m.content}</div>
+                  </div>
+                ) : (
+                  <div style={{
+                    maxWidth: '80%',
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    background: m.role === 'user' ? '#416887' : '#f3f4f6',
+                    color: m.role === 'user' ? '#fff' : '#111',
+                    fontSize: 13,
+                    whiteSpace: 'pre-wrap'
+                  }}>
+                    {m.role === 'assistant' ? renderContent(m.content) : m.content}
+                    {m.role === 'assistant' && agent?.isStreaming && idx === (agent?.history?.length ?? 1) - 1 && (
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          marginLeft: 6,
+                          width: 12,
+                          height: 12,
+                          border: '2px solid #d1d5db',
+                          borderTopColor: '#6b7280',
+                          borderRadius: '50%',
+                          animation: 'agent-spinner 0.9s linear infinite',
+                          verticalAlign: 'middle',
+                        }}
+                      />
+                    )}
+                  </div>
                 )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div style={{ padding: 12, borderTop: '1px solid #e5e7eb' }}>
           <div style={{ position: 'relative', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 12 }}>
@@ -242,7 +280,7 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
                 height: 28,
                 borderRadius: '50%',
                 border: 'none',
-                background: '#2f7f86',
+                background: '#4D8F9D',
                 color: '#fff',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
               }}
