@@ -89,6 +89,7 @@ export class TeamsService extends EventEmitter {
           .post(
             webhookUrl,
             {
+              appId: config.server.appId,
               teamId,
               userId,
             },
