@@ -14,6 +14,7 @@ export class AddModelTrainingConfig1758529338591 implements MigrationInterface {
         "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now(),
         "is_deleted" boolean NOT NULL DEFAULT false,
         "model_training_id" character varying NOT NULL,
+        "creator_user_id" character varying NOT NULL,
         "feishu_table_url" character varying,
         "feishu_image_name_column" character varying,
         "feishu_prompt_column" character varying,
@@ -44,6 +45,11 @@ export class AddModelTrainingConfig1758529338591 implements MigrationInterface {
     await queryRunner.query(`
       CREATE INDEX "IDX_${appId}_model_training_config_model_training_id" 
       ON "${appId}_model_training_config" ("model_training_id")
+    `);
+
+    await queryRunner.query(`
+      CREATE INDEX "IDX_${appId}_model_training_config_creator_user_id" 
+      ON "${appId}_model_training_config" ("creator_user_id")
     `);
 
     // 创建触发器函数（如果不存在）
