@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, Plus, Settings, Table, Upload, X } from 'lucide-react';
+import { Check, Plus, RefreshCw, Settings, Table, Upload, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { vinesHeader } from '@/apis/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -48,6 +49,7 @@ export const TestTableModule: React.FC<ITestTableModuleProps> = ({ modelTraining
   const [isCreating, setIsCreating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [createdTableUrl, setCreatedTableUrl] = useState('');
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
 
   // 创建测试表表单
   const createForm = useForm<CreateTestTableForm>({
@@ -65,11 +67,86 @@ export const TestTableModule: React.FC<ITestTableModuleProps> = ({ modelTraining
     resolver: zodResolver(uploadDataSchema),
     defaultValues: {
       imageCount: '100',
-      dataTaskId: '',
+      dataTaskId: modelTrainingId, // 默认使用当前模型训练ID
       dataFilePath: '',
       uploadImageDimensions: true,
     },
   });
+
+  // 获取测试表配置
+  const fetchTestTableConfig = async () => {
+    setIsLoadingConfig(true);
+    try {
+      const response = await fetch('/api/model-training/get-test-table-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
+        },
+        body: JSON.stringify({
+          id: modelTrainingId,
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('认证失败，请检查登录状态或API Key');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // console.log('获取测试表配置API返回结果:', result); // 调试日志
+
+      if (result.code === 200 && result.data) {
+        const config = result.data;
+
+        // 更新创建测试表表单值
+        const updateData: Partial<CreateTestTableForm> = {};
+
+        if (config.modelName) {
+          updateData.modelName = config.modelName;
+        }
+        if (config.maxTrainEpochs) {
+          updateData.trainingRounds = config.maxTrainEpochs.toString();
+        }
+        if (config.saveEveryNEpochs) {
+          updateData.saveInterval = config.saveEveryNEpochs.toString();
+        }
+
+        // 只更新有值的字段
+        if (Object.keys(updateData).length > 0) {
+          createForm.reset({
+            ...createForm.getValues(),
+            ...updateData,
+          });
+        }
+
+        toast.success('测试表配置加载成功');
+      } else {
+        throw new Error(result.message || '获取测试表配置失败');
+      }
+    } catch (error) {
+      // console.error('获取测试表配置失败:', error);
+
+      // 如果是连接错误，在开发模式下使用默认值
+      if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+        // console.warn('后端连接失败，使用默认配置进行开发测试');
+        toast.success('使用默认测试表配置（开发模式）');
+        return;
+      }
+
+      toast.error(`获取测试表配置失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    } finally {
+      setIsLoadingConfig(false);
+    }
+  };
+
+  // 组件挂载时获取配置
+  React.useEffect(() => {
+    fetchTestTableConfig();
+  }, [modelTrainingId]);
 
   // 添加自定义列
   const addCustomColumn = () => {
@@ -88,24 +165,56 @@ export const TestTableModule: React.FC<ITestTableModuleProps> = ({ modelTraining
   const onCreateTestTable = async (data: CreateTestTableForm) => {
     setIsCreating(true);
     try {
-      // 模拟API调用
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      console.log('创建测试表:', {
-        modelTrainingId,
-        modelName: data.modelName,
-        trainingRounds: Number(data.trainingRounds),
-        saveInterval: Number(data.saveInterval),
-        customColumns: customColumns,
-        createImageDimensions: data.createImageDimensions,
+      // 调用真实的后端API创建测试表
+      const response = await fetch('/api/model-training/create-test-table-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
+        },
+        body: JSON.stringify({
+          id: modelTrainingId,
+          model_name: data.modelName,
+          max_train_epochs: Number(data.trainingRounds),
+          save_every_n_epochs: Number(data.saveInterval),
+          custom_column: customColumns,
+          length_width: data.createImageDimensions,
+        }),
       });
 
-      // 模拟返回URL
-      const mockUrl = `https://caka-labs.feishu.cn/sheets/test_${Date.now()}`;
-      setCreatedTableUrl(mockUrl);
-      toast.success('测试表创建成功！');
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('认证失败，请检查登录状态或API Key');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // console.log('创建测试表API返回结果:', result); // 调试日志
+
+      if (result.code === 200 && result.data?.url) {
+        const testTableUrl = result.data.url;
+        setCreatedTableUrl(testTableUrl);
+        toast.success('测试表创建成功！');
+      } else {
+        throw new Error(result.message || '创建测试表失败');
+      }
     } catch (error) {
-      toast.error('测试表创建失败，请重试');
+      // console.error('创建测试表失败:', error);
+
+      // 如果是连接错误，在开发模式下使用模拟数据
+      if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+        // console.warn('后端连接失败，使用模拟数据进行开发测试');
+
+        // 模拟返回URL
+        const mockUrl = `https://caka-labs.feishu.cn/sheets/test_${Date.now()}`;
+        setCreatedTableUrl(mockUrl);
+        toast.success('测试表创建成功！（开发模式）');
+        return;
+      }
+
+      toast.error(`创建测试表失败: ${error instanceof Error ? error.message : '未知错误'}`);
     } finally {
       setIsCreating(false);
     }
@@ -115,20 +224,58 @@ export const TestTableModule: React.FC<ITestTableModuleProps> = ({ modelTraining
   const onUploadData = async (data: UploadDataForm) => {
     setIsUploading(true);
     try {
-      // 模拟API调用
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      console.log('上传数据到测试表:', {
-        modelTrainingId,
-        imageCount: Number(data.imageCount),
-        dataTaskId: data.dataTaskId,
-        dataFilePath: data.dataFilePath,
-        uploadImageDimensions: data.uploadImageDimensions,
+      // 调用真实的后端API上传数据到测试表
+      const response = await fetch('/api/model-training/upload-data-to-test-table', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
+        },
+        body: JSON.stringify({
+          id: modelTrainingId,
+          quantity: Number(data.imageCount),
+          model_training_id: data.dataTaskId,
+          save_path: data.dataFilePath || undefined,
+        }),
       });
 
-      toast.success('数据上传成功！');
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('认证失败，请检查登录状态或API Key');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      console.log('上传数据到测试表API返回结果:', result); // 调试日志
+
+      if (result.code === 200 && result.data) {
+        // 检查返回的code值
+        const responseCode = result.data.code;
+        const responseMessage = result.data.message || '数据上传完成';
+
+        if (responseCode === 200) {
+          toast.success('数据上传成功！');
+        } else {
+          toast.error(`上传失败: ${responseMessage}`);
+        }
+      } else {
+        throw new Error(result.message || '上传数据到测试表失败');
+      }
     } catch (error) {
-      toast.error('数据上传失败，请重试');
+      // console.error('上传数据到测试表失败:', error);
+
+      // 如果是连接错误，在开发模式下使用模拟数据
+      if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+        // console.warn('后端连接失败，使用模拟数据进行开发测试');
+
+        // 模拟上传成功
+        toast.success('数据上传成功！（开发模式）');
+        return;
+      }
+
+      toast.error(`上传数据到测试表失败: ${error instanceof Error ? error.message : '未知错误'}`);
     } finally {
       setIsUploading(false);
     }
@@ -169,9 +316,21 @@ export const TestTableModule: React.FC<ITestTableModuleProps> = ({ modelTraining
             <form onSubmit={createForm.handleSubmit(onCreateTestTable)} className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Table className="h-5 w-5" />
-                    创建测试表
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Table className="h-5 w-5" />
+                      创建测试表
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="small"
+                      onClick={fetchTestTableConfig}
+                      loading={isLoadingConfig}
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      刷新配置
+                    </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">

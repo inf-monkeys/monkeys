@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, CheckCircle, Download, Link, Settings, TestTube, X } from 'lucide-react';
@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { vinesHeader } from '@/apis/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,7 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
   const [customColumns, setCustomColumns] = useState<string[]>([]);
   const [isTesting, setIsTesting] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
 
   const form = useForm<ModelTestForm>({
     resolver: zodResolver(modelTestSchema),
@@ -69,6 +71,92 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
     return feishuPattern.test(url);
   };
 
+  // 获取模型测试配置
+  const fetchModelTestConfig = async () => {
+    setIsLoadingConfig(true);
+    try {
+      const response = await fetch('/api/model-training/get-model-test-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
+        },
+        body: JSON.stringify({
+          id: modelTrainingId,
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('认证失败，请检查登录状态或API Key');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // console.log('获取模型测试配置API返回结果:', result); // 调试日志
+
+      if (result.code === 200 && result.data) {
+        const configData = result.data;
+
+        // 更新表单字段，只填入非空值
+        const updateData: Partial<ModelTestForm> = {};
+
+        if (configData.feishuTestTableUrl) {
+          updateData.feishuUrl = configData.feishuTestTableUrl;
+        }
+
+        if (configData.modelTrainingType) {
+          updateData.modelType = configData.modelTrainingType as 'flux' | 'lora' | 'qwen';
+        }
+
+        // 使用reset方法更新表单，保留现有值
+        form.reset({
+          ...form.getValues(),
+          ...updateData,
+        });
+
+        // console.log('模型测试配置已更新:', updateData);
+      } else {
+        throw new Error(result.message || '获取模型测试配置失败');
+      }
+    } catch (error) {
+      // console.error('获取模型测试配置失败:', error);
+
+      // 如果是连接错误，在开发模式下使用模拟数据
+      if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+        // console.warn('后端连接失败，使用模拟数据进行开发测试');
+
+        // 模拟配置数据
+        const mockConfig = {
+          feishuUrl:
+            'https://caka-labs.feishu.cn/base/IQ6ibUNZra4eQgs8P2pcSXjnnoe?table=tblO6VoXRtwncnHx&view=vewGBz8reI',
+          modelType: 'flux' as const,
+        };
+
+        form.reset({
+          ...form.getValues(),
+          ...mockConfig,
+        });
+
+        // console.log('使用模拟配置数据:', mockConfig);
+        return;
+      }
+
+      toast.error(`获取模型测试配置失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    } finally {
+      setIsLoadingConfig(false);
+    }
+  };
+
+  // 组件加载时获取配置
+  useEffect(() => {
+    if (modelTrainingId) {
+      fetchModelTestConfig();
+    }
+  }, [modelTrainingId]);
+
   // 获取表格表头数据
   const fetchTableHeaders = async () => {
     const feishuUrl = form.getValues('feishuUrl');
@@ -85,25 +173,102 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
 
     setIsLoadingHeaders(true);
     try {
-      // 模拟API调用 - 这里应该调用实际的后端API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // 调用真实的后端API获取表头
+      const response = await fetch('/api/model-training/feishu-table-headers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
+        },
+        body: JSON.stringify({
+          url: feishuUrl,
+        }),
+      });
 
-      // 模拟返回的表头数据
-      const mockHeaders: ITableHeader[] = [
-        { columnName: '测试ID', columnType: 'string', sampleData: 'TEST_001' },
-        { columnName: '图片路径', columnType: 'string', sampleData: '/path/to/image1.jpg' },
-        { columnName: '预测结果', columnType: 'string', sampleData: 'cat' },
-        { columnName: '真实标签', columnType: 'string', sampleData: 'cat' },
-        { columnName: '置信度', columnType: 'number', sampleData: '0.95' },
-        { columnName: '测试时间', columnType: 'datetime', sampleData: '2024-01-15 10:30:00' },
-        { columnName: '模型版本', columnType: 'string', sampleData: 'v1.2.3' },
-        { columnName: '准确率', columnType: 'number', sampleData: '0.98' },
-      ];
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('认证失败，请检查登录状态或API Key');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      setTableHeaders(mockHeaders);
-      toast.success('成功获取表格表头信息');
+      const result = await response.json();
+
+      // console.log('获取表头API返回结果:', result); // 调试日志
+
+      if (result.code === 200 && result.data) {
+        // 解析表头数据，转换为ITableHeader格式
+        const headersData = result.data;
+
+        // 确保headersData是数组格式
+        let headersArray: string[] = [];
+        if (Array.isArray(headersData)) {
+          headersArray = headersData;
+        } else if (typeof headersData === 'string') {
+          // 如果是字符串，尝试解析为数组
+          try {
+            const parsed = JSON.parse(headersData);
+            headersArray = Array.isArray(parsed) ? parsed : [headersData];
+          } catch {
+            headersArray = [headersData];
+          }
+        } else if (typeof headersData === 'object' && headersData !== null) {
+          // 如果是对象，尝试提取数组
+          if (Array.isArray(headersData.headers)) {
+            headersArray = headersData.headers;
+          } else if (Array.isArray(headersData.data)) {
+            headersArray = headersData.data;
+          } else {
+            // 将对象的键作为表头
+            headersArray = Object.keys(headersData);
+          }
+        } else {
+          // console.warn('无法解析表头数据:', headersData);
+          headersArray = [];
+        }
+
+        // 需要过滤掉的字段
+        const excludedFields = ['编号', '长宽', '图片', '图片来源', '提示词文本', '是否通过'];
+
+        // 过滤掉指定的字段
+        const filteredHeadersArray = headersArray.filter((header) => !excludedFields.includes(header));
+
+        const parsedHeaders: ITableHeader[] = filteredHeadersArray.map((header: string, index: number) => ({
+          columnName: header,
+          columnType: 'string', // 默认类型为string
+          sampleData: `示例数据_${index + 1}`, // 生成示例数据
+        }));
+
+        setTableHeaders(parsedHeaders);
+        toast.success(`成功获取表格表头信息，共 ${parsedHeaders.length} 列`);
+      } else {
+        throw new Error(result.message || '获取表格表头失败');
+      }
     } catch (error) {
-      toast.error('获取表格表头失败，请检查URL是否正确');
+      // console.error('获取表格表头失败:', error);
+
+      // 如果是连接错误，在开发模式下使用模拟数据
+      if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+        // console.warn('后端连接失败，使用模拟数据进行开发测试');
+
+        // 模拟返回的表头数据
+        const mockHeaders: ITableHeader[] = [
+          { columnName: '测试ID', columnType: 'string', sampleData: 'TEST_001' },
+          { columnName: '图片路径', columnType: 'string', sampleData: '/path/to/image1.jpg' },
+          { columnName: '预测结果', columnType: 'string', sampleData: 'cat' },
+          { columnName: '真实标签', columnType: 'string', sampleData: 'cat' },
+          { columnName: '置信度', columnType: 'number', sampleData: '0.95' },
+          { columnName: '测试时间', columnType: 'datetime', sampleData: '2024-01-15 10:30:00' },
+          { columnName: '模型版本', columnType: 'string', sampleData: 'v1.2.3' },
+          { columnName: '准确率', columnType: 'number', sampleData: '0.98' },
+        ];
+
+        setTableHeaders(mockHeaders);
+        toast.success('成功获取表格表头信息！（开发模式）');
+        return;
+      }
+
+      toast.error(`获取表格表头失败: ${error instanceof Error ? error.message : '未知错误'}`);
       setTableHeaders([]);
     } finally {
       setIsLoadingHeaders(false);
@@ -128,23 +293,64 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
     setTestStatus('idle');
 
     try {
-      // 模拟API调用 - 这里应该调用实际的后端API
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      console.log('提交模型测试:', {
-        modelTrainingId,
-        feishuUrl: data.feishuUrl,
-        modelType: data.modelType,
-        modelPathPrefix: data.modelPathPrefix,
-        customColumns: customColumns,
-        useImageDimensions: data.useImageDimensions,
+      // 调用真实的后端API开始模型测试
+      const response = await fetch('/api/model-training/start-model-test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
+        },
+        body: JSON.stringify({
+          id: modelTrainingId,
+          spreadsheet_url: data.feishuUrl,
+          model_type: data.modelType,
+          path: data.modelPathPrefix || '',
+          custom_columns: customColumns,
+          length_width: data.useImageDimensions,
+        }),
       });
 
-      setTestStatus('success');
-      toast.success('模型测试任务提交成功！');
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('认证失败，请检查登录状态或API Key');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // console.log('开始模型测试API返回结果:', result); // 调试日志
+
+      if (result.code === 200 && result.data) {
+        // 检查返回的code值
+        const responseCode = result.data.code;
+        const responseMessage = result.data.message || '模型测试任务已提交';
+
+        if (responseCode === 200) {
+          setTestStatus('success');
+          toast.success('模型测试任务提交成功！');
+        } else {
+          setTestStatus('error');
+          toast.error(`测试失败: ${responseMessage}`);
+        }
+      } else {
+        throw new Error(result.message || '模型测试任务提交失败');
+      }
     } catch (error) {
+      // console.error('模型测试任务提交失败:', error);
+
+      // 如果是连接错误，在开发模式下使用模拟数据
+      if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+        // console.warn('后端连接失败，使用模拟数据进行开发测试');
+
+        // 模拟测试成功
+        setTestStatus('success');
+        toast.success('模型测试任务提交成功！（开发模式）');
+        return;
+      }
+
       setTestStatus('error');
-      toast.error('模型测试任务提交失败，请重试');
+      toast.error(`模型测试任务提交失败: ${error instanceof Error ? error.message : '未知错误'}`);
     } finally {
       setIsTesting(false);
     }
@@ -157,6 +363,19 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
         <div>
           <h2 className="text-2xl font-bold">模型测试</h2>
           <p className="mt-2 text-muted-foreground">使用测试数据集评估模型效果和性能</p>
+          <div className="mt-2 flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="small"
+              onClick={fetchModelTestConfig}
+              loading={isLoadingConfig}
+              className="h-8"
+            >
+              刷新配置
+            </Button>
+            <span className="text-xs text-muted-foreground">模型训练ID: {modelTrainingId}</span>
+          </div>
         </div>
 
         <Form {...form}>
@@ -203,7 +422,7 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
                 {/* 表头信息展示 */}
                 {tableHeaders.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="mb-2 font-medium">检测到的表格列：</h4>
+                    <h4 className="mb-2 font-medium">可测试模型列：</h4>
                     <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 max-h-32 overflow-y-auto">
                       <div className="grid grid-cols-2 gap-2 pr-2 md:grid-cols-3 lg:grid-cols-4">
                         {tableHeaders.map((header, index) => (

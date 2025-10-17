@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, CheckCircle, Download, Link, Upload } from 'lucide-react';
+import { AlertCircle, CheckCircle, Download, Link, RefreshCw, Upload } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { vinesHeader } from '@/apis/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,24 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isGettingUrl, setIsGettingUrl] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState<string>('');
+  const [isUrlGenerated, setIsUrlGenerated] = useState(false);
+
+  // 优先使用传入的modelTrainingId，如果没有则尝试从URL获取
+  const currentModelTrainingId =
+    modelTrainingId ||
+    (() => {
+      try {
+        // 从当前URL路径中提取模型训练ID
+        const pathSegments = window.location.pathname.split('/');
+        const modelTrainingIndex = pathSegments.findIndex((segment) => segment === 'model-training');
+        if (modelTrainingIndex !== -1 && pathSegments[modelTrainingIndex + 1]) {
+          return pathSegments[modelTrainingIndex + 1];
+        }
+      } catch (error) {
+        // console.warn('无法从URL获取模型训练ID:', error);
+      }
+      return null;
+    })();
 
   const form = useForm<DataUploadForm>({
     resolver: zodResolver(dataUploadSchema),
@@ -53,10 +72,149 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
     },
   });
 
+  // 组件挂载时自动获取飞书表格链接
+  React.useEffect(() => {
+    const autoFetchFeishuUrl = async () => {
+      if (!currentModelTrainingId) {
+        // console.warn('无法获取模型训练ID，跳过自动获取飞书表格链接');
+        return;
+      }
+
+      setIsGettingUrl(true);
+      setGeneratedUrl('');
+      try {
+        // console.log('页面加载时自动获取飞书表格URL，模型训练ID:', currentModelTrainingId);
+
+        // 调用真实的API获取飞书表格URL
+        const feishuUrl = await fetchFeishuTableUrl();
+
+        if (feishuUrl) {
+          // 设置生成的URL并显示动画
+          setGeneratedUrl(feishuUrl);
+          setIsUrlGenerated(true);
+
+          // 延迟填入表单，让用户看到URL显示
+          setTimeout(() => {
+            form.setValue('feishuUrl', feishuUrl);
+            toast.success('自动获取飞书表格链接成功！');
+
+            // 自动调用获取表头功能
+            setTimeout(() => {
+              fetchTableHeaders();
+            }, 1000);
+          }, 500);
+        } else {
+          // console.warn('自动获取飞书表格链接失败');
+        }
+      } catch (error) {
+        // console.error('自动获取飞书表格URL错误:', error);
+
+        // 如果是连接错误，在开发模式下使用模拟数据
+        if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+          // console.warn('后端连接失败，使用模拟URL进行开发测试');
+
+          const mockUrl = 'https://caka-labs.feishu.cn/sheets/shtcn1234567890abcdef';
+          setGeneratedUrl(mockUrl);
+          setIsUrlGenerated(true);
+
+          setTimeout(() => {
+            form.setValue('feishuUrl', mockUrl);
+            toast.success('自动使用模拟URL获取飞书表格链接（开发模式）');
+
+            // 自动调用获取表头功能
+            setTimeout(() => {
+              fetchTableHeaders();
+            }, 1000);
+          }, 500);
+        }
+      } finally {
+        setIsGettingUrl(false);
+      }
+    };
+
+    // 延迟执行，确保组件完全加载
+    const timer = setTimeout(autoFetchFeishuUrl, 1000);
+
+    return () => clearTimeout(timer);
+  }, [currentModelTrainingId]);
+
   // 验证URL是否为飞书表格URL
   const isValidFeishuUrl = (url: string): boolean => {
     const feishuPattern = /^https:\/\/caka-labs\.feishu\.cn\//i;
     return feishuPattern.test(url);
+  };
+
+  // 获取飞书表格URL的API调用
+  const fetchFeishuTableUrl = async (): Promise<string | null> => {
+    if (!currentModelTrainingId) {
+      toast.error('无法获取模型训练ID');
+      return null;
+    }
+
+    // eslint-disable-next-line no-useless-catch
+    try {
+      // 使用项目标准的认证头
+      const headers = {
+        'Content-Type': 'application/json',
+        ...vinesHeader({ useToast: true }),
+      };
+
+      const response = await fetch('/api/model-training/feishu-table-url', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          id: currentModelTrainingId,
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('认证失败，请检查登录状态或API Key');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // console.log('获取飞书表格URL API返回结果:', result); // 调试日志
+
+      if (result.code === 200 && result.data) {
+        // 处理不同的数据结构
+        let url = '';
+
+        if (typeof result.data === 'string') {
+          url = result.data;
+        } else if (result.data.url) {
+          url = result.data.url;
+        } else if (result.data.link) {
+          url = result.data.link;
+        } else if (result.data.feishuUrl) {
+          url = result.data.feishuUrl;
+        } else if (result.data.tableUrl) {
+          url = result.data.tableUrl;
+        } else {
+          // 尝试从其他可能的字段中提取
+          const possibleFields = ['url', 'link', 'feishuUrl', 'tableUrl', 'sheetUrl'];
+          for (const field of possibleFields) {
+            if (result.data[field] && typeof result.data[field] === 'string') {
+              url = result.data[field];
+              break;
+            }
+          }
+        }
+
+        if (url) {
+          return url;
+        } else {
+          throw new Error('未找到有效的URL字段');
+        }
+      } else {
+        throw new Error(result.message || '获取飞书表格URL失败');
+      }
+    } catch (error) {
+      // console.error('获取飞书表格URL失败:', error);
+      throw error;
+    }
   };
 
   // 获取表格表头数据
@@ -75,25 +233,163 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
 
     setIsLoadingHeaders(true);
     try {
-      // 模拟API调用 - 这里应该调用实际的后端API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // 调用真实的后端API获取表头
+      const response = await fetch('/api/model-training/feishu-table-headers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
+        },
+        body: JSON.stringify({
+          url: feishuUrl,
+        }),
+      });
 
-      // 模拟返回的表头数据
-      const mockHeaders: ITableHeader[] = [
-        { columnName: '图片ID', columnType: 'string', sampleData: 'IMG_001' },
-        { columnName: '图片名称', columnType: 'string', sampleData: '产品展示图_001.jpg' },
-        { columnName: '图片描述', columnType: 'string', sampleData: '高质量产品展示图片' },
-        { columnName: '提示词', columnType: 'string', sampleData: '一个现代风格的产品展示图片' },
-        { columnName: '图片URL', columnType: 'string', sampleData: 'https://example.com/image1.jpg' },
-        { columnName: '标签', columnType: 'string', sampleData: '产品,展示,现代' },
-        { columnName: '创建时间', columnType: 'datetime', sampleData: '2024-01-15 10:30:00' },
-        { columnName: '文件大小', columnType: 'number', sampleData: '2.5MB' },
-      ];
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('认证失败，请检查登录状态或API Key');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      setTableHeaders(mockHeaders);
-      toast.success('成功获取表格表头信息');
+      const result = await response.json();
+
+      // console.log('API返回结果:', result); // 调试日志
+
+      if (result.code === 200 && result.data) {
+        let headers: ITableHeader[] = [];
+
+        // 处理不同的数据结构
+        if (Array.isArray(result.data)) {
+          // 如果data直接是数组
+          headers = result.data.map((item: any) => {
+            if (typeof item === 'string') {
+              return {
+                columnName: item,
+                columnType: 'string',
+                sampleData: '',
+              };
+            } else if (item && typeof item === 'object') {
+              return {
+                columnName: item.name || item.columnName || item.header || String(item),
+                columnType: item.type || item.columnType || 'string',
+                sampleData: item.sampleData || item.sample || '',
+              };
+            }
+            return {
+              columnName: String(item),
+              columnType: 'string',
+              sampleData: '',
+            };
+          });
+        } else if (result.data.headers && Array.isArray(result.data.headers)) {
+          // 如果data.headers是数组
+          headers = result.data.headers.map((item: any) => {
+            if (typeof item === 'string') {
+              return {
+                columnName: item,
+                columnType: 'string',
+                sampleData: '',
+              };
+            } else if (item && typeof item === 'object') {
+              return {
+                columnName: item.name || item.columnName || item.header || String(item),
+                columnType: item.type || item.columnType || 'string',
+                sampleData: item.sampleData || item.sample || '',
+              };
+            }
+            return {
+              columnName: String(item),
+              columnType: 'string',
+              sampleData: '',
+            };
+          });
+        } else if (result.data.columns && Array.isArray(result.data.columns)) {
+          // 如果data.columns是数组
+          headers = result.data.columns.map((item: any) => {
+            if (typeof item === 'string') {
+              return {
+                columnName: item,
+                columnType: 'string',
+                sampleData: '',
+              };
+            } else if (item && typeof item === 'object') {
+              return {
+                columnName: item.name || item.columnName || item.header || String(item),
+                columnType: item.type || item.columnType || 'string',
+                sampleData: item.sampleData || item.sample || '',
+              };
+            }
+            return {
+              columnName: String(item),
+              columnType: 'string',
+              sampleData: '',
+            };
+          });
+        } else {
+          // 尝试从其他可能的字段中提取
+          const possibleFields = ['fields', 'keys', 'names', 'list'];
+          for (const field of possibleFields) {
+            if (result.data[field] && Array.isArray(result.data[field])) {
+              headers = result.data[field].map((item: any) => {
+                if (typeof item === 'string') {
+                  return {
+                    columnName: item,
+                    columnType: 'string',
+                    sampleData: '',
+                  };
+                } else if (item && typeof item === 'object') {
+                  return {
+                    columnName: item.name || item.columnName || item.header || String(item),
+                    columnType: item.type || item.columnType || 'string',
+                    sampleData: item.sampleData || item.sample || '',
+                  };
+                }
+                return {
+                  columnName: String(item),
+                  columnType: 'string',
+                  sampleData: '',
+                };
+              });
+              break;
+            }
+          }
+        }
+
+        if (headers.length > 0) {
+          setTableHeaders(headers);
+          toast.success(`成功获取表格表头信息，共 ${headers.length} 列`);
+        } else {
+          throw new Error('未找到有效的表头数据');
+        }
+      } else {
+        throw new Error(result.message || '获取表格表头失败');
+      }
     } catch (error) {
-      toast.error('获取表格表头失败，请检查URL是否正确');
+      // console.error('获取表格表头失败:', error);
+
+      // 如果是连接错误，在开发模式下使用模拟数据
+      if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+        // console.warn('后端连接失败，使用模拟数据进行开发测试');
+
+        // 模拟返回的表头数据
+        const mockHeaders: ITableHeader[] = [
+          { columnName: '图片ID', columnType: 'string', sampleData: 'IMG_001' },
+          { columnName: '图片名称', columnType: 'string', sampleData: '产品展示图_001.jpg' },
+          { columnName: '图片描述', columnType: 'string', sampleData: '高质量产品展示图片' },
+          { columnName: '提示词', columnType: 'string', sampleData: '一个现代风格的产品展示图片' },
+          { columnName: '图片URL', columnType: 'string', sampleData: 'https://example.com/image1.jpg' },
+          { columnName: '标签', columnType: 'string', sampleData: '产品,展示,现代' },
+          { columnName: '创建时间', columnType: 'datetime', sampleData: '2024-01-15 10:30:00' },
+          { columnName: '文件大小', columnType: 'number', sampleData: '2.5MB' },
+        ];
+
+        setTableHeaders(mockHeaders);
+        toast.success('使用模拟数据获取表格表头信息（开发模式）');
+        return;
+      }
+
+      toast.error(`获取表格表头失败: ${error instanceof Error ? error.message : '未知错误'}`);
       setTableHeaders([]);
     } finally {
       setIsLoadingHeaders(false);
@@ -106,28 +402,74 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
     setUploadStatus('idle');
 
     try {
-      // 模拟API调用 - 这里应该调用实际的后端API
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      console.log('提交数据上传任务:', {
-        modelTrainingId,
-        feishuUrl: data.feishuUrl,
-        columnMapping: {
-          imageName: data.imageNameColumn,
-          prompt: data.promptColumn,
-          image: data.imageColumn,
+      // 调用真实的后端API提交数据上传任务
+      const response = await fetch('/api/model-training/submit-data-upload-task', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
         },
+        body: JSON.stringify({
+          id: currentModelTrainingId,
+          spreadsheet_url: data.feishuUrl,
+          image_column_name: data.imageNameColumn,
+          txt_column_name: data.promptColumn,
+          image_field: data.imageColumn,
+          path_suffix: '100_1',
+          summary_txt_name: '1',
+          max_records_in_summary: 5,
+        }),
       });
 
-      setUploadStatus('success');
-      toast.success('数据上传任务提交成功！');
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('认证失败，请检查登录状态或API Key');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-      // 重置表单
-      form.reset();
-      setTableHeaders([]);
+      const result = await response.json();
+
+      // console.log('提交数据上传任务API返回结果:', result); // 调试日志
+
+      if (result.code === 200 && result.data) {
+        // 检查返回的code值
+        const responseCode = result.data.code;
+        const responseMessage = result.data.message || '任务提交完成';
+
+        if (responseCode === 200) {
+          setUploadStatus('success');
+          toast.success('数据上传任务提交成功！');
+
+          // 重置表单
+          form.reset();
+          setTableHeaders([]);
+        } else {
+          setUploadStatus('error');
+          toast.error(`任务提交失败: ${responseMessage}`);
+        }
+      } else {
+        throw new Error(result.message || '提交数据上传任务失败');
+      }
     } catch (error) {
+      // console.error('提交数据上传任务失败:', error);
+
+      // 如果是连接错误，在开发模式下使用模拟数据
+      if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+        // console.warn('后端连接失败，使用模拟数据进行开发测试');
+
+        // 模拟任务提交
+        setUploadStatus('success');
+        toast.success('数据上传任务提交成功！（开发模式）');
+
+        // 重置表单
+        form.reset();
+        setTableHeaders([]);
+        return;
+      }
+
       setUploadStatus('error');
-      toast.error('数据上传任务提交失败，请重试');
+      toast.error(`提交数据上传任务失败: ${error instanceof Error ? error.message : '未知错误'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -159,22 +501,53 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
                     setIsGettingUrl(true);
                     setGeneratedUrl('');
                     try {
-                      // 模拟API调用获取飞书表格URL
-                      await new Promise((resolve) => setTimeout(resolve, 2000));
+                      // console.log('正在获取飞书表格URL，模型训练ID:', currentModelTrainingId);
 
-                      // 模拟返回的飞书表格URL
-                      const mockUrl = `https://caka-labs.feishu.cn/sheets/shtcn${Date.now()}`;
+                      // 调用真实的API获取飞书表格URL
+                      const feishuUrl = await fetchFeishuTableUrl();
 
-                      // 设置生成的URL并显示动画
-                      setGeneratedUrl(mockUrl);
+                      if (feishuUrl) {
+                        // 设置生成的URL并显示动画
+                        setGeneratedUrl(feishuUrl);
+                        setIsUrlGenerated(true);
 
-                      // 延迟填入表单，让用户看到URL显示
-                      setTimeout(() => {
-                        form.setValue('feishuUrl', mockUrl);
-                        toast.success('成功获取飞书表格链接！');
-                      }, 500);
+                        // 延迟填入表单，让用户看到URL显示
+                        setTimeout(() => {
+                          form.setValue('feishuUrl', feishuUrl);
+                          toast.success('成功获取飞书表格链接！');
+
+                          // 自动调用获取表头功能
+                          setTimeout(() => {
+                            fetchTableHeaders();
+                          }, 1000);
+                        }, 500);
+                      } else {
+                        toast.error('获取飞书表格链接失败');
+                      }
                     } catch (error) {
-                      toast.error('获取飞书表格链接失败，请重试');
+                      // console.error('获取飞书表格URL错误:', error);
+
+                      // 如果是连接错误，在开发模式下使用模拟数据
+                      if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
+                        // console.warn('后端连接失败，使用模拟URL进行开发测试');
+
+                        const mockUrl = 'https://caka-labs.feishu.cn/sheets/shtcn1234567890abcdef';
+                        setGeneratedUrl(mockUrl);
+                        setIsUrlGenerated(true);
+
+                        setTimeout(() => {
+                          form.setValue('feishuUrl', mockUrl);
+                          toast.success('使用模拟URL获取飞书表格链接（开发模式）');
+
+                          // 自动调用获取表头功能
+                          setTimeout(() => {
+                            fetchTableHeaders();
+                          }, 1000);
+                        }, 500);
+                        return;
+                      }
+
+                      toast.error(`获取飞书表格链接失败: ${error instanceof Error ? error.message : '未知错误'}`);
                     } finally {
                       setIsGettingUrl(false);
                     }
@@ -182,12 +555,14 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
                   className="w-full"
                   variant="outline"
                   loading={isGettingUrl}
-                  disabled={isGettingUrl}
+                  disabled={isGettingUrl || !currentModelTrainingId}
                 >
                   <Download className="mr-2 h-4 w-4" />
                   {isGettingUrl ? '正在获取链接...' : '获取飞书表格链接'}
                 </Button>
                 <p className="text-sm text-muted-foreground">点击按钮自动获取可用的飞书表格链接</p>
+
+                {/* 调试信息 */}
 
                 {/* 生成的URL显示区域 */}
                 {generatedUrl && (
@@ -222,7 +597,31 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
                       <FormLabel>飞书表格URL</FormLabel>
                       <FormControl>
                         <div className="flex gap-2">
-                          <Input placeholder="https://caka-labs.feishu.cn/..." {...field} className="min-w-0 flex-1" />
+                          <Input
+                            placeholder="https://caka-labs.feishu.cn/..."
+                            {...field}
+                            className="min-w-0 flex-1"
+                            disabled={isUrlGenerated}
+                            readOnly={isUrlGenerated}
+                          />
+                          {isUrlGenerated && (
+                            <Button
+                              type="button"
+                              onClick={() => {
+                                setIsUrlGenerated(false);
+                                setGeneratedUrl('');
+                                form.setValue('feishuUrl', '');
+                                setTableHeaders([]);
+                                toast.info('已重置URL，可以重新输入');
+                              }}
+                              variant="outline"
+                              size="small"
+                              className="h-10 flex-shrink-0"
+                            >
+                              <RefreshCw className="mr-2 h-4 w-4" />
+                              重置
+                            </Button>
+                          )}
                           <Button
                             type="button"
                             onClick={fetchTableHeaders}
@@ -238,7 +637,9 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
                       </FormControl>
                       <FormMessage />
                       <p className="text-sm text-muted-foreground">
-                        请输入 caka-labs 飞书表格的完整URL，系统将自动解析表格结构
+                        {isUrlGenerated
+                          ? 'URL已通过系统获取，如需修改请点击"重置"按钮'
+                          : '请输入 caka-labs 飞书表格的完整URL，系统将自动解析表格结构'}
                       </p>
                     </FormItem>
                   )}
@@ -353,18 +754,20 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
                   <Separator />
                   <div>
                     <h4 className="mb-2 font-medium">映射预览：</h4>
-                    <div className="space-y-2 rounded-lg bg-muted/50 p-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">图片名称：</span>
-                        <Badge variant="secondary">{form.watch('imageNameColumn') || '未选择'}</Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">提示词：</span>
-                        <Badge variant="secondary">{form.watch('promptColumn') || '未选择'}</Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">图片：</span>
-                        <Badge variant="secondary">{form.watch('imageColumn') || '未选择'}</Badge>
+                    <div className="rounded-lg bg-muted/50 p-4">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">图片名称：</span>
+                          <Badge variant="secondary">{form.watch('imageNameColumn') || '未选择'}</Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">提示词：</span>
+                          <Badge variant="secondary">{form.watch('promptColumn') || '未选择'}</Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">图片：</span>
+                          <Badge variant="secondary">{form.watch('imageColumn') || '未选择'}</Badge>
+                        </div>
                       </div>
                     </div>
                   </div>

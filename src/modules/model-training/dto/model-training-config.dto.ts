@@ -7,9 +7,6 @@ export class CreateModelTrainingConfigDto extends BaseEntityDto {
   modelTrainingId: string;
 
   @IsString()
-  creatorUserId: string;
-
-  @IsString()
   @IsOptional()
   feishuTableUrl?: string;
 
@@ -66,8 +63,4 @@ export class UpdateModelTrainingConfigDto extends PartialType(CreateModelTrainin
   @IsString()
   @IsOptional()
   modelTrainingId?: string;
-
-  @IsString()
-  @IsOptional()
-  creatorUserId?: string;
 }
