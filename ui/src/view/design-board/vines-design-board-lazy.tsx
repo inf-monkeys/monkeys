@@ -4,6 +4,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import { useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
+import { get } from 'lodash';
 import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -28,7 +29,6 @@ import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 import { IVinesExecutionResultItem } from '@/utils/execution';
 import { downloadFile, getImageSize } from '@/utils/file.ts';
-import { get } from 'lodash';
 
 interface DesignBoardViewProps {
   embed?: boolean;
@@ -80,7 +80,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
   useEffect(() => {
     if (!editor) return;
-    
+
     // 确保 colorScheme 值符合 tldraw 的预期格式
     let colorScheme: 'light' | 'dark' | 'system';
     if (themeMode === 'auto') {
@@ -93,7 +93,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       // 如果 themeMode 不是预期值，默认使用 system
       colorScheme = 'system';
     }
-    
+
     editor.user.updateUserPreferences({
       colorScheme,
     });
@@ -126,11 +126,25 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   }, []);
 
   const handleExport = async () => {
-    if (!editor) return;
-    const ids = [frameShapeId];
-    const { blob } = await editor.toImage(ids, { format: 'png', scale: 0.5 });
-    const file = new File([blob], `${metadata?.displayName ?? 'Board'}-${Date.now()}.png`, { type: blob.type });
-    downloadFile(file);
+    if (!editor) {
+      toast.error('Board uninitialized');
+      return;
+    }
+    toast.promise(
+      async () => {
+        const ids = [frameShapeId];
+        const { blob } = await editor.toImage(ids, { format: 'png', scale: 0.5 });
+        const file = new File([blob], `${metadata?.displayName ?? 'Board'}-${Date.now()}.png`, { type: blob.type });
+        downloadFile(file);
+      },
+      {
+        success: () => {
+          return t('common.export.success');
+        },
+        error: t('common.export.error'),
+        loading: t('common.export.loading'),
+      },
+    );
   };
 
   const handleSave = () => {
@@ -216,9 +230,12 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
     };
 
     // 仅在文档层数据变化时触发。tldraw v3 store 变更事件可通过 listen 订阅
-    const unsubscribe = editor.store.listen(() => {
-      scheduleSave();
-    }, { scope: 'document' });
+    const unsubscribe = editor.store.listen(
+      () => {
+        scheduleSave();
+      },
+      { scope: 'document' },
+    );
 
     // 页面卸载/组件卸载时做一次 flush
     const handleBeforeUnload = () => {

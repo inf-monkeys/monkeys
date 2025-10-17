@@ -1,8 +1,9 @@
 import React, { ErrorInfo, startTransition, useCallback, useEffect } from 'react';
 
 import './index.scss';
-import './layer-panel.css';
 
+import { useEventEmitter } from 'ahooks';
+import { get } from 'lodash';
 import {
   AssetRecordType,
   createShapeId,
@@ -14,6 +15,7 @@ import {
   defaultTools,
   Editor,
   FrameShapeUtil,
+  TLAssetStore,
   TLComponents,
   Tldraw,
   TldrawUiMenuGroup,
@@ -23,31 +25,31 @@ import {
   TLShapeId,
   TLUiContextMenuProps,
   useEditor,
-  useToasts
+  useToasts,
 } from 'tldraw';
+
+import { useSystemConfig } from '@/apis/common';
+import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
+import { useUniImagePreview } from '@/components/layout-wrapper/main/uni-image-preview';
+import { uploadSingleFile } from '@/components/ui/vines-uploader/standalone';
+import type { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
+import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
+import { newConvertExecutionResultToItemList } from '@/utils/execution';
+import { getImageSize } from '@/utils/file';
 
 import { ExternalLayerPanel } from './ExternalLayerPanel';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 
-import { useSystemConfig } from '@/apis/common';
-import { useUniImagePreview } from '@/components/layout-wrapper/main/uni-image-preview';
-import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
-import { getImageSize } from '@/utils/file';
-import { get } from 'lodash';
-
-import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
-import type { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
-import { newConvertExecutionResultToItemList } from '@/utils/execution';
-import { useEventEmitter } from 'ahooks';
 import 'tldraw/tldraw.css';
+import './layer-panel.css';
 
 class FixedFrameShapeUtil extends FrameShapeUtil {
   // override canResize() {
   //   return true;
   // }
-  
+
   // 重写getGeometry方法以防止文本测量错误
   getGeometry(shape: any) {
     try {
@@ -76,10 +78,7 @@ class FixedFrameShapeUtil extends FrameShapeUtil {
 }
 
 // 错误边界组件
-class TldrawErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error?: Error }
-> {
+class TldrawErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error?: Error }> {
   constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false };
@@ -96,17 +95,19 @@ class TldrawErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          height: '100%',
-          flexDirection: 'column',
-          gap: '16px',
-          color: '#666'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            flexDirection: 'column',
+            gap: '16px',
+            color: '#666',
+          }}
+        >
           <div>画板加载出现问题</div>
-          <button 
+          <button
             onClick={() => this.setState({ hasError: false, error: undefined })}
             style={{
               padding: '8px 16px',
@@ -114,7 +115,7 @@ class TldrawErrorBoundary extends React.Component<
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             重试
@@ -185,11 +186,11 @@ function CustomContextMenu(props: TLUiContextMenuProps & { miniPage?: any }) {
   // 检测当前应用是否有图片输入字段
   const getImageInputFields = () => {
     if (!miniPage) return [];
-    
+
     // 尝试不同的路径来获取输入字段
-    const inputs = 
-      miniPage?.workflow?.variables ||        // 主要路径：workflow.variables
-      miniPage?.workflow?.input || 
+    const inputs =
+      miniPage?.workflow?.variables || // 主要路径：workflow.variables
+      miniPage?.workflow?.input ||
       miniPage?.workflow?.data?.input ||
       miniPage?.workflow?.definition?.input ||
       miniPage?.agent?.workflow?.variables ||
@@ -197,7 +198,7 @@ function CustomContextMenu(props: TLUiContextMenuProps & { miniPage?: any }) {
       miniPage?.agent?.workflow?.data?.input ||
       miniPage?.agent?.data?.workflow?.input ||
       [];
-    
+
     return inputs.filter((input: any) => input.type === 'file');
   };
 
@@ -230,14 +231,16 @@ function CustomContextMenu(props: TLUiContextMenuProps & { miniPage?: any }) {
     }
 
     // 通过自定义事件通知应用更新图片字段
-    window.dispatchEvent(new CustomEvent('vines:add-image-to-field', {
-      detail: {
-        pageId: miniPage.id,
-        fieldName,
-        imageUrl,
-        appDisplayName
-      }
-    }));
+    window.dispatchEvent(
+      new CustomEvent('vines:add-image-to-field', {
+        detail: {
+          pageId: miniPage.id,
+          fieldName,
+          imageUrl,
+          appDisplayName,
+        },
+      }),
+    );
 
     addToast({
       title: `图片已添加到 ${appDisplayName} - ${fieldName}`,
@@ -249,46 +252,70 @@ function CustomContextMenu(props: TLUiContextMenuProps & { miniPage?: any }) {
   const selectedImageUrl = getSelectedImageUrl();
   const hasSelectedImage = !!selectedImageUrl;
 
-
   return (
     <DefaultContextMenu {...props}>
       <TldrawUiMenuGroup id="custom-actions">
-        <TldrawUiMenuItem
-          id="view-details"
-          label="显示图片详情"
-          icon="info"
-          readonlyOk
-          onSelect={handleViewDetails}
-        />
+        <TldrawUiMenuItem id="view-details" label="显示图片详情" icon="info" readonlyOk onSelect={handleViewDetails} />
         {/* 当有应用打开且有图片输入字段时，显示添加到应用的选项 */}
-        {hasSelectedImage && imageInputFields.length > 0 && imageInputFields.map((field: any) => {
-          // 处理应用名称（可能是对象）
-          const rawAppName = miniPage?.workflow?.displayName || miniPage?.agent?.displayName || '应用';
-          const appName = typeof rawAppName === 'string' 
-            ? rawAppName 
-            : rawAppName?.['zh-CN'] || rawAppName?.['zh'] || rawAppName?.['en'] || '应用';
-          
-          // 处理字段显示名称（可能是对象）
-          const fieldDisplayName = typeof field.displayName === 'string' 
-            ? field.displayName 
-            : field.displayName?.['zh-CN'] || field.displayName?.['zh'] || field.displayName?.['en'] || field.name;
-          
-          return (
-            <TldrawUiMenuItem
-              key={`add-to-${field.name}`}
-              id={`add-to-${field.name}`}
-              label={`添加到 ${appName} - ${fieldDisplayName}（图片输入）`}
-              icon="plus"
-              readonlyOk
-              onSelect={() => handleAddToApp(field.name, appName)}
-            />
-          );
-        })}
+        {hasSelectedImage &&
+          imageInputFields.length > 0 &&
+          imageInputFields.map((field: any) => {
+            // 处理应用名称（可能是对象）
+            const rawAppName = miniPage?.workflow?.displayName || miniPage?.agent?.displayName || '应用';
+            const appName =
+              typeof rawAppName === 'string'
+                ? rawAppName
+                : rawAppName?.['zh-CN'] || rawAppName?.['zh'] || rawAppName?.['en'] || '应用';
+
+            // 处理字段显示名称（可能是对象）
+            const fieldDisplayName =
+              typeof field.displayName === 'string'
+                ? field.displayName
+                : field.displayName?.['zh-CN'] || field.displayName?.['zh'] || field.displayName?.['en'] || field.name;
+
+            return (
+              <TldrawUiMenuItem
+                key={`add-to-${field.name}`}
+                id={`add-to-${field.name}`}
+                label={`添加到 ${appName} - ${fieldDisplayName}（图片输入）`}
+                icon="plus"
+                readonlyOk
+                onSelect={() => handleAddToApp(field.name, appName)}
+              />
+            );
+          })}
       </TldrawUiMenuGroup>
       <DefaultContextMenuContent />
     </DefaultContextMenu>
   );
 }
+
+const assetsStore: TLAssetStore = {
+  async upload(asset, file) {
+    try {
+      // 使用 vines-uploader 进行文件上传
+      const result = await uploadSingleFile(file, {
+        basePath: 'user-files/designs',
+        maxSize: 50, // 50MB 限制
+        autoUpload: true,
+      });
+
+      // 返回上传后的 URL
+      const uploadUrl = result.urls[0];
+      if (!uploadUrl) {
+        throw new Error('上传失败：未获取到文件 URL');
+      }
+
+      return { src: uploadUrl };
+    } catch (error) {
+      console.error('Asset upload failed:', error);
+      throw error;
+    }
+  },
+  resolve(asset) {
+    return asset.props.src;
+  },
+};
 
 export const Board: React.FC<BoardProps> = ({
   editor,
@@ -312,30 +339,33 @@ export const Board: React.FC<BoardProps> = ({
   const miniBaselineIdsRef = React.useRef<Set<string>>(new Set());
   const miniBaselineReadyRef = React.useRef<boolean>(false);
   const miniBaselineUrlsRef = React.useRef<Set<string>>(new Set());
-  
+
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
   // 是否展示左侧 页面+图层 sidebar（默认 false）
   const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false);
 
-  const createFrame = useCallback((editor: Editor, width: number, height: number) => {
-    const defaultName = showPageAndLayerSidebar ? '默认画板' : 'Design Board';
-    editor.createShape({
-      type: 'frame',
-      id: frameShapeId,
-      x: 0,
-      y: 0,
-      props: {
-        w: width,
-        h: height,
-        color: 'white',
-        name: defaultName,
-      },
-    });
+  const createFrame = useCallback(
+    (editor: Editor, width: number, height: number) => {
+      const defaultName = showPageAndLayerSidebar ? '默认画板' : 'Design Board';
+      editor.createShape({
+        type: 'frame',
+        id: frameShapeId,
+        x: 0,
+        y: 0,
+        props: {
+          w: width,
+          h: height,
+          color: 'white',
+          name: defaultName,
+        },
+      });
 
-    // 设置视图以适应画板
-    editor.zoomToFit();
-  }, [showPageAndLayerSidebar]);
+      // 设置视图以适应画板
+      editor.zoomToFit();
+    },
+    [showPageAndLayerSidebar],
+  );
 
   // 监听选中画板变化（多画板模式）
   useEffect(() => {
@@ -343,12 +373,12 @@ export const Board: React.FC<BoardProps> = ({
 
     const handleSelectionChange = () => {
       const selectedShapes = editor.getSelectedShapes();
-      const frameShape = selectedShapes.find(shape => shape.type === 'frame');
-      
+      const frameShape = selectedShapes.find((shape) => shape.type === 'frame');
+
       if (frameShape && 'w' in frameShape.props && 'h' in frameShape.props) {
         const frameWidth = frameShape.props.w as number;
         const frameHeight = frameShape.props.h as number;
-        
+
         // 更新显示的宽高
         startTransition(() => {
           setBoardCanvasSize(frameWidth, frameHeight);
@@ -358,7 +388,7 @@ export const Board: React.FC<BoardProps> = ({
 
     // 监听选择变化
     editor.addListener('change', handleSelectionChange);
-    
+
     // 初始检查
     handleSelectionChange();
 
@@ -384,26 +414,25 @@ export const Board: React.FC<BoardProps> = ({
   // 定义自定义组件配置 - 使用useMemo稳定引用
   const components: TLComponents = React.useMemo(() => {
     const comps: TLComponents = {};
-    
+
     // 根据 OEM 配置控制组件显示（未配置时隐藏）
     if (!get(oem, 'theme.designProjects.showPageMenu', false)) {
       comps.PageMenu = () => null;
     }
-    
+
     if (!get(oem, 'theme.designProjects.showMainMenu', false)) {
       comps.MainMenu = () => null;
     }
-    
+
     if (!get(oem, 'theme.designProjects.showStylePanel', false)) {
       comps.StylePanel = () => null;
     }
-    
+
     // 控制 tldraw 左上角原生操作条（撤销/重做/删除/重复/更多）
     if (!get(oem, 'theme.designProjects.showActionsMenu', false)) {
       comps.ActionsMenu = () => null;
       comps.QuickActions = () => null;
     }
-    
 
     // 使用自定义的竖向工具栏
     if (!get(oem, 'theme.designProjects.showToolbar', false)) {
@@ -411,14 +440,13 @@ export const Board: React.FC<BoardProps> = ({
     } else {
       comps.Toolbar = VerticalToolbar;
     }
-    
+
     const showContextMenu = get(oem, 'theme.designProjects.showContextMenu', true);
-    
+
     if (showContextMenu) {
       comps.ContextMenu = (props: TLUiContextMenuProps) => <CustomContextMenu {...props} miniPage={miniPage} />;
     }
-    
-    
+
     return comps;
   }, [oem, miniPage]); // 当oem或miniPage发生变化时重新创建
 
@@ -511,7 +539,7 @@ export const Board: React.FC<BoardProps> = ({
     const flat = (allOutputsPages?.flat() ?? []) as VinesWorkflowExecutionOutputListItem[];
     if (!flat?.length) return;
     const items = newConvertExecutionResultToItemList(flat);
-    const workflowId = (miniPage?.workflowId || (miniPage as any)?.workflow?.id);
+    const workflowId = miniPage?.workflowId || (miniPage as any)?.workflow?.id;
     const startMs = miniStartTimeRef.current || 0;
     // 初始化基线：首次看到的当前列表全部加入基线并跳过本轮插入
     if (!miniBaselineReadyRef.current) {
@@ -520,7 +548,8 @@ export const Board: React.FC<BoardProps> = ({
       for (let i = 0; i < items.length; i++) {
         const raw = flat[i] as any;
         const conv = (items as any[])[i];
-        const isSameWorkflow = conv?.workflowId === workflowId || raw?.workflowId === workflowId || raw?.workflow?.id === workflowId;
+        const isSameWorkflow =
+          conv?.workflowId === workflowId || raw?.workflowId === workflowId || raw?.workflow?.id === workflowId;
         if (!isSameWorkflow) continue;
         const id = raw?.id || conv?.id;
         if (id) baseline.add(String(id));
@@ -537,7 +566,8 @@ export const Board: React.FC<BoardProps> = ({
         const conv = (items as any[])[i];
         const raw = flat[i] as any;
         if (!conv) continue;
-        const isSameWorkflow = conv?.workflowId === workflowId || raw?.workflowId === workflowId || raw?.workflow?.id === workflowId;
+        const isSameWorkflow =
+          conv?.workflowId === workflowId || raw?.workflowId === workflowId || raw?.workflow?.id === workflowId;
         if (!isSameWorkflow) continue;
         const rawId = raw?.id || conv?.id;
         if (rawId && miniBaselineIdsRef.current.has(String(rawId))) continue;
@@ -551,13 +581,15 @@ export const Board: React.FC<BoardProps> = ({
         try {
           const { width, height } = await getImageSize(url);
           const id = AssetRecordType.createId();
-          editor.createAssets([{
-            id,
-            type: 'image',
-            typeName: 'asset',
-            props: { name: id, src: url, mimeType: 'image/png', isAnimated: false, h: height, w: width },
-            meta: {},
-          }]);
+          editor.createAssets([
+            {
+              id,
+              type: 'image',
+              typeName: 'asset',
+              props: { name: id, src: url, mimeType: 'image/png', isAnimated: false, h: height, w: width },
+              meta: {},
+            },
+          ]);
           editor.createShape({ type: 'image', props: { assetId: id, w: width, h: height } });
           insertedUrlSetRef.current.add(url);
           if (rawId) miniBaselineIdsRef.current.add(String(rawId));
@@ -570,7 +602,7 @@ export const Board: React.FC<BoardProps> = ({
     <div style={{ position: 'relative', height: '100%', width: '100%', flex: 1 }}>
       {/* Layer Panel - 固定在左侧（可配置） */}
       {showPageAndLayerSidebar && (
-        <div 
+        <div
           className="layer-panel"
           style={{
             position: 'absolute',
@@ -584,7 +616,7 @@ export const Board: React.FC<BoardProps> = ({
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
             zIndex: 1000,
             overflow: leftCollapsed ? 'hidden' : 'visible',
-            ...(leftCollapsed ? {} : { })
+            ...(leftCollapsed ? {} : {}),
           }}
         >
           {editor && <ExternalLayerPanel editor={editor} />}
@@ -619,142 +651,145 @@ export const Board: React.FC<BoardProps> = ({
       )}
 
       {/* mini iframe 现已整合进 ExternalLayerPanel 内部渲染 */}
-      
+
       {/* tldraw容器 - 全屏显示 */}
       <div style={{ height: '100%' }}>
         <TldrawErrorBoundary>
           <Tldraw
-        persistenceKey={persistenceKey}
-        onMount={(editor: Editor) => {
-          setEditor(editor);
-          editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
-            if (shape.id === frameShapeId) {
-              return false;
-            }
-          });
-
-          editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
-            if (prevShape.id === frameShapeId) {
-              if (nextShape.type === 'frame' && 'w' in nextShape.props && 'h' in nextShape.props) {
-                startTransition(() => {
-                  // @ts-ignore
-                  setBoardCanvasSize(nextShape.props.w as number, nextShape.props.h as number);
-                });
-              }
-              return nextShape;
-            }
-            // 若是新创建或默认名仍为英文 Frame 的画板，自动改成中文“画板”
-            try {
-              if (nextShape.type === 'frame') {
-                const name = (nextShape as any)?.props?.name;
-                if (!name || String(name).toLowerCase() === 'frame') {
-                  return {
-                    ...nextShape,
-                    props: { ...(nextShape as any).props, name: '画板' }
-                  } as TLShape;
-                }
-              }
-            } catch {}
-            return nextShape;
-          });
-
-          // 如果提供了画布尺寸，则创建有界 frame
-          if (canvasWidth && canvasHeight) {
-            createFrame(editor, canvasWidth, canvasHeight);
-          }
-
-          // 将默认英文页面名（如 Page 1 / Page1）改为中文“页面1”
-          const renameDefaultPages = () => {
-            try {
-              const pages = (editor as any).getPages?.() || [];
-              pages.forEach((p: any, idx: number) => {
-                const name: string = String(p?.name || '');
-                const m = name.match(/^Page\s*(\d+)$/i) || name.match(/^Page(\d+)$/i);
-                if (m && m[1]) {
-                  const num = Number(m[1]);
-                  const cn = `页面 ${Number.isFinite(num) ? num : idx + 1}`;
-                  try { (editor as any).renamePage?.(p.id, cn); } catch {}
+            persistenceKey={persistenceKey}
+            onMount={(editor: Editor) => {
+              setEditor(editor);
+              editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
+                if (shape.id === frameShapeId) {
+                  return false;
                 }
               });
-            } catch {}
-          };
-          // 立即执行一次，并在下一个宏任务再执行一次，避免初次渲染时覆盖
-          renameDefaultPages();
-          setTimeout(renameDefaultPages, 0);
-          editor.registerExternalContentHandler('url', async ({ url }) => {
-            // 检查是否是图片 URL
-            try {
-              // 获取图片数据
 
-              // 创建 asset
-              const imageUrl = url;
-              const { width, height } = await getImageSize(imageUrl);
-              const assetData = {
-                id: AssetRecordType.createId(),
-                url: imageUrl,
-                width: width,
-                height: height,
+              editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
+                if (prevShape.id === frameShapeId) {
+                  if (nextShape.type === 'frame' && 'w' in nextShape.props && 'h' in nextShape.props) {
+                    startTransition(() => {
+                      // @ts-ignore
+                      setBoardCanvasSize(nextShape.props.w as number, nextShape.props.h as number);
+                    });
+                  }
+                  return nextShape;
+                }
+                // 若是新创建或默认名仍为英文 Frame 的画板，自动改成中文“画板”
+                try {
+                  if (nextShape.type === 'frame') {
+                    const name = (nextShape as any)?.props?.name;
+                    if (!name || String(name).toLowerCase() === 'frame') {
+                      return {
+                        ...nextShape,
+                        props: { ...(nextShape as any).props, name: '画板' },
+                      } as TLShape;
+                    }
+                  }
+                } catch {}
+                return nextShape;
+              });
+
+              // 如果提供了画布尺寸，则创建有界 frame
+              if (canvasWidth && canvasHeight) {
+                createFrame(editor, canvasWidth, canvasHeight);
+              }
+
+              // 将默认英文页面名（如 Page 1 / Page1）改为中文“页面1”
+              const renameDefaultPages = () => {
+                try {
+                  const pages = (editor as any).getPages?.() || [];
+                  pages.forEach((p: any, idx: number) => {
+                    const name: string = String(p?.name || '');
+                    const m = name.match(/^Page\s*(\d+)$/i) || name.match(/^Page(\d+)$/i);
+                    if (m && m[1]) {
+                      const num = Number(m[1]);
+                      const cn = `页面 ${Number.isFinite(num) ? num : idx + 1}`;
+                      try {
+                        (editor as any).renamePage?.(p.id, cn);
+                      } catch {}
+                    }
+                  });
+                } catch {}
               };
+              // 立即执行一次，并在下一个宏任务再执行一次，避免初次渲染时覆盖
+              renameDefaultPages();
+              setTimeout(renameDefaultPages, 0);
+              editor.registerExternalContentHandler('url', async ({ url }) => {
+                // 检查是否是图片 URL
+                try {
+                  // 获取图片数据
 
-              editor.createAssets([
-                {
-                  id: assetData.id,
-                  type: 'image',
-                  typeName: 'asset',
-                  props: {
-                    name: assetData.id,
-                    src: assetData.url,
-                    mimeType: 'image/png',
-                    isAnimated: false,
-                    h: assetData.height,
-                    w: assetData.width,
-                  },
-                  meta: {},
-                },
-              ]);
+                  // 创建 asset
+                  const imageUrl = url;
+                  const { width, height } = await getImageSize(imageUrl);
+                  const assetData = {
+                    id: AssetRecordType.createId(),
+                    url: imageUrl,
+                    width: width,
+                    height: height,
+                  };
 
-              editor.createShape({
-                type: 'image',
-                props: {
-                  assetId: assetData.id,
-                  w: assetData.width,
-                  h: assetData.height,
-                },
+                  editor.createAssets([
+                    {
+                      id: assetData.id,
+                      type: 'image',
+                      typeName: 'asset',
+                      props: {
+                        name: assetData.id,
+                        src: assetData.url,
+                        mimeType: 'image/png',
+                        isAnimated: false,
+                        h: assetData.height,
+                        w: assetData.width,
+                      },
+                      meta: {},
+                    },
+                  ]);
+
+                  editor.createShape({
+                    type: 'image',
+                    props: {
+                      assetId: assetData.id,
+                      w: assetData.width,
+                      h: assetData.height,
+                    },
+                  });
+
+                  return true; // 表示已处理
+                } catch (e) {
+                  console.error(e);
+                }
+
+                return false; // 未处理,使用默认行为
               });
+            }}
+            components={components}
+            shapeUtils={[FixedFrameShapeUtil]}
+            bindingUtils={defaultBindingUtils}
+            tools={[...defaultShapeTools, ...defaultTools]}
+            assetUrls={defaultEditorAssetUrls}
+            overrides={{
+              tools: (_editor, tools) => {
+                // Remove the text tool
+                delete tools.text;
 
-              return true; // 表示已处理
-            } catch (e) {
-              console.error(e);
-            }
+                // 根据 OEM 配置控制 frame 工具（新建画板）
+                const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
+                if (oneOnOne === true) {
+                  // 单画板模式：隐藏 frame 工具
+                  delete tools.frame;
+                }
+                // 多画板模式：保留 frame 工具（默认行为）
 
-            return false; // 未处理,使用默认行为
-          });
-        }}
-        components={components}
-        shapeUtils={[FixedFrameShapeUtil]}
-        bindingUtils={defaultBindingUtils}
-        tools={[...defaultShapeTools, ...defaultTools]}
-        assetUrls={defaultEditorAssetUrls}
-        overrides={{
-          tools: (_editor, tools) => {
-            // Remove the text tool
-            delete tools.text;
-            
-            // 根据 OEM 配置控制 frame 工具（新建画板）
-            const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
-            if (oneOnOne === true) {
-              // 单画板模式：隐藏 frame 工具
-              delete tools.frame;
-            }
-            // 多画板模式：保留 frame 工具（默认行为）
-            
-            return tools;
-          },
-        }}
-        >
-          {/* 小工具工具栏 - 根据 OEM 配置控制显示 */}
-          {get(oem, 'theme.designProjects.showMiniToolsToolbar', false) && <MiniToolsToolbar />}
-        </Tldraw>
+                return tools;
+              },
+            }}
+            assets={assetsStore}
+          >
+            {/* 小工具工具栏 - 根据 OEM 配置控制显示 */}
+            {get(oem, 'theme.designProjects.showMiniToolsToolbar', false) && <MiniToolsToolbar />}
+          </Tldraw>
         </TldrawErrorBoundary>
       </div>
 
