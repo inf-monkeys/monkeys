@@ -11,12 +11,12 @@ import {
   VINES_WORKFLOW_INPUT_SPECIAL_TYPES,
   VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER,
 } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/consts.ts';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tag } from '@/components/ui/tag';
 import { TagGroup } from '@/components/ui/tag/tag-group.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings';
 import { cn, getI18nContent } from '@/utils';
@@ -93,7 +93,7 @@ export const InputItem: React.FC<IInputItemProps> = ({
           )}
 
           <h1 className="font-bold">{getI18nContent(displayName)}</h1>
-          
+
           {/* 添加复制按钮 */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -113,7 +113,7 @@ export const InputItem: React.FC<IInputItemProps> = ({
             <TooltipContent>
               <div className="text-center">
                 <div>点击复制变量引用</div>
-                <div className="text-xs text-gray-500 mt-1">{variableReference}</div>
+                <div className="mt-1 text-xs text-gray-500">{variableReference}</div>
               </div>
             </TooltipContent>
           </Tooltip>

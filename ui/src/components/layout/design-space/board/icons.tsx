@@ -7,12 +7,7 @@ export const VisibilityOff: React.FC = () => (
       fill="currentColor"
       opacity="0.3"
     />
-    <path
-      d="M2 2L22 22"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M2 2L22 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 

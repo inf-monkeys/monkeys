@@ -1,15 +1,13 @@
-import { getUnicornStudio, isUnicornStudioLoaded, loadUnicornStudio } from '@/lib/unicorn-studio';
 import React, { useEffect, useRef, useState } from 'react';
+
+import { getUnicornStudio, isUnicornStudioLoaded, loadUnicornStudio } from '@/lib/unicorn-studio';
 
 interface DynamicBackgroundProps {
   className?: string;
   style?: React.CSSProperties;
 }
 
-export const DynamicBackground: React.FC<DynamicBackgroundProps> = ({ 
-  className = '', 
-  style = {} 
-}) => {
+export const DynamicBackground: React.FC<DynamicBackgroundProps> = ({ className = '', style = {} }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +23,7 @@ export const DynamicBackground: React.FC<DynamicBackgroundProps> = ({
 
       try {
         const unicornStudio = getUnicornStudio();
-        
+
         // 使用本地的JSON文件
         sceneRef.current = await unicornStudio.addScene({
           elementId: containerRef.current.id,
@@ -45,7 +43,7 @@ export const DynamicBackground: React.FC<DynamicBackgroundProps> = ({
             },
           },
         });
-        
+
         setIsLoading(false);
         console.log('UnicornStudio scene initialized successfully');
       } catch (error) {
@@ -68,7 +66,7 @@ export const DynamicBackground: React.FC<DynamicBackgroundProps> = ({
 
         // 加载SDK
         await loadUnicornStudio();
-        
+
         // 初始化场景
         await initializeScene();
       } catch (error) {

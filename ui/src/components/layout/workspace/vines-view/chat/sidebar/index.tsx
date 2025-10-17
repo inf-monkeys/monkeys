@@ -6,8 +6,8 @@ import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
 import { useAgentV2SessionsAsVinesFormat } from '@/apis/agents-v2/chat';
+import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
 import { ChatSession } from '@/components/layout/workspace/vines-view/chat/sidebar/chat-session.tsx';
 import { WorkflowChatViewOptions } from '@/components/layout/workspace/vines-view/chat/sidebar/options.tsx';
 import { Button } from '@/components/ui/button';
@@ -41,7 +41,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({
   // Use different APIs based on mode
   const workflowSessionsResult = useWorkflowChatSessions(isWorkflowMode ? id : '');
   const agentV2SessionsResult = useAgentV2SessionsAsVinesFormat(isAgentV2Mode ? id : undefined);
-  
+
   // Select the appropriate result based on mode
   const { data, mutate } = isAgentV2Mode ? agentV2SessionsResult : workflowSessionsResult;
   const { trigger } = useCreateWorkflowChatSession();
@@ -142,12 +142,12 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({
               </Button>
             </SimpleInputDialog>
           )}
-          
+
           {/* New chat button for Agent V2 mode - clears current session to start fresh */}
           {isAgentV2Mode && (
-            <Button 
-              variant="outline" 
-              icon={<Plus />} 
+            <Button
+              variant="outline"
+              icon={<Plus />}
               size="small"
               onClick={() => {
                 // Clear the current session ID to start a new chat
@@ -155,7 +155,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({
                   ...chatSessions,
                   [id]: '', // Empty session ID means new chat
                 };
-                
+
                 setChatSessions(newSessions);
               }}
             >

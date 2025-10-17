@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 
 import { cn } from '@/utils';
+
 import ButtonBackgroundSvg from './quick-actions/ButtonBackground.svg';
 
 // 定义颜色替换模式
@@ -19,9 +20,9 @@ type ColorMode = {
 
 // 针对不同按钮的图标位置和尺寸映射（可按需微调）
 const ICON_CLASS_MAP: Record<string, string> = {
-  '意图表达': 'bottom-[40px] right-[190px] size-[210px]',
-  '一键生成': 'bottom-[100px] right-[120px] size-[130px]',
-  '智能修改': 'bottom-[120px] right-[210px] size-[120px]',
+  意图表达: 'bottom-[40px] right-[190px] size-[210px]',
+  一键生成: 'bottom-[100px] right-[120px] size-[130px]',
+  智能修改: 'bottom-[120px] right-[210px] size-[120px]',
 };
 
 // 从资源路径中解析出按钮名称（quick-actions/名称/icon.svg）
@@ -131,22 +132,18 @@ export const QuickAction: React.FC<{
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       onClick={onClick}
-      className="quick-action isolate relative flex size-full cursor-pointer flex-col justify-end overflow-hidden rounded-2xl px-[20px] py-[26px]"
+      className="quick-action relative isolate flex size-full cursor-pointer flex-col justify-end overflow-hidden rounded-2xl px-[20px] py-[26px]"
       key={`landing-artist-quick-action-${key}`}
     >
       {/* 背景 SVG */}
-      <div className="absolute inset-0 w-full h-full">
-        <img 
-          src={ButtonBackgroundSvg} 
-          alt="Button Background" 
-          className="w-full h-full object-cover"
-        />
+      <div className="absolute inset-0 h-full w-full">
+        <img src={ButtonBackgroundSvg} alt="Button Background" className="h-full w-full object-cover" />
       </div>
-      
+
       {/* 箭头 */}
       <motion.div
         className={cn(
-          'absolute right-3 top-3 flex size-[40px] items-center justify-center rounded-full z-10',
+          'absolute right-3 top-3 z-10 flex size-[40px] items-center justify-center rounded-full',
           isHovered ? '!bg-[#000000]' : '!bg-[#ffffff00]',
         )}
       >
@@ -157,7 +154,7 @@ export const QuickAction: React.FC<{
       <motion.div
         className={cn(
           'pointer-events-none absolute z-10 mix-blend-normal',
-          ICON_CLASS_MAP[actionName] || 'bottom-[120px] right-[200px] size-[120px]'
+          ICON_CLASS_MAP[actionName] || 'bottom-[120px] right-[200px] size-[120px]',
         )}
       >
         <RemoteSvg
@@ -169,7 +166,7 @@ export const QuickAction: React.FC<{
       </motion.div>
 
       {/* 文本 */}
-      <div className="flex flex-col gap-6 z-10 mix-blend-normal">
+      <div className="z-10 flex flex-col gap-6 mix-blend-normal">
         <RemoteSvg
           url={titleUrl}
           className="h-6"

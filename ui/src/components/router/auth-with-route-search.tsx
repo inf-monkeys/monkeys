@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
-import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useSWRConfig } from 'swr';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import { has } from 'lodash';
 import { useTranslation } from 'react-i18next';

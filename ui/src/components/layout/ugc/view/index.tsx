@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
 import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
+import { useAssetFilterRuleList } from '@/apis/ugc';
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import {
@@ -41,7 +42,6 @@ import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn, getI18nContent } from '@/utils';
-import { useAssetFilterRuleList } from '@/apis/ugc';
 
 interface IUgcViewProps<E extends object> {
   assetKey: string;
@@ -83,7 +83,10 @@ export const UgcView = <E extends object>({
   const team = useVinesTeam();
 
   // local storage
-  const [displayModeStorage, setDisplayModeStorage] = useLocalStorage<IDisplayModeStorage>(`vines-ui-asset-display-mode`, {});
+  const [displayModeStorage, setDisplayModeStorage] = useLocalStorage<IDisplayModeStorage>(
+    `vines-ui-asset-display-mode`,
+    {},
+  );
   const displayMode = useMemo(
     () => (!team || !assetKey ? null : _.get(displayModeStorage, [team.teamId, assetKey], 'card')),
     [displayModeStorage, team.teamId, assetKey],
@@ -122,7 +125,7 @@ export const UgcView = <E extends object>({
 
   // filter
   const [filter, setFilter] = useState<Partial<IListUgcDto['filter']>>({});
-  
+
   // 左侧分组选中状态
   const [selectedRuleId, setSelectedRuleId] = useState<string>();
 
@@ -130,16 +133,16 @@ export const UgcView = <E extends object>({
   const handleFolderClick = (folderId: string, folderFilter: Partial<IListUgcDto['filter']>) => {
     // 设置左侧分组选中状态
     setSelectedRuleId(folderId);
-    
+
     // 应用筛选条件
     setFilter(folderFilter);
-    
+
     // 重置分页到第一页
     setPagination((prev) => ({
       ...prev,
       pageIndex: 0,
     }));
-    
+
     // 切换到画廊视图
     setDisplayModeStorage((prev) => {
       const newStorage = {
@@ -167,9 +170,7 @@ export const UgcView = <E extends object>({
   });
 
   // 获取所有数据用于文件夹视图
-  const {
-    data: allDataRaw,
-  } = useUgcFetcher({
+  const { data: allDataRaw } = useUgcFetcher({
     page: 1,
     limit: 100000, // 获取大量数据
     filter,
@@ -295,7 +296,6 @@ export const UgcView = <E extends object>({
   });
 
   const rows = table.getRowModel().rows;
-
 
   const { data: oem } = useSystemConfig();
   const paginationPosition = oem?.theme.paginationPosition ?? 'left';

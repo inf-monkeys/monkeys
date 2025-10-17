@@ -1,9 +1,9 @@
 import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
 import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { useColumnRenderer } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
-import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -85,11 +85,7 @@ export const UgcViewCard = <E extends object>({
         {isTextFile() ? (
           // 文本文件显示内容预览
           <div className="h-20 overflow-hidden">
-            <AssetContentPreview
-              asset={row.original}
-              isThumbnail={true}
-              className="h-full w-full"
-            />
+            <AssetContentPreview asset={row.original} isThumbnail={true} className="h-full w-full" />
           </div>
         ) : (
           // 其他文件显示描述

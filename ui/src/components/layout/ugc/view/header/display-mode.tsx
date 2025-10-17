@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 
 import _ from 'lodash';
-import { CreditCard, Images, Table2, Folder } from 'lucide-react';
+import { CreditCard, Folder, Images, Table2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { IDisplayMode, IDisplayModeStorage } from '@/components/layout/ugc/typings.ts';

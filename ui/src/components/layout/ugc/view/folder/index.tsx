@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { Clock, Folder } from 'lucide-react';
+import { Folder } from 'lucide-react';
 
-import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx';
 import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
+import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx';
 import { cn } from '@/utils';
 
 interface IFolderCardProps {
@@ -45,65 +45,48 @@ export const UgcViewFolderCard: React.FC<IFolderCardProps> = ({
       className={cn('h-80 cursor-pointer transition-colors hover:bg-neocard active:bg-neocard', {
         'cursor-pointer': !!onClick,
         'cursor-default': !onClick,
-      }) } style={{ height: '24rem' }}
+      })}
+      style={{ height: '24rem' }}
       onClick={onClick}
     >
       <CardHeader className="p-global">
         <div className="flex items-start gap-3">
-          <Folder className="h-6 w-6 text-gray-400 flex-shrink-0 mt-1" />
-          <div className="flex flex-col min-w-0 flex-1">
-            <h3 className="text-lg font-bold text-gray-900 truncate">{folderName}</h3>
-            <p className="text-sm text-gray-500">{assetCount}个资产 更新于{lastUpdated}</p>
+          <Folder className="mt-1 h-6 w-6 flex-shrink-0 text-gray-400" />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <h3 className="truncate text-lg font-bold text-gray-900">{folderName}</h3>
+            <p className="text-sm text-gray-500">
+              {assetCount}个资产 更新于{lastUpdated}
+            </p>
           </div>
         </div>
       </CardHeader>
       <CardContent className="p-global pt-0">
-         <div className="grid grid-cols-2 grid-rows-2 gap-1">
+        <div className="grid grid-cols-2 grid-rows-2 gap-1">
           {(previewAssets || []).slice(0, 4).map((asset, index) => {
             if (isTextFile(asset)) {
               // 文本文件使用 AssetContentPreview 组件
               return (
-                <div
-                  key={index}
-                  className="bg-gray-100 rounded-md overflow-hidden"
-                  style={{ aspectRatio: '16/9' }}
-                >
-                  <AssetContentPreview
-                    asset={asset}
-                    isThumbnail={true}
-                    className="h-full w-full"
-                  />
+                <div key={index} className="overflow-hidden rounded-md bg-gray-100" style={{ aspectRatio: '16/9' }}>
+                  <AssetContentPreview asset={asset} isThumbnail={true} className="h-full w-full" />
                 </div>
               );
             } else if (isImageFile(asset) && asset.url) {
               // 图片文件显示图片
               return (
-                <div
-                  key={index}
-                  className="bg-gray-100 rounded-md overflow-hidden"
-                  style={{ aspectRatio: '16/9' }}
-                >
-                  <img
-                    src={asset.url}
-                    alt={`${folderName} 预览 ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                <div key={index} className="overflow-hidden rounded-md bg-gray-100" style={{ aspectRatio: '16/9' }}>
+                  <img src={asset.url} alt={`${folderName} 预览 ${index + 1}`} className="h-full w-full object-cover" />
                 </div>
               );
             } else {
               // 其他文件类型或回退到原来的图片显示
               const imageUrl = previewImages[index];
               return (
-                <div
-                  key={index}
-                  className="bg-gray-100 rounded-md overflow-hidden"
-                  style={{ aspectRatio: '16/9' }}
-                >
+                <div key={index} className="overflow-hidden rounded-md bg-gray-100" style={{ aspectRatio: '16/9' }}>
                   {imageUrl && (
                     <img
                       src={imageUrl}
                       alt={`${folderName} 预览 ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                     />
                   )}
                 </div>

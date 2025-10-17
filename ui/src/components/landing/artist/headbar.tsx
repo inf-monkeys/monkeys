@@ -8,7 +8,8 @@ import { isAuthed } from '@/components/router/guard/auth';
 import { useVinesUser } from '@/components/router/guard/user';
 
 const ICON_URL = 'https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/icon.svg';
-const ICON_TITLE_URL = 'https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/title%E8%89%BA%E6%9C%AF%E5%AE%B6.svg';
+const ICON_TITLE_URL =
+  'https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/title%E8%89%BA%E6%9C%AF%E5%AE%B6.svg';
 
 export const HeadBar: React.FC = () => {
   const navigate = useNavigate();
@@ -45,22 +46,16 @@ export const HeadBar: React.FC = () => {
         {/* 登录按钮或用户头像 */}
         <div className="login-section mr-4">
           {isAuthenticated ? (
-            <div 
-              className="user-avatar cursor-pointer"
-              onClick={handleUserClick}
-            >
-              <img 
-                className="size-[40px] rounded-full border-2 border-white/20" 
-                src={userPhoto} 
+            <div className="user-avatar cursor-pointer" onClick={handleUserClick}>
+              <img
+                className="size-[40px] rounded-full border-2 border-white/20"
+                src={userPhoto}
                 alt={userName}
                 title={userName}
               />
             </div>
           ) : (
-            <button 
-              className="login-button"
-              onClick={handleLogin}
-            >
+            <button className="login-button" onClick={handleLogin}>
               登录
             </button>
           )}

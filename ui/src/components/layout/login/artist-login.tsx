@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 
+import { useSWRConfig } from 'swr';
 import { useNavigate } from '@tanstack/react-router';
+
+import '@/styles/artist-login.scss';
+
 import { ArrowLeft, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { useLoginByPassword } from '@/apis/authz';
 import { DynamicBackground } from '@/components/landing/artist/dynamic-background';
@@ -11,10 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { useSWRConfig } from 'swr';
-
-import '@/styles/artist-login.scss';
 
 const ICON_URL = 'https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/icon.svg';
 const ICON_TITLE_URL = 'https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/artist/title.svg';
@@ -28,7 +29,7 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
   const navigate = useNavigate();
   const { mutate } = useSWRConfig();
   const { trigger: triggerPassword } = useLoginByPassword();
-  
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,7 +39,7 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast.error('请填写完整信息');
       return;
@@ -58,10 +59,10 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
           const user = await saveAuthToken(result.token);
           if (user) {
             toast.success('登录成功');
-            
+
             // 刷新团队数据
             await mutate('/api/teams');
-            
+
             if (onLoginFinished) {
               onLoginFinished();
             } else {
@@ -96,7 +97,7 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
     <div className="artist-login-container">
       {/* 动态背景 */}
       <DynamicBackground />
-      
+
       {/* ARTIST品牌标志 */}
       <div className="artist-logo">
         <img className="logo-icon" src={ICON_URL} alt="logo" />
@@ -112,16 +113,11 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
         </div>
 
         {/* 表单标题 */}
-        <h1 className="form-title">
-          {isLogin ? '欢迎回来' : '欢迎加入'}
-        </h1>
+        <h1 className="form-title">{isLogin ? '欢迎回来' : '欢迎加入'}</h1>
 
         {/* 登录/注册选项卡 */}
         <div className="auth-tabs">
-          <button
-            className={`tab-button ${isLogin ? 'active' : ''}`}
-            onClick={() => setIsLogin(true)}
-          >
+          <button className={`tab-button ${isLogin ? 'active' : ''}`} onClick={() => setIsLogin(true)}>
             <Mail className="tab-icon" />
             邮箱登录
           </button>
@@ -136,37 +132,37 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
 
         {/* 表单 */}
         <form onSubmit={handleSubmit} className="login-form">
-           <div className="form-field">
-             <Input
-               type="email"
-               placeholder="请输入邮箱"
-               value={email}
-               onChange={(value) => setEmail(value)}
-               className="form-input"
-             />
-           </div>
+          <div className="form-field">
+            <Input
+              type="email"
+              placeholder="请输入邮箱"
+              value={email}
+              onChange={(value) => setEmail(value)}
+              className="form-input"
+            />
+          </div>
 
-           <div className="form-field">
-             <Input
-               type="password"
-               placeholder="请输入密码"
-               value={password}
-               onChange={(value) => setPassword(value)}
-               className="form-input"
-             />
-           </div>
+          <div className="form-field">
+            <Input
+              type="password"
+              placeholder="请输入密码"
+              value={password}
+              onChange={(value) => setPassword(value)}
+              className="form-input"
+            />
+          </div>
 
-           {!isLogin && (
-             <div className="form-field">
-               <Input
-                 type="password"
-                 placeholder="请重复密码"
-                 value={repeatPassword}
-                 onChange={(value) => setRepeatPassword(value)}
-                 className="form-input"
-               />
-             </div>
-           )}
+          {!isLogin && (
+            <div className="form-field">
+              <Input
+                type="password"
+                placeholder="请重复密码"
+                value={repeatPassword}
+                onChange={(value) => setRepeatPassword(value)}
+                className="form-input"
+              />
+            </div>
+          )}
 
           {/* 辅助选项 */}
           <div className="form-options">
@@ -180,7 +176,19 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
                 <Label htmlFor="remember">记住密码</Label>
               </div>
               <div className="remember-hint">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-info" aria-hidden="true">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-info"
+                  aria-hidden="true"
+                >
                   <circle cx="12" cy="12" r="10"></circle>
                   <path d="M12 16v-4"></path>
                   <path d="M12 8h.01"></path>
@@ -196,12 +204,8 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
           </div>
 
           {/* 提交按钮 */}
-          <Button
-            type="submit"
-            className="submit-button"
-            disabled={isLoading}
-          >
-            {isLoading ? '处理中...' : (isLogin ? '登录' : '注册')}
+          <Button type="submit" className="submit-button" disabled={isLoading}>
+            {isLoading ? '处理中...' : isLogin ? '登录' : '注册'}
           </Button>
         </form>
       </div>

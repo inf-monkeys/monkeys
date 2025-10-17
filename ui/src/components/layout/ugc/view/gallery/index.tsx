@@ -1,9 +1,8 @@
 import React from 'react';
 
-import { flexRender } from '@tanstack/react-table';
-import { Pin } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
+
+import { useTranslation } from 'react-i18next';
 
 import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { useColumnRenderer } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
@@ -33,7 +32,7 @@ export const UgcViewGalleryItem = <E extends object>({
     // 跳转到资产详情页面
     navigate({ to: `/$teamId/nav/concept-design:design-assets/asset/${row.original.id}` as any });
   };
-  
+
   // 判断是否置顶
   const isPinned = ((row.original as any).sort ?? 0) > 0;
 
@@ -53,7 +52,7 @@ export const UgcViewGalleryItem = <E extends object>({
     >
       <div className="relative flex items-end justify-end">
         {cover}
-        
+
         {/* 置顶标识 - 左上角 */}
         {/* {isPinned && (
           <div className="absolute top-2 left-2 z-10">
@@ -66,35 +65,41 @@ export const UgcViewGalleryItem = <E extends object>({
             </Tooltip>
           </div>
         )} */}
-        
+
         {/* 右下角操作按钮 */}
         <div className="absolute flex translate-x-[-0.5rem] translate-y-[-0.5rem] cursor-pointer gap-1 opacity-0 transition-all group-hover:opacity-100">
-        <Tooltip content={t('common.utils.info')}>
+          <Tooltip content={t('common.utils.info')}>
             <TooltipTrigger asChild>
               <div onClick={handleInfoClick} className="flex items-center justify-center">
-                <svg 
-                  width="26" 
-                  height="26" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
+                <svg
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                  fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                   className="drop-shadow-md"
                 >
                   <circle cx="12" cy="12" r="10" fill="rgb(var(--vines-500))" />
-                  <path d="M12 16v-4M12 8h.01" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M12 16v-4M12 8h.01"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
-              </TooltipTrigger>
+            </TooltipTrigger>
           </Tooltip>
 
           {operateArea &&
             operateArea(
               row.original,
-              <svg 
-                width="26" 
-                height="26" 
-                viewBox="0 0 24 24" 
-                fill="none" 
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 className="drop-shadow-md"
               >

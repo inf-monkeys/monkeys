@@ -73,7 +73,7 @@ export const UgcViewFolderView = <E extends object>({
       // 先检查文件类型
       const type = (item?.type || item?.mimeType || '') as string;
       const isImage = typeof type === 'string' && type.startsWith('image/');
-      
+
       // 如果是图片类型，优先使用URL
       if (isImage) {
         const url = item && (item.url || item.cover || item.iconUrl || item.thumbnail);
@@ -81,12 +81,12 @@ export const UgcViewFolderView = <E extends object>({
           return url;
         }
       }
-      
+
       // 如果不是图片类型，使用文件夹图标作为回退图标
       if (!isImage) {
         return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMyIgaGVpZ2h0PSIzIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0zIDVWOVYxOUMzIDE5LjU1MjMgMy40NDc3IDIwIDQgMjBIMjBDMjAuNTUyMyAyMCAyMSAxOS41NTIzIDIxIDE5VjlDMjEgOC40NDc3MiAyMC41NTIzIDggMjAgOEgxMkwxMCA2SDRDMy40NDc3MiA2IDMgNS40NDc3MiAzIDVaIiBmaWxsPSIjNjM2NkYxIi8+Cjwvc3ZnPg==';
       }
-      
+
       return '';
     };
 
@@ -96,15 +96,15 @@ export const UgcViewFolderView = <E extends object>({
         const type = (it?.type || it?.mimeType || '') as string;
         return typeof type === 'string' && type.startsWith('image/');
       });
-      
+
       const nonImageItems = items.filter((it) => {
         const type = (it?.type || it?.mimeType || '') as string;
         return !(typeof type === 'string' && type.startsWith('image/'));
       });
-      
+
       // 先取图片，再取非图片文件
       const candidates = [...imageItems, ...nonImageItems];
-      
+
       return candidates
         .slice(0, 4)
         .map((it) => getPreviewUrl(it))
@@ -117,15 +117,15 @@ export const UgcViewFolderView = <E extends object>({
         const type = (it?.type || it?.mimeType || '') as string;
         return typeof type === 'string' && type.startsWith('image/');
       });
-      
+
       const nonImageItems = items.filter((it) => {
         const type = (it?.type || it?.mimeType || '') as string;
         return !(typeof type === 'string' && type.startsWith('image/'));
       });
-      
+
       // 先取图片，再取非图片文件
       const candidates = [...imageItems, ...nonImageItems];
-      
+
       return candidates.slice(0, 4);
     };
 
@@ -137,7 +137,9 @@ export const UgcViewFolderView = <E extends object>({
           const norm = (x: any) =>
             JSON.stringify(
               Object.fromEntries(
-                Object.entries(x).filter(([, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0)),
+                Object.entries(x).filter(
+                  ([, v]) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0),
+                ),
               ),
             );
           return norm(a) === norm(b);
@@ -177,24 +179,25 @@ export const UgcViewFolderView = <E extends object>({
         const items = allData.filter((x: any) => {
           // 如果文件已经被其他规则使用，跳过
           if (usedIds.has(x.id)) return false;
-          
+
           // 使用与左侧筛选完全相同的匹配逻辑
           let ok = matchByRule(x, r);
-          
+
           // 如果规则匹配失败，尝试名称匹配（与左侧筛选保持一致）
           if (!ok && rule?.name) {
             const assetTagNames: string[] = (x.assetTags || []).map((t: any) => t.name);
             const mediaTags: string[] = Array.isArray(x.tags) ? x.tags : [];
-            ok = (x.groupName && x.groupName === rule.name) || 
-                 assetTagNames.includes(rule.name) || 
-                 mediaTags.includes(rule.name);
+            ok =
+              (x.groupName && x.groupName === rule.name) ||
+              assetTagNames.includes(rule.name) ||
+              mediaTags.includes(rule.name);
           }
-          
+
           // 只有匹配成功时才标记为已使用
           if (ok) usedIds.add(x.id);
           return ok;
         });
-        
+
         const previewImages = pickPreviewImages(items);
         const previewAssets = pickPreviewAssets(items);
         const t = items.length ? Math.max(...items.map((i) => i.updatedTimestamp || 0)) : 0;

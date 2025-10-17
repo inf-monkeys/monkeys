@@ -4,13 +4,11 @@ import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { AssetFullContentDisplay } from '@/components/layout/ugc/detail/asset-full-content-display';
+import { UgcTagSelector } from '@/components/layout/ugc/view/tag-selector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx';
-import { UgcTagSelector } from '@/components/layout/ugc/view/tag-selector';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
-import { AssetFullContentDisplay } from '@/components/layout/ugc/detail/asset-full-content-display';
-import { cn } from '@/utils';
 
 interface IAssetDetailPageProps<E extends object> {
   asset: IAssetItem<E>;
@@ -19,12 +17,7 @@ interface IAssetDetailPageProps<E extends object> {
   mutate?: () => Promise<any>;
 }
 
-export const AssetDetailPage = <E extends object>({
-  asset,
-  assetType,
-  onBack,
-  mutate,
-}: IAssetDetailPageProps<E>) => {
+export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mutate }: IAssetDetailPageProps<E>) => {
   const { t } = useTranslation();
   const [conversionType, setConversionType] = useState('text');
 
@@ -61,45 +54,37 @@ export const AssetDetailPage = <E extends object>({
   const previewImageUrl = (asset as any).url || (asset as any).cover || asset.iconUrl || '';
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-black">
+    <div className="flex h-full flex-col bg-white dark:bg-black">
       {/* 头部导航 */}
-      <div className="flex items-center gap-4 border-b border-gray-200 dark:border-gray-800 p-4">
-        <Button
-          variant="ghost"
-          size="small"
-          onClick={onBack}
-          className="flex items-center gap-2"
-        >
+      <div className="flex items-center gap-4 border-b border-gray-200 p-4 dark:border-gray-800">
+        <Button variant="ghost" size="small" onClick={onBack} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
           <span>资产详情</span>
         </Button>
       </div>
 
       {/* 主内容区域 */}
-      <div className="flex flex-1 gap-6 p-6 overflow-hidden">
+      <div className="flex flex-1 gap-6 overflow-hidden p-6">
         {/* 左侧预览区域 */}
         <div className="flex-1">
           {isTextFile() ? (
             // 文本文件显示完整内容
-            <AssetFullContentDisplay 
-              asset={asset} 
-              className="w-full h-full"
-            />
+            <AssetFullContentDisplay asset={asset} className="h-full w-full" />
           ) : isImageFile() && previewImageUrl ? (
             // 图片文件显示图片预览
-            <div className="h-full flex items-center justify-center p-4 bg-white dark:bg-black rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div className="flex h-full items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-black">
               <img
                 src={previewImageUrl}
                 alt={assetInfo.name}
-                className="max-w-full max-h-full w-auto h-auto object-contain"
+                className="h-auto max-h-full w-auto max-w-full object-contain"
                 style={{ maxWidth: 'calc(100% - 2rem)', maxHeight: 'calc(100% - 2rem)' }}
               />
             </div>
           ) : (
             // 其他文件类型显示默认预览
-            <div className="h-full flex items-center justify-center p-8 bg-white dark:bg-black rounded-lg border border-gray-200 dark:border-gray-800">
+            <div className="flex h-full items-center justify-center rounded-lg border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-black">
               <div className="text-center">
-                <div className="text-lg font-medium mb-2 text-gray-500 dark:text-gray-400">{assetInfo.fileFormat}</div>
+                <div className="mb-2 text-lg font-medium text-gray-500 dark:text-gray-400">{assetInfo.fileFormat}</div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">暂不支持预览</div>
               </div>
             </div>
@@ -107,53 +92,53 @@ export const AssetDetailPage = <E extends object>({
         </div>
 
         {/* 右侧信息区域 */}
-        <div className="w-96 flex flex-col">
-          <Card className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex w-96 flex-col">
+          <Card className="flex flex-1 flex-col overflow-hidden">
             <CardHeader className="pb-4">
               <h2 className="text-lg font-semibold dark:text-gray-100">资产信息</h2>
             </CardHeader>
-            <CardContent className="flex-1 overflow-auto space-y-6">
+            <CardContent className="flex-1 space-y-6 overflow-auto">
               {/* 基本信息字段 */}
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-3">
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">名称</label>
-                    <div className="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm dark:text-gray-200">
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200">
                       {assetInfo.name}
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">文件大小</label>
-                    <div className="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm dark:text-gray-200">
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200">
                       {assetInfo.fileSize}
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">文件格式</label>
-                    <div className="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm dark:text-gray-200">
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200">
                       {assetInfo.fileFormat}
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">创建人</label>
-                    <div className="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm dark:text-gray-200">
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200">
                       {assetInfo.creator}
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">上传时间</label>
-                    <div className="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm dark:text-gray-200">
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200">
                       {assetInfo.uploadTime}
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">更新时间</label>
-                    <div className="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 px-3 py-2 text-sm dark:text-gray-200">
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200">
                       {assetInfo.updateTime}
                     </div>
                   </div>
@@ -175,13 +160,11 @@ export const AssetDetailPage = <E extends object>({
                     {(asset as any).assetTags?.map((tag: any, index: number) => (
                       <span
                         key={index}
-                        className="rounded-full bg-blue-100 dark:bg-gray-800 px-2 py-1 text-xs text-blue-800 dark:text-gray-200"
+                        className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800 dark:bg-gray-800 dark:text-gray-200"
                       >
                         {tag.name}
                       </span>
-                    )) || (
-                      <span className="text-sm text-gray-500 dark:text-gray-400">暂无标签</span>
-                    )}
+                    )) || <span className="text-sm text-gray-500 dark:text-gray-400">暂无标签</span>}
                   </div>
                 )}
               </div>
@@ -189,14 +172,16 @@ export const AssetDetailPage = <E extends object>({
 
             {/* 转换功能区域 - 只在非文本文件时显示 */}
             {!isTextFile() && (
-              <div className="border-t border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-black">
+              <div className="border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-black">
                 <div className="flex flex-col gap-3">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">转换</label>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded whitespace-nowrap">图片</span>
+                    <span className="whitespace-nowrap rounded bg-gray-100 px-2 py-1 text-sm font-medium text-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                      图片
+                    </span>
                     <span className="text-gray-400 dark:text-gray-500">→</span>
                     <Select value={conversionType} onValueChange={setConversionType}>
-                      <SelectTrigger className="w-24 h-8 border-gray-300 dark:border-gray-700">
+                      <SelectTrigger className="h-8 w-24 border-gray-300 dark:border-gray-700">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -206,9 +191,9 @@ export const AssetDetailPage = <E extends object>({
                         <SelectItem value="neural-model">神经模型</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button 
+                    <Button
                       size="small"
-                      className="ml-auto bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 px-4 py-2 rounded-md font-medium"
+                      className="ml-auto rounded-md bg-black px-4 py-2 font-medium text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                       onClick={() => {
                         console.log('开始转换:', conversionType);
                       }}
@@ -219,7 +204,6 @@ export const AssetDetailPage = <E extends object>({
                 </div>
               </div>
             )}
-
           </Card>
         </div>
       </div>

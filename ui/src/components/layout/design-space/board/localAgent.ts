@@ -66,7 +66,12 @@ export class LocalTldrawAgent {
         const y = bounds?.y ?? 120;
         const x2 = x + (bounds?.w ?? 180);
         const y2 = y + (bounds?.h ?? 60);
-        this.editor.createShape({ type: 'arrow', x, y, props: { start: { x: 0, y: 0 }, end: { x: x2 - x, y: y2 - y } } as any });
+        this.editor.createShape({
+          type: 'arrow',
+          x,
+          y,
+          props: { start: { x: 0, y: 0 }, end: { x: x2 - x, y: y2 - y } } as any,
+        });
         return '已创建箭头';
       }
       if (t.includes('删除选中') || t.includes('delete selection')) {
@@ -90,6 +95,3 @@ export class LocalTldrawAgent {
     }
   }
 }
-
-
-

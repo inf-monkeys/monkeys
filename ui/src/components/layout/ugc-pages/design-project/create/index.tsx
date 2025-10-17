@@ -29,10 +29,10 @@ interface ICreateDesignProjectDialogProps {
   afterCreate?: () => void;
 }
 
-export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps> = ({ 
-  visible, 
-  setVisible, 
-  afterCreate 
+export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps> = ({
+  visible,
+  setVisible,
+  afterCreate,
 }) => {
   const { t } = useTranslation();
 

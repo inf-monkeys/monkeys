@@ -31,7 +31,7 @@ interface HistoryResultProps {
   setSize: Dispatch<SetStateAction<number>>;
 }
 
-const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, setSize }) => {
+const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, setSize, loading }) => {
   // 折叠态改为原生横向滚动
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -99,12 +99,12 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
     return () => io.disconnect();
   }, [expanded, setSize, images.length]);
 
-  const handleDragStart = (e: React.DragEvent, item: ImagesResultWithOrigin, src: string) => {
+  const handleDragStart = React.useCallback((e: React.DragEvent, item: ImagesResultWithOrigin, src: string) => {
     e.stopPropagation();
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', item.render.origin);
     e.dataTransfer.setData('text/uri-list', src);
-  };
+  }, []);
 
   const slideLeftRef = useRef<HTMLButtonElement>(null);
   const slideRightRef = useRef<HTMLButtonElement>(null);
@@ -448,55 +448,82 @@ export default function HistoryResultDefault() {
 
 export const HistoryResult = React.memo(HistoryResultOg);
 
-function CarouselItemImage({
-  image,
-  index,
-  handleDragStart,
-  onClick,
-}: {
-  image: ImagesResultWithOrigin;
-  index: number;
-  handleDragStart: (e: React.DragEvent, item: ImagesResultWithOrigin, src: string) => void;
-  onClick?: () => void;
-}) {
-  const [shouldUseThumbnail, setShouldUseThumbnail] = useState(true);
-  const [isInView, setIsInView] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+const CarouselItemImage = React.memo(
+  function CarouselItemImage({
+    image,
+    index,
+    handleDragStart,
+    onClick,
+  }: {
+    image: ImagesResultWithOrigin;
+    index: number;
+    handleDragStart: (e: React.DragEvent, item: ImagesResultWithOrigin, src: string) => void;
+    onClick?: () => void;
+  }) {
+    const [currentSrc, setCurrentSrc] = useState(image.render.data as string);
+    const [isInView, setIsInView] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const imgRef = useRef<HTMLImageElement>(null);
 
-  // 只在进入视口后再做真实源可用性检查
-  useEffect(() => {
-    const el = imgRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setIsInView(true);
+    // 只在进入视口后再做真实源可用性检查
+    useEffect(() => {
+      const el = imgRef.current;
+      if (!el) return;
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              setIsInView(true);
+            }
           }
+        },
+        { root: null, rootMargin: '200px', threshold: 0.01 },
+      );
+      io.observe(el);
+      return () => io.disconnect();
+    }, []);
+
+    useAsyncEffect(async () => {
+      if (!isInView) return;
+      setIsLoading(true);
+      // 检查缩略图是否可用，如果不可用则使用原图
+      const thumbnailAvailable = await checkImageUrlAvailable(image.render.data as string);
+      if (thumbnailAvailable) {
+        setCurrentSrc(image.render.data as string);
+      } else {
+        // 缩略图不可用，检查原图
+        const originalAvailable = await checkImageUrlAvailable(image.render.origin as string);
+        if (originalAvailable) {
+          setCurrentSrc(image.render.origin as string);
         }
-      },
-      { root: null, rootMargin: '200px', threshold: 0.01 },
+      }
+      setIsLoading(false);
+    }, [image.render.data, image.render.origin, isInView]);
+
+    return (
+      <div className="relative h-full w-full">
+        {isLoading && (
+          <div className="absolute inset-0 animate-pulse bg-slate-3 rounded-md" />
+        )}
+        <img
+          ref={imgRef}
+          draggable
+          onPointerDown={(e) => e.stopPropagation()}
+          onDragStart={(e) => handleDragStart(e, image, image.render.origin as string)}
+          src={currentSrc}
+          alt={typeof image.render.alt === 'string' ? image.render.alt : `Image ${index + 1}`}
+          className={cn(
+            'h-full w-full select-none object-contain transition-opacity duration-300',
+            isLoading ? 'opacity-0' : 'opacity-100',
+          )}
+          onClick={onClick}
+          onLoad={() => setIsLoading(false)}
+        />
+      </div>
     );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  useAsyncEffect(async () => {
-    if (!isInView) return;
-    const res = await checkImageUrlAvailable(image.render.data as string);
-    setShouldUseThumbnail(res);
-  }, [image, isInView]);
-
-  return (
-    <img
-      ref={imgRef}
-      draggable
-      onPointerDown={(e) => e.stopPropagation()}
-      onDragStart={(e) => handleDragStart(e, image, image.render.origin as string)}
-      src={shouldUseThumbnail ? (image.render.data as string) : (image.render.origin as string)}
-      alt={typeof image.render.alt === 'string' ? image.render.alt : `Image ${index + 1}`}
-      className="h-full w-full select-none object-contain"
-      onClick={onClick}
-    />
-  );
-}
+  },
+  (prevProps, nextProps) => {
+    // 自定义比较函数，只有在关键属性变化时才重新渲染
+    return prevProps.image.render.key === nextProps.image.render.key && prevProps.index === nextProps.index;
+  },
+);

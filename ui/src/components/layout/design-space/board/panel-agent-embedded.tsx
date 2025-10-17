@@ -1,6 +1,8 @@
-import { useTldrawAgent } from '@/agent/useTldrawAgent';
 import React, { useRef, useState } from 'react';
+
 import type { Editor } from 'tldraw';
+
+import { useTldrawAgent } from '@/agent/useTldrawAgent';
 
 interface AgentEmbeddedPanelProps {
   editor: Editor | null;
@@ -41,7 +43,8 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
             <div
               key={i}
               style={{
-                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                fontFamily:
+                  'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
                 fontSize: 12,
                 color: '#6b7280',
                 background: '#f9fafb',
@@ -55,7 +58,9 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
               {p.text.trim()}
             </div>
           ) : (
-            <span key={i} style={{ whiteSpace: 'pre-wrap' }}>{p.text}</span>
+            <span key={i} style={{ whiteSpace: 'pre-wrap' }}>
+              {p.text}
+            </span>
           ),
         )}
       </div>
@@ -98,10 +103,16 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
           if (!blob.size) return;
           const form = new FormData();
           form.append('file', blob, 'audio.webm');
-          const resp = await fetch('/api/tldraw-agent/transcribe', { method: 'POST', body: form, credentials: 'include' });
+          const resp = await fetch('/api/tldraw-agent/transcribe', {
+            method: 'POST',
+            body: form,
+            credentials: 'include',
+          });
           const data = await resp.json().catch(() => ({ text: '' }));
           const text = String(data?.text || '').trim();
-          const durationSec = recordStartRef.current ? Math.max(1, Math.round((Date.now() - recordStartRef.current) / 1000)) : 0;
+          const durationSec = recordStartRef.current
+            ? Math.max(1, Math.round((Date.now() - recordStartRef.current) / 1000))
+            : 0;
           const voiceTs = Date.now();
           recordStartRef.current = null;
           if (text) {
@@ -142,7 +153,10 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
     >
       <style>{`@keyframes agent-spinner { from { transform: rotate(0); } to { transform: rotate(360deg); } }`}</style>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0, height: '100%' }}>
-        <div ref={scrollRef} style={{ flex: 1, overflow: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div
+          ref={scrollRef}
+          style={{ flex: 1, overflow: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}
+        >
           {(agent?.history ?? []).length === 0 && (
             <div style={{ color: '#9ca3af', fontSize: 12 }}>开始与 Agent 对话，它会理解画布并执行操作。</div>
           )}
@@ -168,23 +182,33 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10.5438301421875,1.20522402375C10.2612226621875,0.9127117917500001,9.7924292421875,0.9127117917500001,9.5098224121875,1.20522402375C9.2496899361875,1.48194375375,9.2496899361875,1.91327315375,9.5098224121875,2.18999294375C12.6789412421875,5.36530444375,12.6789412421875,10.50693514375,9.5098224121875,13.68224584375C9.2218237221875,13.97060384375,9.2218237221875,14.43774284375,9.5098224121875,14.72610184375C9.7981799821875,15.01410084375,10.2653193521875,15.01410084375,10.5536774421875,14.72610184375C14.2622752421875,10.98047544375,14.2578797421875,4.94544484375,10.5438301421875,1.20522402375Z" fill="#FFFFFF" fillOpacity="0.8"/>
-                        <path d="M7.303897421875,3.79500763375C7.023533321875,3.54424224075,6.599493021875,3.54424224075,6.319128721875,3.79500763375C6.063781021875,4.07360598375,6.063781021875,4.50117868375,6.319128721875,4.77977669375C8.134398421875,6.60452369375,8.134398421875,9.55298229375,6.319128721875,11.37772849375C6.068363621875,11.65809349375,6.068363621875,12.08213429375,6.319128721875,12.36249829375C6.597726821875,12.61784649375,7.025298621875,12.61784649375,7.303897421875,12.36249829375C9.617761121874999,9.97535519375,9.617761121874999,6.18215129375,7.303897421875,3.79500763375ZM2.970914001875,7.15306969375C2.489838561875,7.63065289375,2.489838561875,8.40867949375,2.970914001875,8.88626389375C3.450511451875,9.37008429375,4.231873521875,9.37236829375,4.714290821875,8.891358893749999C5.196708221874999,8.410348893750001,5.196708221874999,7.62898399375,4.714290821875,7.14797399375C4.231873121875,6.66696449375,3.450511871875,6.66924829375,2.970914001875,7.15306969375Z" fill="#FFFFFF" fillOpacity="0.8"/>
+                        <path
+                          d="M10.5438301421875,1.20522402375C10.2612226621875,0.9127117917500001,9.7924292421875,0.9127117917500001,9.5098224121875,1.20522402375C9.2496899361875,1.48194375375,9.2496899361875,1.91327315375,9.5098224121875,2.18999294375C12.6789412421875,5.36530444375,12.6789412421875,10.50693514375,9.5098224121875,13.68224584375C9.2218237221875,13.97060384375,9.2218237221875,14.43774284375,9.5098224121875,14.72610184375C9.7981799821875,15.01410084375,10.2653193521875,15.01410084375,10.5536774421875,14.72610184375C14.2622752421875,10.98047544375,14.2578797421875,4.94544484375,10.5438301421875,1.20522402375Z"
+                          fill="#FFFFFF"
+                          fillOpacity="0.8"
+                        />
+                        <path
+                          d="M7.303897421875,3.79500763375C7.023533321875,3.54424224075,6.599493021875,3.54424224075,6.319128721875,3.79500763375C6.063781021875,4.07360598375,6.063781021875,4.50117868375,6.319128721875,4.77977669375C8.134398421875,6.60452369375,8.134398421875,9.55298229375,6.319128721875,11.37772849375C6.068363621875,11.65809349375,6.068363621875,12.08213429375,6.319128721875,12.36249829375C6.597726821875,12.61784649375,7.025298621875,12.61784649375,7.303897421875,12.36249829375C9.617761121874999,9.97535519375,9.617761121874999,6.18215129375,7.303897421875,3.79500763375ZM2.970914001875,7.15306969375C2.489838561875,7.63065289375,2.489838561875,8.40867949375,2.970914001875,8.88626389375C3.450511451875,9.37008429375,4.231873521875,9.37236829375,4.714290821875,8.891358893749999C5.196708221874999,8.410348893750001,5.196708221874999,7.62898399375,4.714290821875,7.14797399375C4.231873121875,6.66696449375,3.450511871875,6.66924829375,2.970914001875,7.15306969375Z"
+                          fill="#FFFFFF"
+                          fillOpacity="0.8"
+                        />
                       </svg>
-                      <span style={{ opacity: 0.9, color: '#fff' }}>{((matchedVoice?.duration ?? 0)) + '”'}</span>
+                      <span style={{ opacity: 0.9, color: '#fff' }}>{(matchedVoice?.duration ?? 0) + '”'}</span>
                     </div>
                     <div style={{ opacity: 0.95, color: '#fff' }}>{m.content}</div>
                   </div>
                 ) : (
-                  <div style={{
-                    maxWidth: '80%',
-                    padding: '8px 10px',
-                    borderRadius: 10,
-                    background: m.role === 'user' ? '#416887' : '#f3f4f6',
-                    color: m.role === 'user' ? '#fff' : '#111',
-                    fontSize: 13,
-                    whiteSpace: 'pre-wrap'
-                  }}>
+                  <div
+                    style={{
+                      maxWidth: '80%',
+                      padding: '8px 10px',
+                      borderRadius: 10,
+                      background: m.role === 'user' ? '#416887' : '#f3f4f6',
+                      color: m.role === 'user' ? '#fff' : '#111',
+                      fontSize: 13,
+                      whiteSpace: 'pre-wrap',
+                    }}
+                  >
                     {m.role === 'assistant' ? renderContent(m.content) : m.content}
                     {m.role === 'assistant' && agent?.isStreaming && idx === (agent?.history?.length ?? 1) - 1 && (
                       <span
@@ -243,9 +267,14 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
                 border: '1px solid #e5e7eb',
                 background: '#fff',
                 color: '#6b7280',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
               }}
-              onClick={() => { /* 预留：打开更多操作 */ }}
+              onClick={() => {
+                /* 预留：打开更多操作 */
+              }}
             >
               <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
             </button>
@@ -262,11 +291,28 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
                 border: '1px solid #e5e7eb',
                 background: isRecording ? '#fde68a' : '#fff',
                 color: isRecording ? '#b45309' : '#6b7280',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
               }}
               onClick={toggleRecord}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="8" y1="23" x2="16" y2="23" />
+              </svg>
             </button>
             {/* 右侧发送按钮 */}
             <button
@@ -282,18 +328,33 @@ export const AgentEmbeddedPanel: React.FC<AgentEmbeddedPanelProps> = ({ editor, 
                 border: 'none',
                 background: '#4D8F9D',
                 color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
             </button>
           </div>
-          <button onClick={() => agent?.cancel()} style={{ display: 'none' }}>取消</button>
+          <button onClick={() => agent?.cancel()} style={{ display: 'none' }}>
+            取消
+          </button>
           <button onClick={reset} style={{ display: 'none' }} />
         </div>
       </div>
     </div>
   );
 };
-
-

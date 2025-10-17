@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Code, Download, Copy, Check, Maximize2, Minimize2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+
+import { Check, Code, Copy, Download, FileText, Maximize2, Minimize2 } from 'lucide-react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
 import { cn } from '@/utils';
 
 interface IAssetFullContentDisplayProps {
@@ -12,10 +14,7 @@ interface IAssetFullContentDisplayProps {
   className?: string;
 }
 
-export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = ({
-  asset,
-  className,
-}) => {
+export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = ({ asset, className }) => {
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
@@ -33,16 +32,16 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
   // 获取文件内容
   const fetchFileContent = async () => {
     if (!asset?.url) return;
-    
+
     setIsLoading(true);
     setError('');
-    
+
     try {
       const response = await fetch(asset.url);
       if (!response.ok) {
         throw new Error('Failed to fetch file content');
       }
-      
+
       const text = await response.text();
       setContent(text);
     } catch (err) {
@@ -58,7 +57,7 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
     if (lines.length <= maxLines) {
       return { content: text, isTruncated: false };
     }
-    
+
     const truncatedLines = lines.slice(0, maxLines);
     const truncatedContent = truncatedLines.join('\n') + '\n\n... (内容过长，已截断显示前1000行)';
     return { content: truncatedContent, isTruncated: true };
@@ -84,13 +83,13 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
   const getFormattedContent = () => {
     const fileType = getFileType();
     let formattedContent: string;
-    
+
     if (fileType === 'json') {
       formattedContent = formatJsonContent(content);
     } else {
       formattedContent = content;
     }
-    
+
     const { content: limitedContent, isTruncated } = limitContentLines(formattedContent);
     return limitedContent;
   };
@@ -137,16 +136,12 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
 
   if (!isTextFile) {
     return (
-      <Card className={cn("w-full", className)}>
-        <CardContent className="flex items-center justify-center h-64">
+      <Card className={cn('w-full', className)}>
+        <CardContent className="flex h-64 items-center justify-center">
           <div className="text-center">
-            <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <div className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
-              非文本文件
-            </div>
-            <div className="text-sm text-gray-500 dark:text-gray-500">
-              此文件类型不支持内容预览
-            </div>
+            <FileText className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+            <div className="mb-2 text-lg font-medium text-gray-600 dark:text-gray-400">非文本文件</div>
+            <div className="text-sm text-gray-500 dark:text-gray-500">此文件类型不支持内容预览</div>
           </div>
         </CardContent>
       </Card>
@@ -154,8 +149,8 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
   }
 
   return (
-    <Card className={cn("w-full h-full flex flex-col", className, isFullscreen && "fixed inset-0 z-50 m-0")}>
-      <CardHeader className="pb-4 flex-shrink-0">
+    <Card className={cn('flex h-full w-full flex-col', className, isFullscreen && 'fixed inset-0 z-50 m-0')}>
+      <CardHeader className="flex-shrink-0 pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             {fileType === 'json' ? (
@@ -163,121 +158,90 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
             ) : (
               <FileText className="h-5 w-5 text-gray-600" />
             )}
-            <span className="text-lg font-semibold">
-              {asset?.name || asset?.displayName || '未知文件'}
-            </span>
-            <span className="text-sm text-gray-500 font-normal">
-              ({fileType?.toUpperCase() || 'TEXT'})
-            </span>
+            <span className="text-lg font-semibold">{asset?.name || asset?.displayName || '未知文件'}</span>
+            <span className="text-sm font-normal text-gray-500">({fileType?.toUpperCase() || 'TEXT'})</span>
           </CardTitle>
-          
+
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="small"
-              onClick={handleCopy}
-              disabled={!content || isLoading}
-            >
+            <Button variant="outline" size="small" onClick={handleCopy} disabled={!content || isLoading}>
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {copied ? '已复制' : '复制'}
             </Button>
-            
-            <Button
-              variant="outline"
-              size="small"
-              onClick={handleDownload}
-              disabled={!content || isLoading}
-            >
+
+            <Button variant="outline" size="small" onClick={handleDownload} disabled={!content || isLoading}>
               <Download className="h-4 w-4" />
               下载
             </Button>
-            
-            <Button
-              variant="outline"
-              size="small"
-              onClick={toggleFullscreen}
-              disabled={!content || isLoading}
-            >
+
+            <Button variant="outline" size="small" onClick={toggleFullscreen} disabled={!content || isLoading}>
               {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </Button>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="p-0 flex-1 overflow-hidden">
+      <CardContent className="flex-1 overflow-hidden p-0">
         {isLoading ? (
-          <div className="flex items-center justify-center h-64">
+          <div className="flex h-64 items-center justify-center">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
               <div className="text-sm text-gray-500">加载中...</div>
             </div>
           </div>
         ) : error ? (
-          <div className="flex items-center justify-center h-64">
+          <div className="flex h-64 items-center justify-center">
             <div className="text-center">
-              <div className="text-lg font-medium text-red-600 mb-2">加载失败</div>
+              <div className="mb-2 text-lg font-medium text-red-600">加载失败</div>
               <div className="text-sm text-gray-500">{error}</div>
-              <Button
-                variant="outline"
-                size="small"
-                onClick={fetchFileContent}
-                className="mt-4"
-              >
+              <Button variant="outline" size="small" onClick={fetchFileContent} className="mt-4">
                 重试
               </Button>
             </div>
           </div>
         ) : content ? (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-2 flex-shrink-0 bg-gray-100 dark:bg-gray-800">
-              <TabsTrigger 
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex h-full w-full flex-col">
+            <TabsList className="grid w-full flex-shrink-0 grid-cols-2 bg-gray-100 dark:bg-gray-800">
+              <TabsTrigger
                 value="content"
                 className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:data-[state=active]:shadow-md"
               >
                 格式化内容
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="raw"
                 className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:data-[state=active]:shadow-md"
               >
                 原始内容
               </TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="content" className="mt-0 flex-1 overflow-hidden">
-              <ScrollArea className={cn("w-full h-full", isFullscreen ? "h-[calc(100vh-200px)]" : "h-full")}>
-                <pre className={cn(
-                  "text-sm font-mono whitespace-pre-wrap break-words p-4 overflow-hidden",
-                  fileType === 'json' ? "text-blue-800 dark:text-blue-200" : "text-gray-800 dark:text-gray-200"
-                )}>
+              <ScrollArea className={cn('h-full w-full', isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-full')}>
+                <pre
+                  className={cn(
+                    'overflow-hidden whitespace-pre-wrap break-words p-4 font-mono text-sm',
+                    fileType === 'json' ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200',
+                  )}
+                >
                   {getFormattedContent()}
                 </pre>
               </ScrollArea>
             </TabsContent>
-            
+
             <TabsContent value="raw" className="mt-0 flex-1 overflow-hidden">
-              <ScrollArea className={cn("w-full h-full", isFullscreen ? "h-[calc(100vh-200px)]" : "h-full")}>
-                <pre className="text-sm font-mono whitespace-pre-wrap break-words p-4 overflow-hidden text-gray-800 dark:text-gray-200">
+              <ScrollArea className={cn('h-full w-full', isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-full')}>
+                <pre className="overflow-hidden whitespace-pre-wrap break-words p-4 font-mono text-sm text-gray-800 dark:text-gray-200">
                   {getRawContent()}
                 </pre>
               </ScrollArea>
             </TabsContent>
           </Tabs>
         ) : (
-          <div className="flex items-center justify-center h-64">
+          <div className="flex h-64 items-center justify-center">
             <div className="text-center">
-              <div className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
-                暂无内容
-              </div>
-              <div className="text-sm text-gray-500 dark:text-gray-500">
-                点击加载按钮获取文件内容
-              </div>
-              <Button
-                variant="outline"
-                size="small"
-                onClick={fetchFileContent}
-                className="mt-4"
-              >
+              <div className="mb-2 text-lg font-medium text-gray-600 dark:text-gray-400">暂无内容</div>
+              <div className="text-sm text-gray-500 dark:text-gray-500">点击加载按钮获取文件内容</div>
+              <Button variant="outline" size="small" onClick={fetchFileContent} className="mt-4">
                 加载内容
               </Button>
             </div>

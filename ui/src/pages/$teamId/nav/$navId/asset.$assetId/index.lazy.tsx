@@ -41,14 +41,7 @@ export const AssetDetail: React.FC = () => {
     );
   }
 
-  return (
-    <AssetDetailPage
-      asset={currentAsset}
-      assetType="media-file"
-      onBack={handleBack}
-      mutate={mutate}
-    />
-  );
+  return <AssetDetailPage asset={currentAsset} assetType="media-file" onBack={handleBack} mutate={mutate} />;
 };
 
 export const Route = createLazyFileRoute('/$teamId/nav/$navId/asset/$assetId/')({

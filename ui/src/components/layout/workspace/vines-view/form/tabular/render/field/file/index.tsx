@@ -38,14 +38,14 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
   useEffect(() => {
     const handleAddImageToField = (event: any) => {
       const { fieldName, imageUrl } = event.detail || {};
-      
+
       // 检查是否是针对当前字段的事件
       if (fieldName === name && imageUrl) {
         const isMultiple = typeOptions?.multipleValues;
-        
+
         if (isMultiple) {
           // 多选模式：将新图片添加到现有数组中
-          const currentValues = isArray(value) ? value : (value ? [value] : []);
+          const currentValues = isArray(value) ? value : value ? [value] : [];
           const newValues = [...currentValues, imageUrl];
           form.setValue(name, newValues);
         } else {
@@ -56,7 +56,7 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
     };
 
     window.addEventListener('vines:add-image-to-field', handleAddImageToField);
-    
+
     return () => {
       window.removeEventListener('vines:add-image-to-field', handleAddImageToField);
     };

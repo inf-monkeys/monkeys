@@ -195,7 +195,6 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
     }
 
     public getToolsByCategory(search?: string, oemId?: string) {
-
       // 当前分类下的工具、数量、分类 ID、分类名称
       const tools: VinesToolWithCategory[] = [];
 

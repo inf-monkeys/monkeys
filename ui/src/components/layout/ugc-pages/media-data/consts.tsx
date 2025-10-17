@@ -6,8 +6,8 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
+import { RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IMediaData>>();
@@ -21,17 +21,15 @@ export const createMediaDataColumns = () => [
       const parts = fileName.split('.');
       const extension = parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
       const isTextFile = ['txt', 'json', 'md', 'csv', 'log', 'xml', 'yaml', 'yml'].includes(extension);
-      const isImageFile = row.original.type?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension);
+      const isImageFile =
+        row.original.type?.startsWith('image') ||
+        ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension);
 
       if (isTextFile) {
         // 文本文件显示内容预览
         return (
-          <div className="w-12 h-12 rounded overflow-hidden">
-            <AssetContentPreview
-              asset={row.original}
-              isThumbnail={true}
-              className="h-full w-full"
-            />
+          <div className="h-12 w-12 overflow-hidden rounded">
+            <AssetContentPreview asset={row.original} isThumbnail={true} className="h-full w-full" />
           </div>
         );
       } else if (isImageFile && row.original.url) {

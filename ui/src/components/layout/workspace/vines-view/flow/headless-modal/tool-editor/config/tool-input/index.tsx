@@ -3,19 +3,19 @@ import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { ToolCredentialItem } from '@inf-monkeys/monkeys';
 import equal from 'fast-deep-equal/es6';
 import { get, isArray, set } from 'lodash';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { VinesInputCredentials } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-credentials';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator.tsx';
-import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { VinesInputProperty } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import {
   calculateDisplayInputs,
   getPropertyValueFromTask,
 } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
+import { Button } from '@/components/ui/button';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
+import { Separator } from '@/components/ui/separator.tsx';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
@@ -137,7 +137,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
     return (
       <div className={cn('flex flex-col gap-global px-1 py-2', className)}>
         {isSwitchNode && (
-          <div className="flex flex-col gap-2 rounded-md border border-gray-6/40 bg-dialog p-2">
+          <div className="bg-dialog flex flex-col gap-2 rounded-md border border-gray-6/40 p-2">
             <div className="flex items-center justify-between">
               <div className="text-xxs font-medium text-muted-foreground">分支管理</div>
               <div className="flex items-center gap-2">
@@ -181,7 +181,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
                 {decisionNames.map((name) => (
                   <div
                     key={name}
-                    className="group flex items-center gap-1 rounded-full border bg-background/50 px-2 py-0.5 text-xxs hover:border-gray-8"
+                    className="text-xxs group flex items-center gap-1 rounded-full border bg-background/50 px-2 py-0.5 hover:border-gray-8"
                   >
                     <span className="font-medium">{name}</span>
                     <SimpleInputDialog
@@ -212,7 +212,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
                     <Button
                       size="xs"
                       variant="borderless"
-                      className="opacity-60 group-hover:opacity-100 [&_svg]:stroke-red-10 text-red-10"
+                      className="text-red-10 opacity-60 group-hover:opacity-100 [&_svg]:stroke-red-10"
                       icon={<Trash2 className="h-3 w-3" />}
                       onClick={() => {
                         const taskObj: any = taskRef.current;

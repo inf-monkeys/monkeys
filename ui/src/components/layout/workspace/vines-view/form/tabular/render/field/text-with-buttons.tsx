@@ -181,9 +181,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                     <div className="max-h-[60vh] overflow-auto pr-1">
                       {entries.map(([l2, items]) => (
                         <div key={l2} className="mb-4">
-                          {!hideDefaultHeader && (
-                            <div className="mb-2 text-[13px] text-muted-foreground">{l2}</div>
-                          )}
+                          {!hideDefaultHeader && <div className="mb-2 text-[13px] text-muted-foreground">{l2}</div>}
                           <div className="flex flex-wrap gap-2">
                             {(items || []).map((it) => {
                               const k = keyOf(k2, l2, it);

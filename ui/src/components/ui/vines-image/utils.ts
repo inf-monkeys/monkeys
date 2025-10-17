@@ -1,11 +1,34 @@
+// URL 可用性检查缓存
+const urlAvailabilityCache = new Map<string, { result: boolean; timestamp: number }>();
+// 缓存时间配置：
+// - 成功的检查结果缓存较长时间（10分钟），因为图片URL一般不会变化
+// - 失败的检查结果缓存较短时间（1分钟），给临时网络问题重试机会
+const CACHE_TTL_SUCCESS = 10 * 60 * 1000; // 成功结果缓存 10 分钟
+const CACHE_TTL_FAILURE = 60 * 1000; // 失败结果缓存 1 分钟
+
 export const checkImageUrlAvailable = async (url: string) => {
   // console.log(new URL(url).search);
   if (url.startsWith('blob:')) {
     return true;
   }
+
+  // 检查缓存
+  const cached = urlAvailabilityCache.get(url);
+  if (cached) {
+    const ttl = cached.result ? CACHE_TTL_SUCCESS : CACHE_TTL_FAILURE;
+    if (Date.now() - cached.timestamp < ttl) {
+      return cached.result;
+    }
+  }
+
   try {
-    return (await fetch(url, { method: 'HEAD' })).ok;
+    const result = (await fetch(url, { method: 'HEAD' })).ok;
+    // 缓存结果
+    urlAvailabilityCache.set(url, { result, timestamp: Date.now() });
+    return result;
   } catch {
+    // 缓存失败结果
+    urlAvailabilityCache.set(url, { result: false, timestamp: Date.now() });
     return false;
   }
 };
