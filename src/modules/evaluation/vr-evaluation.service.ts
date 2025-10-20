@@ -1,6 +1,6 @@
 import { generateDbId } from '@/common/utils';
 import { VREvaluationTaskEntity, VRTaskStatus } from '@/database/entities/evaluation/vr-evaluation-task.entity';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -70,14 +70,14 @@ export class VREvaluationService {
     });
 
     if (!task) {
-      throw new Error('Task not found');
+      throw new NotFoundException('Task not found');
     }
 
     // 验证分数范围（1-5）
     const scores = Object.values(evaluationResult);
     for (const score of scores) {
       if (score < 1 || score > 5) {
-        throw new Error('Score must be between 1 and 5');
+        throw new BadRequestException('Score must be between 1 and 5');
       }
     }
 
@@ -153,7 +153,7 @@ export class VREvaluationService {
     });
 
     if (!task) {
-      throw new Error('Task not found');
+      throw new NotFoundException('Task not found or access denied');
     }
 
     task.isDeleted = true;
