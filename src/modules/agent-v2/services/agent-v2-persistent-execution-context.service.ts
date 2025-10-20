@@ -249,12 +249,6 @@ export class AgentV2PersistentExecutionContext extends EventEmitter {
         continue;
       }
 
-      // Handle tool result summary messages (created by executeTools method)
-      if (m.isSystem && m.content.includes('[') && m.content.includes(']') && m.content.includes('web_search')) {
-        // This looks like a tool result summary message, skip it as we already handled results above
-        continue;
-      }
-
       // Regular message mapping
       conversationHistory.push({
         role: m.isSystem ? 'assistant' : 'user',
@@ -553,15 +547,11 @@ Please use one of these tools in your next response.`;
         });
       }
 
-      // Also create a summary message for easy reading in chat history
-      const resultSummary = toolResults.map((result, index) => `[${tools[index].name}] ${result.is_error ? 'ERROR: ' : ''}${result.output}`).join('\n\n');
-
-      await this.repository.createMessage({
-        sessionId: this.session.id,
-        senderId: this.session.userId, // Use real user ID to satisfy foreign key constraint
-        content: resultSummary,
-        isSystem: true, // Mark as system/tool result message
-      });
+      // Note: We no longer create a separate summary message for tool results.
+      // Tool results are already available in:
+      // 1. The toolCalls field of the assistant message (with result property)
+      // 2. The SSE tool_result events sent to the frontend
+      // This ensures consistency between SSE stream and chat history.
     }
 
     // Clear processing context
