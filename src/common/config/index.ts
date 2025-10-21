@@ -204,6 +204,7 @@ export interface ServerConfig {
       presetAppFileUrl?: string;
     };
     workbench: CustomizationWorkbench;
+    visionProWorkflows?: string[];
   };
   webhook: {
     token?: string;
@@ -602,6 +603,7 @@ export const config: Config = {
         pages: readConfig('server.customization.workbench.pages', []),
         pageGroups: readConfig('server.customization.workbench.pageGroups', []),
       },
+      visionProWorkflows: readConfig('server.customization.visionProWorkflows', []),
     },
     webhook: {
       token: readConfig('server.webhook.token', undefined),

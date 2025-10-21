@@ -187,6 +187,7 @@ export interface ISystemConfig {
     uploader: CustomizationUploader;
     designProjects: CustomizationDesignProjects;
     workbench: CustomizationWorkbench;
+    visionProWorkflows?: string[];
     initTeam: boolean;
   };
   auth: {

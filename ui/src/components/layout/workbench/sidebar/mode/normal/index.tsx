@@ -18,6 +18,15 @@ import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/uti
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator';
@@ -98,6 +107,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const [groupId, setGroupId] = useState<string>('default');
   const [pageId, setPageId] = useState<string>('');
+  const [visionProAlertVisible, setVisionProAlertVisible] = useState(false);
   // const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const originalPages: IPinPage[] = useMemo(() => {
     const pages = [...(data?.pages ?? [])];
@@ -294,6 +304,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const onPageClick = useCallback(
     (page: IWorkbenchViewItemPage) => {
+      const pageName = getI18nContent(page.displayName) ?? '';
+      const visionProWorkflows = oem?.theme?.visionProWorkflows ?? [];
+
+      // 检查是否在 Vision Pro 工作流列表中
+      if (visionProWorkflows.includes(pageName)) {
+        setVisionProAlertVisible(true);
+        return;
+      }
+
       startTransition(() => {
         navigate({
           search: {
@@ -303,7 +322,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         setCurrentPage({ [teamId]: { ...page, groupId } });
       });
     },
-    [teamId, groupId, setCurrentPage],
+    [teamId, groupId, setCurrentPage, oem],
   );
 
   useEffect(() => {
@@ -466,6 +485,24 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           </div>
         </WorkbenchViewItemCurrentData.Provider>
       )}
+      <AlertDialog open={visionProAlertVisible} onOpenChange={setVisionProAlertVisible}>
+        <AlertDialogContent
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('common.utils.tips')}</AlertDialogTitle>
+            <AlertDialogDescription>请在 Vision Pro 中打开使用</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setVisionProAlertVisible(false)}>
+              {t('common.utils.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

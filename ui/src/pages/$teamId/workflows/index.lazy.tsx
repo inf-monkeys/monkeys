@@ -8,6 +8,7 @@ import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, Share, Trash, U
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { cloneWorkflow, deleteWorkflow } from '@/apis/workflow';
@@ -60,6 +61,7 @@ export const Workflows: React.FC = () => {
   const navigate = useNavigate();
   const { copy } = useCopy({ timeout: 500 });
   const { teamId } = useVinesTeam();
+  const { data: systemConfig } = useSystemConfig();
   const mutateWorkflows = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/workflow/metadata'));
 
   const [currentWorkflow, setCurrentWorkflow] = useState<IAssetItem<MonkeyWorkflow>>();
@@ -71,6 +73,7 @@ export const Workflows: React.FC = () => {
   const [publishToMarketContext, setPublishToMarketContext] = useState<IPublishToMarketWithAssetsContext | undefined>();
   const [rollbackWorkflowVisible, setRollbackWorkflowVisible] = useState(false);
   const [rollbackWorkflowContext, setRollbackWorkflowContext] = useState<IRollbackWorkflowContext | undefined>();
+  const [visionProAlertVisible, setVisionProAlertVisible] = useState(false);
 
   const handleAfterUpdateWorkflow = () => {
     void mutateWorkflows();
@@ -258,7 +261,19 @@ export const Workflows: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        onItemClick={(item) => open(`/${item.teamId}/workspace/${item.workflowId}`, '_blank')}
+        onItemClick={(item) => {
+          const workflowName = getI18nContent(item.displayName) ?? '';
+          const visionProWorkflows = systemConfig?.theme?.visionProWorkflows ?? [];
+
+          // 检查是否在 Vision Pro 工作流列表中
+          if (visionProWorkflows.includes(workflowName)) {
+            setVisionProAlertVisible(true);
+            return;
+          }
+
+          // 默认行为：在新标签页打开工作流
+          open(`/${item.teamId}/workspace/${item.workflowId}`, '_blank');
+        }}
         subtitle={
           <>
             <DropdownMenu>
@@ -346,6 +361,24 @@ export const Workflows: React.FC = () => {
         setVisible={setRollbackWorkflowVisible}
         context={rollbackWorkflowContext}
       />
+      <AlertDialog open={visionProAlertVisible} onOpenChange={setVisionProAlertVisible}>
+        <AlertDialogContent
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('common.utils.tips')}</AlertDialogTitle>
+            <AlertDialogDescription>请在 Vision Pro 中打开使用</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setVisionProAlertVisible(false)}>
+              {t('common.utils.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 };
