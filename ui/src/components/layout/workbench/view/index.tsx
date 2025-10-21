@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import { InitTeamButton } from '@/components/ui/init-team-button';
 import { VinesLoading } from '@/components/ui/loading';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
@@ -99,6 +100,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
             <div className="flex flex-col text-center">
               <h2 className="font-bold">{t('workbench.view.no-starred-view')}</h2>
             </div>
+            <InitTeamButton />
           </motion.div>
         )}
       </AnimatePresence>

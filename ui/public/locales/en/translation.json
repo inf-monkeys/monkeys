@@ -189,6 +189,9 @@
       "dark": "Dark",
       "light": "Light"
     },
+    "init-team-button": {
+      "tooltip": "Sync data"
+    },
     "load": {
       "loading": "Loading...",
       "empty": "No data",

@@ -84,9 +84,9 @@ export class TeamsController {
     description: '初始化团队',
     summary: '初始化团队',
   })
-  public async initTeam(@Req() req: IRequest, @Param('id') teamId: string) {
+  public async initTeam(@Req() req: IRequest, @Param('id') teamId: string, @Body() body: { deleteAllAssets?: boolean }) {
     const { userId } = req;
-    const data = await this.service.initTeam(teamId, userId);
+    const data = await this.service.initTeam(teamId, userId, body.deleteAllAssets);
     return new SuccessResponse({ data });
   }
 

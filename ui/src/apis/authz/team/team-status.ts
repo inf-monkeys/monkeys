@@ -4,6 +4,7 @@ import { EventSourcePolyfill } from 'event-source-polyfill';
 
 import { ITeamInitStatusEnum } from '@/apis/authz/team/typings.ts';
 import { vinesHeader } from '@/apis/utils';
+import { useTeamStatusStore } from '@/store/useTeamStatusStore';
 
 /**
  * SSE 事件结构
@@ -62,6 +63,9 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const manualCloseRef = useRef(false);
+
+  // 订阅来自 store 的刷新信号（仅订阅该 teamId 对应的刷新时间戳）
+  const refreshTrigger = useTeamStatusStore((state) => state.refreshTriggers[teamId]);
 
   // ---- 内部通用断开逻辑 ----
   const disconnect = useCallback(() => {
@@ -251,6 +255,13 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
     if (enabled && teamId) fetchTeamStatus();
     return disconnect;
   }, [enabled, teamId, fetchTeamStatus, disconnect]);
+
+  // ---- 响应刷新信号 ----
+  useEffect(() => {
+    if (enabled && teamId && refreshTrigger !== undefined) {
+      reconnect();
+    }
+  }, [refreshTrigger, enabled, teamId, reconnect]);
 
   return {
     status,

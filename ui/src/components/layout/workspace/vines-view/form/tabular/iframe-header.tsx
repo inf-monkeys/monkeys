@@ -10,6 +10,7 @@ import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/ut
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
+import { InitTeamButton } from '@/components/ui/init-team-button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -82,6 +83,7 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
                 <div className="flex items-center gap-2">
                   <VinesDarkMode />
                   <I18nSelector />
+                  <InitTeamButton size="icon" />
                 </div>
               </PopoverContent>
             </Popover>

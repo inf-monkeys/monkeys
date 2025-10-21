@@ -158,6 +158,7 @@ export class AppController {
         uploader: config.server.customization.uploader,
         designProjects: config.server.customization.designProjects,
         workbench: config.server.customization.workbench,
+        initTeam: Boolean(config.server.webhook.initTeam),
       },
       auth: {
         enabled: config.auth.enabled,

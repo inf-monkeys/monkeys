@@ -112,3 +112,7 @@ export enum ITeamInitStatusEnum {
   SUCCESS = 'SUCCESS',
   FAILED = 'FAILED',
 }
+
+export interface IInitTeamOptions {
+  deleteAllAssets?: boolean;
+}

@@ -5,6 +5,7 @@ import _ from 'lodash';
 
 import {
   IExportTeamOptions,
+  IInitTeamOptions,
   IInviteTeamData,
   ITeamApplyListData,
   ITeamApplyUpdateData,
@@ -97,3 +98,10 @@ export const useInviteTeam = (inviteId: string) =>
 
 export const acceptTeamInvite = (inviteId: string) =>
   vinesFetcher<boolean>({ method: 'POST', simple: true })(`/api/teams/invites/${inviteId}/accept`, {});
+
+export const initTeam = async (teamId: string, options?: IInitTeamOptions) => {
+  await vinesFetcher<boolean, IInitTeamOptions>({
+    method: 'POST',
+    simple: true,
+  })(`/api/teams/${teamId}/init`, options);
+};

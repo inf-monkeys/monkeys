@@ -183,6 +183,9 @@
       "dark": "深色模式",
       "light": "浅色模式"
     },
+    "init-team-button": {
+      "tooltip": "同步数据"
+    },
     "load": {
       "loading": "加载中...",
       "empty": "暂无数据",

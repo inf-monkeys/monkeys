@@ -76,6 +76,7 @@ export interface ISystemConfig {
     uploader: CustomizationUploader;
     designProjects: CustomizationDesignProjects;
     workbench: CustomizationWorkbench;
+    initTeam: boolean;
   };
   auth: {
     enabled: AuthMethod[];
