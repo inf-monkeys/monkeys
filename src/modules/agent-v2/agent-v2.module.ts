@@ -21,6 +21,6 @@ import { AgentV2ToolsService } from './services/tools/agent-v2-tools.service';
   imports: [TypeOrmModule.forFeature([AgentV2Entity, AgentV2SessionEntity, AgentV2MessageEntity, AgentV2TaskStateEntity, AgentV2MessageQueueEntity]), ToolsModule, WorkflowModule, ConductorModule],
   controllers: [AgentV2Controller],
   providers: [AgentV2Service, AgentV2Repository, AgentV2LlmService, AgentV2ToolsService, AgentV2McpService, AgentV2PersistentTaskManager, AgentV2TaskStateManager, AgentV2ConductorBridgeService],
-  exports: [AgentV2Service],
+  exports: [AgentV2Service, AgentV2Repository],
 })
 export class AgentV2Module {}

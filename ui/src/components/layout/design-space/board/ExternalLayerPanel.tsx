@@ -6,9 +6,9 @@ import { History } from 'lucide-react';
 import { Editor, TLShapeId } from 'tldraw';
 
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
-import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
+import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
@@ -19,7 +19,7 @@ import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { newConvertExecutionResultToItemList } from '@/utils/execution';
 
 import { VisibilityOff, VisibilityOn } from './icons';
-import { AgentEmbeddedPanel } from './panel-agent-embedded';
+import { TldrawAgentV2EmbeddedPanel } from './panel-agent-v2-embedded';
 
 // 形状类型中文映射
 const getShapeTypeInChinese = (type: string, geoKind?: string): string => {
@@ -2469,7 +2469,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
       {/* 当 agentVisible 时，显示 Agent 嵌入；其次是 mini 应用；否则显示页面+图层面板 */}
       {agentVisible && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
-          <AgentEmbeddedPanel editor={editor} onClose={() => setAgentVisible(false)} />
+          <TldrawAgentV2EmbeddedPanel editor={editor} onClose={() => setAgentVisible(false)} />
         </div>
       ) : miniPage && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>

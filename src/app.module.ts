@@ -23,6 +23,7 @@ import { ModelTrainingModule } from './modules/model-training/model-training.mod
 import { PaymentModule } from './modules/payment/payment.module';
 import { TemporaryWorkflowModule } from './modules/temporary-workflow/temporary-workflow.module';
 import { TenantModule } from './modules/tenant/tenant.module';
+import { TldrawAgentV2Module } from './modules/tldraw-agent-v2/tldraw-agent-v2.module';
 import { TldrawAgentModule } from './modules/tldraw-agent/tldraw-agent.module';
 import { LLMToolsModule } from './modules/tools/llm/llm.module';
 import { MediaToolsModule } from './modules/tools/media/media.module';
@@ -67,6 +68,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     EvaluationModule,
     ModelTrainingModule,
     TldrawAgentModule,
+    TldrawAgentV2Module,
   ],
   controllers: [AppController],
   providers: [AppService],
