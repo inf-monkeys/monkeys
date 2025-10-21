@@ -1,5 +1,5 @@
 import { BaseEntityDto } from '@/common/dto/base-entity.dto';
-import { IsBoolean, IsNotEmpty, IsObject, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class CreateDesignMetadataDto extends BaseEntityDto {
   @IsString()
@@ -21,4 +21,8 @@ export class CreateDesignMetadataDto extends BaseEntityDto {
   @IsString()
   @IsNotEmpty()
   teamId: string;
+
+  @IsString()
+  @IsOptional()
+  thumbnailUrl?: string;
 }

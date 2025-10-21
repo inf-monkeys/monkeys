@@ -20,6 +20,7 @@ export interface IDesignBoardMetadata {
   designProjectId: string;
   snapshot: any;
   pinned: boolean;
+  thumbnailUrl?: string;
 }
 
 export type IDesignBoardItem = IAssetItem<Omit<IDesignBoardMetadata, 'snapshot'>>;

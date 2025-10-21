@@ -84,3 +84,9 @@ export const deleteDesignAssociation = (associationId: string) =>
 
 export const useGetDesignAssociationList = () =>
   useSWR<IDesignAssociation[] | undefined>(`/api/design/association`, vinesFetcher());
+
+export const generateDesignBoardThumbnail = (designBoardId: string, imageData: string) =>
+  vinesFetcher<{ success: boolean }, { imageData: string }>({
+    method: 'POST',
+    simple: true,
+  })(`/api/design/metadata/${designBoardId}/generate-thumbnail`, { imageData });

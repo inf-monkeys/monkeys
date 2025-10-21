@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { get } from 'lodash';
 import { Link, Pencil, Trash } from 'lucide-react';
@@ -14,11 +14,12 @@ import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor.tsx';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createDesignProjectsColumns } from '@/components/layout/ugc-pages/design-project/consts.tsx';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { DesignAssociationEditorDialog } from '@/components/layout/ugc-pages/design-project/design-association-editor';
+import { DesignProjectCardWrapper } from '@/components/layout/ugc-pages/design-project/design-project-card-wrapper';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -90,7 +91,7 @@ export const Designs: React.FC = () => {
   };
 
   return (
-    <main className="size-full">
+    <main className="size-full flex flex-col">
       <UgcView
         assetKey="design-project"
         assetType="design-project"
@@ -106,6 +107,69 @@ export const Designs: React.FC = () => {
             </span>
           ),
           cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),
+          // 自定义卡片渲染
+          customCard: (item) => (
+            <DesignProjectCardWrapper
+              key={item.id}
+              project={item}
+              onItemClick={navigateHelper}
+              operateArea={(item, trigger, tooltipTriggerContent) => (
+                <DropdownMenu>
+                  {tooltipTriggerContent ? (
+                    <Tooltip content={tooltipTriggerContent}>
+                      <TooltipTrigger asChild>
+                        <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+                      </TooltipTrigger>
+                    </Tooltip>
+                  ) : (
+                    <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+                  )}
+
+                  <DropdownMenuContent
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                  >
+                    <DropdownMenuLabel>{t('ugc-page.design-project.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          setCurrentDesignProject(item);
+                          setDesignProjectEditorVisible(true);
+                        }}
+                      >
+                        <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                          <Pencil size={15} />
+                        </DropdownMenuShortcut>
+                        {t('ugc-page.design-project.ugc-view.operate-area.options.edit-info')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => copy(location.origin.concat(`/${item.teamId}/design/${item.id}`))}>
+                        <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                          <Link size={15} />
+                        </DropdownMenuShortcut>
+                        {t('ugc-page.design-project.ugc-view.operate-area.options.copy-link')}
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        className="text-red-10"
+                        onSelect={() => {
+                          setCurrentDesignProject(item);
+                          setDeleteAlertDialogVisible(true);
+                        }}
+                      >
+                        <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                          <Trash size={15} />
+                        </DropdownMenuShortcut>
+                        {t('common.utils.delete')}
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            />
+          ),
         }}
         operateArea={(item, trigger, tooltipTriggerContent) => (
           <DropdownMenu>

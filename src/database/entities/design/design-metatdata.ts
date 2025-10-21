@@ -39,4 +39,11 @@ export class DesignMetadataEntity extends BaseEntity {
     default: false,
   })
   pinned: boolean;
+
+  @Column({
+    name: 'thumbnail_url',
+    type: 'varchar',
+    nullable: true,
+  })
+  thumbnailUrl: string;
 }

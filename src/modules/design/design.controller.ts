@@ -12,6 +12,7 @@ import { DesignProjectService } from './design.project.service';
 import { CreateDesignAssociationDto } from './dto/create-design-association.dto';
 import { CreateDesignMetadataDto } from './dto/create-design-metadata.dto';
 import { CreateDesignProjectDto } from './dto/create-design-project.dto';
+import { GenerateThumbnailDto } from './dto/generate-thumbnail.dto';
 import { UpdateDesignAssociationDto } from './dto/update-design-association.dto';
 import { UpdateDesignMetadataDto } from './dto/update-design-metadata.dto';
 import { UpdateDesignProjectDto } from './dto/update-design-project.dto';
@@ -224,5 +225,15 @@ export class DesignController {
   async getDesignAssociation(@Param('associationId') associationId: string) {
     const result = await this.designAssociationService.findById(associationId);
     return new SuccessResponse({ data: result });
+  }
+
+  @Post('metadata/:metadataId/generate-thumbnail')
+  @ApiOperation({
+    summary: '生成画板缩略图',
+    description: '为指定画板生成缩略图',
+  })
+  async generateThumbnail(@Param('metadataId') metadataId: string, @Body() generateThumbnailDto: GenerateThumbnailDto) {
+    await this.designMetadataService.generateThumbnail(metadataId, generateThumbnailDto.imageData);
+    return new SuccessResponse({ data: { success: true } });
   }
 }

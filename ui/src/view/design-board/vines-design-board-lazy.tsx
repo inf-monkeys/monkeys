@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { AssetRecordType, createShapeId, getSnapshot, TLShapeId } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
-import { updateDesignBoardMetadata, useDesignBoardMetadata } from '@/apis/designs';
+import { generateDesignBoardThumbnail, updateDesignBoardMetadata, useDesignBoardMetadata } from '@/apis/designs';
 import { useWorkspacePages } from '@/apis/pages';
 import { Board } from '@/components/layout/design-space/board';
 import { DesignBoardRightSidebar } from '@/components/layout/design-space/board/right-sidebar';
@@ -211,6 +211,61 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         const snapshot = getSnapshot(editor.store);
         await updateDesignBoardMetadata(designBoardId, { snapshot });
         void mutateMetadata();
+        
+        // 异步生成缩略图 - 使用setTimeout避免递归
+        setTimeout(async () => {
+          try {
+            // 检查编辑器是否有内容
+            const shapes = editor.getCurrentPageShapes();
+            
+            if (shapes.length === 0) {
+              return;
+            }
+            
+            // 使用与"导出全部"相同的方法
+            const pageId = (editor as any).getCurrentPageId?.();
+            let ids: any[] = [];
+            if (pageId && typeof (editor as any).getSortedChildIdsForParent === 'function') {
+              ids = (editor as any).getSortedChildIdsForParent(pageId) || [];
+            }
+            if ((!ids || ids.length === 0) && typeof (editor as any).getCurrentPageShapeIds === 'function') {
+              ids = (editor as any).getCurrentPageShapeIds() || [];
+            }
+            
+            if (!ids || ids.length === 0) {
+              return;
+            }
+            
+            // 使用与导出全部相同的方法，但压缩图片
+            const { blob } = await (editor as any).toImage(ids, { 
+              format: 'jpeg', // 使用JPEG格式，文件更小
+              scale: 0.3, // 降低分辨率到30%
+              quality: 0.7 // 降低质量到70%
+            });
+            
+            if (!blob) {
+              return;
+            }
+            
+            // 将blob转换为Base64 - 使用FileReader API
+            const base64Data = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const result = reader.result as string;
+                // 移除data:image/jpeg;base64,前缀
+                const base64 = result.split(',')[1];
+                resolve(base64);
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+            
+            // 调用后端API，传递Base64数据而不是snapshot
+            await generateDesignBoardThumbnail(designBoardId, base64Data);
+          } catch (error) {
+            console.error('生成缩略图失败:', error);
+          }
+        }, 1000); // 延迟1秒执行，避免与自动保存冲突
       } catch (e) {
         // 静默失败，避免频繁 toast；必要时可改为节流提示
       } finally {

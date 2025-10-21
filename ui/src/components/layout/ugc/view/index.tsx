@@ -40,7 +40,6 @@ import { Button } from '@/components/ui/button';
 import { RemoteDataTable } from '@/components/ui/data-table/remote';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn, getI18nContent } from '@/utils';
 
@@ -342,13 +341,7 @@ export const UgcView = <E extends object>({
             {(isLoading || isNull(displayMode)) && <VinesFullLoading motionKey={`vines-assets-${assetKey}-loading`} />}
           </AnimatePresence>
           <div className="flex size-full flex-col">
-            <ScrollArea
-              className={cn(
-                'relative w-full p-global',
-                showPagination ? 'h-[calc(100%-4.9rem)]' : 'h-[calc(100%-1.7rem)]',
-              )}
-              disabledOverflowMask
-            >
+            <div className="relative w-full p-global overflow-y-auto" style={{ height: showPagination ? 'calc(100% - 4.9rem)' : 'calc(100% - 1.7rem)' }}>
               {displayMode === 'folder' ? (
                 <UgcViewFolderView
                   allData={allDataRaw?.data || []}
@@ -372,22 +365,40 @@ export const UgcView = <E extends object>({
               ) : (
                 <>
                   {displayMode === 'card' && (
-                    <div className="grid w-full grid-cols-1 gap-6 overflow-y-auto lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                      {rows.map((row, index) => (
-                        <UgcViewCard
-                          row={row}
-                          key={
-                            row.original?.['_key'] ??
-                            (row.original?.['id'] ?? '') + (row.original['updatedTimestamp'] ?? '')
-                          }
-                          index={index}
-                          columns={columns}
-                          renderOptions={renderOptions}
-                          operateArea={operateArea}
-                          onItemClick={onItemClick}
-                          ugcOptions={ugcOptions}
-                        />
-                      ))}
+                    <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                      {rows.map((row, index) => {
+                        // 如果提供了自定义卡片渲染函数，使用它
+                        if (renderOptions.customCard) {
+                          return (
+                            <div
+                              key={
+                                row.original?.['_key'] ??
+                                (row.original?.['id'] ?? '') + (row.original['updatedTimestamp'] ?? '')
+                              }
+                              className="h-fit"
+                            >
+                              {renderOptions.customCard(row.original)}
+                            </div>
+                          );
+                        }
+                        
+                        // 否则使用默认的UgcViewCard
+                        return (
+                          <UgcViewCard
+                            row={row}
+                            key={
+                              row.original?.['_key'] ??
+                              (row.original?.['id'] ?? '') + (row.original['updatedTimestamp'] ?? '')
+                            }
+                            index={index}
+                            columns={columns}
+                            renderOptions={renderOptions}
+                            operateArea={operateArea}
+                            onItemClick={onItemClick}
+                            ugcOptions={ugcOptions}
+                          />
+                        );
+                      })}
                     </div>
                   )}
                   {displayMode === 'table' && (
@@ -428,7 +439,7 @@ export const UgcView = <E extends object>({
                   )}
                 </>
               )}
-            </ScrollArea>
+            </div>
             {showPagination && displayMode !== 'folder' && (
               <TablePagination
                 className={cn('py-0', paginationPosition === 'right' ? 'justify-end gap-global' : '')}

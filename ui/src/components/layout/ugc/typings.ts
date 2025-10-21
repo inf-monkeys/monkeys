@@ -45,6 +45,8 @@ export type IDividePageType = 'pagination' | 'scroll' | null;
 
 export type IUgcRenderOptions<E> = {
   [type in IRenderKey]?: ColumnDef<E>['id'] | ((item: E) => React.ReactNode);
+} & {
+  customCard?: (item: E) => React.ReactNode;
 };
 
 export type IAssetCustomStorage<T> = {
