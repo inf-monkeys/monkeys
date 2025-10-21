@@ -17,11 +17,13 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { get } from 'lodash';
 import { FolderIcon } from 'lucide-react';
 
 import { useSystemConfig } from '@/apis/common';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import useUrlState from '@/hooks/use-url-state';
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { cn } from '@/utils';
 
@@ -43,9 +45,13 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
 }) => {
   const { data: oem } = useSystemConfig();
 
+  const [{ workbenchSidebarMoreAction: urlWorkbenchSidebarMoreAction }] = useUrlState<{
+    workbenchSidebarMoreAction?: boolean;
+  }>({ workbenchSidebarMoreAction: undefined });
+
   const density = oem?.theme.density ?? 'default';
 
-  const showMoreAction = oem?.theme.workbenchSidebarMoreAction ?? true;
+  const showMoreAction = urlWorkbenchSidebarMoreAction ?? get(oem, ['theme', 'workbenchSidebarMoreAction'], true);
 
   const workbenchSidebarToggleGroupDetail = oem?.theme.workbenchSidebarToggleGroupDetail ?? true;
 

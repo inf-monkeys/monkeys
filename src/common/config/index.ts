@@ -129,6 +129,10 @@ export type CustomizationWorkbench = {
   pageGroups: IPageGroup[];
 };
 
+export type CustomizationUgc = {
+  onItemClick: boolean;
+};
+
 export interface ServerConfig {
   port: number;
   appId: string;
@@ -184,6 +188,7 @@ export interface ServerConfig {
     workbenchSidebarToggleGroupDetail: boolean;
     workbenchSidebarViewType: boolean;
     workbenchSidebarFormViewEmbed: boolean;
+    ugc: CustomizationUgc;
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;
@@ -564,6 +569,9 @@ export const config: Config = {
       workbenchSidebarToggleGroupDetail: readConfig('server.customization.workbenchSidebarToggleGroupDetail', true),
       workbenchSidebarViewType: readConfig('server.customization.workbenchSidebarViewType', true),
       workbenchSidebarFormViewEmbed: readConfig('server.customization.workbenchSidebarFormViewEmbed', false),
+      ugc: {
+        onItemClick: readConfig('server.customization.ugc.onItemClick', true),
+      },
       uniImagePreview: readConfig('server.customization.uniImagePreview', false),
       imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
       teamAsUser: readConfig('server.customization.teamAsUser', false),

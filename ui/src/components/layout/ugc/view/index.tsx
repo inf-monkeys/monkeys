@@ -11,11 +11,12 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { AnimatePresence, motion } from 'framer-motion';
-import _, { isNull } from 'lodash';
+import _, { get, isNull } from 'lodash';
 import { CircleSlash, MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
+import { CustomizationUgc } from '@/apis/common/typings';
 import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
 import { useAssetFilterRuleList } from '@/apis/ugc';
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
@@ -42,6 +43,8 @@ import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn, getI18nContent } from '@/utils';
+
+import { DefaultTitleCell } from '../consts-cell';
 
 interface IUgcViewProps<E extends object> {
   assetKey: string;
@@ -73,7 +76,7 @@ export const UgcView = <E extends object>({
   createColumns,
   renderOptions,
   operateArea,
-  onItemClick,
+  onItemClick: onItemClickProp,
   subtitle,
   defaultPageSize = 24,
   assetIdKey = 'id',
@@ -298,7 +301,11 @@ export const UgcView = <E extends object>({
   const rows = table.getRowModel().rows;
 
   const { data: oem } = useSystemConfig();
-  const paginationPosition = oem?.theme.paginationPosition ?? 'left';
+  const paginationPosition = get(oem, ['theme', 'paginationPosition'], 'left');
+  const ugcOptions = get(oem, ['theme', 'ugc'], {
+    onItemClick: true,
+  } as CustomizationUgc);
+  const onItemClick = ugcOptions.onItemClick ? onItemClickProp : undefined;
   const { data: assetFilterRules } = useAssetFilterRuleList(assetType as any, isMarket);
   return (
     <div className="flex size-full">
@@ -378,13 +385,24 @@ export const UgcView = <E extends object>({
                           renderOptions={renderOptions}
                           operateArea={operateArea}
                           onItemClick={onItemClick}
+                          ugcOptions={ugcOptions}
                         />
                       ))}
                     </div>
                   )}
                   {displayMode === 'table' && (
                     <RemoteDataTable
-                      columns={columns as any}
+                      columns={
+                        columns.map((col) => {
+                          if (col.id === 'title' && !ugcOptions.onItemClick) {
+                            return {
+                              ...col,
+                              cell: DefaultTitleCell,
+                            };
+                          }
+                          return col;
+                        }) as any
+                      }
                       data={data}
                       onPaginationChange={table.setPagination}
                       rowCount={table.getRowCount()}
@@ -403,6 +421,7 @@ export const UgcView = <E extends object>({
                           renderOptions={renderOptions}
                           operateArea={operateArea}
                           onItemClick={onItemClick}
+                          ugcOptions={ugcOptions}
                         />
                       ))}
                     </div>

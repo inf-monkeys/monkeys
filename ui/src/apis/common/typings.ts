@@ -125,6 +125,10 @@ export type CustomizationWorkbench = {
   pageGroups: IPageGroup[];
 };
 
+export type CustomizationUgc = {
+  onItemClick: boolean;
+};
+
 export interface ISystemConfig {
   theme: {
     id?: string;
@@ -172,6 +176,7 @@ export interface ISystemConfig {
     workbenchSidebarToggleGroupDetail?: boolean;
     workbenchSidebarViewType?: boolean;
     workbenchSidebarFormViewEmbed?: boolean;
+    ugc: CustomizationUgc;
     uniImagePreview?: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
     teamAsUser: boolean;

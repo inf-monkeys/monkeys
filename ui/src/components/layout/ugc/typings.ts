@@ -3,6 +3,7 @@ import React from 'react';
 import { AssetType } from '@inf-monkeys/monkeys';
 import { ColumnDef, Row } from '@tanstack/react-table';
 
+import { CustomizationUgc } from '@/apis/common/typings';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 
 export interface IUgcViewItemProps<E extends object> {
@@ -12,6 +13,7 @@ export interface IUgcViewItemProps<E extends object> {
   operateArea?: IOperateAreaProps<E>;
   onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   index: number;
+  ugcOptions: CustomizationUgc;
 }
 
 export interface IUgcCreateColumnsProps {

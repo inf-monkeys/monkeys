@@ -15,12 +15,13 @@ export const UgcViewCard = <E extends object>({
   renderOptions,
   operateArea,
   onItemClick,
+  ugcOptions,
 }: IUgcViewItemProps<E>) => {
   const { t } = useTranslation();
 
   const cells = row.getAllCells();
 
-  const render = useColumnRenderer({ row, columns, renderOptions, cells });
+  const render = useColumnRenderer({ row, columns, renderOptions, cells, ugcOptions });
 
   const logo = render('logo');
   const title = render('title');

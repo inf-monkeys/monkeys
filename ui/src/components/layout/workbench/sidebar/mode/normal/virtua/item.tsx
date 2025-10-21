@@ -12,6 +12,7 @@ import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import useUrlState from '@/hooks/use-url-state';
 import { cn, getI18nContent } from '@/utils';
 
 export const WorkbenchViewItemCurrentData = createContext<{ pageId?: string; groupId?: string }>({});
@@ -36,7 +37,11 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
     const isLFTheme = themeMode === 'shadow';
     const backgroundClass = isLFTheme ? 'bg-[#f2f3f4]' : 'bg-neocard';
 
-    const showMoreAction = oem?.theme.workbenchSidebarMoreAction ?? true;
+    const [{ workbenchSidebarMoreAction: urlWorkbenchSidebarMoreAction }] = useUrlState<{
+      workbenchSidebarMoreAction?: boolean;
+    }>({ workbenchSidebarMoreAction: undefined });
+
+    const showMoreAction = urlWorkbenchSidebarMoreAction ?? get(oem, ['theme', 'workbenchSidebarMoreAction'], true);
 
     const info = page?.workflow || page?.agent || page?.designProject || page?.info;
     const viewIcon = page?.instance?.icon ?? '';

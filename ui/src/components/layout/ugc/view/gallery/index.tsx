@@ -15,13 +15,14 @@ export const UgcViewGalleryItem = <E extends object>({
   renderOptions,
   operateArea,
   onItemClick,
+  ugcOptions,
 }: IUgcViewItemProps<E>) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const cells = row.getAllCells();
 
-  const render = useColumnRenderer({ row, columns, renderOptions, cells });
+  const render = useColumnRenderer({ row, columns, renderOptions, cells, ugcOptions });
 
   const cover = render('cover');
   const title = render('title');
