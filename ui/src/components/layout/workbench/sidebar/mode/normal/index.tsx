@@ -269,7 +269,11 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   useThrottleEffect(
     () => {
       if (!wrapperHeight) return;
-      setHeight(globalViewSize != 'sm' ? wrapperHeight - 56 : `calc(${wrapperHeight}px - 1.5rem - 2px)`);
+      const calcHeight =
+        globalViewSize != 'sm'
+          ? `calc(${wrapperHeight}px - var(--global-spacing) * 2 - 2.5rem - 0.5rem)`
+          : `calc(${wrapperHeight}px - 1.5rem - 2px)`;
+      setHeight(calcHeight);
     },
     [wrapperHeight, globalViewSize],
     { wait: 64 },
