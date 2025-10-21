@@ -31,7 +31,7 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, is
           paddingRight: visible ? 16 : 0,
         }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pl-1">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button icon={<ChevronLeft />} variant="outline" onClick={() => setVisible(false)} />

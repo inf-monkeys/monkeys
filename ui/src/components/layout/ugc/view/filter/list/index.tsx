@@ -150,7 +150,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   }, [assetFilterRules, searchValue, assetPublicCategories]);
 
   return (
-    <div ref={ref} className="flex flex-col gap-2 p-1">
+    <div ref={ref} className="flex flex-col gap-2">
       {filterAreaVisible && (
         <div className="flex gap-2">
           <Input
@@ -161,171 +161,173 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
           <UgcViewFilterButton assetType={assetType} assetKey={assetKey} {...filterButtonProps} defaultAddToFavourite />
         </div>
       )}
-      <div
-        className={cn(
-          'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-          currentRuleId === 'all' ? 'border border-input bg-background text-accent-foreground shadow-sm' : 'p-[1px]',
-        )}
-        onClick={() => setCurrentRuleId('all')}
-      >
-        <div className="flex w-full items-center justify-between px-global text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">
-              <LayoutGrid />
+      <div className="ml-1 flex flex-col gap-2">
+        <div
+          className={cn(
+            'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+            currentRuleId === 'all' ? 'border border-input bg-background text-accent-foreground shadow-sm' : 'p-[1px]',
+          )}
+          onClick={() => setCurrentRuleId('all')}
+        >
+          <div className="flex w-full items-center justify-between px-global text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">
+                <LayoutGrid />
+              </div>
+              <span>
+                {t('common.utils.all') +
+                  (assetType === 'tools' && !isMarket
+                    ? t('common.utils.counter', {
+                        count: toolsData?.total,
+                      })
+                    : '')}
+              </span>
             </div>
-            <span>
-              {t('common.utils.all') +
-                (assetType === 'tools' && !isMarket
-                  ? t('common.utils.counter', {
-                      count: toolsData?.total,
-                    })
-                  : '')}
-            </span>
           </div>
         </div>
-      </div>
-      <ScrollArea className="h-[calc(100vh-15rem)]">
-        <div className="flex flex-col gap-2">
-          {assetType === 'tools' && !isMarket ? (
-            oemId === 'concept-design' ? (
-              <>
-                {[
-                  {
-                    id: 'demand',
-                    displayName: {
-                      'zh-CN': '需求',
-                      'en-US': 'Demand',
+        <ScrollArea className="h-[calc(100vh-15rem)]">
+          <div className="flex flex-col gap-2">
+            {assetType === 'tools' && !isMarket ? (
+              oemId === 'concept-design' ? (
+                <>
+                  {[
+                    {
+                      id: 'demand',
+                      displayName: {
+                        'zh-CN': '需求',
+                        'en-US': 'Demand',
+                      },
                     },
-                  },
-                  {
-                    id: 'feature',
-                    displayName: {
-                      'zh-CN': '功能',
-                      'en-US': 'Feature',
+                    {
+                      id: 'feature',
+                      displayName: {
+                        'zh-CN': '功能',
+                        'en-US': 'Feature',
+                      },
                     },
-                  },
-                  {
-                    id: 'logic',
-                    displayName: {
-                      'zh-CN': '逻辑',
-                      'en-US': 'Logic',
+                    {
+                      id: 'logic',
+                      displayName: {
+                        'zh-CN': '逻辑',
+                        'en-US': 'Logic',
+                      },
                     },
-                  },
-                  {
-                    id: 'prototype',
-                    displayName: {
-                      'zh-CN': '原型',
-                      'en-US': 'Prototype',
+                    {
+                      id: 'prototype',
+                      displayName: {
+                        'zh-CN': '原型',
+                        'en-US': 'Prototype',
+                      },
                     },
-                  },
-                ].map(({ id, displayName }) => {
-                  return (
-                    <div
-                      className={cn(
-                        'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                        currentRuleId === id
-                          ? 'border border-input bg-background text-accent-foreground shadow-sm'
-                          : 'p-[1px]',
-                      )}
-                      onClick={() => setCurrentRuleId(id)}
-                      key={id}
-                    >
-                      <span className="pl-[calc(1rem+20px+0.5rem)] pr-global text-sm !font-normal">
-                        {getI18nContent(displayName)}
-                      </span>
-                    </div>
-                  );
-                })}
-              </>
-            ) : (
-              <Accordion
-                type="multiple"
-                className="flex w-full flex-col gap-2 text-sm text-slateA-8 text-opacity-70"
-                value={activeIndex}
-                onValueChange={setActiveIndex}
-              >
-                {Object.keys(TOOLS_ROOT_CATEGORIES_MAP).map((rootName) => {
-                  const rootLabel = getI18nContent(TOOLS_ROOT_CATEGORIES_MAP[rootName]['label']);
-                  const rootIcon = TOOLS_ROOT_CATEGORIES_MAP[rootName]['icon'];
-                  const categoriesMap =
-                    rootName === 'internal-tools' ? ACTION_TOOLS_CATEGORIES_MAP : EXTERNAL_TOOLS_CATEGORIES_MAP;
-                  return (
-                    <AccordionItem key={rootName} value={rootName}>
-                      <>
-                        <AccordionTrigger>
-                          <div className="group flex h-10 w-full cursor-pointer items-center rounded-md p-[1px] transition-colors hover:bg-accent hover:text-accent-foreground">
-                            <div className="flex w-full items-center justify-between px-global text-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{rootIcon}</div>
+                  ].map(({ id, displayName }) => {
+                    return (
+                      <div
+                        className={cn(
+                          'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+                          currentRuleId === id
+                            ? 'border border-input bg-background text-accent-foreground shadow-sm'
+                            : 'p-[1px]',
+                        )}
+                        onClick={() => setCurrentRuleId(id)}
+                        key={id}
+                      >
+                        <span className="pl-[calc(1rem+20px+0.5rem)] pr-global text-sm !font-normal">
+                          {getI18nContent(displayName)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </>
+              ) : (
+                <Accordion
+                  type="multiple"
+                  className="flex w-full flex-col gap-2 text-sm text-slateA-8 text-opacity-70"
+                  value={activeIndex}
+                  onValueChange={setActiveIndex}
+                >
+                  {Object.keys(TOOLS_ROOT_CATEGORIES_MAP).map((rootName) => {
+                    const rootLabel = getI18nContent(TOOLS_ROOT_CATEGORIES_MAP[rootName]['label']);
+                    const rootIcon = TOOLS_ROOT_CATEGORIES_MAP[rootName]['icon'];
+                    const categoriesMap =
+                      rootName === 'internal-tools' ? ACTION_TOOLS_CATEGORIES_MAP : EXTERNAL_TOOLS_CATEGORIES_MAP;
+                    return (
+                      <AccordionItem key={rootName} value={rootName}>
+                        <>
+                          <AccordionTrigger>
+                            <div className="group flex h-10 w-full cursor-pointer items-center rounded-md p-[1px] transition-colors hover:bg-accent hover:text-accent-foreground">
+                              <div className="flex w-full items-center justify-between px-global text-sm">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{rootIcon}</div>
 
-                                <span className="!font-normal">
-                                  {rootLabel +
-                                    t('common.utils.counter', {
-                                      count: toolsData?.[rootName]['total'],
-                                    })}
-                                </span>
+                                  <span className="!font-normal">
+                                    {rootLabel +
+                                      t('common.utils.counter', {
+                                        count: toolsData?.[rootName]['total'],
+                                      })}
+                                  </span>
+                                </div>
+                                <ChevronRightIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                               </div>
-                              <ChevronRightIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                             </div>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="flex flex-col gap-2 first:mt-2">
-                          {Object.keys(categoriesMap).map((cateName) => {
-                            const cateLabel = getI18nContent(categoriesMap[cateName]);
-                            return (
-                              <div
-                                className={cn(
-                                  'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                                  currentRuleId === cateName
-                                    ? 'border border-input bg-background text-accent-foreground shadow-sm'
-                                    : 'p-[1px]',
-                                )}
-                                onClick={() => setCurrentRuleId(cateName)}
-                                key={cateName}
-                              >
-                                <span className="pl-[calc(1rem+20px+0.5rem)] pr-global text-sm !font-normal">
-                                  {cateLabel +
-                                    t('common.utils.counter', {
-                                      count: toolsData?.[rootName][cateName],
-                                    })}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </AccordionContent>
-                      </>
-                    </AccordionItem>
-                  );
-                })}
-              </Accordion>
-            )
-          ) : (
-            (assetFilterRules || assetPublicCategories) && (
-              <VirtualUgcFilterList
-                data={categoryList}
-                height={height}
-                currentRuleId={currentRuleId}
-                onItemClicked={(ruleId) => setCurrentRuleId(ruleId)}
-                onItemDeleteClicked={
-                  isMarket
-                    ? undefined
-                    : (ruleId) => {
-                        toast.promise(removeAssetFilterRules(ruleId), {
-                          loading: t('common.delete.loading'),
-                          success: () => {
-                            void mutateAssetFilterRules();
-                            (currentRuleId === ruleId || currentRuleId === ruleId) && setCurrentRuleId('all');
-                            return t('common.delete.success');
-                          },
-                          error: t('common.delete.error'),
-                        });
-                      }
-                }
-              />
-            )
-          )}
-        </div>
-      </ScrollArea>
+                          </AccordionTrigger>
+                          <AccordionContent className="flex flex-col gap-2 first:mt-2">
+                            {Object.keys(categoriesMap).map((cateName) => {
+                              const cateLabel = getI18nContent(categoriesMap[cateName]);
+                              return (
+                                <div
+                                  className={cn(
+                                    'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+                                    currentRuleId === cateName
+                                      ? 'border border-input bg-background text-accent-foreground shadow-sm'
+                                      : 'p-[1px]',
+                                  )}
+                                  onClick={() => setCurrentRuleId(cateName)}
+                                  key={cateName}
+                                >
+                                  <span className="pl-[calc(1rem+20px+0.5rem)] pr-global text-sm !font-normal">
+                                    {cateLabel +
+                                      t('common.utils.counter', {
+                                        count: toolsData?.[rootName][cateName],
+                                      })}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </AccordionContent>
+                        </>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+              )
+            ) : (
+              (assetFilterRules || assetPublicCategories) && (
+                <VirtualUgcFilterList
+                  data={categoryList}
+                  height={height}
+                  currentRuleId={currentRuleId}
+                  onItemClicked={(ruleId) => setCurrentRuleId(ruleId)}
+                  onItemDeleteClicked={
+                    isMarket
+                      ? undefined
+                      : (ruleId) => {
+                          toast.promise(removeAssetFilterRules(ruleId), {
+                            loading: t('common.delete.loading'),
+                            success: () => {
+                              void mutateAssetFilterRules();
+                              (currentRuleId === ruleId || currentRuleId === ruleId) && setCurrentRuleId('all');
+                              return t('common.delete.success');
+                            },
+                            error: t('common.delete.error'),
+                          });
+                        }
+                  }
+                />
+              )
+            )}
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 };
