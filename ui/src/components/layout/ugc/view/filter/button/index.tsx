@@ -83,7 +83,9 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
       <Tooltip content={t('common.utils.filter')}>
         <PopoverTrigger asChild>
           <TooltipTrigger asChild>
-            <Button icon={<Filter />} variant="outline" size="small" />
+            <div className="py-1 [&>button]:!h-full">
+              <Button icon={<Filter />} variant="outline" size="small" />
+            </div>
           </TooltipTrigger>
         </PopoverTrigger>
       </Tooltip>
