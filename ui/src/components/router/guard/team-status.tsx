@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { useSWRConfig } from 'swr';
 import { useMatches } from '@tanstack/react-router';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, CheckCircle, Loader2, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useTeamStatusSSE } from '@/apis/authz/team/team-status';
 import { ITeamInitStatusEnum } from '@/apis/authz/team/typings';
@@ -23,6 +25,8 @@ interface TeamStatusGuardProps {
   successDisplayDuration?: number;
   /** 失败状态显示时长（毫秒） */
   errorDisplayDuration?: number;
+  /** 状态变为 success 时的回调函数 */
+  onSuccess?: () => void;
 }
 
 export const TeamStatusGuard: React.FC<TeamStatusGuardProps> = ({
@@ -32,14 +36,17 @@ export const TeamStatusGuard: React.FC<TeamStatusGuardProps> = ({
   enableBlur = true,
   successDisplayDuration = 1500,
   errorDisplayDuration = 2000,
+  onSuccess,
 }) => {
   const matches = useMatches();
   const { teamId } = useVinesTeam();
+  const { t } = useTranslation();
+
+  const { mutate } = useSWRConfig();
 
   const [showOverlay, setShowOverlay] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [statusDescription, setStatusDescription] = useState('');
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<ITeamInitStatusEnum | null>(null);
 
   // 检查当前路由是否包含 teamId
@@ -54,55 +61,51 @@ export const TeamStatusGuard: React.FC<TeamStatusGuardProps> = ({
 
       switch (newStatus) {
         case ITeamInitStatusEnum.PENDING:
-          setStatusMessage('数据更新中');
-          setStatusDescription('正在同步数据，请稍候...');
+          setStatusMessage(t('common.team-status-guard.pending'));
+          setStatusDescription(t('common.team-status-guard.pending-desc'));
           setShowOverlay(true);
-          setIsTransitioning(false);
           break;
 
         case ITeamInitStatusEnum.SUCCESS:
-          setStatusMessage('更新完毕');
-          setStatusDescription('数据已更新完成');
-          setIsTransitioning(true);
+          setStatusMessage(t('common.team-status-guard.success'));
+          setStatusDescription(t('common.team-status-guard.success-desc'));
           // 延迟隐藏遮罩，让用户看到"更新完毕"的消息
           setTimeout(() => {
             setShowOverlay(false);
-            setIsTransitioning(false);
+            // 状态变为 success 时调用回调函数
+            onSuccess?.();
+            mutate((key) => typeof key === 'string' && key.startsWith('/api/workflow'));
           }, successDisplayDuration);
           break;
 
         case ITeamInitStatusEnum.FAILED:
-          setStatusMessage('更新失败');
-          setStatusDescription('数据更新失败，请稍后重试');
-          setIsTransitioning(true);
+          setStatusMessage(t('common.team-status-guard.failed'));
+          setStatusDescription(t('common.team-status-guard.failed-desc'));
           setTimeout(() => {
             setShowOverlay(false);
-            setIsTransitioning(false);
           }, errorDisplayDuration);
           break;
       }
     },
-    [successDisplayDuration, errorDisplayDuration],
+    [successDisplayDuration, errorDisplayDuration, onSuccess, t],
   );
 
   // 错误处理函数
   const handleError = useCallback(
     (err: Error) => {
       console.error('团队状态监听错误:', err);
-      setStatusMessage('连接失败');
-      setStatusDescription('无法连接到服务器，请检查网络连接');
+      setStatusMessage(t('common.team-status-guard.connection-error'));
+      setStatusDescription(t('common.team-status-guard.connection-error-desc'));
       setCurrentStatus(ITeamInitStatusEnum.FAILED);
-      setIsTransitioning(true);
       setTimeout(() => {
         setShowOverlay(false);
-        setIsTransitioning(false);
       }, errorDisplayDuration);
     },
-    [errorDisplayDuration],
+    [errorDisplayDuration, t],
   );
 
   // 使用团队状态 SSE hook
-  const { status, isLoading, error } = useTeamStatusSSE(teamId || '', {
+  const { error } = useTeamStatusSSE(teamId || '', {
     enabled: enabled && !!teamId && isTeamRoute,
     onStatusChange: handleStatusChange,
     onError: handleError,
@@ -112,7 +115,6 @@ export const TeamStatusGuard: React.FC<TeamStatusGuardProps> = ({
   useEffect(() => {
     if (!isTeamRoute) {
       setShowOverlay(false);
-      setIsTransitioning(false);
       setCurrentStatus(null);
     }
   }, [isTeamRoute]);

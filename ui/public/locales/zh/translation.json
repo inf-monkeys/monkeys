@@ -186,6 +186,16 @@
     "init-team-button": {
       "tooltip": "同步数据"
     },
+    "team-status-guard": {
+      "pending": "数据更新中",
+      "pending-desc": "正在同步数据，请稍候...",
+      "success": "更新完毕",
+      "success-desc": "数据已更新完成",
+      "failed": "更新失败",
+      "failed-desc": "数据更新失败，请稍后重试",
+      "connection-error": "连接失败",
+      "connection-error-desc": "无法连接到服务器，请检查网络连接"
+    },
     "load": {
       "loading": "加载中...",
       "empty": "暂无数据",

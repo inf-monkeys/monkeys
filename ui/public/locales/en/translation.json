@@ -192,6 +192,16 @@
     "init-team-button": {
       "tooltip": "Sync data"
     },
+    "team-status-guard": {
+      "pending": "Updating data",
+      "pending-desc": "Synchronizing data, please wait...",
+      "success": "Update complete",
+      "success-desc": "Data has been updated successfully",
+      "failed": "Update failed",
+      "failed-desc": "Data update failed, please try again later",
+      "connection-error": "Connection failed",
+      "connection-error-desc": "Failed to connect to server, please check your network connection"
+    },
     "load": {
       "loading": "Loading...",
       "empty": "No data",
