@@ -840,7 +840,25 @@ export class WorkflowExecutionService {
   }
 
   public async deleteWorkflowExecution(teamId: string, workflowInstanceId: string) {
-    return await this.conductorService.deleteWorkflowExecution(workflowInstanceId);
+    // 1. 删除 Conductor 中的执行数据
+    await this.conductorService.deleteWorkflowExecution(workflowInstanceId);
+
+    // 2. 软删除本地数据库中的执行记录（设置 isDeleted = true）
+    // 这样全局历史记录查询时会过滤掉这些记录
+    const result = await this.workflowExecutionRepository.update(
+      {
+        workflowInstanceId,
+        group: teamId,
+      },
+      {
+        isDeleted: true,
+        updatedTimestamp: Date.now(),
+      },
+    );
+
+    logger.info(`Deleted workflow execution: ${workflowInstanceId}, affected rows: ${result.affected}`);
+
+    return true;
   }
 
   public async startWorkflow(request: StartWorkflowRequest, temp = false) {
