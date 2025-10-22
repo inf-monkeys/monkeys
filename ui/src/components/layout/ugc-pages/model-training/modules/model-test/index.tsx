@@ -18,8 +18,8 @@ import { Switch } from '@/components/ui/switch';
 
 // 模型类型枚举
 const MODEL_TYPES = [
-  { value: 'flux', label: 'Flux', description: 'Flux 模型' },
-  { value: 'lora', label: 'LoRA', description: 'LoRA 模型' },
+  { value: 'flux', label: 'Flux Dreambooth', description: 'Flux Dreambooth 模型' },
+  { value: 'lora', label: 'Flux LoRA', description: 'Flux LoRA 模型' },
   { value: 'qwen', label: 'Qwen', description: 'Qwen 模型' },
 ] as const;
 

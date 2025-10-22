@@ -8,6 +8,7 @@ import { preloadUgcModelTraining, useUgcModelTraining } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { createModelTrainingColumns } from '@/components/layout/ugc-pages/model-training/consts';
 import { CreateModelTrainingDialog } from '@/components/layout/ugc-pages/model-training/create';
+import { OperateArea } from '@/components/layout/ugc-pages/model-training/operate-area';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const ModelTraining: React.FC = () => {
@@ -38,8 +39,7 @@ export const ModelTraining: React.FC = () => {
           ),
         }}
         operateArea={(item, trigger, tooltipTriggerContent) => (
-          // <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
-          <></>
+          <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
         )}
         subtitle={
           <>

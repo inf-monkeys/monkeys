@@ -44,10 +44,10 @@ interface UploadTaskStatus {
   path_suffix: string | null;
 }
 
-// 模型类型枚举
+// 模型类型枚举（展示为 Flux Dreambooth / Flux LoRA，提交仍使用原有取值）
 const MODEL_TYPES = [
-  { value: 'flux', label: 'Flux' },
-  { value: 'lora', label: 'LoRA' },
+  { value: 'flux', label: 'Flux Dreambooth' },
+  { value: 'lora', label: 'Flux LoRA' },
 ] as const;
 
 // 学习率验证函数
@@ -82,9 +82,10 @@ type TrainingConfigForm = z.infer<typeof trainingConfigSchema>;
 
 interface IModelTrainingModuleProps {
   modelTrainingId: string;
+  displayName?: string; // 页面显示名称，用于作为默认模型名称
 }
 
-export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ modelTrainingId }) => {
+export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ modelTrainingId, displayName }) => {
   const [trainingStatus, setTrainingStatus] = useState<keyof typeof TRAINING_STATUS>('IDLE');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -105,7 +106,7 @@ export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ model
     defaultValues: {
       fileStorageId: modelTrainingId, // 默认使用模型训练ID
       learningRate: '2e-6',
-      modelName: '',
+      modelName: displayName || '',
       modelType: undefined,
       maxTrainEpochs: 6,
       trainBatchSize: 1,
@@ -200,7 +201,8 @@ export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ model
         form.reset({
           fileStorageId: config.fileStorageId || modelTrainingId,
           learningRate: config.learningRate || '2e-6',
-          modelName: config.modelName || '',
+          // 如果后端未返回 modelName，默认使用页面显示名称
+          modelName: config.modelName || displayName || '',
           modelType: config.modelTrainingType || undefined,
           maxTrainEpochs: config.maxTrainEpochs || 6,
           trainBatchSize: config.trainBatchSize || 1,
@@ -222,7 +224,7 @@ export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ model
         form.reset({
           fileStorageId: modelTrainingId,
           learningRate: '2e-6',
-          modelName: '',
+          modelName: displayName || '',
           modelType: undefined,
           maxTrainEpochs: 6,
           trainBatchSize: 1,

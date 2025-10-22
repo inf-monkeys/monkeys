@@ -106,7 +106,35 @@ export class ModelTrainingService {
   }
 
   async delete(id: string) {
-    return this.modelTrainingRepository.update(id, { isDeleted: true });
+    try {
+      // 先删除本地数据库中的数据
+      const result = await this.modelTrainingRepository.update(id, { isDeleted: true });
+
+      // 调用外部API删除训练任务
+      const modelTrainingEndpoint = config.modelTraining.endpoint;
+      const apiUrl = `${modelTrainingEndpoint}/api/v1/model/training/${id}`;
+
+      try {
+        await firstValueFrom(
+          this.httpService.delete(apiUrl, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }),
+        );
+
+        // console.log('外部API删除训练任务成功:', id);
+      } catch (externalError) {
+        // 外部API调用失败，记录日志但不影响本地删除
+        // console.error('外部API删除训练任务失败:', externalError);
+        // 可以选择是否抛出错误，这里选择继续执行
+      }
+
+      return result;
+    } catch (error) {
+      // console.error('删除模型训练失败:', error);
+      throw error;
+    }
   }
 
   /**
@@ -992,7 +1020,7 @@ export class ModelTrainingService {
    * @returns 测试结果
    */
   async startModelTest(dto: StartModelTestDto): Promise<StartModelTestResponseDto> {
-    const { id, spreadsheet_url, path = '', custom_columns = [], length_width = false } = dto;
+    const { spreadsheet_url, model_type, path = '', custom_columns = [], length_width = false } = dto;
 
     try {
       // 处理自定义列和长宽设置
@@ -1003,6 +1031,15 @@ export class ModelTrainingService {
         heading.push('长宽');
       }
 
+      // 映射模型类型字符串到数字
+      const modelTypeMapping: Record<string, number> = {
+        flux: 1, // Flux Dreambooth
+        lora: 2, // Flux LoRA
+        qwen: 3, // Qwen
+      };
+
+      const modelTypeNumber = modelTypeMapping[model_type] || 3; // 默认使用Qwen
+
       // 调用外部API开始模型测试
       const modelTrainingEndpoint = config.modelTraining.endpoint;
       const apiUrl = `${modelTrainingEndpoint}/api/v1/comfyui/fleet`;
@@ -1011,11 +1048,13 @@ export class ModelTrainingService {
       //   endpoint: modelTrainingEndpoint,
       //   apiUrl,
       //   modelTrainingId: id,
+      //   modelType: model_type,
+      //   modelTypeNumber,
       // });
 
       const requestData = {
         spreadsheet_url,
-        model_type: 3, // 固定为3
+        model_type: modelTypeNumber,
         path,
         heading,
         length_width,

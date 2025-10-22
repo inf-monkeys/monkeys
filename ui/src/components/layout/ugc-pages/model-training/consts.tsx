@@ -3,11 +3,13 @@ import { Link } from '@tanstack/react-router';
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
+import { MoreHorizontal } from 'lucide-react';
 
 import { IModelTraining } from '@/apis/model-training/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { Button } from '@/components/ui/button';
 import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IModelTraining>>();
@@ -24,7 +26,7 @@ export const createModelTrainingColumns = ({ hooks }: ICreateModelTrainingColumn
     cell: ({ getValue, row }) => (
       <Link
         className="hover:text-primary-500 cursor-pointer transition-colors"
-        to={`/$teamId/model-training/${row.original.id}`}
+        to={`/$teamId/model-training/${row.original.id}` as any}
       >
         {getI18nContent(getValue() as string | I18nValue)}
       </Link>
@@ -47,5 +49,23 @@ export const createModelTrainingColumns = ({ hooks }: ICreateModelTrainingColumn
     id: 'updatedTimestamp',
     cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
     maxSize: 72,
+  }),
+  // 操作列
+  columnHelper.display({
+    id: 'actions',
+    cell: ({ row }) => (
+      <Button
+        variant="ghost"
+        size="small"
+        className="h-8 w-8 p-0"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
+        <MoreHorizontal className="h-4 w-4" />
+      </Button>
+    ),
+    maxSize: 40,
   }),
 ];

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
-import { createFileRoute } from '@tanstack/react-router';
-import { useRouter } from '@tanstack/react-router';
+import { createFileRoute, useRouter } from '@tanstack/react-router';
 
 import { Brain, Table, TestTube, Undo2, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -83,7 +82,7 @@ export const ModelTrainingDetail: React.FC<IModelTrainingDetailProps> = () => {
             </TabsContent>
 
             <TabsContent value="model-training" className="h-full">
-              <ModelTrainingModule modelTrainingId={modelTrainingId} />
+              <ModelTrainingModule modelTrainingId={modelTrainingId} displayName={String(modelTraining.displayName)} />
             </TabsContent>
 
             <TabsContent value="test-table" className="h-full">

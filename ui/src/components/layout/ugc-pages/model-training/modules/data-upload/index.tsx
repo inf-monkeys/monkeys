@@ -358,6 +358,63 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
 
         if (headers.length > 0) {
           setTableHeaders(headers);
+
+          // 自动填入列映射
+          const autoFillColumnMapping = () => {
+            const currentFormValues = form.getValues();
+            const updates: Partial<DataUploadForm> = {};
+
+            // 查找编号列，填入图片名称列
+            const numberColumn = headers.find(
+              (header) =>
+                header.columnName.includes('编号') ||
+                header.columnName.includes('ID') ||
+                header.columnName.includes('id'),
+            );
+            if (numberColumn && !currentFormValues.imageNameColumn) {
+              updates.imageNameColumn = numberColumn.columnName;
+            }
+
+            // 查找提示词文本列，填入提示词列
+            const promptColumn = headers.find(
+              (header) =>
+                header.columnName.includes('提示词') ||
+                header.columnName.includes('prompt') ||
+                header.columnName.includes('Prompt'),
+            );
+            if (promptColumn && !currentFormValues.promptColumn) {
+              updates.promptColumn = promptColumn.columnName;
+            }
+
+            // 查找图片列，填入图片列
+            const imageColumn = headers.find(
+              (header) =>
+                header.columnName.includes('图片') ||
+                header.columnName.includes('image') ||
+                header.columnName.includes('Image') ||
+                header.columnName.includes('URL') ||
+                header.columnName.includes('url'),
+            );
+            if (imageColumn && !currentFormValues.imageColumn) {
+              updates.imageColumn = imageColumn.columnName;
+            }
+
+            // 如果有自动填入的字段，更新表单
+            if (Object.keys(updates).length > 0) {
+              form.setValue('imageNameColumn', updates.imageNameColumn || '');
+              form.setValue('promptColumn', updates.promptColumn || '');
+              form.setValue('imageColumn', updates.imageColumn || '');
+
+              const filledFields = Object.keys(updates).filter((key) => updates[key as keyof DataUploadForm]);
+              if (filledFields.length > 0) {
+                toast.success(`已自动填入 ${filledFields.length} 个列映射`);
+              }
+            }
+          };
+
+          // 延迟执行自动填入，确保表头状态已更新
+          setTimeout(autoFillColumnMapping, 100);
+
           toast.success(`成功获取表格表头信息，共 ${headers.length} 列`);
         } else {
           throw new Error('未找到有效的表头数据');
@@ -385,6 +442,63 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
         ];
 
         setTableHeaders(mockHeaders);
+
+        // 为模拟数据也添加自动填入逻辑
+        const autoFillMockData = () => {
+          const currentFormValues = form.getValues();
+          const updates: Partial<DataUploadForm> = {};
+
+          // 查找编号列，填入图片名称列
+          const numberColumn = mockHeaders.find(
+            (header) =>
+              header.columnName.includes('编号') ||
+              header.columnName.includes('ID') ||
+              header.columnName.includes('id'),
+          );
+          if (numberColumn && !currentFormValues.imageNameColumn) {
+            updates.imageNameColumn = numberColumn.columnName;
+          }
+
+          // 查找提示词文本列，填入提示词列
+          const promptColumn = mockHeaders.find(
+            (header) =>
+              header.columnName.includes('提示词') ||
+              header.columnName.includes('prompt') ||
+              header.columnName.includes('Prompt'),
+          );
+          if (promptColumn && !currentFormValues.promptColumn) {
+            updates.promptColumn = promptColumn.columnName;
+          }
+
+          // 查找图片列，填入图片列
+          const imageColumn = mockHeaders.find(
+            (header) =>
+              header.columnName.includes('图片') ||
+              header.columnName.includes('image') ||
+              header.columnName.includes('Image') ||
+              header.columnName.includes('URL') ||
+              header.columnName.includes('url'),
+          );
+          if (imageColumn && !currentFormValues.imageColumn) {
+            updates.imageColumn = imageColumn.columnName;
+          }
+
+          // 如果有自动填入的字段，更新表单
+          if (Object.keys(updates).length > 0) {
+            form.setValue('imageNameColumn', updates.imageNameColumn || '');
+            form.setValue('promptColumn', updates.promptColumn || '');
+            form.setValue('imageColumn', updates.imageColumn || '');
+
+            const filledFields = Object.keys(updates).filter((key) => updates[key as keyof DataUploadForm]);
+            if (filledFields.length > 0) {
+              toast.success(`已自动填入 ${filledFields.length} 个列映射（开发模式）`);
+            }
+          }
+        };
+
+        // 延迟执行自动填入
+        setTimeout(autoFillMockData, 100);
+
         toast.success('使用模拟数据获取表格表头信息（开发模式）');
         return;
       }
