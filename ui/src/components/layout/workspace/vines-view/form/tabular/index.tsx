@@ -78,7 +78,6 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
     event$.emit?.();
 
     const parallelTaskCount = inputData.__parallelTaskCount ?? 1;
-    console.log('parallelTaskCount', parallelTaskCount);
 
     const runTask = async () => {
       try {
