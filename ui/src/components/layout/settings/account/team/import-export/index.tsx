@@ -27,7 +27,7 @@ export const ImportExportTeam: React.FC<IImportExportTeamProps> = ({ team }) => 
 
   const [exportVisible, setExportVisible] = useState(false);
 
-  const exportEnabled = false;
+  const exportEnabled = true;
 
   return (
     <>

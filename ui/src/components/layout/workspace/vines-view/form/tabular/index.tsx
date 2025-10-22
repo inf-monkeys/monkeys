@@ -75,31 +75,35 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
 
     setIsSubmitting(true);
     setLoading(true);
-
     event$.emit?.();
 
-    vines
-      .start({ inputData, onlyStart: true })
-      .then((instanceId) => {
+    const parallelTaskCount = inputData.__parallelTaskCount ?? 1;
+
+    const runTask = async () => {
+      try {
+        const instanceId = await vines.start({ inputData, onlyStart: true });
         if (instanceId) {
           if (
             !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
-            oem?.theme?.views?.form?.toast?.afterCreate != false
-          )
+            oem?.theme?.views?.form?.toast?.afterCreate !== false
+          ) {
             toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
-
+          }
           onWorkflowStart?.();
           event$.emit?.();
         }
-      })
-      .catch(() => {
-        // 执行失败时的处理
-      })
-      .finally(() => {
-        setExecutionStatus('running');
-        setLoading(false);
-        setIsSubmitting(false);
-      });
+      } catch (error) {
+        console.error('Task execution failed:', error);
+      }
+    };
+
+    const tasks = Array.from({ length: parallelTaskCount }, () => runTask());
+
+    Promise.allSettled(tasks).finally(() => {
+      setExecutionStatus('running');
+      setLoading(false);
+      setIsSubmitting(false);
+    });
   });
 
   const { read } = useClipboard({ showSuccess: false });
