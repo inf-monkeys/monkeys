@@ -128,6 +128,9 @@ export const UgcView = <E extends object>({
   // filter
   const [filter, setFilter] = useState<Partial<IListUgcDto['filter']>>({});
 
+  // search
+  const [search, setSearch] = useState<string>('');
+
   // 左侧分组选中状态
   const [selectedRuleId, setSelectedRuleId] = useState<string>();
 
@@ -166,6 +169,7 @@ export const UgcView = <E extends object>({
   } = useUgcFetcher({
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
+    search: search || undefined,
     filter,
     orderBy: sortCondition.orderBy,
     orderColumn: sortCondition.orderColumn,
@@ -175,6 +179,7 @@ export const UgcView = <E extends object>({
   const { data: allDataRaw } = useUgcFetcher({
     page: 1,
     limit: 100000, // 获取大量数据
+    search: search || undefined,
     filter,
     orderBy: sortCondition.orderBy,
     orderColumn: sortCondition.orderColumn,
@@ -331,6 +336,8 @@ export const UgcView = <E extends object>({
           assetType={assetType}
           isMarket={isMarket}
           subtitle={subtitle}
+          search={search}
+          onSearchChange={setSearch}
           filterButtonProps={{
             filter,
             onChange: setFilter,
@@ -341,7 +348,10 @@ export const UgcView = <E extends object>({
             {(isLoading || isNull(displayMode)) && <VinesFullLoading motionKey={`vines-assets-${assetKey}-loading`} />}
           </AnimatePresence>
           <div className="flex size-full flex-col">
-            <div className="relative w-full p-global overflow-y-auto" style={{ height: showPagination ? 'calc(100% - 4.9rem)' : 'calc(100% - 1.7rem)' }}>
+            <div
+              className="relative w-full overflow-y-auto p-global"
+              style={{ height: showPagination ? 'calc(100% - 4.9rem)' : 'calc(100% - 1.7rem)' }}
+            >
               {displayMode === 'folder' ? (
                 <UgcViewFolderView
                   allData={allDataRaw?.data || []}
@@ -381,7 +391,7 @@ export const UgcView = <E extends object>({
                             </div>
                           );
                         }
-                        
+
                         // 否则使用默认的UgcViewCard
                         return (
                           <UgcViewCard
