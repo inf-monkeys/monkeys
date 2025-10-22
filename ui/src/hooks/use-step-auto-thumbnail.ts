@@ -11,16 +11,16 @@ interface StepThumbnailTask {
 }
 
 /**
- * 检查文件是否是 STEP 格式
+ * 检查文件是否是 STEP 或 GLB 格式
  */
 export function isStepFile(filename: string): boolean {
-  return /\.(step|stp)$/i.test(filename);
+  return /\.(step|stp|glb)$/i.test(filename);
 }
 
 /**
- * STEP 文件自动缩略图生成 Hook
+ * STEP 和 GLB 文件自动缩略图生成 Hook
  *
- * 在 STEP 文件上传成功后，自动使用 StepViewer 生成缩略图并更新
+ * 在 STEP 或 GLB 文件上传成功后，自动使用 StepViewer 生成缩略图并更新
  */
 export function useStepAutoThumbnail() {
   const [tasks, setTasks] = useState<StepThumbnailTask[]>([]);
@@ -46,10 +46,10 @@ export function useStepAutoThumbnail() {
     try {
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substr(2, 9);
-      const thumbnailFileName = `step-thumbnails/${timestamp}_${randomId}_${fileName.replace(/\.(step|stp)$/i, '')}.png`;
+      const thumbnailFileName = `step-thumbnails/${timestamp}_${randomId}_${fileName.replace(/\.(step|stp|glb)$/i, '')}.png`;
 
       const formData = new FormData();
-      formData.append('file', blob, `${fileName.replace(/\.(step|stp)$/i, '')}.png`);
+      formData.append('file', blob, `${fileName.replace(/\.(step|stp|glb)$/i, '')}.png`);
       formData.append('key', thumbnailFileName);
 
       const headers = vinesHeader({});

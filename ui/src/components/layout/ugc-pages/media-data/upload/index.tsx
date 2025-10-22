@@ -24,7 +24,7 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
 
   // 设置缩略图更新回调
   useEffect(() => {
-    onThumbnailUpdated((mediaFileId) => {
+    onThumbnailUpdated((_mediaFileId) => {
       // 刷新媒体文件列表
       void mutate((key) => typeof key === 'string' && key.startsWith('/api/media-files'));
     });
@@ -73,6 +73,8 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
               'stp',
               'STEP',
               'STP',
+              'glb',
+              'GLB',
             ]}
             onChange={handleUploadChange}
             basePath="user-files/media"

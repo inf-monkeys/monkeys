@@ -4,6 +4,7 @@ import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
 import occtimportjs from 'occt-import-js';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { VinesLoading } from '@/components/ui/loading';
 import { cn } from '@/utils';
@@ -17,6 +18,68 @@ interface StepViewerProps {
   className?: string;
   onReady?: () => void;
 }
+
+// GLB 模型组件
+interface GLBModelProps {
+  url: string;
+  onReady?: () => void;
+}
+
+const GLBModel: React.FC<GLBModelProps> = ({ url, onReady }) => {
+  const [model, setModel] = useState<THREE.Group | null>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const { camera } = useThree();
+
+  useEffect(() => {
+    const loader = new GLTFLoader();
+    loader.load(
+      url,
+      (gltf) => {
+        setModel(gltf.scene);
+        // 模型加载完成后调用 onReady
+        if (onReady) {
+          setTimeout(() => {
+            onReady();
+          }, 500);
+        }
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading GLB model:', error);
+      },
+    );
+  }, [url, onReady]);
+
+  useEffect(() => {
+    if (groupRef.current && model) {
+      // 计算边界
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const scale = 2 / maxDim;
+
+      // 设置相机位置
+      camera.position.set(center.x, center.y, center.z + maxDim * 2);
+      camera.lookAt(center);
+
+      // 缩放模型
+      model.scale.setScalar(scale);
+      model.position.copy(center).multiplyScalar(-scale);
+    }
+  }, [model, camera]);
+
+  if (!model) {
+    return null;
+  }
+
+  return (
+    <group ref={groupRef}>
+      {/* eslint-disable-next-line react/no-unknown-property */}
+      <primitive object={model} />
+    </group>
+  );
+};
 
 interface ModelProps {
   geometry: THREE.BufferGeometry;
@@ -72,7 +135,12 @@ const Model: React.FC<ModelProps> = ({ geometry }) => {
   );
 };
 
-const Scene: React.FC<{ geometry: THREE.BufferGeometry | null }> = ({ geometry }) => {
+const Scene: React.FC<{ geometry: THREE.BufferGeometry | null; isGLB: boolean; url: string; onReady?: () => void }> = ({
+  geometry,
+  isGLB,
+  url,
+  onReady,
+}) => {
   return (
     <>
       <PerspectiveCamera makeDefault position={[5, 5, 5]} fov={50} />
@@ -83,7 +151,7 @@ const Scene: React.FC<{ geometry: THREE.BufferGeometry | null }> = ({ geometry }
       <directionalLight position={[10, 10, 10]} intensity={1} />
       {/* eslint-disable-next-line react/no-unknown-property */}
       <directionalLight position={[-10, -10, -10]} intensity={0.5} />
-      {geometry && <Model geometry={geometry} />}
+      {isGLB ? <GLBModel url={url} onReady={onReady} /> : geometry && <Model geometry={geometry} />}
       {/* eslint-disable-next-line react/no-unknown-property */}
       <gridHelper args={[10, 10]} />
     </>
@@ -92,6 +160,7 @@ const Scene: React.FC<{ geometry: THREE.BufferGeometry | null }> = ({ geometry }
 
 export const StepViewer = React.forwardRef<StepViewerRef, StepViewerProps>(({ url, className, onReady }, ref) => {
   const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
+  const [isGLB, setIsGLB] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const occtRef = useRef<any>(null);
@@ -138,6 +207,17 @@ export const StepViewer = React.forwardRef<StepViewerRef, StepViewerProps>(({ ur
       try {
         setLoading(true);
         setError(null);
+
+        // 检查文件类型
+        const isGLBFile = url.toLowerCase().endsWith('.glb');
+        setIsGLB(isGLBFile);
+
+        if (isGLBFile) {
+          // GLB 文件使用 GLTFLoader 加载
+          setLoading(false);
+          // GLB 模型的 onReady 会在 GLBModel 组件中处理
+          return;
+        }
 
         // 初始化 occt-import-js
         if (!occtRef.current) {
@@ -280,7 +360,7 @@ export const StepViewer = React.forwardRef<StepViewerRef, StepViewerProps>(({ ur
           canvasRef.current = gl.domElement;
         }}
       >
-        <Scene geometry={geometry} />
+        <Scene geometry={geometry} isGLB={isGLB} url={url} onReady={onReady} />
       </Canvas>
     </div>
   );

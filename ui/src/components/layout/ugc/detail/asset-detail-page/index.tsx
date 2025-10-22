@@ -57,10 +57,10 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
     return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(fileType || '');
   };
 
-  // 判断是否为 STEP 文件
+  // 判断是否为 STEP 或 GLB 文件
   const isStepFile = () => {
     const fileType = getFileType();
-    return ['step', 'stp'].includes(fileType || '');
+    return ['step', 'stp', 'glb'].includes(fileType || '');
   };
 
   // 获取预览图片URL
@@ -94,7 +94,7 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
               />
             </div>
           ) : isStepFile() && previewImageUrl ? (
-            // STEP 文件显示 3D 模型预览
+            // STEP 或 GLB 文件显示 3D 模型预览
             <StepViewer url={previewImageUrl} className="h-full w-full" />
           ) : (
             // 其他文件类型显示默认预览
