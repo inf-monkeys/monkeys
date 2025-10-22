@@ -1,27 +1,25 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 
-import { Plus } from 'lucide-react';
+import { Link, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkflowAssociationList } from '@/apis/workflow/association';
+import { WorkflowAssociationEditor } from '@/components/layout/workspace/vines-view/flow/toolbar/more/association-editor/editor';
+import { WorkflowAssociationEditorItem } from '@/components/layout/workspace/vines-view/flow/toolbar/more/association-editor/item';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events';
 
-import { WorkflowAssociationEditor } from './editor';
-import { WorkflowAssociationEditorItem } from './item';
+import { useGetUgcViewIconOnlyMode } from '../../util';
 
-interface IWorkflowAssociationEditorProps {
-  children?: ReactNode;
-}
+interface IGlobalWorkflowAssociationEditorProps {}
 
-export const WorkflowAssociationEditorDialog: React.FC<IWorkflowAssociationEditorProps> = ({ children }) => {
-  const { workflowId } = useFlowStore();
+export const GlobalWorkflowAssociationEditorDialog: React.FC<IGlobalWorkflowAssociationEditorProps> = () => {
+  const iconOnlyMode = useGetUgcViewIconOnlyMode();
 
   const { t } = useTranslation();
 
-  const { data, mutate } = useWorkflowAssociationList(workflowId);
+  const { data, mutate } = useWorkflowAssociationList('global');
 
   return (
     <>
@@ -44,9 +42,13 @@ export const WorkflowAssociationEditorDialog: React.FC<IWorkflowAssociationEdito
           </div>
           <DialogFooter></DialogFooter>
         </DialogContent>
-        <DialogTrigger asChild>{children}</DialogTrigger>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="small" icon={<Link />}>
+            {iconOnlyMode ? null : '关联'}
+          </Button>
+        </DialogTrigger>
       </Dialog>
-      <WorkflowAssociationEditor workflowId={workflowId} />
+      <WorkflowAssociationEditor scope="global" />
     </>
   );
 };

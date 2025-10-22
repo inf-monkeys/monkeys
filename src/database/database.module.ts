@@ -65,6 +65,7 @@ import { ModelTrainingConfigEntity } from './entities/model-training/model-train
 import { WorkflowObservabilityEntity } from './entities/observability/workflow-observability';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
+import { GlobalWorkflowAssociationsEntity } from './entities/workflow/global-workflow-association';
 import { TemporaryWorkflowEntity } from './entities/workflow/temporary-workflow.entity';
 import { WorkflowArtifactEntity } from './entities/workflow/workflow-artifact.entity';
 import { WorkflowAssociationsEntity } from './entities/workflow/workflow-association';
@@ -81,6 +82,7 @@ export const entities: EntityClassOrSchema[] = [
   WorkflowMetadataEntity,
   WorkflowChatSessionEntity,
   WorkflowAssociationsEntity,
+  GlobalWorkflowAssociationsEntity,
   WorkflowArtifactEntity,
   WorkflowTriggersEntity,
   WorkflowTemplateEntity,

@@ -1,16 +1,11 @@
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base/base';
+import { IWorkflowAssociationExtraData, WorkflowAssociationType } from './workflow-association';
 import { WorkflowMetadataEntity } from './workflow-metadata';
 
-export type WorkflowAssociationType = 'to-workflow' | 'new-design';
-
-export interface IWorkflowAssociationExtraData {
-  newDesignDisplayName?: I18nValue;
-}
-
-@Entity({ name: 'workflow_associations' })
-export class WorkflowAssociationsEntity extends BaseEntity {
+@Entity({ name: 'global_workflow_associations' })
+export class GlobalWorkflowAssociationsEntity extends BaseEntity {
   @Column({
     name: 'enabled',
     type: 'boolean',
@@ -45,9 +40,10 @@ export class WorkflowAssociationsEntity extends BaseEntity {
   sortIndex?: number | null;
 
   @Column({
-    name: 'origin_workflow_id',
+    name: 'team_id',
+    nullable: true,
   })
-  originWorkflowId: string;
+  teamId: string;
 
   @Column({
     name: 'type',
@@ -80,10 +76,6 @@ export class WorkflowAssociationsEntity extends BaseEntity {
   extraData?: IWorkflowAssociationExtraData | null;
 
   @ManyToOne(() => WorkflowMetadataEntity)
-  @JoinColumn({ name: 'origin_workflow_id' })
-  originWorkflow: WorkflowMetadataEntity;
-
-  @ManyToOne(() => WorkflowMetadataEntity)
   @JoinColumn({ name: 'target_workflow_id' })
   targetWorkflow: WorkflowMetadataEntity;
 
@@ -95,11 +87,19 @@ export class WorkflowAssociationsEntity extends BaseEntity {
   preferAppId?: string;
 }
 
-export type UpdateAndCreateWorkflowAssociation = Pick<
-  WorkflowAssociationsEntity,
+export type UpdateAndCreateGlobalWorkflowAssociations = Pick<
+  GlobalWorkflowAssociationsEntity,
   'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex' | 'type' | 'extraData' | 'preferAppId'
 >;
 
-export type ExportedWorkflowAssociationEntity = WorkflowAssociationsEntity & {
-  scope: 'specific';
+export type BaseWorkflowAssosciationEntity = Omit<GlobalWorkflowAssociationsEntity | Omit<GlobalWorkflowAssociationsEntity, 'targetWorkflow'>, 'teamId'>;
+
+export type ExportedExtra = {
+  scope: 'global' | 'specific';
+};
+
+export type BaseWorkflowAssosciation = BaseWorkflowAssosciationEntity & ExportedExtra;
+
+export type ExportedGlobalWorkflowAssociationEntity = GlobalWorkflowAssociationsEntity & {
+  scope: 'global';
 };

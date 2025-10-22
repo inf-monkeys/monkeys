@@ -17,10 +17,15 @@ import { FieldNewDesignDisplayName } from './new-design-display-name';
 
 interface IAssociationEditorFieldsProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowAssociationForEditor>;
-  workflowId: string;
+  workflowId?: string;
+  scope?: 'global' | 'specific';
 }
 
-export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = ({ form, workflowId }) => {
+export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = ({
+  form,
+  workflowId,
+  scope = 'specific',
+}) => {
   const type = form.watch('type');
   return (
     <div className="flex gap-global">
@@ -29,7 +34,7 @@ export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = 
           <FieldEnabled form={form} />
           <div className="flex justify-between gap-global">
             <FieldIconUrl form={form} />
-            <FieldPreferAppIdInput form={form} assetType="workflow-association" workflowId={workflowId} />
+            <FieldPreferAppIdInput form={form} assetType="workflow-association" workflowId={workflowId} scope={scope} />
           </div>
           <FieldDisplayName form={form} />
           <FieldDescription form={form} />
@@ -41,7 +46,7 @@ export const AssociationEditorFields: React.FC<IAssociationEditorFieldsProps> = 
         <div className="flex w-96 max-w-md flex-col gap-2 px-1">
           {type === 'to-workflow' && (
             <>
-              <FieldWorkflow form={form} />
+              <FieldWorkflow form={form} currentWorkflowId={workflowId} />
               <FieldMapper form={form} />
             </>
           )}

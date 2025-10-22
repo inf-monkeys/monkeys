@@ -54,9 +54,9 @@ export class WorkflowAssociationController {
   })
   @UseGuards(CompatibleAuthGuard)
   @Put('/:workflowId/associations/:associationId')
-  async updateWorkflowAssociation(@Param('associationId') associationId: string, @Req() request: IRequest, @Body() body: UpdateAndCreateWorkflowAssociation) {
+  async updateWorkflowAssociation(@Param('workflowId') workflowId: string, @Param('associationId') associationId: string, @Req() request: IRequest, @Body() body: UpdateAndCreateWorkflowAssociation) {
     const { teamId } = request;
-    const data = await this.associationService.updateWorkflowAssociation(associationId, teamId, { ...body });
+    const data = await this.associationService.updateWorkflowAssociation(associationId, workflowId, teamId, { ...body });
     return new SuccessResponse({ data });
   }
 
@@ -66,9 +66,9 @@ export class WorkflowAssociationController {
   })
   @UseGuards(CompatibleAuthGuard)
   @Delete('/:workflowId/associations/:associationId')
-  async removeWorkflowAssociation(@Param('associationId') associationId: string, @Req() request: IRequest) {
+  async removeWorkflowAssociation(@Param('workflowId') workflowId: string, @Param('associationId') associationId: string, @Req() request: IRequest) {
     const { teamId } = request;
-    const data = await this.associationService.removeWorkflowAssociation(associationId, teamId);
+    const data = await this.associationService.removeWorkflowAssociation(associationId, workflowId, teamId);
     return new SuccessResponse({ data });
   }
 }

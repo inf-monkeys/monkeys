@@ -14,11 +14,11 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons';
 import { IWorkflowAssociationForEditor } from '@/schema/workspace/workflow-association';
-import { useFlowStore } from '@/store/useFlowStore';
 import { cn, getI18nContent } from '@/utils';
 
 interface IFieldWorkflowProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowAssociationForEditor>;
+  currentWorkflowId?: string;
 }
 
 const getWorkflowDisplayName = (workflow?: MonkeyWorkflow) => {
@@ -32,9 +32,8 @@ const getWorkflowDisplayName = (workflow?: MonkeyWorkflow) => {
   );
 };
 
-export const FieldWorkflow: React.FC<IFieldWorkflowProps> = ({ form }) => {
+export const FieldWorkflow: React.FC<IFieldWorkflowProps> = ({ form, currentWorkflowId }) => {
   const { t } = useTranslation();
-  const { workflowId: currentWorkflowId } = useFlowStore();
 
   const { data: workflowList, isLoading } = useAllWorkflowList();
   const [visible, setVisible] = useState(false);

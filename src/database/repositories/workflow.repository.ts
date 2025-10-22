@@ -16,6 +16,7 @@ import _, { isEmpty, isString, keyBy, omit, pick } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { DataSource, FindManyOptions, In, IsNull, MoreThan, Repository } from 'typeorm';
 import { InstalledAppEntity } from '../entities/marketplace/installed-app.entity';
+import { BaseWorkflowAssosciation, GlobalWorkflowAssociationsEntity, UpdateAndCreateGlobalWorkflowAssociations } from '../entities/workflow/global-workflow-association';
 import { UpdateAndCreateWorkflowAssociation, WorkflowAssociationsEntity } from '../entities/workflow/workflow-association';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
@@ -71,6 +72,8 @@ export class WorkflowRepository {
     private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
     @InjectRepository(WorkflowAssociationsEntity)
     private readonly workflowAssociationRepository: Repository<WorkflowAssociationsEntity>,
+    @InjectRepository(GlobalWorkflowAssociationsEntity)
+    private readonly globalWorkflowAssociationRepository: Repository<GlobalWorkflowAssociationsEntity>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -1357,8 +1360,142 @@ ORDER BY
     return null;
   }
 
+  public async listGlobalWorkflowAssociations(teamId: string, detail = false): Promise<BaseWorkflowAssosciation[]> {
+    return await this.globalWorkflowAssociationRepository
+      .find({
+        where: {
+          isDeleted: false,
+          teamId,
+        },
+        relations: {
+          targetWorkflow: true,
+        },
+      })
+      .then((data) => (detail ? data : data.map((item) => omit(item, ['targetWorkflow']))))
+      .then((data) => data.map((item) => ({ ...item, scope: 'global' }) as BaseWorkflowAssosciation));
+  }
+
+  public async getGlobalWorkflowAssociation(workflowAssociationId: string, relation = true) {
+    return await this.globalWorkflowAssociationRepository.findOne({
+      where: { id: workflowAssociationId, isDeleted: false },
+      relations: relation
+        ? {
+            targetWorkflow: true,
+          }
+        : undefined,
+    });
+  }
+
+  public async createGlobalWorkflowAssociation(teamId: string, createAssociation: UpdateAndCreateGlobalWorkflowAssociations) {
+    return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
+      const workflows =
+        createAssociation.type === 'to-workflow'
+          ? await transactionalEntityManager.find(WorkflowMetadataEntity, {
+              where: {
+                id: In([createAssociation.targetWorkflowId]),
+                isDeleted: false,
+                teamId,
+              },
+            })
+          : [];
+
+      if (createAssociation.type !== 'to-workflow' && workflows.length !== 1) {
+        throw new NotFoundException('targetWorkflowId not found, targetWorkflowId: ' + createAssociation.targetWorkflowId);
+      }
+
+      return await transactionalEntityManager.save(GlobalWorkflowAssociationsEntity, {
+        ...pick(createAssociation, ['displayName', 'description', 'enabled', 'mapper', 'targetWorkflowId', 'iconUrl', 'sortIndex', 'type', 'extraData', 'preferAppId']),
+        teamId,
+        id: generateDbId(),
+        isDeleted: false,
+      });
+    });
+  }
+
+  public async updateGlobalWorkflowAssociation(id: string, teamId: string, updateAssociation: UpdateAndCreateGlobalWorkflowAssociations) {
+    return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
+      const association = await transactionalEntityManager.findOne(GlobalWorkflowAssociationsEntity, {
+        where: { id, isDeleted: false },
+        relations: {
+          targetWorkflow: true,
+        },
+      });
+
+      if (!association) {
+        throw new NotFoundException(`global workflow association not found: ${id}`);
+      }
+
+      if (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId) {
+        throw new ForbiddenException(`no permission to operate the global workflow association: ${id}`);
+      }
+
+      if (association.type === 'to-workflow' && updateAssociation.targetWorkflowId) {
+        const workflow = await this.workflowMetadataRepository.findOne({
+          where: {
+            id: updateAssociation.targetWorkflowId,
+            isDeleted: false,
+            teamId,
+          },
+        });
+        if (!workflow) {
+          throw new NotFoundException(`targetWorkflowId not found: ${updateAssociation.targetWorkflowId}`);
+        }
+      }
+
+      const updateFields = {
+        ..._.pickBy(
+          {
+            displayName: updateAssociation.displayName,
+            description: updateAssociation.description,
+            enabled: updateAssociation.enabled,
+            mapper: updateAssociation.mapper,
+            targetWorkflowId: updateAssociation.targetWorkflowId,
+            iconUrl: updateAssociation.iconUrl,
+            sortIndex: updateAssociation.sortIndex,
+            type: updateAssociation.type,
+            extraData: updateAssociation.extraData,
+            preferAppId: updateAssociation.preferAppId,
+          },
+          (v) => typeof v !== 'undefined',
+        ),
+        updatedTimestamp: Date.now(),
+      };
+      await transactionalEntityManager.update(GlobalWorkflowAssociationsEntity, { id, isDeleted: false }, updateFields);
+      const updatedAssociation = await transactionalEntityManager.findOne(GlobalWorkflowAssociationsEntity, {
+        where: { id, isDeleted: false },
+        relations: {
+          targetWorkflow: true,
+        },
+      });
+      return updatedAssociation;
+    });
+  }
+
+  public async removeGlobalWorkflowAssociation(id: string, teamId: string) {
+    return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
+      const association = await transactionalEntityManager.findOne(GlobalWorkflowAssociationsEntity, {
+        where: { id, isDeleted: false },
+        relations: {
+          targetWorkflow: true,
+        },
+      });
+
+      if (!association) {
+        throw new NotFoundException(`global workflow association not found: ${id}`);
+      }
+
+      if (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId) {
+        throw new ForbiddenException(`no permission to operate the global workflow association: ${id}`);
+      }
+
+      await transactionalEntityManager.update(GlobalWorkflowAssociationsEntity, { id, isDeleted: false }, { isDeleted: true, updatedTimestamp: Date.now() });
+      return { success: true };
+    });
+  }
+
   public async listAllWorkflowAssociations(teamId: string, detail = false) {
-    return await this.workflowAssociationRepository
+    const globalWorkflowAssociations = await this.listGlobalWorkflowAssociations(teamId, detail);
+    const allWorkflowAssociations = await this.workflowAssociationRepository
       .find({
         where: {
           originWorkflow: {
@@ -1371,11 +1508,13 @@ ORDER BY
           targetWorkflow: true,
         },
       })
-      .then((data) => (detail ? data : data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow']))));
+      .then((data) => (detail ? data : data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow']))))
+      .then((data) => data.map((item) => ({ ...item, scope: 'specific' }) as BaseWorkflowAssosciation));
+    return [...globalWorkflowAssociations, ...allWorkflowAssociations];
   }
 
-  public async listWorkflowAssociations(workflowId: string, teamId: string, detail = false) {
-    return await this.workflowAssociationRepository
+  public async listWorkflowAssociations(workflowId: string, teamId: string, detail = false): Promise<BaseWorkflowAssosciation[]> {
+    const currentWorkflowAssociations = await this.workflowAssociationRepository
       .find({
         where: {
           originWorkflowId: workflowId,
@@ -1389,7 +1528,10 @@ ORDER BY
           targetWorkflow: true,
         },
       })
-      .then((data) => (detail ? data : data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow']))));
+      .then((data) => (detail ? data : data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow']))))
+      .then((data) => data.map((item) => ({ ...item, scope: 'specific' }) as BaseWorkflowAssosciation));
+    const globalWorkflowAssociations = await this.listGlobalWorkflowAssociations(teamId, detail);
+    return [...globalWorkflowAssociations, ...currentWorkflowAssociations];
   }
 
   public async getWorkflowAssociation(workflowAssociationId: string, relation = true) {

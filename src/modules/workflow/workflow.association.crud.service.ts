@@ -1,10 +1,14 @@
-import { WorkflowAssociationsEntity } from '@/database/entities/workflow/workflow-association';
+import { ExportedGlobalWorkflowAssociationEntity, GlobalWorkflowAssociationsEntity } from '@/database/entities/workflow/global-workflow-association';
+import { ExportedWorkflowAssociationEntity, WorkflowAssociationsEntity } from '@/database/entities/workflow/workflow-association';
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import _, { isArray } from 'lodash';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { AssetCloneResult, AssetUpdateResult, IAssetHandler, IStagedAssets } from '../marketplace/types';
 import { WorkflowAssociationService } from './workflow.association.service';
 import { WorkflowCrudService } from './workflow.curd.service';
+
+export type ImportedAllWorkflowAssociationEntity = WorkflowAssociationsEntity | GlobalWorkflowAssociationsEntity;
+export type ExportedAllWorkflowAssociationEntity = ExportedWorkflowAssociationEntity | ExportedGlobalWorkflowAssociationEntity;
 
 @Injectable()
 export class WorkflowAssociationCrudService implements IAssetHandler {
@@ -16,11 +20,11 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
     private readonly marketplaceService: MarketplaceService,
   ) {}
 
-  public async processSnapshot(snapshot: WorkflowAssociationsEntity, teamId: string): Promise<WorkflowAssociationsEntity> {
+  public async processSnapshot(snapshot: ExportedAllWorkflowAssociationEntity, teamId: string): Promise<ImportedAllWorkflowAssociationEntity> {
     const associationData = _.pick(snapshot, ['displayName', 'description', 'enabled', 'mapper', 'iconUrl', 'sortIndex', 'type', 'extraData']);
 
     // 处理 originWorkflowId
-    if (snapshot.originWorkflowId) {
+    if (snapshot.scope === 'specific' && snapshot.originWorkflowId) {
       // 1. 通过 app id 找到所有版本
       const app = await this.marketplaceService.getAppDetails(snapshot.originWorkflowId);
 
@@ -73,55 +77,87 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
       throw new NotFoundException('关联不存在');
     }
 
-    const { originWorkflowId: originOriginWorkflowId, targetWorkflowId: originTargetWorkflowId, type } = association;
+    const { targetWorkflowId: originTargetWorkflowId, type, scope } = association;
 
-    // 获取目标工作流和源工作流的信息
-    const originWorkflow = await this.workflowCrudService.getWorkflowDef(originOriginWorkflowId);
-    const targetWorkflow = type === 'to-workflow' ? await this.workflowCrudService.getWorkflowDef(originTargetWorkflowId) : undefined;
+    let originWorkflowId: string | undefined;
+    let targetWorkflowId: string | undefined;
 
-    if ((!targetWorkflow && type === 'to-workflow') || !originWorkflow) {
-      throw new NotFoundException('目标工作流或源工作流不存在');
-    }
+    if (scope === 'specific') {
+      const { originWorkflowId: originOriginWorkflowId } = association as WorkflowAssociationsEntity;
 
-    let originWorkflowId = '';
-    let targetWorkflowId = '';
+      // 获取目标工作流和源工作流的信息
+      const originWorkflow = await this.workflowCrudService.getWorkflowDef(originOriginWorkflowId);
+      const targetWorkflow = type === 'to-workflow' ? await this.workflowCrudService.getWorkflowDef(originTargetWorkflowId) : undefined;
 
-    // 如果有指定的资产列表，先从资产列表检查
-    if (isArray(externalAssetList) && externalAssetList.length > 0) {
-      const originWorkflowAsset = externalAssetList.find((asset) => asset.type === 'workflow' && asset.id === originOriginWorkflowId);
-      if (originWorkflowAsset) {
-        originWorkflowId = originWorkflowAsset.appId;
-      } else {
-        throw new Error(`工作流 ${originOriginWorkflowId} 不存在于资产列表中`);
+      if ((!targetWorkflow && type === 'to-workflow') || !originWorkflow) {
+        throw new NotFoundException('目标工作流或源工作流不存在');
       }
 
-      if (type === 'to-workflow') {
-        const targetWorkflowAsset = externalAssetList.find((asset) => asset.type === 'workflow' && asset.id === originTargetWorkflowId);
-        if (targetWorkflowAsset) {
-          targetWorkflowId = targetWorkflowAsset.appId;
+      // 如果有指定的资产列表，先从资产列表检查
+      if (isArray(externalAssetList) && externalAssetList.length > 0) {
+        const originWorkflowAsset = externalAssetList.find((asset) => asset.type === 'workflow' && asset.id === originOriginWorkflowId);
+        if (originWorkflowAsset) {
+          originWorkflowId = originWorkflowAsset.appId;
         } else {
           throw new Error(`工作流 ${originOriginWorkflowId} 不存在于资产列表中`);
         }
+
+        if (type === 'to-workflow') {
+          const targetWorkflowAsset = externalAssetList.find((asset) => asset.type === 'workflow' && asset.id === originTargetWorkflowId);
+          if (targetWorkflowAsset) {
+            targetWorkflowId = targetWorkflowAsset.appId;
+          } else {
+            throw new Error(`工作流 ${targetWorkflowId} 不存在于资产列表中`);
+          }
+        }
+      } else {
+        // 检查 forkFromId
+        if (originWorkflow?.forkFromId) {
+          // 获取应用市场版本信息
+          const appVersion = await this.marketplaceService.getAppVersionById(originWorkflow.forkFromId);
+          if (!appVersion) {
+            throw new Error(`找不到工作流 ${originOriginWorkflowId} 对应的应用市场应用`);
+          }
+          originWorkflowId = appVersion.appId;
+        } else {
+          throw new Error(`工作流 ${originOriginWorkflowId} 没有发布到市场`);
+        }
+
+        if (type === 'to-workflow') {
+          const tagetWorkflowAppVersionId = await this.marketplaceService.getAppVersionById(targetWorkflow.forkFromId);
+          if (tagetWorkflowAppVersionId) {
+            targetWorkflowId = tagetWorkflowAppVersionId.appId;
+          } else {
+            throw new Error(`找不到工作流 ${originTargetWorkflowId} 对应的应用市场应用`);
+          }
+        }
       }
     } else {
-      // 检查 forkFromId
-      if (originWorkflow?.forkFromId) {
-        // 获取应用市场版本信息
-        const appVersion = await this.marketplaceService.getAppVersionById(originWorkflow.forkFromId);
-        if (!appVersion) {
-          throw new Error(`找不到工作流 ${originOriginWorkflowId} 对应的应用市场应用`);
-        }
-        originWorkflowId = appVersion.appId;
-      } else {
-        throw new Error(`工作流 ${originOriginWorkflowId} 没有发布到市场`);
+      // 获取目标工作流的信息
+      const targetWorkflow = type === 'to-workflow' ? await this.workflowCrudService.getWorkflowDef(originTargetWorkflowId) : undefined;
+
+      if (!targetWorkflow && type === 'to-workflow') {
+        throw new NotFoundException('目标工作流不存在');
       }
 
-      if (type === 'to-workflow') {
-        const tagetWorkflowAppVersionId = await this.marketplaceService.getAppVersionById(targetWorkflow.forkFromId);
-        if (tagetWorkflowAppVersionId) {
-          targetWorkflowId = tagetWorkflowAppVersionId.appId;
-        } else {
-          throw new Error(`找不到工作流 ${originTargetWorkflowId} 对应的应用市场应用`);
+      // 如果有指定的资产列表，先从资产列表检查
+      if (isArray(externalAssetList) && externalAssetList.length > 0) {
+        if (type === 'to-workflow') {
+          const targetWorkflowAsset = externalAssetList.find((asset) => asset.type === 'workflow' && asset.id === originTargetWorkflowId);
+          if (targetWorkflowAsset) {
+            targetWorkflowId = targetWorkflowAsset.appId;
+          } else {
+            throw new Error(`工作流 ${targetWorkflowId} 不存在于资产列表中`);
+          }
+        }
+      } else {
+        if (type === 'to-workflow') {
+          const tagetWorkflowAppVersionId = await this.marketplaceService.getAppVersionById(targetWorkflow.forkFromId);
+          if (tagetWorkflowAppVersionId) {
+            targetWorkflowId = tagetWorkflowAppVersionId.appId;
+          } else {
+            throw new Error(`找不到工作流 ${originTargetWorkflowId} 对应的应用市场应用`);
+          }
         }
       }
     }
@@ -137,10 +173,10 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
    * 从快照中克隆工作流关联
    * 需要将市场中的 app id 映射为团队内的实际工作流 id
    */
-  public async cloneFromSnapshot(snapshot: WorkflowAssociationsEntity, teamId: string): Promise<AssetCloneResult> {
+  public async cloneFromSnapshot(snapshot: ExportedAllWorkflowAssociationEntity, teamId: string): Promise<AssetCloneResult> {
     const processedSnapshot = await this.processSnapshot(snapshot, teamId);
 
-    const newAssociation = await this.workflowAssociationService.createWorkflowAssociation(processedSnapshot['originWorkflowId'], teamId, processedSnapshot);
+    const newAssociation = await this.workflowAssociationService.createWorkflowAssociation(snapshot.scope === 'global' ? 'global' : processedSnapshot['originWorkflowId'], teamId, processedSnapshot);
 
     // 返回第一个关联的ID作为主要ID
     return {
@@ -149,9 +185,9 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
     };
   }
 
-  public async updateFromSnapshot(snapshot: WorkflowAssociationsEntity, teamId: string, userId: string, assetId: string): Promise<AssetUpdateResult> {
+  public async updateFromSnapshot(snapshot: ExportedAllWorkflowAssociationEntity, teamId: string, userId: string, assetId: string): Promise<AssetUpdateResult> {
     const processedSnapshot = await this.processSnapshot(snapshot, teamId);
-    await this.workflowAssociationService.updateWorkflowAssociation(assetId, teamId, processedSnapshot);
+    await this.workflowAssociationService.updateWorkflowAssociation(assetId, snapshot.scope, teamId, processedSnapshot);
     return { originalId: assetId };
   }
 
@@ -168,7 +204,7 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
     const updates = _.pick(association, ['displayName', 'description', 'enabled', 'mapper', 'iconUrl', 'sortIndex', 'type', 'extraData']);
 
     // 1. 处理 originWorkflowId
-    if (association.originWorkflowId && idMapping[association.originWorkflowId]) {
+    if (association.scope === 'specific' && association.originWorkflowId && idMapping[association.originWorkflowId]) {
       updates['originWorkflowId'] = idMapping[association.originWorkflowId];
       needsUpdate = true;
     }
@@ -181,7 +217,7 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
 
     // 如果有更新，保存更改
     if (needsUpdate) {
-      await this.workflowAssociationService.updateWorkflowAssociation(association.id, association.originWorkflow.teamId, updates);
+      await this.workflowAssociationService.updateWorkflowAssociation(association.id, association.scope, association.targetWorkflow.teamId, updates);
     }
   }
 
