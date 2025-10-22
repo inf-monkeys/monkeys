@@ -49,8 +49,8 @@ export class TldrawAgentV2Service {
         },
       };
 
-      // 处理请求
-      await this.bridgeService.processRequest(sessionId, request, agentCallbacks);
+      // 处理请求 - 使用流式处理
+      await this.bridgeService.processStreamRequest(sessionId, request, agentCallbacks);
 
     } catch (error) {
       this.logger.error(`Stream processing failed for session ${sessionId}:`, error);
@@ -71,6 +71,13 @@ export class TldrawAgentV2Service {
   }
 
   /**
+   * 获取会话信息
+   */
+  getSession(sessionId: string) {
+    return this.bridgeService.getSession(sessionId);
+  }
+
+  /**
    * 停止会话
    */
   async stopSession(sessionId: string): Promise<void> {
@@ -84,12 +91,6 @@ export class TldrawAgentV2Service {
     this.bridgeService.updateSessionEditor(sessionId, editor);
   }
 
-  /**
-   * 获取会话状态
-   */
-  getSession(sessionId: string) {
-    return this.bridgeService.getSession(sessionId);
-  }
 
   /**
    * 取消会话

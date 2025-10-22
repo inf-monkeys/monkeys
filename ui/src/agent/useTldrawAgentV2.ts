@@ -35,8 +35,14 @@ export function useTldrawAgentV2(editor: Editor | null): TldrawAgentV2API | null
   const agentApi = useMemo(() => {
     if (!editor) return null;
 
-    const push = (role: 'user' | 'assistant' | 'system', content: string) =>
-      setHistory((h) => [...h, { role, content, timestamp: Date.now() }]);
+    const push = (role: 'user' | 'assistant' | 'system', content: string) => {
+      console.log('push called:', { role, content });
+      setHistory((h) => {
+        const newHistory = [...h, { role, content, timestamp: Date.now() }];
+        console.log('History after push:', newHistory.length, 'messages');
+        return newHistory;
+      });
+    };
 
     const resolveServerBase = async (): Promise<string | null> => {
       if (serverBaseRef.current) return serverBaseRef.current;
@@ -108,8 +114,10 @@ export function useTldrawAgentV2(editor: Editor | null): TldrawAgentV2API | null
       };
 
       const upsertAssistantMessage = (message: string, replace = false) => {
+        console.log('upsertAssistantMessage called:', { message, replace, streamingIdx: streamingIdxRef.current });
         setHistory((h) => {
           const newHistory = [...h];
+          console.log('Current history length:', h.length, 'streamingIdx:', streamingIdxRef.current);
           if (streamingIdxRef.current !== null && newHistory[streamingIdxRef.current]) {
             if (replace) {
               newHistory[streamingIdxRef.current] = {
@@ -122,6 +130,9 @@ export function useTldrawAgentV2(editor: Editor | null): TldrawAgentV2API | null
                 content: newHistory[streamingIdxRef.current].content + message,
               };
             }
+            console.log('Updated message content:', newHistory[streamingIdxRef.current].content);
+          } else {
+            console.log('No streaming message found to update');
           }
           return newHistory;
         });
@@ -140,8 +151,11 @@ export function useTldrawAgentV2(editor: Editor | null): TldrawAgentV2API | null
         const screenshot = await captureViewportImage();
         context.screenshot = screenshot;
 
-        const sessionId = generateSessionId();
-        sessionIdRef.current = sessionId;
+        // 如果已有会话ID，复用现有会话；否则创建新会话
+        const sessionId = sessionIdRef.current || generateSessionId();
+        if (!sessionIdRef.current) {
+          sessionIdRef.current = sessionId;
+        }
 
         setHistory((h) => {
           streamingIdxRef.current = h.length;
@@ -216,16 +230,22 @@ export function useTldrawAgentV2(editor: Editor | null): TldrawAgentV2API | null
             try {
               const json = JSON.parse(dataStr);
 
-              if (eventName === 'delta' && json.content) {
+              if (eventName === 'message_chunk' && json.content) {
+                console.log('Message chunk received:', json.content);
                 upsertAssistantMessage(json.content);
-              } else if (eventName === 'action' && json.action) {
+              } else if (eventName === 'tool_calls' && json.toolCalls) {
                 // 处理工具调用
-                console.log('Tool action received:', json.action);
+                console.log('Tool calls received:', json.toolCalls);
                 // 这里可以添加工具调用的可视化反馈
-              } else if (eventName === 'done') {
+              } else if (eventName === 'response_complete') {
+                console.log('Response complete received:', json.finalContent);
+                if (json.finalContent) {
+                  upsertAssistantMessage(json.finalContent, true);
+                }
                 finalize();
               } else if (eventName === 'error') {
-                upsertAssistantMessage(`错误：${json.message}`, true);
+                console.log('Error received:', json.error || json.message);
+                upsertAssistantMessage(`错误：${json.error || json.message}`, true);
                 finalize();
               }
             } catch {
@@ -267,14 +287,14 @@ export function useTldrawAgentV2(editor: Editor | null): TldrawAgentV2API | null
     };
 
     return {
-      history: historyRef.current,
+      history,
       isStreaming,
       push,
       request,
       cancel,
       reset,
     };
-  }, [editor]);
+  }, [editor, history, isStreaming]);
 
   return agentApi;
 }

@@ -103,7 +103,10 @@ export class TldrawAgentV2BridgeService {
       const tldrawTools = this.toolsRegistry.getAllTools();
       
       // 为agent-v2注册tldraw工具
-      await this.registerTldrawToolsForAgent(agentId, tldrawTools);
+      await this.registerTldrawToolsForAgent(agentId, tldrawTools, session.teamId);
+      
+      // 确保tldraw工具已注册到全局工具注册表
+      await this.ensureTldrawToolsInGlobalRegistry(tldrawTools, session.teamId);
 
       // 构建系统提示词
       const systemPrompt = this.buildTldrawSystemPrompt(tldrawTools);
@@ -116,8 +119,10 @@ export class TldrawAgentV2BridgeService {
         callbacks.onMessage || (() => {}),
         callbacks.onToolCall || (() => {}),
         async (tool, result) => {
-          // 处理tldraw工具调用
-          await this.handleTldrawToolCall(session, tool, result);
+          // 只处理tldraw工具调用，忽略其他工具
+          if (this.isTldrawTool(tool)) {
+            await this.handleTldrawToolCall(session, tool, result);
+          }
           callbacks.onToolResult?.(tool, result);
         },
         callbacks.onComplete || (() => {}),
@@ -129,6 +134,71 @@ export class TldrawAgentV2BridgeService {
 
     } catch (error) {
       this.logger.error(`Error processing tldraw agent request:`, error);
+      callbacks.onError?.(error as Error);
+    }
+  }
+
+  /**
+   * 处理tldraw agent流式请求
+   */
+  async processStreamRequest(
+    sessionId: string,
+    request: TldrawAgentV2Request,
+    callbacks: TldrawAgentV2Callbacks = {},
+  ): Promise<void> {
+    const session = this.activeSessions.get(sessionId);
+    if (!session || !session.isActive) {
+      throw new Error(`Session ${sessionId} not found or inactive`);
+    }
+
+    try {
+      // 确保Agent存在，如果不存在则创建默认Agent
+      const agentId = await this.ensureAgentExists(session.agentId, session.teamId, session.userId);
+
+      // 获取tldraw专用工具
+      const tldrawTools = this.toolsRegistry.getAllTools();
+      
+      // 为agent-v2注册tldraw工具
+      await this.registerTldrawToolsForAgent(agentId, tldrawTools, session.teamId);
+      
+      // 确保tldraw工具已注册到全局工具注册表
+      await this.ensureTldrawToolsInGlobalRegistry(tldrawTools, session.teamId);
+
+      // 构建系统提示词
+      const systemPrompt = this.buildTldrawSystemPrompt(tldrawTools);
+
+      // 启动agent-v2流式会话 - 使用与agent-v2控制器相同的方式
+      const agentContext = await this.agentV2Service.startNewSession(
+        agentId,
+        session.userId,
+        request.message,
+        callbacks.onMessage || (() => {}),
+        callbacks.onToolCall || (() => {}),
+        async (tool, result) => {
+          // 只处理tldraw工具调用，忽略其他工具
+          if (this.isTldrawTool(tool)) {
+            await this.handleTldrawToolCall(session, tool, result);
+          }
+          callbacks.onToolResult?.(tool, result);
+        },
+        callbacks.onComplete || (() => {}),
+        callbacks.onError || (() => {}),
+        // 添加followup question回调
+        async (question: string, suggestions?: Array<{ answer: string; mode?: string }>) => {
+          return new Promise<string>((resolve, reject) => {
+            // 对于tldraw场景，我们暂时不处理followup questions
+            // 直接返回一个默认响应
+            this.logger.log(`Followup question received: ${question}`);
+            resolve('继续处理');
+          });
+        },
+      );
+
+      // 设置自定义工具处理器
+      this.setupTldrawToolHandler(agentContext, session);
+
+    } catch (error) {
+      this.logger.error(`Error processing tldraw agent stream request:`, error);
       callbacks.onError?.(error as Error);
     }
   }
@@ -172,7 +242,7 @@ export class TldrawAgentV2BridgeService {
       description: '专业的tldraw画布助手，能够创建、修改和操作画布上的图形元素',
       iconUrl: '/icons/tldraw-agent.png',
       config: {
-        model: 'gpt-4o-mini',
+        model: 'gemini-2.5-flash',
         temperature: 0.7,
         maxTokens: 4000,
         systemPrompt: '你是一个专业的tldraw画布助手，能够帮助用户创建、修改和操作画布上的图形元素。',
@@ -205,13 +275,28 @@ export class TldrawAgentV2BridgeService {
   /**
    * 为agent注册tldraw工具
    */
-  private async registerTldrawToolsForAgent(agentId: string, tools: any[]): Promise<void> {
-    // 这里需要调用agent-v2的工具注册API
-    // 由于agent-v2的工具注册机制可能需要调整，这里提供一个接口
+  private async registerTldrawToolsForAgent(agentId: string, tools: any[], teamId?: string): Promise<void> {
     this.logger.log(`Registering ${tools.length} tldraw tools for agent ${agentId}`);
     
-    // TODO: 实现具体的工具注册逻辑
-    // 可能需要修改AgentV2Service来支持动态工具注册
+    try {
+      // 获取工具名称列表
+      const toolNames = tools.map(tool => tool.name);
+      
+      // 使用agent-v2的工具更新API来注册工具
+      const result = await this.agentV2Service.updateAgentTools(agentId, teamId || 'system', {
+        enabled: true,
+        toolNames: toolNames,
+      });
+      
+      if (result.success) {
+        this.logger.log(`Successfully registered ${toolNames.length} tldraw tools for agent ${agentId}`);
+      } else {
+        this.logger.warn(`Failed to register tldraw tools for agent ${agentId}: ${result.error}`);
+      }
+    } catch (error) {
+      this.logger.error(`Error registering tldraw tools for agent ${agentId}:`, error);
+      // 不抛出错误，继续执行
+    }
   }
 
   /**
@@ -311,6 +396,37 @@ Remember: You are a powerful drawing assistant. Use your tools effectively to he
     if (session) {
       session.editor = editor;
       this.logger.log(`Updated editor for session: ${sessionId}`);
+    }
+  }
+
+  /**
+   * 判断是否是tldraw专用工具
+   */
+  private isTldrawTool(tool: any): boolean {
+    if (!tool || !tool._type) {
+      return false;
+    }
+    
+    // 获取所有tldraw工具名称
+    const tldrawTools = this.toolsRegistry.getAllTools();
+    const tldrawToolNames = tldrawTools.map(t => t.name);
+    
+    // 检查工具类型是否在tldraw工具列表中
+    return tldrawToolNames.includes(tool._type);
+  }
+
+  /**
+   * 确保tldraw工具已注册到全局工具注册表
+   */
+  private async ensureTldrawToolsInGlobalRegistry(tools: any[], teamId: string): Promise<void> {
+    this.logger.log(`Ensuring ${tools.length} tldraw tools are registered in global registry for team ${teamId}`);
+    
+    for (const tool of tools) {
+      try {
+        await this.toolsRegistry.registerTool(tool, teamId);
+      } catch (error) {
+        this.logger.warn(`Failed to register tool ${tool.name} to global registry:`, error);
+      }
     }
   }
 }

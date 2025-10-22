@@ -33,6 +33,7 @@ export class TldrawAgentV2Controller {
   async stream(@Request() req: IRequest, @Body() body: StreamRequestBody, @Res() res: Response) {
     let sessionId = body.sessionId || `tldraw-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     let closed = false;
+    let isExistingSession = false;
 
     const abort = () => {
       if (closed) return;
@@ -92,14 +93,30 @@ export class TldrawAgentV2Controller {
         return;
       }
       
-      // 始终使用认证后的真实用户信息，忽略前端发送的假值
-      // 系统会自动在当前用户的团队下创建一个默认的tldraw Agent
-      const tempSessionId = await this.service.startSession(
-        'default-tldraw-agent',
-        userId,
-        teamId
-      );
-      sessionId = tempSessionId;
+      // 检查是否是现有会话
+      if (body.sessionId) {
+        const existingSession = this.service.getSession(body.sessionId);
+        if (existingSession && existingSession.isActive) {
+          isExistingSession = true;
+          this.logger.log(`Continuing existing session: ${body.sessionId}`);
+        } else {
+          this.logger.log(`Session ${body.sessionId} not found or inactive, creating new session`);
+        }
+      }
+
+      // 如果不是现有会话，创建新会话
+      if (!isExistingSession) {
+        const tempSessionId = await this.service.startSession(
+          'default-tldraw-agent',
+          userId,
+          teamId
+        );
+        sessionId = tempSessionId;
+        this.logger.log(`Created new session: ${sessionId}`);
+      }
+
+      // 发送会话开始事件
+      writeEvent('session_start', { sessionId });
 
       await this.service.startStream(
         sessionId,
@@ -112,15 +129,18 @@ export class TldrawAgentV2Controller {
           onInfo: (message) => writeEvent('info', { message }),
           onDelta: (payload) => {
             if (payload.content) {
-              writeEvent('delta', { content: payload.content });
+              writeEvent('message_chunk', { content: payload.content });
             }
             if (payload.action) {
-              writeEvent('action', { action: payload.action });
+              writeEvent('tool_calls', { toolCalls: [payload.action] });
             }
           },
-          onDone: (message) => writeEvent('done', { message }),
+          onDone: (message) => {
+            writeEvent('response_complete', { finalContent: message });
+            // 不要立即关闭连接，让心跳保持连接
+          },
           onError: (message) => {
-            writeEvent('error', { message });
+            writeEvent('error', { error: message });
             abort();
           },
         },
@@ -130,8 +150,9 @@ export class TldrawAgentV2Controller {
       abort();
     }
 
-    clearInterval(heartbeat);
-    abort();
+    // 不要立即关闭连接，让心跳保持连接
+    // clearInterval(heartbeat);
+    // abort();
   }
 
   @Post('start-session')
