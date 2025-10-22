@@ -10,6 +10,7 @@ import {
   Updater,
   useReactTable,
 } from '@tanstack/react-table';
+import { useDebounceEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import _, { get, isNull } from 'lodash';
 import { CircleSlash, MoreHorizontal } from 'lucide-react';
@@ -128,8 +129,23 @@ export const UgcView = <E extends object>({
   // filter
   const [filter, setFilter] = useState<Partial<IListUgcDto['filter']>>({});
 
-  // search
-  const [search, setSearch] = useState<string>('');
+  // search with debounce
+  const [searchInput, setSearchInput] = useState<string>(''); // 用户输入的即时值
+  const [search, setSearch] = useState<string>(''); // 防抖后的搜索值
+
+  // 防抖：用户停止输入 400ms 后才触发搜索
+  useDebounceEffect(
+    () => {
+      setSearch(searchInput);
+      // 搜索时重置分页到第一页
+      setPagination((prev) => ({
+        ...prev,
+        pageIndex: 0,
+      }));
+    },
+    [searchInput],
+    { wait: 500 },
+  );
 
   // 左侧分组选中状态
   const [selectedRuleId, setSelectedRuleId] = useState<string>();
@@ -336,8 +352,8 @@ export const UgcView = <E extends object>({
           assetType={assetType}
           isMarket={isMarket}
           subtitle={subtitle}
-          search={search}
-          onSearchChange={setSearch}
+          search={searchInput}
+          onSearchChange={setSearchInput}
           filterButtonProps={{
             filter,
             onChange: setFilter,
