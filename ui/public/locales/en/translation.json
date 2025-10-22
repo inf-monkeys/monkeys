@@ -4360,6 +4360,34 @@
           "loading": "Generating Prefer App ID..."
         }
       }
+    },
+    "detail": {
+      "title": "Asset Details",
+      "back": "Back",
+      "info": "Asset Information",
+      "name": "Name",
+      "fileSize": "File Size",
+      "fileFormat": "File Format",
+      "creator": "Creator",
+      "uploadTime": "Upload Time",
+      "updateTime": "Update Time",
+      "tags": "Tags",
+      "noTags": "No tags",
+      "unknownName": "Unknown Name",
+      "unknownSize": "Unknown Size",
+      "unknownFormat": "Unknown Format",
+      "unknownCreator": "Unknown Creator",
+      "unknownTime": "Unknown Time",
+      "conversion": "Conversion",
+      "imageToText": "Image",
+      "startConversion": "Start Conversion",
+      "previewNotSupported": "Preview not supported",
+      "conversionTypes": {
+        "text": "Text",
+        "symbol-summary": "Symbol Summary",
+        "3d-model": "3D Model",
+        "neural-model": "Neural Model"
+      }
     }
   }
 }

@@ -16,12 +16,17 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/u
 import { Form } from '@/components/ui/form.tsx';
 import { DEFAULT_WORKFLOW_ASSOCIATION_LUCIDE_ICON_URL } from '@/consts/icons';
 import { IWorkflowAssociationForEditor, workflowAssociationSchema } from '@/schema/workspace/workflow-association';
-import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
 
-interface IWorkflowAssociationEditorProps {}
+interface IWorkflowAssociationEditorProps {
+  scope?: 'global' | 'specific';
+  workflowId?: string;
+}
 
-export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps> = () => {
+export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps> = ({
+  scope = 'specific',
+  workflowId,
+}) => {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
@@ -42,7 +47,7 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
     defaultValues,
   });
 
-  const { workflowId } = useFlowStore();
+  const submitWorkflowId = scope === 'global' ? 'global' : workflowId;
 
   const [aid, setAid] = useState<string | undefined>();
 
@@ -70,15 +75,17 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
   const handleSubmit = form.handleSubmit(
     (data) => {
       if (mode === 'update') {
-        if (!workflowId || !aid) {
+        if (!submitWorkflowId || !aid) {
           toast.warning(t('common.toast.loading'));
           return;
         }
-        toast.promise(updateWorkflowAssociation(workflowId, aid, data), {
+        toast.promise(updateWorkflowAssociation(submitWorkflowId, aid, data), {
           loading: t('common.update.loading'),
           error: t('common.update.error'),
           success: () => {
-            void mutate((key) => typeof key === 'string' && key.startsWith(`/api/workflow/${workflowId}/associations`));
+            void mutate(
+              (key) => typeof key === 'string' && key.startsWith(`/api/workflow/${submitWorkflowId}/associations`),
+            );
             setAid(undefined);
             setMode('create');
             setOpen(false);
@@ -88,11 +95,17 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
         });
       }
       if (mode === 'create') {
-        toast.promise(createWorkflowAssociation(workflowId, data), {
+        if (!submitWorkflowId) {
+          toast.warning(t('common.toast.loading'));
+          return;
+        }
+        toast.promise(createWorkflowAssociation(submitWorkflowId, data), {
           loading: t('common.create.loading'),
           error: t('common.create.error'),
           success: () => {
-            void mutate((key) => typeof key === 'string' && key.startsWith(`/api/workflow/${workflowId}/associations`));
+            void mutate(
+              (key) => typeof key === 'string' && key.startsWith(`/api/workflow/${submitWorkflowId}/associations`),
+            );
             setAid(undefined);
             setMode('create');
             setOpen(false);
@@ -138,7 +151,7 @@ export const WorkflowAssociationEditor: React.FC<IWorkflowAssociationEditorProps
               }
             }}
           >
-            <AssociationEditorFields form={form} workflowId={workflowId} />
+            <AssociationEditorFields form={form} workflowId={workflowId} scope={scope} />
             <DialogFooter>
               <div className="flex items-center gap-2">
                 <Button ref={submitButtonRef} type="submit" variant="outline">

@@ -46,7 +46,7 @@ export const WorkflowAssociationEditorDialog: React.FC<IWorkflowAssociationEdito
         </DialogContent>
         <DialogTrigger asChild>{children}</DialogTrigger>
       </Dialog>
-      <WorkflowAssociationEditor />
+      <WorkflowAssociationEditor workflowId={workflowId} />
     </>
   );
 };

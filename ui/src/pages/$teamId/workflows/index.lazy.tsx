@@ -14,6 +14,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { cloneWorkflow, deleteWorkflow } from '@/apis/workflow';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { GlobalWorkflowAssociationEditorDialog } from '@/components/layout/ugc-pages/apps/association';
 import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
 import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
 import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
@@ -276,6 +277,7 @@ export const Workflows: React.FC = () => {
         }}
         subtitle={
           <>
+            <GlobalWorkflowAssociationEditorDialog />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="small" icon={<Import />}>

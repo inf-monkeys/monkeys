@@ -25,12 +25,14 @@ interface IFieldPreferAppIdProps<T extends IFieldPreferAppIdPropsBase> extends R
   form: UseFormReturn<T>;
   assetType: AssetType;
   workflowId?: string;
+  scope?: 'global' | 'specific';
 }
 
 export const FieldPreferAppIdInput = <T extends IFieldPreferAppIdPropsBase>({
   form,
   assetType,
   workflowId,
+  scope = 'specific',
 }: IFieldPreferAppIdProps<T>) => {
   const { t } = useTranslation();
 
@@ -39,16 +41,25 @@ export const FieldPreferAppIdInput = <T extends IFieldPreferAppIdPropsBase>({
 
     if (assetType === 'workflow') {
       enDisplayName = getI18nContent(form.getValues('displayName' as Path<T>), '', 'en') ?? '';
-    } else if (assetType === 'workflow-association' && workflowId) {
-      const originWorkflow = await getWorkflow(workflowId);
-      if (form.getValues('type' as Path<T>) === 'to-workflow') {
-        const targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
-        enDisplayName =
-          getI18nContent(originWorkflow?.displayName, '', 'en') +
-          '-to-' +
-          getI18nContent(targetWorkflow?.displayName, '', 'en');
-      } else {
-        enDisplayName = getI18nContent(originWorkflow?.displayName, '', 'en') + '-to-board';
+    } else if (assetType === 'workflow-association') {
+      if (scope === 'specific' && workflowId) {
+        const originWorkflow = await getWorkflow(workflowId);
+        if (form.getValues('type' as Path<T>) === 'to-workflow') {
+          const targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
+          enDisplayName =
+            getI18nContent(originWorkflow?.displayName, '', 'en') +
+            '-to-' +
+            getI18nContent(targetWorkflow?.displayName, '', 'en');
+        } else {
+          enDisplayName = getI18nContent(originWorkflow?.displayName, '', 'en') + '-to-board';
+        }
+      } else if (scope === 'global') {
+        if (form.getValues('type' as Path<T>) === 'to-workflow') {
+          const targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
+          enDisplayName = 'global-to-' + getI18nContent(targetWorkflow?.displayName, '', 'en');
+        } else {
+          enDisplayName = 'global-to-board';
+        }
       }
     } else if (assetType === 'design-association') {
       enDisplayName = 'to-' + getI18nContent(form.getValues('displayName' as Path<T>), '', 'en');

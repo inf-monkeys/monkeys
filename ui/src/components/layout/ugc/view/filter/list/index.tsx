@@ -158,7 +158,14 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
             value={searchValue}
             onChange={setSearchValue}
           />
-          <UgcViewFilterButton assetType={assetType} assetKey={assetKey} {...filterButtonProps} defaultAddToFavourite />
+          <div className="flex h-full py-1">
+            <UgcViewFilterButton
+              assetType={assetType}
+              assetKey={assetKey}
+              {...filterButtonProps}
+              defaultAddToFavourite
+            />
+          </div>
         </div>
       )}
       <div className="ml-1 flex flex-col gap-2">

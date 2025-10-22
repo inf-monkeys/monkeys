@@ -144,21 +144,8 @@ export default class VinesUpload<M extends Meta, B extends Body> extends BasePlu
   }
 
   private async updateFileSuccessState(file: UppyFile<M, B>, uploadURL: string) {
-    this.uppy.emit('upload-success', file, {
-      status: 200,
-      body: { url: uploadURL } as unknown as B,
-      uploadURL,
-    });
-
-    const currentFile = this.uppy.getFile(file.id);
-    this.uppy.setFileState(file.id, {
-      ...currentFile,
-      progress: { ...currentFile.progress, uploadComplete: true },
-      meta: { ...currentFile.meta, remoteUrl: uploadURL, isUploading: false },
-      isRemote: true,
-    });
-
-    await createMediaFile({
+    // 先创建媒体文件记录，获取返回的数据（包含 id）
+    const mediaFileData = await createMediaFile({
       type: file.type as VinesResourceType,
       md5: file.meta.md5 as string,
       displayName: file.name!,
@@ -167,6 +154,21 @@ export default class VinesUpload<M extends Meta, B extends Body> extends BasePlu
       tags: [],
       categoryIds: [],
       size: file.size!,
+    });
+
+    // 将媒体文件数据包含在 response 中
+    this.uppy.emit('upload-success', file, {
+      status: 200,
+      body: { url: uploadURL, data: mediaFileData } as unknown as B,
+      uploadURL,
+    });
+
+    const currentFile = this.uppy.getFile(file.id);
+    this.uppy.setFileState(file.id, {
+      ...currentFile,
+      progress: { ...currentFile.progress, uploadComplete: true },
+      meta: { ...currentFile.meta, remoteUrl: uploadURL, isUploading: false, mediaFileId: mediaFileData?.id },
+      isRemote: true,
     });
   }
 

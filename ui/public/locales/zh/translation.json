@@ -4338,6 +4338,34 @@
           "loading": "生成偏好应用 ID..."
         }
       }
+    },
+    "detail": {
+      "title": "资产详情",
+      "back": "返回",
+      "info": "资产信息",
+      "name": "名称",
+      "fileSize": "文件大小",
+      "fileFormat": "文件格式",
+      "creator": "创建人",
+      "uploadTime": "上传时间",
+      "updateTime": "更新时间",
+      "tags": "标签",
+      "noTags": "暂无标签",
+      "unknownName": "未知名称",
+      "unknownSize": "未知大小",
+      "unknownFormat": "未知格式",
+      "unknownCreator": "未知创建者",
+      "unknownTime": "未知时间",
+      "conversion": "转换",
+      "imageToText": "图片",
+      "startConversion": "开始转换",
+      "previewNotSupported": "暂不支持预览",
+      "conversionTypes": {
+        "text": "文本",
+        "symbol-summary": "符号概括",
+        "3d-model": "3D模型",
+        "neural-model": "神经模型"
+      }
     }
   }
 }

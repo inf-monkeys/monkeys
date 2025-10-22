@@ -47,6 +47,10 @@ export class MediaFileService {
     return data;
   }
 
+  public async updateMedia(id: string, teamId: string, updates: { iconUrl?: string; displayName?: string; description?: string }) {
+    return await this.mediaRepository.updateMedia(id, teamId, updates);
+  }
+
   /**
    * 获取媒体文件的公网可访问 URL (更健壮的版本)
    * @param media 媒体文件实体

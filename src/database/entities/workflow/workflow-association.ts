@@ -99,3 +99,7 @@ export type UpdateAndCreateWorkflowAssociation = Pick<
   WorkflowAssociationsEntity,
   'displayName' | 'description' | 'enabled' | 'mapper' | 'targetWorkflowId' | 'iconUrl' | 'sortIndex' | 'type' | 'extraData' | 'preferAppId'
 >;
+
+export type ExportedWorkflowAssociationEntity = WorkflowAssociationsEntity & {
+  scope: 'specific';
+};

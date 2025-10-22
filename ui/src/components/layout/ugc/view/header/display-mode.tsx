@@ -19,6 +19,9 @@ import {
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
+// 支持文件夹视图的 assetType 白名单
+const FOLDER_VIEW_WHITELIST = ['media-data'];
+
 interface IUgcHeaderDisplayModeButtonProps extends React.ComponentPropsWithoutRef<'div'> {
   assetKey: string;
 }
@@ -27,6 +30,10 @@ export const UgcHeaderDisplayModeButton: React.FC<IUgcHeaderDisplayModeButtonPro
   const { t } = useTranslation();
 
   const team = useVinesTeam();
+
+  const assetType = assetKey.includes(':') ? assetKey.split(':')[1] : assetKey;
+
+  const supportsFolderView = FOLDER_VIEW_WHITELIST.includes(assetType);
 
   const [displayModeStorage, setDisplayModeStorage] = useLocalStorage<IDisplayModeStorage>(
     `vines-ui-asset-display-mode`,
@@ -91,9 +98,11 @@ export const UgcHeaderDisplayModeButton: React.FC<IUgcHeaderDisplayModeButtonPro
           <DropdownMenuRadioItem value="card">
             {t('components.layout.ugc.view.header.display-mode.options.card')}
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="folder">
-            {t('components.layout.ugc.view.header.display-mode.options.folder')}
-          </DropdownMenuRadioItem>
+          {supportsFolderView && (
+            <DropdownMenuRadioItem value="folder">
+              {t('components.layout.ugc.view.header.display-mode.options.folder')}
+            </DropdownMenuRadioItem>
+          )}
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>

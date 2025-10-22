@@ -56,6 +56,33 @@ export class MediaFileRepository {
     };
   }
 
+  public async updateMedia(id: string, teamId: string, updates: { iconUrl?: string; displayName?: string; description?: string }) {
+    const media = await this.mediaFileRepository.findOne({
+      where: {
+        id,
+        teamId,
+        isDeleted: false,
+      },
+    });
+
+    if (!media) {
+      return null;
+    }
+
+    if (updates.iconUrl !== undefined) {
+      media.iconUrl = updates.iconUrl;
+    }
+    if (updates.displayName !== undefined) {
+      media.displayName = updates.displayName;
+    }
+    if (updates.description !== undefined) {
+      media.description = updates.description;
+    }
+
+    media.updatedTimestamp = Date.now();
+    return await this.mediaFileRepository.save(media);
+  }
+
   public async deleteMedia(teamId: string, id: string) {
     const data = await this.mediaFileRepository.findOne({
       where: {

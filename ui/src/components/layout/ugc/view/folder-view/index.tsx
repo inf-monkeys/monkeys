@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { IAssetItem, IListUgcDto } from '@/apis/ugc/typings.ts';
 import { UgcViewFolderCard } from '@/components/layout/ugc/view/folder';
@@ -70,13 +70,18 @@ export const UgcViewFolderView = <E extends object>({
     };
 
     const getPreviewUrl = (item: any): string => {
+      // 优先使用 iconUrl（缩略图）
+      if (item?.iconUrl) {
+        return item.iconUrl;
+      }
+
       // 先检查文件类型
       const type = (item?.type || item?.mimeType || '') as string;
       const isImage = typeof type === 'string' && type.startsWith('image/');
 
-      // 如果是图片类型，优先使用URL
+      // 如果是图片类型，使用URL
       if (isImage) {
-        const url = item && (item.url || item.cover || item.iconUrl || item.thumbnail);
+        const url = item && (item.url || item.cover || item.thumbnail);
         if (url) {
           return url;
         }
