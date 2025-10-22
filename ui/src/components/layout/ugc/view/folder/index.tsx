@@ -70,11 +70,12 @@ export const UgcViewFolderCard: React.FC<IFolderCardProps> = ({
                   <AssetContentPreview asset={asset} isThumbnail={true} className="h-full w-full" />
                 </div>
               );
-            } else if (isImageFile(asset) && asset.url) {
-              // 图片文件显示图片
+            } else if (isImageFile(asset) && (asset.url || asset.iconUrl)) {
+              // 图片文件显示图片，优先使用 iconUrl（缩略图）
+              const imageUrl = asset.iconUrl || asset.url;
               return (
                 <div key={index} className="overflow-hidden rounded-md bg-gray-100" style={{ aspectRatio: '16/9' }}>
-                  <img src={asset.url} alt={`${folderName} 预览 ${index + 1}`} className="h-full w-full object-cover" />
+                  <img src={imageUrl} alt={`${folderName} 预览 ${index + 1}`} className="h-full w-full object-cover" />
                 </div>
               );
             } else {

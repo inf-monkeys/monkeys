@@ -9,6 +9,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BulkCreateMediaDto } from './dto/req/bulk-create-media.dto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
 import { TogglePinMediaDto } from './dto/req/toggle-pin-media.dto';
+import { UpdateMediaDto } from './dto/req/update-media.dto';
 import { MediaFileService } from './media.service';
 
 @ApiTags('Resources')
@@ -124,6 +125,24 @@ export class MediaFileCrudController {
     }
 
     return new SuccessResponse({ data });
+  }
+
+  @Put(':id')
+  @ApiOperation({
+    summary: '更新媒体文件',
+    description: '更新媒体文件的信息，如缩略图、显示名称等',
+  })
+  public async updateMedia(@Req() request: IRequest, @Param('id') id: string, @Body() updateDto: UpdateMediaDto) {
+    const { teamId } = request;
+
+    // 验证媒体文件是否存在且属于当前团队
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    const updatedMedia = await this.service.updateMedia(id, teamId, updateDto);
+    return new SuccessResponse({ data: updatedMedia });
   }
 
   @Put(':id/pin')

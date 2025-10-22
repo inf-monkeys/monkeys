@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { Canvas, useThree } from '@react-three/fiber';
@@ -8,9 +8,14 @@ import * as THREE from 'three';
 import { VinesLoading } from '@/components/ui/loading';
 import { cn } from '@/utils';
 
+export interface StepViewerRef {
+  captureScreenshot: () => Promise<Blob | null>;
+}
+
 interface StepViewerProps {
   url: string;
   className?: string;
+  onReady?: () => void;
 }
 
 interface ModelProps {
@@ -58,7 +63,9 @@ const Model: React.FC<ModelProps> = ({ geometry }) => {
 
   return (
     <group ref={groupRef}>
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <mesh geometry={geometry}>
+        {/* eslint-disable-next-line react/no-unknown-property */}
         <meshStandardMaterial color="#888888" side={THREE.DoubleSide} />
       </mesh>
     </group>
@@ -70,20 +77,59 @@ const Scene: React.FC<{ geometry: THREE.BufferGeometry | null }> = ({ geometry }
     <>
       <PerspectiveCamera makeDefault position={[5, 5, 5]} fov={50} />
       <OrbitControls enableDamping dampingFactor={0.05} />
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <ambientLight intensity={0.5} />
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <directionalLight position={[10, 10, 10]} intensity={1} />
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <directionalLight position={[-10, -10, -10]} intensity={0.5} />
       {geometry && <Model geometry={geometry} />}
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <gridHelper args={[10, 10]} />
     </>
   );
 };
 
-export const StepViewer: React.FC<StepViewerProps> = ({ url, className }) => {
+export const StepViewer = React.forwardRef<StepViewerRef, StepViewerProps>(({ url, className, onReady }, ref) => {
   const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const occtRef = useRef<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    captureScreenshot: async () => {
+      if (!canvasRef.current) {
+        return null;
+      }
+      try {
+        return new Promise<Blob | null>((resolve, reject) => {
+          const canvas = canvasRef.current;
+          if (!canvas) {
+            reject(new Error('Canvas not found'));
+            return;
+          }
+          try {
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  resolve(blob);
+                } else {
+                  reject(new Error('Failed to create blob from canvas'));
+                }
+              },
+              'image/png',
+              1.0,
+            );
+          } catch (error) {
+            reject(error);
+          }
+        });
+      } catch (error) {
+        return null;
+      }
+    },
+  }));
 
   useEffect(() => {
     let mounted = true;
@@ -171,6 +217,12 @@ export const StepViewer: React.FC<StepViewerProps> = ({ url, className }) => {
       } finally {
         if (mounted) {
           setLoading(false);
+          // 延迟调用 onReady，确保渲染完成
+          setTimeout(() => {
+            if (mounted && onReady) {
+              onReady();
+            }
+          }, 100);
         }
       }
     };
@@ -180,7 +232,7 @@ export const StepViewer: React.FC<StepViewerProps> = ({ url, className }) => {
     return () => {
       mounted = false;
     };
-  }, [url]);
+  }, [url, onReady]);
 
   if (loading) {
     return (
@@ -218,9 +270,20 @@ export const StepViewer: React.FC<StepViewerProps> = ({ url, className }) => {
         className,
       )}
     >
-      <Canvas>
+      <Canvas
+        gl={{
+          preserveDrawingBuffer: true, // 重要：保留绘图缓冲区，用于截图
+          antialias: true,
+        }}
+        onCreated={({ gl }) => {
+          // 保存 canvas 引用
+          canvasRef.current = gl.domElement;
+        }}
+      >
         <Scene geometry={geometry} />
       </Canvas>
     </div>
   );
-};
+});
+
+StepViewer.displayName = 'StepViewer';
