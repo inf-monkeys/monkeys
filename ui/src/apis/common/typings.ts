@@ -127,6 +127,7 @@ export type CustomizationWorkbench = {
 
 export type CustomizationUgc = {
   onItemClick: boolean;
+  subtitle: boolean;
 };
 
 export interface ISystemConfig {

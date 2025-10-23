@@ -131,6 +131,7 @@ export type CustomizationWorkbench = {
 
 export type CustomizationUgc = {
   onItemClick: boolean;
+  subtitle?: boolean;
 };
 
 export interface ServerConfig {
@@ -571,6 +572,7 @@ export const config: Config = {
       workbenchSidebarFormViewEmbed: readConfig('server.customization.workbenchSidebarFormViewEmbed', false),
       ugc: {
         onItemClick: readConfig('server.customization.ugc.onItemClick', true),
+        subtitle: readConfig('server.customization.ugc.subtitle', true),
       },
       uniImagePreview: readConfig('server.customization.uniImagePreview', false),
       imagePreviewStyle: readConfig('server.customization.imagePreviewStyle', false),
