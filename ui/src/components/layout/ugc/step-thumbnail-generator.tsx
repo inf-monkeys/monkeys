@@ -23,13 +23,39 @@ export const StepThumbnailGenerator: React.FC<StepThumbnailGeneratorProps> = ({ 
     }
 
     try {
-      // 等待一小段时间确保渲染完成
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // 等待更长时间确保3D模型完全渲染完成
+      // 从500ms增加到2000ms，给复杂模型更多时间
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
+      // 额外检查：如果viewer还在加载中，再等待一段时间
+      let retryCount = 0;
+      const maxRetries = 3;
+
+      while (retryCount < maxRetries) {
+        const blob = await viewerRef.current?.captureScreenshot();
+
+        if (blob && blob.size > 100) {
+          // 确保截图有实际内容（大于1KB）
+          console.log(`✅ [StepThumbnailGenerator] Screenshot captured successfully (${blob.size} bytes)`);
+          completedRef.current = true;
+          onComplete(blob);
+          return;
+        }
+
+        // 如果截图太小或为空，说明模型可能还没完全渲染
+        console.log(
+          `⏳ [StepThumbnailGenerator] Screenshot too small or empty (${blob?.size || 0} bytes), retrying...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        retryCount++;
+      }
+
+      // 最后一次尝试
       const blob = await viewerRef.current?.captureScreenshot();
-
       if (!blob) {
-        console.warn('⚠️ [StepThumbnailGenerator] Failed to capture screenshot');
+        console.warn('⚠️ [StepThumbnailGenerator] Failed to capture screenshot after retries');
+      } else {
+        console.log(`⚠️ [StepThumbnailGenerator] Screenshot captured but may be incomplete (${blob.size} bytes)`);
       }
 
       completedRef.current = true;

@@ -298,11 +298,12 @@ export const StepViewer = React.forwardRef<StepViewerRef, StepViewerProps>(({ ur
         if (mounted) {
           setLoading(false);
           // 延迟调用 onReady，确保渲染完成
+          // 增加延迟时间，让3D模型有更多时间完成渲染
           setTimeout(() => {
             if (mounted && onReady) {
               onReady();
             }
-          }, 100);
+          }, 500);
         }
       }
     };
