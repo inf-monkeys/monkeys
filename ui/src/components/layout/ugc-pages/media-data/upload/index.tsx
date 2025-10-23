@@ -36,7 +36,7 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
 
     // 检查是否有 STEP 文件需要生成缩略图
     files.forEach((file) => {
-      const fileName = file.name || '';
+      const fileName = (file.meta as any)?.originalName || file.name || '';
       const fileUrl = file.uploadURL || (file.meta.remoteUrl as string);
       const mediaFileId = (file.response as any)?.body?.data?.id || file.meta?.mediaFileId;
 

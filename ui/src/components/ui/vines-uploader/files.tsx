@@ -144,10 +144,10 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <p className="line-clamp-1 max-w-36 rounded border border-input bg-slate-1 p-1 text-sm leading-none shadow dark:bg-card-dark">
-                            {name}
+                            {(meta as any)?.originalName || name}
                           </p>
                         </TooltipTrigger>
-                        <TooltipContent>{name}</TooltipContent>
+                        <TooltipContent>{(meta as any)?.originalName || name}</TooltipContent>
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>

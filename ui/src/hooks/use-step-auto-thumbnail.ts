@@ -46,10 +46,17 @@ export function useStepAutoThumbnail() {
     try {
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substr(2, 9);
-      const thumbnailFileName = `step-thumbnails/${timestamp}_${randomId}_${fileName.replace(/\.(step|stp|glb)$/i, '')}.png`;
+
+      // 安全地处理文件名，移除扩展名并替换空格和特殊字符
+      const safeFileName = fileName
+        .replace(/\.(step|stp|glb)$/i, '') // 移除扩展名
+        .replace(/[^a-zA-Z0-9\-_]/g, '_') // 替换空格和特殊字符为下划线
+        .substring(0, 50); // 限制长度
+
+      const thumbnailFileName = `step-thumbnails/${timestamp}_${randomId}_${safeFileName}.png`;
 
       const formData = new FormData();
-      formData.append('file', blob, `${fileName.replace(/\.(step|stp|glb)$/i, '')}.png`);
+      formData.append('file', blob, `${safeFileName}.png`);
       formData.append('key', thumbnailFileName);
 
       const headers = vinesHeader({});

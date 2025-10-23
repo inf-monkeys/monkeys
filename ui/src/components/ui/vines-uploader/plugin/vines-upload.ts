@@ -145,10 +145,13 @@ export default class VinesUpload<M extends Meta, B extends Body> extends BasePlu
 
   private async updateFileSuccessState(file: UppyFile<M, B>, uploadURL: string) {
     // 先创建媒体文件记录，获取返回的数据（包含 id）
+    // 使用原始文件名，如果没有则使用生成的文件名
+    const displayName = (file.meta as any)?.originalName || file.name!;
+
     const mediaFileData = await createMediaFile({
       type: file.type as VinesResourceType,
       md5: file.meta.md5 as string,
-      displayName: file.name!,
+      displayName: displayName,
       source: VinesResourceSource.UPLOAD,
       url: uploadURL,
       tags: [],
