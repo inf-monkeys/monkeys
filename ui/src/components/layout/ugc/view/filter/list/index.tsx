@@ -72,13 +72,22 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   };
 
   const [activeIndex, setActiveIndex] = useState<string[]>([]);
+  const [isUserAction, setIsUserAction] = useState(false);
+
+  // 处理用户点击筛选规则
+  const handleRuleClick = (ruleId: string) => {
+    setIsUserAction(true);
+    setCurrentRuleId(ruleId);
+  };
 
   useEffect(() => {
+    // 只有当用户主动选择筛选规则时才应用筛选条件
+    // 避免覆盖用户手动设置的筛选条件
+    if (!isUserAction) return;
+
     if (currentRuleId === 'all') {
       onChange({});
-      return;
-    }
-    if (assetType === 'tools') {
+    } else if (assetType === 'tools') {
       onChange({
         cate: currentRuleId,
       });
@@ -94,7 +103,9 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
         onChange(rule.rules);
       }
     }
-  }, [currentRuleId]);
+
+    setIsUserAction(false);
+  }, [currentRuleId, assetFilterRules, isUserAction, onChange]);
 
   // special for tools
   const toolsData = useMemo(() => {
@@ -174,7 +185,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
             'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
             currentRuleId === 'all' ? 'border border-input bg-background text-accent-foreground shadow-sm' : 'p-[1px]',
           )}
-          onClick={() => setCurrentRuleId('all')}
+          onClick={() => handleRuleClick('all')}
         >
           <div className="flex w-full items-center justify-between px-global text-sm">
             <div className="flex items-center gap-2">
@@ -235,7 +246,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                             ? 'border border-input bg-background text-accent-foreground shadow-sm'
                             : 'p-[1px]',
                         )}
-                        onClick={() => setCurrentRuleId(id)}
+                        onClick={() => handleRuleClick(id)}
                         key={id}
                       >
                         <span className="pl-[calc(1rem+20px+0.5rem)] pr-global text-sm !font-normal">
@@ -288,7 +299,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                                       ? 'border border-input bg-background text-accent-foreground shadow-sm'
                                       : 'p-[1px]',
                                   )}
-                                  onClick={() => setCurrentRuleId(cateName)}
+                                  onClick={() => handleRuleClick(cateName)}
                                   key={cateName}
                                 >
                                   <span className="pl-[calc(1rem+20px+0.5rem)] pr-global text-sm !font-normal">
@@ -313,7 +324,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                   data={categoryList}
                   height={height}
                   currentRuleId={currentRuleId}
-                  onItemClicked={(ruleId) => setCurrentRuleId(ruleId)}
+                  onItemClicked={(ruleId) => handleRuleClick(ruleId)}
                   onItemDeleteClicked={
                     isMarket
                       ? undefined
@@ -322,7 +333,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                             loading: t('common.delete.loading'),
                             success: () => {
                               void mutateAssetFilterRules();
-                              (currentRuleId === ruleId || currentRuleId === ruleId) && setCurrentRuleId('all');
+                              (currentRuleId === ruleId || currentRuleId === ruleId) && handleRuleClick('all');
                               return t('common.delete.success');
                             },
                             error: t('common.delete.error'),

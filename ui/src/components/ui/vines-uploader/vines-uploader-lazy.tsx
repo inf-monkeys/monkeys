@@ -496,26 +496,15 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                           ? t('components.ui.updater.release-file')
                           : t('components.ui.updater.click-or-drag-area')}
                       </h1>
-                      {accept && accept.length > 8 ? (
-                        <div className="space-y-1">
-                          <div className="max-w-full overflow-hidden">
-                            <p className="break-words text-xs text-muted-foreground text-opacity-85">
-                              {accept.map((it) => `.${it}`).join('、')}{' '}
-                              {t('components.ui.updater.hint.max-size', { maxSize })}
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-muted-foreground text-opacity-85">
-                          {accept
-                            ? t('components.ui.updater.hint.accept.custom', {
-                                acceptString: accept.map((it) => `.${it}`).join('、'),
-                                count: max,
-                              })
-                            : t('components.ui.updater.hint.accept.any')}{' '}
-                          {t('components.ui.updater.hint.max-size', { maxSize })}
-                        </p>
-                      )}
+                      <p className="break-words text-xs text-muted-foreground text-opacity-85">
+                        {accept
+                          ? t('components.ui.updater.hint.accept.custom', {
+                              acceptString: accept.map((it) => `.${it}`).join('、'),
+                              count: max,
+                            })
+                          : t('components.ui.updater.hint.accept.any')}{' '}
+                        {t('components.ui.updater.hint.max-size', { maxSize })}
+                      </p>
                       {uploaderOrientation === 'horizontal' && (
                         <p className="text-xs text-muted-foreground text-opacity-85">
                           {t('components.ui.updater.paste-hint')}
