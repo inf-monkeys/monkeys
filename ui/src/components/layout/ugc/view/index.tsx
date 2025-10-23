@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AssetType, ToolCategory } from '@inf-monkeys/monkeys';
 import {
@@ -27,14 +27,12 @@ import {
   IDisplayModeStorage,
   IOperateAreaProps,
   ISortCondition,
-  ISortConditionStorage,
   IUgcRenderOptions,
 } from '@/components/layout/ugc/typings.ts';
 import { UgcViewCard } from '@/components/layout/ugc/view/card';
 import { UgcViewFolderView } from '@/components/layout/ugc/view/folder-view';
 import { UgcViewGalleryItem } from '@/components/layout/ugc/view/gallery';
 import { UgcViewHeader } from '@/components/layout/ugc/view/header';
-import { DEFAULT_SORT_CONDITION } from '@/components/layout/ugc/view/header/consts.ts';
 import { RenderTags } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
@@ -42,6 +40,7 @@ import { RemoteDataTable } from '@/components/ui/data-table/remote';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useMediaDataStore } from '@/store/useMediaDataStore';
 import { cn, getI18nContent } from '@/utils';
 
 import { DefaultTitleCell } from '../consts-cell';
@@ -95,12 +94,6 @@ export const UgcView = <E extends object>({
     [displayModeStorage, team.teamId, assetKey],
   );
 
-  const [sortConditionStorage] = useLocalStorage<ISortConditionStorage>(`vines-ui-asset-sort-condition`, {});
-  const sortCondition: ISortCondition = useMemo(
-    () => _.get(sortConditionStorage, [team.teamId, assetKey], DEFAULT_SORT_CONDITION),
-    [sortConditionStorage, team.teamId, assetKey],
-  );
-
   const [defaultPageSizeStorage, setDefaultPageSizeStorage] = useLocalStorage<IDefaultPageSizeStorage>(
     `vines-ui-asset-default-page-size`,
     {},
@@ -110,30 +103,86 @@ export const UgcView = <E extends object>({
     [defaultPageSizeStorage, team.teamId, assetKey, defaultPageSize],
   );
 
-  // state
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageSize: defaultPageSizeLS ?? defaultPageSize,
-    pageIndex: 0,
-  });
+  // 使用localStorage状态管理
+  const {
+    pagination: storedPagination,
+    filter: storedFilter,
+    search: storedSearch,
+    orderBy: storedOrderBy,
+    orderColumn: storedOrderColumn,
+    selectedRuleId: storedSelectedRuleId,
+    setPagination: setStoredPagination,
+    setFilter: setStoredFilter,
+    setSearch: setStoredSearch,
+    setSelectedRuleId: setStoredSelectedRuleId,
+  } = useMediaDataStore();
 
-  useEffect(() => {
-    defaultPageSizeLS &&
-      setPagination((prev) => {
-        return {
-          ...prev,
-          pageSize: isLoadAll ? 1000 : defaultPageSizeLS,
-        };
-      });
-  }, [defaultPageSizeLS]);
+  // 合并localStorage状态和本地状态
+  const pagination = useMemo(
+    () => ({
+      pageSize: defaultPageSizeLS ?? defaultPageSize,
+      pageIndex: storedPagination.pageIndex,
+    }),
+    [defaultPageSizeLS, defaultPageSize, storedPagination.pageIndex],
+  );
 
-  // filter
-  const [filter, setFilter] = useState<Partial<IListUgcDto['filter']>>({});
+  const filter = storedFilter;
+  const search = storedSearch;
+  const sortCondition: ISortCondition = useMemo(
+    () => ({ orderBy: storedOrderBy as any, orderColumn: storedOrderColumn as any }),
+    [storedOrderBy, storedOrderColumn],
+  );
+  const selectedRuleId = storedSelectedRuleId;
 
-  // search with debounce
-  const [searchInput, setSearchInput] = useState<string>(''); // 用户输入的即时值
-  const [search, setSearch] = useState<string>(''); // 防抖后的搜索值
+  // 更新分页状态
+  const setPagination = useCallback(
+    (updater: Updater<PaginationState>) => {
+      const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
+      setStoredPagination(newPagination);
+    },
+    [pagination, setStoredPagination],
+  );
 
-  // 防抖：用户停止输入 400ms 后才触发搜索
+  // 更新筛选条件
+  const setFilter = useCallback(
+    (newFilter: Partial<IListUgcDto['filter']>) => {
+      setStoredFilter(newFilter);
+      // 筛选时重置分页到第一页
+      setStoredPagination({ pageIndex: 0 });
+    },
+    [setStoredFilter, setStoredPagination],
+  );
+
+  // 更新搜索关键词
+  const setSearch = useCallback(
+    (newSearch: string) => {
+      setStoredSearch(newSearch);
+      // 搜索时重置分页到第一页
+      setStoredPagination({ pageIndex: 0 });
+    },
+    [setStoredSearch, setStoredPagination],
+  );
+
+  // 更新排序条件
+  // const setSortCondition = useCallback(
+  //   (newSortCondition: ISortCondition) => {
+  //     setStoredOrder(newSortCondition.orderBy, newSortCondition.orderColumn);
+  //   },
+  //   [setStoredOrder],
+  // );
+
+  // 更新选中规则ID
+  const setSelectedRuleId = useCallback(
+    (ruleId?: string) => {
+      setStoredSelectedRuleId(ruleId);
+    },
+    [setStoredSelectedRuleId],
+  );
+
+  // 搜索输入处理（防抖）
+  const [searchInput, setSearchInput] = useState<string>(search); // 用户输入的即时值
+
+  // 防抖：用户停止输入 500ms 后才触发搜索
   useDebounceEffect(
     () => {
       setSearch(searchInput);
@@ -147,8 +196,10 @@ export const UgcView = <E extends object>({
     { wait: 500 },
   );
 
-  // 左侧分组选中状态
-  const [selectedRuleId, setSelectedRuleId] = useState<string>();
+  // 当store中的search变化时，同步到输入框
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
 
   // 处理文件夹点击
   const handleFolderClick = (folderId: string, folderFilter: Partial<IListUgcDto['filter']>) => {
