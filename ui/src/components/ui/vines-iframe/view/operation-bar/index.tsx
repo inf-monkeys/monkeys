@@ -104,7 +104,7 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
       )}
     >
       <OperationBarTipButton mode={mode} type="form-view" density={density} />
-      <div className="flex h-full items-center justify-center">
+      <div className="flex min-h-0 flex-1 items-center justify-center">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}

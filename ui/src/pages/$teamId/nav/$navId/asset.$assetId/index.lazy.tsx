@@ -14,7 +14,11 @@ export const AssetDetail: React.FC = () => {
   const { navId, assetId } = useParams({ from: '/$teamId/nav/$navId/asset/$assetId/' });
 
   // 获取资产数据
-  const { data: assetsData, mutate } = useUgcMediaData({
+  const {
+    data: assetsData,
+    mutate,
+    isLoading,
+  } = useUgcMediaData({
     page: 1,
     limit: 10000,
     filter: {},
@@ -27,6 +31,20 @@ export const AssetDetail: React.FC = () => {
     navigate({ to: `/$teamId/nav/${navId}` as any });
   };
 
+  // 如果正在加载，显示加载状态
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+          <h2 className="text-lg font-semibold text-gray-900">{t('asset.detail.loading')}</h2>
+          <p className="mt-2 text-gray-600">{t('asset.detail.loadingAssetInfo')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 如果数据已加载但找不到资产，显示不存在
   if (!currentAsset) {
     return (
       <div className="flex h-full items-center justify-center">

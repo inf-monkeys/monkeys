@@ -4390,7 +4390,9 @@
       },
       "notFound": "Asset not found",
       "checkId": "Please check if the asset ID is correct",
-      "backToList": "Back to List"
+      "backToList": "Back to List",
+      "loading": "Loading",
+      "loadingAssetInfo": "Loading asset information"
     }
   }
 }

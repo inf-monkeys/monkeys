@@ -380,13 +380,15 @@ export const UgcView = <E extends object>({
 
   const { data: oem } = useSystemConfig();
   const oemUgcConfig = get(oem, ['theme', 'ugc'], defaultUgcConfig);
-  const [{ ugc: urlUgcConfig }] = useUrlState<{ ugc?: CustomizationUgc }>({ ugc: defaultUgcConfig });
+  const [{ ugc: urlUgcConfig }] = useUrlState<{ ugc?: CustomizationUgc }>();
 
   // url > oem
-  const ugcConfig: CustomizationUgc = {
-    ...oemUgcConfig,
-    ...urlUgcConfig,
-  };
+  const ugcConfig: CustomizationUgc = useMemo(() => {
+    return {
+      ...oemUgcConfig,
+      ...urlUgcConfig,
+    };
+  }, [oemUgcConfig, urlUgcConfig]);
 
   const paginationPosition = get(oem, ['theme', 'paginationPosition'], 'left');
 

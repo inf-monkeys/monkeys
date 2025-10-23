@@ -95,20 +95,25 @@ export const UgcViewFolderView = <E extends object>({
       return '';
     };
 
+    // 判断是否置顶
+    const isPinned = (item: any): boolean => {
+      return (item?.sort ?? 0) > 0;
+    };
+
     const pickPreviewImages = (items: any[]): string[] => {
-      // 优先选择图片文件，然后选择其他文件
+      // 分类文件：置顶文件、图片文件、其他文件
+      const pinnedItems = items.filter((it) => isPinned(it));
       const imageItems = items.filter((it) => {
         const type = (it?.type || it?.mimeType || '') as string;
-        return typeof type === 'string' && type.startsWith('image/');
+        return typeof type === 'string' && type.startsWith('image/') && !isPinned(it);
       });
-
-      const nonImageItems = items.filter((it) => {
+      const otherItems = items.filter((it) => {
         const type = (it?.type || it?.mimeType || '') as string;
-        return !(typeof type === 'string' && type.startsWith('image/'));
+        return !(typeof type === 'string' && type.startsWith('image/')) && !isPinned(it);
       });
 
-      // 先取图片，再取非图片文件
-      const candidates = [...imageItems, ...nonImageItems];
+      // 优先级：置顶文件 > 图片文件 > 其他文件
+      const candidates = [...pinnedItems, ...imageItems, ...otherItems];
 
       return candidates
         .slice(0, 4)
@@ -117,19 +122,19 @@ export const UgcViewFolderView = <E extends object>({
     };
 
     const pickPreviewAssets = (items: any[]): any[] => {
-      // 优先选择图片文件，然后选择其他文件
+      // 分类文件：置顶文件、图片文件、其他文件
+      const pinnedItems = items.filter((it) => isPinned(it));
       const imageItems = items.filter((it) => {
         const type = (it?.type || it?.mimeType || '') as string;
-        return typeof type === 'string' && type.startsWith('image/');
+        return typeof type === 'string' && type.startsWith('image/') && !isPinned(it);
       });
-
-      const nonImageItems = items.filter((it) => {
+      const otherItems = items.filter((it) => {
         const type = (it?.type || it?.mimeType || '') as string;
-        return !(typeof type === 'string' && type.startsWith('image/'));
+        return !(typeof type === 'string' && type.startsWith('image/')) && !isPinned(it);
       });
 
-      // 先取图片，再取非图片文件
-      const candidates = [...imageItems, ...nonImageItems];
+      // 优先级：置顶文件 > 图片文件 > 其他文件
+      const candidates = [...pinnedItems, ...imageItems, ...otherItems];
 
       return candidates.slice(0, 4);
     };
