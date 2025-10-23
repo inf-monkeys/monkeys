@@ -31,10 +31,10 @@ export const AssetDetail: React.FC = () => {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h2 className="text-lg font-semibold text-gray-900">资产未找到</h2>
-          <p className="mt-2 text-gray-600">请检查资产ID是否正确</p>
+          <h2 className="text-lg font-semibold text-gray-900">{t('asset.detail.notFound')}</h2>
+          <p className="mt-2 text-gray-600">{t('asset.detail.checkId')}</p>
           <Button onClick={handleBack} className="mt-4">
-            返回列表
+            {t('asset.detail.backToList')}
           </Button>
         </div>
       </div>

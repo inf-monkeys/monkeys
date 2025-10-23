@@ -4387,7 +4387,10 @@
         "symbol-summary": "Symbol Summary",
         "3d-model": "3D Model",
         "neural-model": "Neural Model"
-      }
+      },
+      "notFound": "Asset not found",
+      "checkId": "Please check if the asset ID is correct",
+      "backToList": "Back to List"
     }
   }
 }

@@ -4365,7 +4365,10 @@
         "symbol-summary": "符号概括",
         "3d-model": "3D模型",
         "neural-model": "神经模型"
-      }
+      },
+      "notFound": "资产未找到",
+      "checkId": "请检查资产ID是否正确",
+      "backToList": "返回列表"
     }
   }
 }
