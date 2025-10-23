@@ -28,7 +28,7 @@ export const WorkflowAssociationEditorDialog: React.FC<IWorkflowAssociationEdito
       <Dialog>
         <DialogContent className="flex h-[36rem] flex-col">
           <DialogTitle>{t('workspace.flow-view.tooltip.more.association-editor.title')}</DialogTitle>
-          <div className="flex h-full flex-col gap-2">
+          <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
             {(data ?? []).map((item) => (
               <WorkflowAssociationEditorItem key={item.id} data={item} mutate={mutate} />
             ))}
