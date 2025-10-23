@@ -4,6 +4,7 @@ import { Code, File, FileCode, FileSpreadsheet, FileText } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useFileContentCache, useSetFileContentCache } from '@/store/useFileContentCacheStore';
 import { cn } from '@/utils';
 
 interface IAssetContentPreviewProps {
@@ -13,9 +14,26 @@ interface IAssetContentPreviewProps {
 }
 
 export const AssetContentPreview: React.FC<IAssetContentPreviewProps> = ({ asset, isThumbnail = false, className }) => {
-  const [content, setContent] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>('');
+  // 使用缓存
+  const {
+    content: cachedContent,
+    isLoading: cachedIsLoading,
+    error: cachedError,
+    hasContent,
+  } = useFileContentCache(asset?.url || '');
+  const { setContent, setLoading, setError } = useSetFileContentCache();
+
+  // 本地状态（用于非缓存的情况）
+  const [localContent, setLocalContent] = useState<string>('');
+  const [localIsLoading, setLocalIsLoading] = useState(false);
+  const [localError, setLocalError] = useState<string>('');
+
+  // 优先使用缓存，如果没有缓存则使用本地状态
+  const content = cachedContent || localContent;
+  const isLoading = cachedIsLoading || localIsLoading;
+  const error = cachedError || localError;
+
+  // 暂时移除访问信息更新，避免无限循环
 
   // 获取文件类型
   const getFileType = () => {
@@ -92,8 +110,16 @@ export const AssetContentPreview: React.FC<IAssetContentPreviewProps> = ({ asset
   const fetchFileContent = async () => {
     if (!asset?.url) return;
 
-    setIsLoading(true);
-    setError('');
+    // 如果已经有缓存内容，直接返回
+    if (hasContent) {
+      return;
+    }
+
+    // 设置加载状态
+    setLoading(asset.url, true);
+    setLocalIsLoading(true);
+    setError(asset.url, '');
+    setLocalError('');
 
     try {
       const response = await fetch(asset.url);
@@ -102,11 +128,17 @@ export const AssetContentPreview: React.FC<IAssetContentPreviewProps> = ({ asset
       }
 
       const text = await response.text();
-      setContent(text);
+
+      // 保存到缓存
+      setContent(asset.url, text);
+      setLocalContent(text);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load content');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load content';
+      setError(asset.url, errorMessage);
+      setLocalError(errorMessage);
     } finally {
-      setIsLoading(false);
+      setLoading(asset.url, false);
+      setLocalIsLoading(false);
     }
   };
 
@@ -213,19 +245,19 @@ export const AssetContentPreview: React.FC<IAssetContentPreviewProps> = ({ asset
     );
   };
 
-  // 缩略图模式：点击加载内容
-  const handleThumbnailClick = () => {
-    if (!content && !isLoading) {
+  // 预加载内容（当用户悬停时）
+  const handleMouseEnter = () => {
+    if (!hasContent && !isLoading && asset?.url) {
       fetchFileContent();
     }
   };
 
   // 自动加载内容
   useEffect(() => {
-    if (!content && !isLoading) {
+    if (!content && !isLoading && asset?.url) {
       fetchFileContent();
     }
-  }, [content, isLoading]);
+  }, [asset?.url]); // 只依赖asset.url，避免重复加载
 
   const fileType = getFileType();
   const isTextFile = ['txt', 'json', 'md', 'csv', 'log', 'xml', 'yaml', 'yml'].includes(fileType || '');
@@ -253,6 +285,7 @@ export const AssetContentPreview: React.FC<IAssetContentPreviewProps> = ({ asset
           'h-full w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700',
           className,
         )}
+        onMouseEnter={handleMouseEnter} // 悬停时预加载
       >
         {/* 内容预览区域 - 全尺寸显示 */}
         <div className="h-full overflow-hidden p-3">
