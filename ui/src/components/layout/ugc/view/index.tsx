@@ -40,6 +40,7 @@ import { RemoteDataTable } from '@/components/ui/data-table/remote';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import useUrlState from '@/hooks/use-url-state';
 import { useMediaDataStore } from '@/store/useMediaDataStore';
 import { cn, getI18nContent } from '@/utils';
 
@@ -76,7 +77,7 @@ export const UgcView = <E extends object>({
   renderOptions,
   operateArea,
   onItemClick: onItemClickProp,
-  subtitle,
+  subtitle: subtitleProp,
   defaultPageSize = 24,
   assetIdKey = 'id',
 }: IUgcViewProps<E>): React.ReactNode => {
@@ -371,12 +372,26 @@ export const UgcView = <E extends object>({
 
   const rows = table.getRowModel().rows;
 
-  const { data: oem } = useSystemConfig();
-  const paginationPosition = get(oem, ['theme', 'paginationPosition'], 'left');
-  const ugcOptions = get(oem, ['theme', 'ugc'], {
+  // oem config & url state 控制项
+  const defaultUgcConfig = {
+    subtitle: true,
     onItemClick: true,
-  } as CustomizationUgc);
-  const onItemClick = ugcOptions.onItemClick ? onItemClickProp : undefined;
+  } as CustomizationUgc;
+
+  const { data: oem } = useSystemConfig();
+  const oemUgcConfig = get(oem, ['theme', 'ugc'], defaultUgcConfig);
+  const [{ ugc: urlUgcConfig }] = useUrlState<{ ugc?: CustomizationUgc }>({ ugc: defaultUgcConfig });
+
+  // url > oem
+  const ugcConfig: CustomizationUgc = {
+    ...oemUgcConfig,
+    ...urlUgcConfig,
+  };
+
+  const paginationPosition = get(oem, ['theme', 'paginationPosition'], 'left');
+
+  const onItemClick = ugcConfig.onItemClick ? onItemClickProp : undefined;
+  const subtitle = ugcConfig.subtitle ? subtitleProp : undefined;
   const { data: assetFilterRules } = useAssetFilterRuleList(assetType as any, isMarket);
   return (
     <div className="flex size-full">
@@ -472,7 +487,7 @@ export const UgcView = <E extends object>({
                             renderOptions={renderOptions}
                             operateArea={operateArea}
                             onItemClick={onItemClick}
-                            ugcOptions={ugcOptions}
+                            ugcOptions={ugcConfig}
                           />
                         );
                       })}
@@ -482,7 +497,7 @@ export const UgcView = <E extends object>({
                     <RemoteDataTable
                       columns={
                         columns.map((col) => {
-                          if (col.id === 'title' && !ugcOptions.onItemClick) {
+                          if (col.id === 'title' && !ugcConfig.onItemClick) {
                             return {
                               ...col,
                               cell: DefaultTitleCell,
@@ -509,7 +524,7 @@ export const UgcView = <E extends object>({
                           renderOptions={renderOptions}
                           operateArea={operateArea}
                           onItemClick={onItemClick}
-                          ugcOptions={ugcOptions}
+                          ugcOptions={ugcConfig}
                         />
                       ))}
                     </div>

@@ -24,7 +24,7 @@ export const DesignAssociationEditorDialog: React.FC = () => {
       <Dialog>
         <DialogContent className="flex h-[36rem] flex-col">
           <DialogTitle>{t('ugc-page.design-project.association-editor.title')}</DialogTitle>
-          <div className="flex h-full flex-col gap-2">
+          <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
             {(data ?? []).map((item) => (
               <DesignAssociationEditorItem key={item.id} data={item} mutate={mutate} />
             ))}
