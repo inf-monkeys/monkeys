@@ -73,9 +73,27 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   const [canvasWidth, setCanvasWidth] = useState<number>(1280);
   const [canvasHeight, setCanvasHeight] = useState<number>(720);
 
+  // 避免重复加载相同的数据
+  const lastSnapshotRef = useRef<any>(null);
+  
   useEffect(() => {
     if (!metadata || !editor) return;
+    
+    // 比较snapshot是否真的发生了变化
+    if (JSON.stringify(lastSnapshotRef.current) === JSON.stringify(metadata.snapshot)) {
+      return; // 数据没有变化，不重新加载
+    }
+    
+    lastSnapshotRef.current = metadata.snapshot;
+    
+    // 设置加载标志，防止触发自动保存
+    isLoadingSnapshotRef.current = true;
     editor.loadSnapshot(metadata.snapshot);
+    
+    // 延迟重置标志位，确保加载完成
+    setTimeout(() => {
+      isLoadingSnapshotRef.current = false;
+    }, 200);
   }, [metadata, editor]);
 
   useEffect(() => {
@@ -182,9 +200,11 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         const snapshot = getSnapshot(editor.store);
         await updateDesignBoardMetadata(designBoardId, { snapshot });
         void mutateMetadata();
+        // 手动保存成功后，重置未保存标志
+        hasUnsavedChangesRef.current = false;
         toast.success('已自动保存');
       } catch (_) {
-        // 失败也提示“已自动保存”
+        // 失败也提示"已自动保存"
         toast.success('已自动保存');
       }
     };
@@ -197,6 +217,8 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   const autosaveTimerRef = useRef<number | null>(null);
   const autosaveInFlightRef = useRef<boolean>(false);
   const pendingAutosaveRef = useRef<boolean>(false);
+  const isLoadingSnapshotRef = useRef<boolean>(false);
+  const hasUnsavedChangesRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (!editor || !designBoardId) return;
@@ -211,6 +233,9 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         const snapshot = getSnapshot(editor.store);
         await updateDesignBoardMetadata(designBoardId, { snapshot });
         void mutateMetadata();
+        
+        // 保存成功后，重置未保存标志
+        hasUnsavedChangesRef.current = false;
         
         // 异步生成缩略图 - 使用setTimeout避免递归
         setTimeout(async () => {
@@ -287,6 +312,12 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
     // 仅在文档层数据变化时触发。tldraw v3 store 变更事件可通过 listen 订阅
     const unsubscribe = editor.store.listen(
       () => {
+        // 如果正在加载snapshot，跳过自动保存
+        if (isLoadingSnapshotRef.current) {
+          return;
+        }
+        // 标记有未保存的更改
+        hasUnsavedChangesRef.current = true;
         scheduleSave();
       },
       { scope: 'document' },
@@ -298,8 +329,11 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         window.clearTimeout(autosaveTimerRef.current);
         autosaveTimerRef.current = null;
       }
-      // 同步保存可能阻塞卸载，这里仅尽力触发（不阻塞）
-      void flushSave();
+      // 只有在有未保存的更改时才进行保存
+      if (hasUnsavedChangesRef.current) {
+        // 同步保存可能阻塞卸载，这里仅尽力触发（不阻塞）
+        void flushSave();
+      }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
 
