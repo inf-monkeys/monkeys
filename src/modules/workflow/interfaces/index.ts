@@ -138,6 +138,7 @@ export interface WorkflowExportJson extends BaseAsset {
   variables: ToolProperty[];
   output: WorkflowOutputValue[];
   validationIssues?: WorkflowValidationIssue[];
+  originalId: string;
 }
 
 export interface WorkflowWithAssetsJson {

@@ -49,9 +49,19 @@ export class WorkflowCrudService implements IAssetHandler {
     private readonly marketplaceService: MarketplaceService,
   ) {}
 
-  public async getSnapshot(workflowId: string, version: number): Promise<any> {
-    const { workflow } = await this.exportWorkflowOfVersion(workflowId, version);
-    const pages = await this.pageService.listWorkflowPagesBrief(workflowId);
+  public async getSnapshot(workflowIdOrRecordId: string, version: number): Promise<any> {
+    let workflow: WorkflowExportJson | undefined;
+    try {
+      workflow = (await this.exportWorkflowOfVersion(workflowIdOrRecordId, version)).workflow;
+    } catch (error) {
+      workflow = (await this.exportWorkflowByRecordId(workflowIdOrRecordId)).workflow;
+    }
+
+    if (!workflow) {
+      throw new NotFoundException(`工作流 (${workflowIdOrRecordId}) 不存在！`);
+    }
+
+    const pages = await this.pageService.listWorkflowPagesBrief(workflow.originalId);
 
     const tasks = workflow.tasks;
 
@@ -638,6 +648,15 @@ export class WorkflowCrudService implements IAssetHandler {
   public async exportWorkflowOfVersion(workflowId: string, version: number) {
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
     const triggers = await this.workflowRepository.listWorkflowTriggers(workflowId, version);
+    const json: WorkflowExportJson = this.convertWorkflowToJson(workflow, triggers);
+    return {
+      workflow: json,
+    };
+  }
+
+  public async exportWorkflowByRecordId(recordId: string) {
+    const workflow = await this.workflowRepository.getWorkflowByRecordId(recordId);
+    const triggers = await this.workflowRepository.listWorkflowTriggers(workflow.workflowId, workflow.version);
     const json: WorkflowExportJson = this.convertWorkflowToJson(workflow, triggers);
     return {
       workflow: json,
