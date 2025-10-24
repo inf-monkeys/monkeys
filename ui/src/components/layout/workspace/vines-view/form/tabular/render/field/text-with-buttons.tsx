@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Toggle } from '@/components/ui/toggle';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useShouldShowFormButton } from '@/store/useShouldShowFormButton';
 import { cn } from '@/utils';
 
@@ -75,31 +76,50 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     onChange((uniq || []).join(' '));
   };
 
-  // 归一化到 { 一级: { 二级: [三级...] } }
+  // 归一化到 { 一级: { 二级: [{label: string, description?: string}] } }
   const normalizedDict = React.useMemo(() => {
-    const result: Record<string, Record<string, string[]>> = {};
+    const result: Record<string, Record<string, Array<{ label: string; description?: string }>>> = {};
     const d = promptDictionary;
     if (!d) return result;
 
     if (Array.isArray(d?.entries)) {
-      for (const it of d.entries as Array<{ level1: string; level2?: string; label: string }>) {
+      for (const it of d.entries as Array<{ level1: string; level2?: string; label: string; description?: string }>) {
         const l1 = it.level1 || '未分组';
         const l2 = it.level2 || '默认';
         result[l1] = result[l1] || {};
         result[l1][l2] = result[l1][l2] || [];
-        result[l1][l2].push(it.label);
+        result[l1][l2].push({ label: it.label, description: it.description });
       }
       return result;
     }
 
     if (typeof d === 'object') {
-      for (const [l1, sub] of Object.entries(d as Record<string, any>)) {
+      // 使用 Object.keys() 保持顺序，然后遍历
+      const keys = Object.keys(d as Record<string, any>);
+      for (const l1 of keys) {
+        const sub = (d as Record<string, any>)[l1];
         if (Array.isArray(sub)) {
-          result[l1] = { 默认: sub as string[] };
+          // 处理数组，可能是字符串数组或对象数组
+          const items = sub.map((item) => {
+            if (typeof item === 'string') {
+              return { label: item };
+            }
+            return { label: item.label || item, description: item.description };
+          });
+          result[l1] = { 默认: items };
         } else if (typeof sub === 'object') {
-          const obj: Record<string, string[]> = {};
-          for (const [l2, items] of Object.entries(sub)) {
-            obj[l2] = Array.isArray(items) ? (items as string[]) : [];
+          const obj: Record<string, Array<{ label: string; description?: string }>> = {};
+          const subKeys = Object.keys(sub);
+          for (const l2 of subKeys) {
+            const items = sub[l2];
+            obj[l2] = Array.isArray(items)
+              ? items.map((item: any) => {
+                  if (typeof item === 'string') {
+                    return { label: item };
+                  }
+                  return { label: item.label || item, description: item.description };
+                })
+              : [];
           }
           result[l1] = obj;
         }
@@ -108,7 +128,11 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     return result;
   }, [promptDictionary]);
 
-  const level1Keys = React.useMemo(() => Object.keys(normalizedDict), [normalizedDict]);
+  const level1Keys = React.useMemo(() => {
+    const keys = Object.keys(normalizedDict);
+    // 确保顺序一致：按照 JSON 中定义的顺序
+    return keys;
+  }, [normalizedDict]);
   const [activeL1, setActiveL1] = React.useState<string | null>(null);
   React.useEffect(() => {
     if (!activeL1 && level1Keys.length) setActiveL1(level1Keys[0]);
@@ -165,50 +189,68 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
             <DialogHeader>
               <DialogTitle>提示词词典</DialogTitle>
             </DialogHeader>
-            <Tabs value={activeL1 ?? undefined} onValueChange={setActiveL1}>
-              <TabsList>
-                {level1Keys.map((k) => (
-                  <TabsTrigger key={k} value={k}>
-                    {k}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              {level1Keys.map((k2) => {
-                const entries = Object.entries(normalizedDict[k2] || {});
-                const hideDefaultHeader = entries.length === 1 && entries[0][0] === '默认';
-                return (
-                  <TabsContent key={k2} value={k2}>
-                    <div className="max-h-[60vh] overflow-auto pr-1">
-                      {entries.map(([l2, items]) => (
-                        <div key={l2} className="mb-4">
-                          {!hideDefaultHeader && <div className="mb-2 text-[13px] text-muted-foreground">{l2}</div>}
-                          <div className="flex flex-wrap gap-2">
-                            {(items || []).map((it) => {
-                              const k = keyOf(k2, l2, it);
-                              const on = !!selected[k];
-                              return (
-                                <Toggle
-                                  key={k}
-                                  pressed={on}
-                                  onPressedChange={(v) => {
-                                    const ns = { ...selected, [k]: v };
-                                    setSelected(ns);
-                                    applyFromSelected(ns);
-                                  }}
-                                  className="rounded-full border px-3 py-1 text-sm data-[state=on]:bg-vines-500 data-[state=on]:text-white"
-                                >
-                                  {it}
-                                </Toggle>
-                              );
-                            })}
+            <TooltipProvider>
+              <Tabs value={activeL1 ?? undefined} onValueChange={setActiveL1}>
+                <TabsList>
+                  {level1Keys.map((k) => (
+                    <TabsTrigger key={k} value={k}>
+                      {k}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {level1Keys.map((k2) => {
+                  const l2Dict = normalizedDict[k2] || {};
+                  const l2Keys = Object.keys(l2Dict);
+                  const entries = l2Keys.map(l2 => [l2, l2Dict[l2]] as [string, Array<{ label: string; description?: string }>]);
+                  const hideDefaultHeader = entries.length === 1 && entries[0][0] === '默认';
+                  return (
+                    <TabsContent key={k2} value={k2}>
+                      <div className="max-h-[60vh] overflow-auto pr-1">
+                        {entries.map(([l2, items]) => (
+                          <div key={l2} className="mb-4">
+                            {!hideDefaultHeader && <div className="mb-2 text-[13px] text-muted-foreground">{l2}</div>}
+                            <div className="flex flex-wrap gap-2">
+                              {(items || []).map((it) => {
+                                const k = keyOf(k2, l2, it.label);
+                                const on = !!selected[k];
+                                const toggleButton = (
+                                  <Toggle
+                                    key={k}
+                                    pressed={on}
+                                    onPressedChange={(v) => {
+                                      const ns = { ...selected, [k]: v };
+                                      setSelected(ns);
+                                      applyFromSelected(ns);
+                                    }}
+                                    className="rounded-full border px-3 py-1 text-sm data-[state=on]:bg-vines-500 data-[state=on]:text-white"
+                                  >
+                                    {it.label}
+                                  </Toggle>
+                                );
+
+                                // 如果有描述，则用 Tooltip 包裹
+                                if (it.description) {
+                                  return (
+                                    <Tooltip key={k}>
+                                      <TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
+                                      <TooltipContent className="max-w-xs">
+                                        <p className="text-xs">{it.description}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  );
+                                }
+
+                                return toggleButton;
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </TabsContent>
-                );
-              })}
-            </Tabs>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
+            </TooltipProvider>
           </DialogContent>
         </Dialog>
       )}

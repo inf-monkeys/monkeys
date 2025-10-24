@@ -55,7 +55,7 @@ export const FieldPromptDictionary: React.FC<IFieldPromptDictionaryProps> = ({ f
             <div className="space-y-2">
               <Textarea
                 className="h-40 resize-none font-mono text-[12px]"
-                placeholder={`示例：\n{\n  "题材": {\n    "人物画": ["单人肖像", "半身像"]\n  }\n}\n或：\n{\n  "entries": [{"level1":"题材","level2":"人物画","label":"单人肖像"}]\n}`}
+                placeholder={`示例：\n{\n  "题材": {\n    "人物画": ["单人肖像", "半身像"]\n  }\n}\n或：\n{\n  "entries": [{"level1":"题材","level2":"人物画","label":"单人肖像","description":"描述信息"}]\n}\n或带描述的对象数组：\n{\n  "题材": {\n    "人物画": [\n      {"label": "单人肖像", "description": "单人肖像的描述"},\n      {"label": "半身像", "description": "半身像的描述"}\n    ]\n  }\n}`}
                 value={jsonText}
                 onChange={(e) => setJsonText(e.target.value)}
               />
