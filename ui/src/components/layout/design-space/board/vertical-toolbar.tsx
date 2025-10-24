@@ -24,29 +24,6 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   const geoGroupRef = useRef<HTMLDivElement | null>(null);
   const geoCloseTimerRef = useRef<number | undefined>(undefined);
 
-  // 检查是否显示 sidebar
-  const showPageAndLayerSidebar = oem?.theme?.designProjects?.showPageAndLayerSidebar || false;
-  const [leftCollapsed, setLeftCollapsed] = useState(false);
-  useEffect(() => {
-    const handler = (e: any) => setLeftCollapsed(Boolean(e?.detail?.collapsed));
-    window.addEventListener('vines:toggle-left-sidebar-body', handler as any);
-    return () => window.removeEventListener('vines:toggle-left-sidebar-body', handler as any);
-  }, []);
-  // 工具栏位置：跟随左侧栏实际宽度
-  const [leftSidebarWidth, setLeftSidebarWidth] = useState<number>(300);
-  useEffect(() => {
-    const handler = (e: any) => {
-      const w = Number(e?.detail?.width);
-      if (!Number.isNaN(w)) setLeftSidebarWidth(w);
-    };
-    window.addEventListener('vines:left-sidebar-width-change', handler as any);
-    return () => window.removeEventListener('vines:left-sidebar-width-change', handler as any);
-  }, []);
-  // 工具栏位置：
-  // - 侧栏展开：始终在 sidebar 右边 10px（左边距10 + 宽度 + 10）
-  // - 侧栏收起：回到最左边 16px
-  const toolbarLeft = showPageAndLayerSidebar ? (leftCollapsed ? '16px' : `${leftSidebarWidth + 20}px`) : '16px';
-
   // 监听工具变化
   useEffect(() => {
     const handleToolChange = () => {
@@ -97,14 +74,14 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
       className="vertical-toolbar"
       style={{
         position: 'fixed',
-        left: toolbarLeft,
-        top: '50%',
-        transform: 'translateY(-50%)',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        bottom: '20px',
         zIndex: 9999,
         pointerEvents: 'auto',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'row', gap: 20 }}>
         <div className="custom-toolbar">
           {toolbarTools.map((tool) => {
             if (tool.id === 'shape') {
@@ -343,7 +320,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
         </div>
 
         {/* Agent toggle button */}
-        <div className="custom-toolbar" style={{ marginTop: 20 }}>
+        <div className="custom-toolbar" style={{ marginLeft: 20 }}>
           <div className="tool-group">
             <button
               className="tool-button"

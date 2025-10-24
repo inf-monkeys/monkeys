@@ -185,6 +185,8 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
   // OEM：是否显示左右侧边栏，统一由 showPageAndLayerSidebar 控制
   const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false);
+  // OEM：是否显示右侧边栏，单独控制
+  const showRightSidebar = get(oem, 'theme.designProjects.showRightSidebar', true);
 
   // Ctrl/Cmd + S：阻止浏览器保存页面，执行静默保存并提示“已自动保存”
   useEffect(() => {
@@ -493,8 +495,8 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         setEditor={setEditor}
         instance={{ frameShapeId }}
       />
-      {/* 右侧属性侧边栏（按 OEM 同开关控制） */}
-      {showPageAndLayerSidebar && (
+      {/* 右侧属性侧边栏（按 OEM 配置控制） */}
+      {showRightSidebar && (
         <DesignBoardRightSidebar
           visible={sidebarVisible}
           onToggle={() => setSidebarVisible(!sidebarVisible)}

@@ -120,6 +120,7 @@ export type CustomizationDesignProjects = {
   showPageAndLayerSidebar?: boolean; // 是否显示左侧页面+图层侧边栏
   showBoardOperationSidebar?: boolean; // 是否显示画板操作侧边栏（宽/高、导出、保存）
   showMiniToolsToolbar?: boolean; // 是否显示小工具工具栏
+  showRightSidebar?: boolean; // 是否显示右侧边栏
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
@@ -604,6 +605,7 @@ export const config: Config = {
         showBoardOperationSidebar: readConfig('server.customization.designProjects.showBoardOperationSidebar', true),
         showActionsMenu: readConfig('server.customization.designProjects.showActionsMenu', true),
         showMiniToolsToolbar: readConfig('server.customization.designProjects.showMiniToolsToolbar', false),
+        showRightSidebar: readConfig('server.customization.designProjects.showRightSidebar', false),
       },
       marketplace: {
         presetAppSortFileUrl: readConfig('server.customization.marketplace.presetAppSortFileUrl', undefined),

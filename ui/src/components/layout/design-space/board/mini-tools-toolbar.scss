@@ -1,14 +1,17 @@
 .mini-tools-toolbar {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 20px;
+  position: fixed !important;
+  left: var(--toolbar-left, 16px) !important;
+  top: calc(72px + var(--global-spacing) * 3.5 + 10px) !important;
+  bottom: calc(var(--global-spacing) * 3.5 + 10px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   z-index: 9999;
   pointer-events: auto;
 
   .custom-toolbar {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 8px;
     padding: 8px;
     border-radius: 12px;
@@ -18,11 +21,14 @@
     backdrop-filter: blur(8px);
 
     .tool-button {
-      width: 40px;
+      min-width: 40px;
       height: 40px;
       display: flex;
+      flex-direction: row;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      gap: 8px;
+      padding: 0 12px;
       border-radius: 8px;
       border: 1px solid transparent;
       background: transparent;
@@ -33,6 +39,7 @@
       pointer-events: auto;
       z-index: 10000;
       position: relative;
+      white-space: nowrap;
 
       &:hover {
         background: #f2f3f5;
@@ -75,6 +82,10 @@
           fill: currentColor;
           stroke: currentColor;
         }
+
+        .tool-button-label {
+          color: #fff !important;
+        }
       }
 
       svg {
@@ -91,8 +102,14 @@
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 100% !important;
-        height: 100% !important;
+        flex-shrink: 0;
+      }
+
+      .tool-button-label {
+        font-size: 12px;
+        line-height: 1;
+        color: inherit;
+        pointer-events: none;
       }
     }
 
