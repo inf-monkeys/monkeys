@@ -125,7 +125,7 @@ export const ExportAssetSelect: React.FC<IExportAssetSelectProps> = ({ onSelect 
     if (workflowList) {
       setWorkflows(
         workflowList.map((workflow) => ({
-          id: workflow.workflowId,
+          id: workflow.id,
           displayName: workflow.displayName,
           assetType: 'workflow',
           selected: false,

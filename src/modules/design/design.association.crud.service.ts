@@ -63,7 +63,7 @@ export class DesignAssociationCrudService implements IAssetHandler {
     const { targetWorkflowId: originTargetWorkflowId } = association;
 
     // 获取目标工作流的信息
-    const targetWorkflow = await this.workflowCrudService.getWorkflowDef(originTargetWorkflowId);
+    const targetWorkflow = await this.workflowCrudService.getWorkflowDefByRecordId(originTargetWorkflowId);
 
     if (!targetWorkflow) {
       throw new NotFoundException('目标工作流不存在');
