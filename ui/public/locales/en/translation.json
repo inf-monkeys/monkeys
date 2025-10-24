@@ -4379,10 +4379,10 @@
       "unknownCreator": "Unknown Creator",
       "unknownTime": "Unknown Time",
       "conversion": "Conversion",
-      "imageToText": "Image",
       "startConversion": "Start Conversion",
       "previewNotSupported": "Preview not supported",
       "conversionTypes": {
+        "image": "Image",
         "text": "Text",
         "symbol-summary": "Symbol Summary",
         "3d-model": "3D Model",
