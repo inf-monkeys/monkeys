@@ -86,8 +86,8 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
       const { originWorkflowId: originOriginWorkflowId } = association as WorkflowAssociationsEntity;
 
       // 获取目标工作流和源工作流的信息
-      const originWorkflow = await this.workflowCrudService.getWorkflowDef(originOriginWorkflowId);
-      const targetWorkflow = type === 'to-workflow' ? await this.workflowCrudService.getWorkflowDef(originTargetWorkflowId) : undefined;
+      const originWorkflow = await this.workflowCrudService.getWorkflowDefByRecordId(originOriginWorkflowId);
+      const targetWorkflow = type === 'to-workflow' ? await this.workflowCrudService.getWorkflowDefByRecordId(originTargetWorkflowId) : undefined;
 
       if ((!targetWorkflow && type === 'to-workflow') || !originWorkflow) {
         throw new NotFoundException('目标工作流或源工作流不存在');
@@ -134,7 +134,7 @@ export class WorkflowAssociationCrudService implements IAssetHandler {
       }
     } else {
       // 获取目标工作流的信息
-      const targetWorkflow = type === 'to-workflow' ? await this.workflowCrudService.getWorkflowDef(originTargetWorkflowId) : undefined;
+      const targetWorkflow = type === 'to-workflow' ? await this.workflowCrudService.getWorkflowDefByRecordId(originTargetWorkflowId) : undefined;
 
       if (!targetWorkflow && type === 'to-workflow') {
         throw new NotFoundException('目标工作流不存在');

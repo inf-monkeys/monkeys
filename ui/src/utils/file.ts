@@ -1,8 +1,8 @@
-export const downloadFile = (file: File) => {
+export const downloadFile = (file: File | Blob, filename?: string) => {
   const link = document.createElement('a');
   const url = URL.createObjectURL(file);
   link.href = url;
-  link.download = file.name;
+  link.download = filename || (file instanceof File ? file.name : 'download');
   link.click();
   URL.revokeObjectURL(url);
 };

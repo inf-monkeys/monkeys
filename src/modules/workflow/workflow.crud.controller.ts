@@ -341,4 +341,12 @@ export class WorkflowCrudController {
       data: result,
     });
   }
+
+  @Get('/record/:recordId')
+  public async getWorkflowDefByRecordId(@Param('recordId') recordId: string) {
+    const result = await this.service.getWorkflowDefByRecordId(recordId);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
 }

@@ -192,6 +192,10 @@ export class WorkflowCrudService implements IAssetHandler {
     return workflow;
   }
 
+  public async getWorkflowDefByRecordId(recordId: string): Promise<WorkflowMetadataEntity> {
+    return await this.workflowRepository.getWorkflowByRecordId(recordId);
+  }
+
   public async getWorkflowVersions(workflowId: string) {
     return await this.workflowRepository.getWorkflowVersions(workflowId);
   }

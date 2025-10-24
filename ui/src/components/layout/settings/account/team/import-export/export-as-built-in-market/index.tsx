@@ -8,9 +8,11 @@ import { toast } from 'sonner';
 
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { exportAssetsByAssetList } from '@/apis/marketplace';
+import { useWorkspacePages } from '@/apis/pages';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { exportAssetsSchema, IExportAssets } from '@/schema/workspace/export-asset';
+import { downloadFile } from '@/utils/file';
 
 import { ExportAssetConfig } from './asset-config';
 import { ExportAssetSelect } from './asset-select';
@@ -45,6 +47,9 @@ export const ExportTeamAsBuiltInMarket: React.FC<IExportTeamAsBuiltInMarketProps
   const [selectedAssets, setSelectedAssets] = useState<SelectedAssets>([]);
   const [step, setStep] = useState(1);
 
+  const { data: pageWithGroups } = useWorkspacePages();
+  console.log(pageWithGroups);
+
   const form = useForm<IExportAssets>({
     resolver: zodResolver(exportAssetsSchema),
     defaultValues: {
@@ -72,14 +77,8 @@ export const ExportTeamAsBuiltInMarket: React.FC<IExportTeamAsBuiltInMarketProps
           loading: t('common.operate.loading'),
           success: (data) => {
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `export-${new Date().getTime()}.json`;
-            document.body.appendChild(link);
-            link.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(link);
+            downloadFile(blob, `presetApp.${new Date().getTime()}.json`);
+
             return t('common.operate.success');
           },
           error: (error) => {

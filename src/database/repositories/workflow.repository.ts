@@ -148,6 +148,19 @@ export class WorkflowRepository {
     return workflow;
   }
 
+  public async getWorkflowByRecordId(id: string, throwError = true) {
+    const workflow = await this.workflowMetadataRepository.findOne({
+      where: {
+        id,
+        isDeleted: false,
+      },
+    });
+    if (!workflow && throwError) {
+      throw new NotFoundException(`Workflow Record ${id} not found`);
+    }
+    return workflow;
+  }
+
   public async getWorkflowByIdWithoutVersion(workflowId: string, throwError = true) {
     const maxVersion = await this.getMaxVersion(workflowId);
     return await this.getWorkflowById(workflowId, maxVersion, throwError);
