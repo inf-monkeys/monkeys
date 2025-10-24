@@ -791,7 +791,7 @@ export class WorkflowCrudService implements IAssetHandler {
   }
 
   public async getById(assetId: string, _teamId: string): Promise<any> {
-    return await this.workflowRepository.getWorkflowById(assetId, 1);
+    return await this.workflowRepository.getWorkflowByRecordId(assetId);
   }
 
   public async rollbackWorkflow(teamId: string, workflowId: string, version: number) {
