@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -66,6 +66,17 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
   // 获取预览图片URL
   const previewImageUrl = (asset as any).url || (asset as any).cover || asset.iconUrl || '';
 
+  // 设置默认转换类型
+  useEffect(() => {
+    if (isImageFile()) {
+      setConversionType('text');
+    } else if (isStepFile()) {
+      setConversionType('image');
+    } else if (isTextFile()) {
+      setConversionType('image');
+    }
+  }, [asset]);
+
   return (
     <div className="flex h-full flex-col bg-white dark:bg-black">
       {/* 头部导航 */}
@@ -81,7 +92,7 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
         {/* 左侧预览区域 */}
         <div className="flex-1">
           {isTextFile() ? (
-            // 文本文件显示完整内容
+            // 文本文件显示完整内容（使用改进后的AssetFullContentDisplay）
             <AssetFullContentDisplay asset={asset} className="h-full w-full" />
           ) : isImageFile() && previewImageUrl ? (
             // 图片文件显示图片预览
@@ -198,8 +209,8 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
               </div>
             </CardContent>
 
-            {/* 转换功能区域 - 只在非文本文件且非 STEP 文件时显示 */}
-            {!isTextFile() && !isStepFile() && (
+            {/* 转换功能区域 - 对所有文件类型显示 */}
+            {
               <div className="border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-black">
                 <div className="flex flex-col gap-3">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -207,7 +218,11 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
                   </label>
                   <div className="flex items-center gap-2">
                     <span className="whitespace-nowrap rounded bg-gray-100 px-2 py-1 text-sm font-medium text-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                      {t('asset.detail.imageToText')}
+                      {isTextFile()
+                        ? t('asset.detail.conversionTypes.text')
+                        : isStepFile()
+                          ? t('asset.detail.conversionTypes.3d-model')
+                          : t('asset.detail.conversionTypes.image')}
                     </span>
                     <span className="text-gray-400 dark:text-gray-500">→</span>
                     <Select value={conversionType} onValueChange={setConversionType}>
@@ -215,12 +230,46 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="text">{t('asset.detail.conversionTypes.text')}</SelectItem>
-                        <SelectItem value="symbol-summary">
-                          {t('asset.detail.conversionTypes.symbol-summary')}
-                        </SelectItem>
-                        <SelectItem value="3d-model">{t('asset.detail.conversionTypes.3d-model')}</SelectItem>
-                        <SelectItem value="neural-model">{t('asset.detail.conversionTypes.neural-model')}</SelectItem>
+                        {isTextFile() ? (
+                          // JSON 文件的转换选项
+                          <>
+                            <SelectItem value="image">{t('asset.detail.conversionTypes.image')}</SelectItem>
+                            <SelectItem value="symbol-summary">
+                              {t('asset.detail.conversionTypes.symbol-summary')}
+                            </SelectItem>
+                            <SelectItem value="3d-model">{t('asset.detail.conversionTypes.3d-model')}</SelectItem>
+                            <SelectItem value="neural-model">
+                              {t('asset.detail.conversionTypes.neural-model')}
+                            </SelectItem>
+                          </>
+                        ) : isStepFile() ? (
+                          // STEP 文件的转换选项
+                          <>
+                            <SelectItem value="image">{t('asset.detail.conversionTypes.image')}</SelectItem>
+                            <SelectItem value="text">{t('asset.detail.conversionTypes.text')}</SelectItem>
+                            <SelectItem value="symbol-summary">
+                              {t('asset.detail.conversionTypes.symbol-summary')}
+                            </SelectItem>
+                            <SelectItem value="neural-model">
+                              {t('asset.detail.conversionTypes.neural-model')}
+                            </SelectItem>
+                          </>
+                        ) : isImageFile() ? (
+                          // 图片文件的转换选项
+                          <>
+                            <SelectItem value="text">{t('asset.detail.conversionTypes.text')}</SelectItem>
+                            <SelectItem value="symbol-summary">
+                              {t('asset.detail.conversionTypes.symbol-summary')}
+                            </SelectItem>
+                            <SelectItem value="3d-model">{t('asset.detail.conversionTypes.3d-model')}</SelectItem>
+                            <SelectItem value="neural-model">
+                              {t('asset.detail.conversionTypes.neural-model')}
+                            </SelectItem>
+                          </>
+                        ) : (
+                          // 其他文件的转换选项
+                          <SelectItem value="text">{t('asset.detail.conversionTypes.text')}</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <Button
@@ -235,7 +284,7 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
                   </div>
                 </div>
               </div>
-            )}
+            }
           </Card>
         </div>
       </div>

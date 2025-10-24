@@ -4357,10 +4357,10 @@
       "unknownCreator": "未知创建者",
       "unknownTime": "未知时间",
       "conversion": "转换",
-      "imageToText": "图片",
       "startConversion": "开始转换",
       "previewNotSupported": "暂不支持预览",
       "conversionTypes": {
+        "image": "图片",
         "text": "文本",
         "symbol-summary": "符号概括",
         "3d-model": "3D模型",

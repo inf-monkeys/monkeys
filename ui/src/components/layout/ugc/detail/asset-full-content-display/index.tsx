@@ -9,6 +9,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/utils';
 
+import { LazyAssetPreview } from './components/lazy-asset-preview';
+
 interface IAssetFullContentDisplayProps {
   asset: any;
   className?: string;
@@ -20,7 +22,7 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
   const [error, setError] = useState<string>('');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState('content');
+  const [activeTab, setActiveTab] = useState('preview');
 
   // 获取文件类型
   const getFileType = () => {
@@ -63,34 +65,9 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
     return { content: truncatedContent, isTruncated: true };
   };
 
-  // 格式化JSON内容
-  const formatJsonContent = (jsonString: string) => {
-    try {
-      const parsed = JSON.parse(jsonString);
-      return JSON.stringify(parsed, null, 2);
-    } catch {
-      return jsonString;
-    }
-  };
-
   // 获取原始内容（限制行数）
   const getRawContent = () => {
-    const { content: limitedContent, isTruncated } = limitContentLines(content);
-    return limitedContent;
-  };
-
-  // 获取格式化内容（限制行数）
-  const getFormattedContent = () => {
-    const fileType = getFileType();
-    let formattedContent: string;
-
-    if (fileType === 'json') {
-      formattedContent = formatJsonContent(content);
-    } else {
-      formattedContent = content;
-    }
-
-    const { content: limitedContent, isTruncated } = limitContentLines(formattedContent);
+    const { content: limitedContent } = limitContentLines(content);
     return limitedContent;
   };
 
@@ -202,10 +179,10 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex h-full w-full flex-col">
             <TabsList className="grid w-full flex-shrink-0 grid-cols-2 bg-gray-100 dark:bg-gray-800">
               <TabsTrigger
-                value="content"
+                value="preview"
                 className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-white dark:data-[state=active]:shadow-md"
               >
-                格式化内容
+                {getFileType() === 'json' ? '智能预览' : '格式化内容'}
               </TabsTrigger>
               <TabsTrigger
                 value="raw"
@@ -215,17 +192,23 @@ export const AssetFullContentDisplay: React.FC<IAssetFullContentDisplayProps> = 
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="content" className="mt-0 flex-1 overflow-hidden">
-              <ScrollArea className={cn('h-full w-full', isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-full')}>
-                <pre
-                  className={cn(
-                    'overflow-hidden whitespace-pre-wrap break-words p-4 font-mono text-sm',
-                    fileType === 'json' ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200',
-                  )}
-                >
-                  {getFormattedContent()}
-                </pre>
-              </ScrollArea>
+            <TabsContent value="preview" className="mt-0 flex-1 overflow-hidden">
+              {getFileType() === 'json' ? (
+                <LazyAssetPreview
+                  content={content}
+                  fileName={asset?.name || asset?.displayName || '未知文件'}
+                  className="h-full"
+                  style={{ height: isFullscreen ? 'calc(100vh - 200px)' : '100%' }}
+                  maxContentLength={50000}
+                  enablePartialRender={true}
+                />
+              ) : (
+                <ScrollArea className={cn('h-full w-full', isFullscreen ? 'h-[calc(100vh-200px)]' : 'h-full')}>
+                  <pre className="overflow-hidden whitespace-pre-wrap break-words p-4 font-mono text-sm text-gray-800 dark:text-gray-200">
+                    {getRawContent()}
+                  </pre>
+                </ScrollArea>
+              )}
             </TabsContent>
 
             <TabsContent value="raw" className="mt-0 flex-1 overflow-hidden">
