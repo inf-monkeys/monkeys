@@ -154,16 +154,6 @@ export const UgcView = <E extends object>({
     [setStoredFilter, setStoredPagination],
   );
 
-  // 更新搜索关键词
-  const setSearch = useCallback(
-    (newSearch: string) => {
-      setStoredSearch(newSearch);
-      // 搜索时重置分页到第一页
-      setStoredPagination({ pageIndex: 0 });
-    },
-    [setStoredSearch, setStoredPagination],
-  );
-
   // 更新排序条件
   // const setSortCondition = useCallback(
   //   (newSortCondition: ISortCondition) => {
@@ -186,12 +176,9 @@ export const UgcView = <E extends object>({
   // 防抖：用户停止输入 500ms 后才触发搜索
   useDebounceEffect(
     () => {
-      setSearch(searchInput);
+      setStoredSearch(searchInput);
       // 搜索时重置分页到第一页
-      setPagination((prev) => ({
-        ...prev,
-        pageIndex: 0,
-      }));
+      setStoredPagination({ pageIndex: 0 });
     },
     [searchInput],
     { wait: 500 },
