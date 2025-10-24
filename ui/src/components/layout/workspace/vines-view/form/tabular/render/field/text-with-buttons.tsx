@@ -178,7 +178,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
             }}
           >
             <Book className="h-4 w-4 text-gray-800 dark:text-white" />
-            提示词词典
+            {t('workspace.pre-view.actuator.execution-form.knowledge-graph.button')}
           </Button>
         </div>
       )}
@@ -187,7 +187,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-w-3xl">
             <DialogHeader>
-              <DialogTitle>提示词词典</DialogTitle>
+              <DialogTitle>{t('workspace.pre-view.actuator.execution-form.knowledge-graph.title')}</DialogTitle>
             </DialogHeader>
             <TooltipProvider>
               <Tabs value={activeL1 ?? undefined} onValueChange={setActiveL1}>

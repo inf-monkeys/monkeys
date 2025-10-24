@@ -2,13 +2,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useEventEmitter } from 'ahooks';
 import { capitalize } from 'lodash';
-import { History } from 'lucide-react';
+import { ArrowLeft, History } from 'lucide-react';
 import { Editor, TLShapeId } from 'tldraw';
 
-import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
+import { useWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
@@ -408,6 +409,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
   // mini iframe 集成：折叠时显示
   const [miniPage, setMiniPage] = useState<any | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyPageSize, setHistoryPageSize] = useState(8);
   const miniEvent$ = useEventEmitter<any>();
   // agent 嵌入：在左侧 sidebar 内显示
   const [agentVisible, setAgentVisible] = useState(false);
@@ -417,7 +420,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
     return () => window.removeEventListener('vines:toggle-agent-embed', toggle as any);
   }, []);
   // 获取执行历史（用于历史记录视图）
-  const { data: allOutputsPages } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
+  const { data: allOutputsPages } = useWorkflowExecutionAllOutputs({ limit: 1000, page: 1 });
   // 文本归一化：支持多语言对象 { 'zh-CN': '...', en: '...' }
   const normalizeText = useCallback((val: any): string => {
     if (typeof val === 'string') return val;
@@ -452,6 +455,41 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
       window.removeEventListener('vines:close-pinned-page-mini', closeHandler as any);
     };
   }, []);
+
+  // 当历史记录打开时，重置页码为1
+  useEffect(() => {
+    if (historyOpen) {
+      setHistoryPage(1);
+    }
+  }, [historyOpen]);
+
+  // 根据页面高度计算历史记录每页显示的数量
+  useEffect(() => {
+    if (!miniPage || !historyOpen) return;
+    
+    // 固定显示8张图片，不需要自适应
+    // const timer = setTimeout(() => {
+    //   // 假设每行高度约 90px（图片高度）+ 8px（gap）= 98px
+    //   // 标题高度：40px，分页组件高度：60px
+    //   // 可用高度 = 面板高度 - 标题 - 分页组件
+    //   const itemHeight = 98;
+    //   const headerHeight = 40;
+    //   const paginationHeight = 60;
+    //   const padding = 24; // 上下 padding
+    //   
+    //   // 获取面板高度
+    //   const panel = document.querySelector('.layer-panel-content');
+    //   if (panel) {
+    //     const panelHeight = panel.clientHeight;
+    //     const availableHeight = panelHeight - headerHeight - paginationHeight - padding;
+    //     const rows = Math.floor(availableHeight / itemHeight);
+    //     const itemsPerPage = Math.max(4, rows * 2); // 每行2个，至少显示4个
+    //     setHistoryPageSize(itemsPerPage);
+    //   }
+    // }, 100);
+    
+    // return () => clearTimeout(timer);
+  }, [miniPage, historyOpen]);
 
   // 折叠：左侧除顶栏外的区域
   const [isLeftBodyCollapsed, setIsLeftBodyCollapsed] = useState(false);
@@ -2598,21 +2636,24 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                   );
                 })()}
                 <button
-                  title={historyOpen ? '隐藏历史' : '显示历史'}
+                  title={historyOpen ? '返回' : '显示历史'}
                   onClick={() => setHistoryOpen(!historyOpen)}
                   style={{
-                    width: 28,
+                    minWidth: 28,
                     height: 28,
                     borderRadius: 6,
                     border: '1px solid #e5e7eb',
-                    background: historyOpen ? '#f3f4f6' : '#fff',
+                    background: '#fff',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'flex-start',
+                    padding: '0 8px',
+                    gap: 6,
                     cursor: 'pointer',
                   }}
                 >
-                  <History size={14} />
+                  {historyOpen ? <ArrowLeft size={14} color="#6b7280" /> : <History size={14} color="#6b7280" />}
+                  <span style={{ fontSize: 12, color: '#6b7280' }}>{historyOpen ? '返回' : '历史记录'}</span>
                 </button>
               </div>
             </div>
@@ -2632,15 +2673,19 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
               </div>
             )}
             {historyOpen && (
-              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8, height: '100%', overflow: 'hidden' }}>
                 <div style={{ fontSize: 12, color: '#6b7280' }}>历史记录</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+                <div style={{ flex: 1, overflow: 'hidden', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
                   {(() => {
                     try {
-                      const flat = (allOutputsPages?.flat?.() ?? []) as any[];
-                      const items = newConvertExecutionResultToItemList(flat);
+                      const items = newConvertExecutionResultToItemList(allOutputsPages ?? []);
                       const workflowId = miniPage?.workflowId || miniPage?.workflow?.id;
-                      const list = items.filter((it: any) => it?.workflowId === workflowId).slice(0, 12);
+                      const allItems = items.filter((it: any) => it?.workflowId === workflowId);
+                      const totalPages = Math.ceil(allItems.length / historyPageSize);
+                      const startIndex = (historyPage - 1) * historyPageSize;
+                      const endIndex = startIndex + historyPageSize;
+                      const list = allItems.slice(startIndex, endIndex);
+                      
                       if (list.length === 0)
                         return <div style={{ gridColumn: '1 / -1', color: '#9ca3af', fontSize: 12 }}>暂无历史</div>;
                       return list.map((it: any, idx: number) => {
@@ -2658,7 +2703,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                               }}
                             >
                               {/* 这里可替换为 thumbUrl */}
-                              <img src={data} style={{ width: '100%', height: 90, objectFit: 'cover' }} />
+                              <img src={data} style={{ width: '100%', height: 150, objectFit: 'cover' }} />
                             </div>
                           );
                         }
@@ -2670,7 +2715,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                               borderRadius: 8,
                               padding: 8,
                               fontSize: 12,
-                              maxHeight: 90,
+                              maxHeight: 120,
                               overflow: 'auto',
                             }}
                           >
@@ -2685,6 +2730,39 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                     }
                   })()}
                 </div>
+                {(() => {
+                  try {
+                    const items = newConvertExecutionResultToItemList(allOutputsPages ?? []);
+                    const workflowId = miniPage?.workflowId || miniPage?.workflow?.id;
+                    const allItems = items.filter((it: any) => it?.workflowId === workflowId);
+                    const totalPages = Math.ceil(allItems.length / historyPageSize);
+                    
+                    if (totalPages <= 1) return null;
+                    
+                    return (
+                      <div style={{ paddingTop: 8, borderTop: '1px solid #e5e7eb', width: '100%', flexShrink: 0 }}>
+                        <Pagination className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                          <PaginationContent className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                            <PaginationItem>
+                              <PaginationPrevious 
+                                onClick={() => setHistoryPage(Math.max(1, historyPage - 1))}
+                                style={{ cursor: historyPage === 1 ? 'not-allowed' : 'pointer', opacity: historyPage === 1 ? 0.5 : 1 }}
+                              />
+                            </PaginationItem>
+                            <PaginationItem>
+                              <PaginationNext 
+                                onClick={() => setHistoryPage(Math.min(totalPages, historyPage + 1))}
+                                style={{ cursor: historyPage === totalPages ? 'not-allowed' : 'pointer', opacity: historyPage === totalPages ? 0.5 : 1 }}
+                              />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                      </div>
+                    );
+                  } catch {
+                    return null;
+                  }
+                })()}
               </div>
             )}
           </div>

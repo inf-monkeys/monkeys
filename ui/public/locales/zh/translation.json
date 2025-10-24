@@ -3768,6 +3768,10 @@
         "execution-form": {
           "string": "请输入{{displayName}}",
           "select": "请选择{{displayName}}",
+          "knowledge-graph": {
+            "button": "绘画知识图谱",
+            "title": "绘画知识图谱"
+          },
           "file": {
             "label": "请输入文件直链",
             "click-to-upload": "点击上传文件",

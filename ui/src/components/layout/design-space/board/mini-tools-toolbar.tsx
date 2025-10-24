@@ -93,13 +93,16 @@ export const MiniToolsToolbar: React.FC = () => {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    // 简单直接的切换逻辑：总是先关闭所有状态，然后打开目标小工具
-                    // 这样可以避免复杂的状态判断和中间状态问题
+                    // 如果当前应用已经打开，则关闭它
+                    if (miniActive && currentMiniPageId === page.id) {
+                      window.dispatchEvent(new CustomEvent('vines:close-pinned-page-mini'));
+                      return;
+                    }
 
-                    // 1. 先关闭所有可能的状态
+                    // 否则，关闭所有可能的状态，然后打开目标小工具
                     window.dispatchEvent(new CustomEvent('vines:close-pinned-page-mini'));
 
-                    // 2. 短暂延迟后打开目标小工具
+                    // 短暂延迟后打开目标小工具
                     setTimeout(() => {
                       window.dispatchEvent(
                         new CustomEvent('vines:open-pinned-page-mini', { detail: { pageId: page.id, page } }),

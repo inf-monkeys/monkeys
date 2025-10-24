@@ -3745,6 +3745,10 @@
         "execution-form": {
           "string": "Enter {{displayName}}",
           "select": "Select {{displayName}}",
+          "knowledge-graph": {
+            "button": "Painting Knowledge Graph",
+            "title": "Painting Knowledge Graph"
+          },
           "file": {
             "label": "Please enter the file url",
             "click-to-upload": "Click to upload file",

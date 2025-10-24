@@ -48,9 +48,9 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
     console.log('Smart optimize for:', name);
   };
 
-  // 提示词词典处理函数
+  // 知识图谱处理函数
   const handleShowDictionary = () => {
-    // 这里可以添加显示提示词词典的逻辑
+    // 这里可以添加显示知识图谱的逻辑
     console.log('Show dictionary for:', name);
   };
 
@@ -104,7 +104,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
               onClick={handleShowDictionary}
             >
               <Book className="h-4 w-4 text-gray-800 dark:text-white" />
-              提示词词典
+              {t('workspace.pre-view.actuator.execution-form.knowledge-graph.button')}
             </Button>
           </div>
         )}
