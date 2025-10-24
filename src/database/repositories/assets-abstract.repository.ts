@@ -14,6 +14,13 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
 
   public async findAssetIdsByCommonFilter(assetType: AssetType, filter: AssetFilter, assetIdField: string = 'id') {
     const condition: FindOptionsWhere<BaseAssetEntity> = {};
+
+    // 处理搜索关键词
+    if (filter.search && typeof filter.search === 'string' && filter.search.trim()) {
+      const searchTerm = filter.search.trim();
+      condition.displayName = searchTerm;
+    }
+
     if (filter.createdTimestamp) {
       const [startCreatedTimestamp, endCreatedTimestamp] = filter.createdTimestamp;
       if (startCreatedTimestamp && endCreatedTimestamp) {
@@ -47,9 +54,26 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     if (filter.userIds?.length) {
       condition.creatorUserId = In(filter.userIds);
     }
-    const assets = await this.repository.find({
-      where: condition as unknown as FindOptionsWhere<E>,
-    });
+
+    let assets: E[];
+
+    // 如果有搜索关键词，使用模糊搜索
+    if (filter.search && typeof filter.search === 'string' && filter.search.trim()) {
+      const searchTerm = filter.search.trim();
+      assets = await this.repository
+        .createQueryBuilder('asset')
+        .where(condition)
+        .andWhere('(asset.displayName ILIKE :search OR asset.description ILIKE :search)', {
+          search: `%${searchTerm}%`,
+        })
+        .getMany();
+    } else {
+      // 无搜索关键词，使用原始查询
+      assets = await this.repository.find({
+        where: condition as unknown as FindOptionsWhere<E>,
+      });
+    }
+
     return assets.map((x) => x.getAssetId());
   }
 
@@ -78,11 +102,24 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     totalCount: number;
   }> {
     const [DEFAULT_PAGE, DEFAULT_LIMIT] = [1, 24];
-    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, filter, orderBy = 'DESC', orderColumn = 'createdTimestamp' } = dto ?? {};
+    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, filter, orderBy = 'DESC', orderColumn = 'createdTimestamp', search } = dto ?? {};
     const authorizedIds = await this.assetCommonRepository.listAuthorizedAssetIds(teamId, assetType);
     let idsConstraints = [];
     if (filter) {
-      idsConstraints = await this.findAssetIdsByCommonFilter(assetType, filter);
+      const filterWithSearch = { ...filter };
+      if (search && typeof search === 'string' && search.trim()) {
+        filterWithSearch.search = search.trim();
+      }
+      idsConstraints = await this.findAssetIdsByCommonFilter(assetType, filterWithSearch);
+      if (!idsConstraints.length) {
+        return {
+          totalCount: 0,
+          list: [],
+        };
+      }
+    } else if (search && typeof search === 'string' && search.trim()) {
+      // 如果只有搜索参数没有filter
+      idsConstraints = await this.findAssetIdsByCommonFilter(assetType, { search: search.trim() });
       if (!idsConstraints.length) {
         return {
           totalCount: 0,
@@ -169,10 +206,23 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     totalCount: number;
   }> {
     const [DEFAULT_PAGE, DEFAULT_LIMIT] = [1, 24];
-    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, filter, orderBy = 'DESC', orderColumn = 'createdTimestamp' } = dto ?? {};
+    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, filter, orderBy = 'DESC', orderColumn = 'createdTimestamp', search } = dto ?? {};
     let idsConstraints = [];
     if (filter) {
-      idsConstraints = await this.findAssetIdsByCommonFilter(assetType, filter);
+      const filterWithSearch = { ...filter };
+      if (search && typeof search === 'string' && search.trim()) {
+        filterWithSearch.search = search.trim();
+      }
+      idsConstraints = await this.findAssetIdsByCommonFilter(assetType, filterWithSearch);
+      if (!idsConstraints.length) {
+        return {
+          totalCount: 0,
+          list: [],
+        };
+      }
+    } else if (search && typeof search === 'string' && search.trim()) {
+      // 如果只有搜索参数没有filter
+      idsConstraints = await this.findAssetIdsByCommonFilter(assetType, { search: search.trim() });
       if (!idsConstraints.length) {
         return {
           totalCount: 0,
