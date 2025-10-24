@@ -38,6 +38,12 @@ export const CUSTOM_NAV_LIST_MAP: Record<string, INavListSidebar> = {
       icon: <BotIcon />,
       to: '/$teamId/nav/concept-design:design-models/visual-generation-model',
     },
+    {
+      id: 'model-training',
+      name: '模型训练',
+      icon: <BotIcon />,
+      to: '/$teamId/nav/concept-design:design-models/model-training',
+    },
   ],
   'concept-design:design-evaluations': [
     {
