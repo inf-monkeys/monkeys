@@ -356,6 +356,12 @@ export const Board: React.FC<BoardProps> = ({
 
   const createFrame = useCallback(
     (editor: Editor, width: number, height: number) => {
+      // 检查画板是否已经存在，避免重复创建
+      const existingFrame = editor.getShape(frameShapeId as any);
+      if (existingFrame) {
+        return;
+      }
+
       const defaultName = showPageAndLayerSidebar ? '默认画板' : 'Design Board';
       editor.createShape({
         type: 'frame',
@@ -373,7 +379,7 @@ export const Board: React.FC<BoardProps> = ({
       // 设置视图以适应画板
       editor.zoomToFit();
     },
-    [showPageAndLayerSidebar],
+    [showPageAndLayerSidebar, frameShapeId],
   );
 
   // 监听选中画板变化（多画板模式）
@@ -463,9 +469,30 @@ export const Board: React.FC<BoardProps> = ({
   const createFrameWithConfig = useCallback(
     (editor: Editor, width: number, height: number) => {
       if (!createDefaultFrame) return;
+      
+      // 在多画板模式下，检查是否应该创建默认画板
+      if (!oneOnOne) {
+        // 检查是否已经有任何画板存在
+        const allShapes = editor.getCurrentPageShapes();
+        const hasAnyFrame = allShapes.some((shape) => shape.type === 'frame');
+        
+        // 如果已经有画板，说明用户已经在使用，不需要创建默认画板
+        if (hasAnyFrame) return;
+        
+        // 如果没有任何画板，检查存储中是否有内容
+        // 如果有内容但没有画板，说明用户可能删除了所有画板，尊重用户的选择
+        try {
+          const allShapesCount = allShapes.length;
+          // 如果页面中有其他形状但没有画板，说明用户是有意删除画板的
+          if (allShapesCount > 0) return;
+        } catch (error) {
+          // 忽略错误
+        }
+      }
+      
       createFrame(editor, width, height);
     },
-    [createFrame, createDefaultFrame],
+    [createFrame, createDefaultFrame, oneOnOne],
   );
 
   // 监听左侧面板折叠事件以调整外层容器高度

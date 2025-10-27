@@ -10,6 +10,8 @@ export const downloadFile = (file: File | Blob, filename?: string) => {
 export const getImageSize = (url: string): Promise<{ width: number; height: number }> => {
   return new Promise<{ width: number; height: number }>((resolve, reject) => {
     const img = new Image();
+    // 设置 crossOrigin 属性以支持跨域图片加载
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
       resolve({ width: img.naturalWidth, height: img.naturalHeight });
     };
