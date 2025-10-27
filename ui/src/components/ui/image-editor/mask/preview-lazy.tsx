@@ -56,7 +56,7 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
         initial={{ opacity: 0 }}
         animate={{ opacity: visible ? 1 : 0, height: visible ? 500 : 253 }}
         exit={{ opacity: 0 }}
-        className={cn('pointer-events-none top-0 size-full', visible && 'pointer-events-auto z-20', className)}
+        className={cn('pointer-events-none top-0 z-0 size-full', visible && 'pointer-events-auto z-20', className)}
       >
         <VinesImageMaskEditor
           visible={visible}
@@ -131,7 +131,7 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
       </motion.div>
       <motion.div
         key="field-image-mask-editor-preview"
-        className={cn('vines-center group absolute size-full', visible && 'pointer-events-none z-0')}
+        className={cn('vines-center group absolute z-10 size-full', visible && 'pointer-events-none z-0')}
         initial={{ opacity: 0 }}
         animate={{ opacity: visible ? 0 : 1 }}
         exit={{ opacity: 0 }}
