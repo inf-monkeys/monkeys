@@ -124,14 +124,18 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
     });
   });
 
-  // lock frame
+  // lock frame（仅在单画板模式下保护默认画板）
   useEffect(() => {
     if (!editor) return;
-    editor.sideEffects.registerBeforeDeleteHandler('shape', (shape) => {
-      if (shape.id === frameShapeId) return false;
-      return;
-    });
-  }, [editor]);
+    const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
+    // 只在单画板模式下阻止删除默认画板
+    if (oneOnOne) {
+      editor.sideEffects.registerBeforeDeleteHandler('shape', (shape) => {
+        if (shape.id === frameShapeId) return false;
+        return;
+      });
+    }
+  }, [editor, oem]);
 
   // 监听来自左侧布局切换按钮的事件，联动右侧侧栏显示/隐藏
   useEffect(() => {

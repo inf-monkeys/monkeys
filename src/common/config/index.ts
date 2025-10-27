@@ -111,6 +111,7 @@ export type CustomizationFormView = {
 export type CustomizationDesignProjects = {
   oneOnOne: boolean;
   newTabOpenBoard: boolean;
+  createDefaultFrame: boolean;
   showPageMenu: boolean;
   showMainMenu: boolean;
   showStylePanel: boolean;
@@ -596,6 +597,7 @@ export const config: Config = {
       designProjects: {
         oneOnOne: readConfig('server.customization.designProjects.oneOnOne', true),
         newTabOpenBoard: readConfig('server.customization.designProjects.newTabOpenBoard', true),
+        createDefaultFrame: readConfig('server.customization.designProjects.createDefaultFrame', true),
         showPageMenu: readConfig('server.customization.designProjects.showPageMenu', false),
         showMainMenu: readConfig('server.customization.designProjects.showMainMenu', false),
         showStylePanel: readConfig('server.customization.designProjects.showStylePanel', false),

@@ -344,6 +344,8 @@ export const Board: React.FC<BoardProps> = ({
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
   // 是否展示左侧 页面+图层 sidebar（默认 false）
   const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false);
+  // 是否自动创建默认画板（默认 true）
+  const createDefaultFrame = get(oem, 'theme.designProjects.createDefaultFrame', true);
 
   const createFrame = useCallback(
     (editor: Editor, width: number, height: number) => {
@@ -448,7 +450,16 @@ export const Board: React.FC<BoardProps> = ({
     }
 
     return comps;
-  }, [oem, miniPage]); // 当oem或miniPage发生变化时重新创建
+  }, [oem, miniPage, createDefaultFrame]); // 当oem或miniPage发生变化时重新创建
+
+  // 创建 frame 函数引用 createDefaultFrame
+  const createFrameWithConfig = useCallback(
+    (editor: Editor, width: number, height: number) => {
+      if (!createDefaultFrame) return;
+      createFrame(editor, width, height);
+    },
+    [createFrame, createDefaultFrame],
+  );
 
   // 监听左侧面板折叠事件以调整外层容器高度
   React.useEffect(() => {
@@ -659,11 +670,14 @@ export const Board: React.FC<BoardProps> = ({
             persistenceKey={persistenceKey}
             onMount={(editor: Editor) => {
               setEditor(editor);
-              editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
-                if (shape.id === frameShapeId) {
-                  return false;
-                }
-              });
+              // 只在单画板模式下保护默认画板不被删除
+              if (oneOnOne) {
+                editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
+                  if (shape.id === frameShapeId) {
+                    return false;
+                  }
+                });
+              }
 
               editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
                 if (prevShape.id === frameShapeId) {
@@ -690,9 +704,9 @@ export const Board: React.FC<BoardProps> = ({
                 return nextShape;
               });
 
-              // 如果提供了画布尺寸，则创建有界 frame
+              // 如果提供了画布尺寸且启用自动创建，则创建有界 frame
               if (canvasWidth && canvasHeight) {
-                createFrame(editor, canvasWidth, canvasHeight);
+                createFrameWithConfig(editor, canvasWidth, canvasHeight);
               }
 
               // 将默认英文页面名（如 Page 1 / Page1）改为中文“页面1”
