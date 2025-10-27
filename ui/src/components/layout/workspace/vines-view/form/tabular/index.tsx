@@ -25,6 +25,10 @@ interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
   height: string | number;
   theme?: CustomizationFormView['tabular']['theme'];
+  appInfo?: {
+    appName?: string;
+    appIcon?: string;
+  };
 }
 
 export const VinesTabular: React.FC<IVinesTabularProps> = ({
@@ -34,6 +38,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   height,
   onWorkflowStart,
   theme = 'default',
+  appInfo,
 }) => {
   const { t } = useTranslation();
 
@@ -83,6 +88,20 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
       try {
         const instanceId = await vines.start({ inputData, onlyStart: true });
         if (instanceId) {
+          // 触发创建占位图事件
+          if (appInfo) {
+            window.dispatchEvent(
+              new CustomEvent('vines:create-placeholder', {
+                detail: {
+                  instanceId,
+                  workflowId: vines.workflowId,
+                  appName: appInfo.appName || 'AI应用',
+                  appIcon: appInfo.appIcon,
+                },
+              }),
+            );
+          }
+
           if (
             !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
             oem?.theme?.views?.form?.toast?.afterCreate !== false

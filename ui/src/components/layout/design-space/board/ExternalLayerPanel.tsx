@@ -2664,7 +2664,19 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                     <CanvasStoreProvider createStore={createCanvasStore}>
                       <VinesViewWrapper workflowId={miniPage?.workflowId || miniPage?.workflow?.id}>
                         <ExecutionStoreProvider createStore={createExecutionStore}>
-                          <VinesTabular className="h-full w-full" event$={miniEvent$} height={'100%'} />
+                          <VinesTabular
+                            className="h-full w-full"
+                            event$={miniEvent$}
+                            height={'100%'}
+                            appInfo={{
+                              appName:
+                                normalizeText(miniPage?.workflow?.displayName) ||
+                                normalizeText(miniPage?.workflow?.name) ||
+                                normalizeText(miniPage?.name) ||
+                                '未命名应用',
+                              appIcon: miniPage?.workflow?.iconUrl || DEFAULT_WORKFLOW_ICON_URL,
+                            }}
+                          />
                         </ExecutionStoreProvider>
                       </VinesViewWrapper>
                     </CanvasStoreProvider>

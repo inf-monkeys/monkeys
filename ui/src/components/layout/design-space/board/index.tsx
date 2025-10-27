@@ -40,6 +40,7 @@ import { getImageSize } from '@/utils/file';
 import { ExternalLayerPanel } from './ExternalLayerPanel';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
+import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 
 import 'tldraw/tldraw.css';
@@ -341,6 +342,8 @@ export const Board: React.FC<BoardProps> = ({
   const miniBaselineUrlsRef = React.useRef<Set<string>>(new Set());
   // 跟踪鼠标位置，用于图片插入
   const mousePositionRef = React.useRef<{ x: number; y: number } | null>(null);
+  // 存储instanceId到占位图shapeId的映射
+  const placeholderMapRef = React.useRef<Map<string, string>>(new Map());
 
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
@@ -529,6 +532,32 @@ export const Board: React.FC<BoardProps> = ({
     return () => window.removeEventListener('vines:open-pinned-page-mini', handler as any);
   }, []);
 
+  // 监听创建占位图事件
+  React.useEffect(() => {
+    const handler = async (e: any) => {
+      if (!editor) return;
+      const { instanceId, workflowId, appName, appIcon } = e.detail || {};
+      if (!instanceId || !workflowId) return;
+
+      try {
+        console.log('[占位图创建] 开始创建占位图:', { instanceId, workflowId, appName });
+        const shapeId = await createPlaceholderShape(editor, {
+          instanceId,
+          workflowId,
+          appName: appName || 'AI应用',
+          appIcon,
+        });
+        // 保存映射关系
+        placeholderMapRef.current.set(instanceId, shapeId);
+        console.log('[占位图创建] 占位图创建成功，已保存映射:', { instanceId, shapeId });
+      } catch (error) {
+        console.error('[占位图创建] 创建占位图失败:', error);
+      }
+    };
+    window.addEventListener('vines:create-placeholder', handler as any);
+    return () => window.removeEventListener('vines:create-placeholder', handler as any);
+  }, [editor]);
+
   // 记录 mini 打开时间，用于只接收新生成的输出
   React.useEffect(() => {
     if (miniPage) {
@@ -596,44 +625,85 @@ export const Board: React.FC<BoardProps> = ({
         const createdAtStr = raw?.createdAt || raw?.updatedAt || raw?.time || raw?.timestamp;
         const createdMs = createdAtStr ? new Date(createdAtStr).getTime() : 0;
         if (startMs && createdMs && createdMs < startMs) continue;
-        if (String(conv?.render?.type).toLowerCase() !== 'image') continue;
-        const url = conv?.render?.data as string;
-        if (!url || insertedUrlSetRef.current.has(url)) continue;
-        if (miniBaselineUrlsRef.current.has(url)) continue;
-        try {
-          const { width, height } = await getImageSize(url);
-          const id = AssetRecordType.createId();
-          editor.createAssets([
-            {
-              id,
-              type: 'image',
-              typeName: 'asset',
-              props: { name: id, src: url, mimeType: 'image/png', isAnimated: false, h: height, w: width },
-              meta: {},
-            },
-          ]);
-          // 获取当前鼠标位置并转换为画布坐标
-          let imageX = 0;
-          let imageY = 0;
-          if (mousePositionRef.current) {
-            const { x: clientX, y: clientY } = mousePositionRef.current;
-            // 将鼠标坐标转换为画布坐标
-            const viewportBounds = editor.getViewportPageBounds();
-            if (viewportBounds) {
-              const point = editor.screenToPage({ x: clientX, y: clientY });
-              imageX = point.x - width / 2; // 让图片中心对齐鼠标
-              imageY = point.y - height / 2;
-            }
+
+        const resultType = String(conv?.render?.type).toLowerCase();
+        const resultData = conv?.render?.data;
+
+        // 检查是否有对应的占位图需要更新
+        // 优先使用 instanceId（标准字段名）
+        const instanceId = raw?.instanceId || conv?.instanceId || raw?.workflowInstanceId || raw?.executionId;
+        let placeholderShapeId: string | undefined;
+        if (instanceId) {
+          placeholderShapeId = placeholderMapRef.current.get(instanceId);
+          
+          // 调试日志：帮助定位问题
+          if (placeholderShapeId) {
+            console.log('[占位图更新] 找到占位图:', {
+              instanceId,
+              placeholderShapeId,
+              resultType,
+              hasData: !!resultData,
+              dataPreview: typeof resultData === 'string' ? resultData.substring(0, 50) : resultData,
+            });
           }
-          editor.createShape({ 
-            type: 'image', 
-            x: imageX,
-            y: imageY,
-            props: { assetId: id, w: width, h: height } 
-          });
-          insertedUrlSetRef.current.add(url);
-          if (rawId) miniBaselineIdsRef.current.add(String(rawId));
-        } catch {}
+        }
+
+        if (placeholderShapeId) {
+          // 有占位图，检查结果是否有效
+          const isValidResult = (() => {
+            if (!resultData) return false;
+            
+            // 检查是否是空对象（中间态）
+            if (typeof resultData === 'object' && Object.keys(resultData).length === 0) {
+              return false;
+            }
+            
+            // 对于图片类型，必须有有效的URL
+            if (resultType === 'image') {
+              return typeof resultData === 'string' && resultData.length > 0 && resultData.startsWith('http');
+            }
+            
+            // 对于文本类型，必须有实际内容
+            if (resultType === 'text' || resultType === 'string') {
+              const textContent = typeof resultData === 'string' ? resultData : JSON.stringify(resultData);
+              return textContent.length > 0;
+            }
+            
+            // 对于视频类型，必须有有效的URL
+            if (resultType === 'video') {
+              return typeof resultData === 'string' && resultData.length > 0 && resultData.startsWith('http');
+            }
+            
+            // 其他类型，只要有数据就认为有效
+            return true;
+          })();
+
+          if (isValidResult) {
+            // 有有效结果，更新占位图
+            try {
+              console.log('[占位图更新] 开始更新占位图为实际结果');
+              await updateShapeWithResult(editor, placeholderShapeId, resultType, resultData);
+              console.log('[占位图更新] 成功更新占位图');
+              // 更新后移除映射
+              placeholderMapRef.current.delete(instanceId);
+              if (rawId) miniBaselineIdsRef.current.add(String(rawId));
+              // 标记已处理
+              if (resultType === 'image' && typeof resultData === 'string') {
+                insertedUrlSetRef.current.add(resultData);
+              }
+            } catch (error) {
+              console.error('[占位图更新] 更新占位图失败:', error);
+            }
+          } else {
+            console.log('[占位图更新] 结果无效，跳过更新:', {
+              resultType,
+              resultData,
+              isEmpty: typeof resultData === 'object' && Object.keys(resultData).length === 0,
+            });
+          }
+          // 如果结果无效（如空对象{}），不更新占位图，保持占位图显示，继续等待有效结果
+        }
+        // 没有占位图时不再自动插入，只有通过点击生成按钮创建的占位图才会被更新
       }
     })();
   }, [allOutputsPages, editor, miniPage]);
