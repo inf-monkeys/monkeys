@@ -73,7 +73,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
               return (
                 <div
                   key={id}
-                  className="vines-center group relative h-48 min-w-28 overflow-hidden dark:bg-card-dark [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static"
+                  className="vines-center group relative h-48 min-w-28 overflow-hidden dark:bg-card-dark [&_.rc-image-mask]:absolute [&_.rc-image-mask]:z-[1] [&_.rc-image-mask]:h-full [&_.rc-image]:static"
                 >
                   {isUniImagePreview ? (
                     <UniImagePreviewWrapper imageUrl={(meta.originUrl as string | undefined) || src}>
@@ -93,7 +93,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                       }}
                     />
                   )}
-                  <div className="absolute left-2 top-2 flex items-center justify-center gap-1 rounded border border-input bg-slate-1 px-2 py-1.5 shadow dark:bg-card-dark">
+                  <div className="absolute left-2 top-2 z-30 flex items-center justify-center gap-1 rounded border border-input bg-slate-1 px-2 py-1.5 shadow dark:bg-card-dark">
                     {isError ? (
                       <CircleX size={13} />
                     ) : isUploadComplete ? (
@@ -140,28 +140,34 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                     )}
                   </div>
                   {!meta.isUploading && (
-                    <div className="pointer-events-none absolute bottom-2 flex w-full items-center justify-between gap-2 px-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <p className="line-clamp-1 max-w-36 rounded border border-input bg-slate-1 p-1 text-sm leading-none shadow dark:bg-card-dark">
-                            {(meta as any)?.originalName || name}
-                          </p>
-                        </TooltipTrigger>
-                        <TooltipContent>{(meta as any)?.originalName || name}</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            className="!p-1.5"
-                            icon={<Trash2 size={12} />}
-                            variant="outline"
-                            size="small"
-                            onClick={() => uppy.removeFile(id)}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent>{t('common.utils.delete')}</TooltipContent>
-                      </Tooltip>
-                    </div>
+                    <>
+                      {/* 删除按钮 - 右上角 */}
+                      <div className="pointer-events-none absolute right-2 top-2 z-30 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              className="!p-1.5"
+                              icon={<Trash2 size={12} />}
+                              variant="outline"
+                              size="small"
+                              onClick={() => uppy.removeFile(id)}
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>{t('common.utils.delete')}</TooltipContent>
+                        </Tooltip>
+                      </div>
+                      {/* 文件名 - 底部居中（在按钮上方） */}
+                      <div className="pointer-events-none absolute bottom-16 z-10 flex w-full items-center justify-center px-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="line-clamp-1 max-w-36 rounded border border-input bg-slate-1 p-1 text-sm leading-none shadow dark:bg-card-dark">
+                              {(meta as any)?.originalName || name}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>{(meta as any)?.originalName || name}</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </>
                   )}
                 </div>
               );
