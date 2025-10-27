@@ -569,11 +569,17 @@ export const Board: React.FC<BoardProps> = ({
       // 检查是否有shape被更新
       if (entry.changes?.updated) {
         const updatedShapes = Object.keys(entry.changes.updated);
-        // 过滤出真正的shape（排除其他类型的记录）
+        // 过滤出真正的shape（排除其他类型的记录、画板等，但保留占位图）
         const shapeIds = updatedShapes.filter(id => {
           try {
             const record = editor.store.get(id as any);
-            return record && (record as any).typeName === 'shape';
+            if (!record || (record as any).typeName !== 'shape') return false;
+            
+            const shape = record as any;
+            // 排除画板（frame类型）
+            if (shape.type === 'frame') return false;
+            
+            return true;
           } catch {
             return false;
           }
@@ -581,7 +587,22 @@ export const Board: React.FC<BoardProps> = ({
         
         if (shapeIds.length > 0) {
           // 记录最后一个被修改的shape
-          lastModifiedShapeIdRef.current = shapeIds[shapeIds.length - 1];
+          const lastShapeId = shapeIds[shapeIds.length - 1];
+          lastModifiedShapeIdRef.current = lastShapeId;
+          
+          // 输出调试信息
+          try {
+            const shape = editor.getShape(lastShapeId as any);
+            console.log('[形状追踪] 检测到形状更新:', {
+              shapeId: lastShapeId,
+              shapeType: shape?.type,
+              x: (shape as any)?.x,
+              y: (shape as any)?.y,
+              bounds: shape ? editor.getShapeGeometry(shape).bounds : null,
+            });
+          } catch (error) {
+            console.warn('[形状追踪] 无法获取形状详情:', error);
+          }
         }
       }
       
@@ -591,14 +612,35 @@ export const Board: React.FC<BoardProps> = ({
         const shapeIds = addedShapes.filter(id => {
           try {
             const record = editor.store.get(id as any);
-            return record && (record as any).typeName === 'shape';
+            if (!record || (record as any).typeName !== 'shape') return false;
+            
+            const shape = record as any;
+            // 排除画板
+            if (shape.type === 'frame') return false;
+            
+            return true;
           } catch {
             return false;
           }
         });
         
         if (shapeIds.length > 0) {
-          lastModifiedShapeIdRef.current = shapeIds[shapeIds.length - 1];
+          const lastShapeId = shapeIds[shapeIds.length - 1];
+          lastModifiedShapeIdRef.current = lastShapeId;
+          
+          // 输出调试信息
+          try {
+            const shape = editor.getShape(lastShapeId as any);
+            console.log('[形状追踪] 检测到新形状创建:', {
+              shapeId: lastShapeId,
+              shapeType: shape?.type,
+              x: (shape as any)?.x,
+              y: (shape as any)?.y,
+              bounds: shape ? editor.getShapeGeometry(shape).bounds : null,
+            });
+          } catch (error) {
+            console.warn('[形状追踪] 无法获取形状详情:', error);
+          }
         }
       }
     });
@@ -616,6 +658,7 @@ export const Board: React.FC<BoardProps> = ({
       if (!instanceId || !workflowId) return;
 
       try {
+        console.log('[占位图创建] 开始创建占位图', { instanceId, workflowId, appName });
         const shapeId = await createPlaceholderShape(
           editor,
           {
@@ -629,6 +672,7 @@ export const Board: React.FC<BoardProps> = ({
 
         // 保存映射关系
         placeholderMapRef.current.set(instanceId, shapeId);
+        console.log('[占位图创建] 占位图创建成功，保存映射', { instanceId, shapeId });
       } catch (error) {
         console.error('创建占位图失败:', error);
       }
@@ -714,6 +758,17 @@ export const Board: React.FC<BoardProps> = ({
             let placeholderShapeId: string | undefined;
             if (instanceId) {
               placeholderShapeId = placeholderMapRef.current.get(instanceId);
+              
+              // 调试日志
+              if (placeholderShapeId) {
+                console.log('[占位图更新检查]', {
+                  instanceId,
+                  placeholderShapeId,
+                  resultType,
+                  resultData: typeof resultData === 'string' ? resultData.substring(0, 100) : resultData,
+                  rawId,
+                });
+              }
             }
 
         if (placeholderShapeId) {
@@ -748,8 +803,10 @@ export const Board: React.FC<BoardProps> = ({
 
               if (isValidResult) {
                 // 有有效结果，更新占位图
+                console.log('[占位图更新] 开始更新占位图，结果有效');
                 try {
                   await updateShapeWithResult(editor, placeholderShapeId, resultType, resultData);
+                  console.log('[占位图更新] 占位图更新成功');
                   // 更新后移除映射
                   placeholderMapRef.current.delete(instanceId);
                   if (rawId) miniBaselineIdsRef.current.add(String(rawId));
@@ -760,6 +817,13 @@ export const Board: React.FC<BoardProps> = ({
                 } catch (error) {
                   console.error('更新占位图失败:', error);
                 }
+              } else {
+                console.log('[占位图更新] 结果无效，保持占位图', {
+                  resultType,
+                  hasData: !!resultData,
+                  dataType: typeof resultData,
+                  isEmpty: typeof resultData === 'object' ? Object.keys(resultData).length === 0 : false,
+                });
               }
           // 如果结果无效（如空对象{}），不更新占位图，保持占位图显示，继续等待有效结果
         }
