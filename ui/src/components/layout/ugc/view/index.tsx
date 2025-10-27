@@ -240,8 +240,6 @@ export const UgcView = <E extends object>({
     orderColumn: sortCondition.orderColumn,
   });
 
-  const originData = rawData;
-
   const data = useMemo(() => {
     // For tools with category filter, use all data; otherwise use paginated data
     const sourceData = assetType === 'tools' && filter?.cate ? allDataRaw : rawData;
@@ -416,9 +414,7 @@ export const UgcView = <E extends object>({
             onChange: setFilter,
           },
           toolsData:
-            assetType === 'tools'
-              ? ((allDataRaw?.data ?? []) as unknown as IAssetItem<ICommonTool>[])
-              : undefined,
+            assetType === 'tools' ? ((allDataRaw?.data ?? []) as unknown as IAssetItem<ICommonTool>[]) : undefined,
           selectedRuleId,
           onSelectedRuleIdChange: setSelectedRuleId,
         }}
