@@ -26,8 +26,6 @@ export const Tools: React.FC = () => {
         assetKey="tools"
         assetType="tools"
         assetName={tHook('components.layout.main.sidebar.list.tools.label')}
-        isLoadAll
-        showPagination={false}
         useUgcFetcher={useUgcTools}
         createColumns={() => createToolsColumns({ hooks: { navigate } })}
         renderOptions={{

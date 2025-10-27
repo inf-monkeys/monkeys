@@ -4396,7 +4396,8 @@
       "checkId": "Please check if the asset ID is correct",
       "backToList": "Back to List",
       "loading": "Loading",
-      "loadingAssetInfo": "Loading asset information"
+      "loadingAssetInfo": "Loading asset information",
+      "description": "Description"
     }
   }
 }

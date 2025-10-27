@@ -4374,7 +4374,8 @@
       "checkId": "请检查资产ID是否正确",
       "backToList": "返回列表",
       "loading": "加载中",
-      "loadingAssetInfo": "正在获取资产信息"
+      "loadingAssetInfo": "正在获取资产信息",
+      "description": "描述"
     }
   }
 }
