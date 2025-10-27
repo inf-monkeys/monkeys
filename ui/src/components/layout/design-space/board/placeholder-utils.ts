@@ -33,7 +33,7 @@ function extractTextContent(resultData: any): string {
 
 /**
  * 生成占位图的Canvas图片（512x512）
- * 包含应用图标、加载动画效果、应用名称
+ * 包含应用图标、应用名称、生成中状态
  */
 export async function generatePlaceholderImage(info: PlaceholderInfo): Promise<string> {
   const canvas = document.createElement('canvas');
@@ -55,36 +55,19 @@ export async function generatePlaceholderImage(info: PlaceholderInfo): Promise<s
   ctx.lineWidth = 2;
   ctx.strokeRect(0, 0, size, size);
 
-  // 绘制加载动画圆环
+  // 中心位置
   const centerX = size / 2;
-  const centerY = size / 2 - 40;
-  const radius = 60;
+  const centerY = size / 2;
 
-  // 背景圆
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-  ctx.strokeStyle = '#e5e7eb';
-  ctx.lineWidth = 6;
-  ctx.stroke();
-
-  // 加载圆弧（模拟旋转效果）
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, -Math.PI / 2, Math.PI / 2);
-  ctx.strokeStyle = '#8b5cf6';
-  ctx.lineWidth = 6;
-  ctx.lineCap = 'round';
-  ctx.stroke();
-
-  // 如果有图标URL，尝试绘制（但因为是异步的，这里简化处理）
-  // 实际项目中可能需要预加载图标
+  // 如果有图标URL，尝试绘制
   if (info.appIcon && info.appIcon.startsWith('http')) {
     try {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       await new Promise<void>((resolve, reject) => {
         img.onload = () => {
-          const iconSize = 48;
-          ctx.drawImage(img, centerX - iconSize / 2, centerY - iconSize / 2, iconSize, iconSize);
+          const iconSize = 80;
+          ctx.drawImage(img, centerX - iconSize / 2, centerY - 100, iconSize, iconSize);
           resolve();
         };
         img.onerror = () => reject();
@@ -93,30 +76,37 @@ export async function generatePlaceholderImage(info: PlaceholderInfo): Promise<s
         setTimeout(() => reject(), 2000);
       });
     } catch {
-      // 图标加载失败，跳过
+      // 图标加载失败，绘制默认图标
+      ctx.fillStyle = '#8b5cf6';
+      ctx.fillRect(centerX - 40, centerY - 100, 80, 80);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 48px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('AI', centerX, centerY - 60);
     }
   } else {
     // 绘制默认图标（简单的方块）
     ctx.fillStyle = '#8b5cf6';
-    ctx.fillRect(centerX - 24, centerY - 24, 48, 48);
+    ctx.fillRect(centerX - 40, centerY - 100, 80, 80);
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 32px sans-serif';
+    ctx.font = 'bold 48px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('AI', centerX, centerY);
+    ctx.fillText('AI', centerX, centerY - 60);
   }
 
-  // 绘制应用名称
+  // 绘制应用名称（更大的字体）
   ctx.fillStyle = '#374151';
-  ctx.font = 'bold 24px sans-serif';
+  ctx.font = 'bold 36px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.fillText(info.appName, centerX, centerY + radius + 30);
+  ctx.fillText(info.appName, centerX, centerY + 20);
 
-  // 绘制"生成中"文字
-  ctx.fillStyle = '#6b7280';
-  ctx.font = '18px sans-serif';
-  ctx.fillText('生成中...', centerX, centerY + radius + 65);
+  // 绘制"生成中"文字（更大的字体）
+  ctx.fillStyle = '#8b5cf6';
+  ctx.font = 'bold 28px sans-serif';
+  ctx.fillText('生成中...', centerX, centerY + 70);
 
   // 返回Base64图片
   return canvas.toDataURL('image/png');
@@ -125,10 +115,12 @@ export async function generatePlaceholderImage(info: PlaceholderInfo): Promise<s
 /**
  * 在Tldraw编辑器中创建占位图shape
  * 返回创建的shapeId（字符串格式）
+ * @param lastModifiedShapeId 最后修改的shape的ID，用于定位占位图位置
  */
 export async function createPlaceholderShape(
   editor: Editor,
   info: PlaceholderInfo,
+  lastModifiedShapeId?: string | null,
 ): Promise<string> {
   // 生成占位图
   const placeholderImageUrl = await generatePlaceholderImage(info);
@@ -154,10 +146,51 @@ export async function createPlaceholderShape(
     },
   ]);
 
-  // 获取画板中心位置
-  const viewport = editor.getViewportPageBounds();
-  const x = viewport.center.x - size / 2;
-  const y = viewport.center.y - size / 2;
+  // 获取占位图的位置：优先放在最后修改的形状右边，否则放在画板中心
+  let x: number;
+  let y: number;
+  
+  try {
+    let targetShape: any = null;
+    
+    // 优先使用最后修改的shape
+    if (lastModifiedShapeId) {
+      try {
+        const shape = editor.getShape(lastModifiedShapeId as any);
+        if (shape) {
+          targetShape = shape;
+        }
+      } catch (error) {
+        // 忽略错误，继续尝试其他方式
+      }
+    }
+    
+    // 如果没有最后修改的shape，尝试使用选中的shape
+    if (!targetShape) {
+      const selectedShapes = editor.getSelectedShapes();
+      if (selectedShapes.length > 0) {
+        targetShape = selectedShapes[selectedShapes.length - 1];
+      }
+    }
+    
+    if (targetShape) {
+      const bounds = editor.getShapeGeometry(targetShape).bounds;
+      
+      // 放在目标形状的右边，间距20px
+      x = (targetShape.x || 0) + bounds.w + 20;
+      y = targetShape.y || 0;
+    } else {
+      // 没有可用的形状，使用画板中心
+      const viewport = editor.getViewportPageBounds();
+      x = viewport.center.x - size / 2;
+      y = viewport.center.y - size / 2;
+    }
+  } catch (error) {
+    // 出错时fallback到画板中心
+    const viewport = editor.getViewportPageBounds();
+    x = viewport.center.x - size / 2;
+    y = viewport.center.y - size / 2;
+  }
 
   // 创建图像shape
   const shapeId = createShapeId();

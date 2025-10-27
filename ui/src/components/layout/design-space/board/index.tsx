@@ -344,6 +344,8 @@ export const Board: React.FC<BoardProps> = ({
   const mousePositionRef = React.useRef<{ x: number; y: number } | null>(null);
   // 存储instanceId到占位图shapeId的映射
   const placeholderMapRef = React.useRef<Map<string, string>>(new Map());
+  // 追踪最后修改的shapeId
+  const lastModifiedShapeIdRef = React.useRef<string | null>(null);
 
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
@@ -532,6 +534,53 @@ export const Board: React.FC<BoardProps> = ({
     return () => window.removeEventListener('vines:open-pinned-page-mini', handler as any);
   }, []);
 
+  // 监听shape变化，追踪最后修改的shape
+  React.useEffect(() => {
+    if (!editor) return;
+
+    const unsubscribe = editor.store.listen((entry) => {
+      // 检查是否有shape被更新
+      if (entry.changes?.updated) {
+        const updatedShapes = Object.keys(entry.changes.updated);
+        // 过滤出真正的shape（排除其他类型的记录）
+        const shapeIds = updatedShapes.filter(id => {
+          try {
+            const record = editor.store.get(id as any);
+            return record && (record as any).typeName === 'shape';
+          } catch {
+            return false;
+          }
+        });
+        
+        if (shapeIds.length > 0) {
+          // 记录最后一个被修改的shape
+          lastModifiedShapeIdRef.current = shapeIds[shapeIds.length - 1];
+        }
+      }
+      
+      // 检查是否有新创建的shape
+      if (entry.changes?.added) {
+        const addedShapes = Object.keys(entry.changes.added);
+        const shapeIds = addedShapes.filter(id => {
+          try {
+            const record = editor.store.get(id as any);
+            return record && (record as any).typeName === 'shape';
+          } catch {
+            return false;
+          }
+        });
+        
+        if (shapeIds.length > 0) {
+          lastModifiedShapeIdRef.current = shapeIds[shapeIds.length - 1];
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [editor]);
+
   // 监听创建占位图事件
   React.useEffect(() => {
     const handler = async (e: any) => {
@@ -540,18 +589,21 @@ export const Board: React.FC<BoardProps> = ({
       if (!instanceId || !workflowId) return;
 
       try {
-        console.log('[占位图创建] 开始创建占位图:', { instanceId, workflowId, appName });
-        const shapeId = await createPlaceholderShape(editor, {
-          instanceId,
-          workflowId,
-          appName: appName || 'AI应用',
-          appIcon,
-        });
+        const shapeId = await createPlaceholderShape(
+          editor,
+          {
+            instanceId,
+            workflowId,
+            appName: appName || 'AI应用',
+            appIcon,
+          },
+          lastModifiedShapeIdRef.current,
+        );
+
         // 保存映射关系
         placeholderMapRef.current.set(instanceId, shapeId);
-        console.log('[占位图创建] 占位图创建成功，已保存映射:', { instanceId, shapeId });
       } catch (error) {
-        console.error('[占位图创建] 创建占位图失败:', error);
+        console.error('创建占位图失败:', error);
       }
     };
     window.addEventListener('vines:create-placeholder', handler as any);
@@ -629,24 +681,13 @@ export const Board: React.FC<BoardProps> = ({
         const resultType = String(conv?.render?.type).toLowerCase();
         const resultData = conv?.render?.data;
 
-        // 检查是否有对应的占位图需要更新
-        // 优先使用 instanceId（标准字段名）
-        const instanceId = raw?.instanceId || conv?.instanceId || raw?.workflowInstanceId || raw?.executionId;
-        let placeholderShapeId: string | undefined;
-        if (instanceId) {
-          placeholderShapeId = placeholderMapRef.current.get(instanceId);
-          
-          // 调试日志：帮助定位问题
-          if (placeholderShapeId) {
-            console.log('[占位图更新] 找到占位图:', {
-              instanceId,
-              placeholderShapeId,
-              resultType,
-              hasData: !!resultData,
-              dataPreview: typeof resultData === 'string' ? resultData.substring(0, 50) : resultData,
-            });
-          }
-        }
+            // 检查是否有对应的占位图需要更新
+            // 优先使用 instanceId（标准字段名）
+            const instanceId = raw?.instanceId || conv?.instanceId || raw?.workflowInstanceId || raw?.executionId;
+            let placeholderShapeId: string | undefined;
+            if (instanceId) {
+              placeholderShapeId = placeholderMapRef.current.get(instanceId);
+            }
 
         if (placeholderShapeId) {
           // 有占位图，检查结果是否有效
@@ -678,29 +719,21 @@ export const Board: React.FC<BoardProps> = ({
             return true;
           })();
 
-          if (isValidResult) {
-            // 有有效结果，更新占位图
-            try {
-              console.log('[占位图更新] 开始更新占位图为实际结果');
-              await updateShapeWithResult(editor, placeholderShapeId, resultType, resultData);
-              console.log('[占位图更新] 成功更新占位图');
-              // 更新后移除映射
-              placeholderMapRef.current.delete(instanceId);
-              if (rawId) miniBaselineIdsRef.current.add(String(rawId));
-              // 标记已处理
-              if (resultType === 'image' && typeof resultData === 'string') {
-                insertedUrlSetRef.current.add(resultData);
+              if (isValidResult) {
+                // 有有效结果，更新占位图
+                try {
+                  await updateShapeWithResult(editor, placeholderShapeId, resultType, resultData);
+                  // 更新后移除映射
+                  placeholderMapRef.current.delete(instanceId);
+                  if (rawId) miniBaselineIdsRef.current.add(String(rawId));
+                  // 标记已处理
+                  if (resultType === 'image' && typeof resultData === 'string') {
+                    insertedUrlSetRef.current.add(resultData);
+                  }
+                } catch (error) {
+                  console.error('更新占位图失败:', error);
+                }
               }
-            } catch (error) {
-              console.error('[占位图更新] 更新占位图失败:', error);
-            }
-          } else {
-            console.log('[占位图更新] 结果无效，跳过更新:', {
-              resultType,
-              resultData,
-              isEmpty: typeof resultData === 'object' && Object.keys(resultData).length === 0,
-            });
-          }
           // 如果结果无效（如空对象{}），不更新占位图，保持占位图显示，继续等待有效结果
         }
         // 没有占位图时不再自动插入，只有通过点击生成按钮创建的占位图才会被更新
