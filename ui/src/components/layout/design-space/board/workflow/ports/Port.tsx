@@ -16,31 +16,34 @@ export function Port({ shapeId, portId }: { shapeId: TLShapeId; portId: string }
   const state = getPortState(editor)
   const isHinting = state.hintingPort && state.hintingPort.shapeId === shapeId && state.hintingPort.portId === portId
 
+  const isOutput = (port as any).id === 'output'
   return (
     <div
       className="wf-port"
       style={{
         position: 'absolute',
-        left: port.x - 6,
-        top: port.y - 6,
+        left: (port as any).x - 6,
+        top: (port as any).y - 6,
         width: 12,
         height: 12,
         borderRadius: 6,
-        background: '#fff',
+        background: isOutput ? '#0ea5e9' : '#fff',
         border: `2px solid ${isHinting ? '#2563eb' : '#94a3b8'}`,
         boxSizing: 'border-box',
         cursor: 'crosshair',
+        pointerEvents: 'auto',
       }}
       onPointerDown={(e) => {
         // 不阻止默认，让拖拽可被内部状态机识别；仅阻止冒泡避免触发节点选中
         e.stopPropagation()
         // 1) 切到 select
         try { editor.setCurrentTool('select') } catch {}
-        // 2) 创建连接并将当前端绑定到本端口
+        // 2) 创建连接并将当前端绑定到本端口（输出端为 start，输入端为 end）
         const pagePt = editor.inputs.currentPagePoint
         const connectionId = (editor as any).createShapeId ? (editor as any).createShapeId() : `shape:${Date.now()}`
+        const isOutput = (port as any).terminal === 'start'
         editor.createShape({ type: 'wf-connection', id: connectionId as any, x: pagePt.x, y: pagePt.y, props: { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } } as any })
-        createOrUpdateConnectionBinding(editor as any, { id: connectionId } as any, { id: shapeId } as any, { portId, terminal: (port as any).terminal })
+        createOrUpdateConnectionBinding(editor as any, { id: connectionId } as any, { id: shapeId } as any, { portId, terminal: isOutput ? 'start' : 'end' })
         // 3) 转入拖拽另一端的内置状态（dragging_handle）
         const draggingTerminal = ((port as any).terminal === 'start' ? 'end' : 'start') as 'start' | 'end'
         const handles = editor.getShapeHandles(connectionId as any) as TLHandle[] | undefined

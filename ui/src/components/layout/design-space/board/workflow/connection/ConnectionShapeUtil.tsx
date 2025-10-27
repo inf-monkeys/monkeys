@@ -14,6 +14,8 @@ import {
   Vec,
   VecLike,
   vecModelValidator,
+  useEditor,
+  useValue,
 } from 'tldraw'
 import { getPortAtPoint } from '../ports/getPortAtPoint.ts'
 import { updatePortState } from '../ports/portState'
@@ -86,18 +88,18 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 }
 
 function ConnectionPath({ connection }: { connection: ConnectionShape }) {
-  const editor = (Editor as any).useEditor?.() || (React as any).useContext((Editor as any).context)
-  const { start, end } = editor.useValue('terminals', () => getConnectionTerminals(editor, connection), [editor, connection])
+  const editor = useEditor()
+  const { start, end } = useValue('terminals', () => getConnectionTerminals(editor, connection), [editor, connection])
   return (
     <SVGContainer className={classNames('ConnectionShape')}>
-      <path d={getConnectionPath(start, end)} />
+      <path d={getConnectionPath(start, end)} stroke="#94a3b8" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </SVGContainer>
   )
 }
 
 function getConnectionControlPoints(start: VecLike, end: VecLike): [Vec, Vec] {
   const distance = end.x - start.x
-  const adjustedDistance = Math.max(30, distance > 0 ? distance / 3 : Math.min(Math.abs(distance) + 30, 100))
+  const adjustedDistance = Math.max(60, distance > 0 ? distance / 2.8 : Math.min(Math.abs(distance) + 80, 200))
   return [new Vec(start.x + adjustedDistance, start.y), new Vec(end.x - adjustedDistance, end.y)]
 }
 function getConnectionPath(start: VecLike, end: VecLike) {

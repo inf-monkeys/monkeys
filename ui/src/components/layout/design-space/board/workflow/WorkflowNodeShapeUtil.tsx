@@ -91,31 +91,18 @@ function WorkflowNodeComponent({ shape }: { shape: WorkflowNodeShape }) {
     editor.updateShape<WorkflowNodeShape>({ id: shape.id, type: 'wf-node', props: { items: next } as any })
   }
 
-  // 读取与本节点相连的前驱节点的输出（使用 tldraw 默认箭头绑定：end.boundShapeId === shape.id）
+  // 读取与本节点相连的前驱节点的输出（基于连接绑定，严格映射到 item_1..n）
   const getInboundValues = (): number[] => {
     try {
-      const pageShapes = editor.getCurrentPageShapes()
-      const arrows = pageShapes.filter((s: any) => s.type === 'arrow') as any[]
-      const inbound: Array<{ id: string; value: number }> = []
-      for (const a of arrows) {
-        const end = (a as any).props?.end
-        const start = (a as any).props?.start
-        const endBound = end && end.type === 'binding' && end.boundShapeId === shape.id
-        const startBoundId = start && start.type === 'binding' ? start.boundShapeId : null
-        if (endBound && startBoundId) {
-          const src = editor.getShape(startBoundId) as any
-          if (src?.type === 'wf-node') {
-            const v = Number(src?.props?.lastResult ?? 0)
-            if (Number.isFinite(v)) inbound.push({ id: String(a.id), value: v })
-          }
-        }
+      const { getNodeInputPortValues } = require('./nodePorts')
+      const values = getNodeInputPortValues(editor, shape.id)
+      const ordered: number[] = []
+      for (let i = 1; i <= Math.max(2, items.length); i++) {
+        const v = values[`item_${i}`]?.value
+        if (typeof v === 'number') ordered.push(v)
       }
-      // 稳定排序，保证端口-值映射稳定
-      inbound.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
-      return inbound.map((x) => x.value)
-    } catch {
-      return []
-    }
+      return ordered
+    } catch { return [] }
   }
 
   const recompute = () => {
@@ -149,20 +136,25 @@ function WorkflowNodeComponent({ shape }: { shape: WorkflowNodeShape }) {
   }, [editor, shape.id])
 
   return (
-    <HTMLContainer style={{ width: NODE_WIDTH, height: h }}>
-      <div style={{ width: NODE_WIDTH, height: h, borderRadius: 10, background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', border: '1px solid var(--color-panel-contrast-weak)' }}>
+    <HTMLContainer style={{ width: NODE_WIDTH, height: h, pointerEvents: 'all' }}>
+      <div style={{ position: 'relative', width: NODE_WIDTH, height: h, borderRadius: 10, background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', border: '1px solid var(--color-panel-contrast-weak)' }}>
         <div style={{ height: HEADER_H, display: 'flex', alignItems: 'center', padding: '0 12px', fontWeight: 600, borderBottom: '1px solid #eee' }}>
           <span style={{ flex: 1 }}>{shape.props.title}</span>
           <span style={{ color: '#64748b', fontSize: 12 }}>输出: {shape.props.lastResult ?? 0}</span>
         </div>
-        <div style={{ padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 6, position: 'relative' }}>
+        {/* 端口覆盖层，坐标与节点局部坐标一致 */}
+        <div style={{ position: 'absolute', left: 0, top: 0, width: NODE_WIDTH + 12, height: h, pointerEvents: 'none' }}>
+          {/* 输入端口们 */}
+          {Array.from({ length: Math.max(2, items.length) }).map((_, i) => (
+            <Port key={`p-${i+1}`} shapeId={shape.id} portId={`item_${i+1}`} />
+          ))}
+          {/* 输出端口 */}
+          <Port shapeId={shape.id} portId={'output'} />
+        </div>
+        <div style={{ padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
           {Array.from({ length: Math.max(2, items.length) }).map((_, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, height: ROW_H }}>
               <span style={{ width: 40, color: '#475569', fontSize: 12 }}>输入{i + 1}</span>
-              {/* 左侧输入端口 */}
-              <div style={{ position: 'absolute', left: -18, top: 6 + NODE_ROW_HEADER_GAP_PX + ROW_H * i + ROW_H / 2 - 6 }}>
-                <Port shapeId={shape.id} portId={`item_${i}`} />
-              </div>
               <input
                 type="number"
                 defaultValue={items[i] ?? 0}
