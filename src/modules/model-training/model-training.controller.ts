@@ -5,6 +5,8 @@ import { IRequest } from '@/common/typings/request';
 import { ModelTrainingEntity } from '@/database/entities/model-training/model-training';
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AnalyzeTensorboardDto } from './dto/analyze-tensorboard.dto';
+import { AnalyzeTrainingLogDto } from './dto/analyze-training-log.dto';
 import { CreateModelTrainingDto } from './dto/create-model-training.dto';
 import { CreateTestTableUrlDto } from './dto/create-test-table-url.dto';
 import { GetFeishuTableHeadersDto } from './dto/get-feishu-table-headers.dto';
@@ -239,6 +241,26 @@ export class ModelTrainingController {
   })
   async startModelTest(@Body() startModelTestDto: StartModelTestDto) {
     const result = await this.modelTrainingService.startModelTest(startModelTestDto);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Post('analyze-training-log')
+  @ApiOperation({
+    summary: '分析训练日志',
+    description: '根据模型训练ID分析训练日志，获取训练进度和状态信息',
+  })
+  async analyzeTrainingLog(@Body() analyzeTrainingLogDto: AnalyzeTrainingLogDto) {
+    const result = await this.modelTrainingService.analyzeTrainingLog(analyzeTrainingLogDto);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Post('analyze-tensorboard')
+  @ApiOperation({
+    summary: '分析TensorBoard事件文件',
+    description: '根据模型训练ID分析TensorBoard事件文件，获取损失和学习率数据',
+  })
+  async analyzeTensorboard(@Body() analyzeTensorboardDto: AnalyzeTensorboardDto) {
+    const result = await this.modelTrainingService.analyzeTensorboard(analyzeTensorboardDto);
     return new SuccessResponse({ data: result });
   }
 }

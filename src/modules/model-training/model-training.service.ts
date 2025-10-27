@@ -8,6 +8,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
+import { AnalyzeTensorboardDto, AnalyzeTensorboardResponseDto } from './dto/analyze-tensorboard.dto';
+import { AnalyzeTrainingLogDto, AnalyzeTrainingLogResponseDto } from './dto/analyze-training-log.dto';
 import { CreateModelTrainingDto } from './dto/create-model-training.dto';
 import { CreateTestTableUrlDto, CreateTestTableUrlResponseDto } from './dto/create-test-table-url.dto';
 import { FeishuTableHeadersResponseDto, GetFeishuTableHeadersDto } from './dto/get-feishu-table-headers.dto';
@@ -1095,6 +1097,78 @@ export class ModelTrainingService {
     } catch (error) {
       // console.error('开始模型测试失败:', error);
       throw new Error(`开始模型测试失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * 分析训练日志
+   * @param dto 包含模型训练ID的DTO
+   * @returns 训练日志分析结果
+   */
+  async analyzeTrainingLog(dto: AnalyzeTrainingLogDto): Promise<AnalyzeTrainingLogResponseDto> {
+    const { model_training_id } = dto;
+
+    try {
+      // 调用外部API分析训练日志
+      const modelTrainingEndpoint = config.modelTraining?.endpoint || 'http://sh-07.d.run:30025';
+      const apiUrl = `${modelTrainingEndpoint}/api/v1/training/log/analyze`;
+
+      const requestData = {
+        model_training_id,
+      };
+
+      const response = await firstValueFrom(
+        this.httpService.post(apiUrl, requestData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }),
+      );
+
+      if (response.data.code === 200) {
+        return response.data.data;
+      } else {
+        throw new Error(`训练日志分析失败: ${response.data.message}`);
+      }
+    } catch (error) {
+      // console.error('分析训练日志失败:', error);
+      throw new Error(`分析训练日志失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * 分析TensorBoard事件文件
+   * @param dto 包含模型训练ID的DTO
+   * @returns TensorBoard分析结果
+   */
+  async analyzeTensorboard(dto: AnalyzeTensorboardDto): Promise<AnalyzeTensorboardResponseDto> {
+    const { model_training_id } = dto;
+
+    try {
+      // 调用外部API分析TensorBoard事件文件
+      const modelTrainingEndpoint = config.modelTraining?.endpoint || 'http://sh-07.d.run:30025';
+      const apiUrl = `${modelTrainingEndpoint}/api/v1/training/tensorboard/analyze`;
+
+      const requestData = {
+        model_training_id,
+      };
+
+      const response = await firstValueFrom(
+        this.httpService.post(apiUrl, requestData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }),
+      );
+
+      if (response.data.code === 200) {
+        return response.data.data;
+      } else {
+        throw new Error(`TensorBoard分析失败: ${response.data.message}`);
+      }
+    } catch (error) {
+      // console.error('分析TensorBoard失败:', error);
+      throw new Error(`分析TensorBoard失败: ${error.message}`);
     }
   }
 }
