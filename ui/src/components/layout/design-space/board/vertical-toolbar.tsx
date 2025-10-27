@@ -90,6 +90,8 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     { id: 'eraser', label: '橡皮擦', icon: 'tool-eraser' },
     { id: 'text', label: '文本', icon: 'tool-text' },
     { id: 'note', label: '便签', icon: 'tool-note' },
+    // 自定义：工作流 Add 节点
+    { id: 'wf-add', label: 'Add 节点', icon: 'plus' },
   ];
 
   return (
@@ -319,6 +321,29 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     </div>
                   )}
                 </div>
+              );
+            }
+
+            if (tool.id === 'wf-add') {
+              return (
+                <button
+                  key={tool.id}
+                  className={`tool-button`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                      const vp = editor.getViewportPageBounds();
+                      const cx = vp ? vp.x + vp.w / 2 : 0;
+                      const cy = vp ? vp.y + vp.h / 2 : 0;
+                      editor.createShape({ type: 'wf-node', x: cx - 120, y: cy - 80 } as any);
+                    } catch {}
+                  }}
+                  title={tool.label}
+                  style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                >
+                  <TldrawUiIcon icon={tool.icon} />
+                </button>
               );
             }
 

@@ -41,6 +41,10 @@ import { ExternalLayerPanel } from './ExternalLayerPanel';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { VerticalToolbar } from './vertical-toolbar.tsx';
+import { PointingPort } from './workflow/ports/PointingPort';
+import { WorkflowNodeShapeUtil } from './workflow/WorkflowNodeShapeUtil';
+import { ConnectionShapeUtil } from './workflow/connection/ConnectionShapeUtil';
+import { ConnectionBindingUtil } from './workflow/connection/ConnectionBindingUtil';
 
 import 'tldraw/tldraw.css';
 import './layer-panel.css';
@@ -715,6 +719,13 @@ export const Board: React.FC<BoardProps> = ({
               // 立即执行一次，并在下一个宏任务再执行一次，避免初次渲染时覆盖
               renameDefaultPages();
               setTimeout(renameDefaultPages, 0);
+              // 将 pointing_port 注入 select 工具，以支持从端口拖拽连线
+              try {
+                const selectState: any = editor.getStateDescendant('select')
+                if (selectState && typeof selectState.addChild === 'function') {
+                  selectState.addChild(PointingPort as any)
+                }
+              } catch {}
               editor.registerExternalContentHandler('url', async ({ url }) => {
                 // 检查是否是图片 URL
                 try {
@@ -765,8 +776,8 @@ export const Board: React.FC<BoardProps> = ({
               });
             }}
             components={components}
-            shapeUtils={[FixedFrameShapeUtil]}
-            bindingUtils={defaultBindingUtils}
+            shapeUtils={[FixedFrameShapeUtil, WorkflowNodeShapeUtil, ConnectionShapeUtil]}
+            bindingUtils={[...defaultBindingUtils, ConnectionBindingUtil]}
             tools={[...defaultShapeTools, ...defaultTools]}
             assetUrls={defaultEditorAssetUrls}
             overrides={{
