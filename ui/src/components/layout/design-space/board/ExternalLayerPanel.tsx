@@ -2695,15 +2695,27 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                           return (
                             <div
                               key={idx}
+                              draggable
+                              onDragStart={(e) => {
+                                e.dataTransfer.setData('text/plain', data);
+                                e.dataTransfer.effectAllowed = 'copy';
+                              }}
                               style={{
                                 position: 'relative',
                                 overflow: 'hidden',
                                 border: '1px solid #e5e7eb',
                                 borderRadius: 8,
+                                cursor: 'grab',
+                              }}
+                              onMouseDown={(e) => {
+                                e.currentTarget.style.cursor = 'grabbing';
+                              }}
+                              onMouseUp={(e) => {
+                                e.currentTarget.style.cursor = 'grab';
                               }}
                             >
                               {/* 这里可替换为 thumbUrl */}
-                              <img src={data} style={{ width: '100%', height: 150, objectFit: 'cover' }} />
+                              <img src={data} style={{ width: '100%', height: 150, objectFit: 'cover', pointerEvents: 'none' }} />
                             </div>
                           );
                         }

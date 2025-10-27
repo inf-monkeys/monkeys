@@ -339,6 +339,8 @@ export const Board: React.FC<BoardProps> = ({
   const miniBaselineIdsRef = React.useRef<Set<string>>(new Set());
   const miniBaselineReadyRef = React.useRef<boolean>(false);
   const miniBaselineUrlsRef = React.useRef<Set<string>>(new Set());
+  // 跟踪鼠标位置，用于图片插入
+  const mousePositionRef = React.useRef<{ x: number; y: number } | null>(null);
 
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
@@ -508,6 +510,15 @@ export const Board: React.FC<BoardProps> = ({
 
   // Agent 嵌入由 ExternalLayerPanel 控制
 
+  // 监听鼠标移动，记录鼠标位置
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mousePositionRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   // 监听打开 mini 模式应用事件，记录当前 page 信息
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -601,7 +612,25 @@ export const Board: React.FC<BoardProps> = ({
               meta: {},
             },
           ]);
-          editor.createShape({ type: 'image', props: { assetId: id, w: width, h: height } });
+          // 获取当前鼠标位置并转换为画布坐标
+          let imageX = 0;
+          let imageY = 0;
+          if (mousePositionRef.current) {
+            const { x: clientX, y: clientY } = mousePositionRef.current;
+            // 将鼠标坐标转换为画布坐标
+            const viewportBounds = editor.getViewportPageBounds();
+            if (viewportBounds) {
+              const point = editor.screenToPage({ x: clientX, y: clientY });
+              imageX = point.x - width / 2; // 让图片中心对齐鼠标
+              imageY = point.y - height / 2;
+            }
+          }
+          editor.createShape({ 
+            type: 'image', 
+            x: imageX,
+            y: imageY,
+            props: { assetId: id, w: width, h: height } 
+          });
           insertedUrlSetRef.current.add(url);
           if (rawId) miniBaselineIdsRef.current.add(String(rawId));
         } catch {}
@@ -664,7 +693,54 @@ export const Board: React.FC<BoardProps> = ({
       {/* mini iframe 现已整合进 ExternalLayerPanel 内部渲染 */}
 
       {/* tldraw容器 - 全屏显示 */}
-      <div style={{ height: '100%' }}>
+      <div 
+        style={{ height: '100%' }}
+        onDrop={async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // 获取拖拽的图片URL
+          const imageUrl = e.dataTransfer.getData('text/plain');
+          if (!imageUrl || !editor) return;
+          
+          // 获取鼠标位置并转换为画布坐标
+          const dropPoint = editor.screenToPage({ x: e.clientX, y: e.clientY });
+          
+          try {
+            const { width, height } = await getImageSize(imageUrl);
+            const id = AssetRecordType.createId();
+            
+            editor.createAssets([{
+              id,
+              type: 'image',
+              typeName: 'asset',
+              props: { 
+                name: id, 
+                src: imageUrl, 
+                mimeType: 'image/png', 
+                isAnimated: false, 
+                h: height, 
+                w: width 
+              },
+              meta: {},
+            }]);
+            
+            // 将图片放在鼠标位置
+            editor.createShape({ 
+              type: 'image', 
+              x: dropPoint.x - width / 2,
+              y: dropPoint.y - height / 2,
+              props: { assetId: id, w: width, h: height } 
+            });
+          } catch (error) {
+            console.error('Failed to insert image:', error);
+          }
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+        }}
+      >
         <TldrawErrorBoundary>
           <Tldraw
             persistenceKey={persistenceKey}
@@ -729,7 +805,7 @@ export const Board: React.FC<BoardProps> = ({
               // 立即执行一次，并在下一个宏任务再执行一次，避免初次渲染时覆盖
               renameDefaultPages();
               setTimeout(renameDefaultPages, 0);
-              editor.registerExternalContentHandler('url', async ({ url }) => {
+              editor.registerExternalContentHandler('url', async ({ url, point }) => {
                 // 检查是否是图片 URL
                 try {
                   // 获取图片数据
@@ -763,6 +839,8 @@ export const Board: React.FC<BoardProps> = ({
 
                   editor.createShape({
                     type: 'image',
+                    x: point ? point.x - width / 2 : 0,
+                    y: point ? point.y - height / 2 : 0,
                     props: {
                       assetId: assetData.id,
                       w: assetData.width,
