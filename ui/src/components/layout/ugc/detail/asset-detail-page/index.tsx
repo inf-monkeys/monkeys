@@ -19,7 +19,7 @@ interface IAssetDetailPageProps<E extends object> {
 }
 
 export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mutate }: IAssetDetailPageProps<E>) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [conversionType, setConversionType] = useState('text');
 
   // 获取资产的基本信息
@@ -36,6 +36,21 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
     updateTime: asset.updatedTimestamp
       ? new Date(asset.updatedTimestamp).toLocaleDateString('zh-CN')
       : t('asset.detail.unknownTime'),
+    description: (() => {
+      const desc = (asset as any).description;
+      if (!desc) return '';
+      if (typeof desc === 'string') return desc;
+      // 如果是多语言对象，根据当前语言返回
+      if (typeof desc === 'object' && desc !== null) {
+        // 优先尝试当前语言，然后尝试 zh-CN，最后尝试 en-US
+        if (i18n.language === 'zh') {
+          return desc['zh-CN'] || desc['en-US'] || '';
+        } else if (i18n.language === 'en') {
+          return desc['en-US'] || desc['zh-CN'] || '';
+        }
+      }
+      return desc;
+    })(),
   };
 
   // 获取文件类型
@@ -207,6 +222,18 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
                   </div>
                 )}
               </div>
+
+              {/* 图片描述区域 */}
+              {assetInfo.description && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {t('asset.detail.description')}
+                  </label>
+                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200">
+                    {assetInfo.description}
+                  </div>
+                </div>
+              )}
             </CardContent>
 
             {/* 转换功能区域 - 对所有文件类型显示 */}
