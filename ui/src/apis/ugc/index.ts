@@ -184,7 +184,7 @@ export const useUgcTools = (dto: IListUgcDto) => {
   const sortedList = totalList.sort(
     (a, b) => (orderList.indexOf(a.categories?.[0] ?? '') ?? 999) - (orderList.indexOf(b.categories?.[0] ?? '') ?? 0),
   );
-  const sliceList = sortedList.slice(limit * (page - 1), limit);
+  const sliceList = sortedList.slice(limit * (page - 1), limit * page);
 
   const data: IPaginationListData<ICommonTool> = {
     page,

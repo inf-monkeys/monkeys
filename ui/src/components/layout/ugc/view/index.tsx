@@ -243,16 +243,26 @@ export const UgcView = <E extends object>({
   const originData = rawData;
 
   const data = useMemo(() => {
-    const result =
-      rawData && _.isArray(rawData.data)
+    // For tools with category filter, use all data; otherwise use paginated data
+    const sourceData = assetType === 'tools' && filter?.cate ? allDataRaw : rawData;
+
+    let result =
+      sourceData && _.isArray(sourceData.data)
         ? assetType === 'tools' && filter?.cate
-          ? rawData.data.filter((l) =>
+          ? sourceData.data.filter((l) =>
               filter.cate
                 ? (l as unknown as IAssetItem<IWorkflowTool>)?.categories?.includes(filter.cate as ToolCategory)
                 : true,
             )
-          : rawData.data
+          : sourceData.data
         : [];
+
+    // Apply pagination for filtered tools
+    if (assetType === 'tools' && filter?.cate) {
+      const startIndex = pagination.pageIndex * pagination.pageSize;
+      const endIndex = startIndex + pagination.pageSize;
+      result = result.slice(startIndex, endIndex);
+    }
 
     return result.map((it, i) => {
       const { description, displayName } = it as IAssetItem<E> & { displayName?: string };
@@ -264,19 +274,29 @@ export const UgcView = <E extends object>({
         ...(displayName && { displayName: getI18nContent(displayName) }),
       };
     });
-  }, [rawData, filter]);
+  }, [rawData, allDataRaw, filter, assetType, pagination]);
 
-  const pageData = useMemo(
-    () =>
-      rawData
-        ? _.pick(rawData, ['total', 'limit', 'page'])
-        : {
-            total: 0,
-            limit: pagination.pageSize,
-            page: 1,
-          },
-    [rawData],
-  );
+  const pageData = useMemo(() => {
+    // For tools with category filter, total should be the filtered count
+    if (assetType === 'tools' && filter?.cate && allDataRaw) {
+      const filteredCount = allDataRaw.data.filter((l) =>
+        (l as unknown as IAssetItem<IWorkflowTool>)?.categories?.includes(filter.cate as ToolCategory),
+      ).length;
+      return {
+        total: filteredCount,
+        limit: pagination.pageSize,
+        page: pagination.pageIndex + 1,
+      };
+    }
+
+    return rawData
+      ? _.pick(rawData, ['total', 'limit', 'page'])
+      : {
+          total: 0,
+          limit: pagination.pageSize,
+          page: 1,
+        };
+  }, [rawData, allDataRaw, assetType, filter, pagination]);
 
   const handlePreload = (pageIndex: number) =>
     preloadUgcFetcher?.({
@@ -396,7 +416,9 @@ export const UgcView = <E extends object>({
             onChange: setFilter,
           },
           toolsData:
-            assetType === 'tools' ? ((originData?.data ?? []) as unknown as IAssetItem<ICommonTool>[]) : undefined,
+            assetType === 'tools'
+              ? ((allDataRaw?.data ?? []) as unknown as IAssetItem<ICommonTool>[])
+              : undefined,
           selectedRuleId,
           onSelectedRuleIdChange: setSelectedRuleId,
         }}
