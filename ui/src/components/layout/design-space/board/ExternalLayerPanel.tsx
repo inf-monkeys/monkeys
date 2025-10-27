@@ -2511,12 +2511,11 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
         </div>
       ) : miniPage && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
-          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: historyOpen ? 'hidden' : 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {/* 迷你应用顶部信息栏：显示当前工作流名称与描述 */}
             <div
               style={{
-                position: 'sticky',
-                top: 0,
+                flexShrink: 0,
                 zIndex: 1,
                 background: '#fff',
                 padding: '10px 12px',
@@ -2658,7 +2657,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
               </div>
             </div>
             {!historyOpen && (
-              <div style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '111.111111%' }}>
+              <div style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '111.111111%', flex: 1, minHeight: 0 }}>
                 <VinesFlowProvider workflowId={miniPage?.workflowId || miniPage?.workflow?.id || ''}>
                   <FlowStoreProvider createStore={createFlowStore}>
                     <CanvasStoreProvider createStore={createCanvasStore}>
@@ -2685,31 +2684,96 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
               </div>
             )}
             {historyOpen && (
-              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8, height: '100%', overflow: 'hidden' }}>
-                <div style={{ fontSize: 12, color: '#6b7280' }}>历史记录</div>
-                <div style={{ flex: 1, overflow: 'hidden', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <div style={{ fontSize: 12, color: '#6b7280', padding: '12px 12px 8px 12px', flexShrink: 0 }}>历史记录</div>
+                <div style={{ flex: 1, overflow: 'auto', columnCount: 2, columnGap: 8, padding: '0 12px 8px 12px', minHeight: 0 }}>
                   {(() => {
                     try {
                       const items = newConvertExecutionResultToItemList(allOutputsPages ?? []);
                       const workflowId = miniPage?.workflowId || miniPage?.workflow?.id;
-                      const allItems = items.filter((it: any) => it?.workflowId === workflowId);
+                      // 过滤出对应工作流且成功完成的项目（排除失败、超时、取消等状态）
+                      const allItems = items.filter((it: any) => {
+                        const isSameWorkflow = it?.workflowId === workflowId;
+                        const isSuccess = it?.status === 'COMPLETED';
+                        return isSameWorkflow && isSuccess;
+                      });
                       const totalPages = Math.ceil(allItems.length / historyPageSize);
                       const startIndex = (historyPage - 1) * historyPageSize;
                       const endIndex = startIndex + historyPageSize;
                       const list = allItems.slice(startIndex, endIndex);
                       
                       if (list.length === 0)
-                        return <div style={{ gridColumn: '1 / -1', color: '#9ca3af', fontSize: 12 }}>暂无历史</div>;
+                        return <div style={{ columnSpan: 'all', color: '#9ca3af', fontSize: 12 }}>暂无历史</div>;
+                      
+                      // 辅助函数：判断是否是图片URL
+                      const isImageUrl = (str: string): boolean => {
+                        if (!str || typeof str !== 'string') return false;
+                        // 检查是否是URL格式
+                        try {
+                          const url = new URL(str);
+                          // 检查文件扩展名
+                          const ext = url.pathname.toLowerCase().split('.').pop();
+                          return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext || '');
+                        } catch {
+                          // 如果不是有效URL，检查是否是base64图片
+                          return str.startsWith('data:image/');
+                        }
+                      };
+                      
+                      // 辅助函数：提取显示内容（只返回图片或包含outputtext的文本，其他返回null）
+                      const extractDisplayContent = (data: any): { type: 'image' | 'text', content: string } | null => {
+                        // 如果是字符串，检查是否是图片URL
+                        if (typeof data === 'string') {
+                          if (isImageUrl(data)) {
+                            return { type: 'image', content: data };
+                          }
+                          // 尝试解析JSON字符串
+                          try {
+                            const parsed = JSON.parse(data);
+                            if (parsed && typeof parsed === 'object' && parsed.outputtext) {
+                              return { type: 'text', content: String(parsed.outputtext) };
+                            }
+                          } catch {
+                            // 不是JSON，也不是图片，过滤掉
+                            return null;
+                          }
+                          // 不符合条件，过滤掉
+                          return null;
+                        }
+                        
+                        // 如果是对象
+                        if (data && typeof data === 'object') {
+                          // 检查是否有 outputtext 键
+                          if (data.outputtext) {
+                            return { type: 'text', content: String(data.outputtext) };
+                          }
+                          // 检查是否有图片URL字段
+                          for (const key of ['url', 'imageUrl', 'image', 'src']) {
+                            if (data[key] && typeof data[key] === 'string' && isImageUrl(data[key])) {
+                              return { type: 'image', content: data[key] };
+                            }
+                          }
+                          // 不符合条件，过滤掉
+                          return null;
+                        }
+                        
+                        return null;
+                      };
+                      
                       return list.map((it: any, idx: number) => {
-                        const type = String(it?.render?.type || '').toLowerCase();
                         const data = it?.render?.data;
-                        if (type === 'image' && typeof data === 'string') {
+                        const displayContent = extractDisplayContent(data);
+                        
+                        if (!displayContent) return null;
+                        
+                        // 显示图片
+                        if (displayContent.type === 'image') {
                           return (
                             <div
                               key={idx}
                               draggable
                               onDragStart={(e) => {
-                                e.dataTransfer.setData('text/plain', data);
+                                e.dataTransfer.setData('text/plain', displayContent.content);
                                 e.dataTransfer.effectAllowed = 'copy';
                               }}
                               style={{
@@ -2718,6 +2782,10 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                                 border: '1px solid #e5e7eb',
                                 borderRadius: 8,
                                 cursor: 'grab',
+                                marginBottom: 8,
+                                breakInside: 'avoid',
+                                display: 'inline-block',
+                                width: '100%',
                               }}
                               onMouseDown={(e) => {
                                 e.currentTarget.style.cursor = 'grabbing';
@@ -2726,11 +2794,17 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                                 e.currentTarget.style.cursor = 'grab';
                               }}
                             >
-                              {/* 这里可替换为 thumbUrl */}
-                              <img src={data} style={{ width: '100%', height: 150, objectFit: 'cover', pointerEvents: 'none' }} />
+                              {/* 图片等比例缩放，保持宽高比 */}
+                              <img 
+                                src={displayContent.content} 
+                                style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
+                                alt="历史记录"
+                              />
                             </div>
                           );
                         }
+                        
+                        // 显示文本
                         return (
                           <div
                             key={idx}
@@ -2741,16 +2815,20 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                               fontSize: 12,
                               maxHeight: 120,
                               overflow: 'auto',
+                              marginBottom: 8,
+                              breakInside: 'avoid',
+                              display: 'inline-block',
+                              width: '100%',
                             }}
                           >
-                            <pre style={{ margin: 0, fontSize: 11 }}>
-                              {typeof data === 'string' ? data : JSON.stringify(data, null, 2)}
+                            <pre style={{ margin: 0, fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                              {displayContent.content}
                             </pre>
                           </div>
                         );
-                      });
+                      }).filter(Boolean);
                     } catch {
-                      return <div style={{ gridColumn: '1 / -1', color: '#9ca3af', fontSize: 12 }}>历史加载失败</div>;
+                      return <div style={{ columnSpan: 'all', color: '#9ca3af', fontSize: 12 }}>历史加载失败</div>;
                     }
                   })()}
                 </div>
@@ -2758,13 +2836,18 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                   try {
                     const items = newConvertExecutionResultToItemList(allOutputsPages ?? []);
                     const workflowId = miniPage?.workflowId || miniPage?.workflow?.id;
-                    const allItems = items.filter((it: any) => it?.workflowId === workflowId);
+                    // 过滤出对应工作流且成功完成的项目（排除失败、超时、取消等状态）
+                    const allItems = items.filter((it: any) => {
+                      const isSameWorkflow = it?.workflowId === workflowId;
+                      const isSuccess = it?.status === 'COMPLETED';
+                      return isSameWorkflow && isSuccess;
+                    });
                     const totalPages = Math.ceil(allItems.length / historyPageSize);
                     
                     if (totalPages <= 1) return null;
                     
                     return (
-                      <div style={{ paddingTop: 8, borderTop: '1px solid #e5e7eb', width: '100%', flexShrink: 0 }}>
+                      <div style={{ padding: '8px 12px 12px 12px', borderTop: '1px solid #e5e7eb', width: '100%', flexShrink: 0, backgroundColor: '#fff' }}>
                         <Pagination className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                           <PaginationContent className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                             <PaginationItem>
