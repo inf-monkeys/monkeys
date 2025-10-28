@@ -2994,16 +2994,12 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                               {timeStr && (
                                 <div
                                   style={{
-                                    position: 'absolute',
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)',
-                                    color: 'white',
+                                    padding: '6px 8px',
                                     fontSize: 10,
-                                    padding: '4px 8px',
-                                    paddingTop: 12,
-                                    pointerEvents: 'none',
+                                    color: '#9ca3af',
+                                    backgroundColor: '#f9fafb',
+                                    textAlign: 'center',
+                                    borderTop: '1px solid #e5e7eb',
                                   }}
                                 >
                                   {timeStr}
@@ -3024,8 +3020,6 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                               breakInside: 'avoid',
                               display: 'inline-block',
                               width: '100%',
-                              position: 'relative',
-                              maxHeight: 120,
                               overflow: 'hidden',
                             }}
                           >
@@ -3035,7 +3029,6 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                                 fontSize: 12,
                                 maxHeight: 120,
                                 overflow: 'auto',
-                                paddingBottom: 24,
                               }}
                             >
                               <pre style={{ margin: 0, fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
@@ -3046,17 +3039,12 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                             {timeStr && (
                               <div
                                 style={{
-                                  position: 'absolute',
-                                  bottom: 8,
-                                  right: 8,
+                                  padding: '6px 8px',
                                   fontSize: 10,
                                   color: '#9ca3af',
                                   backgroundColor: '#f9fafb',
-                                  padding: '2px 6px',
-                                  borderRadius: 4,
-                                  whiteSpace: 'nowrap',
-                                  pointerEvents: 'none',
-                                  zIndex: 10,
+                                  textAlign: 'center',
+                                  borderTop: '1px solid #e5e7eb',
                                 }}
                               >
                                 {timeStr}
