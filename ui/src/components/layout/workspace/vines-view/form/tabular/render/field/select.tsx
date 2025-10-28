@@ -78,6 +78,7 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
           return (
             <Button
               key={i}
+              type="button"
               variant={isSelected ? 'default' : 'outline'}
               size="small"
               onClick={() => {
@@ -100,6 +101,7 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
           return (
             <Button
               key={i}
+              type="button"
               variant={isSelected ? 'default' : 'outline'}
               size="small"
               onClick={() => {
