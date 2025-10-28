@@ -246,7 +246,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
           </Button>
         </div>
       ) : (
-        <div ref={inputRef} style={{ height: '0px', background: 'transparent', flexShrink: 0 }} />
+        <div ref={inputRef} style={{ height: '60px', background: 'transparent', flexShrink: 0 }} />
       )}
     </div>
   );
