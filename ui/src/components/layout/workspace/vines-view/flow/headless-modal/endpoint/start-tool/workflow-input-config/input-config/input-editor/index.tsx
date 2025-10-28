@@ -115,6 +115,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       voiceButtonText: get(currentVariable, 'typeOptions.voiceButtonText', ''),
       expandButtonText: get(currentVariable, 'typeOptions.expandButtonText', ''),
       knowledgeGraphButtonText: get(currentVariable, 'typeOptions.knowledgeGraphButtonText', ''),
+      selectListDisplayMode: get(currentVariable, 'typeOptions.selectListDisplayMode', 'dropdown'),
     };
 
     form.reset(defaultValues);
@@ -146,6 +147,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       voiceButtonText,
       expandButtonText,
       knowledgeGraphButtonText,
+      selectListDisplayMode,
     } = pick(data, [
       'multipleValues',
       'assetType',
@@ -172,6 +174,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'voiceButtonText',
       'expandButtonText',
       'knowledgeGraphButtonText',
+      'selectListDisplayMode',
     ]);
 
     const finalVariable = omit(data, [
@@ -225,6 +228,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOption('voiceButtonText', voiceButtonText);
     setOption('expandButtonText', expandButtonText);
     setOption('knowledgeGraphButtonText', knowledgeGraphButtonText);
+    setOption('selectListDisplayMode', selectListDisplayMode);
     if (Default) {
       set(finalVariable, 'default', Default);
     }

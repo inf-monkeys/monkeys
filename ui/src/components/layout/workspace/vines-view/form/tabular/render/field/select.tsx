@@ -3,12 +3,13 @@ import React, { useEffect, useRef } from 'react';
 import { ControllerRenderProps, FieldValues, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@/components/ui/button';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
-import { getI18nContent } from '@/utils';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
+import { cn, getI18nContent } from '@/utils';
 
 export type TSelect = {
   value: string;
@@ -41,6 +42,7 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
   const { t } = useTranslation();
 
   const selectList = (typeOptions?.selectList ?? []).filter(filter ?? (() => true)) as TSelectList;
+  const displayMode = typeOptions?.selectListDisplayMode || 'dropdown';
 
   const handleLinkage = (val: string) => {
     if (!typeOptions?.multipleValues) {
@@ -67,6 +69,54 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
     }
   }, [finalValue]);
 
+  // 按钮模式渲染
+  if (displayMode === 'button') {
+    return typeOptions?.multipleValues ? (
+      <div className="flex flex-wrap gap-2">
+        {selectList.map((it, i) => {
+          const isSelected = (finalValue as any[]).includes(it.value);
+          return (
+            <Button
+              key={i}
+              variant={isSelected ? 'default' : 'outline'}
+              size="small"
+              onClick={() => {
+                const newValue = isSelected
+                  ? (finalValue as any[]).filter((v) => v !== it.value)
+                  : [...(finalValue as any[]), it.value];
+                onChange(type === 'number' ? newValue.map(Number) : newValue);
+              }}
+              className={cn('whitespace-nowrap', isSelected && 'bg-vines-500 text-white hover:bg-vines-600')}
+            >
+              {getI18nContent(it.label)}
+            </Button>
+          );
+        })}
+      </div>
+    ) : (
+      <div className="flex flex-wrap gap-2">
+        {selectList.map((it, i) => {
+          const isSelected = finalValue === it.value?.toString();
+          return (
+            <Button
+              key={i}
+              variant={isSelected ? 'default' : 'outline'}
+              size="small"
+              onClick={() => {
+                onChange(type === 'number' ? Number(it.value) : it.value);
+                handleLinkage(it.value?.toString());
+              }}
+              className={cn('whitespace-nowrap', isSelected && 'bg-vines-500 text-white hover:bg-vines-600')}
+            >
+              {getI18nContent(it.label)}
+            </Button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // 下拉模式渲染（原有逻辑）
   return typeOptions?.multipleValues ? (
     <MultiSelect
       onValueChange={(val) => {

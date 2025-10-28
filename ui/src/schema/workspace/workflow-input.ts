@@ -133,6 +133,7 @@ export const workflowInputSchema = z.object({
   voiceButtonText: z.string().optional(),
   expandButtonText: z.string().optional(),
   knowledgeGraphButtonText: z.string().optional(),
+  selectListDisplayMode: z.enum(['dropdown', 'button']).optional(), // 列表选择显示模式
 });
 
 export type IWorkflowInput = z.infer<typeof workflowInputSchema>;

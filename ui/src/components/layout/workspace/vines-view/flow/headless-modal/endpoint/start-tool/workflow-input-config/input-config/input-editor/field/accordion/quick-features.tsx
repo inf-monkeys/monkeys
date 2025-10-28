@@ -3,6 +3,7 @@ import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@/components/ui/button/index.tsx';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -17,9 +18,46 @@ export const FieldQuickFeatures: React.FC<IFieldQuickFeaturesProps> = ({ form })
   const enableVoice = form.watch('enableVoice');
   const enableExpand = form.watch('enableExpand');
   const promptDictionary = form.watch('promptDictionary');
+  const enableSelectList = form.watch('enableSelectList');
+  const selectList = form.watch('selectList');
 
   return (
     <>
+      {enableSelectList && selectList && selectList.length > 0 && (
+        <FormField
+          name="selectListDisplayMode"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>列表显示模式</FormLabel>
+              <FormControl>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={field.value === 'dropdown' || !field.value ? 'default' : 'outline'}
+                    size="small"
+                    onClick={() => field.onChange('dropdown')}
+                    className="flex-1"
+                  >
+                    下拉选择
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={field.value === 'button' ? 'default' : 'outline'}
+                    size="small"
+                    onClick={() => field.onChange('button')}
+                    className="flex-1"
+                  >
+                    方框按钮
+                  </Button>
+                </div>
+              </FormControl>
+              <FormDescription>选择列表选项的展示方式</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       <FormField
         name="enableVoice"
         control={form.control}
