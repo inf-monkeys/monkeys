@@ -1,21 +1,29 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useEventEmitter } from 'ahooks';
-import { capitalize } from 'lodash';
-import { ArrowLeft, History } from 'lucide-react';
+import { useDebounceFn, useEventEmitter, useMemoizedFn } from 'ahooks';
+import { capitalize, get } from 'lodash';
+import { ArrowLeft, Clipboard, History, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Editor, TLShapeId } from 'tldraw';
 
+import { useSystemConfig } from '@/apis/common';
 import { useWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
+import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons';
+import { useClipboard } from '@/hooks/use-clipboard';
+import { useVinesFlow } from '@/package/vines-flow';
+import { useMaskEditorStore } from '@/store/maskEditorStore';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
-import { createExecutionStore, ExecutionStoreProvider } from '@/store/useExecutionStore';
+import { createExecutionStore, ExecutionStoreProvider, useExecutionStore } from '@/store/useExecutionStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { newConvertExecutionResultToItemList } from '@/utils/execution';
 
@@ -379,6 +387,159 @@ const PageItem: React.FC<{
   );
 };
 
+// 在黄色块中渲染的按钮组件的包装器
+const MiniTabularButtonsWrapper: React.FC<{ miniPage: any }> = ({ miniPage }) => {
+  const [tabular$, setTabular$] = useState<any>(null);
+
+  useEffect(() => {
+    // 等待 tabular event 被创建
+    const checkTabularEvent = setInterval(() => {
+      if ((window as any).tabularEventRef) {
+        setTabular$((window as any).tabularEventRef);
+        clearInterval(checkTabularEvent);
+      }
+    }, 100);
+
+    return () => clearInterval(checkTabularEvent);
+  }, []);
+
+  return (
+    <VinesFlowProvider workflowId={miniPage?.workflowId || miniPage?.workflow?.id || ''}>
+      <FlowStoreProvider createStore={createFlowStore}>
+        <ExecutionStoreProvider createStore={createExecutionStore}>
+          {tabular$ ? (
+            <MiniTabularButtons tabular$={tabular$} />
+          ) : (
+            <div style={{ position: 'absolute', bottom: 0, height: '60px', background: '#fff' }}>
+              {/* Tabular buttons will render here */}
+            </div>
+          )}
+        </ExecutionStoreProvider>
+      </FlowStoreProvider>
+    </VinesFlowProvider>
+  );
+};
+
+// 在黄色块中渲染的按钮组件
+const MiniTabularButtons: React.FC<{ tabular$: any }> = ({ tabular$ }) => {
+  const { t } = useTranslation();
+  const { data: oem } = useSystemConfig();
+  const { vines } = useVinesFlow();
+  const { read } = useClipboard({ showSuccess: false });
+  const { status: executionStatus } = useExecutionStore();
+  const { isEditorOpen } = useMaskEditorStore();
+
+  const allowConcurrentRuns = get(oem, 'theme.workflow.allowConcurrentRuns', true);
+  const useOpenAIInterface = vines.usedOpenAIInterface();
+  const openAIInterfaceEnabled = useOpenAIInterface.enable;
+  const isInputNotEmpty = vines.workflowInput.length > 0;
+
+  const handlePasteInput = useMemoizedFn(async () => {
+    const text = await read();
+    if (text) {
+      try {
+        const inputData = JSON.parse(text);
+        if (inputData.type === 'input-parameters') {
+          tabular$.emit({ type: 'paste-param', data: inputData.data });
+        } else {
+          toast.error(t('workspace.form-view.quick-toolbar.paste-param.bad-content'));
+        }
+      } catch (error) {
+        toast.error(t('workspace.form-view.quick-toolbar.paste-param.bad-content'));
+      }
+    }
+  });
+
+  const debouncedSubmit = useDebounceFn(
+    () => {
+      tabular$.emit('submit');
+    },
+    { wait: 300 },
+  );
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
+        minHeight: '60px',
+        background: '#fff',
+        borderTop: '1px solid #e5e7eb',
+        borderBottomLeftRadius: '20px',
+        borderBottomRightRadius: '20px',
+        zIndex: 10,
+        padding: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}
+    >
+      {isInputNotEmpty && (
+        <>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="!px-2.5"
+                variant="outline"
+                theme="primary"
+                onClick={() => tabular$.emit('restore-previous-param')}
+                icon={<Undo2 />}
+                size="small"
+              />
+            </TooltipTrigger>
+            <TooltipContent>{t('workspace.form-view.quick-toolbar.restore-previous-param.label')}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="!px-2.5"
+                variant="outline"
+                theme="primary"
+                onClick={() => tabular$.emit('reset')}
+                icon={<RotateCcw />}
+                size="small"
+              />
+            </TooltipTrigger>
+            <TooltipContent>{t('workspace.form-view.quick-toolbar.reset')}</TooltipContent>
+          </Tooltip>
+        </>
+      )}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            className="!px-2.5"
+            variant="outline"
+            theme="primary"
+            onClick={handlePasteInput}
+            icon={<Clipboard />}
+            size="small"
+          />
+        </TooltipTrigger>
+        <TooltipContent>{t('workspace.form-view.quick-toolbar.paste-param.label')}</TooltipContent>
+      </Tooltip>
+      <Button
+        variant="solid"
+        className="flex-1 text-base"
+        onClick={debouncedSubmit.run}
+        size="with-icon"
+        disabled={openAIInterfaceEnabled || isEditorOpen}
+        icon={<Sparkles className="fill-white" />}
+      >
+        {t(
+          openAIInterfaceEnabled
+            ? 'workspace.pre-view.disable.exec-button-tips'
+            : isEditorOpen
+              ? 'workspace.pre-view.actuator.execution.mask-editor-open-tips'
+              : 'workspace.pre-view.actuator.execution.label',
+        )}
+      </Button>
+    </div>
+  );
+};
+
 export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }) => {
   const SUBMENU_WIDTH = 220;
   const [currentPageShapeIds, setCurrentPageShapeIds] = useState<TLShapeId[]>([]);
@@ -466,7 +627,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
   // 根据页面高度计算历史记录每页显示的数量
   useEffect(() => {
     if (!miniPage || !historyOpen) return;
-    
+
     // 固定显示8张图片，不需要自适应
     // const timer = setTimeout(() => {
     //   // 假设每行高度约 90px（图片高度）+ 8px（gap）= 98px
@@ -476,7 +637,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
     //   const headerHeight = 40;
     //   const paginationHeight = 60;
     //   const padding = 24; // 上下 padding
-    //   
+    //
     //   // 获取面板高度
     //   const panel = document.querySelector('.layer-panel-content');
     //   if (panel) {
@@ -487,7 +648,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
     //     setHistoryPageSize(itemsPerPage);
     //   }
     // }, 100);
-    
+
     // return () => clearTimeout(timer);
   }, [miniPage, historyOpen]);
 
@@ -2510,8 +2671,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
           <TldrawAgentV2EmbeddedPanel editor={editor} onClose={() => setAgentVisible(false)} />
         </div>
       ) : miniPage && !isLeftBodyCollapsed ? (
-        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
-          <div style={{ flex: 1, minHeight: 0, overflowY: historyOpen ? 'hidden' : 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', position: 'relative' }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: historyOpen ? 'hidden' : 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column' , paddingBottom: '50px' }}>
             {/* 迷你应用顶部信息栏：显示当前工作流名称与描述 */}
             <div
               style={{
@@ -2667,6 +2828,9 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                             className="h-full w-full"
                             event$={miniEvent$}
                             height={'100%'}
+                            onTabularEventCreated={(event$) => {
+                              (window as any).tabularEventRef = event$;
+                            }}
                             appInfo={{
                               appName:
                                 normalizeText(miniPage?.workflow?.displayName) ||
@@ -2701,10 +2865,10 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                       const startIndex = (historyPage - 1) * historyPageSize;
                       const endIndex = startIndex + historyPageSize;
                       const list = allItems.slice(startIndex, endIndex);
-                      
+
                       if (list.length === 0)
                         return <div style={{ columnSpan: 'all', color: '#9ca3af', fontSize: 12 }}>暂无历史</div>;
-                      
+
                       // 辅助函数：判断是否是图片URL
                       const isImageUrl = (str: string): boolean => {
                         if (!str || typeof str !== 'string') return false;
@@ -2719,7 +2883,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                           return str.startsWith('data:image/');
                         }
                       };
-                      
+
                       // 辅助函数：提取显示内容（只返回图片或包含outputtext的文本，其他返回null）
                       const extractDisplayContent = (data: any): { type: 'image' | 'text', content: string } | null => {
                         // 如果是字符串，检查是否是图片URL
@@ -2740,7 +2904,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                           // 不符合条件，过滤掉
                           return null;
                         }
-                        
+
                         // 如果是对象
                         if (data && typeof data === 'object') {
                           // 检查是否有 outputtext 键
@@ -2756,16 +2920,16 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                           // 不符合条件，过滤掉
                           return null;
                         }
-                        
+
                         return null;
                       };
-                      
+
                       return list.map((it: any, idx: number) => {
                         const data = it?.render?.data;
                         const displayContent = extractDisplayContent(data);
-                        
+
                         if (!displayContent) return null;
-                        
+
                         // 显示图片
                         if (displayContent.type === 'image') {
                           return (
@@ -2795,15 +2959,15 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                               }}
                             >
                               {/* 图片等比例缩放，保持宽高比 */}
-                              <img 
-                                src={displayContent.content} 
+                              <img
+                                src={displayContent.content}
                                 style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
                                 alt="历史记录"
                               />
                             </div>
                           );
                         }
-                        
+
                         // 显示文本
                         return (
                           <div
@@ -2843,21 +3007,21 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                       return isSameWorkflow && isSuccess;
                     });
                     const totalPages = Math.ceil(allItems.length / historyPageSize);
-                    
+
                     if (totalPages <= 1) return null;
-                    
+
                     return (
                       <div style={{ padding: '8px 12px 12px 12px', borderTop: '1px solid #e5e7eb', width: '100%', flexShrink: 0, backgroundColor: '#fff' }}>
                         <Pagination className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                           <PaginationContent className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                             <PaginationItem>
-                              <PaginationPrevious 
+                              <PaginationPrevious
                                 onClick={() => setHistoryPage(Math.max(1, historyPage - 1))}
                                 style={{ cursor: historyPage === 1 ? 'not-allowed' : 'pointer', opacity: historyPage === 1 ? 0.5 : 1 }}
                               />
                             </PaginationItem>
                             <PaginationItem>
-                              <PaginationNext 
+                              <PaginationNext
                                 onClick={() => setHistoryPage(Math.min(totalPages, historyPage + 1))}
                                 style={{ cursor: historyPage === totalPages ? 'not-allowed' : 'pointer', opacity: historyPage === totalPages ? 0.5 : 1 }}
                               />
@@ -2873,6 +3037,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
               </div>
             )}
           </div>
+          {/* 固定在底部的区域 - 包含按钮 */}
+          <MiniTabularButtonsWrapper miniPage={miniPage} />
         </div>
       ) : (
         <>
