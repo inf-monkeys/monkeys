@@ -68,21 +68,22 @@ export const DesignProjectCard: React.FC<DesignProjectCardProps> = ({
       {/* 中间：第一个页面缩略图（固定大小） */}
       <CardContent className="flex flex-1 flex-col px-3 pb-2">
         <div className="relative h-40 w-full overflow-hidden rounded-md border">
-          {firstBoard?.thumbnailUrl
-            ? // <img
-              //   src={firstBoard.thumbnailUrl}
-              //   alt={`${getI18nContent(firstBoard.displayName)} - 第1页预览`}
-              //   className="h-full w-full object-cover"
-              //   onError={(e) => {
-              //     // 缩略图加载失败时显示默认图标
-              //     const target = e.target as HTMLImageElement;
-              //     target.style.display = 'none';
-              //     const fallback = target.nextElementSibling as HTMLElement;
-              //     if (fallback) fallback.style.display = 'flex';
-              //   }}
-              // />
-              null
-            : null}
+          {firstBoard?.thumbnailUrl ? (
+            <img
+              src={firstBoard.thumbnailUrl}
+              alt={`${getI18nContent(firstBoard.displayName)} - 第1页预览`}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+              onError={(e) => {
+                // 缩略图加载失败时显示默认图标
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'flex';
+              }}
+            />
+          ) : null}
 
           <div
             className={`flex h-full w-full items-center justify-center bg-muted ${
