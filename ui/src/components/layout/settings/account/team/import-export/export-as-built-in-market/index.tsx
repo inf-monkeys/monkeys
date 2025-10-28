@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { exportAssetsSchema, IExportAssets } from '@/schema/workspace/export-asset';
 import { downloadFile } from '@/utils/file';
+import { inferAppId } from '@/utils/infer-app-id';
 
 import { ExportAssetConfig } from './asset-config';
 import { ExportAssetSelect } from './asset-select';
@@ -38,6 +39,18 @@ export type StagedAssets = {
   version: string;
   comments?: string;
 }[];
+
+export interface IPresetAppSort {
+  id: string;
+  displayName: I18nValue | string;
+  iconUrl?: string;
+  pages: {
+    id: string;
+    appId: string;
+    assetType: AssetType;
+    pageType: string;
+  }[];
+}
 
 export const ExportTeamAsBuiltInMarket: React.FC<IExportTeamAsBuiltInMarketProps> = ({ children }) => {
   const { t } = useTranslation();
@@ -70,14 +83,48 @@ export const ExportTeamAsBuiltInMarket: React.FC<IExportTeamAsBuiltInMarketProps
       });
       const result = await form.trigger();
       if (result) {
-        const data = form.getValues();
-        console.log(data);
+        const queryData = form.getValues();
+        console.log(queryData);
         setIsLoading(true);
-        toast.promise(exportAssetsByAssetList(data), {
+        toast.promise(exportAssetsByAssetList(queryData), {
           loading: t('common.operate.loading'),
           success: (data) => {
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             downloadFile(blob, `presetApp.${new Date().getTime()}.json`);
+
+            // pinned pages
+            const workflowPinnedPages = pageWithGroups?.pages.filter((page) => page.workflowId && page.workflow) ?? [];
+
+            const pinnedGroups =
+              pageWithGroups?.groups.filter((group) =>
+                group.pageIds.some((pageId) => workflowPinnedPages.some((page) => page.id === pageId)),
+              ) ?? [];
+
+            const exportPages: IPresetAppSort[] = pinnedGroups.map((group) => ({
+              id: inferAppId({
+                displayName: group.displayName,
+                assetType: 'page-group',
+              }),
+              displayName: JSON.parse(group.displayName as string),
+              iconUrl: group.iconUrl,
+              pages: group.pageIds
+                .map((pageId) => {
+                  const page = workflowPinnedPages.find((page) => page.id === pageId);
+                  if (!page) return;
+                  const workflowId = page?.workflowId;
+                  const appId = queryData.assets.find((asset) => asset.id === workflowId)?.appId || '';
+                  return {
+                    id: appId,
+                    appId: appId,
+                    assetType: 'workflow' as AssetType,
+                    pageType: page.type,
+                  };
+                })
+                .filter((page) => page !== undefined),
+            }));
+
+            const pinnedBlob = new Blob([JSON.stringify(exportPages, null, 2)], { type: 'application/json' });
+            downloadFile(pinnedBlob, `presetAppSort.${new Date().getTime()}.json`);
 
             return t('common.operate.success');
           },

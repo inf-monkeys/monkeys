@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { AssetType, I18nValue } from '@inf-monkeys/monkeys';
+import { AssetType, I18nValue, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { CaseSensitive } from 'lucide-react';
 import { Path, PathValue, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { getI18nContent } from '@/utils';
+import { inferAppId } from '@/utils/infer-app-id';
 
 interface IFieldPreferAppIdPropsBase {
   displayName?: string | I18nValue;
@@ -37,38 +37,66 @@ export const FieldPreferAppIdInput = <T extends IFieldPreferAppIdPropsBase>({
   const { t } = useTranslation();
 
   const handleAutoGenerate = useCallback(async () => {
-    let enDisplayName = '';
+    // let enDisplayName = '';
 
-    if (assetType === 'workflow') {
-      enDisplayName = getI18nContent(form.getValues('displayName' as Path<T>), '', 'en') ?? '';
-    } else if (assetType === 'workflow-association') {
+    // if (assetType === 'workflow') {
+    //   enDisplayName = getI18nContent(form.getValues('displayName' as Path<T>), '', 'en') ?? '';
+    // } else if (assetType === 'workflow-association') {
+    //   if (scope === 'specific' && workflowId) {
+    //     const originWorkflow = await getWorkflow(workflowId);
+    //     if (form.getValues('type' as Path<T>) === 'to-workflow') {
+    //       const targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
+    //       enDisplayName =
+    //         getI18nContent(originWorkflow?.displayName, '', 'en') +
+    //         '-to-' +
+    //         getI18nContent(targetWorkflow?.displayName, '', 'en');
+    //     } else {
+    //       enDisplayName = getI18nContent(originWorkflow?.displayName, '', 'en') + '-to-board';
+    //     }
+    //   } else if (scope === 'global') {
+    //     if (form.getValues('type' as Path<T>) === 'to-workflow') {
+    //       const targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
+    //       enDisplayName = 'global-to-' + getI18nContent(targetWorkflow?.displayName, '', 'en');
+    //     } else {
+    //       enDisplayName = 'global-to-board';
+    //     }
+    //   }
+    // } else if (assetType === 'design-association') {
+    //   enDisplayName = 'to-' + getI18nContent(form.getValues('displayName' as Path<T>), '', 'en');
+    // }
+
+    // const namePart = enDisplayName
+    //   ?.toLowerCase()
+    //   .replace(/[\s_\-.,，。？！!?:;；、~`'"“”‘’()[\]{}<>@#$%^&*+=\\/|]/g, '-');
+    // const appId = `${namePart}-${assetType}`;
+
+    let originWorkflow: MonkeyWorkflow | undefined;
+    let targetWorkflow: MonkeyWorkflow | undefined;
+
+    const type = form.getValues('type' as Path<T>) as IWorkflowAssociationType;
+
+    if (assetType === 'workflow-association') {
       if (scope === 'specific' && workflowId) {
-        const originWorkflow = await getWorkflow(workflowId);
-        if (form.getValues('type' as Path<T>) === 'to-workflow') {
-          const targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
-          enDisplayName =
-            getI18nContent(originWorkflow?.displayName, '', 'en') +
-            '-to-' +
-            getI18nContent(targetWorkflow?.displayName, '', 'en');
-        } else {
-          enDisplayName = getI18nContent(originWorkflow?.displayName, '', 'en') + '-to-board';
+        originWorkflow = await getWorkflow(workflowId);
+        if (type === 'to-workflow') {
+          targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
         }
       } else if (scope === 'global') {
-        if (form.getValues('type' as Path<T>) === 'to-workflow') {
-          const targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
-          enDisplayName = 'global-to-' + getI18nContent(targetWorkflow?.displayName, '', 'en');
-        } else {
-          enDisplayName = 'global-to-board';
+        if (type === 'to-workflow') {
+          targetWorkflow = await getWorkflow(form.getValues('targetWorkflowId' as Path<T>) as string);
         }
       }
-    } else if (assetType === 'design-association') {
-      enDisplayName = 'to-' + getI18nContent(form.getValues('displayName' as Path<T>), '', 'en');
     }
 
-    const namePart = enDisplayName
-      ?.toLowerCase()
-      .replace(/[\s_\-.,，。？！!?:;；、~`'"“”‘’()[\]{}<>@#$%^&*+=\\/|]/g, '-');
-    const appId = `${namePart}-${assetType}`;
+    const appId = inferAppId({
+      displayName: form.getValues('displayName' as Path<T>) as string | I18nValue,
+      assetType,
+      scope,
+      workflowId,
+      type,
+      targetWorkflow,
+      originWorkflow,
+    });
     form.setValue('preferAppId' as Path<T>, appId as PathValue<T, Path<T>>);
   }, [assetType, form]);
 
