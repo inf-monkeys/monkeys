@@ -30,6 +30,7 @@ interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
     appIcon?: string;
   };
   onTabularEventCreated?: (tabularEvent$: EventEmitter<TTabularEvent>) => void;
+  showButtons?: boolean; // 是否显示按钮（默认 true，兼容旧组件）
 }
 
 export const VinesTabular: React.FC<IVinesTabularProps> = ({
@@ -41,6 +42,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   theme = 'default',
   appInfo,
   onTabularEventCreated,
+  showButtons = false,
 }) => {
   const { t } = useTranslation();
 
@@ -179,8 +181,76 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
           workflowId={vines.workflowId}
         ></TabularRender>
       </div>
-      {/* 按钮已移除，在外部黄色区块渲染 */}
-      <div ref={inputRef} style={{ height: 0 }} />
+      {/* 根据 showButtons 条件渲染：有按钮或无按钮（透明占位） */}
+      {showButtons ? (
+        <div ref={inputRef} className="flex items-stretch gap-2 px-global">
+          {isInputNotEmpty && (
+            <>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="!px-2.5"
+                    variant={theme === 'default' ? 'outline' : 'ghost'}
+                    theme={theme === 'default' ? 'primary' : 'black'}
+                    onClick={() => tabular$.emit('restore-previous-param')}
+                    icon={<Undo2 />}
+                    size="small"
+                  />
+                </TooltipTrigger>
+                <TooltipContent>{t('workspace.form-view.quick-toolbar.restore-previous-param.label')}</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="!px-2.5"
+                    variant={theme === 'default' ? 'outline' : 'ghost'}
+                    theme={theme === 'default' ? 'primary' : 'black'}
+                    onClick={() => tabular$.emit('reset')}
+                    icon={<RotateCcw />}
+                    size="small"
+                  />
+                </TooltipTrigger>
+                <TooltipContent>{t('workspace.form-view.quick-toolbar.reset')}</TooltipContent>
+              </Tooltip>
+            </>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="!px-2.5"
+                variant={theme === 'default' ? 'outline' : 'ghost'}
+                theme={theme === 'default' ? 'primary' : 'black'}
+                onClick={handlePasteInput}
+                icon={<Clipboard />}
+                size="small"
+              />
+            </TooltipTrigger>
+            <TooltipContent>{t('workspace.form-view.quick-toolbar.paste-param.label')}</TooltipContent>
+          </Tooltip>
+          <Button
+            variant="solid"
+            className="flex-1 text-base"
+            onClick={debouncedSubmit.run}
+            size="with-icon"
+            disabled={openAIInterfaceEnabled || isSubmitting || isEditorOpen}
+            icon={<Sparkles className="fill-white" />}
+            loading={loading || (!allowConcurrentRuns && executionStatus === 'running')}
+          >
+            {t(
+              openAIInterfaceEnabled
+                ? 'workspace.pre-view.disable.exec-button-tips'
+                : isEditorOpen
+                  ? 'workspace.pre-view.actuator.execution.mask-editor-open-tips'
+                  : 'workspace.pre-view.actuator.execution.label',
+            )}
+          </Button>
+        </div>
+      ) : (
+        <div ref={inputRef} style={{ height: '0px', background: 'transparent', flexShrink: 0 }} />
+      )}
     </div>
   );
 };
+
+// 向后兼容：为需要使用按钮的场景提供便捷导出
+export const VinesTabularLegacy = VinesTabular;
