@@ -2930,6 +2930,32 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
 
                         if (!displayContent) return null;
 
+                        // 格式化时间
+                        const formatTime = (timestamp: number | string | undefined) => {
+                          if (!timestamp) return '';
+                          // 处理时间戳，可能是字符串或数字，可能不是毫秒
+                          let ts = timestamp;
+                          if (typeof ts === 'string') {
+                            ts = parseInt(ts, 10);
+                            if (isNaN(ts)) return '';
+                          }
+                          // 如果是秒级时间戳（小于13位），转换为毫秒
+                          if (ts < 1e12) {
+                            ts = ts * 1000;
+                          }
+                          const date = new Date(ts);
+                          if (isNaN(date.getTime())) return '';
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const day = String(date.getDate()).padStart(2, '0');
+                          const hours = String(date.getHours()).padStart(2, '0');
+                          const minutes = String(date.getMinutes()).padStart(2, '0');
+                          const seconds = String(date.getSeconds()).padStart(2, '0');
+                          return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                        };
+
+                        const timeStr = formatTime(it?.endTime || it?.createTime || it?.startTime);
+
                         // 显示图片
                         if (displayContent.type === 'image') {
                           return (
@@ -2964,6 +2990,25 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                                 style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
                                 alt="历史记录"
                               />
+                              {/* 时间标签 */}
+                              {timeStr && (
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent)',
+                                    color: 'white',
+                                    fontSize: 10,
+                                    padding: '4px 8px',
+                                    paddingTop: 12,
+                                    pointerEvents: 'none',
+                                  }}
+                                >
+                                  {timeStr}
+                                </div>
+                              )}
                             </div>
                           );
                         }
@@ -2975,19 +3020,48 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                             style={{
                               border: '1px solid #e5e7eb',
                               borderRadius: 8,
-                              padding: 8,
-                              fontSize: 12,
-                              maxHeight: 120,
-                              overflow: 'auto',
                               marginBottom: 8,
                               breakInside: 'avoid',
                               display: 'inline-block',
                               width: '100%',
+                              position: 'relative',
+                              maxHeight: 120,
+                              overflow: 'hidden',
                             }}
                           >
-                            <pre style={{ margin: 0, fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                              {displayContent.content}
-                            </pre>
+                            <div
+                              style={{
+                                padding: 8,
+                                fontSize: 12,
+                                maxHeight: 120,
+                                overflow: 'auto',
+                                paddingBottom: 24,
+                              }}
+                            >
+                              <pre style={{ margin: 0, fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                {displayContent.content}
+                              </pre>
+                            </div>
+                            {/* 时间标签 */}
+                            {timeStr && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  bottom: 8,
+                                  right: 8,
+                                  fontSize: 10,
+                                  color: '#9ca3af',
+                                  backgroundColor: '#f9fafb',
+                                  padding: '2px 6px',
+                                  borderRadius: 4,
+                                  whiteSpace: 'nowrap',
+                                  pointerEvents: 'none',
+                                  zIndex: 10,
+                                }}
+                              >
+                                {timeStr}
+                              </div>
+                            )}
                           </div>
                         );
                       }).filter(Boolean);
