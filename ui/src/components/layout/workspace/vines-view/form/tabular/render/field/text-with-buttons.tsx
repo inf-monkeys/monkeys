@@ -350,7 +350,19 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     setIsExpanding(true);
     try {
       const headers = vinesHeader({ useToast: true });
-      const response = await fetch('/v1/chat/completions', {
+      // 获取默认可用的聊天模型
+      const model = await (async () => {
+        try {
+          const resp = await fetch('/api/llm-tool/models', { credentials: 'include' });
+          const list = await resp.json();
+          const chatModels = Array.isArray(list) ? list.filter((m: any) => Array.isArray(m?.type) && m.type.includes('chat_completions')) : [];
+          const def = chatModels.find((m: any) => m?.isDefault) || chatModels[0];
+          return def?.value || 'gpt-4o-mini';
+        } catch {
+          return 'gpt-4o-mini';
+        }
+      })();
+      const response = await fetch('/api/llm-tool/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -358,7 +370,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
         },
         credentials: 'include',
         body: JSON.stringify({
-          model: 'auto',
+          model,
           messages: [
             {
               role: 'system',
