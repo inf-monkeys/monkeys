@@ -10,6 +10,7 @@ import { FieldFoldUp } from '@/components/layout/workspace/vines-view/flow/headl
 import { FieldName } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/name.tsx';
 import { FieldPlaceholder } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/placeholder.tsx';
 import { FieldPromptDictionary } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/prompt-dictionary.tsx';
+import { FieldQuickFeatures } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/quick-features.tsx';
 import { FieldSingleColumn } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/single-column.tsx';
 import { FieldTextareaMinHeight } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/textarea-min-height.tsx';
 import { FieldTips } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/tips.tsx';
@@ -42,6 +43,7 @@ export const FieldAccordion: React.FC<IFieldAccordionProps> = ({ form }) => {
           <FieldSingleColumn form={form} />
           <FieldTextareaMinHeight form={form} />
           <FieldPromptDictionary form={form} />
+          <FieldQuickFeatures form={form} />
           <FieldFlag form={form} />
         </AccordionContent>
       </AccordionItem>

@@ -3338,6 +3338,14 @@
                   "label": "标记",
                   "desc": "用于第三方 API 调用时标记数据"
                 },
+                "voice": {
+                  "label": "启用语音输入",
+                  "desc": "启用后将在文本输入框旁显示语音输入按钮"
+                },
+                "expand": {
+                  "label": "启用文本扩写",
+                  "desc": "启用后将在文本输入框旁显示扩写按钮"
+                },
                 "textarea-mini-height": {
                   "label": "输入框行高"
                 },
@@ -3769,8 +3777,8 @@
           "string": "请输入{{displayName}}",
           "select": "请选择{{displayName}}",
           "knowledge-graph": {
-            "button": "绘画知识图谱",
-            "title": "绘画知识图谱"
+            "button": "知识图谱",
+            "title": "知识图谱"
           },
           "file": {
             "label": "请输入文件直链",

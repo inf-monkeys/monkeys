@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
-import { Book } from 'lucide-react';
+import { Book, Mic, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
+import { vinesHeader } from '@/apis/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,9 +24,11 @@ interface TextWithButtonsProps {
   onShowDictionary?: () => void;
   // 支持两种形态：
   // 1) { [一级]: { [二级]: string[] } }
-  // 2) { [一级]: string[] }（兼容旧版，按一个“默认”二级分组呈现）
+  // 2) { [一级]: string[] }（兼容旧版，按一个"默认"二级分组呈现）
   // 3) { entries: Array<{ level1: string; level2: string; label: string }> }
   promptDictionary?: any;
+  enableVoice?: boolean;
+  enableExpand?: boolean;
 }
 
 export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
@@ -37,6 +41,8 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   onSmartOptimize,
   onShowDictionary,
   promptDictionary,
+  enableVoice,
+  enableExpand,
 }) => {
   const shouldShouldFormButtons = useShouldShowFormButton();
   const { t } = useTranslation();
@@ -58,6 +64,12 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   
   // 当 sidebar 宽度小于 280px 时，只显示图标
   const shouldShowButtonText = sidebarWidth >= 280;
+
+  // 语音输入相关状态
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const [isExpanding, setIsExpanding] = useState(false);
 
   const insertText = (text: string) => {
     const el = textareaRef.current;
@@ -189,6 +201,141 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     }
   }, [value, level1Keys, normalizedDict]);
 
+  // 语音输入处理函数
+  const toggleRecord = async () => {
+    if (isRecording) {
+      try {
+        mediaRecorderRef.current?.stop();
+      } catch {}
+      setIsRecording(false);
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      recordedChunksRef.current = [];
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        try {
+          const blob = new Blob(recordedChunksRef.current, { type: 'audio/webm' });
+          if (!blob.size) return;
+
+          const form = new FormData();
+          form.append('file', blob, 'audio.webm');
+          const resp = await fetch('/api/tldraw-agent/transcribe', {
+            method: 'POST',
+            body: form,
+            credentials: 'include',
+          });
+          const data = await resp.json().catch(() => ({ text: '' }));
+          const text = String(data?.text || '').trim();
+
+          if (text) {
+            onChange(text);
+            toast.success('语音输入成功');
+          }
+        } catch (e) {
+          toast.error('语音转写失败');
+        } finally {
+          recordedChunksRef.current = [];
+        }
+      };
+      mediaRecorderRef.current = mr;
+      mr.start();
+      setIsRecording(true);
+    } catch (error) {
+      toast.error('无法访问麦克风');
+      setIsRecording(false);
+    }
+  };
+
+  // 扩写处理函数
+  const handleExpand = async () => {
+    if (!value.trim()) {
+      toast.error('请先输入内容');
+      return;
+    }
+
+    setIsExpanding(true);
+    try {
+      const headers = vinesHeader({ useToast: true });
+      const response = await fetch('/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers,
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          model: 'auto',
+          messages: [
+            {
+              role: 'system',
+              content: '你是一个专业的文本扩写助手。请根据用户提供的文本，进行内容丰富、逻辑清晰的扩写。保持原意不变，增加必要的细节和说明。',
+            },
+            {
+              role: 'user',
+              content: value,
+            },
+          ],
+          stream: true,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('扩写请求失败');
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let expandedText = '';
+
+      if (!reader) return;
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value: chunkValue } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(chunkValue, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.slice(6).trim();
+            if (dataStr === '[DONE]') continue;
+
+            try {
+              const json = JSON.parse(dataStr);
+              const content = json?.choices?.[0]?.delta?.content;
+              if (content) {
+                expandedText += content;
+              }
+            } catch {
+              // ignore
+            }
+          }
+        }
+      }
+
+      if (expandedText) {
+        onChange(expandedText);
+        toast.success('扩写完成');
+      } else {
+        toast.error('扩写失败');
+      }
+    } catch (error) {
+      console.error('Expand error:', error);
+      toast.error('扩写失败');
+    } finally {
+      setIsExpanding(false);
+    }
+  };
+
   return (
     <div className="relative p-1">
       <textarea
@@ -202,7 +349,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
         )}
         style={{ height: '180px' }}
       />
-      {shouldShouldFormButtons && level1Keys.length > 0 && (
+      {shouldShouldFormButtons && (level1Keys.length > 0 || enableVoice || enableExpand) && (
         <div className="absolute bottom-4 left-4 flex gap-2">
           {/* <Button
             variant="outline"
@@ -217,24 +364,73 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
             <RefreshCcw className="h-4 w-4 text-gray-800 dark:text-white" />
             智能优化
           </Button> */}
-          <Button
-            variant="outline"
-            size="small"
-            className={cn(
-              "vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white",
-              shouldShowButtonText ? 'px-3 py-1' : 'px-2 py-1 w-9'
-            )}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              onShowDictionary?.();
-              setOpen(true);
-            }}
-            title={!shouldShowButtonText ? t('workspace.pre-view.actuator.execution-form.knowledge-graph.button') : undefined}
-          >
-            <Book className="h-4 w-4 text-gray-800 dark:text-white" />
-            {shouldShowButtonText && t('workspace.pre-view.actuator.execution-form.knowledge-graph.button')}
-          </Button>
+          {enableVoice && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    className={cn(
+                      'vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white px-3 py-1 text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white',
+                      isRecording && 'animate-pulse bg-red-100 dark:bg-red-900',
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      toggleRecord();
+                    }}
+                  >
+                    <Mic className="h-4 w-4 text-gray-800 dark:text-white" />
+                    
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>语音输入</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {enableExpand && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    className={cn(
+                      'vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white px-3 py-1 text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white',
+                      (isExpanding) && 'animate-spin',
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      handleExpand();
+                    }}
+                    disabled={isExpanding}
+                  >
+                    <Sparkles className="h-4 w-4 text-gray-800 dark:text-white" />
+                    
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>AI扩写</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          {level1Keys.length > 0 && (
+            <Button
+              variant="outline"
+              size="small"
+              className="vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white px-3 py-1 text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onShowDictionary?.();
+                setOpen(true);
+              }}
+            >
+              <Book className="h-4 w-4 text-gray-800 dark:text-white" />
+              {t('workspace.pre-view.actuator.execution-form.knowledge-graph.button')}
+            </Button>
+          )}
         </div>
       )}
 

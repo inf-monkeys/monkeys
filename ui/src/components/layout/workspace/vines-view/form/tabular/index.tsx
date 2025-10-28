@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useDebounceFn, useEventEmitter, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
@@ -29,6 +29,7 @@ interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
     appName?: string;
     appIcon?: string;
   };
+  onTabularEventCreated?: (tabularEvent$: EventEmitter<TTabularEvent>) => void;
 }
 
 export const VinesTabular: React.FC<IVinesTabularProps> = ({
@@ -39,6 +40,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   onWorkflowStart,
   theme = 'default',
   appInfo,
+  onTabularEventCreated,
 }) => {
   const { t } = useTranslation();
 
@@ -50,6 +52,11 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   const { vines } = useVinesFlow();
 
   const tabular$ = useEventEmitter<TTabularEvent>();
+
+  // 暴露 tabular$ 给外部组件
+  useEffect(() => {
+    onTabularEventCreated?.(tabular$);
+  }, [tabular$, onTabularEventCreated]);
 
   const useOpenAIInterface = vines.usedOpenAIInterface();
   const openAIInterfaceEnabled = useOpenAIInterface.enable;
@@ -172,68 +179,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
           workflowId={vines.workflowId}
         ></TabularRender>
       </div>
-      <div ref={inputRef} className="flex items-stretch gap-2 px-global">
-        {isInputNotEmpty && (
-          <>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="!px-2.5"
-                  variant={theme === 'default' ? 'outline' : 'ghost'}
-                  theme={theme === 'default' ? 'primary' : 'black'}
-                  onClick={() => tabular$.emit('restore-previous-param')}
-                  icon={<Undo2 />}
-                  size="small"
-                />
-              </TooltipTrigger>
-              <TooltipContent>{t('workspace.form-view.quick-toolbar.restore-previous-param.label')}</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="!px-2.5"
-                  variant={theme === 'default' ? 'outline' : 'ghost'}
-                  theme={theme === 'default' ? 'primary' : 'black'}
-                  onClick={() => tabular$.emit('reset')}
-                  icon={<RotateCcw />}
-                  size="small"
-                />
-              </TooltipTrigger>
-              <TooltipContent>{t('workspace.form-view.quick-toolbar.reset')}</TooltipContent>
-            </Tooltip>
-          </>
-        )}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              className="!px-2.5"
-              variant={theme === 'default' ? 'outline' : 'ghost'}
-              theme={theme === 'default' ? 'primary' : 'black'}
-              onClick={handlePasteInput}
-              icon={<Clipboard />}
-              size="small"
-            />
-          </TooltipTrigger>
-          <TooltipContent>{t('workspace.form-view.quick-toolbar.paste-param.label')}</TooltipContent>
-        </Tooltip>
-        <Button
-          variant="solid"
-          className="flex-1 text-base"
-          onClick={debouncedSubmit.run}
-          size="with-icon"
-          disabled={openAIInterfaceEnabled || isSubmitting || isEditorOpen}
-          icon={<Sparkles className="fill-white" />}
-          loading={loading || (!allowConcurrentRuns && executionStatus === 'running')}
-        >
-          {t(
-            openAIInterfaceEnabled
-              ? 'workspace.pre-view.disable.exec-button-tips'
-              : isEditorOpen
-                ? 'workspace.pre-view.actuator.execution.mask-editor-open-tips'
-                : 'workspace.pre-view.actuator.execution.label',
-          )}
-        </Button>
-      </div>
+      {/* 按钮已移除，在外部黄色区块渲染 */}
+      <div ref={inputRef} style={{ height: 0 }} />
     </div>
   );
 };

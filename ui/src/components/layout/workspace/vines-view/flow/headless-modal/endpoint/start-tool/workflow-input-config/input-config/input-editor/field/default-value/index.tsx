@@ -4,6 +4,7 @@ import { isArray, isBoolean, toNumber } from 'lodash';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { QuickFeatures } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value/quick-features';
 import { SelectListMode } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value/select-list';
 import { BOOLEAN_VALUES } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { FieldGroup, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -25,7 +26,15 @@ const ENABLE_TYPE_FOR_SELECT_LIST = ['string', 'number'];
 export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) => {
   const { t } = useTranslation();
 
-  const { default: Default, multipleValues, type, enableSelectList, selectList = [] } = form.getValues();
+  const {
+    default: Default,
+    multipleValues,
+    type,
+    enableSelectList,
+    selectList = [],
+    enableVoice,
+    enableExpand,
+  } = form.getValues();
 
   const forceUpdate = useForceUpdate();
 
@@ -99,12 +108,22 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
                   </FieldGroup>
                 </NumberField>
               ) : (
-                <Textarea
-                  placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.default.placeholder')}
-                  className="resize-none"
-                  value={value?.toString()}
-                  {...field}
-                />
+                <div className="relative">
+                  <Textarea
+                    placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.default.placeholder')}
+                    className="resize-none"
+                    value={value?.toString()}
+                    {...field}
+                  />
+                  {(enableVoice || enableExpand) && type === 'string' && !multipleValues && (
+                    <QuickFeatures
+                      value={value?.toString() || ''}
+                      onChange={(newValue) => form.setValue('default', newValue)}
+                      enableVoice={enableVoice}
+                      enableExpand={enableExpand}
+                    />
+                  )}
+                </div>
               )}
             </SmoothTransition>
           </FormControl>

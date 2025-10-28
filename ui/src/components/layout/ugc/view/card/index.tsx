@@ -47,6 +47,12 @@ export const UgcViewCard = <E extends object>({
     t('common.utils.operate'),
   );
 
+  // 处理描述文本截断（最大250字符）
+  const maxLength = 250;
+  const descriptionText = (description || t('components.layout.ugc.utils.no-description')) as string;
+  const truncatedDescription =
+    descriptionText.length > maxLength ? descriptionText.slice(0, maxLength) + '...' : descriptionText;
+
   return (
     <Card
       className={cn('h-52', {
@@ -90,9 +96,15 @@ export const UgcViewCard = <E extends object>({
           </div>
         ) : (
           // 其他文件显示描述
-          <div className="flex flex-col gap-1 text-xs text-opacity-70">
-            {description || t('components.layout.ugc.utils.no-description')}
-          </div>
+          <Tooltip
+            content={<span className="flex max-w-md flex-wrap whitespace-pre-wrap break-words">{descriptionText}</span>}
+          >
+            <TooltipTrigger asChild>
+              <div className="line-clamp-3 flex cursor-default flex-col gap-1 text-xs text-opacity-70">
+                {truncatedDescription}
+              </div>
+            </TooltipTrigger>
+          </Tooltip>
         )}
       </CardContent>
     </Card>
