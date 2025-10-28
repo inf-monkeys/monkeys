@@ -375,17 +375,31 @@ export class WorkflowPageService {
       };
     });
 
+    // 合并所有页面
+    const allPages = [
+      ...filteredPages.map((p) => ({
+        ...p,
+        workflow: workflowMap[p.workflowId],
+        instance: pageInstanceTypeMapper[p.type],
+      })),
+      ...agentPages,
+      ...agentV2Pages,
+      ...designBoardPages,
+    ];
+
+    // 按照 groups 中的 pageIds 顺序排序
+    const pageIdsForSort = Array.from(new Set(groups.flatMap((it) => it.pageIds)));
+    const sortedPages = allPages.sort((a, b) => {
+      const aIndex = pageIdsForSort.indexOf(a.id);
+      const bIndex = pageIdsForSort.indexOf(b.id);
+      // 如果某个页面不在 pageIds 中，放到最后
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    });
+
     return {
-      pages: [
-        ...filteredPages.map((p) => ({
-          ...p,
-          workflow: workflowMap[p.workflowId],
-          instance: pageInstanceTypeMapper[p.type],
-        })),
-        ...agentPages,
-        ...agentV2Pages,
-        ...designBoardPages,
-      ],
+      pages: sortedPages,
       groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn', 'iconUrl', 'sortIndex'])),
     };
   }
