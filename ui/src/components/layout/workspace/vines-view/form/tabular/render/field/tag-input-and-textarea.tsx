@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { isArray } from 'lodash';
 import { Book, RefreshCcw } from 'lucide-react';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { TagInput } from '@/components/ui/input/tag';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
-import { getI18nContent } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IFieldTagInputAndTextareaProps {
   input: VinesWorkflowVariable;
@@ -30,6 +30,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
   miniMode = false,
 }) => {
   const { t } = useTranslation();
+  const [sidebarWidth, setSidebarWidth] = useState<number>(300);
 
   const isNumber = type === 'number';
   const isMultiple = typeOptions?.multipleValues ?? false;
@@ -41,6 +42,19 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
   const placeholder =
     typeOptions?.placeholder ??
     t('workspace.pre-view.actuator.execution-form.string', { displayName: getI18nContent(displayName) });
+
+  // 监听 sidebar 宽度变化
+  useEffect(() => {
+    const handler = (e: any) => {
+      const w = Number(e?.detail?.width);
+      if (!Number.isNaN(w)) setSidebarWidth(w);
+    };
+    window.addEventListener('vines:left-sidebar-width-change', handler as any);
+    return () => window.removeEventListener('vines:left-sidebar-width-change', handler as any);
+  }, []);
+
+  // 当 sidebar 宽度小于 280px 时，只显示图标
+  const shouldShowButtonText = sidebarWidth >= 280;
 
   // 智能优化处理函数
   const handleSmartOptimize = () => {
@@ -91,20 +105,28 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
             <Button
               variant="outline"
               size="small"
-              className="vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white px-3 py-1 text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white"
+              className={cn(
+                "vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white",
+                shouldShowButtonText ? 'px-3 py-1' : 'px-2 py-1 w-9'
+              )}
               onClick={handleSmartOptimize}
+              title={!shouldShowButtonText ? '智能优化' : undefined}
             >
               <RefreshCcw className="h-4 w-4 text-gray-800 dark:text-white" />
-              智能优化
+              {shouldShowButtonText && '智能优化'}
             </Button>
             <Button
               variant="outline"
               size="small"
-              className="vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white px-3 py-1 text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white"
+              className={cn(
+                "vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white",
+                shouldShowButtonText ? 'px-3 py-1' : 'px-2 py-1 w-9'
+              )}
               onClick={handleShowDictionary}
+              title={!shouldShowButtonText ? t('workspace.pre-view.actuator.execution-form.knowledge-graph.button') : undefined}
             >
               <Book className="h-4 w-4 text-gray-800 dark:text-white" />
-              {t('workspace.pre-view.actuator.execution-form.knowledge-graph.button')}
+              {shouldShowButtonText && t('workspace.pre-view.actuator.execution-form.knowledge-graph.button')}
             </Button>
           </div>
         )}

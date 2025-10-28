@@ -44,6 +44,20 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   const [open, setOpen] = React.useState(false);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const [selected, setSelected] = React.useState<Record<string, boolean>>({});
+  const [sidebarWidth, setSidebarWidth] = React.useState<number>(300);
+  
+  // 监听 sidebar 宽度变化
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const w = Number(e?.detail?.width);
+      if (!Number.isNaN(w)) setSidebarWidth(w);
+    };
+    window.addEventListener('vines:left-sidebar-width-change', handler as any);
+    return () => window.removeEventListener('vines:left-sidebar-width-change', handler as any);
+  }, []);
+  
+  // 当 sidebar 宽度小于 280px 时，只显示图标
+  const shouldShowButtonText = sidebarWidth >= 280;
 
   const insertText = (text: string) => {
     const el = textareaRef.current;
@@ -66,7 +80,24 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   const keyOf = (l1: string, l2: string, label: string) => `${l1}|||${l2}|||${label}`;
   const labelOf = (key: string) => key.split('|||')[2] || '';
 
-  const applyFromSelected = (nextSelected: Record<string, boolean>) => {
+  const applyFromSelected = (nextSelected: Record<string, boolean>, changedKey?: string) => {
+    // 如果提供了改变的词，只追加这个新选中的词
+    if (changedKey) {
+      const wasSelected = !!selected[changedKey];
+      const isNowSelected = !!nextSelected[changedKey];
+      const label = labelOf(changedKey);
+      
+      // 如果是从未选中变成选中，追加到末尾（加逗号）
+      if (!wasSelected && isNowSelected) {
+        const currentValue = (value ?? '').trim();
+        const separator = currentValue ? ', ' : '';
+        onChange(currentValue + separator + label);
+        return;
+      }
+      // 如果是从选中变成未选中，不做任何操作（保留用户输入）
+    }
+    
+    // 如果没有提供 changedKey，保持原有逻辑（用于其他场景）
     const chosen = Object.entries(nextSelected)
       .filter(([, on]) => on)
       .map(([k]) => labelOf(k));
@@ -137,6 +168,26 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   React.useEffect(() => {
     if (!activeL1 && level1Keys.length) setActiveL1(level1Keys[0]);
   }, [level1Keys, activeL1]);
+  
+  // 同步 selected 状态和输入框内容
+  React.useEffect(() => {
+    const currentValue = (value ?? '').trim();
+    if (currentValue && level1Keys.length > 0) {
+      const updatedSelected: Record<string, boolean> = {};
+      
+      // 遍历所有词，检查输入框是否包含
+      Object.entries(normalizedDict).forEach(([l1, l2Dict]) => {
+        Object.entries(l2Dict).forEach(([l2, items]) => {
+          items.forEach((item) => {
+            const k = keyOf(l1, l2, item.label);
+            updatedSelected[k] = currentValue.includes(item.label);
+          });
+        });
+      });
+      
+      setSelected(updatedSelected);
+    }
+  }, [value, level1Keys, normalizedDict]);
 
   return (
     <div className="relative p-1">
@@ -169,23 +220,27 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
           <Button
             variant="outline"
             size="small"
-            className="vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white px-3 py-1 text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white"
+            className={cn(
+              "vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white",
+              shouldShowButtonText ? 'px-3 py-1' : 'px-2 py-1 w-9'
+            )}
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
               onShowDictionary?.();
               setOpen(true);
             }}
+            title={!shouldShowButtonText ? t('workspace.pre-view.actuator.execution-form.knowledge-graph.button') : undefined}
           >
             <Book className="h-4 w-4 text-gray-800 dark:text-white" />
-            {t('workspace.pre-view.actuator.execution-form.knowledge-graph.button')}
+            {shouldShowButtonText && t('workspace.pre-view.actuator.execution-form.knowledge-graph.button')}
           </Button>
         </div>
       )}
 
       {level1Keys.length > 0 && (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-3xl">
+        <Dialog open={open} onOpenChange={setOpen} modal={false}>
+          <DialogContent className="max-w-3xl" hideOverlay>
             <DialogHeader>
               <DialogTitle>{t('workspace.pre-view.actuator.execution-form.knowledge-graph.title')}</DialogTitle>
             </DialogHeader>
@@ -212,17 +267,22 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                             <div className="flex flex-wrap gap-2">
                               {(items || []).map((it) => {
                                 const k = keyOf(k2, l2, it.label);
-                                const on = !!selected[k];
+                                // 基于输入框内容判断是否选中，而不仅仅是 selected 状态
+                                const currentValue = (value ?? '').trim();
+                                const isSelected = currentValue.includes(it.label);
                                 const toggleButton = (
                                   <Toggle
                                     key={k}
-                                    pressed={on}
+                                    pressed={isSelected}
                                     onPressedChange={(v) => {
-                                      const ns = { ...selected, [k]: v };
-                                      setSelected(ns);
-                                      applyFromSelected(ns);
+                                      applyFromSelected({ ...selected, [k]: v }, k);
                                     }}
-                                    className="rounded-full border px-3 py-1 text-sm data-[state=on]:bg-vines-500 data-[state=on]:text-white"
+                                    className={cn(
+                                      "rounded-full border px-3 py-1 text-sm",
+                                      isSelected 
+                                        ? "bg-vines-500 text-white border-vines-500" 
+                                        : "bg-transparent hover:bg-muted"
+                                    )}
                                   >
                                     {it.label}
                                   </Toggle>

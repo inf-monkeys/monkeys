@@ -121,6 +121,7 @@ export const MiniToolsToolbar: React.FC = () => {
                       justifyContent: 'center',
                       flexShrink: 0,
                     }}
+                    disabledPreview
                   >
                     {icon}
                   </VinesIcon>
