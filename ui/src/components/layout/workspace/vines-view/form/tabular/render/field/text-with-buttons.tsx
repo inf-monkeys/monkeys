@@ -60,7 +60,8 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   // 拖动相关状态
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState(false);
-  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
+  const dragStartRef = React.useRef({ x: 0, y: 0 });
+  const dragStartPositionRef = React.useRef({ x: 0, y: 0 });
   const dialogRef = React.useRef<HTMLDivElement | null>(null);
   
   // 监听 sidebar 宽度变化
@@ -76,8 +77,11 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   // 拖动处理函数
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // 只处理左键
+    
+    // 记录拖拽开始时的鼠标位置和对话框位置（使用 ref 确保立即生效）
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    dragStartPositionRef.current = { x: position.x, y: position.y };
     setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
     e.preventDefault();
   };
   
@@ -86,9 +90,14 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     if (!isDragging) return;
     
     const handleMouseMove = (e: MouseEvent) => {
+      // 计算鼠标移动的距离（使用 ref 确保获取正确的起始值）
+      const deltaX = e.clientX - dragStartRef.current.x;
+      const deltaY = e.clientY - dragStartRef.current.y;
+      
+      // 更新位置：初始位置 + 移动距离
       setPosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
+        x: dragStartPositionRef.current.x + deltaX,
+        y: dragStartPositionRef.current.y + deltaY,
       });
     };
     
@@ -103,7 +112,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, dragStart]);
+  }, [isDragging]);
   
   // 重置位置当对话框关闭时
   React.useEffect(() => {
@@ -533,7 +542,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
           <DialogContent 
             className="max-w-3xl" 
             hideOverlay
-            style={position.x !== 0 || position.y !== 0 ? { transform: `translate(${position.x}px, ${position.y}px)` } : undefined}
+            style={{ transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))` }}
           >
             <DialogHeader 
               className="cursor-move select-none border-b pb-3" 
