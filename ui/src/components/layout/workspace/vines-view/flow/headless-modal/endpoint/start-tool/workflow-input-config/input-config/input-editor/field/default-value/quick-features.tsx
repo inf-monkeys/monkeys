@@ -3,7 +3,6 @@ import React, { useRef, useState } from 'react';
 import { Mic, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { vinesHeader } from '@/apis/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
@@ -89,29 +88,15 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
 
     setIsExpanding(true);
     try {
-      // 调用LLM API进行扩写
-      const headers = vinesHeader({ useToast: true });
-      const response = await fetch('/v1/chat/completions', {
+      // 调用后端代理接口进行扩写（服务端持有 API Key）
+      const response = await fetch('/api/text-expansion/expand', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...headers,
         },
         credentials: 'include',
         body: JSON.stringify({
-          model: 'auto',
-          messages: [
-            {
-              role: 'system',
-              content: '你是一个专业的文本扩写助手。请根据用户提供的文本，进行内容丰富、逻辑清晰的扩写。保持原意不变，增加必要的细节和说明。',
-            },
-            {
-              role: 'user',
-              content: value,
-            },
-          ],
-          stream: true,
-          temperature: 0.7,
+          text: value,
         }),
       });
 
@@ -119,43 +104,63 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
         throw new Error('扩写请求失败');
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+      const data = await response.json();
+      
+      // 尝试从不同可能的响应结构中提取扩写结果
       let expandedText = '';
-
-      if (!reader) return;
-
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { done, value: chunkValue } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(chunkValue, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.slice(6).trim();
-            if (dataStr === '[DONE]') continue;
-
-            try {
-              const json = JSON.parse(dataStr);
-              const content = json?.choices?.[0]?.delta?.content;
-              if (content) {
-                expandedText += content;
-              }
-            } catch {
-              // ignore
-            }
+      
+      // 首先尝试遍历所有字段，查找output相关的字段（如output1, output2等）
+      for (const key in data) {
+        if (key.startsWith('output')) {
+          const value = data[key];
+          if (typeof value === 'string' && value.trim()) {
+            expandedText = value;
+            break;
           }
         }
       }
+      
+      // 如果有output字段，尝试提取
+      if (!expandedText && data?.output) {
+        // 如果是数组，尝试从第一个元素获取text或content字段
+        if (Array.isArray(data.output) && data.output[0]) {
+          const firstOutput = data.output[0];
+          expandedText = firstOutput.text || firstOutput.content || firstOutput.data || firstOutput.value || '';
+        }
+        // 如果是对象，尝试直接获取text或content字段
+        else if (typeof data.output === 'object') {
+          expandedText = data.output.text || data.output.content || data.output.data || data.output.value || 
+                        data.output.result || data.output.message || '';
+        }
+        // 如果是字符串，直接使用
+        else if (typeof data.output === 'string') {
+          expandedText = data.output;
+        }
+      }
+      
+      // 如果没有从output中获取到，尝试从根级别的字段获取
+      if (!expandedText) {
+        expandedText = data.text || data.content || data.data || data.result || data.message || '';
+      }
+      
+      // 如果仍然没有，尝试从rawOutput中获取
+      if (!expandedText && data?.rawOutput) {
+        if (Array.isArray(data.rawOutput) && data.rawOutput[0]) {
+          const firstOutput = data.rawOutput[0];
+          expandedText = firstOutput.text || firstOutput.content || firstOutput.data || '';
+        } else if (typeof data.rawOutput === 'object') {
+          expandedText = data.rawOutput.text || data.rawOutput.content || data.rawOutput.data || '';
+        } else if (typeof data.rawOutput === 'string') {
+          expandedText = data.rawOutput;
+        }
+      }
 
-      if (expandedText) {
+      if (expandedText && expandedText.trim()) {
         onChange(expandedText);
         toast.success('扩写完成');
       } else {
-        toast.error('扩写失败');
+        console.error('扩写响应结构:', data);
+        toast.error('扩写失败：无法从响应中提取结果');
       }
     } catch (error) {
       console.error('Expand error:', error);
