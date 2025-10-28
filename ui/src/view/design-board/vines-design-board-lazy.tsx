@@ -75,9 +75,16 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
   // 避免重复加载相同的数据
   const lastSnapshotRef = useRef<any>(null);
+  const lastSavedSnapshotRef = useRef<any>(null);
   
   useEffect(() => {
     if (!metadata || !editor) return;
+    
+    // 如果这是刚保存的快照，不要重新加载（避免覆盖用户操作）
+    if (lastSavedSnapshotRef.current && 
+        JSON.stringify(lastSavedSnapshotRef.current) === JSON.stringify(metadata.snapshot)) {
+      return;
+    }
     
     // 比较snapshot是否真的发生了变化
     if (JSON.stringify(lastSnapshotRef.current) === JSON.stringify(metadata.snapshot)) {
@@ -90,10 +97,10 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
     isLoadingSnapshotRef.current = true;
     editor.loadSnapshot(metadata.snapshot);
     
-    // 延迟重置标志位，确保加载完成
+    // 延迟重置标志位，确保加载完成（增加到500ms，给编辑器更多时间完成加载）
     setTimeout(() => {
       isLoadingSnapshotRef.current = false;
-    }, 200);
+    }, 500);
   }, [metadata, editor]);
 
   useEffect(() => {
@@ -172,13 +179,18 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   const handleSave = () => {
     if (!editor) return;
     const snapshot = getSnapshot(editor.store);
+    
+    // 记录保存的快照，避免重新加载
+    lastSavedSnapshotRef.current = snapshot;
+    
     toast.promise(
       updateDesignBoardMetadata(designBoardId, {
         snapshot,
       }),
       {
         success: () => {
-          void mutateMetadata();
+          // 不要调用 mutateMetadata()，避免触发重新加载导致操作丢失
+          // void mutateMetadata();
           return t('common.update.success');
         },
         error: t('common.update.error'),
@@ -192,7 +204,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   // OEM：是否显示右侧边栏，单独控制
   const showRightSidebar = get(oem, 'theme.designProjects.showRightSidebar', true);
 
-  // Ctrl/Cmd + S：阻止浏览器保存页面，执行静默保存并提示“已自动保存”
+  // Ctrl/Cmd + S：阻止浏览器保存页面，执行静默保存并提示"已自动保存"
   useEffect(() => {
     const handleKeydown = async (e: KeyboardEvent) => {
       const isSaveHotkey = (e.key === 's' || e.code === 'KeyS') && (e.ctrlKey || e.metaKey);
@@ -204,8 +216,15 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       }
       try {
         const snapshot = getSnapshot(editor.store);
+        
+        // 记录保存的快照，避免重新加载
+        lastSavedSnapshotRef.current = snapshot;
+        
         await updateDesignBoardMetadata(designBoardId, { snapshot });
-        void mutateMetadata();
+        
+        // 不要调用 mutateMetadata()，避免触发重新加载导致操作丢失
+        // void mutateMetadata();
+        
         // 手动保存成功后，重置未保存标志
         hasUnsavedChangesRef.current = false;
         toast.success('已自动保存');
@@ -217,7 +236,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
-  }, [editor, designBoardId, mutateMetadata, t]);
+  }, [editor, designBoardId, t]);
 
   // 自动保存：监听 store 变更，2 秒防抖 & 并发保护
   const autosaveTimerRef = useRef<number | null>(null);
@@ -237,8 +256,14 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       autosaveInFlightRef.current = true;
       try {
         const snapshot = getSnapshot(editor.store);
+        
+        // 保存前记录快照，避免保存后重新加载时覆盖
+        lastSavedSnapshotRef.current = snapshot;
+        
         await updateDesignBoardMetadata(designBoardId, { snapshot });
-        void mutateMetadata();
+        
+        // 不要调用 mutateMetadata()，避免触发重新加载导致操作丢失
+        // void mutateMetadata();
         
         // 保存成功后，重置未保存标志
         hasUnsavedChangesRef.current = false;
@@ -329,29 +354,92 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       { scope: 'document' },
     );
 
-    // 页面卸载/组件卸载时做一次 flush
-    const handleBeforeUnload = () => {
+    // 兜底保存函数：在退出时同步保存数据
+    const emergencySave = () => {
+      if (!hasUnsavedChangesRef.current || !editor || !designBoardId) {
+        return;
+      }
+      
+      try {
+        const snapshot = getSnapshot(editor.store);
+        lastSavedSnapshotRef.current = snapshot;
+        
+        const data = JSON.stringify({ snapshot });
+        const url = `/api/design/metadata/${designBoardId}`;
+        
+        // 使用 fetch + keepalive 选项，确保即使页面关闭也能发送请求
+        // keepalive 允许请求在页面卸载后继续完成
+        if ('fetch' in window) {
+          fetch(url, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: data,
+            credentials: 'include', // 包含认证信息
+            keepalive: true, // 关键：即使页面卸载也继续发送
+          }).catch((error) => {
+            console.error('Emergency save (fetch) failed:', error);
+          });
+        } else {
+          // 降级方案：使用同步 XMLHttpRequest（阻塞式，但保证发送）
+          const xhr = new XMLHttpRequest();
+          xhr.open('PUT', url, false); // false = 同步
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.withCredentials = true; // 包含认证信息
+          xhr.send(data);
+        }
+        
+        hasUnsavedChangesRef.current = false;
+      } catch (error) {
+        console.error('Emergency save failed:', error);
+      }
+    };
+
+    // 页面卸载时的保存（浏览器关闭、刷新等）
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (autosaveTimerRef.current) {
         window.clearTimeout(autosaveTimerRef.current);
         autosaveTimerRef.current = null;
       }
-      // 只有在有未保存的更改时才进行保存
+      
+      // 如果有未保存的更改，进行兜底保存
       if (hasUnsavedChangesRef.current) {
-        // 同步保存可能阻塞卸载，这里仅尽力触发（不阻塞）
+        emergencySave();
+        // 提示用户有未保存的更改（可选）
+        // e.preventDefault();
+        // e.returnValue = '';
+      }
+    };
+    
+    // 页面可见性变化时保存（切换标签页、最小化等）
+    const handleVisibilityChange = () => {
+      if (document.hidden && hasUnsavedChangesRef.current) {
+        // 页面隐藏时立即保存
         void flushSave();
       }
     };
+    
     window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      // 组件卸载时（路由切换等）进行兜底保存
       if (autosaveTimerRef.current) {
         window.clearTimeout(autosaveTimerRef.current);
         autosaveTimerRef.current = null;
       }
+      
+      // 组件卸载前的最后保存
+      if (hasUnsavedChangesRef.current) {
+        emergencySave();
+      }
+      
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       unsubscribe();
     };
-  }, [editor, designBoardId, mutateMetadata]);
+  }, [editor, designBoardId]);
 
   const handleInsertImages = async (operation: string, tid: string) => {
     if (operation === 'insert-images' && tid && editor) {
