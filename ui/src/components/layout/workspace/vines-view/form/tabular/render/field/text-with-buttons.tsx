@@ -95,8 +95,15 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     }, 0);
   };
 
-  const keyOf = (l1: string, l2: string, label: string) => `${l1}|||${l2}|||${label}`;
-  const labelOf = (key: string) => key.split('|||')[2] || '';
+  const keyOf = (l1: string, l2: string, label: string, level4?: string) => {
+    const l4 = level4 || '';
+    return `${l1}|||${l2}|||${label}${l4 ? `|||${l4}` : ''}`;
+  };
+  const labelOf = (key: string) => {
+    const parts = key.split('|||');
+    // 如果有 level4，返回 level4；否则返回 label（在第三个位置）
+    return parts.length >= 4 ? parts[3] : parts[2] || '';
+  };
 
   const applyFromSelected = (nextSelected: Record<string, boolean>, changedKey?: string) => {
     // 如果提供了改变的词，只追加这个新选中的词
@@ -112,7 +119,32 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
         onChange(currentValue + separator + label);
         return;
       }
-      // 如果是从选中变成未选中，不做任何操作（保留用户输入）
+      
+      // 如果是从选中变成未选中，从输入框中删除这个词
+      if (wasSelected && !isNowSelected) {
+        const currentValue = (value ?? '').trim();
+        if (!currentValue) return;
+        
+        // 使用正则表达式精确匹配并删除这个词（考虑各种分隔符）
+        const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // 优先匹配 ",\s*词" 或 "词," 模式，这样可以保留一个逗号
+        let newValue = currentValue;
+        
+        // 处理开头的情况："词," -> 直接删除
+        newValue = newValue.replace(new RegExp(`^${escapedLabel}\\s*,?\\s*`, 'g'), '');
+        
+        // 处理结尾的情况：", 词" -> 删除逗号和词
+        newValue = newValue.replace(new RegExp(`,\\s*${escapedLabel}\\s*$`, 'g'), '');
+        
+        // 处理中间的情况：", 词," -> 保留一个逗号
+        newValue = newValue.replace(new RegExp(`,\\s*${escapedLabel}\\s*,`, 'g'), ',');
+        
+        // 清理多余的逗号和空格
+        newValue = newValue.replace(/\s*,\s*,\s*/g, ', ').replace(/^,|,$/g, '').trim();
+        
+        onChange(newValue);
+        return;
+      }
     }
     
     // 如果没有提供 changedKey，保持原有逻辑（用于其他场景）
@@ -125,19 +157,21 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     onChange((uniq || []).join(' '));
   };
 
-  // 归一化到 { 一级: { 二级: [{label: string, description?: string}] } }
+  // 归一化到 { 一级: { 二级: { 三级: [{label: string, level4?: string, description?: string}] } } }
   const normalizedDict = React.useMemo(() => {
-    const result: Record<string, Record<string, Array<{ label: string; description?: string }>>> = {};
+    const result: Record<string, Record<string, Record<string, Array<{ label: string; level4?: string; description?: string }>>>> = {};
     const d = promptDictionary;
     if (!d) return result;
 
     if (Array.isArray(d?.entries)) {
-      for (const it of d.entries as Array<{ level1: string; level2?: string; label: string; description?: string }>) {
+      for (const it of d.entries as Array<{ level1: string; level2?: string; level3?: string; level4?: string; label: string; description?: string }>) {
         const l1 = it.level1 || '未分组';
         const l2 = it.level2 || '默认';
+        const l3 = it.level3 || '默认';
         result[l1] = result[l1] || {};
-        result[l1][l2] = result[l1][l2] || [];
-        result[l1][l2].push({ label: it.label, description: it.description });
+        result[l1][l2] = result[l1][l2] || {};
+        result[l1][l2][l3] = result[l1][l2][l3] || [];
+        result[l1][l2][l3].push({ label: it.label, level4: it.level4, description: it.description });
       }
       return result;
     }
@@ -155,20 +189,20 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
             }
             return { label: item.label || item, description: item.description };
           });
-          result[l1] = { 默认: items };
+          result[l1] = { 默认: { 默认: items } };
         } else if (typeof sub === 'object') {
-          const obj: Record<string, Array<{ label: string; description?: string }>> = {};
+          const obj: Record<string, Record<string, Array<{ label: string; level4?: string; description?: string }>>> = {};
           const subKeys = Object.keys(sub);
           for (const l2 of subKeys) {
             const items = sub[l2];
-            obj[l2] = Array.isArray(items)
+            obj[l2] = { 默认: Array.isArray(items)
               ? items.map((item: any) => {
                   if (typeof item === 'string') {
                     return { label: item };
                   }
                   return { label: item.label || item, description: item.description };
                 })
-              : [];
+              : [] };
           }
           result[l1] = obj;
         }
@@ -193,12 +227,15 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     if (currentValue && level1Keys.length > 0) {
       const updatedSelected: Record<string, boolean> = {};
       
-      // 遍历所有词，检查输入框是否包含
+      // 遍历所有词，检查输入框是否包含（支持四级标签）
       Object.entries(normalizedDict).forEach(([l1, l2Dict]) => {
-        Object.entries(l2Dict).forEach(([l2, items]) => {
-          items.forEach((item) => {
-            const k = keyOf(l1, l2, item.label);
-            updatedSelected[k] = currentValue.includes(item.label);
+        Object.entries(l2Dict).forEach(([l2, l3Dict]) => {
+          Object.entries(l3Dict).forEach(([l3, items]) => {
+            items.forEach((item) => {
+              const displayLabel = item.level4 || item.label;
+              const k = keyOf(l1, l2, item.label, item.level4);
+              updatedSelected[k] = currentValue.includes(displayLabel);
+            });
           });
         });
       });
@@ -458,55 +495,137 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                 {level1Keys.map((k2) => {
                   const l2Dict = normalizedDict[k2] || {};
                   const l2Keys = Object.keys(l2Dict);
-                  const entries = l2Keys.map(l2 => [l2, l2Dict[l2]] as [string, Array<{ label: string; description?: string }>]);
-                  const hideDefaultHeader = entries.length === 1 && entries[0][0] === '默认';
                   return (
                     <TabsContent key={k2} value={k2}>
                       <div className="max-h-[60vh] overflow-auto pr-1">
-                        {entries.map(([l2, items]) => (
-                          <div key={l2} className="mb-4">
-                            {!hideDefaultHeader && <div className="mb-2 text-[13px] text-muted-foreground">{l2}</div>}
-                            <div className="flex flex-wrap gap-2">
-                              {(items || []).map((it) => {
-                                const k = keyOf(k2, l2, it.label);
-                                // 基于输入框内容判断是否选中，而不仅仅是 selected 状态
-                                const currentValue = (value ?? '').trim();
-                                const isSelected = currentValue.includes(it.label);
-                                const toggleButton = (
-                                  <Toggle
-                                    key={k}
-                                    pressed={isSelected}
-                                    onPressedChange={(v) => {
-                                      applyFromSelected({ ...selected, [k]: v }, k);
-                                    }}
-                                    className={cn(
-                                      "rounded-full border px-3 py-1 text-sm",
-                                      isSelected 
-                                        ? "bg-vines-500 text-white border-vines-500" 
-                                        : "bg-transparent hover:bg-muted"
-                                    )}
-                                  >
-                                    {it.label}
-                                  </Toggle>
+                        {l2Keys.map((l2) => {
+                          const l3Dict = l2Dict[l2];
+                          const l3Keys = Object.keys(l3Dict);
+                          const hideL2Header = l2Keys.length === 1 && l2Keys[0] === '默认';
+                          const currentValue = (value ?? '').trim();
+                          
+                          // 分离有 level4 和没有 level4 的 l3
+                          const l3WithL4: string[] = [];
+                          const l3WithoutL4: string[] = [];
+                          l3Keys.forEach(l3 => {
+                            const items = l3Dict[l3];
+                            const hasL4 = (items || []).some(it => it.level4);
+                            if (hasL4) {
+                              l3WithL4.push(l3);
+                            } else {
+                              l3WithoutL4.push(l3);
+                            }
+                          });
+                          
+                          return (
+                            <div key={l2} className="mb-4">
+                              {!hideL2Header && <div className="mb-2 text-base font-medium text-muted-foreground">{l2}</div>}
+                              
+                              {/* 先渲染所有没有 level4 的 L3 按钮在同一排 */}
+                              {l3WithoutL4.length > 0 && (
+                                <div className="mb-3">
+                                  <div className="flex flex-wrap gap-2">
+                                    {l3WithoutL4.map((l3) => {
+                                      const k = keyOf(k2, l2, l3, '');
+                                      const isSelected = currentValue.includes(l3);
+                                      
+                                      // 获取 description
+                                      const items = l3Dict[l3];
+                                      const item = (items || []).find(it => !it.level4);
+                                      const description = item?.description;
+                                      
+                                      const toggleButton = (
+                                        <Toggle
+                                          key={k}
+                                          pressed={isSelected}
+                                          onPressedChange={(v) => {
+                                            applyFromSelected({ ...selected, [k]: v }, k);
+                                          }}
+                                          className={cn(
+                                            "rounded-full border px-3 py-1 text-sm",
+                                            isSelected 
+                                              ? "bg-vines-500 text-white border-vines-500" 
+                                              : "bg-transparent hover:bg-muted"
+                                          )}
+                                        >
+                                          {l3}
+                                        </Toggle>
+                                      );
+                                      
+                                      // 如果有描述，则用 Tooltip 包裹
+                                      if (description) {
+                                        return (
+                                          <Tooltip key={k}>
+                                            <TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
+                                            <TooltipContent className="max-w-xs">
+                                              <p className="text-xs">{description}</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        );
+                                      }
+                                      
+                                      return toggleButton;
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* 再渲染有 level4 的 L3 */}
+                              {l3WithL4.map((l3) => {
+                                const items = l3Dict[l3];
+                                const hideL3Header = l3Keys.length === 1 && l3Keys[0] === '默认';
+                                
+                                const itemsWithL4 = (items || []).filter(it => it.level4);
+                                
+                                return (
+                                  <div key={l3} className="mb-3">
+                                    {/* 显示 level4 的标题 */}
+                                    {!hideL3Header && <div className="mb-2 text-[13px] text-muted-foreground">{l3}</div>}
+                                    <div className="flex flex-wrap gap-2">
+                                      {/* 显示 level4 按钮 */}
+                                      {itemsWithL4.map((it, idx) => {
+                                        const displayLabel = it.level4 || '';
+                                        const k = keyOf(k2, l2, it.label, it.level4);
+                                        const isSelected = currentValue.includes(displayLabel);
+                                        const toggleButton = (
+                                          <Toggle
+                                            key={k}
+                                            pressed={isSelected}
+                                            onPressedChange={(v) => {
+                                              applyFromSelected({ ...selected, [k]: v }, k);
+                                            }}
+                                            className={cn(
+                                              "rounded-full border px-3 py-1 text-sm",
+                                              isSelected 
+                                                ? "bg-vines-500 text-white border-vines-500" 
+                                                : "bg-transparent hover:bg-muted"
+                                            )}
+                                          >
+                                            {displayLabel}
+                                          </Toggle>
+                                        );
+
+                                        // 如果有描述，则用 Tooltip 包裹
+                                        if (it.description) {
+                                          return (
+                                            <Tooltip key={k}>
+                                              <TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
+                                              <TooltipContent className="max-w-xs">
+                                                <p className="text-xs">{it.description}</p>
+                                              </TooltipContent>
+                                            </Tooltip>
+                                          );
+                                        }
+
+                                        return toggleButton;
+                                      })}
+                                    </div>
+                                  </div>
                                 );
-
-                                // 如果有描述，则用 Tooltip 包裹
-                                if (it.description) {
-                                  return (
-                                    <Tooltip key={k}>
-                                      <TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
-                                      <TooltipContent className="max-w-xs">
-                                        <p className="text-xs">{it.description}</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  );
-                                }
-
-                                return toggleButton;
                               })}
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </TabsContent>
                   );
