@@ -165,11 +165,9 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
       const isNowSelected = !!nextSelected[changedKey];
       const label = labelOf(changedKey);
       
-      // 如果是从未选中变成选中，追加到末尾（加逗号）
+      // 如果是从未选中变成选中，在光标位置插入
       if (!wasSelected && isNowSelected) {
-        const currentValue = (value ?? '').trim();
-        const separator = currentValue ? ', ' : '';
-        onChange(currentValue + separator + label);
+        insertText(label);
         return;
       }
       
@@ -200,14 +198,9 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
       }
     }
     
-    // 如果没有提供 changedKey，保持原有逻辑（用于其他场景）
-    const chosen = Object.entries(nextSelected)
-      .filter(([, on]) => on)
-      .map(([k]) => labelOf(k));
-    // 用空格拼接并去重（以插入顺序为准）
-    const uniq: string[] = [];
-    for (const s of chosen) if (!uniq.includes(s)) uniq.push(s);
-    onChange((uniq || []).join(' '));
+    // 如果没有提供 changedKey，不对输入框做重建，避免清空内容
+    // 仅同步内部 selected 状态（已在调用处完成）
+    return;
   };
 
   // 归一化到 { 一级: { 二级: { 三级: [{label: string, level4?: string, description?: string}] } } }
