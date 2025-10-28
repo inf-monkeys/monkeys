@@ -432,11 +432,20 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               <>
                 <Separator orientation="vertical" />
                 {currentPage?.[teamId]?.type === 'preview' && (
-                  <VinesFlowProvider workflowId={currentPage?.[teamId]?.workflowId}>
-                    <FlowStoreProvider createStore={createFlowStore}>
-                      <CanvasStoreProvider createStore={createCanvasStore}>
-                        <VinesViewWrapper workflowId={currentPage?.[teamId]?.workflowId}>
-                          <ExecutionStoreProvider createStore={createExecutionStore}>
+                  <VinesFlowProvider
+                    key={currentPage?.[teamId]?.workflowId}
+                    workflowId={currentPage?.[teamId]?.workflowId}
+                  >
+                    <FlowStoreProvider key={currentPage?.[teamId]?.workflowId} createStore={createFlowStore}>
+                      <CanvasStoreProvider key={currentPage?.[teamId]?.workflowId} createStore={createCanvasStore}>
+                        <VinesViewWrapper
+                          key={currentPage?.[teamId]?.workflowId}
+                          workflowId={currentPage?.[teamId]?.workflowId}
+                        >
+                          <ExecutionStoreProvider
+                            key={currentPage?.[teamId]?.workflowId}
+                            createStore={createExecutionStore}
+                          >
                             <WorkbenchSidebarNormalModeEmbedContent
                               displayName={currentPage?.[teamId]?.workflow?.displayName}
                             >

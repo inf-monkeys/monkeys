@@ -92,6 +92,7 @@ const VinesForm: React.FC = () => {
             }}
             event$={event$}
             height={height - (showViewTitle ? 32 : 0)}
+            showButtons={true}
           />
         )}
         <VinesExecutionResult
