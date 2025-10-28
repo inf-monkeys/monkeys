@@ -388,7 +388,7 @@ const PageItem: React.FC<{
 };
 
 // 在黄色块中渲染的按钮组件的包装器
-const MiniTabularButtonsWrapper: React.FC<{ miniPage: any }> = ({ miniPage }) => {
+const MiniTabularButtonsWrapper: React.FC<{ miniPage: any; useAbsolutePosition?: boolean }> = ({ miniPage, useAbsolutePosition = true }) => {
   const [tabular$, setTabular$] = useState<any>(null);
 
   useEffect(() => {
@@ -408,9 +408,9 @@ const MiniTabularButtonsWrapper: React.FC<{ miniPage: any }> = ({ miniPage }) =>
       <FlowStoreProvider createStore={createFlowStore}>
         <ExecutionStoreProvider createStore={createExecutionStore}>
           {tabular$ ? (
-            <MiniTabularButtons tabular$={tabular$} />
+            <MiniTabularButtons tabular$={tabular$} useAbsolutePosition={useAbsolutePosition} />
           ) : (
-            <div style={{ position: 'absolute', bottom: 0, height: '60px', background: '#fff' }}>
+            <div style={{ position: useAbsolutePosition ? 'absolute' : 'relative', bottom: useAbsolutePosition ? 0 : undefined, height: '60px', background: '#fff' }}>
               {/* Tabular buttons will render here */}
             </div>
           )}
@@ -421,7 +421,7 @@ const MiniTabularButtonsWrapper: React.FC<{ miniPage: any }> = ({ miniPage }) =>
 };
 
 // 在黄色块中渲染的按钮组件
-const MiniTabularButtons: React.FC<{ tabular$: any }> = ({ tabular$ }) => {
+const MiniTabularButtons: React.FC<{ tabular$: any; useAbsolutePosition?: boolean }> = ({ tabular$, useAbsolutePosition = true }) => {
   const { t } = useTranslation();
   const { data: oem } = useSystemConfig();
   const { vines } = useVinesFlow();
@@ -460,16 +460,23 @@ const MiniTabularButtons: React.FC<{ tabular$: any }> = ({ tabular$ }) => {
   return (
     <div
       style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
+        ...(useAbsolutePosition ? {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+        } : {
+          position: 'relative',
+          marginTop: '12px',
+        }),
         width: '100%',
         minHeight: '60px',
         background: '#fff',
         borderTop: '1px solid #e5e7eb',
-        borderBottomLeftRadius: '20px',
-        borderBottomRightRadius: '20px',
+        ...(useAbsolutePosition ? {
+          borderBottomLeftRadius: '20px',
+          borderBottomRightRadius: '20px',
+        } : {}),
         zIndex: 10,
         padding: '12px',
         display: 'flex',
@@ -2672,7 +2679,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
         </div>
       ) : miniPage && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', position: 'relative' }}>
-          <div style={{ flex: 1, minHeight: 0, overflowY: historyOpen ? 'hidden' : 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column' , paddingBottom: '50px' }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: historyOpen ? 'hidden' : 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column' , paddingBottom: historyOpen ? '0px' : '50px' }}>
             {/* 迷你应用顶部信息栏：显示当前工作流名称与描述 */}
             <div
               style={{
@@ -3073,7 +3080,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                     if (totalPages <= 1) return null;
 
                     return (
-                      <div style={{ padding: '8px 12px 12px 12px', borderTop: '1px solid #e5e7eb', width: '100%', flexShrink: 0, backgroundColor: '#fff' }}>
+                      <div style={{ padding: '8px 12px 12px 12px', borderTop: '1px solid #e5e7eb', width: '100%', flexShrink: 0, backgroundColor: '#fff', borderBottomLeftRadius: '20px', borderBottomRightRadius: '20px' }}>
                         <Pagination className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                           <PaginationContent className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                             <PaginationItem>
@@ -3099,8 +3106,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
               </div>
             )}
           </div>
-          {/* 固定在底部的区域 - 包含按钮 */}
-          <MiniTabularButtonsWrapper miniPage={miniPage} />
+          {/* 固定在底部的区域 - 包含按钮（仅在没有打开历史记录时显示） */}
+          {!historyOpen && <MiniTabularButtonsWrapper miniPage={miniPage} useAbsolutePosition={true} />}
         </div>
       ) : (
         <>
