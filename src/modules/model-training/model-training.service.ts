@@ -67,7 +67,8 @@ export class ModelTrainingService {
     totalCount: number;
     list: ModelTrainingEntity[];
   }> {
-    const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp', filter } = dto;
+    const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp', filter, search } = dto;
+    const searchText = typeof search === 'string' ? search.trim() : '';
 
     const queryBuilder = this.modelTrainingRepository.createQueryBuilder('mt').where('mt.team_id = :teamId', { teamId }).andWhere('mt.is_deleted = false');
 
@@ -78,6 +79,12 @@ export class ModelTrainingService {
         if (start) queryBuilder.andWhere('mt.created_timestamp >= :start', { start });
         if (end) queryBuilder.andWhere('mt.created_timestamp <= :end', { end });
       }
+    }
+
+    if (searchText) {
+      queryBuilder.andWhere('(mt.display_name::text ILIKE :search OR mt.description::text ILIKE :search)', {
+        search: `%${searchText}%`,
+      });
     }
 
     // Count total number of projects

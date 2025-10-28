@@ -1086,7 +1086,8 @@ ORDER BY
     totalCount: number;
     list: WorkflowMetadataEntity[];
   }> {
-    const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp', filter } = dto;
+    const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp', filter, search } = dto;
+    const searchText = typeof search === 'string' ? search.trim() : '';
 
     // Prepare a subquery to find the latest version for each workflow.
     const latestVersionSubquery = this.workflowMetadataRepository
@@ -1111,6 +1112,12 @@ ORDER BY
       .createQueryBuilder('w')
       .innerJoin(`(${latestVersionSubquery.getQuery()})`, 'latest', 'w.workflow_id = latest.workflow_id AND w.version = latest.max_version AND w.is_published = false')
       .setParameters(latestVersionSubquery.getParameters());
+
+    if (searchText) {
+      workflowsQueryBuilder.andWhere('(w.display_name ILIKE :search OR w.description ILIKE :search)', {
+        search: `%${searchText}%`,
+      });
+    }
 
     // Count total number of workflows
     const totalCount = await workflowsQueryBuilder.getCount();

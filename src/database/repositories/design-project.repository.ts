@@ -37,7 +37,8 @@ export class DesignProjectRepository {
     totalCount: number;
     list: DesignProjectEntity[];
   }> {
-    const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp', filter } = dto;
+    const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp', filter, search } = dto;
+    const searchText = typeof search === 'string' ? search.trim() : '';
 
     const queryBuilder = this.designProjectRepository.createQueryBuilder('dp').where('dp.team_id = :teamId', { teamId }).andWhere('dp.is_deleted = false');
 
@@ -52,6 +53,12 @@ export class DesignProjectRepository {
         if (start) queryBuilder.andWhere('dp.created_timestamp >= :start', { start });
         if (end) queryBuilder.andWhere('dp.created_timestamp <= :end', { end });
       }
+    }
+
+    if (searchText) {
+      queryBuilder.andWhere('(dp.display_name ILIKE :search OR dp.description ILIKE :search)', {
+        search: `%${searchText}%`,
+      });
     }
 
     // Count total number of projects

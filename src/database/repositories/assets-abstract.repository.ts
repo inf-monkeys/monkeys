@@ -2,7 +2,7 @@ import { AssetFilter, ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { AssetType } from '@inf-monkeys/monkeys';
 import _ from 'lodash';
-import { And, Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
+import { And, Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Not, Repository, ILike } from 'typeorm';
 import { AssetPublishConfig, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
 
@@ -14,12 +14,6 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
 
   public async findAssetIdsByCommonFilter(assetType: AssetType, filter: AssetFilter, assetIdField: string = 'id') {
     const condition: FindOptionsWhere<BaseAssetEntity> = {};
-
-    // 处理搜索关键词
-    if (filter.search && typeof filter.search === 'string' && filter.search.trim()) {
-      const searchTerm = filter.search.trim();
-      condition.displayName = searchTerm;
-    }
 
     if (filter.createdTimestamp) {
       const [startCreatedTimestamp, endCreatedTimestamp] = filter.createdTimestamp;
@@ -60,13 +54,21 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     // 如果有搜索关键词，使用模糊搜索
     if (filter.search && typeof filter.search === 'string' && filter.search.trim()) {
       const searchTerm = filter.search.trim();
-      assets = await this.repository
-        .createQueryBuilder('asset')
-        .where(condition)
-        .andWhere('(asset.displayName ILIKE :search OR asset.description ILIKE :search)', {
-          search: `%${searchTerm}%`,
-        })
-        .getMany();
+      const baseCondition = { ...(condition as unknown as FindOptionsWhere<E>) };
+      const fuzzyWhere: FindOptionsWhere<E>[] = [
+        {
+          ...baseCondition,
+          displayName: ILike(`%${searchTerm}%`),
+        } as FindOptionsWhere<E>,
+        {
+          ...baseCondition,
+          description: ILike(`%${searchTerm}%`),
+        } as FindOptionsWhere<E>,
+      ];
+
+      assets = await this.repository.find({
+        where: fuzzyWhere,
+      });
     } else {
       // 无搜索关键词，使用原始查询
       assets = await this.repository.find({

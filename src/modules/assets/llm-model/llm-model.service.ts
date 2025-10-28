@@ -26,7 +26,11 @@ export class LlmModelService {
   }
 
   public async listLlmModels(teamId: string, dto?: ListDto) {
-    let { list } = await this.llmModelRepository.listLlmModels(teamId, dto);
+    const { list: persistedList } = await this.llmModelRepository.listLlmModels(teamId, dto);
+    const searchTextRaw = typeof dto?.search === 'string' ? dto.search.trim() : '';
+    const searchText = searchTextRaw.toLowerCase();
+
+    let list = persistedList;
 
     const systemModels = getModels();
 
@@ -50,6 +54,24 @@ export class LlmModelService {
       }
 
       list = [...list, ...systemChannels];
+    }
+
+    if (searchText) {
+      const matchKeyword = (value?: unknown) => {
+        if (!value) return false;
+        if (typeof value === 'string') {
+          return value.toLowerCase().includes(searchText);
+        }
+        if (typeof value === 'object') {
+          try {
+            return JSON.stringify(value).toLowerCase().includes(searchText);
+          } catch {
+            return false;
+          }
+        }
+        return false;
+      };
+      list = list.filter((item) => matchKeyword(item.displayName) || matchKeyword(item.description));
     }
 
     return list;

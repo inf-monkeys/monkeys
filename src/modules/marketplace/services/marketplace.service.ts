@@ -14,7 +14,7 @@ import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundEx
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { omit, set, uniq } from 'lodash';
-import { EntityManager, In, Repository } from 'typeorm';
+import { EntityManager, ILike, In, Repository } from 'typeorm';
 import { CreateMarketplaceAppWithVersionDto } from '../dto/create-app.dto';
 import { UpdateMarketplaceAppDto } from '../dto/update-app.dto';
 import { InstalledAssetInfo, IStagedAsset, IStagedAssets, IStagedAssetWithSnapshot, MarketplaceAssetSnapshot, SourceAssetReference } from '../types';
@@ -244,9 +244,16 @@ export class MarketplaceService {
   }
 
   public async listApprovedApps(dto: ListDto) {
-    const { page = 1, limit = 10 } = dto;
+    const { page = 1, limit = 10, search } = dto;
+    const searchText = typeof search === 'string' ? search.trim() : '';
+    const where = searchText
+      ? [
+          { status: MarketplaceAppStatus.APPROVED, name: ILike(`%${searchText}%`) },
+          { status: MarketplaceAppStatus.APPROVED, description: ILike(`%${searchText}%`) },
+        ]
+      : { status: MarketplaceAppStatus.APPROVED };
     const [list, total] = await this.appRepo.findAndCount({
-      where: { status: MarketplaceAppStatus.APPROVED },
+      where,
       take: limit,
       skip: (page - 1) * limit,
       order: { updatedTimestamp: 'DESC' },
@@ -255,9 +262,16 @@ export class MarketplaceService {
   }
 
   public async listSubmissions(dto: ListDto) {
-    const { page = 1, limit = 10 } = dto;
+    const { page = 1, limit = 10, search } = dto;
+    const searchText = typeof search === 'string' ? search.trim() : '';
+    const where = searchText
+      ? [
+          { status: MarketplaceAppStatus.PENDING_APPROVAL, name: ILike(`%${searchText}%`) },
+          { status: MarketplaceAppStatus.PENDING_APPROVAL, description: ILike(`%${searchText}%`) },
+        ]
+      : { status: MarketplaceAppStatus.PENDING_APPROVAL };
     const [list, total] = await this.appRepo.findAndCount({
-      where: { status: MarketplaceAppStatus.PENDING_APPROVAL },
+      where,
       take: limit,
       skip: (page - 1) * limit,
       order: { updatedTimestamp: 'DESC' },
@@ -292,9 +306,16 @@ export class MarketplaceService {
   }
 
   public async listDeveloperSubmissions(teamId: string, dto: ListDto) {
-    const { page = 1, limit = 10 } = dto;
+    const { page = 1, limit = 10, search } = dto;
+    const searchText = typeof search === 'string' ? search.trim() : '';
+    const where = searchText
+      ? [
+          { authorTeamId: teamId, name: ILike(`%${searchText}%`) },
+          { authorTeamId: teamId, description: ILike(`%${searchText}%`) },
+        ]
+      : { authorTeamId: teamId };
     const [list, total] = await this.appRepo.findAndCount({
-      where: { authorTeamId: teamId },
+      where,
       take: limit,
       skip: (page - 1) * limit,
       order: { updatedTimestamp: 'DESC' },
