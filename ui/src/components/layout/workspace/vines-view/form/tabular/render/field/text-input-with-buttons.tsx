@@ -48,6 +48,9 @@ export const FieldTextInputWithButtons: React.FC<IFieldTextInputWithButtonsProps
         promptDictionary={typeOptions?.promptDictionary as Record<string, string[]> | undefined}
         enableVoice={typeOptions?.enableVoice}
         enableExpand={typeOptions?.enableExpand}
+        voiceButtonText={typeOptions?.voiceButtonText as string | undefined}
+        expandButtonText={typeOptions?.expandButtonText as string | undefined}
+        knowledgeGraphButtonText={typeOptions?.knowledgeGraphButtonText as string | undefined}
       />
     )
   );

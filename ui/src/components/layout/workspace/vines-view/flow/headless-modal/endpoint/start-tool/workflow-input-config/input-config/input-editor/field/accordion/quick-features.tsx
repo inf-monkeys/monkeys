@@ -4,6 +4,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
+import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 
@@ -13,6 +14,9 @@ interface IFieldQuickFeaturesProps extends React.ComponentPropsWithoutRef<'div'>
 
 export const FieldQuickFeatures: React.FC<IFieldQuickFeaturesProps> = ({ form }) => {
   const { t } = useTranslation();
+  const enableVoice = form.watch('enableVoice');
+  const enableExpand = form.watch('enableExpand');
+  const promptDictionary = form.watch('promptDictionary');
 
   return (
     <>
@@ -32,6 +36,20 @@ export const FieldQuickFeatures: React.FC<IFieldQuickFeaturesProps> = ({ form })
             <FormDescription>
               {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.voice.desc')}
             </FormDescription>
+            {enableVoice && (
+              <FormField
+                name="voiceButtonText"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">自定义按钮文本（留空仅显示图标）</FormLabel>
+                    <FormControl>
+                      <Input placeholder="留空仅显示图标" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
             <FormMessage />
           </FormItem>
         )}
@@ -52,10 +70,40 @@ export const FieldQuickFeatures: React.FC<IFieldQuickFeaturesProps> = ({ form })
             <FormDescription>
               {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.expand.desc')}
             </FormDescription>
+            {enableExpand && (
+              <FormField
+                name="expandButtonText"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs">自定义按钮文本（留空仅显示图标）</FormLabel>
+                    <FormControl>
+                      <Input placeholder="留空仅显示图标" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
             <FormMessage />
           </FormItem>
         )}
       />
+      {promptDictionary && (
+        <FormField
+          name="knowledgeGraphButtonText"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+               <FormLabel>知识图谱按钮文本（留空仅显示图标）</FormLabel>
+               <FormControl>
+                 <Input placeholder="留空仅显示图标" {...field} />
+               </FormControl>
+               <FormDescription>自定义知识图谱按钮显示的文字，留空则不显示文字</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
     </>
   );
 };

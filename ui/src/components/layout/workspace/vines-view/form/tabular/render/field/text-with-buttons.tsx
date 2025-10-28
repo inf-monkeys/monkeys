@@ -29,6 +29,9 @@ interface TextWithButtonsProps {
   promptDictionary?: any;
   enableVoice?: boolean;
   enableExpand?: boolean;
+  voiceButtonText?: string;
+  expandButtonText?: string;
+  knowledgeGraphButtonText?: string;
 }
 
 export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
@@ -43,6 +46,9 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   promptDictionary,
   enableVoice,
   enableExpand,
+  voiceButtonText,
+  expandButtonText,
+  knowledgeGraphButtonText,
 }) => {
   const shouldShouldFormButtons = useShouldShowFormButton();
   const { t } = useTranslation();
@@ -381,11 +387,11 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                       toggleRecord();
                     }}
                   >
-                    <Mic className="h-4 w-4 text-gray-800 dark:text-white" />
-                    
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>语音输入</TooltipContent>
+                     <Mic className="h-4 w-4 text-gray-800 dark:text-white" />
+                     {shouldShowButtonText && voiceButtonText}
+                   </Button>
+                 </TooltipTrigger>
+                 <TooltipContent>语音输入</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
@@ -407,11 +413,11 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                     }}
                     disabled={isExpanding}
                   >
-                    <Sparkles className="h-4 w-4 text-gray-800 dark:text-white" />
-                    
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>AI扩写</TooltipContent>
+                     <Sparkles className="h-4 w-4 text-gray-800 dark:text-white" />
+                     {shouldShowButtonText && expandButtonText}
+                   </Button>
+                 </TooltipTrigger>
+                 <TooltipContent>AI扩写</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
@@ -427,9 +433,9 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                 setOpen(true);
               }}
             >
-              <Book className="h-4 w-4 text-gray-800 dark:text-white" />
-              {t('workspace.pre-view.actuator.execution-form.knowledge-graph.button')}
-            </Button>
+               <Book className="h-4 w-4 text-gray-800 dark:text-white" />
+               {shouldShowButtonText && knowledgeGraphButtonText}
+             </Button>
           )}
         </div>
       )}
