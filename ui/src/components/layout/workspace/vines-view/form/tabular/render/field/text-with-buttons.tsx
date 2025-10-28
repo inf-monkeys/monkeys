@@ -58,6 +58,12 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   const [selected, setSelected] = React.useState<Record<string, boolean>>({});
   const [sidebarWidth, setSidebarWidth] = React.useState<number>(300);
   
+  // 拖动相关状态
+  const [position, setPosition] = React.useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
+  const dialogRef = React.useRef<HTMLDivElement | null>(null);
+  
   // 监听 sidebar 宽度变化
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -67,6 +73,45 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     window.addEventListener('vines:left-sidebar-width-change', handler as any);
     return () => window.removeEventListener('vines:left-sidebar-width-change', handler as any);
   }, []);
+  
+  // 拖动处理函数
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return; // 只处理左键
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    e.preventDefault();
+  };
+  
+  // 全局鼠标移动处理
+  React.useEffect(() => {
+    if (!isDragging) return;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    };
+    
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragStart]);
+  
+  // 重置位置当对话框关闭时
+  React.useEffect(() => {
+    if (!open) {
+      setPosition({ x: 0, y: 0 });
+    }
+  }, [open]);
   
   // 当 sidebar 宽度小于 280px 时，只显示图标
   const shouldShowButtonText = sidebarWidth >= 280;
@@ -479,8 +524,15 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
 
       {level1Keys.length > 0 && (
         <Dialog open={open} onOpenChange={setOpen} modal={false}>
-          <DialogContent className="max-w-3xl" hideOverlay>
-            <DialogHeader>
+          <DialogContent 
+            className="max-w-3xl" 
+            hideOverlay
+            style={position.x !== 0 || position.y !== 0 ? { transform: `translate(${position.x}px, ${position.y}px)` } : undefined}
+          >
+            <DialogHeader 
+              className="cursor-move select-none border-b pb-3" 
+              onMouseDown={handleMouseDown}
+            >
               <DialogTitle>{t('workspace.pre-view.actuator.execution-form.knowledge-graph.title')}</DialogTitle>
             </DialogHeader>
             <TooltipProvider>

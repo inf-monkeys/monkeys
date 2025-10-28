@@ -62,19 +62,47 @@ export async function generatePlaceholderImage(info: PlaceholderInfo): Promise<s
   // 如果有图标URL，尝试绘制
   if (info.appIcon && info.appIcon.startsWith('http')) {
     try {
+      // 先尝试不使用 crossOrigin
+      let loaded = false;
       const img = new Image();
-      img.crossOrigin = 'anonymous';
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => {
+      img.onload = () => {
+        const iconSize = 240;
+        ctx.drawImage(img, centerX - iconSize / 2, centerY - 300, iconSize, iconSize);
+        loaded = true;
+      };
+      img.onerror = () => {
+        // 如果失败，尝试使用 crossOrigin
+        const img2 = new Image();
+        img2.crossOrigin = 'anonymous';
+        img2.onload = () => {
           const iconSize = 240;
-          ctx.drawImage(img, centerX - iconSize / 2, centerY - 300, iconSize, iconSize);
-          resolve();
+          ctx.drawImage(img2, centerX - iconSize / 2, centerY - 300, iconSize, iconSize);
+          loaded = true;
         };
-        img.onerror = () => reject();
-        img.src = info.appIcon!;
-        // 超时处理
-        setTimeout(() => reject(), 2000);
+        img2.onerror = () => {
+          loaded = false;
+        };
+        img2.src = info.appIcon!;
+      };
+      img.src = info.appIcon!;
+      // 等待加载完成
+      await new Promise<void>((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (loaded) {
+            clearInterval(checkInterval);
+            clearTimeout(timeout);
+            resolve();
+          }
+        }, 50);
+        const timeout = setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve();
+        }, 2000);
       });
+      // 如果加载失败，绘制默认图标
+      if (!loaded) {
+        throw new Error('图标加载失败');
+      }
     } catch {
       // 图标加载失败，绘制默认图标
       ctx.fillStyle = '#8b5cf6';

@@ -1115,7 +1115,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
       const img = new Image();
       const svgBlob = new Blob([svgText], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(svgBlob);
-      img.crossOrigin = 'anonymous';
+      // blob URL 不需要设置 crossOrigin
       img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
