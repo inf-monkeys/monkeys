@@ -110,6 +110,11 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       visibility: get(currentVariable, 'typeOptions.visibility', undefined),
       promptDictionary: get(currentVariable, 'typeOptions.promptDictionary', undefined),
       flag: get(currentVariable, 'flag', undefined),
+      enableVoice: get(currentVariable, 'typeOptions.enableVoice', false),
+      enableExpand: get(currentVariable, 'typeOptions.enableExpand', false),
+      voiceButtonText: get(currentVariable, 'typeOptions.voiceButtonText', ''),
+      expandButtonText: get(currentVariable, 'typeOptions.expandButtonText', ''),
+      knowledgeGraphButtonText: get(currentVariable, 'typeOptions.knowledgeGraphButtonText', ''),
     };
 
     form.reset(defaultValues);
@@ -136,6 +141,11 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       comfyuiModelTypeName,
       visibility,
       promptDictionary,
+      enableVoice,
+      enableExpand,
+      voiceButtonText,
+      expandButtonText,
+      knowledgeGraphButtonText,
     } = pick(data, [
       'multipleValues',
       'assetType',
@@ -157,6 +167,11 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'visibility',
       'promptDictionary',
       'flag',
+      'enableVoice',
+      'enableExpand',
+      'voiceButtonText',
+      'expandButtonText',
+      'knowledgeGraphButtonText',
     ]);
 
     const finalVariable = omit(data, [
@@ -205,6 +220,11 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOption('textareaMiniHeight', textareaMiniHeight);
     setOption('visibility', visibility);
     setOption('promptDictionary', promptDictionary);
+    setOption('enableVoice', enableVoice);
+    setOption('enableExpand', enableExpand);
+    setOption('voiceButtonText', voiceButtonText);
+    setOption('expandButtonText', expandButtonText);
+    setOption('knowledgeGraphButtonText', knowledgeGraphButtonText);
     if (Default) {
       set(finalVariable, 'default', Default);
     }

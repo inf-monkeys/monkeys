@@ -3314,6 +3314,14 @@
                   "label": "Flag",
                   "desc": "Used to mark data when calling third-party APIs"
                 },
+                "voice": {
+                  "label": "Enable Voice Input",
+                  "desc": "When enabled, a voice input button will be displayed next to the text input box"
+                },
+                "expand": {
+                  "label": "Enable Text Expansion",
+                  "desc": "When enabled, an expansion button will be displayed next to the text input box"
+                },
                 "textarea-mini-height": {
                   "label": "Input box line height"
                 },

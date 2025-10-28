@@ -126,6 +126,13 @@ export const workflowInputSchema = z.object({
   promptDictionary: z.any().optional(),
 
   flag: z.boolean().optional(),
+  
+  // 快捷功能选项
+  enableVoice: z.boolean().optional(),
+  enableExpand: z.boolean().optional(),
+  voiceButtonText: z.string().optional(),
+  expandButtonText: z.string().optional(),
+  knowledgeGraphButtonText: z.string().optional(),
 });
 
 export type IWorkflowInput = z.infer<typeof workflowInputSchema>;
