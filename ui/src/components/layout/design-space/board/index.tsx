@@ -294,8 +294,45 @@ function CustomContextMenu(props: TLUiContextMenuProps & { miniPage?: any }) {
 const assetsStore: TLAssetStore = {
   async upload(asset, file) {
     try {
+      // 调试信息：查看 tldraw 传入的文件信息
+      console.log('[assetsStore.upload] 收到文件:', {
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+        asset,
+      });
+      
+      // 检查文件名是否有扩展名，如果没有则根据 MIME 类型添加
+      let fileToUpload = file;
+      const fileName = file.name;
+      const hasExtension = fileName.includes('.') && !fileName.startsWith('.');
+      
+      if (!hasExtension && file.type) {
+        // 根据 MIME 类型推断扩展名
+        const mimeToExt: Record<string, string> = {
+          'image/png': 'png',
+          'image/jpeg': 'jpg',
+          'image/gif': 'gif',
+          'image/webp': 'webp',
+          'image/bmp': 'bmp',
+          'image/svg+xml': 'svg',
+          'video/mp4': 'mp4',
+          'video/webm': 'webm',
+          'video/ogg': 'ogg',
+        };
+        
+        const extension = mimeToExt[file.type];
+        if (extension) {
+          // 创建新的 File 对象，带有正确的扩展名
+          fileToUpload = new File([file], `${fileName}.${extension}`, {
+            type: file.type,
+            lastModified: file.lastModified,
+          });
+        }
+      }
+      
       // 使用 vines-uploader 进行文件上传
-      const result = await uploadSingleFile(file, {
+      const result = await uploadSingleFile(fileToUpload, {
         basePath: 'user-files/designs',
         maxSize: 50, // 50MB 限制
         autoUpload: true,

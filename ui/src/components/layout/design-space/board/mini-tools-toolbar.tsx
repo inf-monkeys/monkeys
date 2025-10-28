@@ -51,6 +51,7 @@ export const MiniToolsToolbar: React.FC = () => {
   // mini 开关状态（不影响 toolbar 定位，仅用于样式或激活态）
   const [miniActive, setMiniActive] = useState(false);
   const [currentMiniPageId, setCurrentMiniPageId] = useState<string | null>(null);
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
   useEffect(() => {
     const onMini = (e: any) => {
       const pid = e?.detail?.pageId ?? null;
@@ -60,6 +61,25 @@ export const MiniToolsToolbar: React.FC = () => {
     window.addEventListener('vines:mini-state', onMini as any);
     return () => window.removeEventListener('vines:mini-state', onMini as any);
   }, []);
+
+  // 自动打开第一个应用
+  useEffect(() => {
+    // 只在有置顶应用、sidebar 展开、且还没有自动打开过的情况下执行
+    if (pinnedPages?.pages && pinnedPages.pages.length > 0 && !leftCollapsed && !hasAutoOpened && !miniActive) {
+      const firstPage = pinnedPages.pages[0];
+      setHasAutoOpened(true);
+      
+      // 延迟打开，确保组件已完全加载
+      setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent('vines:open-pinned-page-mini', { detail: { pageId: firstPage.id, page: firstPage } }),
+        );
+        window.dispatchEvent(
+          new CustomEvent('vines:open-pinned-page', { detail: { pageId: firstPage.id, page: firstPage } }),
+        );
+      }, 300);
+    }
+  }, [pinnedPages, leftCollapsed, hasAutoOpened, miniActive]);
 
   return (
     <>
