@@ -270,8 +270,8 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
             // 使用与导出全部相同的方法，但压缩图片
             const { blob } = await (editor as any).toImage(ids, { 
               format: 'jpeg', // 使用JPEG格式，文件更小
-              scale: 0.2, // 降低分辨率到20%，减小图片体积
-              quality: 0.5 // 降低质量到50%，进一步提升压缩率
+              scale: 0.1, // 降低分辨率到10%，减小图片体积
+              quality: 0.2 // 降低质量到20%，进一步提升压缩率
             });
             
             if (!blob) {
