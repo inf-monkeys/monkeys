@@ -3,11 +3,10 @@ import React from 'react';
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
-import { RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IMediaData>>();
@@ -49,15 +48,13 @@ export const createMediaDataColumns = () => [
         {getI18nContent(getValue() as string | I18nValue)}
       </a>
     ),
+    size: 180,
+    maxSize: 200,
   }),
-  columnHelper.accessor('user', {
-    id: 'user',
-    cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser }),
-    maxSize: 48,
-  }),
-  columnHelper.accessor('assetTags', {
-    id: 'assetTags',
-    maxSize: 96,
+  columnHelper.accessor('description', {
+    id: 'description',
+    cell: ({ getValue }) => RenderDescription({ description: getValue() as string | I18nValue }),
+    size: 400,
   }),
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',

@@ -2,6 +2,7 @@ import React from 'react';
 
 import { createLazyFileRoute } from '@tanstack/react-router';
 
+import { I18nValue } from '@inf-monkeys/monkeys';
 import { useTranslation } from 'react-i18next';
 
 import { preloadUgcMediaData, useUgcMediaData } from '@/apis/ugc';
@@ -14,7 +15,24 @@ import { UploadMedia } from '@/components/layout/ugc-pages/media-data/upload';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const MediaData: React.FC = () => {
-  const { t: tHook } = useTranslation();
+  const { t: tHook, i18n } = useTranslation();
+
+  // 直接在组件函数体内定义，类似 detail-page 的做法
+  // 当语言切换时，useTranslation 触发重新渲染，这里会使用新的 i18n.language
+  const getDescription = (item: any) => {
+    const desc = item.description;
+    if (!desc) return null;
+    if (typeof desc === 'string') return desc;
+    // 如果是多语言对象，根据当前语言返回（与 detail-page 一致）
+    if (typeof desc === 'object' && desc !== null) {
+      if (i18n.language === 'zh') {
+        return desc['zh-CN'] || desc['en-US'] || '';
+      } else if (i18n.language === 'en') {
+        return desc['en-US'] || desc['zh-CN'] || '';
+      }
+    }
+    return '';
+  };
 
   return (
     <main className="size-full">
@@ -33,6 +51,7 @@ export const MediaData: React.FC = () => {
               })}`}
             </span>
           ),
+          description: (item) => getDescription(item),
           cover: (item) => {
             // 判断文件类型
             const fileName = String(item.name || item.displayName || '');

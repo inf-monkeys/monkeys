@@ -52,7 +52,7 @@ function RemoteDataTable<TData, TValue>({
   const paginationPosition = oem?.theme.paginationPosition ?? 'left';
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full max-w-full overflow-x-auto">
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -83,7 +83,7 @@ function RemoteDataTable<TData, TValue>({
                         // minWidth: cell.column.getSize(),
                         width: cell.column.getSize(),
                       }}
-                      className="text-nowrap"
+                      className={cn(cell.column.id === 'description' ? '' : 'text-nowrap')}
                       key={cell.id}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
