@@ -20,6 +20,7 @@ export const ApplicationStore: React.FC = () => {
       assetType="workflow"
       assetName={tHook('components.layout.main.sidebar.list.store.application-store.label')}
       isMarket
+      showSearch
       useUgcFetcher={useUgcApplicationStore}
       preloadUgcFetcher={preloadUgcApplicationStore}
       createColumns={() => createApplicationStoreColumns()}

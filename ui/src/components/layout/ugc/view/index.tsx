@@ -62,6 +62,7 @@ interface IUgcViewProps<E extends object> {
   subtitle?: React.ReactNode;
   defaultPageSize?: number;
   assetIdKey?: string;
+  showSearch?: boolean;
 }
 
 export const UgcView = <E extends object>({
@@ -80,6 +81,7 @@ export const UgcView = <E extends object>({
   subtitle: subtitleProp,
   defaultPageSize = 24,
   assetIdKey = 'id',
+  showSearch,
 }: IUgcViewProps<E>): React.ReactNode => {
   const { t } = useTranslation();
 
@@ -427,6 +429,7 @@ export const UgcView = <E extends object>({
           subtitle={subtitle}
           search={searchInput}
           onSearchChange={setSearchInput}
+          showSearch={showSearch}
           filterButtonProps={{
             filter,
             onChange: setFilter,

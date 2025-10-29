@@ -15,6 +15,7 @@ interface IUgcViewHeaderProps extends IUgcCustomProps {
   search?: string;
   onSearchChange?: (value: string) => void;
   filterButtonProps: Omit<IUgcViewFilterButtonProps, keyof IUgcCustomProps>;
+  showSearch?: boolean;
 }
 
 export const UgcViewHeader: React.FC<IUgcViewHeaderProps> = ({
@@ -25,13 +26,15 @@ export const UgcViewHeader: React.FC<IUgcViewHeaderProps> = ({
   subtitle,
   search,
   onSearchChange,
+  showSearch,
 }) => {
   const { t } = useTranslation();
   const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType) && !isMarket;
+  const searchVisible = showSearch ?? filterAreaVisible;
 
   return (
     <header className="flex w-full items-center justify-between px-global pb-2">
-      {filterAreaVisible && (
+      {searchVisible && (
         <div className="relative w-64">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
             <Search className="h-4 w-4 text-muted-foreground" />

@@ -21,6 +21,7 @@ import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
+import { getI18nContent } from '@/utils';
 
 import { useSystemConfig } from '../common';
 import { IModelTraining } from '../model-training/typings';
@@ -70,8 +71,24 @@ export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowTool
 export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>
   useUgcItems<IComfyuiWorkflow>(dto, '/api/comfyui/workflows');
 
+const normalizeText = (raw: unknown): string => {
+  if (raw === undefined || raw === null) {
+    return '';
+  }
+  if (typeof raw === 'number') {
+    return String(raw);
+  }
+  if (typeof raw === 'string') {
+    const resolved = getI18nContent(raw, raw);
+    return typeof resolved === 'string' ? resolved : raw;
+  }
+  const resolved = getI18nContent(raw as any);
+  return typeof resolved === 'string' ? resolved : '';
+};
+
 export const useUgcTools = (dto: IListUgcDto) => {
-  const { page, limit } = dto;
+  const { page, limit, search } = dto;
+  const normalizedSearch = search?.trim().toLowerCase();
 
   const { data: oem } = useSystemConfig();
 
@@ -181,7 +198,17 @@ export const useUgcTools = (dto: IListUgcDto) => {
           ...processApiToolList,
           ...processServiceToolList,
         ];
-  const sortedList = totalList.sort(
+  const filteredList = normalizedSearch
+    ? totalList.filter((item) => {
+        const nameText = normalizeText((item as any)?.name);
+        const displayNameText = normalizeText((item as any)?.displayName);
+        const descriptionText = normalizeText((item as any)?.description);
+        return [nameText, displayNameText, descriptionText]
+          .map((text) => text.toLowerCase())
+          .some((text) => text.includes(normalizedSearch));
+      })
+    : totalList;
+  const sortedList = [...filteredList].sort(
     (a, b) => (orderList.indexOf(a.categories?.[0] ?? '') ?? 999) - (orderList.indexOf(b.categories?.[0] ?? '') ?? 0),
   );
   const sliceList = sortedList.slice(limit * (page - 1), limit * page);
@@ -189,7 +216,7 @@ export const useUgcTools = (dto: IListUgcDto) => {
   const data: IPaginationListData<ICommonTool> = {
     page,
     limit,
-    total: totalList.length,
+    total: filteredList.length,
     data: sliceList,
   };
 
