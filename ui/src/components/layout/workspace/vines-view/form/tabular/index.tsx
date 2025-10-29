@@ -42,7 +42,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   theme = 'default',
   appInfo,
   onTabularEventCreated,
-  showButtons = false,
+  showButtons = true,
 }) => {
   const { t } = useTranslation();
 
