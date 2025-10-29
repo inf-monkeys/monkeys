@@ -4,7 +4,8 @@ import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { EvaluationService } from '@/modules/evaluation/evaluation.service';
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { ToolsForwardService } from '@/modules/tools/tools.forward.service';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BulkCreateMediaDto } from './dto/req/bulk-create-media.dto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
@@ -19,6 +20,7 @@ export class MediaFileCrudController {
   constructor(
     protected readonly service: MediaFileService,
     private readonly evaluationService: EvaluationService,
+    private readonly toolsForwardService: ToolsForwardService,
   ) {}
 
   @Get('')
@@ -161,5 +163,53 @@ export class MediaFileCrudController {
 
     await this.service.togglePin(id, teamId, togglePinDto.pinned);
     return new SuccessResponse({ data: { success: true } });
+  }
+
+  @Post(':id/generate-description')
+  @ApiOperation({
+    summary: '使用 AI 生成图片描述',
+    description: '调用 monkey-tools-concept-design 的 image_to_text 工具自动生成图片描述，并可选地自动更新到 description 字段',
+  })
+  public async generateDescription(@Req() request: IRequest, @Param('id') id: string) {
+    const { teamId, userId } = request;
+
+    // 1. 获取 media 文件（带权限校验）
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    // 3. 获取可访问的 URL
+    const imageUrl = await this.service.getPublicUrl(media);
+
+    // 4. 调用 image_to_text 工具
+    try {
+      const result = await this.toolsForwardService.invoke(
+        'monkeys_tool_concept_design:image_to_text',
+        {
+          '8rn98n': imageUrl,
+          type: '请描述图片内容',
+        },
+        { teamId, userId },
+      );
+
+      const generatedDescription = result?.output;
+
+      if (!generatedDescription) {
+        throw new BadRequestException('AI service returned empty result');
+      }
+
+      await this.service.updateMedia(id, teamId, {
+        description: generatedDescription,
+      });
+
+      return new SuccessResponse({
+        data: {
+          description: generatedDescription,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate description: ${error.message}`);
+    }
   }
 }

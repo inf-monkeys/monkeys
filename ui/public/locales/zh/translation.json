@@ -4383,7 +4383,12 @@
       "backToList": "返回列表",
       "loading": "加载中",
       "loadingAssetInfo": "正在获取资产信息",
-      "description": "描述"
+      "description": "描述",
+      "noDescription": "暂无描述",
+      "aiGenerate": "AI 生成",
+      "descriptionGenerated": "描述生成成功",
+      "generateFailed": "生成描述失败",
+      "generating": "生成中..."
     }
   }
 }

@@ -4405,7 +4405,12 @@
       "backToList": "Back to List",
       "loading": "Loading",
       "loadingAssetInfo": "Loading asset information",
-      "description": "Description"
+      "description": "Description",
+      "noDescription": "No description",
+      "aiGenerate": "AI Generate",
+      "descriptionGenerated": "Description generated successfully",
+      "generateFailed": "Failed to generate description",
+      "generating": "Generating..."
     }
   }
 }

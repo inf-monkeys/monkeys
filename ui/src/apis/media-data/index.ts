@@ -18,3 +18,9 @@ export const togglePinMedia = (id: string, pinned: boolean) =>
     method: 'PUT',
     simple: true,
   })(`/api/media-files/${id}/pin`, { pinned });
+
+export const generateMediaDescription = (id: string, type?: string, autoUpdate?: boolean) =>
+  vinesFetcher<{ description: string; updated: boolean }>({
+    method: 'POST',
+    simple: true,
+  })(`/api/media-files/${id}/generate-description`, { type, autoUpdate });

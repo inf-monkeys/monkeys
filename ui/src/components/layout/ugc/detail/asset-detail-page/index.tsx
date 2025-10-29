@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
+import { generateMediaDescription } from '@/apis/media-data';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { AssetFullContentDisplay } from '@/components/layout/ugc/detail/asset-full-content-display';
 import { StepViewer } from '@/components/layout/ugc/detail/step-viewer';
@@ -21,6 +23,7 @@ interface IAssetDetailPageProps<E extends object> {
 export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mutate }: IAssetDetailPageProps<E>) => {
   const { t, i18n } = useTranslation();
   const [conversionType, setConversionType] = useState('text');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // 获取资产的基本信息
   const assetInfo = {
@@ -302,11 +305,33 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
                     <Button
                       size="small"
                       className="ml-auto rounded-md bg-black px-4 py-2 font-medium text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                      onClick={() => {
-                        console.log('开始转换:', conversionType);
+                      disabled={isGenerating}
+                      onClick={async () => {
+                        // 当图片转换为文字时，调用 AI 生成描述
+                        if (isImageFile() && conversionType === 'text' && mutate) {
+                          setIsGenerating(true);
+                          try {
+                            await generateMediaDescription(asset.id, 'description', true);
+                            toast.success(t('asset.detail.descriptionGenerated'));
+                            await mutate();
+                          } catch (error: any) {
+                            toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
+                          } finally {
+                            setIsGenerating(false);
+                          }
+                        } else {
+                          console.log('开始转换:', conversionType);
+                        }
                       }}
                     >
-                      {t('asset.detail.startConversion')}
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                          {t('asset.detail.generating')}
+                        </>
+                      ) : (
+                        t('asset.detail.startConversion')
+                      )}
                     </Button>
                   </div>
                 </div>
