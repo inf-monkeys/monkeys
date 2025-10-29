@@ -4,3 +4,4 @@ export class TogglePinMediaDto {
   @IsBoolean()
   pinned: boolean;
 }
+

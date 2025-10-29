@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { imageGenerateTxt, txtGenerate3DModel, txtGenerateImage } from '@/apis/media-data';
+import { generateMediaDescription } from '@/apis/media-data';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { AssetFullContentDisplay } from '@/components/layout/ugc/detail/asset-full-content-display';
 import { StepViewer } from '@/components/layout/ugc/detail/step-viewer';
@@ -72,11 +72,7 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
   // 判断是否为图片文件
   const isImageFile = () => {
     const fileType = getFileType();
-    const assetType = (asset as any).type;
-    // 检查 type 字段或文件扩展名
-    return (
-      assetType?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(fileType || '')
-    );
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(fileType || '');
   };
 
   // 判断是否为 STEP 或 GLB 文件
@@ -308,53 +304,15 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
                     </Select>
                     <Button
                       size="small"
-                      className="ml-auto rounded-md bg-black px-4 py-2 font-medium text-white hover:bg-black hover:text-white dark:bg-white dark:text-black"
+                      className="ml-auto rounded-md bg-black px-4 py-2 font-medium text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-100"
                       disabled={isGenerating}
                       onClick={async () => {
                         // 当图片转换为文字时，调用 AI 生成描述
                         if (isImageFile() && conversionType === 'text' && mutate) {
                           setIsGenerating(true);
                           try {
-                            await imageGenerateTxt(asset.id);
+                            await generateMediaDescription(asset.id, 'description', true);
                             toast.success(t('asset.detail.descriptionGenerated'));
-                            await mutate();
-                          } catch (error: any) {
-                            toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
-                          } finally {
-                            setIsGenerating(false);
-                          }
-                        } else if (isTextFile() && conversionType === 'image' && mutate) {
-                          // 当文本转换为图片时，读取文本内容并生成图片
-                          setIsGenerating(true);
-                          try {
-                            const response = await fetch((asset as any).url);
-                            const text = await response.text();
-                            const textPreview = text.substring(0, 100);
-
-                            // 获取 JSON 文件名（不含扩展名）
-                            const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
-
-                            await txtGenerateImage(asset.id, textPreview, jsonFileName);
-                            toast.success(t('asset.detail.imageGenerated') || '图片已生成');
-                            await mutate();
-                          } catch (error: any) {
-                            toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
-                          } finally {
-                            setIsGenerating(false);
-                          }
-                        } else if (isTextFile() && conversionType === '3d-model' && mutate) {
-                          // 当文本转换为3D模型时，读取文本内容并生成3D模型
-                          setIsGenerating(true);
-                          try {
-                            const response = await fetch((asset as any).url);
-                            const text = await response.text();
-                            const textPreview = text.substring(0, 100);
-
-                            // 获取 JSON 文件名（不含扩展名）
-                            const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
-
-                            await txtGenerate3DModel(asset.id, textPreview, jsonFileName);
-                            toast.success(t('asset.detail.3dModelGenerated') || '3D模型已生成');
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));

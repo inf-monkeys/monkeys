@@ -10,8 +10,6 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BulkCreateMediaDto } from './dto/req/bulk-create-media.dto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
 import { TogglePinMediaDto } from './dto/req/toggle-pin-media.dto';
-import { TxtGenerate3DModelDto } from './dto/req/txt-generate-3dmodel.dto';
-import { TxtGenerateImageDto } from './dto/req/txt-generate-image.dto';
 import { UpdateMediaDto } from './dto/req/update-media.dto';
 import { MediaFileService } from './media.service';
 
@@ -114,93 +112,6 @@ export class MediaFileCrudController {
     return new SuccessResponse({ data: evaluationInfo });
   }
 
-  @Post(':id/image-generate-txt')
-  @ApiOperation({
-    summary: '使用 AI 为图片生成描述',
-    description: '调用 monkey-tools-concept-design 的 image_to_function 工具为图片生成描述，并将描述保存到媒体库',
-  })
-  public async imageGenerateTxt(@Req() request: IRequest, @Param('id') id: string) {
-    const { teamId, userId } = request;
-
-    // 验证媒体文件是否存在且属于当前团队
-    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
-    if (!media) {
-      throw new NotFoundException('Media file not found or access denied');
-    }
-    const createdMedia = await this.service.ImageGenerateTxt(id, teamId, userId, media);
-    return new SuccessResponse({ data: createdMedia });
-  }
-
-  @Post(':id/txt-generate-image')
-  @ApiOperation({
-    summary: '使用 AI 根据文本生成图片',
-    description: '调用 monkey-tools-concept-design 的 text_to_image 工具根据文本描述自动生成图片，并将图片保存到媒体库',
-  })
-  public async generateImage(@Req() request: IRequest, @Param('id') id: string, @Body() body: TxtGenerateImageDto) {
-    const { teamId, userId } = request;
-    const { text, jsonFileName } = body;
-
-    // 验证媒体文件是否存在且属于当前团队
-    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
-    if (!media) {
-      throw new NotFoundException('Media file not found or access denied');
-    }
-
-    try {
-      const createdMedia = await this.service.TextGenerateImage(teamId, userId, text, jsonFileName);
-
-      return new SuccessResponse({
-        data: createdMedia,
-      });
-    } catch (error) {
-      throw new BadRequestException(`Failed to generate image: ${error.message}`);
-    }
-  }
-
-  @Post(':id/txt-generate-3d-model')
-  @ApiOperation({
-    summary: '使用 AI 根据文本生成3D模型',
-    description: '调用 monkey-tools-concept-design 的 text_to_3d_model 工具根据文本描述自动生成3D模型，并将模型保存到媒体库',
-  })
-  public async generate3DModel(@Req() request: IRequest, @Param('id') id: string, @Body() body: TxtGenerate3DModelDto) {
-    const { teamId, userId } = request;
-    const { text, jsonFileName } = body;
-
-    // 验证媒体文件是否存在且属于当前团队
-    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
-    if (!media) {
-      throw new NotFoundException('Media file not found or access denied');
-    }
-
-    try {
-      const createdMedia = await this.service.TextGenerate3DModel(teamId, userId, text, jsonFileName);
-
-      return new SuccessResponse({
-        data: createdMedia,
-      });
-    } catch (error) {
-      throw new BadRequestException(`Failed to generate 3D model: ${error.message}`);
-    }
-  }
-
-  @Put(':id/pin')
-  @ApiOperation({
-    summary: '置顶/取消置顶媒体文件',
-    description: '切换媒体文件的置顶状态。置顶时会自动设置 sort 值，取消置顶时会重置 sort 值。',
-  })
-  public async togglePinMedia(@Req() request: IRequest, @Param('id') id: string, @Body() togglePinDto: TogglePinMediaDto) {
-    const { teamId } = request;
-
-    // 验证媒体文件是否存在且属于当前团队
-    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
-    if (!media) {
-      throw new NotFoundException('Media file not found or access denied');
-    }
-
-    await this.service.togglePin(id, teamId, togglePinDto.pinned);
-    return new SuccessResponse({ data: { success: true } });
-  }
-
   @Get(':id')
   @ApiOperation({
     summary: '根据 Asset ID 获取媒体文件信息 (带权限校验)',
@@ -234,5 +145,71 @@ export class MediaFileCrudController {
 
     const updatedMedia = await this.service.updateMedia(id, teamId, updateDto);
     return new SuccessResponse({ data: updatedMedia });
+  }
+
+  @Put(':id/pin')
+  @ApiOperation({
+    summary: '置顶/取消置顶媒体文件',
+    description: '切换媒体文件的置顶状态。置顶时会自动设置 sort 值，取消置顶时会重置 sort 值。',
+  })
+  public async togglePinMedia(@Req() request: IRequest, @Param('id') id: string, @Body() togglePinDto: TogglePinMediaDto) {
+    const { teamId } = request;
+
+    // 验证媒体文件是否存在且属于当前团队
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    await this.service.togglePin(id, teamId, togglePinDto.pinned);
+    return new SuccessResponse({ data: { success: true } });
+  }
+
+  @Post(':id/generate-description')
+  @ApiOperation({
+    summary: '使用 AI 生成图片描述',
+    description: '调用 monkey-tools-concept-design 的 image_to_text 工具自动生成图片描述，并可选地自动更新到 description 字段',
+  })
+  public async generateDescription(@Req() request: IRequest, @Param('id') id: string) {
+    const { teamId, userId } = request;
+
+    // 1. 获取 media 文件（带权限校验）
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    // 3. 获取可访问的 URL
+    const imageUrl = await this.service.getPublicUrl(media);
+
+    // 4. 调用 image_to_text 工具
+    try {
+      const result = await this.toolsForwardService.invoke(
+        'monkeys_tool_concept_design:image_to_text',
+        {
+          '8rn98n': imageUrl,
+          type: '请描述图片内容',
+        },
+        { teamId, userId },
+      );
+
+      const generatedDescription = result?.output;
+
+      if (!generatedDescription) {
+        throw new BadRequestException('AI service returned empty result');
+      }
+
+      await this.service.updateMedia(id, teamId, {
+        description: generatedDescription,
+      });
+
+      return new SuccessResponse({
+        data: {
+          description: generatedDescription,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate description: ${error.message}`);
+    }
   }
 }

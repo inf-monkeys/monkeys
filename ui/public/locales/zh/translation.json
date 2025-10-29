@@ -4388,9 +4388,7 @@
       "aiGenerate": "AI 生成",
       "descriptionGenerated": "描述生成成功",
       "generateFailed": "生成描述失败",
-      "generating": "生成中...",
-      "imageGenerated": "图片生成成功",
-      "3dModelGenerated": "3D模型生成成功"
+      "generating": "生成中..."
     }
   }
 }

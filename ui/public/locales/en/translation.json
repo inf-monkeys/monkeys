@@ -4410,9 +4410,7 @@
       "aiGenerate": "AI Generate",
       "descriptionGenerated": "Description generated successfully",
       "generateFailed": "Failed to generate description",
-      "generating": "Generating...",
-      "imageGenerated": "Image generated successfully",
-      "3dModelGenerated": "3D model generated successfully"
+      "generating": "Generating..."
     }
   }
 }
