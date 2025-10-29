@@ -14,6 +14,9 @@ export class CreateRichMediaDto {
   @Joiful.number().allow(1, 2, 3, 4)
   source: MediaSource;
 
+  @Joiful.string()
+  description?: string;
+
   @Joiful.object()
   params?: any;
 

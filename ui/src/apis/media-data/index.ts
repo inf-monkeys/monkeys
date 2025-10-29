@@ -19,8 +19,23 @@ export const togglePinMedia = (id: string, pinned: boolean) =>
     simple: true,
   })(`/api/media-files/${id}/pin`, { pinned });
 
-export const generateMediaDescription = (id: string, type?: string, autoUpdate?: boolean) =>
-  vinesFetcher<{ description: string; updated: boolean }>({
+export const imageGenerateTxt = (id: string) =>
+  vinesFetcher<MediaAsset>({
     method: 'POST',
     simple: true,
-  })(`/api/media-files/${id}/generate-description`, { type, autoUpdate });
+  })(`/api/media-files/${id}/image-generate-txt`);
+
+export const txtGenerateImage = (id: string, text: string, jsonFileName?: string) =>
+  vinesFetcher<MediaAsset>({
+    method: 'POST',
+    simple: true,
+  })(`/api/media-files/${id}/txt-generate-image`, { text, jsonFileName });
+
+export const txtGenerate3DModel = (id: string, text: string, jsonFileName?: string) =>
+  vinesFetcher<MediaAsset>({
+    method: 'POST',
+    simple: true,
+  })(`/api/media-files/${id}/txt-generate-3d-model`, {
+    text,
+    jsonFileName,
+  });

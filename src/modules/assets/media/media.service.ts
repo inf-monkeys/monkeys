@@ -1,16 +1,23 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { S3Helpers } from '@/common/s3';
+import { getFileExtensionFromUrl } from '@/common/utils/file';
+import { calculateMd5FromArrayBuffer } from '@/common/utils/markdown-image-utils';
 import { MediaFileEntity } from '@/database/entities/assets/media/media-file';
 import { MediaFileRepository } from '@/database/repositories/media.repository';
+import { ToolsForwardService } from '@/modules/tools/tools.forward.service';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import axios from 'axios';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
 
 @Injectable()
 export class MediaFileService {
   private readonly logger = new Logger(MediaFileService.name);
 
-  constructor(private readonly mediaRepository: MediaFileRepository) {}
+  constructor(
+    private readonly mediaRepository: MediaFileRepository,
+    private readonly toolsForwardService: ToolsForwardService,
+  ) {}
 
   public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[]) {
     return await this.mediaRepository.listRichMedias(teamId, dto, excludeIds);
@@ -112,5 +119,182 @@ export class MediaFileService {
 
   public async togglePin(mediaId: string, teamId: string, pinned: boolean) {
     return await this.mediaRepository.togglePin(mediaId, teamId, pinned);
+  }
+
+  /**
+   * 为图片生成描述
+   */
+  public async ImageGenerateTxt(mediaId: string, teamId: string, userId: string, media: any): Promise<string> {
+    // 获取可访问的 URL
+    const imageUrl = await this.getPublicUrl(media);
+
+    // 调用 image_to_function 工具
+    const result = await this.toolsForwardService.invoke(
+      'monkeys_tool_concept_design:image_to_function',
+      {
+        image: imageUrl,
+        function: 'text',
+      },
+      { teamId, userId },
+    );
+
+    const generatedDescription = result?.data;
+
+    if (!generatedDescription) {
+      throw new BadRequestException('AI service returned empty result');
+    }
+
+    // 更新媒体文件描述
+    await this.updateMedia(mediaId, teamId, {
+      description: generatedDescription,
+    });
+
+    return generatedDescription;
+  }
+
+  /**
+   * 根据文本生成图片
+   */
+  public async TextGenerateImage(teamId: string, userId: string, text: string, jsonFileName?: string): Promise<any> {
+    // 调用 text_to_image 工具
+    const result = await this.toolsForwardService.invoke(
+      'monkeys_tool_concept_design:text_to_function',
+      {
+        text: text,
+        function: 'image',
+      },
+      { teamId, userId },
+    );
+
+    const imageUrl = result?.data;
+
+    if (!imageUrl) {
+      throw new BadRequestException('AI service returned no image URL');
+    }
+
+    // 下载图片
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
+      timeout: 30000,
+    });
+    const buffer = response.data;
+
+    // 计算 MD5
+    const md5 = await calculateMd5FromArrayBuffer(buffer);
+    if (!md5) {
+      throw new BadRequestException('Failed to calculate MD5 for generated image');
+    }
+
+    // 检查是否已存在相同 MD5 的媒体文件
+    const existingMedia = await this.getMediaByMd5(teamId, md5);
+    if (existingMedia) {
+      return existingMedia;
+    }
+
+    // 上传到 S3
+    const s3Helpers = new S3Helpers();
+    const fileExtension = getFileExtensionFromUrl(imageUrl) || 'png';
+    const s3Key = `ai-generated-images/${md5}.${fileExtension}`;
+    const s3UploadedUrl = await s3Helpers.uploadFile(buffer, s3Key);
+
+    // 获取最终 URL（考虑私有桶的签名 URL）
+    const finalUrl = config.s3.isPrivate ? await s3Helpers.getSignedUrl(s3Key) : s3UploadedUrl;
+
+    // 生成文件名：AI_generate: "json名称.png"，使用 JSON 文件名
+    const fileName = jsonFileName || 'unknown';
+    const generatedFileName = `AI_generate:${fileName}.png`;
+
+    // 创建媒体记录
+    const createdMedia = await this.createMedia(teamId, userId, {
+      type: 'image',
+      displayName: generatedFileName,
+      url: finalUrl,
+      description: text, // 原文内容作为描述
+      source: 4, // OUTPUT
+      params: {
+        originalUrl: imageUrl,
+        aiGenerated: true,
+        prompt: text,
+        s3Key: s3Key,
+      },
+      size: buffer.byteLength,
+      md5,
+    });
+    return createdMedia;
+  }
+
+  /**
+   * 根据文本生成3D模型
+   */
+  public async TextGenerate3DModel(teamId: string, userId: string, text: string, jsonFileName?: string): Promise<any> {
+    // 调用 text_to_3d_model 工具
+    const result = await this.toolsForwardService.invoke(
+      'monkeys_tool_concept_design:text_to_function',
+      {
+        text: text,
+        function: 'model',
+      },
+      { teamId, userId },
+    );
+
+    // 3D模型可能返回文件URL，字段名可能是 modelUrl, url, model 等
+    const modelUrl = result?.data;
+
+    if (!modelUrl) {
+      throw new BadRequestException('AI service returned no 3D model URL');
+    }
+
+    // 下载3D模型文件
+    const response = await axios.get(modelUrl, {
+      responseType: 'arraybuffer',
+      timeout: 60000, // 3D模型可能较大，设置更长的超时时间
+    });
+    const buffer = response.data;
+
+    // 计算 MD5
+    const md5 = await calculateMd5FromArrayBuffer(buffer);
+    if (!md5) {
+      throw new BadRequestException('Failed to calculate MD5 for generated 3D model');
+    }
+
+    // 检查是否已存在相同 MD5 的媒体文件
+    const existingMedia = await this.getMediaByMd5(teamId, md5);
+    if (existingMedia) {
+      return existingMedia;
+    }
+
+    // 上传到 S3
+    const s3Helpers = new S3Helpers();
+    // 3D模型常见格式：glb, obj, fbx, stl 等
+    const fileExtension = getFileExtensionFromUrl(modelUrl) || 'glb';
+    const s3Key = `ai-generated-3d-models/${md5}.${fileExtension}`;
+    const s3UploadedUrl = await s3Helpers.uploadFile(buffer, s3Key);
+
+    // 获取最终 URL（考虑私有桶的签名 URL）
+    const finalUrl = config.s3.isPrivate ? await s3Helpers.getSignedUrl(s3Key) : s3UploadedUrl;
+
+    // 生成文件名：AI_generate_3D: "json名称.glb"，使用 JSON 文件名
+    const fileName = jsonFileName || 'unknown';
+    const generatedFileName = `AI_generate_3D:${fileName}.${fileExtension}`;
+
+    // 创建媒体记录
+    const createdMedia = await this.createMedia(teamId, userId, {
+      type: 'text', // 使用 text 类型存储3D模型，通过 params.type 标识为 '3d-model'
+      displayName: generatedFileName,
+      url: finalUrl,
+      description: text, // 原文内容作为描述
+      source: 4, // OUTPUT
+      params: {
+        originalUrl: modelUrl,
+        aiGenerated: true,
+        prompt: text,
+        s3Key: s3Key,
+        type: '3d-model',
+      },
+      size: buffer.byteLength,
+      md5,
+    });
+
+    return createdMedia;
   }
 }
