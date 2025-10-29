@@ -1,6 +1,6 @@
 import * as Joiful from 'joiful';
 
-export class TxtGenerate3DModelDto {
+export class TextGenerateImageDto {
   @Joiful.string()
   text: string;
 

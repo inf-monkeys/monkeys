@@ -56,7 +56,7 @@ export class MediaFileRepository {
     };
   }
 
-  public async updateMedia(id: string, teamId: string, updates: { iconUrl?: string; displayName?: string; description?: string }) {
+  public async updateMedia(id: string, teamId: string, updates: { iconUrl?: string; displayName?: string; description?: string; params?: any }) {
     const media = await this.mediaFileRepository.findOne({
       where: {
         id,
@@ -77,6 +77,9 @@ export class MediaFileRepository {
     }
     if (updates.description !== undefined) {
       media.description = updates.description;
+    }
+    if (updates.params !== undefined) {
+      media.params = updates.params;
     }
 
     media.updatedTimestamp = Date.now();

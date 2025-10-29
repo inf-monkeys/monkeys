@@ -4,13 +4,21 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { imageGenerateTxt, txtGenerate3DModel, txtGenerateImage } from '@/apis/media-data';
+import {
+  imageGenerate3DModel,
+  imageGenerateMarkdown,
+  imageGenerateTxt,
+  txtGenerate3DModel,
+  txtGenerateImage,
+  txtGenerateMarkdown,
+} from '@/apis/media-data';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { AssetFullContentDisplay } from '@/components/layout/ugc/detail/asset-full-content-display';
 import { StepViewer } from '@/components/layout/ugc/detail/step-viewer';
 import { UgcTagSelector } from '@/components/layout/ugc/view/tag-selector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx';
+import { VinesMarkdown } from '@/components/ui/markdown';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface IAssetDetailPageProps<E extends object> {
@@ -54,6 +62,7 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
       }
       return desc;
     })(),
+    markdownDescription: (asset as any).params?.markdownDescription || '',
   };
 
   // 获取文件类型
@@ -241,6 +250,18 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
                   </div>
                 </div>
               )}
+
+              {/* Markdown 描述区域 */}
+              {assetInfo.markdownDescription && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {t('asset.detail.markdownDescription') || 'Markdown 描述'}
+                  </label>
+                  <div className="max-h-96 overflow-auto rounded-md border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-800 dark:bg-gray-900">
+                    <VinesMarkdown className="text-sm">{assetInfo.markdownDescription}</VinesMarkdown>
+                  </div>
+                </div>
+              )}
             </CardContent>
 
             {/* 转换功能区域 - 对所有文件类型显示 */}
@@ -323,6 +344,30 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
                           } finally {
                             setIsGenerating(false);
                           }
+                        } else if (isImageFile() && conversionType === '3d-model' && mutate) {
+                          // 当图片转换为3D模型时，调用 AI 生成3D模型
+                          setIsGenerating(true);
+                          try {
+                            await imageGenerate3DModel(asset.id);
+                            toast.success(t('asset.detail.3dModelGenerated') || '3D模型已生成');
+                            await mutate();
+                          } catch (error: any) {
+                            toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
+                          } finally {
+                            setIsGenerating(false);
+                          }
+                        } else if (isImageFile() && conversionType === 'symbol-summary' && mutate) {
+                          // 当图片转换为 Markdown 时，调用 AI 生成 Markdown 描述
+                          setIsGenerating(true);
+                          try {
+                            await imageGenerateMarkdown(asset.id);
+                            toast.success(t('asset.detail.markdownGenerated') || 'Markdown描述已生成');
+                            await mutate();
+                          } catch (error: any) {
+                            toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
+                          } finally {
+                            setIsGenerating(false);
+                          }
                         } else if (isTextFile() && conversionType === 'image' && mutate) {
                           // 当文本转换为图片时，读取文本内容并生成图片
                           setIsGenerating(true);
@@ -336,6 +381,25 @@ export const AssetDetailPage = <E extends object>({ asset, assetType, onBack, mu
 
                             await txtGenerateImage(asset.id, textPreview, jsonFileName);
                             toast.success(t('asset.detail.imageGenerated') || '图片已生成');
+                            await mutate();
+                          } catch (error: any) {
+                            toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
+                          } finally {
+                            setIsGenerating(false);
+                          }
+                        } else if (isTextFile() && conversionType === 'symbol-summary' && mutate) {
+                          // 当文本转换为 Markdown 时，读取文本内容并生成 Markdown
+                          setIsGenerating(true);
+                          try {
+                            const response = await fetch((asset as any).url);
+                            const text = await response.text();
+                            const textPreview = text.substring(0, 100);
+
+                            // 获取 JSON 文件名（不含扩展名）
+                            const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
+
+                            await txtGenerateMarkdown(asset.id, textPreview, jsonFileName);
+                            toast.success(t('asset.detail.markdownGenerated') || 'Markdown描述已生成');
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));

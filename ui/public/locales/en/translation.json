@@ -4406,13 +4406,15 @@
       "loading": "Loading",
       "loadingAssetInfo": "Loading asset information",
       "description": "Description",
+      "markdownDescription": "Markdown Description",
       "noDescription": "No description",
       "aiGenerate": "AI Generate",
       "descriptionGenerated": "Description generated successfully",
       "generateFailed": "Failed to generate description",
       "generating": "Generating...",
       "imageGenerated": "Image generated successfully",
-      "3dModelGenerated": "3D model generated successfully"
+      "3dModelGenerated": "3D model generated successfully",
+      "markdownGenerated": "Markdown description generated successfully"
     }
   }
 }

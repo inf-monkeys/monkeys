@@ -9,9 +9,10 @@ import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, 
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BulkCreateMediaDto } from './dto/req/bulk-create-media.dto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
+import { TextGenerate3DModelDto } from './dto/req/text-generate-3dmodel.dto';
+import { TextGenerateImageDto } from './dto/req/text-generate-image.dto';
+import { TextGenerateMarkdownDto } from './dto/req/text-generate-markdown.dto';
 import { TogglePinMediaDto } from './dto/req/toggle-pin-media.dto';
-import { TxtGenerate3DModelDto } from './dto/req/txt-generate-3dmodel.dto';
-import { TxtGenerateImageDto } from './dto/req/txt-generate-image.dto';
 import { UpdateMediaDto } from './dto/req/update-media.dto';
 import { MediaFileService } from './media.service';
 
@@ -131,12 +132,56 @@ export class MediaFileCrudController {
     return new SuccessResponse({ data: createdMedia });
   }
 
+  @Post(':id/image-generate-3d-model')
+  @ApiOperation({
+    summary: '使用 AI 从图片生成3D模型',
+    description: '调用 monkey-tools-concept-design 的 image_to_function 工具从图片生成3D模型，并将模型保存到媒体库',
+  })
+  public async imageGenerate3DModel(@Req() request: IRequest, @Param('id') id: string) {
+    const { teamId, userId } = request;
+
+    // 验证媒体文件是否存在且属于当前团队
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    try {
+      const createdMedia = await this.service.ImageGenerate3DModel(id, teamId, userId, media);
+      return new SuccessResponse({ data: createdMedia });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate 3D model from image: ${error.message}`);
+    }
+  }
+
+  @Post(':id/image-generate-markdown')
+  @ApiOperation({
+    summary: '使用 AI 从图片生成 Markdown 描述',
+    description: '调用 monkey-tools-concept-design 的 image_to_function 工具从图片生成 Markdown 格式的描述，并将描述保存到媒体库的 params 中',
+  })
+  public async imageGenerateMarkdown(@Req() request: IRequest, @Param('id') id: string) {
+    const { teamId, userId } = request;
+
+    // 验证媒体文件是否存在且属于当前团队
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    try {
+      const updatedMedia = await this.service.ImageGenerateMarkdown(id, teamId, userId, media);
+      return new SuccessResponse({ data: updatedMedia });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate markdown from image: ${error.message}`);
+    }
+  }
+
   @Post(':id/txt-generate-image')
   @ApiOperation({
     summary: '使用 AI 根据文本生成图片',
     description: '调用 monkey-tools-concept-design 的 text_to_image 工具根据文本描述自动生成图片，并将图片保存到媒体库',
   })
-  public async generateImage(@Req() request: IRequest, @Param('id') id: string, @Body() body: TxtGenerateImageDto) {
+  public async textGenerateImage(@Req() request: IRequest, @Param('id') id: string, @Body() body: TextGenerateImageDto) {
     const { teamId, userId } = request;
     const { text, jsonFileName } = body;
 
@@ -157,12 +202,38 @@ export class MediaFileCrudController {
     }
   }
 
+  @Post(':id/txt-generate-markdown')
+  @ApiOperation({
+    summary: '使用 AI 根据文本生成 Markdown 描述',
+    description: '调用 monkey-tools-concept-design 的 text_to_function 工具根据文本生成 Markdown 格式的描述，并将描述保存到媒体库',
+  })
+  public async textGenerateMarkdown(@Req() request: IRequest, @Param('id') id: string, @Body() body: TextGenerateMarkdownDto) {
+    const { teamId, userId } = request;
+    const { text } = body;
+
+    // 验证媒体文件是否存在且属于当前团队
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    try {
+      const createdMedia = await this.service.TextGenerateMarkdown(id, teamId, userId, text);
+
+      return new SuccessResponse({
+        data: createdMedia,
+      });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate markdown: ${error.message}`);
+    }
+  }
+
   @Post(':id/txt-generate-3d-model')
   @ApiOperation({
     summary: '使用 AI 根据文本生成3D模型',
     description: '调用 monkey-tools-concept-design 的 text_to_3d_model 工具根据文本描述自动生成3D模型，并将模型保存到媒体库',
   })
-  public async generate3DModel(@Req() request: IRequest, @Param('id') id: string, @Body() body: TxtGenerate3DModelDto) {
+  public async generate3DModel(@Req() request: IRequest, @Param('id') id: string, @Body() body: TextGenerate3DModelDto) {
     const { teamId, userId } = request;
     const { text, jsonFileName } = body;
 

@@ -25,11 +25,32 @@ export const imageGenerateTxt = (id: string) =>
     simple: true,
   })(`/api/media-files/${id}/image-generate-txt`);
 
+export const imageGenerate3DModel = (id: string) =>
+  vinesFetcher<MediaAsset>({
+    method: 'POST',
+    simple: true,
+  })(`/api/media-files/${id}/image-generate-3d-model`);
+
+export const imageGenerateMarkdown = (id: string) =>
+  vinesFetcher<MediaAsset>({
+    method: 'POST',
+    simple: true,
+  })(`/api/media-files/${id}/image-generate-markdown`);
+
 export const txtGenerateImage = (id: string, text: string, jsonFileName?: string) =>
   vinesFetcher<MediaAsset>({
     method: 'POST',
     simple: true,
   })(`/api/media-files/${id}/txt-generate-image`, { text, jsonFileName });
+
+export const txtGenerateMarkdown = (id: string, text: string, jsonFileName?: string) =>
+  vinesFetcher<MediaAsset>({
+    method: 'POST',
+    simple: true,
+  })(`/api/media-files/${id}/txt-generate-markdown`, {
+    text,
+    jsonFileName,
+  });
 
 export const txtGenerate3DModel = (id: string, text: string, jsonFileName?: string) =>
   vinesFetcher<MediaAsset>({
