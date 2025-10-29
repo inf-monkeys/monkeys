@@ -139,12 +139,12 @@ export class MediaFileRepository {
   }
 
   public async createMedia(teamId: string, userId: string, body: CreateRichMediaDto) {
-    const { url, source = MediaSource.UPLOAD, displayName, params, type, size, md5 } = body;
+    const { url, source = MediaSource.UPLOAD, displayName, description, params, type, size, md5 } = body;
     const mediaId = generateDbId();
     await this.mediaFileRepository.save({
       id: mediaId,
       iconUrl: '',
-      description: '',
+      description: description || '',
       type,
       teamId,
       creatorUserId: userId,
