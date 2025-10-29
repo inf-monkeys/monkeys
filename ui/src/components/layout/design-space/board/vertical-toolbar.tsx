@@ -377,7 +377,6 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
 
   // 定义工具栏中要显示的工具列表 - 使用正确的工具ID
   const oneOnOne = (oem as any)?.theme?.designProjects?.oneOnOne === true;
-  const showInstructionButton = (oem as any)?.theme?.designProjects?.showInstructionButton === true;
   const toolbarTools = [
     { id: 'select', label: '选择', icon: 'tool-pointer' },
     { id: 'hand', label: '拖动', icon: 'tool-hand' },
@@ -665,25 +664,23 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
           </div>
         </div>
 
-        {/* Instruction 框创建按钮（受配置开关控制）*/}
-        {showInstructionButton && (
-          <div className="custom-toolbar" style={{ marginLeft: 20 }}>
-            <div className="tool-group">
-              <button
-                className="tool-button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  createInstructionBox();
-                }}
-                title="创建Instruction输入框"
-                style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
-              >
-                <TldrawUiIcon icon="tool-note" />
-              </button>
-            </div>
+        {/* Instruction 框创建按钮 */}
+        <div className="custom-toolbar" style={{ marginLeft: 20 }}>
+          <div className="tool-group">
+            <button
+              className="tool-button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                createInstructionBox();
+              }}
+              title="创建Instruction输入框"
+              style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+            >
+              <TldrawUiIcon icon="tool-note" />
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
