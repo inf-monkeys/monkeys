@@ -387,6 +387,8 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     { id: 'eraser', label: '橡皮擦', icon: 'tool-eraser' },
     { id: 'text', label: '文本', icon: 'tool-text' },
     { id: 'note', label: '便签', icon: 'tool-note' },
+    { id: 'instruction', label: 'Instruction', icon: 'tool-text' },
+    { id: 'output', label: 'Output', icon: 'tool-frame' },
   ];
 
   return (
@@ -633,7 +635,13 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                 title={tool.label}
                 style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
               >
-                <TldrawUiIcon icon={tool.icon} />
+                {tool.id === 'instruction' ? (
+                  <span style={{ fontSize: '16px', fontWeight: 'bold' }}>I</span>
+                ) : tool.id === 'output' ? (
+                  <span style={{ fontSize: '16px', fontWeight: 'bold' }}>O</span>
+                ) : (
+                  <TldrawUiIcon icon={tool.icon} />
+                )}
               </button>
             );
           })}

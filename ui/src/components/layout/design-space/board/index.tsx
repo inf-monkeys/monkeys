@@ -5,27 +5,27 @@ import './index.scss';
 import { useEventEmitter } from 'ahooks';
 import { get } from 'lodash';
 import {
-  AssetRecordType,
-  createShapeId,
-  defaultBindingUtils,
-  DefaultContextMenu,
-  DefaultContextMenuContent,
-  defaultEditorAssetUrls,
-  defaultShapeTools,
-  defaultTools,
-  Editor,
-  FrameShapeUtil,
-  TLAssetStore,
-  TLComponents,
-  Tldraw,
-  TldrawUiMenuGroup,
-  TldrawUiMenuItem,
-  TLImageShape,
-  TLShape,
-  TLShapeId,
-  TLUiContextMenuProps,
-  useEditor,
-  useToasts,
+    AssetRecordType,
+    createShapeId,
+    defaultBindingUtils,
+    DefaultContextMenu,
+    DefaultContextMenuContent,
+    defaultEditorAssetUrls,
+    defaultShapeTools,
+    defaultTools,
+    Editor,
+    FrameShapeUtil,
+    TLAssetStore,
+    TLComponents,
+    Tldraw,
+    TldrawUiMenuGroup,
+    TldrawUiMenuItem,
+    TLImageShape,
+    TLShape,
+    TLShapeId,
+    TLUiContextMenuProps,
+    useEditor,
+    useToasts,
 } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
@@ -41,6 +41,7 @@ import { ExternalLayerPanel } from './ExternalLayerPanel';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
+import { ConnectionManager, InstructionShapeUtil, InstructionTool, OutputShapeUtil, OutputTool } from './shapes';
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 
 import 'tldraw/tldraw.css';
@@ -1036,6 +1037,16 @@ export const Board: React.FC<BoardProps> = ({
               // 立即执行一次，并在下一个宏任务再执行一次，避免初次渲染时覆盖
               renameDefaultPages();
               setTimeout(renameDefaultPages, 0);
+              
+              // 初始化 ConnectionManager 来监听 Instruction 和 Output 的连接
+              try {
+                const connectionManager = new ConnectionManager(editor);
+                connectionManager.watchArrowConnections();
+                console.log('[Board] ConnectionManager 已初始化');
+              } catch (error) {
+                console.error('[Board] ConnectionManager 初始化失败:', error);
+              }
+              
               editor.registerExternalContentHandler('url', async ({ url, point }) => {
                 // 检查是否是图片 URL
                 try {
@@ -1088,9 +1099,9 @@ export const Board: React.FC<BoardProps> = ({
               });
             }}
             components={components}
-            shapeUtils={[FixedFrameShapeUtil]}
+            shapeUtils={[FixedFrameShapeUtil, InstructionShapeUtil, OutputShapeUtil]}
             bindingUtils={defaultBindingUtils}
-            tools={[...defaultShapeTools, ...defaultTools]}
+            tools={[...defaultShapeTools, ...defaultTools, InstructionTool, OutputTool]}
             assetUrls={defaultEditorAssetUrls}
             overrides={{
               tools: (_editor, tools) => {
