@@ -7,6 +7,9 @@ import {
 } from 'tldraw';
 import { InstructionShape } from './InstructionShape.types';
 
+// 形状级别的运行中请求控制器
+const instructionAbortControllers = new Map<string, AbortController>();
+
 export class InstructionShapeUtil extends BaseBoxShapeUtil<InstructionShape> {
   static override type = 'instruction' as const;
 
@@ -133,6 +136,21 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
       } catch {}
     }
 
+    // 如果已在运行，则执行“停止”逻辑
+    if (shape.props.isRunning) {
+      const controller = instructionAbortControllers.get(shape.id as any);
+      if (controller) {
+        try { controller.abort(); } catch {}
+      }
+      editor.updateShape<InstructionShape>({
+        id: shape.id,
+        type: 'instruction',
+        props: { ...shape.props, isRunning: false },
+      });
+      console.log('[Instruction] 已请求停止');
+      return;
+    }
+
     // 更新状态为运行中
     editor.updateShape<InstructionShape>({
       id: shape.id,
@@ -154,6 +172,8 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         'http://localhost:33002/api/tldraw-agent-v2/stream',
       ];
       let response: Response | null = null;
+      const controller = new AbortController();
+      instructionAbortControllers.set(shape.id as any, controller);
       for (const url of endpoints) {
         try {
           const resp = await fetch(url, {
@@ -165,6 +185,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
             shapeId: shape.id,
           },
         }),
+            signal: controller.signal,
           });
           if (resp.ok) { response = resp; break; }
           console.warn('[Instruction] 端点失败', url, resp.status);
@@ -240,6 +261,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
           isRunning: false,
         },
       });
+      instructionAbortControllers.delete(shape.id as any);
     }
   };
 
@@ -297,9 +319,8 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
             e.preventDefault();
             e.stopPropagation();
             console.log('[Instruction] 按钮被点击（pointerDown）');
-            if (!shape.props.isRunning) {
-              handleRun();
-            }
+            // 切换：未运行 -> 开始；运行中 -> 停止
+            handleRun();
           }}
           onClick={(e) => {
             e.preventDefault();
@@ -311,10 +332,10 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
             width: '24px',
             height: '24px',
             border: 'none',
-            backgroundColor: shape.props.isRunning ? '#9CA3AF' : '#3B82F6',
+            backgroundColor: shape.props.isRunning ? '#EF4444' : '#3B82F6',
             color: 'white',
             borderRadius: '4px',
-            cursor: shape.props.isRunning ? 'not-allowed' : 'pointer',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -323,11 +344,17 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
             position: 'relative',
             zIndex: 10,
           }}
-          title="运行指令"
+          title={shape.props.isRunning ? '停止' : '运行指令'}
         >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M2 1L10 6L2 11V1Z" fill="currentColor" />
-          </svg>
+          {shape.props.isRunning ? (
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <rect x="3" y="3" width="6" height="6" fill="currentColor" />
+            </svg>
+          ) : (
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 1L10 6L2 11V1Z" fill="currentColor" />
+            </svg>
+          )}
         </button>
       </div>
 
