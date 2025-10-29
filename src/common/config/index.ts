@@ -216,6 +216,7 @@ export interface ServerConfig {
   };
   webhook: {
     token?: string;
+    backendBaseUrl?: string;
     initTeam?: string;
   };
 }
@@ -621,6 +622,7 @@ export const config: Config = {
     },
     webhook: {
       token: readConfig('server.webhook.token', undefined),
+      backendBaseUrl: readConfig('server.webhook.backendBaseUrl', undefined),
       initTeam: readConfig('server.webhook.initTeam', undefined),
     },
   },
