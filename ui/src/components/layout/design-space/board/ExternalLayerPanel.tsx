@@ -2838,6 +2838,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                             onTabularEventCreated={(event$) => {
                               (window as any).tabularEventRef = event$;
                             }}
+                            showButtons={false}
                             appInfo={{
                               appName:
                                 normalizeText(miniPage?.workflow?.displayName) ||
