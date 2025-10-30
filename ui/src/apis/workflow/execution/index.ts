@@ -1,4 +1,4 @@
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import useSWRInfinite from 'swr/infinite';
 import useSWRMutation from 'swr/mutation';
 
@@ -65,8 +65,14 @@ export const useWorkflowExecutionSimple = (instanceId?: string) =>
     vinesFetcher(),
   );
 
-export const deleteWorkflowExecution = (instanceId: string) =>
-  vinesFetcher({ method: 'DELETE' })(`/api/workflow/executions/${instanceId}`);
+export const deleteWorkflowExecution = async (instanceId: string) => {
+  const request = vinesFetcher({ method: 'DELETE' });
+  const result = await request(`/api/workflow/executions/${instanceId}`);
+  void mutate(
+    (key) => typeof key === 'string' && key.startsWith('/api/workflow/executions') && key.includes('/outputs'),
+  );
+  return result;
+};
 
 export const executionWorkflowTerminate = (instanceId: string) =>
   vinesFetcher({ method: 'POST' })(`/api/workflow/executions/${instanceId}/terminate`);
