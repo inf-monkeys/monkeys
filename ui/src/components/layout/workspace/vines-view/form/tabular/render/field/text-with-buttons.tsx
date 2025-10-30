@@ -133,7 +133,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   const insertText = (text: string) => {
     const el = textareaRef.current;
     if (!el) {
-      onChange(((value ?? '') + (value ? ' ' : '') + text).trim());
+      onChange(((value ?? '') + (value ? ', ' : '') + text).trim());
       return;
     }
     const start = el.selectionStart ?? value.length;
@@ -142,9 +142,13 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     onChange(newValue);
     setTimeout(() => {
       try {
-        el.focus();
-        el.selectionStart = el.selectionEnd = start + text.length;
-      } catch {}
+        // 只有当 textarea 已经是焦点时才设置光标位置（避免关闭对话框）
+        if (document.activeElement === el) {
+          el.selectionStart = el.selectionEnd = start + text.length;
+        }
+      } catch {
+        /* empty */
+      }
     }, 0);
   };
 
@@ -158,49 +162,44 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     return parts.length >= 4 ? parts[3] : parts[2] || '';
   };
 
-  const applyFromSelected = (nextSelected: Record<string, boolean>, changedKey?: string) => {
-    // 如果提供了改变的词，只追加这个新选中的词
-    if (changedKey) {
-      const wasSelected = !!selected[changedKey];
-      const isNowSelected = !!nextSelected[changedKey];
-      const label = labelOf(changedKey);
-      
-      // 如果是从未选中变成选中，在光标位置插入
-      if (!wasSelected && isNowSelected) {
-        insertText(label);
-        return;
-      }
-      
-      // 如果是从选中变成未选中，从输入框中删除这个词
-      if (wasSelected && !isNowSelected) {
-        const currentValue = (value ?? '').trim();
-        if (!currentValue) return;
-        
-        // 使用正则表达式精确匹配并删除这个词（考虑各种分隔符）
-        const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // 优先匹配 ",\s*词" 或 "词," 模式，这样可以保留一个逗号
-        let newValue = currentValue;
-        
-        // 处理开头的情况："词," -> 直接删除
-        newValue = newValue.replace(new RegExp(`^${escapedLabel}\\s*,?\\s*`, 'g'), '');
-        
-        // 处理结尾的情况：", 词" -> 删除逗号和词
-        newValue = newValue.replace(new RegExp(`,\\s*${escapedLabel}\\s*$`, 'g'), '');
-        
-        // 处理中间的情况：", 词," -> 保留一个逗号
-        newValue = newValue.replace(new RegExp(`,\\s*${escapedLabel}\\s*,`, 'g'), ',');
-        
-        // 清理多余的逗号和空格
-        newValue = newValue.replace(/\s*,\s*,\s*/g, ', ').replace(/^,|,$/g, '').trim();
-        
-        onChange(newValue);
-        return;
-      }
+  const applyFromSelected = (label: string) => {
+    const currentValue = (value ?? '').trim();
+
+    // 检查是否已经包含这个词
+    if (currentValue.includes(label)) {
+      // 已包含，删除它
+      const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let newValue = currentValue;
+
+      // 处理开头："词," 或 "词 " -> 删除
+      newValue = newValue.replace(new RegExp(`^${escapedLabel}\\s*,?\\s*`, 'g'), '');
+
+      // 处理结尾：", 词" 或 " 词" -> 删除
+      newValue = newValue.replace(new RegExp(`[,\\s]*${escapedLabel}\\s*$`, 'g'), '');
+
+      // 处理中间：", 词," 或 " 词 " -> 保留一个逗号
+      newValue = newValue.replace(new RegExp(`[,\\s]*${escapedLabel}[,\\s]*`, 'g'), ', ');
+
+      // 清理多余的逗号和空格
+      newValue = newValue
+        .replace(/\s*,\s*,\s*/g, ', ')
+        .replace(/^[,\s]+|[,\s]+$/g, '')
+        .trim();
+
+      onChange(newValue);
+
+      // 删除后，将光标移动到末尾（不强制聚焦，避免关闭对话框）
+      setTimeout(() => {
+        const el = textareaRef.current;
+        if (el && document.activeElement === el) {
+          // 只有当 textarea 已经是焦点时才设置光标位置
+          el.selectionStart = el.selectionEnd = newValue.length;
+        }
+      }, 0);
+    } else {
+      // 不包含，添加它
+      insertText(label);
     }
-    
-    // 如果没有提供 changedKey，不对输入框做重建，避免清空内容
-    // 仅同步内部 selected 状态（已在调用处完成）
-    return;
   };
 
   // 归一化到 { 一级: { 二级: { 三级: [{label: string, level4?: string, description?: string}] } } }
@@ -597,8 +596,8 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                                         <Toggle
                                           key={k}
                                           pressed={isSelected}
-                                          onPressedChange={(v) => {
-                                            applyFromSelected({ ...selected, [k]: v }, k);
+                                          onPressedChange={() => {
+                                            applyFromSelected(l3);
                                           }}
                                           className={cn(
                                             "rounded-full border px-3 py-1 text-sm",
@@ -650,8 +649,8 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                                           <Toggle
                                             key={k}
                                             pressed={isSelected}
-                                            onPressedChange={(v) => {
-                                              applyFromSelected({ ...selected, [k]: v }, k);
+                                            onPressedChange={() => {
+                                              applyFromSelected(displayLabel);
                                             }}
                                             className={cn(
                                               "rounded-full border px-3 py-1 text-sm",
