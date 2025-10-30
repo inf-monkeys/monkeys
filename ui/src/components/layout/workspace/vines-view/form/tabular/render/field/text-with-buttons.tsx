@@ -132,19 +132,14 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
 
   const insertText = (text: string) => {
     const el = textareaRef.current;
-    if (!el) {
-      onChange(((value ?? '') + (value ? ', ' : '') + text).trim());
-      return;
-    }
-    const start = el.selectionStart ?? value.length;
-    const end = el.selectionEnd ?? value.length;
-    const newValue = (value ?? '').slice(0, start) + text + (value ?? '').slice(end);
+    const current = (value ?? '');
+    const leftClean = current.replace(/[\s,]+$/g, '');
+    const newValue = leftClean ? `${leftClean}, ${text}` : `${text}`;
     onChange(newValue);
     setTimeout(() => {
       try {
-        // 只有当 textarea 已经是焦点时才设置光标位置（避免关闭对话框）
-        if (document.activeElement === el) {
-          el.selectionStart = el.selectionEnd = start + text.length;
+        if (el && document.activeElement === el) {
+          el.selectionStart = el.selectionEnd = newValue.length;
         }
       } catch {
         /* empty */
