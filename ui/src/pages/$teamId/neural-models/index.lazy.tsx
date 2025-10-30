@@ -13,20 +13,17 @@ import { OperateArea } from '@/components/layout/ugc-pages/media-data/operate-ar
 import { UploadMedia } from '@/components/layout/ugc-pages/media-data/upload';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
-export const MediaData: React.FC = () => {
+export const NeuralModels: React.FC = () => {
   const { t: tHook, i18n } = useTranslation();
 
-  // 包装useUgcMediaData，排除神经模型
-  const useMediaDataExcludeNeural = (dto: any) => useUgcMediaData(dto, 'exclude');
-  const preloadMediaDataExcludeNeural = (dto: any) => preloadUgcMediaData(dto, 'exclude');
+  // 包装useUgcMediaData，只显示神经模型
+  const useNeuralModelsOnly = (dto: any) => useUgcMediaData(dto, 'only');
+  const preloadNeuralModelsOnly = (dto: any) => preloadUgcMediaData(dto, 'only');
 
-  // 直接在组件函数体内定义，类似 detail-page 的做法
-  // 当语言切换时，useTranslation 触发重新渲染，这里会使用新的 i18n.language
   const getDescription = (item: any) => {
     const desc = item.description;
     if (!desc) return null;
     if (typeof desc === 'string') return desc;
-    // 如果是多语言对象，根据当前语言返回（与 detail-page 一致）
     if (typeof desc === 'object' && desc !== null) {
       if (i18n.language === 'zh') {
         return desc['zh-CN'] || desc['en-US'] || '';
@@ -40,12 +37,15 @@ export const MediaData: React.FC = () => {
   return (
     <main className="size-full">
       <UgcView
-        assetKey="media-data"
+        assetKey="neural-models"
         assetType="media-file"
-        assetName={tHook('components.layout.main.sidebar.list.media.media-data.label')}
-        useUgcFetcher={useMediaDataExcludeNeural}
-        preloadUgcFetcher={preloadMediaDataExcludeNeural}
+        assetName={tHook('components.layout.main.sidebar.list.designs.neural-models.label', {
+          defaultValue: '神经模型',
+        })}
+        useUgcFetcher={useNeuralModelsOnly}
+        preloadUgcFetcher={preloadUgcMediaData}
         createColumns={() => createMediaDataColumns()}
+        // 过滤条件：只显示 params.type 为 'neural-model' 的媒体文件
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
@@ -56,7 +56,7 @@ export const MediaData: React.FC = () => {
           ),
           description: (item) => getDescription(item),
           cover: (item) => {
-            // 判断文件类型
+            // 神经模型主要是JSON文件，但也可能包含图片和文本
             const fileName = String(item.name || item.displayName || '');
             const parts = fileName.split('.');
             const extension = parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
@@ -64,8 +64,14 @@ export const MediaData: React.FC = () => {
             const isImageFile =
               item.type?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension);
 
+            // 优先：如果 JSON 的 params 中携带 url，则以该 url 作为缩略图
+            const jsonUrl = (item as any)?.params?.jsonData?.url as string | undefined;
+            if (extension === 'json' && jsonUrl) {
+              return RenderIcon({ iconUrl: jsonUrl, size: 'gallery' });
+            }
+
             if (isTextFile) {
-              // 文本文件显示内容预览 - 与图片尺寸保持一致
+              // JSON和文本文件显示内容预览
               return (
                 <div className="h-36 w-36 overflow-hidden rounded">
                   <AssetContentPreview asset={item} isThumbnail={true} className="h-full w-full" />
@@ -89,6 +95,6 @@ export const MediaData: React.FC = () => {
   );
 };
 
-export const Route = createLazyFileRoute('/$teamId/media-data/')({
-  component: MediaData,
+export const Route = createLazyFileRoute('/$teamId/neural-models/')({
+  component: NeuralModels,
 });

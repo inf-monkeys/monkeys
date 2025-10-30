@@ -30,8 +30,11 @@ export const UgcViewGalleryItem = <E extends object>({
 
   const handleInfoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // 跳转到资产详情页面
-    navigate({ to: `/$teamId/nav/concept-design:design-assets/asset/${row.original.id}` as any });
+    // 跳转到资产详情页面（根据当前 URL 动态识别 navId，默认回退到 design-assets）
+    const path = typeof window !== 'undefined' ? window.location.pathname : '';
+    const match = path.match(/\/[^/]+\/nav\/([^/]+)/);
+    const currentNavId = match?.[1] ?? 'concept-design:design-assets';
+    navigate({ to: `/$teamId/nav/${currentNavId}/asset/${row.original.id}` as any });
   };
 
   // 判断是否置顶

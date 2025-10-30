@@ -483,6 +483,9 @@
               },
               "model-training": {
                 "label": "Model Training"
+              },
+              "neural-models": {
+                "label": "Neural Models"
               }
             },
             "media": {
@@ -2224,6 +2227,33 @@
         "operate-area": {}
       },
       "detail": {}
+    },
+    "neural-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Neural Model Operations"
+        }
+      }
     },
     "text-data": {
       "ugc-view": {
@@ -4414,7 +4444,9 @@
       "generating": "Generating...",
       "imageGenerated": "Image generated successfully",
       "3dModelGenerated": "3D model generated successfully",
-      "markdownGenerated": "Markdown description generated successfully"
+      "markdownGenerated": "Markdown description generated successfully",
+      "neuralModelGenerated": "Neural model generated successfully",
+      "neuralModelGeneratedFailed": "Failed to generate neural model"
     }
   }
 }

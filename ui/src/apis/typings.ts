@@ -14,6 +14,7 @@ export interface IBaseEntity {
 }
 
 export interface IPaginationListData<T> {
+  list: any;
   data: T[];
   page?: number;
   limit?: number;

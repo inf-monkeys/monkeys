@@ -20,7 +20,7 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 // 支持文件夹视图的 assetType 白名单
-const FOLDER_VIEW_WHITELIST = ['media-data'];
+const FOLDER_VIEW_WHITELIST = ['media-data', 'neural-models'];
 
 interface IUgcHeaderDisplayModeButtonProps extends React.ComponentPropsWithoutRef<'div'> {
   assetKey: string;

@@ -9,8 +9,10 @@ import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, 
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BulkCreateMediaDto } from './dto/req/bulk-create-media.dto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
+import { ImageGenerateJsonDto } from './dto/req/image-generate-json.dto';
 import { TextGenerate3DModelDto } from './dto/req/text-generate-3dmodel.dto';
 import { TextGenerateImageDto } from './dto/req/text-generate-image.dto';
+import { TextGenerateJsonDto } from './dto/req/text-generate-json.dto';
 import { TextGenerateMarkdownDto } from './dto/req/text-generate-markdown.dto';
 import { TogglePinMediaDto } from './dto/req/toggle-pin-media.dto';
 import { UpdateMediaDto } from './dto/req/update-media.dto';
@@ -27,9 +29,9 @@ export class MediaFileCrudController {
   ) {}
 
   @Get('')
-  public async listRichMedias(@Req() request: IRequest, @Query() dto: ListDto) {
+  public async listRichMedias(@Req() request: IRequest, @Query() dto: ListDto, @Query('filterNeuralModel') filterNeuralModel?: 'only' | 'exclude' | 'all') {
     const { teamId } = request;
-    const { list, totalCount } = await this.service.listRichMedias(teamId, dto);
+    const { list, totalCount } = await this.service.listRichMedias(teamId, dto, undefined, filterNeuralModel);
     return new SuccessListResponse({
       data: list,
       total: totalCount,
@@ -43,6 +45,41 @@ export class MediaFileCrudController {
     const { teamId, userId } = request;
     const data = await this.service.createMedia(teamId, userId, body);
     return new SuccessResponse({ data });
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: '根据 Asset ID 获取媒体文件信息 (带权限校验)',
+    description: '通过媒体文件的唯一 Asset ID 获取其详细信息，会校验用户所属的 teamId。',
+  })
+  public async getMediaByIdWithAuth(@Req() request: IRequest, @Param('id') id: string) {
+    const { teamId } = request;
+
+    const data = await this.service.getMediaByIdAndTeamId(id, teamId);
+
+    if (!data) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    return new SuccessResponse({ data });
+  }
+
+  @Put(':id')
+  @ApiOperation({
+    summary: '更新媒体文件',
+    description: '更新媒体文件的信息，如缩略图、显示名称等',
+  })
+  public async updateMedia(@Req() request: IRequest, @Param('id') id: string, @Body() updateDto: UpdateMediaDto) {
+    const { teamId } = request;
+
+    // 验证媒体文件是否存在且属于当前团队
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    const updatedMedia = await this.service.updateMedia(id, teamId, updateDto);
+    return new SuccessResponse({ data: updatedMedia });
   }
 
   @Delete(':id')
@@ -115,6 +152,24 @@ export class MediaFileCrudController {
     return new SuccessResponse({ data: evaluationInfo });
   }
 
+  @Put(':id/pin')
+  @ApiOperation({
+    summary: '置顶/取消置顶媒体文件',
+    description: '切换媒体文件的置顶状态。置顶时会自动设置 sort 值，取消置顶时会重置 sort 值。',
+  })
+  public async togglePinMedia(@Req() request: IRequest, @Param('id') id: string, @Body() togglePinDto: TogglePinMediaDto) {
+    const { teamId } = request;
+
+    // 验证媒体文件是否存在且属于当前团队
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    await this.service.togglePin(id, teamId, togglePinDto.pinned);
+    return new SuccessResponse({ data: { success: true } });
+  }
+
   @Post(':id/image-generate-txt')
   @ApiOperation({
     summary: '使用 AI 为图片生成描述',
@@ -130,6 +185,28 @@ export class MediaFileCrudController {
     }
     const createdMedia = await this.service.ImageGenerateTxt(id, teamId, userId, media);
     return new SuccessResponse({ data: createdMedia });
+  }
+
+  @Post(':id/image-generate-markdown')
+  @ApiOperation({
+    summary: '使用 AI 从图片生成 Markdown 描述',
+    description: '调用 monkey-tools-concept-design 的 image_to_function 工具从图片生成 Markdown 格式的描述，并将描述保存到媒体库的 params 中',
+  })
+  public async imageGenerateMarkdown(@Req() request: IRequest, @Param('id') id: string) {
+    const { teamId, userId } = request;
+
+    // 验证媒体文件是否存在且属于当前团队
+    const media = await this.service.getMediaByIdAndTeamId(id, teamId);
+    if (!media) {
+      throw new NotFoundException('Media file not found or access denied');
+    }
+
+    try {
+      const markdown = await this.service.ImageGenerateMarkdown(id, teamId, userId, media);
+      return new SuccessResponse({ data: { markdown } });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate markdown from image: ${error.message}`);
+    }
   }
 
   @Post(':id/image-generate-3d-model')
@@ -154,13 +231,14 @@ export class MediaFileCrudController {
     }
   }
 
-  @Post(':id/image-generate-markdown')
+  @Post(':id/image-generate-json')
   @ApiOperation({
-    summary: '使用 AI 从图片生成 Markdown 描述',
-    description: '调用 monkey-tools-concept-design 的 image_to_function 工具从图片生成 Markdown 格式的描述，并将描述保存到媒体库的 params 中',
+    summary: '使用 AI 从图片生成JSON（神经模型）',
+    description: '调用 monkey-tools-concept-design 的 image_to_function 工具从图片生成JSON格式的神经模型数据，并将JSON保存到媒体库',
   })
-  public async imageGenerateMarkdown(@Req() request: IRequest, @Param('id') id: string) {
+  public async imageGenerateJson(@Req() request: IRequest, @Param('id') id: string, @Body() body: ImageGenerateJsonDto) {
     const { teamId, userId } = request;
+    const { jsonFileName } = body;
 
     // 验证媒体文件是否存在且属于当前团队
     const media = await this.service.getMediaByIdAndTeamId(id, teamId);
@@ -169,10 +247,10 @@ export class MediaFileCrudController {
     }
 
     try {
-      const updatedMedia = await this.service.ImageGenerateMarkdown(id, teamId, userId, media);
-      return new SuccessResponse({ data: updatedMedia });
+      const createdMedia = await this.service.ImageGenerateJson(id, teamId, userId, media, jsonFileName);
+      return new SuccessResponse({ data: createdMedia });
     } catch (error) {
-      throw new BadRequestException(`Failed to generate markdown from image: ${error.message}`);
+      throw new BadRequestException(`Failed to generate JSON from image: ${error.message}`);
     }
   }
 
@@ -218,10 +296,10 @@ export class MediaFileCrudController {
     }
 
     try {
-      const createdMedia = await this.service.TextGenerateMarkdown(id, teamId, userId, text);
+      const markdown = await this.service.TextGenerateMarkdown(id, teamId, userId, text);
 
       return new SuccessResponse({
-        data: createdMedia,
+        data: { markdown },
       });
     } catch (error) {
       throw new BadRequestException(`Failed to generate markdown: ${error.message}`);
@@ -233,7 +311,7 @@ export class MediaFileCrudController {
     summary: '使用 AI 根据文本生成3D模型',
     description: '调用 monkey-tools-concept-design 的 text_to_3d_model 工具根据文本描述自动生成3D模型，并将模型保存到媒体库',
   })
-  public async generate3DModel(@Req() request: IRequest, @Param('id') id: string, @Body() body: TextGenerate3DModelDto) {
+  public async txtGenerate3DModel(@Req() request: IRequest, @Param('id') id: string, @Body() body: TextGenerate3DModelDto) {
     const { teamId, userId } = request;
     const { text, jsonFileName } = body;
 
@@ -244,7 +322,7 @@ export class MediaFileCrudController {
     }
 
     try {
-      const createdMedia = await this.service.TextGenerate3DModel(teamId, userId, text, jsonFileName);
+      const createdMedia = await this.service.TextGenerate3DModel(id, teamId, userId, media, text, jsonFileName);
 
       return new SuccessResponse({
         data: createdMedia,
@@ -254,56 +332,103 @@ export class MediaFileCrudController {
     }
   }
 
-  @Put(':id/pin')
+  @Post(':id/txt-generate-json')
   @ApiOperation({
-    summary: '置顶/取消置顶媒体文件',
-    description: '切换媒体文件的置顶状态。置顶时会自动设置 sort 值，取消置顶时会重置 sort 值。',
+    summary: '使用 AI 根据文本生成JSON（神经模型）',
+    description: '调用 monkey-tools-concept-design 的 text_to_function 工具根据文本生成JSON格式的神经模型数据，并将JSON保存到媒体库',
   })
-  public async togglePinMedia(@Req() request: IRequest, @Param('id') id: string, @Body() togglePinDto: TogglePinMediaDto) {
-    const { teamId } = request;
+  public async txtGenerateJson(@Req() request: IRequest, @Param('id') id: string, @Body() body: TextGenerateJsonDto) {
+    const { teamId, userId } = request;
+    const { text, jsonFileName } = body;
 
     // 验证媒体文件是否存在且属于当前团队
     const media = await this.service.getMediaByIdAndTeamId(id, teamId);
     if (!media) {
       throw new NotFoundException('Media file not found or access denied');
     }
-
-    await this.service.togglePin(id, teamId, togglePinDto.pinned);
-    return new SuccessResponse({ data: { success: true } });
-  }
-
-  @Get(':id')
-  @ApiOperation({
-    summary: '根据 Asset ID 获取媒体文件信息 (带权限校验)',
-    description: '通过媒体文件的唯一 Asset ID 获取其详细信息，会校验用户所属的 teamId。',
-  })
-  public async getMediaByIdWithAuth(@Req() request: IRequest, @Param('id') id: string) {
-    const { teamId } = request;
-
-    const data = await this.service.getMediaByIdAndTeamId(id, teamId);
-
-    if (!data) {
-      throw new NotFoundException('Media file not found or access denied');
+    try {
+      const createdMedia = await this.service.TextGenerateJson(id, teamId, userId, media, text, jsonFileName);
+      return new SuccessResponse({ data: createdMedia });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate JSON: ${error.message}`);
     }
-
-    return new SuccessResponse({ data });
   }
 
-  @Put(':id')
-  @ApiOperation({
-    summary: '更新媒体文件',
-    description: '更新媒体文件的信息，如缩略图、显示名称等',
-  })
-  public async updateMedia(@Req() request: IRequest, @Param('id') id: string, @Body() updateDto: UpdateMediaDto) {
-    const { teamId } = request;
+  /**
+   * 前端传入3D截图（图片URL），服务的进行 上传3D截图到S3
+   */
+  @Post(':id/3d-model-upload-image')
+  @ApiOperation({ summary: '上传3D截图', description: '接收前端截图图片URL，上传到S3' })
+  public async threeDImageUploadImage(@Req() request: IRequest, @Param('id') id: string, @Body() body: { imageUrl: string }) {
+    const { teamId, userId } = request;
+    const { imageUrl } = body ?? {};
+    try {
+      const createdMedia = await this.service.ThreeDImageUploadImage(teamId, userId, imageUrl);
+      return new SuccessResponse({ data: createdMedia });
+    } catch (error) {
+      throw new BadRequestException(`Failed to upload 3D image: ${error.message}`);
+    }
+  }
 
+  /**
+   * 前端传入3D截图（图片URL），服务端进行 图片->文本
+   */
+  @Post(':id/3d-model-generate-txt')
+  @ApiOperation({ summary: '3D截图生成文本', description: '接收前端截图图片URL，输出图片描述文本；可选直接更新指定媒体的description' })
+  public async threeDImageGenerateTxt(@Req() request: IRequest, @Param('id') id: string, @Body() body: { imageUrl: string }) {
+    const { teamId, userId } = request;
+    const { imageUrl } = body ?? {};
+    if (!imageUrl) {
+      throw new BadRequestException('imageUrl is required');
+    }
+    try {
+      const text = await this.service.ImageUrlGenerateTxt(id, teamId, userId, imageUrl);
+      return new SuccessResponse({ data: { text } });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate text from 3D image: ${error.message}`);
+    }
+  }
+
+  /**
+   * 前端传入3D截图（图片URL），服务端进行 图片->Markdown
+   */
+  @Post(':id/3d-model-generate-markdown')
+  @ApiOperation({ summary: '3D截图生成Markdown', description: '接收前端截图图片URL，输出Markdown描述；可选直接更新指定媒体的params.markdownDescription' })
+  public async threeDImageGenerateMarkdown(@Req() request: IRequest, @Param('id') id: string, @Body() body: { imageUrl: string }) {
+    const { teamId, userId } = request;
+    const { imageUrl } = body ?? {};
+    if (!imageUrl) {
+      throw new BadRequestException('imageUrl is required');
+    }
+    try {
+      const markdown = await this.service.ImageUrlGenerateMarkdown(id, teamId, userId, imageUrl);
+      return new SuccessResponse({ data: { markdown } });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate markdown from image: ${error.message}`);
+    }
+  }
+
+  /**
+   * 前端传入3D截图（图片URL），服务端进行 图片->JSON（神经模型），并作为媒体文件保存
+   */
+  @Post(':id/3d-model-generate-json')
+  @ApiOperation({ summary: '3D截图生成JSON（神经模型）', description: '接收前端截图图片URL，输出JSON并落库' })
+  public async threeDImageGenerateJson(@Req() request: IRequest, @Param('id') id: string, @Body() body: { imageUrl: string; jsonFileName?: string }) {
+    const { teamId, userId } = request;
+    const { imageUrl, jsonFileName } = body ?? {};
+    if (!imageUrl) {
+      throw new BadRequestException('imageUrl is required');
+    }
     // 验证媒体文件是否存在且属于当前团队
     const media = await this.service.getMediaByIdAndTeamId(id, teamId);
     if (!media) {
       throw new NotFoundException('Media file not found or access denied');
     }
-
-    const updatedMedia = await this.service.updateMedia(id, teamId, updateDto);
-    return new SuccessResponse({ data: updatedMedia });
+    try {
+      const createdMedia = await this.service.ImageUrlGenerateJson(id, teamId, userId, media, imageUrl, jsonFileName);
+      return new SuccessResponse({ data: createdMedia });
+    } catch (error) {
+      throw new BadRequestException(`Failed to generate JSON from 3D image: ${error.message}`);
+    }
   }
 }

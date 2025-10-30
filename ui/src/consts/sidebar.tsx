@@ -69,6 +69,10 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
         path: '/$teamId/model-training',
         name: 'model-training',
       },
+      {
+        path: '/$teamId/neural-models',
+        name: 'neural-models',
+      },
     ],
   },
   {

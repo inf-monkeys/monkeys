@@ -477,6 +477,9 @@
               },
               "model-training": {
                 "label": "模型训练"
+              },
+              "neural-models": {
+                "label": "神经模型"
               }
             },
             "media": {
@@ -2248,6 +2251,33 @@
         "operate-area": {}
       },
       "detail": {}
+    },
+    "neural-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "user": {
+            "label": "创建者"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "神经模型操作"
+        }
+      }
     },
     "text-data": {
       "ugc-view": {
@@ -4392,7 +4422,9 @@
       "generating": "生成中...",
       "imageGenerated": "图片生成成功",
       "3dModelGenerated": "3D模型生成成功",
-      "markdownGenerated": "Markdown描述生成成功"
+      "markdownGenerated": "Markdown描述生成成功",
+      "neuralModelGenerated": "神经模型生成成功",
+      "neuralModelGeneratedFailed": "生成神经模型失败"
     }
   }
 }

@@ -28,6 +28,10 @@ export const AssetDetail: React.FC = () => {
   const currentAsset = assetsData?.data?.find((asset) => asset.id === assetId);
 
   const handleBack = () => {
+    if (navId === 'concept-design:design-models') {
+      navigate({ to: `/$teamId/nav/concept-design:design-models/neural-models` as any });
+      return;
+    }
     navigate({ to: `/$teamId/nav/${navId}` as any });
   };
 
@@ -59,7 +63,17 @@ export const AssetDetail: React.FC = () => {
     );
   }
 
-  return <AssetDetailPage asset={currentAsset} assetType="media-file" onBack={handleBack} mutate={mutate} />;
+  const hideConversion = navId === 'concept-design:design-models';
+
+  return (
+    <AssetDetailPage
+      asset={currentAsset}
+      assetType="media-file"
+      onBack={handleBack}
+      mutate={mutate}
+      hideConversion={hideConversion}
+    />
+  );
 };
 
 export const Route = createLazyFileRoute('/$teamId/nav/$navId/asset/$assetId/')({

@@ -44,6 +44,12 @@ export const CUSTOM_NAV_LIST_MAP: Record<string, INavListSidebar> = {
       icon: <BotIcon />,
       to: '/$teamId/nav/concept-design:design-models/model-training',
     },
+    {
+      id: 'neural-models',
+      name: '神经模型',
+      icon: <BotIcon />,
+      to: '/$teamId/nav/concept-design:design-models/neural-models',
+    },
   ],
   'concept-design:design-evaluations': [
     {

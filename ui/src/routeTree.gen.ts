@@ -49,6 +49,9 @@ const TeamIdSettingsIndexLazyImport = createFileRoute('/$teamId/settings/')()
 const TeamIdRenderToolsIndexLazyImport = createFileRoute(
   '/$teamId/render-tools/',
 )()
+const TeamIdNeuralModelsIndexLazyImport = createFileRoute(
+  '/$teamId/neural-models/',
+)()
 const TeamIdNavIndexLazyImport = createFileRoute('/$teamId/nav/')()
 const TeamIdMediaDataIndexLazyImport = createFileRoute('/$teamId/media-data/')()
 const TeamIdJoinTeamIndexLazyImport = createFileRoute('/$teamId/join-team/')()
@@ -255,6 +258,14 @@ const TeamIdRenderToolsIndexLazyRoute = TeamIdRenderToolsIndexLazyImport.update(
 ).lazy(() =>
   import('./pages/$teamId/render-tools/index.lazy').then((d) => d.Route),
 )
+
+const TeamIdNeuralModelsIndexLazyRoute =
+  TeamIdNeuralModelsIndexLazyImport.update({
+    path: '/$teamId/neural-models/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./pages/$teamId/neural-models/index.lazy').then((d) => d.Route),
+  )
 
 const TeamIdNavIndexLazyRoute = TeamIdNavIndexLazyImport.update({
   path: '/$teamId/nav/',
@@ -654,6 +665,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdNavIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/neural-models/': {
+      preLoaderRoute: typeof TeamIdNeuralModelsIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/render-tools/': {
       preLoaderRoute: typeof TeamIdRenderToolsIndexLazyImport
       parentRoute: typeof rootRoute
@@ -811,6 +826,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdJoinTeamIndexLazyRoute,
   TeamIdMediaDataIndexLazyRoute,
   TeamIdNavIndexLazyRoute,
+  TeamIdNeuralModelsIndexLazyRoute,
   TeamIdRenderToolsIndexLazyRoute,
   TeamIdSettingsIndexLazyRoute,
   TeamIdStoreIndexLazyRoute,

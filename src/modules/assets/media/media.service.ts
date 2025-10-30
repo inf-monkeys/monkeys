@@ -8,6 +8,7 @@ import { MediaFileRepository } from '@/database/repositories/media.repository';
 import { ToolsForwardService } from '@/modules/tools/tools.forward.service';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
+import { createHash } from 'crypto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
 
 @Injectable()
@@ -19,8 +20,8 @@ export class MediaFileService {
     private readonly toolsForwardService: ToolsForwardService,
   ) {}
 
-  public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[]) {
-    return await this.mediaRepository.listRichMedias(teamId, dto, excludeIds);
+  public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[], filterNeuralModel?: 'only' | 'exclude' | 'all') {
+    return await this.mediaRepository.listRichMedias(teamId, dto, excludeIds, filterNeuralModel);
   }
 
   public async deleteMedia(teamId: string, id: string) {
@@ -122,54 +123,11 @@ export class MediaFileService {
   }
 
   /**
-   * 为图片生成描述
+   * 上传3D截图到S3
    */
-  public async ImageGenerateTxt(mediaId: string, teamId: string, userId: string, media: any): Promise<string> {
-    // 获取可访问的 URL
-    const imageUrl = await this.getPublicUrl(media);
-
-    // 调用 image_to_function 工具
-    const result = await this.toolsForwardService.invoke(
-      'monkeys_tool_concept_design:image_to_function',
-      {
-        image: imageUrl,
-        function: 'text',
-      },
-      { teamId, userId },
-    );
-
-    const generatedDescription = result?.data;
-
-    if (!generatedDescription) {
-      throw new BadRequestException('AI service returned empty result');
-    }
-
-    // 更新媒体文件描述
-    await this.updateMedia(mediaId, teamId, {
-      description: generatedDescription,
-    });
-
-    return generatedDescription;
-  }
-
-  /**
-   * 根据文本生成图片
-   */
-  public async TextGenerateImage(teamId: string, userId: string, text: string, jsonFileName?: string): Promise<any> {
-    // 调用 text_to_image 工具
-    const result = await this.toolsForwardService.invoke(
-      'monkeys_tool_concept_design:text_to_function',
-      {
-        text: text,
-        function: 'image',
-      },
-      { teamId, userId },
-    );
-
-    const imageUrl = result?.data;
-
+  public async ThreeDImageUploadImage(teamId: string, userId: string, imageUrl: string, jsonFileName?: string): Promise<any> {
     if (!imageUrl) {
-      throw new BadRequestException('AI service returned no image URL');
+      throw new BadRequestException('imageUrl is required');
     }
 
     // 下载图片
@@ -201,7 +159,7 @@ export class MediaFileService {
     const finalUrl = config.s3.isPrivate ? await s3Helpers.getSignedUrl(s3Key) : s3UploadedUrl;
 
     // 生成文件名：AI_generate: "json名称.png"，使用 JSON 文件名
-    const fileName = jsonFileName || 'unknown';
+    const fileName = jsonFileName || '3D截图';
     const generatedFileName = `AI_generate:${fileName}.png`;
 
     // 创建媒体记录
@@ -209,18 +167,107 @@ export class MediaFileService {
       type: 'image',
       displayName: generatedFileName,
       url: finalUrl,
-      description: text, // 原文内容作为描述
+      description: '3D截图', // 原文内容作为描述
       source: 4, // OUTPUT
       params: {
         originalUrl: imageUrl,
         aiGenerated: true,
-        prompt: text,
+        prompt: '3D截图',
         s3Key: s3Key,
       },
       size: buffer.byteLength,
       md5,
     });
     return createdMedia;
+  }
+
+  /**
+   * 使用图片URL直接生成文本
+   */
+  public async ImageUrlGenerateTxt(mediaId: string, teamId: string, userId: string, image: string): Promise<string> {
+    // 调用 image_to_function 工具
+    const result = await this.toolsForwardService.invoke(
+      'monkeys_tool_concept_design:image_to_function',
+      {
+        image: image,
+        function: 'text',
+      },
+      { teamId, userId },
+    );
+
+    const generatedDescription = result?.data;
+
+    if (!generatedDescription) {
+      throw new BadRequestException('AI service returned empty result');
+    }
+
+    // 更新媒体文件描述
+    await this.updateMedia(mediaId, teamId, {
+      description: generatedDescription,
+    });
+
+    return generatedDescription;
+  }
+
+  /**
+   * 为图片生成描述
+   */
+  public async ImageGenerateTxt(mediaId: string, teamId: string, userId: string, media: any): Promise<string> {
+    // 获取可访问的 URL
+    const image = await this.getPublicUrl(media);
+
+    return await this.ImageUrlGenerateTxt(mediaId, teamId, userId, image);
+  }
+
+  /**
+   * 使用图片URL直接生成 Markdown
+   */
+  public async ImageUrlGenerateMarkdown(mediaId: string, teamId: string, userId: string, imageUrl: string): Promise<string> {
+    // 调用 image_to_function 工具，function 为 'markdown'
+    const result = await this.toolsForwardService.invoke(
+      'monkeys_tool_concept_design:image_to_function',
+      {
+        image: imageUrl,
+        function: 'markdown',
+      },
+      { teamId, userId },
+    );
+
+    const generatedMarkdown = result?.data;
+
+    if (!generatedMarkdown) {
+      throw new BadRequestException('AI service returned empty markdown result');
+    }
+
+    // 获取当前媒体文件以保留原有 params
+    const currentMedia = await this.getMediaByIdAndTeamId(mediaId, teamId);
+    if (!currentMedia) {
+      throw new BadRequestException('Media file not found');
+    }
+
+    // 更新 params 中的 markdownDescription
+    const updatedParams = {
+      ...(currentMedia.params || {}),
+      markdownDescription: generatedMarkdown,
+    };
+
+    // 更新媒体文件，将 markdown 存储在 params 中
+    await this.updateMedia(mediaId, teamId, {
+      params: updatedParams,
+    });
+
+    // 返回生成的 Markdown 描述
+    return generatedMarkdown;
+  }
+
+  /**
+   * 从图片生成 Markdown 描述
+   */
+  public async ImageGenerateMarkdown(mediaId: string, teamId: string, userId: string, media: any): Promise<string> {
+    // 获取可访问的 URL
+    const image = await this.getPublicUrl(media);
+
+    return await this.ImageUrlGenerateMarkdown(mediaId, teamId, userId, image);
   }
 
   /**
@@ -303,54 +350,164 @@ export class MediaFileService {
   }
 
   /**
-   * 从图片生成 Markdown 描述
+   * 使用图片URL直接生成 JSON（神经模型）并落库
    */
-  public async ImageGenerateMarkdown(mediaId: string, teamId: string, userId: string, media: any): Promise<any> {
-    // 获取可访问的 URL
-    const image = await this.getPublicUrl(media);
-
-    // 调用 image_to_function 工具，function 为 'markdown'
+  public async ImageUrlGenerateJson(mediaId: string, teamId: string, userId: string, media: any, imageUrl: string, jsonFileName?: string) {
+    // 调用 image_to_function 工具，function 为 'json'
     const result = await this.toolsForwardService.invoke(
       'monkeys_tool_concept_design:image_to_function',
       {
-        image: image,
-        function: 'markdown',
+        image: imageUrl,
+        function: 'json',
       },
       { teamId, userId },
     );
 
-    const generatedMarkdown = result?.data;
+    // JSON数据可能在 output 或 data 字段
+    const jsonData = result?.output || result?.data;
 
-    if (!generatedMarkdown) {
-      throw new BadRequestException('AI service returned empty markdown result');
+    if (!jsonData) {
+      throw new BadRequestException('AI service returned no JSON data');
     }
 
-    // 获取当前媒体文件以保留原有 params
-    const currentMedia = await this.getMediaByIdAndTeamId(mediaId, teamId);
-    if (!currentMedia) {
-      throw new BadRequestException('Media file not found');
+    // 将JSON对象转换为字符串
+    const jsonString = typeof jsonData === 'string' ? jsonData : JSON.stringify(jsonData, null, 2);
+    const buffer = Buffer.from(jsonString, 'utf-8');
+
+    // 计算 MD5（Node Buffer）
+    const md5 = createHash('md5')
+      .update(buffer as unknown as Uint8Array)
+      .digest('hex');
+    if (!md5) {
+      throw new BadRequestException('Failed to calculate MD5 for generated JSON');
     }
 
-    // 更新 params 中的 markdownDescription
-    const updatedParams = {
-      ...(currentMedia.params || {}),
-      markdownDescription: generatedMarkdown,
-    };
+    // 检查是否已存在相同 MD5 的媒体文件
+    const existingMedia = await this.getMediaByMd5(teamId, md5);
+    if (existingMedia) {
+      return existingMedia;
+    }
 
-    // 更新媒体文件，将 markdown 存储在 params 中
-    await this.updateMedia(mediaId, teamId, {
-      params: updatedParams,
+    // 上传到 S3
+    const s3Helpers = new S3Helpers();
+    const s3Key = `ai-generated-neural-models/${md5}.json`;
+    const s3UploadedUrl = await s3Helpers.uploadFile(buffer, s3Key);
+
+    // 获取最终 URL（考虑私有桶的签名 URL）
+    const finalUrl = config.s3.isPrivate ? await s3Helpers.getSignedUrl(s3Key) : s3UploadedUrl;
+
+    // 生成文件名：AI_generate_neural: "json名称.json"
+    const originalFileName = media.displayName || 'unknown';
+    const fileName = jsonFileName || originalFileName.replace(/\.[^/.]+$/, ''); // 移除原扩展名
+    const generatedFileName = `AI_generate_neural:${fileName}.json`;
+
+    // 创建媒体记录
+    const createdMedia = await this.createMedia(teamId, userId, {
+      type: 'text', // 使用 text 类型存储JSON，通过 params.type 标识为 'neural-model'
+      displayName: generatedFileName,
+      url: finalUrl,
+      description: `Generated neural model from image: ${originalFileName}`,
+      source: 4, // OUTPUT
+      params: {
+        originalUrl: media.url,
+        aiGenerated: true,
+        sourceImageId: mediaId,
+        s3Key: s3Key,
+        type: 'neural-model',
+        jsonData: jsonData, // 保存解析后的JSON数据供快速访问
+      },
+      size: buffer.byteLength,
+      md5,
     });
 
-    // 返回更新后的媒体对象
-    const updatedMedia = await this.getMediaByIdAndTeamId(mediaId, teamId);
-    return updatedMedia;
+    return createdMedia;
+  }
+
+  /**
+   * 从图片生成JSON（神经模型）
+   */
+  public async ImageGenerateJson(mediaId: string, teamId: string, userId: string, media: any, jsonFileName?: string): Promise<any> {
+    // 获取可访问的 URL
+    const image = await this.getPublicUrl(media);
+
+    return await this.ImageUrlGenerateJson(mediaId, teamId, userId, media, image, jsonFileName);
+  }
+
+  /**
+   * 根据文本生成图片
+   */
+  public async TextGenerateImage(teamId: string, userId: string, text: string, jsonFileName?: string): Promise<any> {
+    // 调用 text_to_image 工具
+    const result = await this.toolsForwardService.invoke(
+      'monkeys_tool_concept_design:text_to_function',
+      {
+        text: text,
+        function: 'image',
+      },
+      { teamId, userId },
+    );
+
+    const imageUrl = result?.data;
+
+    if (!imageUrl) {
+      throw new BadRequestException('AI service returned no image URL');
+    }
+
+    // 下载图片
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
+      timeout: 30000,
+    });
+    const buffer = response.data;
+
+    // 计算 MD5
+    const md5 = await calculateMd5FromArrayBuffer(buffer);
+    if (!md5) {
+      throw new BadRequestException('Failed to calculate MD5 for generated image');
+    }
+
+    // 检查是否已存在相同 MD5 的媒体文件
+    const existingMedia = await this.getMediaByMd5(teamId, md5);
+    if (existingMedia) {
+      return existingMedia;
+    }
+
+    // 上传到 S3
+    const s3Helpers = new S3Helpers();
+    const fileExtension = getFileExtensionFromUrl(imageUrl) || 'png';
+    const s3Key = `ai-generated-images/${md5}.${fileExtension}`;
+    const s3UploadedUrl = await s3Helpers.uploadFile(buffer, s3Key);
+
+    // 获取最终 URL（考虑私有桶的签名 URL）
+    const finalUrl = config.s3.isPrivate ? await s3Helpers.getSignedUrl(s3Key) : s3UploadedUrl;
+
+    // 生成文件名：AI_generate: "json名称.png"，使用 JSON 文件名
+    const fileName = jsonFileName || 'unknown';
+    const generatedFileName = `AI_generate:${fileName}.png`;
+
+    // 创建媒体记录
+    const createdMedia = await this.createMedia(teamId, userId, {
+      type: 'image',
+      displayName: generatedFileName,
+      url: finalUrl,
+      description: text, // 原文内容作为描述
+      source: 4, // OUTPUT
+      params: {
+        originalUrl: imageUrl,
+        aiGenerated: true,
+        prompt: text,
+        s3Key: s3Key,
+      },
+      size: buffer.byteLength,
+      md5,
+    });
+    return createdMedia;
   }
 
   /**
    * 根据文本生成 Markdown 描述
    */
-  public async TextGenerateMarkdown(mediaId: string, teamId: string, userId: string, text: string): Promise<any> {
+  public async TextGenerateMarkdown(mediaId: string, teamId: string, userId: string, text: string): Promise<string> {
     // 调用 text_to_function 工具，function 为 'markdown'
     const result = await this.toolsForwardService.invoke(
       'monkeys_tool_concept_design:text_to_function',
@@ -384,15 +541,14 @@ export class MediaFileService {
       params: updatedParams,
     });
 
-    // 返回更新后的媒体对象
-    const updatedMedia = await this.getMediaByIdAndTeamId(mediaId, teamId);
-    return updatedMedia;
+    // 返回生成的 Markdown 描述
+    return generatedMarkdown;
   }
 
   /**
    * 根据文本生成3D模型
    */
-  public async TextGenerate3DModel(teamId: string, userId: string, text: string, jsonFileName?: string): Promise<any> {
+  public async TextGenerate3DModel(mediaId: string, teamId: string, userId: string, media: any, text: string, jsonFileName?: string): Promise<any> {
     // 调用 text_to_3d_model 工具
     const result = await this.toolsForwardService.invoke(
       'monkeys_tool_concept_design:text_to_function',
@@ -456,6 +612,79 @@ export class MediaFileService {
         prompt: text,
         s3Key: s3Key,
         type: '3d-model',
+      },
+      size: buffer.byteLength,
+      md5,
+    });
+
+    return createdMedia;
+  }
+
+  /**
+   * 根据文本生成 JSON（神经模型）
+   */
+  public async TextGenerateJson(mediaId: string, teamId: string, userId: string, media: any, text: string, jsonFileName?: string): Promise<any> {
+    // 调用 text_to_function 工具，function 为 'json'
+    const result = await this.toolsForwardService.invoke(
+      'monkeys_tool_concept_design:text_to_function',
+      {
+        text: text,
+        function: 'json',
+      },
+      { teamId, userId },
+    );
+    // JSON数据可能在 output 或 data 字段
+    const jsonData = result?.output || result?.data;
+
+    if (!jsonData) {
+      throw new BadRequestException('AI service returned no JSON data');
+    }
+
+    // 将JSON对象转换为字符串
+    const jsonString = typeof jsonData === 'string' ? jsonData : JSON.stringify(jsonData, null, 2);
+    const buffer = Buffer.from(jsonString, 'utf-8');
+
+    // 计算 MD5（Node Buffer）
+    const md5 = createHash('md5')
+      .update(buffer as unknown as Uint8Array)
+      .digest('hex');
+    if (!md5) {
+      throw new BadRequestException('Failed to calculate MD5 for generated JSON');
+    }
+
+    // 检查是否已存在相同 MD5 的媒体文件
+    const existingMedia = await this.getMediaByMd5(teamId, md5);
+    if (existingMedia) {
+      return existingMedia;
+    }
+
+    // 上传到 S3
+    const s3Helpers = new S3Helpers();
+    const s3Key = `ai-generated-neural-models/${md5}.json`;
+    const s3UploadedUrl = await s3Helpers.uploadFile(buffer, s3Key);
+
+    // 获取最终 URL（考虑私有桶的签名 URL）
+    const finalUrl = config.s3.isPrivate ? await s3Helpers.getSignedUrl(s3Key) : s3UploadedUrl;
+
+    // 生成文件名：AI_generate_neural: "json名称.json"
+    const originalFileName = media.displayName || 'unknown';
+    const fileName = jsonFileName || originalFileName.replace(/\.[^/.]+$/, ''); // 移除原扩展名
+    const generatedFileName = `AI_generate_neural:${fileName}.json`;
+
+    // 创建媒体记录
+    const createdMedia = await this.createMedia(teamId, userId, {
+      type: 'text', // 使用 text 类型存储JSON，通过 params.type 标识为 'neural-model'
+      displayName: generatedFileName,
+      url: finalUrl,
+      description: `Generated neural model from image: ${originalFileName}`,
+      source: 4, // OUTPUT
+      params: {
+        originalUrl: media.url,
+        aiGenerated: true,
+        sourceImageId: mediaId,
+        s3Key: s3Key,
+        type: 'neural-model',
+        jsonData: jsonData, // 保存解析后的JSON数据供快速访问
       },
       size: buffer.byteLength,
       md5,

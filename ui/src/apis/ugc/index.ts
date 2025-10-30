@@ -248,8 +248,21 @@ export const preloadKnowledgeBases = (dto: IListUgcDto) =>
 export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/sql-knowledge-bases');
 export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/sql-knowledge-bases');
 
-export const useUgcMediaData = (dto: IListUgcDto) => useUgcItems<IMediaData>(dto, '/api/media-files', 'GET');
-export const preloadUgcMediaData = (dto: IListUgcDto) => preloadUgcItems<IMediaData>(dto, '/api/media-files', 'GET');
+export const useUgcMediaData = (dto: IListUgcDto, filterNeuralModel?: 'only' | 'exclude' | 'all') => {
+  const baseUrl = '/api/media-files';
+  const url = filterNeuralModel ? `${baseUrl}?filterNeuralModel=${filterNeuralModel}` : baseUrl;
+  const swrUrl = `${url}${filterNeuralModel ? '&' : '?'}${qs.stringify(dto, { encode: false })}`;
+  const fetcher = vinesFetcher({ wrapper: paginationWrapper });
+  return useSWR<IPaginationListData<IAssetItem<IMediaData>> | undefined>(swrUrl, fetcher);
+};
+
+export const preloadUgcMediaData = (dto: IListUgcDto, filterNeuralModel?: 'only' | 'exclude' | 'all') => {
+  const baseUrl = '/api/media-files';
+  const url = filterNeuralModel ? `${baseUrl}?filterNeuralModel=${filterNeuralModel}` : baseUrl;
+  const swrUrl = `${url}${filterNeuralModel ? '&' : '?'}${qs.stringify(dto, { encode: false })}`;
+  const fetcher = vinesFetcher({ wrapper: paginationWrapper });
+  return preload(swrUrl, fetcher);
+};
 
 export const useUgcApplicationStore = (dto: IListUgcDto) =>
   useUgcItems<IApplicationStoreItemDetail>(dto, '/api/assets/workflow/marketplace');

@@ -35,7 +35,7 @@ export class MediaFileRepository {
     await Promise.all(promises);
   }
 
-  public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[]) {
+  public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[], filterNeuralModel?: 'only' | 'exclude' | 'all') {
     const { list, totalCount } = await this.mediaFileAssetRepositroy.listAssets(
       'media-file',
       teamId,
@@ -49,10 +49,22 @@ export class MediaFileRepository {
       undefined,
       excludeIds,
     );
-    await this.preprocess(list);
+
+    // 根据params.type过滤神经模型
+    let filteredList = list;
+    if (filterNeuralModel === 'only') {
+      // 仅显示神经模型
+      filteredList = list.filter(item => item.params?.type === 'neural-model');
+    } else if (filterNeuralModel === 'exclude') {
+      // 排除神经模型
+      filteredList = list.filter(item => item.params?.type !== 'neural-model');
+    }
+    // filterNeuralModel === 'all' 或 undefined 时显示全部
+
+    await this.preprocess(filteredList);
     return {
-      list,
-      totalCount,
+      list: filteredList,
+      totalCount: filterNeuralModel ? filteredList.length : totalCount,
     };
   }
 
