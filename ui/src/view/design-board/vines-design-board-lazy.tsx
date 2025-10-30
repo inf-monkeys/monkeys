@@ -14,6 +14,7 @@ import { useSystemConfig } from '@/apis/common';
 import { generateDesignBoardThumbnail, updateDesignBoardMetadata, useDesignBoardMetadata } from '@/apis/designs';
 import { useWorkspacePages } from '@/apis/pages';
 import { Board } from '@/components/layout/design-space/board';
+import { MiniHistoryRightSidebar } from '@/components/layout/design-space/board/mini-history-right-sidebar';
 import { DesignBoardRightSidebar } from '@/components/layout/design-space/board/right-sidebar';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
@@ -67,6 +68,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
   const [rightSidebarWidth, setRightSidebarWidth] = useState<number>(220);
+  const [miniHistoryRightSidebarWidth, setMiniHistoryRightSidebarWidth] = useState<number>(260);
 
   const [frameShapeId, setFrameShapeId] = useState<TLShapeId>(createShapeId('shape:parentFrame'));
 
@@ -203,6 +205,17 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false);
   // OEM：是否显示右侧边栏，单独控制
   const showRightSidebar = get(oem, 'theme.designProjects.showRightSidebar', true);
+
+  // 仅在 MiniTools 显示时展示的右侧历史侧栏：监听 mini 状态事件
+  const [miniWorkflowId, setMiniWorkflowId] = useState<string | null>(null);
+  useEffect(() => {
+    const handler = (e: any) => {
+      const wf = e?.detail?.workflowId || null;
+      setMiniWorkflowId(wf);
+    };
+    window.addEventListener('vines:mini-state', handler as any);
+    return () => window.removeEventListener('vines:mini-state', handler as any);
+  }, []);
 
   // Ctrl/Cmd + S：阻止浏览器保存页面，执行静默保存并提示"已自动保存"
   useEffect(() => {
@@ -597,6 +610,12 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
           editor={editor}
         />
       )}
+      {/* 仅在 MiniTools 显示时展示的右侧历史侧栏（不受 OEM 配置影响） */}
+      <MiniHistoryRightSidebar
+        visible={Boolean(miniWorkflowId)}
+        width={miniHistoryRightSidebarWidth}
+        onResizeWidth={(w) => setMiniHistoryRightSidebarWidth(w)}
+      />
     </div>
   );
 };

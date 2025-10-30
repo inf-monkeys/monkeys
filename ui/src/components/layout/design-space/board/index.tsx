@@ -5,27 +5,27 @@ import './index.scss';
 import { useEventEmitter } from 'ahooks';
 import { get } from 'lodash';
 import {
-    AssetRecordType,
-    createShapeId,
-    defaultBindingUtils,
-    DefaultContextMenu,
-    DefaultContextMenuContent,
-    defaultEditorAssetUrls,
-    defaultShapeTools,
-    defaultTools,
-    Editor,
-    FrameShapeUtil,
-    TLAssetStore,
-    TLComponents,
-    Tldraw,
-    TldrawUiMenuGroup,
-    TldrawUiMenuItem,
-    TLImageShape,
-    TLShape,
-    TLShapeId,
-    TLUiContextMenuProps,
-    useEditor,
-    useToasts,
+  AssetRecordType,
+  createShapeId,
+  defaultBindingUtils,
+  DefaultContextMenu,
+  DefaultContextMenuContent,
+  defaultEditorAssetUrls,
+  defaultShapeTools,
+  defaultTools,
+  Editor,
+  FrameShapeUtil,
+  TLAssetStore,
+  TLComponents,
+  Tldraw,
+  TldrawUiMenuGroup,
+  TldrawUiMenuItem,
+  TLImageShape,
+  TLShape,
+  TLShapeId,
+  TLUiContextMenuProps,
+  useEditor,
+  useToasts,
 } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
@@ -847,6 +847,21 @@ export const Board: React.FC<BoardProps> = ({
                   console.log('[占位图更新] 占位图更新成功');
                   // 更新后移除映射
                   placeholderMapRef.current.delete(instanceId);
+                  try {
+                    const workflowIdCompleted = miniPage?.workflowId || (miniPage as any)?.workflow?.id || null;
+                    // 将用于历史展示的 render.data 一并带上，便于右侧/左侧历史立即替换等待项
+                    window.dispatchEvent(
+                      new CustomEvent('vines:mini-execution-completed', {
+                        detail: {
+                          instanceId,
+                          workflowId: workflowIdCompleted,
+                          status: 'COMPLETED',
+                          render: { data: resultData },
+                          endTime: Date.now(),
+                        },
+                      }),
+                    );
+                  } catch {}
                   if (rawId) miniBaselineIdsRef.current.add(String(rawId));
                   // 标记已处理
                   if (resultType === 'image' && typeof resultData === 'string') {

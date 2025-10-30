@@ -5,6 +5,7 @@ import { capitalize, get } from 'lodash';
 import { ArrowLeft, Clipboard, History, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { mutate as swrMutate } from 'swr';
 import { Editor, TLShapeId } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
@@ -24,6 +25,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { useMaskEditorStore } from '@/store/maskEditorStore';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { createExecutionStore, ExecutionStoreProvider, useExecutionStore } from '@/store/useExecutionStore';
+// swrMutate 已在顶部导入
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { newConvertExecutionResultToItemList } from '@/utils/execution';
 
@@ -580,8 +582,77 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
   const [historyPage, setHistoryPage] = useState(1);
   const [historyPageSize, setHistoryPageSize] = useState(8);
   const miniEvent$ = useEventEmitter<any>();
+  // 等待中历史占位（任务创建后、结果返回前）
+  const [pendingHistory, setPendingHistory] = useState<Array<{ instanceId: string; workflowId?: string | null; time: number; renderData?: any }>>([]);
   // agent 嵌入：在左侧 sidebar 内显示
   const [agentVisible, setAgentVisible] = useState(false);
+  // 等待占位动画样式仅注入一次（正方形+中心旋转）
+  if (typeof document !== 'undefined' && !document.getElementById('mini-history-waiting-styles')) {
+    const css = `
+      @keyframes vinesSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      .mini-history-waiting { display: flex; align-items: center; justify-content: center; }
+      .mini-history-waiting .spinner { width: 28px; height: 28px; border: 3px solid #e5e7eb; border-top-color: #9ca3af; border-radius: 9999px; animation: vinesSpin 0.9s linear infinite; }
+    `;
+    const st = document.createElement('style');
+    st.id = 'mini-history-waiting-styles';
+    st.textContent = css;
+    document.head.appendChild(st);
+  }
+  useEffect(() => {
+    const onCreated = (e: any) => {
+      const instanceId = e?.detail?.instanceId;
+      const workflowId = e?.detail?.workflowId ?? (miniPage?.workflowId || miniPage?.workflow?.id);
+      if (!instanceId || !workflowId) return;
+      setPendingHistory((list) => [{ instanceId, workflowId, time: Date.now() }, ...list.filter((i) => i.instanceId !== instanceId)]);
+    };
+    const onCompleted = (e: any) => {
+      const instanceId = e?.detail?.instanceId;
+      if (!instanceId) return;
+      const renderData = e?.detail?.render?.data;
+      // 立即触发历史接口刷新
+      swrMutate(`/api/workflow/executions/all/outputs?limit=1000&page=1`);
+      // 如果有结果渲染数据，先乐观替换为完成内容，再在几秒后移除（等待后端返回）
+      if (renderData) {
+        setPendingHistory((list) =>
+          list.map((i) => (i.instanceId === instanceId ? { ...i, renderData, time: Date.now() } : i)),
+        );
+        setTimeout(() => {
+          setPendingHistory((list) => list.filter((i) => i.instanceId !== instanceId));
+        }, 5000);
+      } else {
+        // 无可渲染数据，短延迟后移除
+        setTimeout(() => {
+          setPendingHistory((list) => list.filter((i) => i.instanceId !== instanceId));
+        }, 1500);
+      }
+    };
+    window.addEventListener('vines:create-placeholder', onCreated as any);
+    window.addEventListener('vines:mini-execution-completed', onCompleted as any);
+    return () => {
+      window.removeEventListener('vines:create-placeholder', onCreated as any);
+      window.removeEventListener('vines:mini-execution-completed', onCompleted as any);
+    };
+  }, [miniPage]);
+
+  const formatTime = useCallback((timestamp: number | string | undefined) => {
+    if (!timestamp) return '';
+    let ts: any = timestamp;
+    if (typeof ts === 'string') {
+      ts = parseInt(ts, 10);
+      if (isNaN(ts)) return '';
+    }
+    if (ts < 1e12) ts = ts * 1000;
+    const date = new Date(ts);
+    if (isNaN(date.getTime())) return '';
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+  }, []);
+
   useEffect(() => {
     const toggle = () => setAgentVisible((v) => !v);
     window.addEventListener('vines:toggle-agent-embed', toggle as any);
@@ -589,6 +660,14 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
   }, []);
   // 获取执行历史（用于历史记录视图）
   const { data: allOutputsPages } = useWorkflowExecutionAllOutputs({ limit: 1000, page: 1 });
+  // 当后端数据返回包含某个 pending 的 instanceId 时，立即移除对应等待项
+  useEffect(() => {
+    try {
+      const items = newConvertExecutionResultToItemList(allOutputsPages ?? []);
+      const instanceSet = new Set<string>((items || []).map((it: any) => String(it?.instanceId || '')));
+      setPendingHistory((list) => list.filter((p) => !instanceSet.has(String(p.instanceId))));
+    } catch {}
+  }, [allOutputsPages]);
   // 文本归一化：支持多语言对象 { 'zh-CN': '...', en: '...' }
   const normalizeText = useCallback((val: any): string => {
     if (typeof val === 'string') return val;
@@ -610,11 +689,14 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
     const openHandler = (e: any) => {
       const next = e?.detail?.page || e?.detail || null;
       setMiniPage(next);
-      window.dispatchEvent(new CustomEvent('vines:mini-state', { detail: { pageId: next?.id || null } }));
+      const workflowId = next?.workflowId || next?.workflow?.id || null;
+      window.dispatchEvent(
+        new CustomEvent('vines:mini-state', { detail: { pageId: next?.id || null, workflowId } }),
+      );
     };
     const closeHandler = () => {
       setMiniPage(null);
-      window.dispatchEvent(new CustomEvent('vines:mini-state', { detail: { pageId: null } }));
+      window.dispatchEvent(new CustomEvent('vines:mini-state', { detail: { pageId: null, workflowId: null } }));
     };
     window.addEventListener('vines:open-pinned-page-mini', openHandler as any);
     window.addEventListener('vines:close-pinned-page-mini', closeHandler as any);
@@ -2874,7 +2956,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                       const endIndex = startIndex + historyPageSize;
                       const list = allItems.slice(startIndex, endIndex);
 
-                      if (list.length === 0)
+                      let waitingList = (pendingHistory || []).filter((p) => p.workflowId === workflowId);
+                      if (list.length === 0 && waitingList.length === 0)
                         return <div style={{ columnSpan: 'all', color: '#9ca3af', fontSize: 12 }}>暂无历史</div>;
 
                       // 辅助函数：判断是否是图片URL
@@ -2932,7 +3015,68 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                         return null;
                       };
 
-                      return list.map((it: any, idx: number) => {
+                      const waitingNodes = waitingList.map((p, idx) => {
+                        const timeStr = formatTime(p.time);
+                        // 如果已有渲染数据，则按完成卡片渲染（乐观更新）
+                        if (p.renderData) {
+                          const displayContent = extractDisplayContent(p.renderData);
+                          if (displayContent?.type === 'image') {
+                            return (
+                              <div key={`pending-${p.instanceId}-${idx}`} style={{ position: 'relative', overflow: 'hidden', border: '1px solid #e5e7eb', borderRadius: 8, marginBottom: 8, breakInside: 'avoid', display: 'inline-block', width: '100%' }}>
+                                <img src={displayContent.content} style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }} alt="历史记录" />
+                                {timeStr && (
+                                  <div style={{ padding: '6px 8px', fontSize: 10, color: '#9ca3af', backgroundColor: '#f9fafb', textAlign: 'center', borderTop: '1px solid #e5e7eb' }}>{timeStr}</div>
+                                )}
+                              </div>
+                            );
+                          }
+                          if (displayContent?.type === 'text') {
+                            return (
+                              <div key={`pending-${p.instanceId}-${idx}`} style={{ border: '1px solid #e5e7eb', borderRadius: 8, marginBottom: 8, breakInside: 'avoid', display: 'inline-block', width: '100%', overflow: 'hidden' }}>
+                                <div style={{ padding: 8, fontSize: 12, maxHeight: 120, overflow: 'auto' }}>
+                                  <pre style={{ margin: 0, fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{displayContent.content}</pre>
+                                </div>
+                                {timeStr && (
+                                  <div style={{ padding: '6px 8px', fontSize: 10, color: '#9ca3af', backgroundColor: '#f9fafb', textAlign: 'center', borderTop: '1px solid #e5e7eb' }}>{timeStr}</div>
+                                )}
+                              </div>
+                            );
+                          }
+                        }
+                        // 默认等待态
+                        return (
+                          <div
+                            key={`pending-${p.instanceId}-${idx}`}
+                            className="mini-history-waiting"
+                            style={{
+                              border: '1px solid #e5e7eb',
+                              borderRadius: 8,
+                              marginBottom: 8,
+                              breakInside: 'avoid',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              width: '100%',
+                              overflow: 'hidden',
+                              background: '#fff',
+                              aspectRatio: '1 / 1',
+                              minHeight: 160,
+                            }}
+                          >
+                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <div className="spinner" />
+                            </div>
+                            {timeStr && (
+                              <div style={{ padding: '6px 8px', fontSize: 10, color: '#9ca3af', backgroundColor: '#f9fafb', textAlign: 'center', borderTop: '1px solid #e5e7eb' }}>{timeStr}</div>
+                            )}
+                          </div>
+                        );
+                      });
+
+                      // 若某个 instanceId 已经出现在完成列表里，则不再渲染其等待项（避免重复）
+                      const doneInstanceSet = new Set<string>((list || []).map((it: any) => String(it?.instanceId || '')));
+                      waitingList = waitingList.filter((p) => !doneInstanceSet.has(String(p.instanceId)));
+
+                      const doneNodes = list.map((it: any, idx: number) => {
                         const data = it?.render?.data;
                         const displayContent = extractDisplayContent(data);
 
@@ -3061,6 +3205,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                           </div>
                         );
                       }).filter(Boolean);
+
+                      return [...waitingNodes, ...doneNodes];
                     } catch {
                       return <div style={{ columnSpan: 'all', color: '#9ca3af', fontSize: 12 }}>历史加载失败</div>;
                     }

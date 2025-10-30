@@ -59,50 +59,63 @@ export async function generatePlaceholderImage(info: PlaceholderInfo): Promise<s
   const centerX = size / 2;
   const centerY = size / 2;
 
-  // 如果有图标URL，尝试绘制
-  if (info.appIcon && info.appIcon.startsWith('http')) {
+  // 如果有图标URL，尝试以安全方式绘制（避免 tainted canvas）
+  if (info.appIcon) {
     try {
-      // 先尝试不使用 crossOrigin
-      let loaded = false;
-      const img = new Image();
-      img.onload = () => {
-        const iconSize = 240;
-        ctx.drawImage(img, centerX - iconSize / 2, centerY - 300, iconSize, iconSize);
-        loaded = true;
-      };
-      img.onerror = () => {
-        // 如果失败，尝试使用 crossOrigin
-        const img2 = new Image();
-        img2.crossOrigin = 'anonymous';
-        img2.onload = () => {
-          const iconSize = 240;
-          ctx.drawImage(img2, centerX - iconSize / 2, centerY - 300, iconSize, iconSize);
-          loaded = true;
-        };
-        img2.onerror = () => {
-          loaded = false;
-        };
-        img2.src = info.appIcon!;
-      };
-      img.src = info.appIcon!;
-      // 等待加载完成
-      await new Promise<void>((resolve) => {
-        const checkInterval = setInterval(() => {
-          if (loaded) {
-            clearInterval(checkInterval);
-            clearTimeout(timeout);
-            resolve();
+      const iconSize = 240;
+      const drawImage = async (src: string) =>
+        new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          // 始终使用 anonymous，避免污染 canvas；需要目标服务返回 CORS 头
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            try {
+              ctx.drawImage(img, centerX - iconSize / 2, centerY - 300, iconSize, iconSize);
+              resolve();
+            } catch (e) {
+              reject(e);
+            }
+          };
+          img.onerror = () => reject(new Error('图标加载失败'));
+          img.src = src;
+        });
+
+      let drawn = false;
+
+      if (/^data:/i.test(info.appIcon)) {
+        // data URL 安全
+        await drawImage(info.appIcon);
+        drawn = true;
+      } else if (/^https?:/i.test(info.appIcon)) {
+        // 优先尝试通过 fetch 获取 blob（遵守 CORS）；成功则用对象 URL 绘制
+        try {
+          const resp = await fetch(info.appIcon, { mode: 'cors', cache: 'no-store' });
+          if (resp.ok) {
+            const blob = await resp.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            try {
+              await drawImage(objectUrl);
+              drawn = true;
+            } finally {
+              URL.revokeObjectURL(objectUrl);
+            }
           }
-        }, 50);
-        const timeout = setTimeout(() => {
-          clearInterval(checkInterval);
-          resolve();
-        }, 2000);
-      });
-      // 如果加载失败，绘制默认图标
-      if (!loaded) {
-        throw new Error('图标加载失败');
+        } catch {
+          // 忽略，走后备
+        }
+
+        // 若 fetch 失败但资源实际允许 CORS，可直接尝试原链接（依赖服务端 CORS 头）
+        if (!drawn) {
+          await drawImage(info.appIcon);
+          drawn = true;
+        }
+      } else {
+        // 相对路径 / 同源静态资源
+        await drawImage(info.appIcon);
+        drawn = true;
       }
+
+      if (!drawn) throw new Error('图标绘制失败');
     } catch {
       // 图标加载失败，绘制默认图标
       ctx.fillStyle = '#8b5cf6';
