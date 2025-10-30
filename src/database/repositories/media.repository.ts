@@ -36,6 +36,41 @@ export class MediaFileRepository {
   }
 
   public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[], filterNeuralModel?: 'only' | 'exclude' | 'all') {
+    const needPreciseFilter = filterNeuralModel === 'only' || filterNeuralModel === 'exclude';
+
+    // 精确分页：当存在神经模型过滤时，先获取足够大的数据集（已排序），在内存中过滤并精确分页
+    if (needPreciseFilter) {
+      const { page = 1, limit = 24 } = dto || {};
+
+      const { list: allList } = await this.mediaFileAssetRepositroy.listAssets(
+        'media-file',
+        teamId,
+        { ...dto, page: 1, limit: 100000 },
+        {
+          withTags: true,
+          withTeam: true,
+          withUser: true,
+        },
+        undefined,
+        undefined,
+        excludeIds,
+      );
+
+      const filteredAll = filterNeuralModel === 'only' ? allList.filter((item) => item.params?.type === 'neural-model') : allList.filter((item) => item.params?.type !== 'neural-model');
+
+      const totalCount = filteredAll.length;
+      const start = (Number(page) - 1) * Number(limit);
+      const end = start + Number(limit);
+      const pageList = filteredAll.slice(start, end);
+
+      await this.preprocess(pageList);
+      return {
+        list: pageList,
+        totalCount,
+      };
+    }
+
+    // 常规分页：无神经模型过滤时，直接按数据库分页
     const { list, totalCount } = await this.mediaFileAssetRepositroy.listAssets(
       'media-file',
       teamId,
@@ -50,21 +85,10 @@ export class MediaFileRepository {
       excludeIds,
     );
 
-    // 根据params.type过滤神经模型
-    let filteredList = list;
-    if (filterNeuralModel === 'only') {
-      // 仅显示神经模型
-      filteredList = list.filter(item => item.params?.type === 'neural-model');
-    } else if (filterNeuralModel === 'exclude') {
-      // 排除神经模型
-      filteredList = list.filter(item => item.params?.type !== 'neural-model');
-    }
-    // filterNeuralModel === 'all' 或 undefined 时显示全部
-
-    await this.preprocess(filteredList);
+    await this.preprocess(list);
     return {
-      list: filteredList,
-      totalCount: filterNeuralModel ? filteredList.length : totalCount,
+      list,
+      totalCount,
     };
   }
 
