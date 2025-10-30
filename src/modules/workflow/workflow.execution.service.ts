@@ -15,7 +15,7 @@ import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-me
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { FindWorkflowCondition, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Task, Workflow } from '@inf-monkeys/conductor-javascript';
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { pick } from 'lodash';
@@ -840,6 +840,27 @@ export class WorkflowExecutionService {
   }
 
   public async deleteWorkflowExecution(teamId: string, workflowInstanceId: string) {
+    const execution = (await this.workflowRepository.findExecutionsByWorkflowInstanceIds([workflowInstanceId]))?.[0];
+    if (!execution) {
+      throw new NotFoundException(`Workflow execution ${workflowInstanceId} not found`);
+    }
+
+    const executionTeamId = execution.input?.['__context']?.teamId as string | undefined;
+    let workflowTeamId: string | undefined;
+    const version = execution.workflowVersion ?? 0;
+    const workflowWithVersion = await this.workflowRepository.getWorkflowById(execution.workflowId, version, false);
+    if (workflowWithVersion) {
+      workflowTeamId = workflowWithVersion.teamId;
+    } else {
+      const workflowLatest = await this.workflowRepository.getWorkflowByIdWithoutVersion(execution.workflowId, false);
+      workflowTeamId = workflowLatest?.teamId ?? workflowTeamId;
+    }
+
+    const ownerTeamId = workflowTeamId ?? executionTeamId;
+    if (ownerTeamId && ownerTeamId !== teamId) {
+      throw new ForbiddenException('No permission to delete this workflow execution');
+    }
+
     // 1. 删除 Conductor 中的执行数据
     await this.conductorService.deleteWorkflowExecution(workflowInstanceId);
 
@@ -848,7 +869,6 @@ export class WorkflowExecutionService {
     const result = await this.workflowExecutionRepository.update(
       {
         workflowInstanceId,
-        group: teamId,
       },
       {
         isDeleted: true,
@@ -856,7 +876,11 @@ export class WorkflowExecutionService {
       },
     );
 
-    logger.info(`Deleted workflow execution: ${workflowInstanceId}, affected rows: ${result.affected}`);
+    if (!result.affected) {
+      logger.warn(`Workflow execution ${workflowInstanceId} was not updated to deleted state.`);
+    } else {
+      logger.info(`Deleted workflow execution: ${workflowInstanceId}, affected rows: ${result.affected}`);
+    }
 
     return true;
   }
