@@ -7,8 +7,9 @@ import { Eye, Plus, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { vinesFetcher } from '@/apis/fetcher';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { deleteVRTask, preloadUgcVREvaluationTasks, useUgcVREvaluationTasks, VRTask } from '@/apis/ugc/vr-evaluation';
+import { preloadUgcVREvaluationTasks, useUgcVREvaluationTasks, VRTask } from '@/apis/ugc/vr-evaluation';
 import { UgcView } from '@/components/layout/ugc/view';
 import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
 import { createVREvaluationTasksColumns } from '@/components/layout/ugc-pages/vr-evaluations/consts';
@@ -52,7 +53,12 @@ export const VREvaluations: React.FC = () => {
     if (!currentTask) return;
 
     try {
-      await deleteVRTask(currentTask.id);
+      const deleteFetcher = vinesFetcher<{ success: boolean }>({
+        method: 'DELETE',
+        simple: true,
+      });
+
+      await deleteFetcher(`/api/vr-evaluation/tasks/${currentTask.id}`);
       toast.success('删除成功');
       setDeleteAlertDialogVisible(false);
       setCurrentTask(undefined);

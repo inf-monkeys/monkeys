@@ -10,6 +10,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import ReactECharts from 'echarts-for-react';
 import { Undo2 } from 'lucide-react';
 
+import { vinesFetcher } from '@/apis/fetcher';
 import { VRTask } from '@/apis/ugc/vr-evaluation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,10 +18,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 
 echarts.use([TooltipComponent, LegendComponent, RadarChart, CanvasRenderer]);
-
-interface VRTaskDetailResponse {
-  data?: VRTask;
-}
 
 const scoreLabels = [
   '外观美观度',
@@ -35,14 +32,6 @@ const scoreLabels = [
   '模型纹理质量',
 ];
 
-const fetchTaskDetail = async (taskId: string): Promise<VRTaskDetailResponse> => {
-  const response = await fetch(`/api/vr-evaluation/tasks/${taskId}`);
-  if (!response.ok) {
-    throw new Error('获取任务详情失败');
-  }
-  return (await response.json()) as VRTaskDetailResponse;
-};
-
 const formatDateTime = (value?: number | string) => {
   if (!value) return '-';
   const date = typeof value === 'number' ? new Date(value) : new Date(value);
@@ -54,8 +43,13 @@ export const VREvaluationTaskDetail: React.FC = () => {
   const { history } = useRouter();
   const { taskId } = Route.useParams();
 
-  const { data, isLoading, error } = useSWR(taskId ? ['vr-task-detail', taskId] : null, () => fetchTaskDetail(taskId));
-  const task = data?.data;
+  const detailFetcher = useMemo(() => vinesFetcher<VRTask>(), []);
+
+  const {
+    data: task,
+    isLoading,
+    error,
+  } = useSWR(taskId ? ['vr-task-detail', taskId] : null, ([, id]) => detailFetcher(`/api/vr-evaluation/tasks/${id}`));
 
   const chartOption = useMemo(() => {
     if (!task?.evaluationResult) {
