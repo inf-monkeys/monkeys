@@ -22,7 +22,13 @@ export class TextExpansionController {
     }
 
     try {
-      const url = 'https://app.zaowuyun.com/api/workflow/executions/69045c450f569840e06c68e7/start-sync';
+      const url = readConfig('textExpansion.zaowuyunUrl', process.env.ZAOWUYUN_URL);
+      if (!url) {
+        throw new HttpException(
+          'Zaowuyun URL not configured. Please set textExpansion.zaowuyunUrl in config.yaml or ZAOWUYUN_URL env variable',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
 
       const response = await firstValueFrom(
         this.http.post(
@@ -179,7 +185,13 @@ export class TextExpansionController {
     }
 
     try {
-      const url = 'https://artist.infmonkeys.com/api/workflow/executions/6900c009e24dec807a305671/start-sync';
+      const url = readConfig('textExpansion.expandUrl', process.env.TEXT_EXPANSION_URL || process.env.MONKEYS_EXPAND_URL);
+      if (!url) {
+        throw new HttpException(
+          'Text expansion URL not configured. Please set textExpansion.expandUrl in config.yaml or TEXT_EXPANSION_URL env variable',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
 
       const { data } = await firstValueFrom(
         this.http.post(
