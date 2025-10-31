@@ -549,10 +549,12 @@ export const AssetDetailPage = <E extends object>({
                             const textPreview = text.substring(0, 100);
                             const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
                             await txtGenerateJson(asset.id, textPreview, jsonFileName);
-                            toast.success(t('asset.detail.jsonGenerated') || 'JSON已生成');
+                            toast.success(t('asset.detail.neuralModelGenerated') || 'JSON已生成');
                             await mutate();
                           } catch (error: any) {
-                            toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
+                            toast.error(
+                              t('asset.detail.neuralModelGeneratedFailed') + ': ' + (error?.message || 'Unknown error'),
+                            );
                           } finally {
                             setIsGenerating(false);
                           }
