@@ -32,6 +32,9 @@ const TeamIdWorkbenchIndexLazyImport = createFileRoute('/$teamId/workbench/')()
 const TeamIdVrEvaluationsIndexLazyImport = createFileRoute(
   '/$teamId/vr-evaluations/',
 )()
+const TeamIdVrEvaluationsTaskIdIndexLazyImport = createFileRoute(
+  '/$teamId/vr-evaluations/$taskId/',
+)()
 const TeamIdToolsIndexLazyImport = createFileRoute('/$teamId/tools/')()
 const TeamIdTextModelsIndexLazyImport = createFileRoute(
   '/$teamId/text-models/',
@@ -190,6 +193,14 @@ const TeamIdVrEvaluationsIndexLazyRoute =
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
     import('./pages/$teamId/vr-evaluations/index.lazy').then((d) => d.Route),
+  )
+
+const TeamIdVrEvaluationsTaskIdIndexLazyRoute =
+  TeamIdVrEvaluationsTaskIdIndexLazyImport.update({
+    path: '/$teamId/vr-evaluations/$taskId/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./pages/$teamId/vr-evaluations/$taskId/index.lazy').then((d) => d.Route),
   )
 
 const TeamIdToolsIndexLazyRoute = TeamIdToolsIndexLazyImport.update({
@@ -709,6 +720,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdVrEvaluationsIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/vr-evaluations/$taskId/': {
+      preLoaderRoute: typeof TeamIdVrEvaluationsTaskIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/workbench/': {
       preLoaderRoute: typeof TeamIdWorkbenchIndexLazyImport
       parentRoute: typeof rootRoute
@@ -837,6 +852,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdTextModelsIndexLazyRoute,
   TeamIdToolsIndexLazyRoute,
   TeamIdVrEvaluationsIndexLazyRoute,
+  TeamIdVrEvaluationsTaskIdIndexLazyRoute,
   TeamIdWorkbenchIndexLazyRoute,
   TeamIdWorkflowsIndexLazyRoute,
   TeamIdWorkspaceIndexLazyRoute,

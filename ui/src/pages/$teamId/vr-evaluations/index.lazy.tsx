@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { mutate } from 'swr';
-import { createLazyFileRoute } from '@tanstack/react-router';
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { Eye, Plus, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -25,14 +25,6 @@ import {
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -47,11 +39,12 @@ import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const VREvaluations: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { teamId } = Route.useParams();
 
   const [currentTask, setCurrentTask] = useState<IAssetItem<VRTask>>();
   const [deleteAlertDialogVisible, setDeleteAlertDialogVisible] = useState(false);
   const [createDialogVisible, setCreateDialogVisible] = useState(false);
-  const [detailDialogVisible, setDetailDialogVisible] = useState(false);
 
   const mutateVRTasks = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/vr-evaluation/tasks'));
 
@@ -73,19 +66,6 @@ export const VREvaluations: React.FC = () => {
       toast.error('删除失败');
     }
   };
-
-  const scoreLabels = [
-    '外观美观度',
-    '材质/做工质量',
-    '使用舒适度',
-    '操作便利性',
-    '功能满足需求',
-    '功能使用高效',
-    '结实耐用性',
-    '使用安全性',
-    '模型几何质量',
-    '模型纹理质量',
-  ];
 
   const iconOnlyMode = useGetUgcViewIconOnlyMode();
 
@@ -144,7 +124,10 @@ export const VREvaluations: React.FC = () => {
                   <DropdownMenuItem
                     onSelect={() => {
                       setCurrentTask(item);
-                      setDetailDialogVisible(true);
+                      navigate({
+                        to: '/$teamId/vr-evaluations/$taskId/',
+                        params: { teamId, taskId: item.id },
+                      });
                     }}
                   >
                     <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
@@ -172,8 +155,10 @@ export const VREvaluations: React.FC = () => {
         )}
         onItemClick={(item) => {
           if (item.status === 'completed') {
-            setCurrentTask(item);
-            setDetailDialogVisible(true);
+            navigate({
+              to: '/$teamId/vr-evaluations/$taskId/',
+              params: { teamId, taskId: item.id },
+            });
           }
         }}
         subtitle={
@@ -206,33 +191,6 @@ export const VREvaluations: React.FC = () => {
 
       {/* 创建对话框 */}
       <CreateVRTaskDialog open={createDialogVisible} onOpenChange={setCreateDialogVisible} onSuccess={mutateVRTasks} />
-
-      {/* 评测结果详情对话框 */}
-      <Dialog open={detailDialogVisible} onOpenChange={setDetailDialogVisible}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{currentTask?.taskName}</DialogTitle>
-            <DialogDescription>评测结果详情</DialogDescription>
-          </DialogHeader>
-
-          {currentTask?.evaluationResult && (
-            <div className="grid grid-cols-2 gap-4 py-4">
-              {Object.entries(currentTask.evaluationResult).map(([key, value], index) => (
-                <div key={key} className="flex items-center justify-between rounded-lg border p-3">
-                  <span className="text-sm">{scoreLabels[index]}</span>
-                  <span className="font-semibold">
-                    {value} <span className="text-xs text-muted-foreground">/ 5</span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button onClick={() => setDetailDialogVisible(false)}>关闭</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </main>
   );
 };
