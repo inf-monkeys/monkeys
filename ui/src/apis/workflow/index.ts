@@ -31,7 +31,16 @@ export const getWorkflowList = (query: WorkflowListQuery = {}) =>
   vinesFetcher<MonkeyWorkflow[]>({ simple: true })(`/api/workflow/metadata?${qs.stringify(query)}`);
 
 export const createWorkflow = (workflowParams: Partial<MonkeyWorkflow>) =>
-  vinesFetcher<{ workflowId: string }>({ method: 'POST', simple: true })('/api/workflow/metadata', workflowParams);
+  vinesFetcher<{ workflowId: string; warnings: string[] }>({ method: 'POST', simple: true })(
+    '/api/workflow/metadata',
+    workflowParams,
+  );
+
+export const importWorkflowByZip = (data: { zipUrl: string }) =>
+  vinesFetcher<{ workflowId: string; warnings: string[] }>({ method: 'POST', simple: true })(
+    '/api/workflow/metadata/import-from-zip',
+    data,
+  );
 
 export const cloneWorkflow = (workflowId: string) =>
   vinesFetcher<{

@@ -135,6 +135,113 @@ export class WorkflowCrudService implements IAssetHandler {
     return clonedSnapshot;
   }
 
+  /**
+   * 清理workflow中缺失的资产引用
+   * 如果引用的资产不存在，设置为null并记录警告
+   */
+  private async cleanMissingAssetReferences(
+    workflow: WorkflowExportJson,
+    teamId: string,
+    exportedAssets: {
+      llmModels?: any[];
+      sdModels?: any[];
+      tableCollections?: any[];
+      textCollections?: any[];
+    },
+  ): Promise<{ workflow: WorkflowExportJson; assetWarnings: string[] }> {
+    const warnings: string[] = [];
+    const clonedWorkflow = _.cloneDeep(workflow);
+
+    // 遍历所有task，检查资产引用
+    for (let i = 0; i < clonedWorkflow.tasks.length; i++) {
+      const task = clonedWorkflow.tasks[i];
+      const inputParams = task.inputParameters || {};
+
+      // 检查 LLM 模型引用
+      if (inputParams.model) {
+        const modelId = inputParams.model;
+        // 检查是否在导出的资产中
+        const modelExists = exportedAssets.llmModels?.some((m) => m.originalId === modelId);
+
+        if (!modelExists) {
+          // 检查是否在当前团队中存在
+          try {
+            const localModel = await this.assetsCommonRepository.findById(this.ASSET_TYPE_LLM_MODEL, modelId, teamId);
+            if (!localModel) {
+              warnings.push(`Task "${task.name}" (第${i + 1}个): LLM模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
+              task.inputParameters.model = null;
+            }
+          } catch (error) {
+            warnings.push(`Task "${task.name}" (第${i + 1}个): LLM模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
+            task.inputParameters.model = null;
+          }
+        }
+      }
+
+      // 检查 SD 模型引用
+      if (inputParams.sdModel) {
+        const modelId = inputParams.sdModel;
+        const modelExists = exportedAssets.sdModels?.some((m) => m.originalId === modelId);
+
+        if (!modelExists) {
+          try {
+            const localModel = await this.assetsCommonRepository.findById(this.ASSET_TYPE_SD_MODEL, modelId, teamId);
+            if (!localModel) {
+              warnings.push(`Task "${task.name}" (第${i + 1}个): SD模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
+              task.inputParameters.sdModel = null;
+            }
+          } catch (error) {
+            warnings.push(`Task "${task.name}" (第${i + 1}个): SD模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
+            task.inputParameters.sdModel = null;
+          }
+        }
+      }
+
+      // 检查数据库引用
+      if (inputParams.database) {
+        const dbId = inputParams.database;
+        const dbExists = exportedAssets.tableCollections?.some((db) => db.originalId === dbId);
+
+        if (!dbExists) {
+          try {
+            const localDb = await this.assetsCommonRepository.findById(this.ASSET_TYPE_TABLE_COLLECTION, dbId, teamId);
+            if (!localDb) {
+              warnings.push(`Task "${task.name}" (第${i + 1}个): 数据库 "${dbId}" 未找到，已清空。请在导入后手动配置。`);
+              task.inputParameters.database = null;
+            }
+          } catch (error) {
+            warnings.push(`Task "${task.name}" (第${i + 1}个): 数据库 "${dbId}" 未找到，已清空。请在导入后手动配置。`);
+            task.inputParameters.database = null;
+          }
+        }
+      }
+
+      // 检查向量数据库引用
+      if (inputParams.collectionName) {
+        const collectionName = inputParams.collectionName;
+        const collectionExists = exportedAssets.textCollections?.some((c) => c.name === collectionName);
+
+        if (!collectionExists) {
+          try {
+            const localCollection = await this.assetsCommonRepository.findById(this.ASSET_TYPE_TEXT_COLLECTION, collectionName, teamId);
+            if (!localCollection) {
+              warnings.push(`Task "${task.name}" (第${i + 1}个): 向量数据库 "${collectionName}" 未找到，已清空。请在导入后手动配置。`);
+              task.inputParameters.collectionName = null;
+            }
+          } catch (error) {
+            warnings.push(`Task "${task.name}" (第${i + 1}个): 向量数据库 "${collectionName}" 未找到，已清空。请在导入后手动配置。`);
+            task.inputParameters.collectionName = null;
+          }
+        }
+      }
+    }
+
+    return {
+      workflow: clonedWorkflow,
+      assetWarnings: warnings,
+    };
+  }
+
   public async cloneFromSnapshot(snapshot: any, teamId: string, userId: string): Promise<AssetCloneResult & { pages: WorkflowPageEntity[] }> {
     const { workflow, pages } = snapshot;
     const originalId = workflow.originalId;
@@ -219,6 +326,56 @@ export class WorkflowCrudService implements IAssetHandler {
         withTeam: true,
         withTags: true,
       }),
+    };
+  }
+
+  /**
+   * 创建workflow并验证依赖
+   * 用于JSON导入时的容错处理
+   */
+  public async createWorkflowDefWithValidation(teamId: string, userId: string, data: CreateWorkflowData): Promise<{ workflowId: string; warnings: string[] }> {
+    const warnings: string[] = [];
+
+    // 1. 检查并清理缺失的资产引用
+    if (data.tasks && data.tasks.length > 0) {
+      const { workflow: cleanedData, assetWarnings } = await this.cleanMissingAssetReferences(
+        { tasks: data.tasks } as any,
+        teamId,
+        {}, // JSON导入时没有导出的资产
+      );
+
+      data.tasks = cleanedData.tasks;
+      warnings.push(...assetWarnings);
+    }
+
+    // 2. 创建workflow
+    const workflowId = await this.createWorkflowDef(teamId, userId, data);
+
+    // 3. 创建默认页面（JSON导入时没有页面配置）
+    // 创建一个基础的预览页面
+    try {
+      await this.pageService.importWorkflowPage(workflowId, teamId, [
+        {
+          displayName: '预览',
+          type: 'preview',
+          pinned: true,
+          sortIndex: 0,
+          isBuiltIn: false,
+          permissions: ['read', 'write', 'exec'],
+        },
+      ]);
+    } catch (error) {
+      logger.warn(`创建默认页面失败: ${error.message}`);
+      warnings.push('创建默认页面失败，请手动创建页面');
+    }
+
+    if (warnings.length > 0) {
+      logger.warn(`Workflow ${workflowId} 创建成功但有警告: ${warnings.length} 条`);
+    }
+
+    return {
+      workflowId,
+      warnings,
     };
   }
 
@@ -424,109 +581,86 @@ export class WorkflowCrudService implements IAssetHandler {
     return workflowId;
   }
 
-  public async importWorkflowByZip(teamId: string, userId: string, zipUrl: string) {
-    const { tmpFolder, workflows, llmModels, sdModels, textCollections, tableCollections } = await extractAssetFromZip(zipUrl);
-    if (workflows?.length !== 1) {
-      throw new Error('不合法的 zip 文件, zip 文件中必须有且只有一条工作流');
-    }
+  public async importWorkflowByZip(teamId: string, userId: string, zipUrl: string): Promise<{ newWorkflowId: string; warnings: string[] }> {
+    const warnings: string[] = [];
 
-    let newWorkflowId: string;
     try {
-      // 导入表格数据
-      const replaceSqlDatabaseMap = {};
-      logger.log('开始导入表格数据集：', tableCollections.length);
-      for (const infoJson of tableCollections) {
+      // 1. 解压ZIP
+      const { tmpFolder, workflows, pages, llmModels, sdModels, textCollections, tableCollections } = await extractAssetFromZip(zipUrl);
+
+      if (!workflows || workflows.length === 0) {
+        throw new Error('ZIP文件中没有workflow定义');
+      }
+
+      if (workflows.length !== 1) {
+        throw new Error('ZIP文件中必须有且只有一条工作流');
+      }
+
+      const workflowData = workflows[0].workflows[0]; // 取第一个workflow的第一个版本
+      const workflowPages = workflows[0].pages || pages || [];
+
+      let processedWorkflow: WorkflowExportJson;
+      let newWorkflowId: string;
+
+      try {
+        // 2. ⭐ 关键：使用市场应用的 processWorkflowSnapshot 处理依赖
+        //    这个方法会自动解析 comfyui/子工作流的 appId 引用
         try {
-          // const sqlDatabaseId = await this.tableCollectionService.importDatabase(teamId, userId, infoJson);
-          // replaceSqlDatabaseMap[infoJson.originalId] = sqlDatabaseId;
+          processedWorkflow = await this.processWorkflowSnapshot(workflowData, teamId);
         } catch (error) {
-          logger.error('导入表格数据失败：', infoJson, error);
+          // 依赖缺失时不中断，记录警告
+          logger.warn(`处理workflow依赖时出错: ${error.message}`);
+          warnings.push(`部分依赖无法解析: ${error.message}`);
+          processedWorkflow = workflowData; // 使用原始数据
         }
-      }
 
-      // 导入向量数据库
-      logger.log('开始导入文本数据集：', textCollections.length);
-      const replaceVectorDatabaseMap = {};
-      if (textCollections.length) {
-        for (const infoJson of textCollections) {
-          try {
-            // const collectionName = await this.vectorService.importCollection(teamId, userId, infoJson);
-            // replaceVectorDatabaseMap[infoJson.originalId] = collectionName;
-          } catch (error) {
-            logger.error('导入文本数据失败：', infoJson, error);
-          }
-        }
-      }
+        // 3. 处理其他资产引用（容错模式）
+        //    检查workflow中的资产引用，如果本地不存在就清空
+        const { workflow: cleanedWorkflow, assetWarnings } = await this.cleanMissingAssetReferences(processedWorkflow, teamId, {
+          llmModels,
+          sdModels,
+          tableCollections,
+          textCollections,
+        });
+        warnings.push(...assetWarnings);
 
-      // 导入 llm model
-      const replaceLlmModelMap = {};
-      logger.log('开始导入文本模型：', llmModels.length);
-      const llmModelsChunks = _.chunk(llmModels, 10);
-      for (const chunk of llmModelsChunks) {
-        await Promise.all(
-          chunk.map(async (c) => {
-            try {
-              // const newLlmModel = await this.llmModelAssetSvc.createAsset('llm-model', c, {
-              //   teamId,
-              //   userId,
-              // });
-              // replaceLlmModelMap[c.originalId] = newLlmModel._id.toHexString();
-            } catch (error) {
-              logger.error('导入文本模型失败：', c, error);
+        // 4. 导入workflow（使用内部方法，复用市场应用逻辑）
+        const result = await this.importWorkflow(teamId, userId, {
+          workflows: [cleanedWorkflow],
+          pages: workflowPages,
+        });
+
+        newWorkflowId = result.id;
+
+        logger.log(`成功导入workflow: ${newWorkflowId}, 警告数: ${warnings.length}`);
+      } catch (error) {
+        throw new Error(`导入工作流失败: ${error.message}`);
+      } finally {
+        // 清理临时文件
+        fs.rm(
+          tmpFolder,
+          {
+            recursive: true,
+            force: true,
+          },
+          (error) => {
+            if (error) {
+              logger.error(`Error: ${error.message}`);
+            } else {
+              logger.info(`Folder ${tmpFolder} deleted successfully!`);
             }
-          }),
+          },
         );
       }
 
-      // 导入 sd model
-      logger.log('开始导入图像模型：', sdModels.length);
-      const replaceSdModelMap = {};
-      const sdModelsChunks = _.chunk(sdModels, 10);
-      for (const chunk of sdModelsChunks) {
-        await Promise.all(
-          chunk.map(async (c) => {
-            try {
-              // const newSdModel = await this.sdModelAssetSvc.createAsset('sd-model', c, { teamId, userId });
-              // replaceSdModelMap[c.originalId] = newSdModel._id.toHexString();
-            } catch (error) {
-              logger.error('导入图像模型失败：', c, error);
-            }
-          }),
-        );
-      }
-
-      // 导入工作流
-      newWorkflowId = await this.createWorkflowDef(teamId, userId, workflows[0].workflows[0], {
-        replaceSqlDatabaseMap,
-        replaceVectorDatabaseMap,
-        replaceLlmModelMap,
-        replaceSdModelMap,
-      });
+      return {
+        newWorkflowId,
+        warnings,
+      };
     } catch (error) {
-      throw new Error(`导入工作流失败: ${error.message}`);
-    } finally {
-      fs.rm(
-        tmpFolder,
-        {
-          recursive: true,
-          force: true,
-        },
-        (error) => {
-          if (error) {
-            logger.error(`Error: ${error.message}`);
-          } else {
-            logger.info(`Folder ${tmpFolder} deleted successfully!`);
-          }
-        },
-      );
+      logger.error('导入workflow失败', error);
+      throw error;
     }
-
-    // 再查询一遍总共导入的资产
-    // const assets = await this.service.getWorkflowRelatedAssetsOfAllVersion(newWorkflowId);
-    return {
-      newWorkflowId,
-      // assets,
-    };
   }
 
   /**
@@ -674,10 +808,10 @@ export class WorkflowCrudService implements IAssetHandler {
       const { workflow } = await this.exportWorkflowOfVersion(workflowId, version.version);
       workflows.push(workflow);
     }
-    // const pages = await this.pageService.listWorkflowPagesBrief(workflowId, teamId, userId);
+    const pages = await this.pageService.listWorkflowPagesBrief(workflowId);
     return {
       workflows: workflows,
-      pages: [],
+      pages,
     };
   }
 
