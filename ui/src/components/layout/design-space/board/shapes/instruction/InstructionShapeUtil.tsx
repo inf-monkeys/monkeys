@@ -162,75 +162,92 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
     });
 
     try {
-      console.log('[Instruction] 开始调用 API...');
+      console.log('[Instruction] 开始调用文本扩写 API...');
       
-      // 调用 Agent API（多端点回退）
-      const endpoints = [
-        '/api/tldraw-agent-v2/stream',
-        '/tldraw-agent-v2/stream',
-        '/api/v1/tldraw-agent-v2/stream',
-        'http://localhost:33002/api/tldraw-agent-v2/stream',
-      ];
-      let response: Response | null = null;
+      // 实时检测连接的Output框（确保使用最新的连接状态）
+      const currentConnectedOutputs = detectConnectedOutputs();
+      console.log('[Instruction] 当前连接的 Output 框:', currentConnectedOutputs);
+      
+      if (currentConnectedOutputs.length === 0) {
+        console.warn('[Instruction] 没有连接的 Output 框');
+        // 恢复运行状态
+        editor.updateShape<InstructionShape>({
+          id: shape.id,
+          type: 'instruction',
+          props: { ...shape.props, isRunning: false },
+        });
+        alert('请先用箭头工具连接到 Output 框');
+        return;
+      }
+      
+      // 调用文本扩写 API
       const controller = new AbortController();
       instructionAbortControllers.set(shape.id as any, controller);
-      for (const url of endpoints) {
-        try {
-          const resp = await fetch(url, {
+      
+      const response = await fetch('/api/text-expansion/expand', {
         method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...vinesHeader({ useToast: true }) },
+        headers: { 
+          'Content-Type': 'application/json', 
+          ...vinesHeader({ useToast: true }) 
+        },
         body: JSON.stringify({
-          message: shape.props.content,
-          context: {
-            shapeId: shape.id,
-          },
+          text: shape.props.content,
         }),
-            signal: controller.signal,
-          });
-          if (resp.ok) { response = resp; break; }
-          console.warn('[Instruction] 端点失败', url, resp.status);
-        } catch (e) {
-          console.warn('[Instruction] 端点异常', url, e);
-        }
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`扩写请求失败: ${response.status}`);
       }
 
-      if (!response) throw new Error('API call failed across all endpoints');
       console.log('[Instruction] API 响应状态:', response.status);
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+      const data = await response.json();
       let result = '';
 
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.content) {
-                  result += data.content;
-                }
-              } catch (e) {
-                console.error('Failed to parse SSE data:', e);
-              }
-            }
+      // 从响应中提取扩写结果（支持多种可能的响应格式）
+      // 首先尝试遍历所有字段，查找output相关的字段（如output1, output2等）
+      for (const key in data) {
+        if (key.startsWith('output')) {
+          const value = data[key];
+          if (typeof value === 'string' && value.trim()) {
+            result = value;
+            break;
           }
         }
       }
-
-      console.log('[Instruction] API 返回结果:', result.substring(0, 100) + '...');
-
-      // 找到所有连接的 output shapes 并更新它们
-      const connectedOutputs = shape.props.connections;
-      console.log('[Instruction] 更新连接的 Output 框:', connectedOutputs);
       
-      for (const outputId of connectedOutputs) {
+      // 如果有output字段，尝试提取
+      if (!result && data?.output) {
+        if (Array.isArray(data.output) && data.output[0]) {
+          const firstOutput = data.output[0];
+          result = firstOutput.text || firstOutput.content || firstOutput.data || firstOutput.value || '';
+        } else if (typeof data.output === 'object') {
+          result = data.output.text || data.output.content || data.output.data || data.output.value || 
+                   data.output.result || data.output.message || '';
+        } else if (typeof data.output === 'string') {
+          result = data.output;
+        }
+      }
+      
+      // 如果没有从output中获取到，尝试从根级别的字段获取
+      if (!result) {
+        result = data.text || data.content || data.result || data.data || data.message || 
+                 data.expanded || data.expandedText || '';
+      }
+
+      // 如果还是没有结果，使用原文
+      if (!result) {
+        result = shape.props.content;
+        console.warn('[Instruction] 无法提取扩写结果，使用原文');
+      }
+
+      console.log('[Instruction] 扩写结果:', result.substring(0, 100) + '...');
+
+      // 使用实时检测到的连接关系更新 Output 框
+      console.log('[Instruction] 更新连接的 Output 框:', currentConnectedOutputs);
+      
+      for (const outputId of currentConnectedOutputs) {
         const outputShape = editor.getShape(outputId as any) as any;
         console.log('[Instruction] 找到 Output 框:', outputId, outputShape?.type);
         
@@ -245,6 +262,17 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
           });
           console.log('[Instruction] Output 框已更新:', outputId);
         }
+      }
+      
+      // 更新 connections 属性以保持同步
+      const sortedOldConnections = [...shape.props.connections].sort();
+      const sortedNewConnections = [...currentConnectedOutputs].sort();
+      if (JSON.stringify(sortedOldConnections) !== JSON.stringify(sortedNewConnections)) {
+        editor.updateShape<InstructionShape>({
+          id: shape.id,
+          type: 'instruction',
+          props: { ...shape.props, connections: currentConnectedOutputs },
+        });
       }
       
       console.log('[Instruction] 执行完成');
