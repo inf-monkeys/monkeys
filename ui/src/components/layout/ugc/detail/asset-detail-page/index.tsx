@@ -436,9 +436,6 @@ export const AssetDetailPage = <E extends object>({
                           setIsGenerating(true);
                           try {
                             const created3D = await imageGenerate3DModel(asset.id);
-                            console.log(created3D?.url);
-                            console.log(created3D?.id);
-                            console.log(created3D?.displayName);
                             toast.success(t('asset.detail.3dModelGenerated') || '3D模型已生成');
                             if ((created3D as any)?.url && (created3D as any)?.id) {
                               setPending3DThumb({
@@ -543,7 +540,7 @@ export const AssetDetailPage = <E extends object>({
                           } finally {
                             setIsGenerating(false);
                           }
-                        } else if (isTextFile() && conversionType === 'json' && mutate) {
+                        } else if (isTextFile() && conversionType === 'neural-model' && mutate) {
                           // 当文本转换为 JSON 时，读取文本内容并生成 JSON
                           setIsGenerating(true);
                           try {
@@ -552,10 +549,12 @@ export const AssetDetailPage = <E extends object>({
                             const textPreview = text.substring(0, 100);
                             const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
                             await txtGenerateJson(asset.id, textPreview, jsonFileName);
-                            toast.success(t('asset.detail.jsonGenerated') || 'JSON已生成');
+                            toast.success(t('asset.detail.neuralModelGenerated') || 'JSON已生成');
                             await mutate();
                           } catch (error: any) {
-                            toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
+                            toast.error(
+                              t('asset.detail.neuralModelGeneratedFailed') + ': ' + (error?.message || 'Unknown error'),
+                            );
                           } finally {
                             setIsGenerating(false);
                           }
