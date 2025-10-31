@@ -17,7 +17,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label.tsx';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { uploadSingleFile } from '@/components/ui/vines-uploader/standalone';
 
@@ -184,13 +183,27 @@ export const ImportWorkflowDialog: React.FC<IImportWorkflowDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={importMode} onValueChange={(v) => setImportMode(v as 'file' | 'json')}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="file">{t('ugc-page.workflow.import-dialog.tab.file', '文件导入')}</TabsTrigger>
-            <TabsTrigger value="json">{t('ugc-page.workflow.import-dialog.tab.json', 'JSON 导入')}</TabsTrigger>
-          </TabsList>
+        <div className="flex gap-2 rounded-md bg-muted/60 p-1">
+          <Button
+            variant={importMode === 'file' ? 'solid' : 'outline'}
+            size="small"
+            onClick={() => setImportMode('file')}
+            disabled={importing}
+          >
+            {t('ugc-page.workflow.import-dialog.tab.file', '文件导入')}
+          </Button>
+          <Button
+            variant={importMode === 'json' ? 'solid' : 'outline'}
+            size="small"
+            onClick={() => setImportMode('json')}
+            disabled={importing}
+          >
+            {t('ugc-page.workflow.import-dialog.tab.json', 'JSON 导入')}
+          </Button>
+        </div>
 
-          <TabsContent value="file" className="space-y-4">
+        {importMode === 'file' ? (
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label>{t('ugc-page.workflow.import-dialog.file.label', '选择文件')}</Label>
               <div className="flex items-center gap-2">
@@ -222,9 +235,9 @@ export const ImportWorkflowDialog: React.FC<IImportWorkflowDialogProps> = ({
                 </div>
               )}
             </div>
-          </TabsContent>
-
-          <TabsContent value="json" className="space-y-4">
+          </div>
+        ) : (
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label>{t('ugc-page.workflow.import-dialog.json.label', 'JSON 内容')}</Label>
               <Textarea
@@ -239,8 +252,8 @@ export const ImportWorkflowDialog: React.FC<IImportWorkflowDialogProps> = ({
                 {t('ugc-page.workflow.import-dialog.json.hint', '请粘贴完整的工作流 JSON 配置')}
               </p>
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
 
         <DialogFooter>
           <Button onClick={() => handleDialogClose(false)} disabled={importing}>
