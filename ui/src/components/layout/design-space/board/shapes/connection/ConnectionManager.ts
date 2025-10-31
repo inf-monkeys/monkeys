@@ -41,9 +41,8 @@ export class ConnectionManager {
           connections: [...connections, outputId],
         },
       });
-    } else {
-      console.log('[ConnectionManager] 连接已存在，跳过', { instructionId, outputId });
     }
+    // 连接已存在是正常情况，不需要打印日志
 
     // 更新 Output 的来源
     if (outputShape.props.sourceId !== instructionId) {

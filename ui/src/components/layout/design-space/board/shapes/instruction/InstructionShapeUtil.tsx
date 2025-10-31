@@ -204,6 +204,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
 
       const data = await response.json();
       let result = '';
+      let imageUrl = '';
 
       // 从响应中提取扩写结果（支持多种可能的响应格式）
       // 首先尝试遍历所有字段，查找output相关的字段（如output1, output2等）
@@ -236,6 +237,16 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
                  data.expanded || data.expandedText || '';
       }
 
+      // 提取图片 URL（支持多种可能的字段名）
+      imageUrl = data.imageUrl || data.image_url || data.image || data.imageURL || 
+                 data.img || data.picture || data.photo || '';
+      
+      // 如果有output对象，也从中尝试提取图片
+      if (!imageUrl && data?.output && typeof data.output === 'object' && !Array.isArray(data.output)) {
+        imageUrl = data.output.imageUrl || data.output.image_url || data.output.image || 
+                   data.output.imageURL || data.output.img || '';
+      }
+
       // 如果还是没有结果，使用原文
       if (!result) {
         result = shape.props.content;
@@ -243,6 +254,9 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
       }
 
       console.log('[Instruction] 扩写结果:', result.substring(0, 100) + '...');
+      if (imageUrl) {
+        console.log('[Instruction] 图片 URL:', imageUrl);
+      }
 
       // 使用实时检测到的连接关系更新 Output 框
       console.log('[Instruction] 更新连接的 Output 框:', currentConnectedOutputs);
@@ -258,9 +272,10 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
             props: {
               ...outputShape.props,
               content: result,
+              imageUrl: imageUrl,
             },
           });
-          console.log('[Instruction] Output 框已更新:', outputId);
+          console.log('[Instruction] Output 框已更新:', outputId, { hasImage: !!imageUrl });
         }
       }
       
