@@ -16,7 +16,12 @@ import useUrlState from '@/hooks/use-url-state.ts';
 import { useMaskEditorStore } from '@/store/maskEditorStore';
 import { cn } from '@/utils';
 
-const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, className, onFinished }) => {
+const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({
+  src,
+  className,
+  onFinished,
+  openPopup = true,
+}) => {
   const { t } = useTranslation();
 
   const [visible, setVisible] = useState(false);
@@ -148,7 +153,7 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
             variant="outline"
             size="small"
             icon={<PencilRuler />}
-            onClick={() => setVisible(true)}
+            onClick={() => (openPopup ? setFullScreenDialog(true) : setVisible(true))}
             disabled={!src}
           >
             {t('components.ui.vines-image-mask-editor.preview.label')}

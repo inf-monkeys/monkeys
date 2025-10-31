@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton.tsx';
 export interface IVinesImageMaskPreviewProps {
   src: string;
   onFinished?: (src: string) => void;
-
+  openPopup?: boolean;
   className?: string;
 }
 
