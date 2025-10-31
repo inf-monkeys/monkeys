@@ -180,11 +180,17 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         return;
       }
       
-      // 调用文本扩写 API
+      // 判断是文生图还是文本扩写（根据关键词）
+      const isTextToImage = /[图画像]|image|picture|photo|生成图|画一|绘制/i.test(shape.props.content);
+      const apiEndpoint = isTextToImage ? '/api/text-expansion/text-to-image' : '/api/text-expansion/expand';
+      
+      console.log('[Instruction] 使用 API:', isTextToImage ? '文生图' : '文本扩写', apiEndpoint);
+      
+      // 调用 API
       const controller = new AbortController();
       instructionAbortControllers.set(shape.id as any, controller);
       
-      const response = await fetch('/api/text-expansion/expand', {
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json', 
@@ -192,6 +198,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         },
         body: JSON.stringify({
           text: shape.props.content,
+          prompt: shape.props.content,
         }),
         signal: controller.signal,
       });
@@ -202,49 +209,70 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
 
       console.log('[Instruction] API 响应状态:', response.status);
 
-      const data = await response.json();
+      const responseData = await response.json();
+      const data = responseData?.data || responseData;
       let result = '';
       let imageUrl = '';
 
-      // 从响应中提取扩写结果（支持多种可能的响应格式）
-      // 首先尝试遍历所有字段，查找output相关的字段（如output1, output2等）
-      for (const key in data) {
-        if (key.startsWith('output')) {
-          const value = data[key];
-          if (typeof value === 'string' && value.trim()) {
-            result = value;
-            break;
+      console.log('[Instruction] API 响应数据:', data);
+
+      // 如果 data 直接就是字符串（文本扩写 API 的情况）
+      if (typeof data === 'string') {
+        result = data;
+        console.log('[Instruction] 文本扩写结果:', result);
+      } 
+      // 如果是文生图 API 的响应格式
+      else if (isTextToImage && data && typeof data === 'object' && data.imageUrl) {
+        imageUrl = data.imageUrl;
+        result = data.text || shape.props.content;
+        console.log('[Instruction] 文生图结果:', { imageUrl, text: result });
+      } 
+      // 如果是对象格式，尝试提取内容
+      else if (data && typeof data === 'object') {
+        // 首先尝试遍历所有字段，查找output相关的字段（如output1, output2等）
+        for (const key in data) {
+          if (key.startsWith('output')) {
+            const value = data[key];
+            if (typeof value === 'string' && value.trim()) {
+              result = value;
+              break;
+            }
           }
         }
       }
       
-      // 如果有output字段，尝试提取
-      if (!result && data?.output) {
-        if (Array.isArray(data.output) && data.output[0]) {
-          const firstOutput = data.output[0];
-          result = firstOutput.text || firstOutput.content || firstOutput.data || firstOutput.value || '';
-        } else if (typeof data.output === 'object') {
-          result = data.output.text || data.output.content || data.output.data || data.output.value || 
-                   data.output.result || data.output.message || '';
-        } else if (typeof data.output === 'string') {
-          result = data.output;
+      // 如果还没有结果且 data 是对象，继续尝试其他提取方式
+      if (!result && typeof data === 'object' && data) {
+        // 如果有output字段，尝试提取
+        if (data?.output) {
+          if (Array.isArray(data.output) && data.output[0]) {
+            const firstOutput = data.output[0];
+            result = firstOutput.text || firstOutput.content || firstOutput.data || firstOutput.value || '';
+          } else if (typeof data.output === 'object') {
+            result = data.output.text || data.output.content || data.output.data || data.output.value || 
+                     data.output.result || data.output.message || '';
+          } else if (typeof data.output === 'string') {
+            result = data.output;
+          }
         }
-      }
-      
-      // 如果没有从output中获取到，尝试从根级别的字段获取
-      if (!result) {
-        result = data.text || data.content || data.result || data.data || data.message || 
-                 data.expanded || data.expandedText || '';
-      }
+        
+        // 如果没有从output中获取到，尝试从根级别的字段获取
+        if (!result) {
+          result = data.text || data.content || data.result || data.data || data.message || 
+                   data.expanded || data.expandedText || '';
+        }
 
-      // 提取图片 URL（支持多种可能的字段名）
-      imageUrl = data.imageUrl || data.image_url || data.image || data.imageURL || 
-                 data.img || data.picture || data.photo || '';
-      
-      // 如果有output对象，也从中尝试提取图片
-      if (!imageUrl && data?.output && typeof data.output === 'object' && !Array.isArray(data.output)) {
-        imageUrl = data.output.imageUrl || data.output.image_url || data.output.image || 
-                   data.output.imageURL || data.output.img || '';
+        // 提取图片 URL（支持多种可能的字段名）- 对于非文生图API也可能有图片
+        if (!imageUrl) {
+          imageUrl = data.imageUrl || data.image_url || data.image || data.imageURL || 
+                     data.img || data.picture || data.photo || '';
+          
+          // 如果有output对象，也从中尝试提取图片
+          if (!imageUrl && data?.output && typeof data.output === 'object' && !Array.isArray(data.output)) {
+            imageUrl = data.output.imageUrl || data.output.image_url || data.output.image || 
+                       data.output.imageURL || data.output.img || '';
+          }
+        }
       }
 
       // 如果还是没有结果，使用原文
