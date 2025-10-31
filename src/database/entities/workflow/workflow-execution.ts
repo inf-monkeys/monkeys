@@ -1,6 +1,7 @@
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base/base';
+import { ToolsExecutionEntity } from '../tools/tools-execution';
 import { WorkflowTriggerType } from './workflow-trigger';
 
 @Entity({ name: 'workflow_execution' })
@@ -149,4 +150,7 @@ export class WorkflowExecutionEntity extends BaseEntity {
     comment: '是否为临时工作流执行',
   })
   isTemporary: boolean;
+
+  @OneToMany(() => ToolsExecutionEntity, (toolsExecution) => toolsExecution.workflowExecution)
+  toolsExecutions: ToolsExecutionEntity[];
 }

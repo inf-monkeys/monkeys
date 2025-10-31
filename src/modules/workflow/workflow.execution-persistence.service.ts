@@ -3,6 +3,7 @@ import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { logger } from '@/common/logger';
 import { flattenObjectToSearchableText } from '@/common/utils';
 import { convertOutputFromRawOutput } from '@/common/utils/output';
+import { ToolsExecutionEntity } from '@/database/entities/tools/tools-execution';
 import { WorkflowArtifactEntity } from '@/database/entities/workflow/workflow-artifact.entity';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
@@ -34,6 +35,19 @@ export class WorkflowExecutionPersistenceService {
         logger.error(`Execution details missing in event payload for ${workflowInstanceId}. Cannot persist.`);
         return;
       }
+
+      await Promise.all(
+        detailedExecution.tasks.map(async (task) => {
+          const toolsExecution = new ToolsExecutionEntity();
+          toolsExecution.name = task.taskDefName;
+          toolsExecution.namespace = task.taskDefName.split(':')[0] ?? 'unknown';
+          toolsExecution.referenceName = task.referenceTaskName;
+          toolsExecution.input = task.inputData;
+          toolsExecution.output = task.outputData;
+          toolsExecution.takes = task.endTime ? task.endTime - task.startTime : null;
+          return this.workflowRepository.createToolsExecution(toolsExecution, workflowInstanceId);
+        }),
+      );
 
       const inputForSearch = detailedExecution.input ? omit(detailedExecution.input, ['__context', 'extraMetadata']) : null;
       const outputForSearch = detailedExecution.output || null;

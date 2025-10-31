@@ -16,6 +16,7 @@ import _, { isEmpty, isString, keyBy, omit, pick } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { DataSource, FindManyOptions, In, IsNull, MoreThan, Repository } from 'typeorm';
 import { InstalledAppEntity } from '../entities/marketplace/installed-app.entity';
+import { ToolsExecutionEntity } from '../entities/tools/tools-execution';
 import { BaseWorkflowAssosciation, GlobalWorkflowAssociationsEntity, UpdateAndCreateGlobalWorkflowAssociations } from '../entities/workflow/global-workflow-association';
 import { UpdateAndCreateWorkflowAssociation, WorkflowAssociationsEntity } from '../entities/workflow/workflow-association';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
@@ -74,6 +75,8 @@ export class WorkflowRepository {
     private readonly workflowAssociationRepository: Repository<WorkflowAssociationsEntity>,
     @InjectRepository(GlobalWorkflowAssociationsEntity)
     private readonly globalWorkflowAssociationRepository: Repository<GlobalWorkflowAssociationsEntity>,
+    @InjectRepository(ToolsExecutionEntity)
+    private readonly toolsExecutionRepository: Repository<ToolsExecutionEntity>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -644,6 +647,19 @@ export class WorkflowRepository {
 
   public async updateWorkflowExecutionDetailsByInstanceId(workflowInstanceId: string, updateData: Partial<WorkflowExecutionEntity>): Promise<void> {
     await this.workflowExecutionRepository.update({ workflowInstanceId }, updateData);
+  }
+
+  public async createToolsExecution(toolsExecution: ToolsExecutionEntity, workflowInstanceId: string): Promise<ToolsExecutionEntity> {
+    return await this.dataSource.transaction(async (transactionalEntityManager) => {
+      const workflowExecution = await transactionalEntityManager.findOne(WorkflowExecutionEntity, { where: { workflowInstanceId } });
+      if (!workflowExecution) {
+        throw new Error('Workflow execution not found');
+      }
+      return await transactionalEntityManager.save(ToolsExecutionEntity, {
+        ...toolsExecution,
+        workflowExecutionId: workflowExecution.id,
+      });
+    });
   }
 
   private getDateList(startTimestamp: number, endTimestamp: number) {
