@@ -155,13 +155,13 @@ export class WorkflowCrudService implements IAssetHandler {
     // 遍历所有task，检查资产引用
     for (let i = 0; i < clonedWorkflow.tasks.length; i++) {
       const task = clonedWorkflow.tasks[i];
+      const taskAny = task as { name?: string; inputParameters?: Record<string, any> };
 
-      // 类型守卫：只处理有 inputParameters 的任务
-      if (!('inputParameters' in task) || !task.inputParameters) {
+      if (!taskAny.inputParameters || typeof taskAny.inputParameters !== 'object') {
         continue;
       }
 
-      const inputParams = task.inputParameters;
+      const inputParams = taskAny.inputParameters;
 
       // 检查 LLM 模型引用
       if (inputParams.model) {
@@ -171,7 +171,7 @@ export class WorkflowCrudService implements IAssetHandler {
 
         if (!modelExists) {
           warnings.push(`Task "${task.name}" (第${i + 1}个): LLM模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
-          task.inputParameters.model = null;
+          taskAny.inputParameters.model = null;
         }
       }
 
@@ -182,7 +182,7 @@ export class WorkflowCrudService implements IAssetHandler {
 
         if (!modelExists) {
           warnings.push(`Task "${task.name}" (第${i + 1}个): SD模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
-          task.inputParameters.sdModel = null;
+          taskAny.inputParameters.sdModel = null;
         }
       }
 
@@ -193,7 +193,7 @@ export class WorkflowCrudService implements IAssetHandler {
 
         if (!dbExists) {
           warnings.push(`Task "${task.name}" (第${i + 1}个): 数据库 "${dbId}" 未找到，已清空。请在导入后手动配置。`);
-          task.inputParameters.database = null;
+          taskAny.inputParameters.database = null;
         }
       }
 
@@ -204,7 +204,7 @@ export class WorkflowCrudService implements IAssetHandler {
 
         if (!collectionExists) {
           warnings.push(`Task "${task.name}" (第${i + 1}个): 向量数据库 "${collectionName}" 未找到，已清空。请在导入后手动配置。`);
-          task.inputParameters.collectionName = null;
+          taskAny.inputParameters.collectionName = null;
         }
       }
     }
