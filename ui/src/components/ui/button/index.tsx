@@ -79,6 +79,38 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const Comp = asChild ? Slot : 'button';
     const hasChildren = Boolean(children);
+    const leadingNode =
+      loading || loadResult || icon ? (
+        <div
+          className={cn('[&_svg]:h-4 [&_svg]:w-4', {
+            'mr-2': hasChildren,
+          })}
+        >
+          {loading || loadResult ? <Spinner loading={loading} type={loadResult} /> : icon ? icon : null}
+        </div>
+      ) : null;
+
+    const content = React.useMemo(() => {
+      if (asChild && React.isValidElement(children)) {
+        return leadingNode
+          ? React.cloneElement(
+              children,
+              children.props,
+              <>
+                {leadingNode}
+                {children.props.children}
+              </>,
+            )
+          : children;
+      }
+      return (
+        <>
+          {leadingNode}
+          {children}
+        </>
+      );
+    }, [asChild, children, leadingNode]);
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, theme, size, className, block }), !hasChildren && '!h-auto !p-2')}
@@ -87,16 +119,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         data-variant={variant}
         {...props}
       >
-        {(loading || loadResult || icon) && (
-          <div
-            className={cn('[&_svg]:h-4 [&_svg]:w-4', {
-              'mr-2': hasChildren,
-            })}
-          >
-            {loading || loadResult ? <Spinner loading={loading} type={loadResult} /> : icon ? icon : null}
-          </div>
-        )}
-        {children}
+        {content}
       </Comp>
     );
   },
