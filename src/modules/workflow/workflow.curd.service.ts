@@ -141,7 +141,7 @@ export class WorkflowCrudService implements IAssetHandler {
    */
   private async cleanMissingAssetReferences(
     workflow: WorkflowExportJson,
-    teamId: string,
+    _teamId: string,
     exportedAssets: {
       llmModels?: any[];
       sdModels?: any[];
@@ -155,7 +155,13 @@ export class WorkflowCrudService implements IAssetHandler {
     // 遍历所有task，检查资产引用
     for (let i = 0; i < clonedWorkflow.tasks.length; i++) {
       const task = clonedWorkflow.tasks[i];
-      const inputParams = task.inputParameters || {};
+
+      // 类型守卫：只处理有 inputParameters 的任务
+      if (!('inputParameters' in task) || !task.inputParameters) {
+        continue;
+      }
+
+      const inputParams = task.inputParameters;
 
       // 检查 LLM 模型引用
       if (inputParams.model) {
@@ -164,17 +170,8 @@ export class WorkflowCrudService implements IAssetHandler {
         const modelExists = exportedAssets.llmModels?.some((m) => m.originalId === modelId);
 
         if (!modelExists) {
-          // 检查是否在当前团队中存在
-          try {
-            const localModel = await this.assetsCommonRepository.findById(this.ASSET_TYPE_LLM_MODEL, modelId, teamId);
-            if (!localModel) {
-              warnings.push(`Task "${task.name}" (第${i + 1}个): LLM模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
-              task.inputParameters.model = null;
-            }
-          } catch (error) {
-            warnings.push(`Task "${task.name}" (第${i + 1}个): LLM模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
-            task.inputParameters.model = null;
-          }
+          warnings.push(`Task "${task.name}" (第${i + 1}个): LLM模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
+          task.inputParameters.model = null;
         }
       }
 
@@ -184,16 +181,8 @@ export class WorkflowCrudService implements IAssetHandler {
         const modelExists = exportedAssets.sdModels?.some((m) => m.originalId === modelId);
 
         if (!modelExists) {
-          try {
-            const localModel = await this.assetsCommonRepository.findById(this.ASSET_TYPE_SD_MODEL, modelId, teamId);
-            if (!localModel) {
-              warnings.push(`Task "${task.name}" (第${i + 1}个): SD模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
-              task.inputParameters.sdModel = null;
-            }
-          } catch (error) {
-            warnings.push(`Task "${task.name}" (第${i + 1}个): SD模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
-            task.inputParameters.sdModel = null;
-          }
+          warnings.push(`Task "${task.name}" (第${i + 1}个): SD模型 "${modelId}" 未找到，已清空。请在导入后手动配置。`);
+          task.inputParameters.sdModel = null;
         }
       }
 
@@ -203,16 +192,8 @@ export class WorkflowCrudService implements IAssetHandler {
         const dbExists = exportedAssets.tableCollections?.some((db) => db.originalId === dbId);
 
         if (!dbExists) {
-          try {
-            const localDb = await this.assetsCommonRepository.findById(this.ASSET_TYPE_TABLE_COLLECTION, dbId, teamId);
-            if (!localDb) {
-              warnings.push(`Task "${task.name}" (第${i + 1}个): 数据库 "${dbId}" 未找到，已清空。请在导入后手动配置。`);
-              task.inputParameters.database = null;
-            }
-          } catch (error) {
-            warnings.push(`Task "${task.name}" (第${i + 1}个): 数据库 "${dbId}" 未找到，已清空。请在导入后手动配置。`);
-            task.inputParameters.database = null;
-          }
+          warnings.push(`Task "${task.name}" (第${i + 1}个): 数据库 "${dbId}" 未找到，已清空。请在导入后手动配置。`);
+          task.inputParameters.database = null;
         }
       }
 
@@ -222,16 +203,8 @@ export class WorkflowCrudService implements IAssetHandler {
         const collectionExists = exportedAssets.textCollections?.some((c) => c.name === collectionName);
 
         if (!collectionExists) {
-          try {
-            const localCollection = await this.assetsCommonRepository.findById(this.ASSET_TYPE_TEXT_COLLECTION, collectionName, teamId);
-            if (!localCollection) {
-              warnings.push(`Task "${task.name}" (第${i + 1}个): 向量数据库 "${collectionName}" 未找到，已清空。请在导入后手动配置。`);
-              task.inputParameters.collectionName = null;
-            }
-          } catch (error) {
-            warnings.push(`Task "${task.name}" (第${i + 1}个): 向量数据库 "${collectionName}" 未找到，已清空。请在导入后手动配置。`);
-            task.inputParameters.collectionName = null;
-          }
+          warnings.push(`Task "${task.name}" (第${i + 1}个): 向量数据库 "${collectionName}" 未找到，已清空。请在导入后手动配置。`);
+          task.inputParameters.collectionName = null;
         }
       }
     }
@@ -586,7 +559,7 @@ export class WorkflowCrudService implements IAssetHandler {
 
     try {
       // 1. 解压ZIP
-      const { tmpFolder, workflows, pages, llmModels, sdModels, textCollections, tableCollections } = await extractAssetFromZip(zipUrl);
+      const { tmpFolder, workflows, llmModels, sdModels, textCollections, tableCollections } = await extractAssetFromZip(zipUrl);
 
       if (!workflows || workflows.length === 0) {
         throw new Error('ZIP文件中没有workflow定义');
@@ -597,7 +570,7 @@ export class WorkflowCrudService implements IAssetHandler {
       }
 
       const workflowData = workflows[0].workflows[0]; // 取第一个workflow的第一个版本
-      const workflowPages = workflows[0].pages || pages || [];
+      const workflowPages = workflows[0].pages || [];
 
       let processedWorkflow: WorkflowExportJson;
       let newWorkflowId: string;
@@ -943,6 +916,7 @@ export class WorkflowCrudService implements IAssetHandler {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async getById(assetId: string, _teamId: string): Promise<any> {
     return await this.workflowRepository.getWorkflowByRecordId(assetId);
   }
