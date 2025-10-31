@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { preloadUgcVREvaluationTasks, useUgcVREvaluationTasks, VRTask } from '@/apis/ugc/vr-evaluation';
+import { deleteVRTask, preloadUgcVREvaluationTasks, useUgcVREvaluationTasks, VRTask } from '@/apis/ugc/vr-evaluation';
 import { UgcView } from '@/components/layout/ugc/view';
 import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
 import { createVREvaluationTasksColumns } from '@/components/layout/ugc-pages/vr-evaluations/consts';
@@ -52,12 +52,7 @@ export const VREvaluations: React.FC = () => {
     if (!currentTask) return;
 
     try {
-      const response = await fetch(`/api/vr-evaluation/tasks/${currentTask.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('删除失败');
-
+      await deleteVRTask(currentTask.id);
       toast.success('删除成功');
       setDeleteAlertDialogVisible(false);
       setCurrentTask(undefined);
@@ -120,22 +115,20 @@ export const VREvaluations: React.FC = () => {
               <DropdownMenuLabel>操作</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                {item.status === 'completed' && (
-                  <DropdownMenuItem
-                    onSelect={() => {
-                      setCurrentTask(item);
-                      navigate({
-                        to: '/$teamId/vr-evaluations/$taskId/',
-                        params: { teamId, taskId: item.id },
-                      });
-                    }}
-                  >
-                    <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                      <Eye size={15} />
-                    </DropdownMenuShortcut>
-                    查看评测结果
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setCurrentTask(item);
+                    navigate({
+                      to: '/$teamId/vr-evaluations/$taskId/',
+                      params: { teamId, taskId: item.id },
+                    });
+                  }}
+                >
+                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                    <Eye size={15} />
+                  </DropdownMenuShortcut>
+                  查看评测结果
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-red-10"
@@ -154,12 +147,10 @@ export const VREvaluations: React.FC = () => {
           </DropdownMenu>
         )}
         onItemClick={(item) => {
-          if (item.status === 'completed') {
-            navigate({
-              to: '/$teamId/vr-evaluations/$taskId/',
-              params: { teamId, taskId: item.id },
-            });
-          }
+          navigate({
+            to: '/$teamId/vr-evaluations/$taskId/',
+            params: { teamId, taskId: item.id },
+          });
         }}
         subtitle={
           <Button variant="outline" size="small" icon={<Plus />} onClick={() => setCreateDialogVisible(true)}>
