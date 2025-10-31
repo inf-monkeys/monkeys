@@ -18,7 +18,6 @@ export const NeuralModels: React.FC = () => {
 
   // 包装useUgcMediaData，只显示神经模型
   const useNeuralModelsOnly = (dto: any) => useUgcMediaData(dto, 'only');
-  const preloadNeuralModelsOnly = (dto: any) => preloadUgcMediaData(dto, 'only');
 
   const getDescription = (item: any) => {
     const desc = item.description;
@@ -34,6 +33,47 @@ export const NeuralModels: React.FC = () => {
     return '';
   };
 
+  // 创建自定义列定义，修改 logo 列以支持神经模型的 JSON URL
+  const createNeuralModelColumns = () => {
+    const columns = createMediaDataColumns();
+    const logoColumn = columns.find((col) => col.id === 'logo');
+    if (logoColumn) {
+      logoColumn.cell = ({ row }: any) => {
+        // 优先检查 JSON 的 params 中是否携带 url
+        const fileName = String(row.original?.name || row.original?.displayName || '');
+        const parts = fileName.split('.');
+        const extension = parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
+        const jsonUrl = row.original?.params?.jsonData?.url as string | undefined;
+
+        if (extension === 'json' && jsonUrl) {
+          return RenderIcon({ iconUrl: jsonUrl });
+        }
+
+        // 否则使用原始的渲染逻辑（复制自 createMediaDataColumns 中的 logo 列）
+        const isTextFile = ['txt', 'json', 'md', 'csv', 'log', 'xml', 'yaml', 'yml'].includes(extension);
+        const isImageFile =
+          row.original.type?.startsWith('image') ||
+          ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension);
+
+        if (isTextFile) {
+          // 文本文件显示内容预览
+          return (
+            <div className="h-12 w-12 overflow-hidden rounded">
+              <AssetContentPreview asset={row.original} isThumbnail={true} className="h-full w-full" />
+            </div>
+          );
+        } else if (isImageFile && row.original.url) {
+          // 图片文件显示图片预览
+          return RenderIcon({ iconUrl: encodeURI(row.original.url) });
+        } else {
+          // 其他文件显示默认图标
+          return RenderIcon({ iconUrl: row.original.iconUrl || '' });
+        }
+      };
+    }
+    return columns;
+  };
+
   return (
     <main className="size-full">
       <UgcView
@@ -44,7 +84,7 @@ export const NeuralModels: React.FC = () => {
         })}
         useUgcFetcher={useNeuralModelsOnly}
         preloadUgcFetcher={preloadUgcMediaData}
-        createColumns={() => createMediaDataColumns()}
+        createColumns={() => createNeuralModelColumns()}
         // 过滤条件：只显示 params.type 为 'neural-model' 的媒体文件
         renderOptions={{
           subtitle: (item) => (
