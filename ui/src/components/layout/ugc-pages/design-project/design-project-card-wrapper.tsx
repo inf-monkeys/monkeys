@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { useDesignProjectMetadataList } from '@/apis/designs';
-import { IDesignBoardMetadata, IDesignProject } from '@/apis/designs/typings';
+import { IDesignProject } from '@/apis/designs/typings';
 import { IAssetItem } from '@/apis/ugc/typings';
 import { DesignProjectCard } from '@/components/layout/ugc-pages/design-project/design-project-card';
 
@@ -20,9 +19,9 @@ export const DesignProjectCardWrapper: React.FC<DesignProjectCardWrapperProps> =
   onItemClick,
   operateArea,
 }) => {
-  // 获取项目的第一个画板
-  const { data: boards } = useDesignProjectMetadataList(project.id);
-  const firstBoard = boards?.[0] as IDesignBoardMetadata | undefined;
+  // 🚀 性能优化：直接从项目数据中读取第一个画板信息
+  // 后端已经在列表API中返回了 firstBoard 字段，避免了N+1查询问题
+  const firstBoard = (project as any).firstBoard;
 
   return (
     <DesignProjectCard project={project} firstBoard={firstBoard} onItemClick={onItemClick} operateArea={operateArea} />

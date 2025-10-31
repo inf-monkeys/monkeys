@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import { IDesignBoardMetadata, IDesignProject } from '@/apis/designs/typings';
 import { IAssetItem } from '@/apis/ugc/typings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { getI18nContent } from '@/utils';
@@ -30,6 +31,10 @@ export const DesignProjectCard: React.FC<DesignProjectCardProps> = ({
   operateArea,
 }) => {
   const { t } = useTranslation();
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [isImgInView, setIsImgInView] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const handleClick = () => {
     onItemClick?.(project);
@@ -41,7 +46,34 @@ export const DesignProjectCard: React.FC<DesignProjectCardProps> = ({
     t('common.utils.operate'),
   );
 
-  console.log(firstBoard?.thumbnailUrl);
+  // 使用 Intersection Observer 延迟加载缩略图
+  useEffect(() => {
+    if (!firstBoard?.thumbnailUrl || !imgRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !isImgInView) {
+            setIsImgInView(true);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '100px', // 提前100px加载图片
+        threshold: 0.01,
+      },
+    );
+
+    const currentRef = imgRef.current;
+    observer.observe(currentRef);
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [firstBoard?.thumbnailUrl, isImgInView]);
 
   return (
     <Card
@@ -68,30 +100,34 @@ export const DesignProjectCard: React.FC<DesignProjectCardProps> = ({
       {/* 中间：第一个页面缩略图（固定大小） */}
       <CardContent className="flex flex-1 flex-col px-3 pb-2">
         <div className="relative h-40 w-full overflow-hidden rounded-md border">
-          {firstBoard?.thumbnailUrl ? (
-            <img
-              src={firstBoard.thumbnailUrl}
-              alt={`${getI18nContent(firstBoard.displayName)} - 第1页预览`}
-              className="h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
-              onError={(e) => {
-                // 缩略图加载失败时显示默认图标
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const fallback = target.nextElementSibling as HTMLElement;
-                if (fallback) fallback.style.display = 'flex';
-              }}
-            />
-          ) : null}
-
-          <div
-            className={`flex h-full w-full items-center justify-center bg-muted ${
-              firstBoard?.thumbnailUrl ? 'hidden' : 'flex'
-            }`}
-          >
-            <VinesIcon size="lg" src={project.iconUrl || DEFAULT_DESIGN_PROJECT_ICON_URL} />
-          </div>
+          {firstBoard?.thumbnailUrl && !imgError ? (
+            <>
+              {/* 骨架屏 - 加载中显示 */}
+              {!imgLoaded && <Skeleton className="absolute inset-0 h-full w-full" />}
+              
+              {/* 实际图片 */}
+              <img
+                ref={imgRef}
+                src={isImgInView ? firstBoard.thumbnailUrl : undefined}
+                alt={`${getI18nContent(firstBoard.displayName)} - 第1页预览`}
+                className={`h-full w-full object-cover transition-opacity duration-300 ${
+                  imgLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                loading="lazy"
+                decoding="async"
+                onLoad={() => setImgLoaded(true)}
+                onError={() => {
+                  setImgError(true);
+                  setImgLoaded(true);
+                }}
+              />
+            </>
+          ) : (
+            // 无缩略图或加载失败时显示默认图标
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <VinesIcon size="lg" src={project.iconUrl || DEFAULT_DESIGN_PROJECT_ICON_URL} />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
