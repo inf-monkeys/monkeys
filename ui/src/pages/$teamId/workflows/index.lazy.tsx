@@ -20,6 +20,7 @@ import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
 import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { ExportWorkflowDialog } from '@/components/layout/ugc-pages/workflows/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/layout/ugc-pages/workflows/export-workflow/typings.ts';
+import { ImportWorkflowDialog } from '@/components/layout/ugc-pages/workflows/import-workflow';
 import { PublishToMarket } from '@/components/layout/ugc-pages/workflows/publish-to-market';
 import { IPublishToMarketWithAssetsContext } from '@/components/layout/ugc-pages/workflows/publish-to-market/typings.ts';
 import { RollbackWorkflow } from '@/components/layout/ugc-pages/workflows/rollback-workflow';
@@ -68,6 +69,7 @@ export const Workflows: React.FC = () => {
   const [currentWorkflow, setCurrentWorkflow] = useState<IAssetItem<MonkeyWorkflow>>();
   const [workflowEditorVisible, setWorkflowEditorVisible] = useState(false);
   const [deleteAlertDialogVisible, setDeleteAlertDialogVisible] = useState(false);
+  const [importDialogVisible, setImportDialogVisible] = useState(false);
   const [exportDialogVisible, setExportDialogVisible] = useState(false);
   const [exportAssetContext, setExportAssetContext] = useState<IExportWorkflowWithAssetsContext | undefined>();
   const [publishToMarketVisible, setPublishToMarketVisible] = useState(false);
@@ -291,7 +293,11 @@ export const Workflows: React.FC = () => {
                 }}
               >
                 <DropdownMenuGroup>
-                  <DropdownMenuItem disabled>
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      setImportDialogVisible(true);
+                    }}
+                  >
                     {t('ugc-page.workflow.ugc-view.subtitle.import.options.local-import')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -316,6 +322,13 @@ export const Workflows: React.FC = () => {
         setVisible={setWorkflowEditorVisible}
         workflow={currentWorkflow}
         afterUpdate={handleAfterUpdateWorkflow}
+      />
+      <ImportWorkflowDialog
+        visible={importDialogVisible}
+        setVisible={setImportDialogVisible}
+        onImportSuccess={() => {
+          void mutateWorkflows();
+        }}
       />
       <AlertDialog open={deleteAlertDialogVisible} onOpenChange={setDeleteAlertDialogVisible}>
         <AlertDialogContent

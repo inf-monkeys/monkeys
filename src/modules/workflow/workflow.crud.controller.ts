@@ -119,14 +119,16 @@ export class WorkflowCrudController {
 
   @Post()
   @ApiOperation({
-    summary: '创建 workflow 定义',
-    description: '创建 workflow 定义',
+    summary: '创建 workflow 定义（支持JSON导入）',
+    description: '创建 workflow 定义，可用于导入JSON格式的workflow',
   })
   @UseGuards(CompatibleAuthGuard)
   public async createWorkflowDef(@Req() req: IRequest, @Body() body: CreateWorkflowDefDto) {
     const { teamId, userId } = req;
     const { displayName, description, tasks, variables, output, iconUrl, triggers } = body;
-    const workflowId = await this.service.createWorkflowDef(teamId, userId, {
+
+    // ✅ 修改：使用带验证的创建方法
+    const { workflowId, warnings } = await this.service.createWorkflowDefWithValidation(teamId, userId, {
       displayName,
       description,
       iconUrl,
@@ -135,9 +137,11 @@ export class WorkflowCrudController {
       output,
       triggers,
     });
+
     return new SuccessResponse({
       data: {
         workflowId,
+        warnings, // ← 返回警告信息
       },
     });
   }
@@ -248,17 +252,21 @@ export class WorkflowCrudController {
 
   @Post('/import-from-zip')
   @ApiOperation({
-    summary: '使用 zip 导入 workflow',
-    description: '使用 zip 导入 workflow',
+    summary: '从 ZIP 导入 workflow',
+    description: '从 ZIP 文件导入 workflow，支持容错处理',
   })
   @UseGuards(CompatibleAuthGuard)
   public async importWorkflowByZip(@Req() req: IRequest, @Body() body: ImportWorkflowDto) {
     const { teamId, userId } = req;
     const { zipUrl } = body;
-    const { newWorkflowId } = await this.service.importWorkflowByZip(teamId, userId, zipUrl);
+
+    // ✅ 修改：接收warnings
+    const { newWorkflowId, warnings } = await this.service.importWorkflowByZip(teamId, userId, zipUrl);
+
     return new SuccessResponse({
       data: {
         workflowId: newWorkflowId,
+        warnings, // ← 返回给前端
       },
     });
   }

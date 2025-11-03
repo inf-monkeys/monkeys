@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { Object3D, Scene } from 'three';
+import { USDZExporter } from 'three/examples/jsm/exporters/USDZExporter.js';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import * as z from 'zod';
 
 import { createVRTask } from '@/apis/ugc/vr-evaluation';
@@ -18,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { uploadSingleFile } from '@/components/ui/vines-uploader/standalone';
 
 interface CreateVRTaskDialogProps {
   open: boolean;
@@ -36,6 +42,10 @@ type CreateVRTaskFormData = z.infer<typeof createVRTaskSchema>;
 export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, onOpenChange, onSuccess }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [conversionState, setConversionState] = useState<'idle' | 'converting' | 'uploading'>('idle');
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [convertedFileName, setConvertedFileName] = useState<string>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<CreateVRTaskFormData>({
     resolver: zodResolver(createVRTaskSchema),
@@ -45,6 +55,115 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
       thumbnailUrl: '',
     },
   });
+
+  const resetConversionIndicators = useCallback(() => {
+    setConversionState('idle');
+    setUploadProgress(0);
+  }, []);
+
+  const convertFileToUSDZ = useCallback(async (file: File) => {
+    const extension = file.name.split('.').pop()?.toLowerCase();
+
+    if (!extension) {
+      throw new Error('无法识别的文件格式');
+    }
+
+    if (extension === 'usdz') {
+      const buffer = await file.arrayBuffer();
+      return new File([buffer], file.name, { type: 'model/vnd.usdz+zip' });
+    }
+
+    const scene = new Scene();
+
+    const loadWithGLTFLoader = async () => {
+      const loader = new GLTFLoader();
+      const arrayBuffer = await file.arrayBuffer();
+      return await new Promise<Object3D>((resolve, reject) => {
+        loader.parse(
+          arrayBuffer,
+          '',
+          (gltf) => resolve(gltf.scene),
+          (error) => reject(error),
+        );
+      });
+    };
+
+    const loadWithOBJLoader = async () => {
+      const loader = new OBJLoader();
+      const text = await file.text();
+      return loader.parse(text);
+    };
+
+    const loadWithFBXLoader = async () => {
+      const loader = new FBXLoader();
+      const arrayBuffer = await file.arrayBuffer();
+      return loader.parse(arrayBuffer, '');
+    };
+
+    let loadedObject: Object3D | undefined;
+
+    if (extension === 'glb' || extension === 'gltf') {
+      loadedObject = await loadWithGLTFLoader();
+    } else if (extension === 'obj') {
+      loadedObject = await loadWithOBJLoader();
+    } else if (extension === 'fbx') {
+      loadedObject = await loadWithFBXLoader();
+    } else {
+      throw new Error(`暂不支持 ${extension} 格式的转换`);
+    }
+
+    if (!loadedObject) {
+      throw new Error('模型加载失败');
+    }
+
+    scene.add(loadedObject);
+
+    const exporter = new USDZExporter();
+    const arrayBuffer = await exporter.parse(scene);
+    const fileName = `${file.name.replace(/\.[^/.]+$/, '')}.usdz`;
+
+    return new File([arrayBuffer], fileName, { type: 'model/vnd.usdz+zip' });
+  }, []);
+
+  const handleModelConversion = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) {
+        return;
+      }
+
+      setConversionState('converting');
+      setUploadProgress(0);
+
+      try {
+        const usdzFile = await convertFileToUSDZ(file);
+
+        setConversionState('uploading');
+        const { urls } = await uploadSingleFile(usdzFile, {
+          basePath: 'vr-models',
+          onProgress: (progress) => setUploadProgress(progress),
+        });
+
+        const [uploadedUrl] = urls;
+        if (!uploadedUrl) {
+          throw new Error('文件上传失败');
+        }
+
+        form.setValue('modelUrl', uploadedUrl, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+        setConvertedFileName(usdzFile.name);
+        toast.success('模型已转换并上传');
+      } catch (error) {
+        console.error('模型转换失败', error);
+        toast.error(error instanceof Error ? error.message : '模型转换失败，请检查文件格式');
+      } finally {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        resetConversionIndicators();
+      }
+    },
+    [convertFileToUSDZ, form, resetConversionIndicators],
+  );
 
   const onSubmit = async (data: CreateVRTaskFormData) => {
     setLoading(true);
@@ -119,6 +238,39 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
                 </FormItem>
               )}
             />
+
+            <div className="space-y-2 rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h4 className="text-sm font-medium">模型转换</h4>
+                  <p className="text-xs text-muted-foreground">
+                    支持上传 glb/gltf/obj/fbx/usdz，转换后会自动上传并回填链接。
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={conversionState !== 'idle'}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  选择文件
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".glb,.gltf,.obj,.fbx,.usdz"
+                  className="hidden"
+                  onChange={handleModelConversion}
+                />
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {conversionState === 'converting' && <span>正在转换模型，请稍候...</span>}
+                {conversionState === 'uploading' && <span>正在上传 USDZ 文件（{uploadProgress.toFixed(0)}%）</span>}
+                {conversionState === 'idle' && convertedFileName && (
+                  <span className="text-green-600">已生成并上传：{convertedFileName}</span>
+                )}
+              </div>
+            </div>
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>

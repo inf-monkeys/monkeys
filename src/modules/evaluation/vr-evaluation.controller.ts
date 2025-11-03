@@ -3,6 +3,7 @@ import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UpdateEvaluationDataRequestDto } from './dto/vr-evaluation.dto';
 import { CreateVRTaskDto, UpdateEvaluationDataDto, VREvaluationService } from './vr-evaluation.service';
 
 @Controller('vr-evaluation')
@@ -30,8 +31,24 @@ export class VREvaluationController {
     description: 'Vision Pro 端上传评测数据',
   })
   @UseGuards(CompatibleAuthGuard)
-  async updateEvaluateData(@Body() dto: UpdateEvaluationDataDto) {
-    const result = await this.vrEvaluationService.updateEvaluationData(dto);
+  async updateEvaluateData(@Body() dto: UpdateEvaluationDataRequestDto) {
+    const payload: UpdateEvaluationDataDto = {
+      taskId: dto.task_id,
+      evaluationResult: {
+        score_1: dto.evaluation_result.score_1,
+        score_2: dto.evaluation_result.score_2,
+        score_3: dto.evaluation_result.score_3,
+        score_4: dto.evaluation_result.score_4,
+        score_5: dto.evaluation_result.score_5,
+        score_6: dto.evaluation_result.score_6,
+        score_7: dto.evaluation_result.score_7,
+        score_8: dto.evaluation_result.score_8,
+        score_9: dto.evaluation_result.score_9,
+        score_10: dto.evaluation_result.score_10,
+      },
+    };
+
+    const result = await this.vrEvaluationService.updateEvaluationData(payload);
     return result;
   }
 

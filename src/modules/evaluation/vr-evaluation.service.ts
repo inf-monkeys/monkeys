@@ -54,7 +54,6 @@ export class VREvaluationService {
         task_name: task.taskName,
         thumbnail_url: task.thumbnailUrl,
         model_url: task.modelUrl,
-        status: task.status,
       })),
     };
   }
