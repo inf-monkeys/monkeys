@@ -127,7 +127,7 @@ export class WorkflowCrudController {
     const { teamId, userId } = req;
     const { displayName, description, tasks, variables, output, iconUrl, triggers } = body;
 
-    // ✅ 修改：使用带验证的创建方法
+    // 使用带验证的创建方法，支持导入场景的容错处理
     const { workflowId, warnings } = await this.service.createWorkflowDefWithValidation(teamId, userId, {
       displayName,
       description,
@@ -141,7 +141,7 @@ export class WorkflowCrudController {
     return new SuccessResponse({
       data: {
         workflowId,
-        warnings, // ← 返回警告信息
+        warnings, // 返回警告信息（如有）
       },
     });
   }

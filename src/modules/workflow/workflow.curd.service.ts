@@ -304,12 +304,22 @@ export class WorkflowCrudService implements IAssetHandler {
 
   /**
    * 创建workflow并验证依赖
-   * 用于JSON导入时的容错处理
+   * 用于前端创建和导入场景的容错处理
+   *
+   * 功能：
+   * 1. 检查并清理缺失的资产引用（导入场景）
+   * 2. 创建workflow
+   * 3. 页面创建由 listWorkflowPagesAndCreateIfNotExists 懒加载处理
+   *
+   * @param teamId 团队ID
+   * @param userId 用户ID
+   * @param data 工作流数据
+   * @returns 工作流ID和警告信息
    */
   public async createWorkflowDefWithValidation(teamId: string, userId: string, data: CreateWorkflowData): Promise<{ workflowId: string; warnings: string[] }> {
     const warnings: string[] = [];
 
-    // 1. 检查并清理缺失的资产引用
+    // 1. 检查并清理缺失的资产引用（主要用于导入场景）
     if (data.tasks && data.tasks.length > 0) {
       const { workflow: cleanedData, assetWarnings } = await this.cleanMissingAssetReferences(
         { tasks: data.tasks } as any,
@@ -324,23 +334,7 @@ export class WorkflowCrudService implements IAssetHandler {
     // 2. 创建workflow
     const workflowId = await this.createWorkflowDef(teamId, userId, data);
 
-    // 3. 创建默认页面（JSON导入时没有页面配置）
-    // 创建一个基础的预览页面
-    try {
-      await this.pageService.importWorkflowPage(workflowId, teamId, [
-        {
-          displayName: '预览',
-          type: 'preview',
-          pinned: true,
-          sortIndex: 0,
-          isBuiltIn: false,
-          permissions: ['read', 'write', 'exec'],
-        },
-      ]);
-    } catch (error) {
-      logger.warn(`创建默认页面失败: ${error.message}`);
-      warnings.push('创建默认页面失败，请手动创建页面');
-    }
+    // 注意：页面会在首次访问时通过 listWorkflowPagesAndCreateIfNotExists 自动创建
 
     if (warnings.length > 0) {
       logger.warn(`Workflow ${workflowId} 创建成功但有警告: ${warnings.length} 条`);
