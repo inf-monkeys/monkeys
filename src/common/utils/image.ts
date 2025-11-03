@@ -45,25 +45,26 @@ export async function generateThumbnail(
 ): Promise<ThumbnailResult> {
   const { format = 'jpeg', quality = 80 } = options;
 
-  // 获取原图尺寸
-  const metadata = await sharp(inputBuffer).metadata();
-  const originalWidth = metadata.width || 0;
-  const originalHeight = metadata.height || 0;
-
-  // 计算缩放比例,保持原比例,最长边200
-  const maxSize = 200;
-  let resizeWidth = 200;
-  let resizeHeight = 200;
-
-  if (originalWidth > originalHeight) {
-    resizeWidth = maxSize;
-    resizeHeight = Math.round((maxSize * originalHeight) / originalWidth);
-  } else {
-    resizeHeight = maxSize;
-    resizeWidth = Math.round((maxSize * originalWidth) / originalHeight);
-  }
-
-  const transformer = sharp(inputBuffer).resize(resizeWidth, resizeHeight);
+  // 如果传入了自定义宽高，则遵循传入参数进行缩放/裁剪
+  const hasCustomSize = Boolean(options.width || options.height);
+  const transformer = hasCustomSize
+    ? sharp(inputBuffer).resize({
+        width: options.width,
+        height: options.height,
+        fit: (options.fit ?? 'cover') as keyof sharp.FitEnum,
+        position: 'attention',
+        withoutEnlargement: true,
+      } as sharp.ResizeOptions)
+    : (() => {
+        // 未指定尺寸时，按最长边 200 生成等比缩略图
+        return sharp(inputBuffer)
+          .resize({
+            width: 200,
+            height: 200,
+          fit: 'inside',
+            withoutEnlargement: true,
+          } as sharp.ResizeOptions);
+      })();
 
   // 根据格式选择输出
   switch (format) {
