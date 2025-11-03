@@ -52,6 +52,7 @@ export class WorkflowTool extends StateNode {
         isRunning: false,
         connections: [],
         inputParams: this.workflowData?.inputParams || [],
+        inputConnections: [],
       },
     } as any);
 

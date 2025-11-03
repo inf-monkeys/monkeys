@@ -19,6 +19,10 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   const [drawVariant, setDrawVariant] = useState<'draw' | 'highlight' | 'laser'>('draw');
   const drawGroupRef = useRef<HTMLDivElement | null>(null);
   const drawCloseTimerRef = useRef<number | undefined>(undefined);
+  const [isInstructionMenuOpen, setIsInstructionMenuOpen] = useState(false);
+  const [instructionVariant, setInstructionVariant] = useState<'text' | 'image'>('text');
+  const instructionGroupRef = useRef<HTMLDivElement | null>(null);
+  const instructionCloseTimerRef = useRef<number | undefined>(undefined);
   const [isGeoMenuOpen, setIsGeoMenuOpen] = useState(false);
   const [geoVariant, setGeoVariant] = useState<
     (typeof GeoShapeGeoStyle.values extends Iterable<infer T> ? T : never) | 'rectangle'
@@ -55,6 +59,11 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
           setIsDrawMenuOpen(false);
         }
       }
+      if (isInstructionMenuOpen) {
+        if (instructionGroupRef.current && !instructionGroupRef.current.contains(target)) {
+          setIsInstructionMenuOpen(false);
+        }
+      }
       if (isGeoMenuOpen) {
         if (geoGroupRef.current && !geoGroupRef.current.contains(target)) {
           setIsGeoMenuOpen(false);
@@ -68,7 +77,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     };
     document.addEventListener('mousedown', onDocMouseDown);
     return () => document.removeEventListener('mousedown', onDocMouseDown);
-  }, [isDrawMenuOpen, isGeoMenuOpen, isWorkflowMenuOpen]);
+  }, [isDrawMenuOpen, isInstructionMenuOpen, isGeoMenuOpen, isWorkflowMenuOpen]);
 
   // 定义工具栏中要显示的工具列表 - 使用正确的工具ID
   const oneOnOne = (oem as any)?.theme?.designProjects?.oneOnOne === true;
@@ -316,6 +325,111 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
               );
             }
             
+            if (tool.id === 'instruction') {
+              const activeId = instructionVariant;
+              const isActive = currentToolId === 'instruction';
+              return (
+                <div key="instruction-group" className={`tool-group ${isActive ? 'selected' : ''}`} ref={instructionGroupRef}>
+                  <button
+                    className={`tool-button ${isActive ? 'selected' : ''} ${isInstructionMenuOpen ? 'menu-open' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // 设置输入模式并激活工具
+                      const instructionTool = editor.getStateDescendant('instruction') as any;
+                      if (instructionTool && instructionTool.setInputMode) {
+                        instructionTool.setInputMode(activeId);
+                      }
+                      editor.setCurrentTool('instruction');
+                      setCurrentToolId('instruction');
+                      setIsInstructionMenuOpen(false);
+                    }}
+                    title={activeId === 'text' ? '文字输入' : '图片输入'}
+                    style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                  >
+                    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
+                      {activeId === 'text' ? 'I' : '📷'}
+                    </span>
+                    <span className="caret" />
+                    <span
+                      className="caret-hit"
+                      title="更多输入模式"
+                      onMouseEnter={() => {
+                        if (instructionCloseTimerRef.current !== undefined) {
+                          window.clearTimeout(instructionCloseTimerRef.current);
+                          instructionCloseTimerRef.current = undefined;
+                        }
+                        setIsInstructionMenuOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        instructionCloseTimerRef.current = window.setTimeout(() => {
+                          setIsInstructionMenuOpen(false);
+                          instructionCloseTimerRef.current = undefined;
+                        }, 150);
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsInstructionMenuOpen((v) => !v);
+                      }}
+                    />
+                  </button>
+                  {isInstructionMenuOpen && (
+                    <div
+                      className="dropdown-menu"
+                      onMouseEnter={() => {
+                        if (instructionCloseTimerRef.current !== undefined) {
+                          window.clearTimeout(instructionCloseTimerRef.current);
+                          instructionCloseTimerRef.current = undefined;
+                        }
+                        setIsInstructionMenuOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        setIsInstructionMenuOpen(false);
+                      }}
+                    >
+                      <div
+                        className={`dropdown-item ${instructionVariant === 'text' ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setInstructionVariant('text');
+                          const instructionTool = editor.getStateDescendant('instruction') as any;
+                          if (instructionTool && instructionTool.setInputMode) {
+                            instructionTool.setInputMode('text');
+                          }
+                          editor.setCurrentTool('instruction');
+                          setCurrentToolId('instruction');
+                          setIsInstructionMenuOpen(false);
+                        }}
+                      >
+                        <span style={{ fontSize: '16px', fontWeight: 'bold' }}>I</span>
+                        <span>文字输入</span>
+                      </div>
+                      <div
+                        className={`dropdown-item ${instructionVariant === 'image' ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setInstructionVariant('image');
+                          const instructionTool = editor.getStateDescendant('instruction') as any;
+                          if (instructionTool && instructionTool.setInputMode) {
+                            instructionTool.setInputMode('image');
+                          }
+                          editor.setCurrentTool('instruction');
+                          setCurrentToolId('instruction');
+                          setIsInstructionMenuOpen(false);
+                        }}
+                      >
+                        <span style={{ fontSize: '16px' }}>📷</span>
+                        <span>图片输入</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            
             if (tool.id === 'workflow') {
               const isActive = currentToolId === 'workflow';
               return (
@@ -505,9 +619,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                 title={tool.label}
                 style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
               >
-                {tool.id === 'instruction' ? (
-                  <span style={{ fontSize: '16px', fontWeight: 'bold' }}>I</span>
-                ) : tool.id === 'output' ? (
+                {tool.id === 'output' ? (
                   <span style={{ fontSize: '16px', fontWeight: 'bold' }}>O</span>
                 ) : (
                   <TldrawUiIcon icon={tool.icon} />

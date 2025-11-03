@@ -1,4 +1,5 @@
 import { vinesHeader } from '@/apis/utils';
+import { VinesUploader } from '@/components/ui/vines-uploader';
 import {
   BaseBoxShapeUtil,
   Editor,
@@ -22,6 +23,8 @@ export class InstructionShapeUtil extends BaseBoxShapeUtil<InstructionShape> {
       w: 300,
       h: 200,
       content: '',
+      imageUrl: '',
+      inputMode: 'text',
       color: 'blue',
       isRunning: false,
       connections: [],
@@ -63,6 +66,17 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
       props: {
         ...shape.props,
         content: e.target.value,
+      },
+    });
+  };
+
+  const handleImageChange = (urls: string[]) => {
+    editor.updateShape<InstructionShape>({
+      id: shape.id,
+      type: 'instruction',
+      props: {
+        ...shape.props,
+        imageUrl: urls.length > 0 ? urls[0] : '',
       },
     });
   };
@@ -109,13 +123,24 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
     console.log('[Instruction] 播放按钮被点击', {
       shapeId: shape.id,
       content: shape.props.content,
+      imageUrl: shape.props.imageUrl,
+      inputMode: shape.props.inputMode,
       connections: shape.props.connections,
     });
 
-    if (!shape.props.content || shape.props.content.trim() === '') {
-      console.warn('[Instruction] 内容为空，取消执行');
-      alert('请先输入指令内容');
-      return;
+    // 验证输入
+    if (shape.props.inputMode === 'text') {
+      if (!shape.props.content || shape.props.content.trim() === '') {
+        console.warn('[Instruction] 文字内容为空，取消执行');
+        alert('请先输入指令内容');
+        return;
+      }
+    } else if (shape.props.inputMode === 'image') {
+      if (!shape.props.imageUrl || shape.props.imageUrl.trim() === '') {
+        console.warn('[Instruction] 图片为空，取消执行');
+        alert('请先上传图片');
+        return;
+      }
     }
 
     if (!shape.props.connections || shape.props.connections.length === 0) {
@@ -180,11 +205,27 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         return;
       }
       
-      // 判断是文生图还是文本扩写（根据关键词）
-      const isTextToImage = /[图画像]|image|picture|photo|生成图|画一|绘制/i.test(shape.props.content);
-      const apiEndpoint = isTextToImage ? '/api/text-expansion/text-to-image' : '/api/text-expansion/expand';
+      // 根据输入模式选择API
+      let apiEndpoint: string;
+      let requestBody: any;
       
-      console.log('[Instruction] 使用 API:', isTextToImage ? '文生图' : '文本扩写', apiEndpoint);
+      if (shape.props.inputMode === 'image') {
+        // 图片输入模式 - 使用图生文或图生图API
+        apiEndpoint = '/api/image-to-text'; // 根据实际API调整
+        requestBody = {
+          imageUrl: shape.props.imageUrl,
+        };
+        console.log('[Instruction] 使用图片输入 API:', apiEndpoint);
+      } else {
+        // 文字输入模式 - 判断是文生图还是文本扩写
+        const isTextToImage = /[图画像]|image|picture|photo|生成图|画一|绘制/i.test(shape.props.content);
+        apiEndpoint = isTextToImage ? '/api/text-expansion/text-to-image' : '/api/text-expansion/expand';
+        requestBody = {
+          text: shape.props.content,
+          prompt: shape.props.content,
+        };
+        console.log('[Instruction] 使用文字输入 API:', isTextToImage ? '文生图' : '文本扩写', apiEndpoint);
+      }
       
       // 调用 API
       const controller = new AbortController();
@@ -196,10 +237,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
           'Content-Type': 'application/json', 
           ...vinesHeader({ useToast: true }) 
         },
-        body: JSON.stringify({
-          text: shape.props.content,
-          prompt: shape.props.content,
-        }),
+        body: JSON.stringify(requestBody),
         signal: controller.signal,
       });
 
@@ -221,8 +259,8 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         result = data;
         console.log('[Instruction] 文本扩写结果:', result);
       } 
-      // 如果是文生图 API 的响应格式
-      else if (isTextToImage && data && typeof data === 'object' && data.imageUrl) {
+      // 如果是对象格式，尝试提取图片URL
+      else if (data && typeof data === 'object' && data.imageUrl) {
         imageUrl = data.imageUrl;
         result = data.text || shape.props.content;
         console.log('[Instruction] 文生图结果:', { imageUrl, text: result });
@@ -431,27 +469,46 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
 
       {/* 内容区域 */}
       <div style={{ flex: 1, padding: '12px', position: 'relative' }}>
-        <textarea
-          value={shape.props.content}
-          onChange={handleContentChange}
-          onPointerDown={(e) => {
-            // 允许文本框接收点击，但不传播到外层
-            e.stopPropagation();
-          }}
-          placeholder="可以输入内容"
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            outline: 'none',
-            resize: 'none',
-            fontSize: '14px',
-            fontFamily: 'inherit',
-            color: '#374151',
-            backgroundColor: 'transparent',
-            pointerEvents: 'auto',
-          }}
-        />
+        {shape.props.inputMode === 'text' ? (
+          <textarea
+            value={shape.props.content}
+            onChange={handleContentChange}
+            onPointerDown={(e) => {
+              // 允许文本框接收点击，但不传播到外层
+              e.stopPropagation();
+            }}
+            placeholder="可以输入内容"
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              outline: 'none',
+              resize: 'none',
+              fontSize: '14px',
+              fontFamily: 'inherit',
+              color: '#374151',
+              backgroundColor: 'transparent',
+              pointerEvents: 'auto',
+            }}
+          />
+        ) : (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            style={{ 
+              width: '100%', 
+              height: '100%',
+              pointerEvents: 'auto',
+            }}
+          >
+            <VinesUploader
+              files={shape.props.imageUrl ? [shape.props.imageUrl] : []}
+              onChange={handleImageChange}
+              max={1}
+              basePath="user-files/instruction-input"
+            />
+          </div>
+        )}
       </div>
 
       {/* 右侧连接点 */}

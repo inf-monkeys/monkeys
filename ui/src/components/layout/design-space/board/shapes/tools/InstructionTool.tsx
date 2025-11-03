@@ -1,7 +1,11 @@
 import { StateNode, TLEventHandlers, createShapeId } from 'tldraw';
+import { InstructionInputMode } from '../instruction/InstructionShape.types';
 
 export class InstructionTool extends StateNode {
   static override id = 'instruction';
+
+  // 存储输入模式
+  private inputMode: InstructionInputMode = 'text';
 
   override onEnter = () => {
     this.editor.setCursor({ type: 'cross', rotation: 0 });
@@ -10,6 +14,11 @@ export class InstructionTool extends StateNode {
   override onExit = () => {
     this.editor.setCursor({ type: 'default', rotation: 0 });
   };
+
+  // 设置输入模式（从工具栏调用）
+  setInputMode(mode: InstructionInputMode) {
+    this.inputMode = mode;
+  }
 
   override onPointerDown: TLEventHandlers['onPointerDown'] = (info) => {
     const point = this.editor.inputs.currentPagePoint;
@@ -25,6 +34,8 @@ export class InstructionTool extends StateNode {
         w: 300,
         h: 200,
         content: '',
+        imageUrl: '',
+        inputMode: this.inputMode,
         color: 'blue',
         isRunning: false,
         connections: [],

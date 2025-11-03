@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { vinesHeader } from '@/apis/utils';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 import {
@@ -29,6 +31,7 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
       isRunning: false,
       connections: [],
       inputParams: [],
+      inputConnections: [],
     };
   }
 
@@ -60,6 +63,134 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
 }
 
 function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; editor: Editor }) {
+  // 获取参数连接点的引用
+  const paramConnectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // 检测连接的Instruction并自动填充参数
+  const detectAndFillInstructionInputs = () => {
+    const allShapes = editor.getCurrentPageShapes();
+    const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
+    const selfBounds = editor.getShapePageBounds(shape.id as any);
+    
+    if (!selfBounds) return;
+
+    const isPointInRect = (p: { x: number; y: number }, r: { x: number; y: number; w: number; h: number }) =>
+      p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+    const expandRect = (r: { x: number; y: number; w: number; h: number }, padding = 16) => ({
+      x: r.x - padding,
+      y: r.y - padding,
+      w: r.w + padding * 2,
+      h: r.h + padding * 2,
+    });
+
+    const newConnections: Array<{ paramName: string; instructionId: string }> = [];
+
+    arrows.forEach((arrow) => {
+      const start = arrow.props.start as any;
+      const end = arrow.props.end as any;
+      
+      // 检查箭头是否从Instruction指向本Workflow
+      if (start?.type === 'binding' && end?.type === 'binding' && end.boundShapeId === shape.id) {
+        const startShape = editor.getShape(start.boundShapeId) as any;
+        if (startShape?.type === 'instruction') {
+          // 使用第一个参数作为默认映射
+          if (shape.props.inputParams.length > 0) {
+            const firstParam = shape.props.inputParams[0];
+            newConnections.push({
+              paramName: firstParam.name,
+              instructionId: startShape.id,
+            });
+          }
+        }
+      } else {
+        // 精确判定：检查箭头终点是否在某个参数连接点附近
+        const endAbs = { x: arrow.x + (end?.x ?? 0), y: arrow.y + (end?.y ?? 0) };
+        const startAbs = { x: arrow.x + (start?.x ?? 0), y: arrow.y + (start?.y ?? 0) };
+        
+        // 遍历所有参数的连接点
+        shape.props.inputParams.forEach((param) => {
+          const paramRef = paramConnectionRefs.current.get(param.name);
+          if (!paramRef) return;
+          
+          const paramRect = paramRef.getBoundingClientRect();
+          const editorRect = editor.getContainer().getBoundingClientRect();
+          
+          // 转换为画布坐标
+          const camera = editor.getCamera();
+          const paramPageX = (paramRect.left - editorRect.left) / camera.z - camera.x;
+          const paramPageY = (paramRect.top - editorRect.top) / camera.z - camera.y;
+          
+          const paramBounds = {
+            x: paramPageX,
+            y: paramPageY,
+            w: paramRect.width / camera.z,
+            h: paramRect.height / camera.z,
+          };
+          
+          // 检查箭头终点是否在这个参数连接点附近
+          if (isPointInRect(endAbs, expandRect(paramBounds))) {
+            // 检查起点是否是Instruction
+            for (const s of allShapes) {
+              if (s.type !== 'instruction') continue;
+              const b = editor.getShapePageBounds(s.id as any);
+              if (!b) continue;
+              if (isPointInRect(startAbs, expandRect(b))) {
+                newConnections.push({
+                  paramName: param.name,
+                  instructionId: s.id as string,
+                });
+              }
+            }
+          }
+        });
+      }
+    });
+
+    // 填充参数值
+    if (newConnections.length > 0) {
+      const updatedParams = shape.props.inputParams.map(param => {
+        const connection = newConnections.find(c => c.paramName === param.name);
+        if (connection) {
+          const instructionShape = editor.getShape(connection.instructionId as any) as any;
+          if (instructionShape && instructionShape.type === 'instruction') {
+            // 根据Instruction的输入模式获取值
+            if (instructionShape.props.inputMode === 'image') {
+              return { ...param, value: instructionShape.props.imageUrl || param.value };
+            } else {
+              return { ...param, value: instructionShape.props.content || param.value };
+            }
+          }
+        }
+        return param;
+      });
+
+      // 更新inputConnections
+      const currentConnectionsStr = JSON.stringify(shape.props.inputConnections || []);
+      const newConnectionsStr = JSON.stringify(newConnections);
+      
+      if (currentConnectionsStr !== newConnectionsStr || 
+          JSON.stringify(updatedParams) !== JSON.stringify(shape.props.inputParams)) {
+        editor.updateShape<WorkflowShape>({
+          id: shape.id,
+          type: 'workflow',
+          props: {
+            ...shape.props,
+            inputParams: updatedParams,
+            inputConnections: newConnections,
+          },
+        });
+      }
+    }
+  };
+
+  // 定期检测连接（可以优化为事件驱动）
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      detectAndFillInstructionInputs();
+    }, 500);
+    return () => clearInterval(interval);
+  }, [shape.id, shape.props.inputParams, shape.props.inputConnections]);
+
   const handleParamChange = (paramName: string, value: any) => {
     const updatedParams = shape.props.inputParams.map(param => 
       param.name === paramName ? { ...param, value } : param
@@ -427,15 +558,57 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
             <div style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>
               输入参数
             </div>
-            {shape.props.inputParams.map((param) => (
-              <div key={param.name} style={{ marginBottom: '8px' }}>
+            {shape.props.inputParams.map((param, index) => {
+              // 检查这个参数是否有连接
+              const isConnected = shape.props.inputConnections?.some(conn => conn.paramName === param.name);
+              
+              return (
+              <div key={param.name} style={{ marginBottom: '8px', position: 'relative' }}>
+                {/* 参数连接点 */}
+                <div
+                  ref={(el) => {
+                    if (el) {
+                      paramConnectionRefs.current.set(param.name, el);
+                    }
+                  }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  style={{
+                    position: 'absolute',
+                    left: '-20px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: isConnected ? '#10B981' : '#9CA3AF',
+                    border: '2px solid white',
+                    borderRadius: '50%',
+                    cursor: 'crosshair',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                    zIndex: 10,
+                    pointerEvents: 'auto',
+                    transition: 'background-color 0.2s',
+                  }}
+                  title={`连接点: ${param.displayName || param.name}`}
+                />
+                
                 <label style={{ 
-                  display: 'block', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
                   fontSize: '11px', 
                   color: '#374151', 
                   marginBottom: '4px',
                   fontWeight: '500',
                 }}>
+                  {isConnected && (
+                    <span style={{ 
+                      display: 'inline-block',
+                      width: '6px',
+                      height: '6px',
+                      backgroundColor: '#10B981',
+                      borderRadius: '50%',
+                    }} />
+                  )}
                   {param.displayName || param.name}
                   {param.required && <span style={{ color: '#EF4444' }}>*</span>}
                 </label>
@@ -547,7 +720,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                   />
                 )}
               </div>
-            ))}
+            )})}
           </div>
         )}
         
@@ -556,7 +729,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         </div>
       </div>
 
-      {/* 右侧连接点 */}
+      {/* 右侧连接点（输出到Output） */}
       <div
         onPointerDown={(e) => {
           e.stopPropagation();
@@ -577,6 +750,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           zIndex: 10,
           pointerEvents: 'auto',
         }}
+        title="输出到Output框"
       />
     </div>
   );
