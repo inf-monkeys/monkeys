@@ -631,6 +631,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                     value={param.value || ''}
                     onChange={(e) => handleParamChange(param.name, e.target.value)}
                     onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
                     placeholder={param.description || `输入${param.displayName || param.name}`}
                     style={{
                       width: '100%',
@@ -644,31 +645,66 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                     }}
                   />
                 ) : param.type === 'number' ? (
-                  <input
-                    type="number"
-                    value={param.value || ''}
-                    onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
-                    onPointerDown={(e) => e.stopPropagation()}
-                    placeholder={param.description || `输入${param.displayName || param.name}`}
-                    style={{
-                      width: '100%',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      border: '1px solid #D1D5DB',
-                      borderRadius: '4px',
-                      outline: 'none',
-                      backgroundColor: 'white',
-                      pointerEvents: 'auto',
-                    }}
-                  />
+                  <div>
+                    {/* 如果有min/max值，显示滑动条 */}
+                    {(param as any).typeOptions?.minValue !== undefined && (param as any).typeOptions?.maxValue !== undefined ? (
+                      <div onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                        <input
+                          type="range"
+                          min={(param as any).typeOptions.minValue}
+                          max={(param as any).typeOptions.maxValue}
+                          step={(param as any).typeOptions.numberPrecision || 1}
+                          value={param.value || (param as any).typeOptions.minValue}
+                          onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
+                          style={{
+                            width: '100%',
+                            pointerEvents: 'auto',
+                          }}
+                        />
+                        <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          fontSize: '10px', 
+                          color: '#6B7280',
+                          marginTop: '2px',
+                        }}>
+                          <span>{(param as any).typeOptions.minValue}</span>
+                          <span style={{ fontWeight: '600', color: '#374151' }}>{param.value || (param as any).typeOptions.minValue}</span>
+                          <span>{(param as any).typeOptions.maxValue}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <input
+                        type="number"
+                        value={param.value || ''}
+                        onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder={param.description || `输入${param.displayName || param.name}`}
+                        style={{
+                          width: '100%',
+                          padding: '4px 8px',
+                          fontSize: '11px',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '4px',
+                          outline: 'none',
+                          backgroundColor: 'white',
+                          pointerEvents: 'auto',
+                        }}
+                      />
+                    )}
+                  </div>
                 ) : param.type === 'boolean' ? (
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <label 
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
                     <input
                       type="checkbox"
                       checked={param.value || false}
                       onChange={(e) => handleParamChange(param.name, e.target.checked)}
-                      onPointerDown={(e) => e.stopPropagation()}
-                      style={{ pointerEvents: 'auto' }}
+                      style={{ pointerEvents: 'auto', cursor: 'pointer' }}
                     />
                     <span style={{ fontSize: '11px', color: '#6B7280' }}>
                       {param.description || '启用'}
@@ -679,6 +715,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                     value={param.value || ''}
                     onChange={(e) => handleParamChange(param.name, e.target.value)}
                     onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
                     style={{
                       width: '100%',
                       padding: '4px 8px',
@@ -703,6 +740,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                     value={typeof param.value === 'string' ? param.value : JSON.stringify(param.value || '')}
                     onChange={(e) => handleParamChange(param.name, e.target.value)}
                     onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
                     placeholder={param.description || `输入${param.displayName || param.name}`}
                     rows={2}
                     style={{
