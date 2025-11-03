@@ -41,7 +41,7 @@ import { ExternalLayerPanel } from './ExternalLayerPanel';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
-import { ConnectionManager, InstructionShapeUtil, InstructionTool, OutputShapeUtil, OutputTool } from './shapes';
+import { ConnectionManager, InstructionShapeUtil, InstructionTool, OutputShapeUtil, OutputTool, WorkflowShapeUtil, WorkflowTool } from './shapes';
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 
 import 'tldraw/tldraw.css';
@@ -1114,9 +1114,9 @@ export const Board: React.FC<BoardProps> = ({
               });
             }}
             components={components}
-            shapeUtils={[FixedFrameShapeUtil, InstructionShapeUtil, OutputShapeUtil]}
+            shapeUtils={[FixedFrameShapeUtil, InstructionShapeUtil, OutputShapeUtil, WorkflowShapeUtil]}
             bindingUtils={defaultBindingUtils}
-            tools={[...defaultShapeTools, ...defaultTools, InstructionTool, OutputTool]}
+            tools={[...defaultShapeTools, ...defaultTools, InstructionTool, OutputTool, WorkflowTool]}
             assetUrls={defaultEditorAssetUrls}
             overrides={{
               tools: (_editor, tools) => {
