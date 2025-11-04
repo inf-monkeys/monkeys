@@ -101,7 +101,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
 
   const handleDragStart = React.useCallback((e: React.DragEvent, item: ImagesResultWithOrigin, src: string) => {
     e.stopPropagation();
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = 'copy';
     e.dataTransfer.setData('text/plain', item.render.origin);
     e.dataTransfer.setData('text/uri-list', src);
   }, []);
