@@ -3259,7 +3259,8 @@
                 "boolean": "boolean {{extra}}",
                 "file": "file {{extra}}",
                 "workflow": "workflow {{extra}}",
-                "comfyui-model": "image model {{extra}}"
+                "comfyui-model": "image model {{extra}}",
+                "neural-model": "neural model {{extra}}"
               },
               "comfyui-model-server-id": {
                 "label": "ComfyUI Server",

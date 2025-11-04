@@ -3283,7 +3283,8 @@
                 "boolean": "逻辑值{{extra}}",
                 "file": "文件{{extra}}",
                 "workflow": "工作流{{extra}}",
-                "comfyui-model": "图像模型{{extra}}"
+                "comfyui-model": "图像模型{{extra}}",
+                "neural-model": "神经模型{{extra}}"
               },
               "comfyui-model-server-id": {
                 "label": "ComfyUI 服务",

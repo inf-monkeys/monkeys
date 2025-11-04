@@ -75,6 +75,18 @@ export const WORKFLOW_INPUT_TYPE_OPTION_LIST: IWorkflowInputTypeOption[] = [
     multipleValues: false,
     assetType: 'comfyui-model',
   },
+  {
+    value: 'string',
+    label: 'neural-model',
+    multipleValues: false,
+    assetType: 'neural-model',
+  },
+  {
+    value: 'string',
+    label: 'neural-model',
+    multipleValues: true,
+    assetType: 'neural-model',
+  },
 ];
 
 export const VINES_WORKFLOW_INPUT_SPECIAL_TYPES = ['canvas-assist', 'notice'] as ToolPropertyTypes[];
