@@ -459,7 +459,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
+        overflow: 'visible',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         pointerEvents: 'all',
       }}
@@ -540,7 +540,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       </div>
 
       {/* 内容区域 */}
-      <div style={{ flex: 1, padding: '12px', position: 'relative', overflow: 'auto' }}>
+      <div style={{ flex: 1, padding: '12px 12px 12px 24px', position: 'relative', overflow: 'visible' }}>
         <div style={{ marginBottom: '8px' }}>
           <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
             {shape.props.workflowName || '未命名工作流'}
@@ -554,7 +554,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         
         {/* 输入参数区域 */}
         {shape.props.inputParams && shape.props.inputParams.length > 0 && (
-          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #E5E7EB' }}>
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #E5E7EB', position: 'relative' }}>
             <div style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>
               输入参数
             </div>
@@ -563,7 +563,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
               const isConnected = shape.props.inputConnections?.some(conn => conn.paramName === param.name);
               
               return (
-              <div key={param.name} style={{ marginBottom: '8px', position: 'relative' }}>
+              <div key={param.name} style={{ marginBottom: '8px', position: 'relative', paddingLeft: '4px' }}>
                 {/* 参数连接点 */}
                 <div
                   ref={(el) => {
@@ -574,17 +574,17 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                   onPointerDown={(e) => e.stopPropagation()}
                   style={{
                     position: 'absolute',
-                    left: '-20px',
+                    left: '-28px',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    width: '12px',
-                    height: '12px',
+                    width: '14px',
+                    height: '14px',
                     backgroundColor: isConnected ? '#10B981' : '#9CA3AF',
                     border: '2px solid white',
                     borderRadius: '50%',
                     cursor: 'crosshair',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                    zIndex: 10,
+                    zIndex: 100,
                     pointerEvents: 'auto',
                     transition: 'background-color 0.2s',
                   }}
