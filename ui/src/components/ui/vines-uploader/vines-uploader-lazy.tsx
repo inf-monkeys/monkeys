@@ -448,19 +448,23 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
       {({ getRootProps, getInputProps, isDragAccept, isDragActive, isFocused, open }) => {
         const isDropzoneActive = isDragAccept || isDragActive || isHovering || isDraggingOver;
         const isEmptyFilesOrDragAccept = isFilesEmpty || isDropzoneActive;
+        const rootProps = getRootProps({
+          onPaste: onPaste as any,
+          ref,
+          onClick: () => setIsClickOutside(false),
+        });
 
         return (
           <div
-            className={cn('relative h-[12rem] rounded dark:bg-card-dark', className)}
-            {...getRootProps({
-              onPaste: onPaste as any,
-              ref,
-              onClick: () => setIsClickOutside(false),
-            })}
+            {...rootProps}
+            className={cn('relative h-[12rem] rounded dark:bg-card-dark', className, rootProps.className)}
             // 覆盖react-dropzone的拖拽事件处理
             // onDragOver={handleCustomDragOver}
             // onDragLeave={handleCustomDragLeave}
-            onDrop={handleCustomDrop}
+            onDrop={(event) => {
+              rootProps.onDrop?.(event);
+              handleCustomDrop(event);
+            }}
           >
             <input {...getInputProps()} />
             {!isFilesEmpty && <VinesFiles uppy={uppy} files={files} />}
