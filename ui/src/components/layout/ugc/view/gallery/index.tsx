@@ -2,10 +2,12 @@ import React from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
+import { flexRender } from '@tanstack/react-table';
 import { useTranslation } from 'react-i18next';
 
 import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { useColumnRenderer } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
@@ -37,8 +39,20 @@ export const UgcViewGalleryItem = <E extends object>({
     navigate({ to: `/$teamId/nav/${currentNavId}/asset/${row.original.id}` as any });
   };
 
-  // 判断是否置顶
-  const isPinned = ((row.original as any).sort ?? 0) > 0;
+  // 判断是否应该显示查看信息按钮
+  // 只显示在：concept-design:design-assets 和 concept-design:design-models/neural-models
+  const shouldShowInfoButton = React.useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const path = window.location.pathname;
+
+    // 检查是否是 concept-design:design-assets
+    const isDesignAssets = path.includes('/nav/concept-design:design-assets');
+
+    // 检查是否是 concept-design:design-models/neural-models
+    const isNeuralModels = path.includes('/nav/concept-design:design-models/neural-models');
+
+    return isDesignAssets || isNeuralModels;
+  }, []);
 
   return (
     <div
@@ -56,45 +70,85 @@ export const UgcViewGalleryItem = <E extends object>({
     >
       <div className="relative flex items-end justify-end">
         {cover}
-
-        {/* 置顶标识 - 左上角 */}
-        {/* {isPinned && (
-          <div className="absolute top-2 left-2 z-10">
-            <Tooltip content={t('common.utils.pinned')}>
+        {/* 右下角操作按钮 */}
+        <div className="absolute flex translate-x-[-0.5rem] translate-y-[-0.5rem] cursor-pointer gap-1 opacity-0 transition-all group-hover:opacity-100">
+          {shouldShowInfoButton ? (
+            <Tooltip content={t('common.utils.info')}>
               <TooltipTrigger asChild>
-                <div className="flex items-center justify-center">
-                  <Pin size={16} className="text-white fill-white" />
+                <div onClick={handleInfoClick} className="flex items-center justify-center">
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="drop-shadow-md"
+                  >
+                    <circle cx="12" cy="12" r="10" fill="rgb(var(--vines-500))" />
+                    <path
+                      d="M12 16v-4M12 8h.01"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </div>
               </TooltipTrigger>
             </Tooltip>
-          </div>
-        )} */}
-
-        {/* 右下角操作按钮 */}
-        <div className="absolute flex translate-x-[-0.5rem] translate-y-[-0.5rem] cursor-pointer gap-1 opacity-0 transition-all group-hover:opacity-100">
-          <Tooltip content={t('common.utils.info')}>
-            <TooltipTrigger asChild>
-              <div onClick={handleInfoClick} className="flex items-center justify-center">
-                <svg
-                  width="26"
-                  height="26"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="drop-shadow-md"
-                >
-                  <circle cx="12" cy="12" r="10" fill="rgb(var(--vines-500))" />
-                  <path
-                    d="M12 16v-4M12 8h.01"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </TooltipTrigger>
-          </Tooltip>
+          ) : (
+            <Popover>
+              <Tooltip content={t('common.utils.info')}>
+                <TooltipTrigger asChild>
+                  <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-center">
+                      <svg
+                        width="26"
+                        height="26"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="drop-shadow-md"
+                      >
+                        <circle cx="12" cy="12" r="10" fill="rgb(var(--vines-500))" />
+                        <path
+                          d="M12 16v-4M12 8h.01"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  </PopoverTrigger>
+                </TooltipTrigger>
+              </Tooltip>
+              <PopoverContent
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                className="w-64"
+              >
+                <div className="flex flex-col gap-3">
+                  {row
+                    .getAllCells()
+                    .filter((c) => c.column.columnDef.id != 'operate')
+                    .map((cell, index) => {
+                      return (
+                        <div className="grid grid-cols-5 text-sm" key={index}>
+                          <span className="col-span-2 flex justify-start font-bold">
+                            {cell.column.columnDef.header?.toString() ?? ''}
+                          </span>
+                          <span className="col-span-3 flex flex-wrap justify-end">
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </span>
+                        </div>
+                      );
+                    })}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
 
           {operateArea &&
             operateArea(
