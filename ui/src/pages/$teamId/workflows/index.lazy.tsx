@@ -4,7 +4,7 @@ import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, Share, Trash, Undo2 } from 'lucide-react';
+import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, Trash, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -231,7 +231,7 @@ export const Workflows: React.FC = () => {
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
+                {/* <DropdownMenuItem
                   onSelect={() => {
                     setPublishToMarketContext({
                       id: item.workflowId,
@@ -247,7 +247,7 @@ export const Workflows: React.FC = () => {
                   </DropdownMenuShortcut>
                   {t('components.layout.ugc.publish-dialog.title')}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator /> */}
                 <DropdownMenuItem
                   className="text-red-10"
                   onSelect={() => {
