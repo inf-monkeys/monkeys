@@ -15,9 +15,9 @@
     gap: 8px;
     padding: 8px;
     border-radius: 12px;
-    background: var(--color-panel);
-    box-shadow: var(--shadow-l);
-    border: 1px solid var(--color-panel-border);
+    background: var(--color-panel, #ffffff);
+    box-shadow: var(--shadow-l, 0 2px 8px rgba(0, 0, 0, 0.1));
+    border: 1px solid var(--color-panel-border, rgba(0, 0, 0, 0.1));
     backdrop-filter: blur(8px);
 
     .tool-button {

@@ -3,12 +3,20 @@ import { useEffect, useRef, useState } from 'react';
 import './vertical-toolbar.scss';
 
 import { GeoShapeGeoStyle } from '@tldraw/editor';
-import { TLComponents, TldrawUiIcon, useEditor, DefaultStylePanel } from 'tldraw';
+import { DefaultStylePanel, TLComponents, TldrawUiIcon, useEditor } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
 import { getWorkflow, useWorkflowList } from '@/apis/workflow';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
+
+// 导入 Workflow 节点图标
+import { AddIcon } from './workflow-examples/src/components/icons/AddIcon';
+import { ConditionalIcon } from './workflow-examples/src/components/icons/ConditionalIcon';
+import { DivideIcon } from './workflow-examples/src/components/icons/DivideIcon';
+import { MultiplyIcon } from './workflow-examples/src/components/icons/MultiplyIcon';
+import { SliderIcon } from './workflow-examples/src/components/icons/SliderIcon';
+import { SubtractIcon } from './workflow-examples/src/components/icons/SubtractIcon';
 
 // 自定义竖向工具栏组件
 export const VerticalToolbar: TLComponents['Toolbar'] = () => {
@@ -33,6 +41,10 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null);
   const workflowGroupRef = useRef<HTMLDivElement | null>(null);
   const workflowCloseTimerRef = useRef<number | undefined>(undefined);
+  const [isNodeMenuOpen, setIsNodeMenuOpen] = useState(false);
+  const [selectedNodeType, setSelectedNodeType] = useState<string>('add');
+  const nodeGroupRef = useRef<HTMLDivElement | null>(null);
+  const nodeCloseTimerRef = useRef<number | undefined>(undefined);
   const [isStylePanelVisible, setIsStylePanelVisible] = useState(false);
   const stylePanelRef = useRef<HTMLDivElement | null>(null);
   const stylePanelButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -77,6 +89,11 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
           setIsWorkflowMenuOpen(false);
         }
       }
+      if (isNodeMenuOpen) {
+        if (nodeGroupRef.current && !nodeGroupRef.current.contains(target)) {
+          setIsNodeMenuOpen(false);
+        }
+      }
       if (isStylePanelVisible) {
         // 检查点击是否在 StylePanel 或其按钮内
         const isClickInStylePanel =
@@ -88,7 +105,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     };
     document.addEventListener('mousedown', onDocMouseDown);
     return () => document.removeEventListener('mousedown', onDocMouseDown);
-  }, [isDrawMenuOpen, isInstructionMenuOpen, isGeoMenuOpen, isWorkflowMenuOpen, isStylePanelVisible]);
+  }, [isDrawMenuOpen, isInstructionMenuOpen, isGeoMenuOpen, isWorkflowMenuOpen, isNodeMenuOpen, isStylePanelVisible]);
 
   // 定义工具栏中要显示的工具列表 - 使用正确的工具ID
   const oneOnOne = (oem as any)?.theme?.designProjects?.oneOnOne === true;
@@ -105,6 +122,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     { id: 'instruction', label: 'Instruction', icon: 'tool-text' },
     { id: 'output', label: 'Output', icon: 'tool-frame' },
     { id: 'workflow', label: '工作流', icon: 'tool-workflow' },
+    { id: 'workflow-node', label: '流程节点', icon: 'tool-frame' },
   ];
 
   return (
@@ -648,6 +666,109 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                             </span>
                           </div>
                         ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            if (tool.id === 'workflow-node') {
+              const isActive = currentToolId === 'workflow-node';
+              const nodeTypes = [
+                { type: 'add', label: '加法', IconComponent: AddIcon },
+                { type: 'subtract', label: '减法', IconComponent: SubtractIcon },
+                { type: 'multiply', label: '乘法', IconComponent: MultiplyIcon },
+                { type: 'divide', label: '除法', IconComponent: DivideIcon },
+                { type: 'slider', label: '滑块', IconComponent: SliderIcon },
+                { type: 'conditional', label: '条件', IconComponent: ConditionalIcon },
+              ];
+              const currentNode = nodeTypes.find((n) => n.type === selectedNodeType) || nodeTypes[0];
+              const CurrentIcon = currentNode.IconComponent;
+
+              return (
+                <div key="node-group" className={`tool-group ${isActive ? 'selected' : ''}`} ref={nodeGroupRef}>
+                  <button
+                    className={`tool-button ${isActive ? 'selected' : ''} ${isNodeMenuOpen ? 'menu-open' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const nodeTool = editor.getStateDescendant('workflow-node') as any;
+                      if (nodeTool && nodeTool.setNodeType) {
+                        nodeTool.setNodeType({ type: selectedNodeType });
+                      }
+                      editor.setCurrentTool('workflow-node');
+                      setCurrentToolId('workflow-node');
+                    }}
+                    title={`流程节点: ${currentNode.label}`}
+                    style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                  >
+                    <div style={{ width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CurrentIcon />
+                    </div>
+                    <span className="caret" />
+                    <span
+                      className="caret-hit"
+                      title="选择节点类型"
+                      onMouseEnter={() => {
+                        if (nodeCloseTimerRef.current !== undefined) {
+                          window.clearTimeout(nodeCloseTimerRef.current);
+                          nodeCloseTimerRef.current = undefined;
+                        }
+                        setIsNodeMenuOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        nodeCloseTimerRef.current = window.setTimeout(() => {
+                          setIsNodeMenuOpen(false);
+                          nodeCloseTimerRef.current = undefined;
+                        }, 150);
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsNodeMenuOpen((v) => !v);
+                      }}
+                    />
+                  </button>
+                  {isNodeMenuOpen && (
+                    <div
+                      className="dropdown-menu"
+                      onMouseEnter={() => {
+                        if (nodeCloseTimerRef.current !== undefined) {
+                          window.clearTimeout(nodeCloseTimerRef.current);
+                          nodeCloseTimerRef.current = undefined;
+                        }
+                        setIsNodeMenuOpen(true);
+                      }}
+                      onMouseLeave={() => {
+                        setIsNodeMenuOpen(false);
+                      }}
+                    >
+                      {nodeTypes.map((nodeType) => {
+                        const NodeIcon = nodeType.IconComponent;
+                        return (
+                          <div
+                            key={nodeType.type}
+                            className={`dropdown-item ${selectedNodeType === nodeType.type ? 'active' : ''}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedNodeType(nodeType.type);
+                              const nodeTool = editor.getStateDescendant('workflow-node') as any;
+                              if (nodeTool && nodeTool.setNodeType) {
+                                nodeTool.setNodeType({ type: nodeType.type });
+                              }
+                              editor.setCurrentTool('workflow-node');
+                              setCurrentToolId('workflow-node');
+                              setIsNodeMenuOpen(false);
+                            }}
+                          >
+                            <div style={{ width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <NodeIcon />
+                            </div>
+                            <span>{nodeType.label}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

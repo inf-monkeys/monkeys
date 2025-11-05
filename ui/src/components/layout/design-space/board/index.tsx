@@ -45,15 +45,27 @@ import {
   ConnectionManager,
   InstructionShapeUtil,
   InstructionTool,
+  // Workflow 节点系统
+  NodeShapeUtil,
+  NodeTool,
   OutputShapeUtil,
   OutputTool,
+  WorkflowConnectionBindingUtil,
+  WorkflowConnectionShapeUtil,
   WorkflowShapeUtil,
   WorkflowTool,
 } from './shapes';
+// Workflow 交互和工具函数
+import { keepConnectionsAtBottom } from './workflow-examples/src/connection/keepConnectionsAtBottom';
+import { PointingPort } from './workflow-examples/src/ports/PointingPort';
+// Workflow UI 组件
 import { VerticalToolbar } from './vertical-toolbar.tsx';
+import { WorkflowRegions } from './workflow-examples/src/components/WorkflowRegions';
+import { OnCanvasComponentPicker } from './workflow-ui/OnCanvasComponentPicker';
 
 import 'tldraw/tldraw.css';
 import './layer-panel.css';
+import './workflow-nodes.css';
 
 class FixedFrameShapeUtil extends FrameShapeUtil {
   // override canResize() {
@@ -475,6 +487,14 @@ export const Board: React.FC<BoardProps> = ({
   // 定义自定义组件配置 - 使用useMemo稳定引用
   const components: TLComponents = React.useMemo(() => {
     const comps: TLComponents = {};
+
+    // 添加 Workflow 节点选择器和执行区域
+    comps.InFrontOfTheCanvas = () => (
+      <>
+        <OnCanvasComponentPicker />
+        <WorkflowRegions />
+      </>
+    );
 
     // 根据 OEM 配置控制组件显示（未配置时隐藏）
     if (!get(oem, 'theme.designProjects.showPageMenu', false)) {
@@ -1072,6 +1092,17 @@ export const Board: React.FC<BoardProps> = ({
                 console.error('[Board] ConnectionManager 初始化失败:', error);
               }
 
+              // 初始化 Workflow 节点系统
+              try {
+                // 添加 PointingPort 交互状态到 select 工具
+                editor.getStateDescendant('select')!.addChild(PointingPort);
+                // 确保 workflow 连接线始终在底部
+                keepConnectionsAtBottom(editor);
+                console.log('[Board] Workflow 节点系统已初始化');
+              } catch (error) {
+                console.error('[Board] Workflow 节点系统初始化失败:', error);
+              }
+
               editor.registerExternalContentHandler('url', async ({ url, point }) => {
                 // 检查是否是图片 URL
                 try {
@@ -1124,9 +1155,16 @@ export const Board: React.FC<BoardProps> = ({
               });
             }}
             components={components}
-            shapeUtils={[FixedFrameShapeUtil, InstructionShapeUtil, OutputShapeUtil, WorkflowShapeUtil]}
-            bindingUtils={defaultBindingUtils}
-            tools={[...defaultShapeTools, ...defaultTools, InstructionTool, OutputTool, WorkflowTool]}
+            shapeUtils={[
+              FixedFrameShapeUtil,
+              InstructionShapeUtil,
+              OutputShapeUtil,
+              WorkflowShapeUtil,
+              NodeShapeUtil,
+              WorkflowConnectionShapeUtil,
+            ]}
+            bindingUtils={[...defaultBindingUtils, WorkflowConnectionBindingUtil]}
+            tools={[...defaultShapeTools, ...defaultTools, InstructionTool, OutputTool, WorkflowTool, NodeTool]}
             assetUrls={defaultEditorAssetUrls}
             overrides={{
               tools: (_editor, tools) => {
