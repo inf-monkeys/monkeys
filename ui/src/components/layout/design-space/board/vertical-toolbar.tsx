@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import './vertical-toolbar.scss';
 
 import { GeoShapeGeoStyle } from '@tldraw/editor';
-import { TLComponents, TldrawUiIcon, useEditor } from 'tldraw';
+import { TLComponents, TldrawUiIcon, useEditor, DefaultStylePanel } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
 import { getWorkflow, useWorkflowList } from '@/apis/workflow';
@@ -33,6 +33,9 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null);
   const workflowGroupRef = useRef<HTMLDivElement | null>(null);
   const workflowCloseTimerRef = useRef<number | undefined>(undefined);
+  const [isStylePanelVisible, setIsStylePanelVisible] = useState(false);
+  const stylePanelRef = useRef<HTMLDivElement | null>(null);
+  const stylePanelButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // 获取团队工作流列表
   const { data: workflowList } = useWorkflowList();
@@ -74,10 +77,18 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
           setIsWorkflowMenuOpen(false);
         }
       }
+      if (isStylePanelVisible) {
+        // 检查点击是否在 StylePanel 或其按钮内
+        const isClickInStylePanel =
+          stylePanelRef.current?.contains(target) || stylePanelButtonRef.current?.contains(target);
+        if (!isClickInStylePanel) {
+          setIsStylePanelVisible(false);
+        }
+      }
     };
     document.addEventListener('mousedown', onDocMouseDown);
     return () => document.removeEventListener('mousedown', onDocMouseDown);
-  }, [isDrawMenuOpen, isInstructionMenuOpen, isGeoMenuOpen, isWorkflowMenuOpen]);
+  }, [isDrawMenuOpen, isInstructionMenuOpen, isGeoMenuOpen, isWorkflowMenuOpen, isStylePanelVisible]);
 
   // 定义工具栏中要显示的工具列表 - 使用正确的工具ID
   const oneOnOne = (oem as any)?.theme?.designProjects?.oneOnOne === true;
@@ -87,6 +98,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     ...(!oneOnOne ? [{ id: 'frame', label: '画板', icon: 'tool-frame' }] : []),
     { id: 'shape', label: '形状', icon: 'geo-rectangle' },
     { id: 'draw', label: '绘制', icon: 'tool-pencil' },
+    { id: 'style-panel', label: '样式面板', icon: 'palette' },
     { id: 'eraser', label: '橡皮擦', icon: 'tool-eraser' },
     { id: 'text', label: '文本', icon: 'tool-text' },
     { id: 'note', label: '便签', icon: 'tool-note' },
@@ -107,6 +119,22 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
         pointerEvents: 'auto',
       }}
     >
+      {/* StylePanel - 显示在 toolbar 上方 */}
+      {isStylePanelVisible && (
+        <div
+          ref={stylePanelRef}
+          style={{
+            position: 'absolute',
+            bottom: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            marginBottom: '20px',
+            zIndex: 10000,
+          }}
+        >
+          <DefaultStylePanel />
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'row', gap: 20 }}>
         <div className="custom-toolbar">
           {toolbarTools.map((tool) => {
@@ -623,6 +651,25 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     </div>
                   )}
                 </div>
+              );
+            }
+
+            if (tool.id === 'style-panel') {
+              return (
+                <button
+                  key={tool.id}
+                  ref={stylePanelButtonRef}
+                  className={`tool-button ${isStylePanelVisible ? 'selected' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsStylePanelVisible((prev) => !prev);
+                  }}
+                  title={tool.label}
+                  style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                >
+                  <VinesIcon size="xs">lucide:palette</VinesIcon>
+                </button>
               );
             }
 
