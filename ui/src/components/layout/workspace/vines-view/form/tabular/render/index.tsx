@@ -33,7 +33,7 @@ import {
   useSetWorkbenchCacheVal,
   useWorkbenchCacheVal,
 } from '@/store/workbenchFormInputsCacheStore';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 import { evaluateVisibilityCondition } from '@/utils/visibility';
 
@@ -230,7 +230,9 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
       if (hiddenFields.includes(name)) continue;
 
       if (required && isEmpty(value)) {
-        toast.warning(t('workspace.flow-view.execution.workflow-input-is-required', { name: displayName }));
+        toast.warning(
+          t('workspace.flow-view.execution.workflow-input-is-required', { name: getI18nContent(displayName) }),
+        );
         return;
       }
 

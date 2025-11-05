@@ -25,7 +25,7 @@ import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution';
 import { evaluateVisibilityCondition } from '@/utils/visibility';
 
@@ -174,7 +174,9 @@ export const TemporaryWorkflowOverlay: React.FC<TemporaryWorkflowOverlayProps> =
       if (hiddenFields.includes(name)) continue;
 
       if (required && isEmpty(value)) {
-        toast.warning(t('workspace.flow-view.execution.workflow-input-is-required', { name: displayName }));
+        toast.warning(
+          t('workspace.flow-view.execution.workflow-input-is-required', { name: getI18nContent(displayName) }),
+        );
         return;
       }
 
