@@ -1,11 +1,8 @@
+import { BaseBoxShapeUtil, Editor, HTMLContainer, resizeBox } from 'tldraw';
+
 import { vinesHeader } from '@/apis/utils';
 import { VinesUploader } from '@/components/ui/vines-uploader';
-import {
-  BaseBoxShapeUtil,
-  Editor,
-  HTMLContainer,
-  resizeBox,
-} from 'tldraw';
+
 import { InstructionShape } from './InstructionShape.types';
 
 // 形状级别的运行中请求控制器
@@ -165,7 +162,9 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
     if (shape.props.isRunning) {
       const controller = instructionAbortControllers.get(shape.id as any);
       if (controller) {
-        try { controller.abort(); } catch {}
+        try {
+          controller.abort();
+        } catch {}
       }
       editor.updateShape<InstructionShape>({
         id: shape.id,
@@ -188,11 +187,11 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
 
     try {
       console.log('[Instruction] 开始调用文本扩写 API...');
-      
+
       // 实时检测连接的Output框（确保使用最新的连接状态）
       const currentConnectedOutputs = detectConnectedOutputs();
       console.log('[Instruction] 当前连接的 Output 框:', currentConnectedOutputs);
-      
+
       if (currentConnectedOutputs.length === 0) {
         console.warn('[Instruction] 没有连接的 Output 框');
         // 恢复运行状态
@@ -204,11 +203,11 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         alert('请先用箭头工具连接到 Output 框');
         return;
       }
-      
+
       // 根据输入模式选择API
       let apiEndpoint: string;
       let requestBody: any;
-      
+
       if (shape.props.inputMode === 'image') {
         // 图片输入模式 - 使用图生文或图生图API
         apiEndpoint = '/api/image-to-text'; // 根据实际API调整
@@ -226,16 +225,16 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         };
         console.log('[Instruction] 使用文字输入 API:', isTextToImage ? '文生图' : '文本扩写', apiEndpoint);
       }
-      
+
       // 调用 API
       const controller = new AbortController();
       instructionAbortControllers.set(shape.id as any, controller);
-      
+
       const response = await fetch(apiEndpoint, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
-          ...vinesHeader({ useToast: true }) 
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
         },
         body: JSON.stringify(requestBody),
         signal: controller.signal,
@@ -258,13 +257,13 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
       if (typeof data === 'string') {
         result = data;
         console.log('[Instruction] 文本扩写结果:', result);
-      } 
+      }
       // 如果是对象格式，尝试提取图片URL
       else if (data && typeof data === 'object' && data.imageUrl) {
         imageUrl = data.imageUrl;
         result = data.text || shape.props.content;
         console.log('[Instruction] 文生图结果:', { imageUrl, text: result });
-      } 
+      }
       // 如果是对象格式，尝试提取内容
       else if (data && typeof data === 'object') {
         // 首先尝试遍历所有字段，查找output相关的字段（如output1, output2等）
@@ -278,7 +277,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
           }
         }
       }
-      
+
       // 如果还没有结果且 data 是对象，继续尝试其他提取方式
       if (!result && typeof data === 'object' && data) {
         // 如果有output字段，尝试提取
@@ -287,28 +286,53 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
             const firstOutput = data.output[0];
             result = firstOutput.text || firstOutput.content || firstOutput.data || firstOutput.value || '';
           } else if (typeof data.output === 'object') {
-            result = data.output.text || data.output.content || data.output.data || data.output.value || 
-                     data.output.result || data.output.message || '';
+            result =
+              data.output.text ||
+              data.output.content ||
+              data.output.data ||
+              data.output.value ||
+              data.output.result ||
+              data.output.message ||
+              '';
           } else if (typeof data.output === 'string') {
             result = data.output;
           }
         }
-        
+
         // 如果没有从output中获取到，尝试从根级别的字段获取
         if (!result) {
-          result = data.text || data.content || data.result || data.data || data.message || 
-                   data.expanded || data.expandedText || '';
+          result =
+            data.text ||
+            data.content ||
+            data.result ||
+            data.data ||
+            data.message ||
+            data.expanded ||
+            data.expandedText ||
+            '';
         }
 
         // 提取图片 URL（支持多种可能的字段名）- 对于非文生图API也可能有图片
         if (!imageUrl) {
-          imageUrl = data.imageUrl || data.image_url || data.image || data.imageURL || 
-                     data.img || data.picture || data.photo || '';
-          
+          imageUrl =
+            data.imageUrl ||
+            data.image_url ||
+            data.image ||
+            data.imageURL ||
+            data.img ||
+            data.picture ||
+            data.photo ||
+            '';
+
           // 如果有output对象，也从中尝试提取图片
           if (!imageUrl && data?.output && typeof data.output === 'object' && !Array.isArray(data.output)) {
-            imageUrl = data.output.imageUrl || data.output.image_url || data.output.image || 
-                       data.output.imageURL || data.output.img || '';
+            imageUrl =
+              data.output.imageUrl ||
+              data.output.image_url ||
+              data.output.image ||
+              data.output.imageURL ||
+              data.output.img ||
+              '';
           }
         }
       }
@@ -326,11 +350,11 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
 
       // 使用实时检测到的连接关系更新 Output 框
       console.log('[Instruction] 更新连接的 Output 框:', currentConnectedOutputs);
-      
+
       for (const outputId of currentConnectedOutputs) {
         const outputShape = editor.getShape(outputId as any) as any;
         console.log('[Instruction] 找到 Output 框:', outputId, outputShape?.type);
-        
+
         if (outputShape && outputShape.type === 'output') {
           editor.updateShape({
             id: outputId as any,
@@ -344,7 +368,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
           console.log('[Instruction] Output 框已更新:', outputId, { hasImage: !!imageUrl });
         }
       }
-      
+
       // 更新 connections 属性以保持同步
       const sortedOldConnections = [...shape.props.connections].sort();
       const sortedNewConnections = [...currentConnectedOutputs].sort();
@@ -355,7 +379,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
           props: { ...shape.props, connections: currentConnectedOutputs },
         });
       }
-      
+
       console.log('[Instruction] 执行完成');
     } catch (error) {
       console.error('[Instruction] 执行失败:', error);
@@ -495,8 +519,8 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
           <div
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
-            style={{ 
-              width: '100%', 
+            style={{
+              width: '100%',
               height: '100%',
               pointerEvents: 'auto',
             }}
@@ -536,4 +560,3 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
     </div>
   );
 }
-

@@ -68,7 +68,7 @@ export const MiniToolsToolbar: React.FC = () => {
     if (pinnedPages?.pages && pinnedPages.pages.length > 0 && !leftCollapsed && !hasAutoOpened && !miniActive) {
       const firstPage = pinnedPages.pages[0];
       setHasAutoOpened(true);
-      
+
       // 延迟打开，确保组件已完全加载
       setTimeout(() => {
         window.dispatchEvent(
@@ -86,9 +86,11 @@ export const MiniToolsToolbar: React.FC = () => {
       {!leftCollapsed && (
         <div
           className="mini-tools-toolbar"
-          style={{
-            '--toolbar-left': toolbarLeft,
-          } as React.CSSProperties & { '--toolbar-left': string }}
+          style={
+            {
+              '--toolbar-left': toolbarLeft,
+            } as React.CSSProperties & { '--toolbar-left': string }
+          }
           data-toolbar-left={toolbarLeft}
         >
           <div className="custom-toolbar">

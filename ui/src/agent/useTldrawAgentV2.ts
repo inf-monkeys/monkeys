@@ -1,7 +1,9 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import type { Editor } from 'tldraw';
+
 import { getVinesToken } from '@/apis/utils.ts';
 import { getVinesTeamId } from '@/components/router/guard/team.tsx';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Editor } from 'tldraw';
 
 export type TldrawAgentV2Message = {
   role: 'user' | 'assistant' | 'system';
@@ -74,16 +76,19 @@ export function useTldrawAgentV2(editor: Editor | null): TldrawAgentV2API | null
 
       try {
         const viewport = editor.getViewportPageBounds();
-        const selectionIds = editor.getSelectedShapeIds().map(id => id.replace('shape:', ''));
-        const shapes = editor.getCurrentPageShapes().slice(0, 100).map(shape => ({
-          id: shape.id.replace('shape:', ''),
-          type: shape.type,
-          x: shape.x,
-          y: shape.y,
-          w: (shape as any).w || 0,
-          h: (shape as any).h || 0,
-          props: shape.props,
-        }));
+        const selectionIds = editor.getSelectedShapeIds().map((id) => id.replace('shape:', ''));
+        const shapes = editor
+          .getCurrentPageShapes()
+          .slice(0, 100)
+          .map((shape) => ({
+            id: shape.id.replace('shape:', ''),
+            type: shape.type,
+            x: shape.x,
+            y: shape.y,
+            w: (shape as any).w || 0,
+            h: (shape as any).h || 0,
+            props: shape.props,
+          }));
 
         return { viewport, selectionIds, shapes, screenshot: null as string | null };
       } catch (error) {
@@ -105,7 +110,7 @@ export function useTldrawAgentV2(editor: Editor | null): TldrawAgentV2API | null
 
     const request = async (input: { message: string; context?: any }): Promise<string> => {
       push('user', input.message);
-      let resultMessage = '已发送到 Agent V2（流式）';
+      const resultMessage = '已发送到 Agent V2（流式）';
 
       const finalize = () => {
         streamingIdxRef.current = null;
@@ -168,14 +173,14 @@ export function useTldrawAgentV2(editor: Editor | null): TldrawAgentV2API | null
 
         const response = await fetch(`${base}/tldraw-agent-v2/stream`, {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             ...(getVinesToken() && { Authorization: `Bearer ${getVinesToken()}` }),
             ...(getVinesTeamId() && { 'x-monkeys-teamid': getVinesTeamId() }),
           },
-          body: JSON.stringify({ 
-            ...input, 
-            context, 
+          body: JSON.stringify({
+            ...input,
+            context,
             sessionId,
             // 不发送假的认证信息，让后端从token中解析
           }),

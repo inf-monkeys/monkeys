@@ -132,11 +132,11 @@ export const FieldQuickFeatures: React.FC<IFieldQuickFeaturesProps> = ({ form })
           control={form.control}
           render={({ field }) => (
             <FormItem>
-               <FormLabel>知识图谱按钮文本（留空仅显示图标）</FormLabel>
-               <FormControl>
-                 <Input placeholder="留空仅显示图标" {...field} />
-               </FormControl>
-               <FormDescription>自定义知识图谱按钮显示的文字，留空则不显示文字</FormDescription>
+              <FormLabel>知识图谱按钮文本（留空仅显示图标）</FormLabel>
+              <FormControl>
+                <Input placeholder="留空仅显示图标" {...field} />
+              </FormControl>
+              <FormDescription>自定义知识图谱按钮显示的文字，留空则不显示文字</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -145,4 +145,3 @@ export const FieldQuickFeatures: React.FC<IFieldQuickFeaturesProps> = ({ form })
     </>
   );
 };
-

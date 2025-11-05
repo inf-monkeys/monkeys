@@ -126,7 +126,7 @@ export const workflowInputSchema = z.object({
   promptDictionary: z.any().optional(),
 
   flag: z.boolean().optional(),
-  
+
   // 快捷功能选项
   enableVoice: z.boolean().optional(),
   enableExpand: z.boolean().optional(),

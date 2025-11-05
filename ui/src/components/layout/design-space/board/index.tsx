@@ -41,7 +41,15 @@ import { ExternalLayerPanel } from './ExternalLayerPanel';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
-import { ConnectionManager, InstructionShapeUtil, InstructionTool, OutputShapeUtil, OutputTool, WorkflowShapeUtil, WorkflowTool } from './shapes';
+import {
+  ConnectionManager,
+  InstructionShapeUtil,
+  InstructionTool,
+  OutputShapeUtil,
+  OutputTool,
+  WorkflowShapeUtil,
+  WorkflowTool,
+} from './shapes';
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 
 import 'tldraw/tldraw.css';
@@ -302,12 +310,12 @@ const assetsStore: TLAssetStore = {
         fileSize: file.size,
         asset,
       });
-      
+
       // 检查文件名是否有扩展名，如果没有则根据 MIME 类型添加
       let fileToUpload = file;
       const fileName = file.name;
       const hasExtension = fileName.includes('.') && !fileName.startsWith('.');
-      
+
       if (!hasExtension && file.type) {
         // 根据 MIME 类型推断扩展名
         const mimeToExt: Record<string, string> = {
@@ -321,7 +329,7 @@ const assetsStore: TLAssetStore = {
           'video/webm': 'webm',
           'video/ogg': 'ogg',
         };
-        
+
         const extension = mimeToExt[file.type];
         if (extension) {
           // 创建新的 File 对象，带有正确的扩展名
@@ -331,7 +339,7 @@ const assetsStore: TLAssetStore = {
           });
         }
       }
-      
+
       // 使用 vines-uploader 进行文件上传
       const result = await uploadSingleFile(fileToUpload, {
         basePath: 'user-files/designs',
@@ -507,16 +515,16 @@ export const Board: React.FC<BoardProps> = ({
   const createFrameWithConfig = useCallback(
     (editor: Editor, width: number, height: number) => {
       if (!createDefaultFrame) return;
-      
+
       // 在多画板模式下，检查是否应该创建默认画板
       if (!oneOnOne) {
         // 检查是否已经有任何画板存在
         const allShapes = editor.getCurrentPageShapes();
         const hasAnyFrame = allShapes.some((shape) => shape.type === 'frame');
-        
+
         // 如果已经有画板，说明用户已经在使用，不需要创建默认画板
         if (hasAnyFrame) return;
-        
+
         // 如果没有任何画板，检查存储中是否有内容
         // 如果有内容但没有画板，说明用户可能删除了所有画板，尊重用户的选择
         try {
@@ -527,7 +535,7 @@ export const Board: React.FC<BoardProps> = ({
           // 忽略错误
         }
       }
-      
+
       createFrame(editor, width, height);
     },
     [createFrame, createDefaultFrame, oneOnOne],
@@ -608,26 +616,26 @@ export const Board: React.FC<BoardProps> = ({
       if (entry.changes?.updated) {
         const updatedShapes = Object.keys(entry.changes.updated);
         // 过滤出真正的shape（排除其他类型的记录、画板等，但保留占位图）
-        const shapeIds = updatedShapes.filter(id => {
+        const shapeIds = updatedShapes.filter((id) => {
           try {
             const record = editor.store.get(id as any);
             if (!record || (record as any).typeName !== 'shape') return false;
-            
+
             const shape = record as any;
             // 排除画板（frame类型）
             if (shape.type === 'frame') return false;
-            
+
             return true;
           } catch {
             return false;
           }
         });
-        
+
         if (shapeIds.length > 0) {
           // 记录最后一个被修改的shape
           const lastShapeId = shapeIds[shapeIds.length - 1];
           lastModifiedShapeIdRef.current = lastShapeId;
-          
+
           // 输出调试信息
           try {
             const shape = editor.getShape(lastShapeId as any);
@@ -643,29 +651,29 @@ export const Board: React.FC<BoardProps> = ({
           }
         }
       }
-      
+
       // 检查是否有新创建的shape
       if (entry.changes?.added) {
         const addedShapes = Object.keys(entry.changes.added);
-        const shapeIds = addedShapes.filter(id => {
+        const shapeIds = addedShapes.filter((id) => {
           try {
             const record = editor.store.get(id as any);
             if (!record || (record as any).typeName !== 'shape') return false;
-            
+
             const shape = record as any;
             // 排除画板
             if (shape.type === 'frame') return false;
-            
+
             return true;
           } catch {
             return false;
           }
         });
-        
+
         if (shapeIds.length > 0) {
           const lastShapeId = shapeIds[shapeIds.length - 1];
           lastModifiedShapeIdRef.current = lastShapeId;
-          
+
           // 输出调试信息
           try {
             const shape = editor.getShape(lastShapeId as any);
@@ -790,94 +798,94 @@ export const Board: React.FC<BoardProps> = ({
         const resultType = String(conv?.render?.type).toLowerCase();
         const resultData = conv?.render?.data;
 
-            // 检查是否有对应的占位图需要更新
-            // 优先使用 instanceId（标准字段名）
-            const instanceId = raw?.instanceId || conv?.instanceId || raw?.workflowInstanceId || raw?.executionId;
-            let placeholderShapeId: string | undefined;
-            if (instanceId) {
-              placeholderShapeId = placeholderMapRef.current.get(instanceId);
-              
-              // 调试日志
-              if (placeholderShapeId) {
-                console.log('[占位图更新检查]', {
-                  instanceId,
-                  placeholderShapeId,
-                  resultType,
-                  resultData: typeof resultData === 'string' ? resultData.substring(0, 100) : resultData,
-                  rawId,
-                });
-              }
-            }
+        // 检查是否有对应的占位图需要更新
+        // 优先使用 instanceId（标准字段名）
+        const instanceId = raw?.instanceId || conv?.instanceId || raw?.workflowInstanceId || raw?.executionId;
+        let placeholderShapeId: string | undefined;
+        if (instanceId) {
+          placeholderShapeId = placeholderMapRef.current.get(instanceId);
+
+          // 调试日志
+          if (placeholderShapeId) {
+            console.log('[占位图更新检查]', {
+              instanceId,
+              placeholderShapeId,
+              resultType,
+              resultData: typeof resultData === 'string' ? resultData.substring(0, 100) : resultData,
+              rawId,
+            });
+          }
+        }
 
         if (placeholderShapeId) {
           // 有占位图，检查结果是否有效
           const isValidResult = (() => {
             if (!resultData) return false;
-            
+
             // 检查是否是空对象（中间态）
             if (typeof resultData === 'object' && Object.keys(resultData).length === 0) {
               return false;
             }
-            
+
             // 对于图片类型，必须有有效的URL
             if (resultType === 'image') {
               return typeof resultData === 'string' && resultData.length > 0 && resultData.startsWith('http');
             }
-            
+
             // 对于文本类型，必须有实际内容
             if (resultType === 'text' || resultType === 'string') {
               const textContent = typeof resultData === 'string' ? resultData : JSON.stringify(resultData);
               return textContent.length > 0;
             }
-            
+
             // 对于视频类型，必须有有效的URL
             if (resultType === 'video') {
               return typeof resultData === 'string' && resultData.length > 0 && resultData.startsWith('http');
             }
-            
+
             // 其他类型，只要有数据就认为有效
             return true;
           })();
 
-              if (isValidResult) {
-                // 有有效结果，更新占位图
-                console.log('[占位图更新] 开始更新占位图，结果有效');
-                try {
-                  await updateShapeWithResult(editor, placeholderShapeId, resultType, resultData);
-                  console.log('[占位图更新] 占位图更新成功');
-                  // 更新后移除映射
-                  placeholderMapRef.current.delete(instanceId);
-                  try {
-                    const workflowIdCompleted = miniPage?.workflowId || (miniPage as any)?.workflow?.id || null;
-                    // 将用于历史展示的 render.data 一并带上，便于右侧/左侧历史立即替换等待项
-                    window.dispatchEvent(
-                      new CustomEvent('vines:mini-execution-completed', {
-                        detail: {
-                          instanceId,
-                          workflowId: workflowIdCompleted,
-                          status: 'COMPLETED',
-                          render: { data: resultData },
-                          endTime: Date.now(),
-                        },
-                      }),
-                    );
-                  } catch {}
-                  if (rawId) miniBaselineIdsRef.current.add(String(rawId));
-                  // 标记已处理
-                  if (resultType === 'image' && typeof resultData === 'string') {
-                    insertedUrlSetRef.current.add(resultData);
-                  }
-                } catch (error) {
-                  console.error('更新占位图失败:', error);
-                }
-              } else {
-                console.log('[占位图更新] 结果无效，保持占位图', {
-                  resultType,
-                  hasData: !!resultData,
-                  dataType: typeof resultData,
-                  isEmpty: typeof resultData === 'object' ? Object.keys(resultData).length === 0 : false,
-                });
+          if (isValidResult) {
+            // 有有效结果，更新占位图
+            console.log('[占位图更新] 开始更新占位图，结果有效');
+            try {
+              await updateShapeWithResult(editor, placeholderShapeId, resultType, resultData);
+              console.log('[占位图更新] 占位图更新成功');
+              // 更新后移除映射
+              placeholderMapRef.current.delete(instanceId);
+              try {
+                const workflowIdCompleted = miniPage?.workflowId || (miniPage as any)?.workflow?.id || null;
+                // 将用于历史展示的 render.data 一并带上，便于右侧/左侧历史立即替换等待项
+                window.dispatchEvent(
+                  new CustomEvent('vines:mini-execution-completed', {
+                    detail: {
+                      instanceId,
+                      workflowId: workflowIdCompleted,
+                      status: 'COMPLETED',
+                      render: { data: resultData },
+                      endTime: Date.now(),
+                    },
+                  }),
+                );
+              } catch {}
+              if (rawId) miniBaselineIdsRef.current.add(String(rawId));
+              // 标记已处理
+              if (resultType === 'image' && typeof resultData === 'string') {
+                insertedUrlSetRef.current.add(resultData);
               }
+            } catch (error) {
+              console.error('更新占位图失败:', error);
+            }
+          } else {
+            console.log('[占位图更新] 结果无效，保持占位图', {
+              resultType,
+              hasData: !!resultData,
+              dataType: typeof resultData,
+              isEmpty: typeof resultData === 'object' ? Object.keys(resultData).length === 0 : false,
+            });
+          }
           // 如果结果无效（如空对象{}），不更新占位图，保持占位图显示，继续等待有效结果
         }
         // 没有占位图时不再自动插入，只有通过点击生成按钮创建的占位图才会被更新
@@ -940,44 +948,46 @@ export const Board: React.FC<BoardProps> = ({
       {/* mini iframe 现已整合进 ExternalLayerPanel 内部渲染 */}
 
       {/* tldraw容器 - 全屏显示 */}
-      <div 
+      <div
         style={{ height: '100%' }}
         onDrop={async (e) => {
           e.preventDefault();
           e.stopPropagation();
-          
+
           // 获取拖拽的图片URL
           const imageUrl = e.dataTransfer.getData('text/plain');
           if (!imageUrl || !editor) return;
-          
+
           // 获取鼠标位置并转换为画布坐标
           const dropPoint = editor.screenToPage({ x: e.clientX, y: e.clientY });
-          
+
           try {
             const { width, height } = await getImageSize(imageUrl);
             const id = AssetRecordType.createId();
-            
-            editor.createAssets([{
-              id,
-              type: 'image',
-              typeName: 'asset',
-              props: { 
-                name: id, 
-                src: imageUrl, 
-                mimeType: 'image/png', 
-                isAnimated: false, 
-                h: height, 
-                w: width 
+
+            editor.createAssets([
+              {
+                id,
+                type: 'image',
+                typeName: 'asset',
+                props: {
+                  name: id,
+                  src: imageUrl,
+                  mimeType: 'image/png',
+                  isAnimated: false,
+                  h: height,
+                  w: width,
+                },
+                meta: {},
               },
-              meta: {},
-            }]);
-            
+            ]);
+
             // 将图片放在鼠标位置
-            editor.createShape({ 
-              type: 'image', 
+            editor.createShape({
+              type: 'image',
               x: dropPoint.x - width / 2,
               y: dropPoint.y - height / 2,
-              props: { assetId: id, w: width, h: height } 
+              props: { assetId: id, w: width, h: height },
             });
           } catch (error) {
             console.error('Failed to insert image:', error);
@@ -1052,7 +1062,7 @@ export const Board: React.FC<BoardProps> = ({
               // 立即执行一次，并在下一个宏任务再执行一次，避免初次渲染时覆盖
               renameDefaultPages();
               setTimeout(renameDefaultPages, 0);
-              
+
               // 初始化 ConnectionManager 来监听 Instruction 和 Output 的连接
               try {
                 const connectionManager = new ConnectionManager(editor);
@@ -1061,7 +1071,7 @@ export const Board: React.FC<BoardProps> = ({
               } catch (error) {
                 console.error('[Board] ConnectionManager 初始化失败:', error);
               }
-              
+
               editor.registerExternalContentHandler('url', async ({ url, point }) => {
                 // 检查是否是图片 URL
                 try {

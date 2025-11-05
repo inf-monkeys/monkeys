@@ -1,9 +1,5 @@
-import {
-  BaseBoxShapeUtil,
-  Editor,
-  HTMLContainer,
-  resizeBox,
-} from 'tldraw';
+import { BaseBoxShapeUtil, Editor, HTMLContainer, resizeBox } from 'tldraw';
+
 import { OutputShape } from '../instruction/InstructionShape.types';
 
 export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
@@ -180,4 +176,3 @@ function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: E
     </div>
   );
 }
-

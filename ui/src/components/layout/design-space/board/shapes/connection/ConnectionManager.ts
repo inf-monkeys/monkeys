@@ -1,4 +1,5 @@
 import { Editor, TLArrowShape } from 'tldraw';
+
 import { InstructionShape, OutputShape } from '../instruction/InstructionShape.types';
 
 /**
@@ -32,7 +33,7 @@ export class ConnectionManager {
         to: outputId,
         currentConnections: connections,
       });
-      
+
       this.editor.updateShape<InstructionShape>({
         id: instructionShape.id,
         type: 'instruction',
@@ -51,7 +52,7 @@ export class ConnectionManager {
         oldSource: outputShape.props.sourceId,
         newSource: instructionId,
       });
-      
+
       this.editor.updateShape<OutputShape>({
         id: outputShape.id,
         type: 'output',
@@ -99,7 +100,7 @@ export class ConnectionManager {
    */
   watchArrowConnections(): void {
     console.log('[ConnectionManager] 开始监听箭头连接');
-    
+
     const handleArrowChange = () => {
       try {
         const arrows = this.editor.getCurrentPageShapes().filter((shape) => shape.type === 'arrow') as TLArrowShape[];
@@ -163,7 +164,7 @@ export class ConnectionManager {
 
     // 监听编辑器变化
     this.editor.on('change', handleArrowChange);
-    
+
     // 初始检查一次现有的箭头
     handleArrowChange();
   }
@@ -192,4 +193,3 @@ export class ConnectionManager {
     return sourceShape?.type === 'instruction' ? (sourceShape as InstructionShape) : null;
   }
 }
-

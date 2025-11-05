@@ -1,13 +1,10 @@
 import React from 'react';
 
+import { BaseBoxShapeUtil, Editor, HTMLContainer, resizeBox } from 'tldraw';
+
 import { vinesHeader } from '@/apis/utils';
 import { VinesUploader } from '@/components/ui/vines-uploader';
-import {
-  BaseBoxShapeUtil,
-  Editor,
-  HTMLContainer,
-  resizeBox,
-} from 'tldraw';
+
 import { WorkflowShape } from './WorkflowShape.types';
 
 // 形状级别的运行中请求控制器
@@ -71,7 +68,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
     const allShapes = editor.getCurrentPageShapes();
     const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
     const selfBounds = editor.getShapePageBounds(shape.id as any);
-    
+
     if (!selfBounds) return;
 
     const isPointInRect = (p: { x: number; y: number }, r: { x: number; y: number; w: number; h: number }) =>
@@ -88,7 +85,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
     arrows.forEach((arrow) => {
       const start = arrow.props.start as any;
       const end = arrow.props.end as any;
-      
+
       // 检查箭头是否从Instruction指向本Workflow
       if (start?.type === 'binding' && end?.type === 'binding' && end.boundShapeId === shape.id) {
         const startShape = editor.getShape(start.boundShapeId) as any;
@@ -106,27 +103,27 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         // 精确判定：检查箭头终点是否在某个参数连接点附近
         const endAbs = { x: arrow.x + (end?.x ?? 0), y: arrow.y + (end?.y ?? 0) };
         const startAbs = { x: arrow.x + (start?.x ?? 0), y: arrow.y + (start?.y ?? 0) };
-        
+
         // 遍历所有参数的连接点
         shape.props.inputParams.forEach((param) => {
           const paramRef = paramConnectionRefs.current.get(param.name);
           if (!paramRef) return;
-          
+
           const paramRect = paramRef.getBoundingClientRect();
           const editorRect = editor.getContainer().getBoundingClientRect();
-          
+
           // 转换为画布坐标
           const camera = editor.getCamera();
           const paramPageX = (paramRect.left - editorRect.left) / camera.z - camera.x;
           const paramPageY = (paramRect.top - editorRect.top) / camera.z - camera.y;
-          
+
           const paramBounds = {
             x: paramPageX,
             y: paramPageY,
             w: paramRect.width / camera.z,
             h: paramRect.height / camera.z,
           };
-          
+
           // 检查箭头终点是否在这个参数连接点附近
           if (isPointInRect(endAbs, expandRect(paramBounds))) {
             // 检查起点是否是Instruction
@@ -148,8 +145,8 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
     // 填充参数值
     if (newConnections.length > 0) {
-      const updatedParams = shape.props.inputParams.map(param => {
-        const connection = newConnections.find(c => c.paramName === param.name);
+      const updatedParams = shape.props.inputParams.map((param) => {
+        const connection = newConnections.find((c) => c.paramName === param.name);
         if (connection) {
           const instructionShape = editor.getShape(connection.instructionId as any) as any;
           if (instructionShape && instructionShape.type === 'instruction') {
@@ -167,9 +164,11 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       // 更新inputConnections
       const currentConnectionsStr = JSON.stringify(shape.props.inputConnections || []);
       const newConnectionsStr = JSON.stringify(newConnections);
-      
-      if (currentConnectionsStr !== newConnectionsStr || 
-          JSON.stringify(updatedParams) !== JSON.stringify(shape.props.inputParams)) {
+
+      if (
+        currentConnectionsStr !== newConnectionsStr ||
+        JSON.stringify(updatedParams) !== JSON.stringify(shape.props.inputParams)
+      ) {
         editor.updateShape<WorkflowShape>({
           id: shape.id,
           type: 'workflow',
@@ -192,8 +191,8 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
   }, [shape.id, shape.props.inputParams, shape.props.inputConnections]);
 
   const handleParamChange = (paramName: string, value: any) => {
-    const updatedParams = shape.props.inputParams.map(param => 
-      param.name === paramName ? { ...param, value } : param
+    const updatedParams = shape.props.inputParams.map((param) =>
+      param.name === paramName ? { ...param, value } : param,
     );
     editor.updateShape<WorkflowShape>({
       id: shape.id,
@@ -279,7 +278,9 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
     if (shape.props.isRunning) {
       const controller = workflowAbortControllers.get(shape.id as any);
       if (controller) {
-        try { controller.abort(); } catch {}
+        try {
+          controller.abort();
+        } catch {}
       }
       editor.updateShape<WorkflowShape>({
         id: shape.id,
@@ -302,11 +303,11 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
     try {
       console.log('[Workflow] 开始执行工作流...');
-      
+
       // 实时检测连接的Output框
       const currentConnectedOutputs = detectConnectedOutputs();
       console.log('[Workflow] 当前连接的 Output 框:', currentConnectedOutputs);
-      
+
       if (currentConnectedOutputs.length === 0) {
         console.warn('[Workflow] 没有连接的 Output 框');
         editor.updateShape<WorkflowShape>({
@@ -317,25 +318,25 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         alert('请先用箭头工具连接到 Output 框');
         return;
       }
-      
+
       // 调用工作流执行API
       const controller = new AbortController();
       workflowAbortControllers.set(shape.id as any, controller);
-      
+
       // 构建输入参数对象
       const inputs: Record<string, any> = {};
-      shape.props.inputParams.forEach(param => {
+      shape.props.inputParams.forEach((param) => {
         inputs[param.name] = param.value;
       });
-      
+
       console.log('[Workflow] 执行参数:', inputs);
-      
+
       // 调用工作流执行API
       const response = await fetch(`/api/workflow/${shape.props.workflowId}/execute`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
-          ...vinesHeader({ useToast: true }) 
+        headers: {
+          'Content-Type': 'application/json',
+          ...vinesHeader({ useToast: true }),
         },
         body: JSON.stringify({
           inputs: inputs,
@@ -373,13 +374,19 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
         // 如果还没有结果，尝试其他字段
         if (!result) {
-          result = data.text || data.content || data.result || data.data || data.message || 
-                   data.output || '';
+          result = data.text || data.content || data.result || data.data || data.message || data.output || '';
         }
 
         // 提取图片URL
-        imageUrl = data.imageUrl || data.image_url || data.image || data.imageURL || 
-                   data.img || data.picture || data.photo || '';
+        imageUrl =
+          data.imageUrl ||
+          data.image_url ||
+          data.image ||
+          data.imageURL ||
+          data.img ||
+          data.picture ||
+          data.photo ||
+          '';
       }
 
       if (!result && !imageUrl) {
@@ -393,11 +400,11 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
       // 更新连接的 Output 框
       console.log('[Workflow] 更新连接的 Output 框:', currentConnectedOutputs);
-      
+
       for (const outputId of currentConnectedOutputs) {
         const outputShape = editor.getShape(outputId as any) as any;
         console.log('[Workflow] 找到 Output 框:', outputId, outputShape?.type);
-        
+
         if (outputShape && outputShape.type === 'output') {
           editor.updateShape({
             id: outputId as any,
@@ -411,7 +418,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           console.log('[Workflow] Output 框已更新:', outputId, { hasImage: !!imageUrl });
         }
       }
-      
+
       // 更新 connections 属性
       const sortedOldConnections = [...shape.props.connections].sort();
       const sortedNewConnections = [...currentConnectedOutputs].sort();
@@ -422,7 +429,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           props: { ...shape.props, connections: currentConnectedOutputs },
         });
       }
-      
+
       console.log('[Workflow] 执行完成');
     } catch (error: any) {
       console.error('[Workflow] 执行失败:', error);
@@ -551,217 +558,223 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
             </div>
           )}
         </div>
-        
+
         {/* 输入参数区域 */}
         {shape.props.inputParams && shape.props.inputParams.length > 0 && (
           <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #E5E7EB', position: 'relative' }}>
-            <div style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>
-              输入参数
-            </div>
+            <div style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>输入参数</div>
             {shape.props.inputParams.map((param, index) => {
               // 检查这个参数是否有连接
-              const isConnected = shape.props.inputConnections?.some(conn => conn.paramName === param.name);
-              
+              const isConnected = shape.props.inputConnections?.some((conn) => conn.paramName === param.name);
+
               return (
-              <div key={param.name} style={{ marginBottom: '8px', position: 'relative', paddingLeft: '4px' }}>
-                {/* 参数连接点 */}
-                <div
-                  ref={(el) => {
-                    if (el) {
-                      paramConnectionRefs.current.set(param.name, el);
-                    }
-                  }}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  style={{
-                    position: 'absolute',
-                    left: '-28px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: '14px',
-                    height: '14px',
-                    backgroundColor: isConnected ? '#10B981' : '#9CA3AF',
-                    border: '2px solid white',
-                    borderRadius: '50%',
-                    cursor: 'crosshair',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                    zIndex: 100,
-                    pointerEvents: 'auto',
-                    transition: 'background-color 0.2s',
-                  }}
-                  title={`连接点: ${param.displayName || param.name}`}
-                />
-                
-                <label style={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '11px', 
-                  color: '#374151', 
-                  marginBottom: '4px',
-                  fontWeight: '500',
-                }}>
-                  {isConnected && (
-                    <span style={{ 
-                      display: 'inline-block',
-                      width: '6px',
-                      height: '6px',
-                      backgroundColor: '#10B981',
-                      borderRadius: '50%',
-                    }} />
-                  )}
-                  {param.displayName || param.name}
-                  {param.required && <span style={{ color: '#EF4444' }}>*</span>}
-                </label>
-                {param.type === 'file' ? (
+                <div key={param.name} style={{ marginBottom: '8px', position: 'relative', paddingLeft: '4px' }}>
+                  {/* 参数连接点 */}
                   <div
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => e.stopPropagation()}
-                    style={{ pointerEvents: 'auto' }}
-                  >
-                    <VinesUploader
-                      files={param.value ? (Array.isArray(param.value) ? param.value : [param.value]) : []}
-                      onChange={(urls) => handleParamChange(param.name, urls.length > 0 ? urls[0] : '')}
-                      max={1}
-                      basePath="user-files/workflow-input"
-                    />
-                  </div>
-                ) : param.type === 'string' || param.type === 'text' ? (
-                  <input
-                    type="text"
-                    value={param.value || ''}
-                    onChange={(e) => handleParamChange(param.name, e.target.value)}
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    placeholder={param.description || `输入${param.displayName || param.name}`}
-                    style={{
-                      width: '100%',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      border: '1px solid #D1D5DB',
-                      borderRadius: '4px',
-                      outline: 'none',
-                      backgroundColor: 'white',
-                      pointerEvents: 'auto',
+                    ref={(el) => {
+                      if (el) {
+                        paramConnectionRefs.current.set(param.name, el);
+                      }
                     }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    style={{
+                      position: 'absolute',
+                      left: '-28px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: '14px',
+                      height: '14px',
+                      backgroundColor: isConnected ? '#10B981' : '#9CA3AF',
+                      border: '2px solid white',
+                      borderRadius: '50%',
+                      cursor: 'crosshair',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      zIndex: 100,
+                      pointerEvents: 'auto',
+                      transition: 'background-color 0.2s',
+                    }}
+                    title={`连接点: ${param.displayName || param.name}`}
                   />
-                ) : param.type === 'number' ? (
-                  <div>
-                    {/* 如果有min/max值，显示滑动条 */}
-                    {(param as any).typeOptions?.minValue !== undefined && (param as any).typeOptions?.maxValue !== undefined ? (
-                      <div onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
-                        <input
-                          type="range"
-                          min={(param as any).typeOptions.minValue}
-                          max={(param as any).typeOptions.maxValue}
-                          step={(param as any).typeOptions.numberPrecision || 1}
-                          value={param.value || (param as any).typeOptions.minValue}
-                          onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
-                          style={{
-                            width: '100%',
-                            pointerEvents: 'auto',
-                          }}
-                        />
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'space-between', 
-                          fontSize: '10px', 
-                          color: '#6B7280',
-                          marginTop: '2px',
-                        }}>
-                          <span>{(param as any).typeOptions.minValue}</span>
-                          <span style={{ fontWeight: '600', color: '#374151' }}>{param.value || (param as any).typeOptions.minValue}</span>
-                          <span>{(param as any).typeOptions.maxValue}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <input
-                        type="number"
-                        value={param.value || ''}
-                        onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
-                        placeholder={param.description || `输入${param.displayName || param.name}`}
+
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontSize: '11px',
+                      color: '#374151',
+                      marginBottom: '4px',
+                      fontWeight: '500',
+                    }}
+                  >
+                    {isConnected && (
+                      <span
                         style={{
-                          width: '100%',
-                          padding: '4px 8px',
-                          fontSize: '11px',
-                          border: '1px solid #D1D5DB',
-                          borderRadius: '4px',
-                          outline: 'none',
-                          backgroundColor: 'white',
-                          pointerEvents: 'auto',
+                          display: 'inline-block',
+                          width: '6px',
+                          height: '6px',
+                          backgroundColor: '#10B981',
+                          borderRadius: '50%',
                         }}
                       />
                     )}
-                  </div>
-                ) : param.type === 'boolean' ? (
-                  <label 
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={param.value || false}
-                      onChange={(e) => handleParamChange(param.name, e.target.checked)}
-                      style={{ pointerEvents: 'auto', cursor: 'pointer' }}
-                    />
-                    <span style={{ fontSize: '11px', color: '#6B7280' }}>
-                      {param.description || '启用'}
-                    </span>
+                    {param.displayName || param.name}
+                    {param.required && <span style={{ color: '#EF4444' }}>*</span>}
                   </label>
-                ) : param.type === 'options' && (param as any).typeOptions?.options ? (
-                  <select
-                    value={param.value || ''}
-                    onChange={(e) => handleParamChange(param.name, e.target.value)}
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                      width: '100%',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      border: '1px solid #D1D5DB',
-                      borderRadius: '4px',
-                      outline: 'none',
-                      backgroundColor: 'white',
-                      pointerEvents: 'auto',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <option value="">请选择...</option>
-                    {((param as any).typeOptions?.options || []).map((option: any) => (
-                      <option key={option.value || option.name} value={option.value || option.name}>
-                        {option.label || option.name || option.value}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <textarea
-                    value={typeof param.value === 'string' ? param.value : JSON.stringify(param.value || '')}
-                    onChange={(e) => handleParamChange(param.name, e.target.value)}
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    placeholder={param.description || `输入${param.displayName || param.name}`}
-                    rows={2}
-                    style={{
-                      width: '100%',
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      border: '1px solid #D1D5DB',
-                      borderRadius: '4px',
-                      outline: 'none',
-                      resize: 'vertical',
-                      backgroundColor: 'white',
-                      fontFamily: 'inherit',
-                      pointerEvents: 'auto',
-                    }}
-                  />
-                )}
-              </div>
-            )})}
+                  {param.type === 'file' ? (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      style={{ pointerEvents: 'auto' }}
+                    >
+                      <VinesUploader
+                        files={param.value ? (Array.isArray(param.value) ? param.value : [param.value]) : []}
+                        onChange={(urls) => handleParamChange(param.name, urls.length > 0 ? urls[0] : '')}
+                        max={1}
+                        basePath="user-files/workflow-input"
+                      />
+                    </div>
+                  ) : param.type === 'string' || param.type === 'text' ? (
+                    <input
+                      type="text"
+                      value={param.value || ''}
+                      onChange={(e) => handleParamChange(param.name, e.target.value)}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder={param.description || `输入${param.displayName || param.name}`}
+                      style={{
+                        width: '100%',
+                        padding: '4px 8px',
+                        fontSize: '11px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '4px',
+                        outline: 'none',
+                        backgroundColor: 'white',
+                        pointerEvents: 'auto',
+                      }}
+                    />
+                  ) : param.type === 'number' ? (
+                    <div>
+                      {/* 如果有min/max值，显示滑动条 */}
+                      {(param as any).typeOptions?.minValue !== undefined &&
+                      (param as any).typeOptions?.maxValue !== undefined ? (
+                        <div onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                          <input
+                            type="range"
+                            min={(param as any).typeOptions.minValue}
+                            max={(param as any).typeOptions.maxValue}
+                            step={(param as any).typeOptions.numberPrecision || 1}
+                            value={param.value || (param as any).typeOptions.minValue}
+                            onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
+                            style={{
+                              width: '100%',
+                              pointerEvents: 'auto',
+                            }}
+                          />
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              fontSize: '10px',
+                              color: '#6B7280',
+                              marginTop: '2px',
+                            }}
+                          >
+                            <span>{(param as any).typeOptions.minValue}</span>
+                            <span style={{ fontWeight: '600', color: '#374151' }}>
+                              {param.value || (param as any).typeOptions.minValue}
+                            </span>
+                            <span>{(param as any).typeOptions.maxValue}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <input
+                          type="number"
+                          value={param.value || ''}
+                          onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          placeholder={param.description || `输入${param.displayName || param.name}`}
+                          style={{
+                            width: '100%',
+                            padding: '4px 8px',
+                            fontSize: '11px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '4px',
+                            outline: 'none',
+                            backgroundColor: 'white',
+                            pointerEvents: 'auto',
+                          }}
+                        />
+                      )}
+                    </div>
+                  ) : param.type === 'boolean' ? (
+                    <label
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                      onClick={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={param.value || false}
+                        onChange={(e) => handleParamChange(param.name, e.target.checked)}
+                        style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+                      />
+                      <span style={{ fontSize: '11px', color: '#6B7280' }}>{param.description || '启用'}</span>
+                    </label>
+                  ) : param.type === 'options' && (param as any).typeOptions?.options ? (
+                    <select
+                      value={param.value || ''}
+                      onChange={(e) => handleParamChange(param.name, e.target.value)}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        width: '100%',
+                        padding: '4px 8px',
+                        fontSize: '11px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '4px',
+                        outline: 'none',
+                        backgroundColor: 'white',
+                        pointerEvents: 'auto',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="">请选择...</option>
+                      {((param as any).typeOptions?.options || []).map((option: any) => (
+                        <option key={option.value || option.name} value={option.value || option.name}>
+                          {option.label || option.name || option.value}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <textarea
+                      value={typeof param.value === 'string' ? param.value : JSON.stringify(param.value || '')}
+                      onChange={(e) => handleParamChange(param.name, e.target.value)}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder={param.description || `输入${param.displayName || param.name}`}
+                      rows={2}
+                      style={{
+                        width: '100%',
+                        padding: '4px 8px',
+                        fontSize: '11px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '4px',
+                        outline: 'none',
+                        resize: 'vertical',
+                        backgroundColor: 'white',
+                        fontFamily: 'inherit',
+                        pointerEvents: 'auto',
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
-        
+
         <div style={{ fontSize: '11px', color: '#9CA3AF', fontFamily: 'monospace', marginTop: '12px' }}>
           ID: {shape.props.workflowId}
         </div>
@@ -793,4 +806,3 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
     </div>
   );
 }
-

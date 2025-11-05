@@ -78,27 +78,29 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   // 避免重复加载相同的数据
   const lastSnapshotRef = useRef<any>(null);
   const lastSavedSnapshotRef = useRef<any>(null);
-  
+
   useEffect(() => {
     if (!metadata || !editor) return;
-    
+
     // 如果这是刚保存的快照，不要重新加载（避免覆盖用户操作）
-    if (lastSavedSnapshotRef.current && 
-        JSON.stringify(lastSavedSnapshotRef.current) === JSON.stringify(metadata.snapshot)) {
+    if (
+      lastSavedSnapshotRef.current &&
+      JSON.stringify(lastSavedSnapshotRef.current) === JSON.stringify(metadata.snapshot)
+    ) {
       return;
     }
-    
+
     // 比较snapshot是否真的发生了变化
     if (JSON.stringify(lastSnapshotRef.current) === JSON.stringify(metadata.snapshot)) {
       return; // 数据没有变化，不重新加载
     }
-    
+
     lastSnapshotRef.current = metadata.snapshot;
-    
+
     // 设置加载标志，防止触发自动保存
     isLoadingSnapshotRef.current = true;
     editor.loadSnapshot(metadata.snapshot);
-    
+
     // 延迟重置标志位，确保加载完成（增加到500ms，给编辑器更多时间完成加载）
     setTimeout(() => {
       isLoadingSnapshotRef.current = false;
@@ -181,10 +183,10 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   const handleSave = () => {
     if (!editor) return;
     const snapshot = getSnapshot(editor.store);
-    
+
     // 记录保存的快照，避免重新加载
     lastSavedSnapshotRef.current = snapshot;
-    
+
     toast.promise(
       updateDesignBoardMetadata(designBoardId, {
         snapshot,
@@ -229,15 +231,15 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       }
       try {
         const snapshot = getSnapshot(editor.store);
-        
+
         // 记录保存的快照，避免重新加载
         lastSavedSnapshotRef.current = snapshot;
-        
+
         await updateDesignBoardMetadata(designBoardId, { snapshot });
-        
+
         // 不要调用 mutateMetadata()，避免触发重新加载导致操作丢失
         // void mutateMetadata();
-        
+
         // 手动保存成功后，重置未保存标志
         hasUnsavedChangesRef.current = false;
         toast.success('已自动保存');
@@ -269,28 +271,28 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       autosaveInFlightRef.current = true;
       try {
         const snapshot = getSnapshot(editor.store);
-        
+
         // 保存前记录快照，避免保存后重新加载时覆盖
         lastSavedSnapshotRef.current = snapshot;
-        
+
         await updateDesignBoardMetadata(designBoardId, { snapshot });
-        
+
         // 不要调用 mutateMetadata()，避免触发重新加载导致操作丢失
         // void mutateMetadata();
-        
+
         // 保存成功后，重置未保存标志
         hasUnsavedChangesRef.current = false;
-        
+
         // 异步生成缩略图 - 使用setTimeout避免递归
         setTimeout(async () => {
           try {
             // 检查编辑器是否有内容
             const shapes = editor.getCurrentPageShapes();
-            
+
             if (shapes.length === 0) {
               return;
             }
-            
+
             // 使用与"导出全部"相同的方法
             const pageId = (editor as any).getCurrentPageId?.();
             let ids: any[] = [];
@@ -300,22 +302,22 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
             if ((!ids || ids.length === 0) && typeof (editor as any).getCurrentPageShapeIds === 'function') {
               ids = (editor as any).getCurrentPageShapeIds() || [];
             }
-            
+
             if (!ids || ids.length === 0) {
               return;
             }
-            
+
             // 使用与导出全部相同的方法，但压缩图片
-            const { blob } = await (editor as any).toImage(ids, { 
+            const { blob } = await (editor as any).toImage(ids, {
               format: 'jpeg', // 使用JPEG格式，文件更小
               scale: 0.1, // 降低分辨率到10%，减小图片体积
-              quality: 0.2 // 降低质量到20%，进一步提升压缩率
+              quality: 0.2, // 降低质量到20%，进一步提升压缩率
             });
-            
+
             if (!blob) {
               return;
             }
-            
+
             // 将blob转换为Base64 - 使用FileReader API
             const base64Data = await new Promise<string>((resolve, reject) => {
               const reader = new FileReader();
@@ -328,7 +330,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
               reader.onerror = reject;
               reader.readAsDataURL(blob);
             });
-            
+
             // 调用后端API，传递Base64数据而不是snapshot
             await generateDesignBoardThumbnail(designBoardId, base64Data);
           } catch (error) {
@@ -372,14 +374,14 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       if (!hasUnsavedChangesRef.current || !editor || !designBoardId) {
         return;
       }
-      
+
       try {
         const snapshot = getSnapshot(editor.store);
         lastSavedSnapshotRef.current = snapshot;
-        
+
         const data = JSON.stringify({ snapshot });
         const url = `/api/design/metadata/${designBoardId}`;
-        
+
         // 使用 fetch + keepalive 选项，确保即使页面关闭也能发送请求
         // keepalive 允许请求在页面卸载后继续完成
         if ('fetch' in window) {
@@ -402,7 +404,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
           xhr.withCredentials = true; // 包含认证信息
           xhr.send(data);
         }
-        
+
         hasUnsavedChangesRef.current = false;
       } catch (error) {
         console.error('Emergency save failed:', error);
@@ -415,7 +417,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         window.clearTimeout(autosaveTimerRef.current);
         autosaveTimerRef.current = null;
       }
-      
+
       // 如果有未保存的更改，进行兜底保存
       if (hasUnsavedChangesRef.current) {
         emergencySave();
@@ -424,7 +426,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         // e.returnValue = '';
       }
     };
-    
+
     // 页面可见性变化时保存（切换标签页、最小化等）
     const handleVisibilityChange = () => {
       if (document.hidden && hasUnsavedChangesRef.current) {
@@ -432,7 +434,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         void flushSave();
       }
     };
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
@@ -442,12 +444,12 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         window.clearTimeout(autosaveTimerRef.current);
         autosaveTimerRef.current = null;
       }
-      
+
       // 组件卸载前的最后保存
       if (hasUnsavedChangesRef.current) {
         emergencySave();
       }
-      
+
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       unsubscribe();

@@ -16,7 +16,7 @@ function extractTextContent(resultData: any): string {
     // 处理转义的换行符
     return resultData.replace(/\\n/g, '\n');
   }
-  
+
   if (typeof resultData === 'object' && resultData !== null) {
     // 获取第一个值
     const values = Object.values(resultData);
@@ -27,7 +27,7 @@ function extractTextContent(resultData: any): string {
     // 如果没有字符串值，返回JSON格式
     return JSON.stringify(resultData, null, 2);
   }
-  
+
   return String(resultData);
 }
 
@@ -190,12 +190,12 @@ export async function createPlaceholderShape(
   // 获取占位图的位置：优先放在最后修改的形状右边，否则放在画板中心
   let x: number;
   let y: number;
-  
+
   console.log('[占位图位置] 开始计算位置，lastModifiedShapeId:', lastModifiedShapeId);
-  
+
   try {
     let targetShape: any = null;
-    
+
     // 优先使用最后修改的shape
     if (lastModifiedShapeId) {
       try {
@@ -217,7 +217,7 @@ export async function createPlaceholderShape(
     } else {
       console.log('[占位图位置] 没有lastModifiedShapeId');
     }
-    
+
     // 如果没有最后修改的shape，尝试使用选中的shape
     if (!targetShape) {
       const selectedShapes = editor.getSelectedShapes();
@@ -232,35 +232,35 @@ export async function createPlaceholderShape(
         });
       }
     }
-    
+
     if (targetShape) {
       const bounds = editor.getShapeGeometry(targetShape).bounds;
-      
+
       // 放在目标形状的右边，间距20px
       x = (targetShape.x || 0) + bounds.w + 20;
       y = targetShape.y || 0;
-      
+
       console.log('[占位图位置] 计算结果 - 放在形状右边:', {
         targetShapeId: targetShape.id,
         'targetShape.x': targetShape.x,
         'targetShape.y': targetShape.y,
         'bounds.w': bounds.w,
         'bounds.h': bounds.h,
-        '计算后的x': x,
-        '计算后的y': y,
+        计算后的x: x,
+        计算后的y: y,
       });
     } else {
       // 没有可用的形状，使用画板中心
       const viewport = editor.getViewportPageBounds();
       x = viewport.center.x - size / 2;
       y = viewport.center.y - size / 2;
-      
+
       console.log('[占位图位置] 没有可用形状，使用画板中心:', {
         'viewport.center.x': viewport.center.x,
         'viewport.center.y': viewport.center.y,
         size,
-        '计算后的x': x,
-        '计算后的y': y,
+        计算后的x: x,
+        计算后的y: y,
       });
     }
   } catch (error) {
@@ -274,7 +274,7 @@ export async function createPlaceholderShape(
 
   // 创建图像shape
   const shapeId = createShapeId();
-  
+
   console.log('[占位图创建] 最终创建占位图shape:', {
     shapeId,
     x,
@@ -282,7 +282,7 @@ export async function createPlaceholderShape(
     size,
     assetId,
   });
-  
+
   editor.createShape({
     id: shapeId,
     type: 'image',
@@ -317,7 +317,7 @@ export async function updateShapeWithResult(
     resultType,
     resultData: typeof resultData === 'string' ? resultData.substring(0, 100) : resultData,
   });
-  
+
   const shape = editor.getShape(shapeId as any);
   if (!shape) {
     console.warn('找不到占位图shape:', shapeId);
@@ -375,12 +375,12 @@ export async function updateShapeWithResult(
   } else if (type === 'text' || type === 'string') {
     // 文本结果：删除占位图，创建文本shape
     const text = extractTextContent(resultData);
-    
+
     try {
       // 获取占位图的位置（使用shape的x和y，不是bounds）
       const posX = shape.x;
       const posY = shape.y;
-      
+
       // 删除占位图
       editor.deleteShape(shapeId as any);
 
@@ -448,7 +448,7 @@ export async function updateShapeWithResult(
       // 获取占位图的位置
       const posX = shape.x;
       const posY = shape.y;
-      
+
       // 删除占位图
       editor.deleteShape(shapeId as any);
 
@@ -471,4 +471,3 @@ export async function updateShapeWithResult(
     }
   }
 }
-

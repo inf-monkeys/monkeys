@@ -56,14 +56,14 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const [selected, setSelected] = React.useState<Record<string, boolean>>({});
   const [sidebarWidth, setSidebarWidth] = React.useState<number>(300);
-  
+
   // 拖动相关状态
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = React.useState(false);
   const dragStartRef = React.useRef({ x: 0, y: 0 });
   const dragStartPositionRef = React.useRef({ x: 0, y: 0 });
   const dialogRef = React.useRef<HTMLDivElement | null>(null);
-  
+
   // 监听 sidebar 宽度变化
   React.useEffect(() => {
     const handler = (e: any) => {
@@ -73,54 +73,54 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     window.addEventListener('vines:left-sidebar-width-change', handler as any);
     return () => window.removeEventListener('vines:left-sidebar-width-change', handler as any);
   }, []);
-  
+
   // 拖动处理函数
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // 只处理左键
-    
+
     // 记录拖拽开始时的鼠标位置和对话框位置（使用 ref 确保立即生效）
     dragStartRef.current = { x: e.clientX, y: e.clientY };
     dragStartPositionRef.current = { x: position.x, y: position.y };
     setIsDragging(true);
     e.preventDefault();
   };
-  
+
   // 全局鼠标移动处理
   React.useEffect(() => {
     if (!isDragging) return;
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       // 计算鼠标移动的距离（使用 ref 确保获取正确的起始值）
       const deltaX = e.clientX - dragStartRef.current.x;
       const deltaY = e.clientY - dragStartRef.current.y;
-      
+
       // 更新位置：初始位置 + 移动距离
       setPosition({
         x: dragStartPositionRef.current.x + deltaX,
         y: dragStartPositionRef.current.y + deltaY,
       });
     };
-    
+
     const handleMouseUp = () => {
       setIsDragging(false);
     };
-    
+
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-    
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging]);
-  
+
   // 重置位置当对话框关闭时
   React.useEffect(() => {
     if (!open) {
       setPosition({ x: 0, y: 0 });
     }
   }, [open]);
-  
+
   // 当 sidebar 宽度小于 280px 时，只显示图标
   const shouldShowButtonText = sidebarWidth >= 280;
 
@@ -132,7 +132,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
 
   const insertText = (text: string) => {
     const el = textareaRef.current;
-    const current = (value ?? '');
+    const current = value ?? '';
     const leftClean = current.replace(/[\s,]+$/g, '');
     const newValue = leftClean ? `${leftClean}, ${text}` : `${text}`;
     onChange(newValue);
@@ -199,12 +199,22 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
 
   // 归一化到 { 一级: { 二级: { 三级: [{label: string, level4?: string, description?: string}] } } }
   const normalizedDict = React.useMemo(() => {
-    const result: Record<string, Record<string, Record<string, Array<{ label: string; level4?: string; description?: string }>>>> = {};
+    const result: Record<
+      string,
+      Record<string, Record<string, Array<{ label: string; level4?: string; description?: string }>>>
+    > = {};
     const d = promptDictionary;
     if (!d) return result;
 
     if (Array.isArray(d?.entries)) {
-      for (const it of d.entries as Array<{ level1: string; level2?: string; level3?: string; level4?: string; label: string; description?: string }>) {
+      for (const it of d.entries as Array<{
+        level1: string;
+        level2?: string;
+        level3?: string;
+        level4?: string;
+        label: string;
+        description?: string;
+      }>) {
         const l1 = it.level1 || '未分组';
         const l2 = it.level2 || '默认';
         const l3 = it.level3 || '默认';
@@ -231,18 +241,23 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
           });
           result[l1] = { 默认: { 默认: items } };
         } else if (typeof sub === 'object') {
-          const obj: Record<string, Record<string, Array<{ label: string; level4?: string; description?: string }>>> = {};
+          const obj: Record<
+            string,
+            Record<string, Array<{ label: string; level4?: string; description?: string }>>
+          > = {};
           const subKeys = Object.keys(sub);
           for (const l2 of subKeys) {
             const items = sub[l2];
-            obj[l2] = { 默认: Array.isArray(items)
-              ? items.map((item: any) => {
-                  if (typeof item === 'string') {
-                    return { label: item };
-                  }
-                  return { label: item.label || item, description: item.description };
-                })
-              : [] };
+            obj[l2] = {
+              默认: Array.isArray(items)
+                ? items.map((item: any) => {
+                    if (typeof item === 'string') {
+                      return { label: item };
+                    }
+                    return { label: item.label || item, description: item.description };
+                  })
+                : [],
+            };
           }
           result[l1] = obj;
         }
@@ -260,13 +275,13 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   React.useEffect(() => {
     if (!activeL1 && level1Keys.length) setActiveL1(level1Keys[0]);
   }, [level1Keys, activeL1]);
-  
+
   // 同步 selected 状态和输入框内容
   React.useEffect(() => {
     const currentValue = (value ?? '').trim();
     if (currentValue && level1Keys.length > 0) {
       const updatedSelected: Record<string, boolean> = {};
-      
+
       // 遍历所有词，检查输入框是否包含（支持四级标签）
       Object.entries(normalizedDict).forEach(([l1, l2Dict]) => {
         Object.entries(l2Dict).forEach(([l2, l3Dict]) => {
@@ -279,7 +294,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
           });
         });
       });
-      
+
       setSelected(updatedSelected);
     }
   }, [value, level1Keys, normalizedDict]);
@@ -361,10 +376,10 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
       }
 
       const data = await response.json();
-      
+
       // 尝试从不同可能的响应结构中提取扩写结果
       let expandedText = '';
-      
+
       // 首先尝试遍历所有字段，查找output相关的字段（如output1, output2等）
       for (const key in data) {
         if (key.startsWith('output')) {
@@ -375,7 +390,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
           }
         }
       }
-      
+
       // 如果有output字段，尝试提取
       if (!expandedText && data?.output) {
         // 如果是数组，尝试从第一个元素获取text或content字段
@@ -385,20 +400,26 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
         }
         // 如果是对象，尝试直接获取text或content字段
         else if (typeof data.output === 'object') {
-          expandedText = data.output.text || data.output.content || data.output.data || data.output.value || 
-                        data.output.result || data.output.message || '';
+          expandedText =
+            data.output.text ||
+            data.output.content ||
+            data.output.data ||
+            data.output.value ||
+            data.output.result ||
+            data.output.message ||
+            '';
         }
         // 如果是字符串，直接使用
         else if (typeof data.output === 'string') {
           expandedText = data.output;
         }
       }
-      
+
       // 如果没有从output中获取到，尝试从根级别的字段获取
       if (!expandedText) {
         expandedText = data.text || data.content || data.data || data.result || data.message || '';
       }
-      
+
       // 如果仍然没有，尝试从rawOutput中获取
       if (!expandedText && data?.rawOutput) {
         if (Array.isArray(data.rawOutput) && data.rawOutput[0]) {
@@ -471,11 +492,11 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                       toggleRecord();
                     }}
                   >
-                     <Mic className="h-4 w-4 text-gray-800 dark:text-white" />
-                     {shouldShowButtonText && voiceButtonText}
-                   </Button>
-                 </TooltipTrigger>
-                 <TooltipContent>语音输入</TooltipContent>
+                    <Mic className="h-4 w-4 text-gray-800 dark:text-white" />
+                    {shouldShowButtonText && voiceButtonText}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>语音输入</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
@@ -496,11 +517,11 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                     }}
                     disabled={isExpanding}
                   >
-                     <Sparkles className={cn('h-4 w-4 text-gray-800 dark:text-white', isExpanding && 'animate-spin')} />
-                     {shouldShowButtonText && expandButtonText}
-                   </Button>
-                 </TooltipTrigger>
-                 <TooltipContent>AI扩写</TooltipContent>
+                    <Sparkles className={cn('h-4 w-4 text-gray-800 dark:text-white', isExpanding && 'animate-spin')} />
+                    {shouldShowButtonText && expandButtonText}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>AI扩写</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
@@ -516,24 +537,21 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                 setOpen(true);
               }}
             >
-               <Book className="h-4 w-4 text-gray-800 dark:text-white" />
-               {shouldShowButtonText && knowledgeGraphButtonText}
-             </Button>
+              <Book className="h-4 w-4 text-gray-800 dark:text-white" />
+              {shouldShowButtonText && knowledgeGraphButtonText}
+            </Button>
           )}
         </div>
       )}
 
       {level1Keys.length > 0 && (
         <Dialog open={open} onOpenChange={setOpen} modal={false}>
-          <DialogContent 
-            className="max-w-3xl" 
+          <DialogContent
+            className="max-w-3xl"
             hideOverlay
             style={{ transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))` }}
           >
-            <DialogHeader 
-              className="cursor-move select-none border-b pb-3" 
-              onMouseDown={handleMouseDown}
-            >
+            <DialogHeader className="cursor-move select-none border-b pb-3" onMouseDown={handleMouseDown}>
               <DialogTitle>{t('workspace.pre-view.actuator.execution-form.knowledge-graph.title')}</DialogTitle>
             </DialogHeader>
             <TooltipProvider>
@@ -556,24 +574,26 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                           const l3Keys = Object.keys(l3Dict);
                           const hideL2Header = l2Keys.length === 1 && l2Keys[0] === '默认';
                           const currentValue = (value ?? '').trim();
-                          
+
                           // 分离有 level4 和没有 level4 的 l3
                           const l3WithL4: string[] = [];
                           const l3WithoutL4: string[] = [];
-                          l3Keys.forEach(l3 => {
+                          l3Keys.forEach((l3) => {
                             const items = l3Dict[l3];
-                            const hasL4 = (items || []).some(it => it.level4);
+                            const hasL4 = (items || []).some((it) => it.level4);
                             if (hasL4) {
                               l3WithL4.push(l3);
                             } else {
                               l3WithoutL4.push(l3);
                             }
                           });
-                          
+
                           return (
                             <div key={l2} className="mb-4">
-                              {!hideL2Header && <div className="mb-2 text-base font-medium text-muted-foreground">{l2}</div>}
-                              
+                              {!hideL2Header && (
+                                <div className="mb-2 text-base font-medium text-muted-foreground">{l2}</div>
+                              )}
+
                               {/* 先渲染所有没有 level4 的 L3 按钮在同一排 */}
                               {l3WithoutL4.length > 0 && (
                                 <div className="mb-3">
@@ -581,12 +601,12 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                                     {l3WithoutL4.map((l3) => {
                                       const k = keyOf(k2, l2, l3, '');
                                       const isSelected = currentValue.includes(l3);
-                                      
+
                                       // 获取 description
                                       const items = l3Dict[l3];
-                                      const item = (items || []).find(it => !it.level4);
+                                      const item = (items || []).find((it) => !it.level4);
                                       const description = item?.description;
-                                      
+
                                       const toggleButton = (
                                         <Toggle
                                           key={k}
@@ -595,16 +615,16 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                                             applyFromSelected(l3);
                                           }}
                                           className={cn(
-                                            "rounded-full border px-3 py-1 text-sm",
-                                            isSelected 
-                                              ? "bg-vines-500 text-white border-vines-500" 
-                                              : "bg-transparent hover:bg-muted"
+                                            'rounded-full border px-3 py-1 text-sm',
+                                            isSelected
+                                              ? 'border-vines-500 bg-vines-500 text-white'
+                                              : 'bg-transparent hover:bg-muted',
                                           )}
                                         >
                                           {l3}
                                         </Toggle>
                                       );
-                                      
+
                                       // 如果有描述，则用 Tooltip 包裹
                                       if (description) {
                                         return (
@@ -616,24 +636,26 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                                           </Tooltip>
                                         );
                                       }
-                                      
+
                                       return toggleButton;
                                     })}
                                   </div>
                                 </div>
                               )}
-                              
+
                               {/* 再渲染有 level4 的 L3 */}
                               {l3WithL4.map((l3) => {
                                 const items = l3Dict[l3];
                                 const hideL3Header = l3Keys.length === 1 && l3Keys[0] === '默认';
-                                
-                                const itemsWithL4 = (items || []).filter(it => it.level4);
-                                
+
+                                const itemsWithL4 = (items || []).filter((it) => it.level4);
+
                                 return (
                                   <div key={l3} className="mb-3">
                                     {/* 显示 level4 的标题 */}
-                                    {!hideL3Header && <div className="mb-2 text-[13px] text-muted-foreground">{l3}</div>}
+                                    {!hideL3Header && (
+                                      <div className="mb-2 text-[13px] text-muted-foreground">{l3}</div>
+                                    )}
                                     <div className="flex flex-wrap gap-2">
                                       {/* 显示 level4 按钮 */}
                                       {itemsWithL4.map((it, idx) => {
@@ -648,10 +670,10 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                                               applyFromSelected(displayLabel);
                                             }}
                                             className={cn(
-                                              "rounded-full border px-3 py-1 text-sm",
-                                              isSelected 
-                                                ? "bg-vines-500 text-white border-vines-500" 
-                                                : "bg-transparent hover:bg-muted"
+                                              'rounded-full border px-3 py-1 text-sm',
+                                              isSelected
+                                                ? 'border-vines-500 bg-vines-500 text-white'
+                                                : 'bg-transparent hover:bg-muted',
                                             )}
                                           >
                                             {displayLabel}

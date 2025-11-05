@@ -27,4 +27,3 @@ export type OutputShape = TLBaseShape<
     sourceId: string; // 来源的 instruction shape id
   }
 >;
-

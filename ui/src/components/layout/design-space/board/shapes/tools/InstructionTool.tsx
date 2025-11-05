@@ -1,4 +1,5 @@
-import { StateNode, TLEventHandlers, createShapeId } from 'tldraw';
+import { createShapeId, StateNode, TLEventHandlers } from 'tldraw';
+
 import { InstructionInputMode } from '../instruction/InstructionShape.types';
 
 export class InstructionTool extends StateNode {
@@ -22,7 +23,7 @@ export class InstructionTool extends StateNode {
 
   override onPointerDown: TLEventHandlers['onPointerDown'] = (info) => {
     const point = this.editor.inputs.currentPagePoint;
-    
+
     // 创建一个新的 Instruction shape
     const id = createShapeId();
     this.editor.createShape({
@@ -44,7 +45,7 @@ export class InstructionTool extends StateNode {
 
     // 选中新创建的 shape
     this.editor.select(id);
-    
+
     // 切回选择工具
     this.editor.setCurrentTool('select');
   };
@@ -63,7 +64,7 @@ export class OutputTool extends StateNode {
 
   override onPointerDown: TLEventHandlers['onPointerDown'] = (info) => {
     const point = this.editor.inputs.currentPagePoint;
-    
+
     // 创建一个新的 Output shape
     const id = createShapeId();
     this.editor.createShape({
@@ -83,9 +84,8 @@ export class OutputTool extends StateNode {
 
     // 选中新创建的 shape
     this.editor.select(id);
-    
+
     // 切回选择工具
     this.editor.setCurrentTool('select');
   };
 }
-

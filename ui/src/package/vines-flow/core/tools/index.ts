@@ -230,7 +230,18 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
           (a, b) => TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(a[2]) - TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(b[2]),
         );
 
-        return result.filter(([list, , key]) => list.length && key !== 'all');
+        // 当有搜索词时，保留 'all' 分类以确保所有匹配的工具都能显示
+        // 只过滤掉没有结果的分类
+        const filteredResult = result.filter(([list]) => list.length > 0);
+
+        // 如果有除了 'all' 之外的其他分类有结果，则移除 'all' 分类避免重复
+        const hasOtherCategories = filteredResult.some(([, , key]) => key !== 'all');
+        if (hasOtherCategories) {
+          return filteredResult.filter(([, , key]) => key !== 'all');
+        }
+
+        // 如果只有 'all' 分类有结果，则保留它
+        return filteredResult;
       }
 
       // 无搜索词时保持原有逻辑

@@ -33,7 +33,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null);
   const workflowGroupRef = useRef<HTMLDivElement | null>(null);
   const workflowCloseTimerRef = useRef<number | undefined>(undefined);
-  
+
   // 获取团队工作流列表
   const { data: workflowList } = useWorkflowList();
 
@@ -324,12 +324,16 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                 </div>
               );
             }
-            
+
             if (tool.id === 'instruction') {
               const activeId = instructionVariant;
               const isActive = currentToolId === 'instruction';
               return (
-                <div key="instruction-group" className={`tool-group ${isActive ? 'selected' : ''}`} ref={instructionGroupRef}>
+                <div
+                  key="instruction-group"
+                  className={`tool-group ${isActive ? 'selected' : ''}`}
+                  ref={instructionGroupRef}
+                >
                   <button
                     className={`tool-button ${isActive ? 'selected' : ''} ${isInstructionMenuOpen ? 'menu-open' : ''}`}
                     onClick={(e) => {
@@ -347,9 +351,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     title={activeId === 'text' ? '文字输入' : '图片输入'}
                     style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                   >
-                    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                      {activeId === 'text' ? 'I' : '📷'}
-                    </span>
+                    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{activeId === 'text' ? 'I' : '📷'}</span>
                     <span className="caret" />
                     <span
                       className="caret-hit"
@@ -429,7 +431,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                 </div>
               );
             }
-            
+
             if (tool.id === 'workflow') {
               const isActive = currentToolId === 'workflow';
               return (
@@ -444,7 +446,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                         try {
                           // 获取工作流详细信息（包括输入参数）
                           const workflowDetail = await getWorkflow(selectedWorkflow.workflowId);
-                          
+
                           // 转换输入参数格式
                           const inputParams = (workflowDetail?.variables || []).map((variable: any) => ({
                             name: variable.name,
@@ -452,16 +454,21 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                             type: variable.type || 'string',
                             value: variable.default !== undefined ? variable.default : '',
                             required: variable.required || false,
-                            description: getI18nContent(variable.description) || getI18nContent(variable.placeholder) || '',
+                            description:
+                              getI18nContent(variable.description) || getI18nContent(variable.placeholder) || '',
                             typeOptions: variable.typeOptions || undefined,
                           }));
-                          
+
                           const workflowTool = editor.getStateDescendant('workflow') as any;
                           if (workflowTool && workflowTool.setWorkflowData) {
                             workflowTool.setWorkflowData({
                               workflowId: selectedWorkflow.workflowId,
-                              workflowName: getI18nContent(workflowDetail?.displayName || selectedWorkflow.displayName) || selectedWorkflow.name || '未命名工作流',
-                              workflowDescription: getI18nContent(workflowDetail?.description || selectedWorkflow.description) || '',
+                              workflowName:
+                                getI18nContent(workflowDetail?.displayName || selectedWorkflow.displayName) ||
+                                selectedWorkflow.name ||
+                                '未命名工作流',
+                              workflowDescription:
+                                getI18nContent(workflowDetail?.description || selectedWorkflow.description) || '',
                               inputParams: inputParams,
                             });
                           }
@@ -471,7 +478,8 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                           if (workflowTool && workflowTool.setWorkflowData) {
                             workflowTool.setWorkflowData({
                               workflowId: selectedWorkflow.workflowId,
-                              workflowName: getI18nContent(selectedWorkflow.displayName) || selectedWorkflow.name || '未命名工作流',
+                              workflowName:
+                                getI18nContent(selectedWorkflow.displayName) || selectedWorkflow.name || '未命名工作流',
                               workflowDescription: getI18nContent(selectedWorkflow.description) || '',
                               inputParams: [],
                             });
@@ -484,7 +492,11 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                         setIsWorkflowMenuOpen(true);
                       }
                     }}
-                    title={selectedWorkflow ? `工作流: ${getI18nContent(selectedWorkflow.displayName) || selectedWorkflow.name}` : '工作流'}
+                    title={
+                      selectedWorkflow
+                        ? `工作流: ${getI18nContent(selectedWorkflow.displayName) || selectedWorkflow.name}`
+                        : '工作流'
+                    }
                     style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                   >
                     <VinesIcon size="xs">lucide:workflow</VinesIcon>
@@ -532,73 +544,82 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                           <span>暂无工作流</span>
                         </div>
                       )}
-                      {workflowList && workflowList.map((workflow: any) => (
-                        <div
-                          key={workflow.workflowId}
-                          className={`dropdown-item ${selectedWorkflow?.workflowId === workflow.workflowId ? 'active' : ''}`}
-                          onClick={async (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setSelectedWorkflow(workflow);
-                            
-                            try {
-                              // 获取工作流详细信息（包括输入参数）
-                              const workflowDetail = await getWorkflow(workflow.workflowId);
-                              
-                              // 转换输入参数格式
-                              const inputParams = (workflowDetail?.variables || []).map((variable: any) => ({
-                                name: variable.name,
-                                displayName: getI18nContent(variable.displayName) || variable.name,
-                                type: variable.type || 'string',
-                                value: variable.default !== undefined ? variable.default : '',
-                                required: variable.required || false,
-                                description: getI18nContent(variable.description) || getI18nContent(variable.placeholder) || '',
-                                typeOptions: variable.typeOptions || undefined,
-                              }));
-                              
-                              // 设置工作流数据并激活工具
-                              const workflowTool = editor.getStateDescendant('workflow') as any;
-                              if (workflowTool && workflowTool.setWorkflowData) {
-                                workflowTool.setWorkflowData({
-                                  workflowId: workflow.workflowId,
-                                  workflowName: getI18nContent(workflowDetail?.displayName || workflow.displayName) || workflow.name || '未命名工作流',
-                                  workflowDescription: getI18nContent(workflowDetail?.description || workflow.description) || '',
-                                  inputParams: inputParams,
-                                });
+                      {workflowList &&
+                        workflowList.map((workflow: any) => (
+                          <div
+                            key={workflow.workflowId}
+                            className={`dropdown-item ${selectedWorkflow?.workflowId === workflow.workflowId ? 'active' : ''}`}
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedWorkflow(workflow);
+
+                              try {
+                                // 获取工作流详细信息（包括输入参数）
+                                const workflowDetail = await getWorkflow(workflow.workflowId);
+
+                                // 转换输入参数格式
+                                const inputParams = (workflowDetail?.variables || []).map((variable: any) => ({
+                                  name: variable.name,
+                                  displayName: getI18nContent(variable.displayName) || variable.name,
+                                  type: variable.type || 'string',
+                                  value: variable.default !== undefined ? variable.default : '',
+                                  required: variable.required || false,
+                                  description:
+                                    getI18nContent(variable.description) || getI18nContent(variable.placeholder) || '',
+                                  typeOptions: variable.typeOptions || undefined,
+                                }));
+
+                                // 设置工作流数据并激活工具
+                                const workflowTool = editor.getStateDescendant('workflow') as any;
+                                if (workflowTool && workflowTool.setWorkflowData) {
+                                  workflowTool.setWorkflowData({
+                                    workflowId: workflow.workflowId,
+                                    workflowName:
+                                      getI18nContent(workflowDetail?.displayName || workflow.displayName) ||
+                                      workflow.name ||
+                                      '未命名工作流',
+                                    workflowDescription:
+                                      getI18nContent(workflowDetail?.description || workflow.description) || '',
+                                    inputParams: inputParams,
+                                  });
+                                }
+                                editor.setCurrentTool('workflow');
+                                setCurrentToolId('workflow');
+                              } catch (error) {
+                                console.error('获取工作流详情失败:', error);
+                                // 如果获取失败，使用基本信息
+                                const workflowTool = editor.getStateDescendant('workflow') as any;
+                                if (workflowTool && workflowTool.setWorkflowData) {
+                                  workflowTool.setWorkflowData({
+                                    workflowId: workflow.workflowId,
+                                    workflowName:
+                                      getI18nContent(workflow.displayName) || workflow.name || '未命名工作流',
+                                    workflowDescription: getI18nContent(workflow.description) || '',
+                                    inputParams: [],
+                                  });
+                                }
+                                editor.setCurrentTool('workflow');
+                                setCurrentToolId('workflow');
                               }
-                              editor.setCurrentTool('workflow');
-                              setCurrentToolId('workflow');
-                            } catch (error) {
-                              console.error('获取工作流详情失败:', error);
-                              // 如果获取失败，使用基本信息
-                              const workflowTool = editor.getStateDescendant('workflow') as any;
-                              if (workflowTool && workflowTool.setWorkflowData) {
-                                workflowTool.setWorkflowData({
-                                  workflowId: workflow.workflowId,
-                                  workflowName: getI18nContent(workflow.displayName) || workflow.name || '未命名工作流',
-                                  workflowDescription: getI18nContent(workflow.description) || '',
-                                  inputParams: [],
-                                });
-                              }
-                              editor.setCurrentTool('workflow');
-                              setCurrentToolId('workflow');
-                            }
-                            
-                            setIsWorkflowMenuOpen(false);
-                          }}
-                          title={getI18nContent(workflow.description) || ''}
-                        >
-                          <VinesIcon size="xs">lucide:workflow</VinesIcon>
-                          <span style={{ 
-                            maxWidth: '150px', 
-                            overflow: 'hidden', 
-                            textOverflow: 'ellipsis', 
-                            whiteSpace: 'nowrap' 
-                          }}>
-                            {getI18nContent(workflow.displayName) || workflow.name || '未命名工作流'}
-                          </span>
-                        </div>
-                      ))}
+
+                              setIsWorkflowMenuOpen(false);
+                            }}
+                            title={getI18nContent(workflow.description) || ''}
+                          >
+                            <VinesIcon size="xs">lucide:workflow</VinesIcon>
+                            <span
+                              style={{
+                                maxWidth: '150px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {getI18nContent(workflow.displayName) || workflow.name || '未命名工作流'}
+                            </span>
+                          </div>
+                        ))}
                     </div>
                   )}
                 </div>

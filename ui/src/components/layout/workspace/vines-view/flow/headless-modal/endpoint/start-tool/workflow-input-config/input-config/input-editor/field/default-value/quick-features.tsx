@@ -105,10 +105,10 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
       }
 
       const data = await response.json();
-      
+
       // 尝试从不同可能的响应结构中提取扩写结果
       let expandedText = '';
-      
+
       // 首先尝试遍历所有字段，查找output相关的字段（如output1, output2等）
       for (const key in data) {
         if (key.startsWith('output')) {
@@ -119,7 +119,7 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
           }
         }
       }
-      
+
       // 如果有output字段，尝试提取
       if (!expandedText && data?.output) {
         // 如果是数组，尝试从第一个元素获取text或content字段
@@ -129,20 +129,26 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
         }
         // 如果是对象，尝试直接获取text或content字段
         else if (typeof data.output === 'object') {
-          expandedText = data.output.text || data.output.content || data.output.data || data.output.value || 
-                        data.output.result || data.output.message || '';
+          expandedText =
+            data.output.text ||
+            data.output.content ||
+            data.output.data ||
+            data.output.value ||
+            data.output.result ||
+            data.output.message ||
+            '';
         }
         // 如果是字符串，直接使用
         else if (typeof data.output === 'string') {
           expandedText = data.output;
         }
       }
-      
+
       // 如果没有从output中获取到，尝试从根级别的字段获取
       if (!expandedText) {
         expandedText = data.text || data.content || data.data || data.result || data.message || '';
       }
-      
+
       // 如果仍然没有，尝试从rawOutput中获取
       if (!expandedText && data?.rawOutput) {
         if (Array.isArray(data.rawOutput) && data.rawOutput[0]) {
@@ -173,7 +179,7 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
   if (!enableVoice && !enableExpand) return null;
 
   return (
-    <div className="absolute right-2 bottom-2 flex gap-1">
+    <div className="absolute bottom-2 right-2 flex gap-1">
       {enableVoice && (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -184,7 +190,7 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
               onClick={toggleRecord}
               disabled={isRecording}
             >
-              <Mic className={cn('size-4', isRecording && 'text-red-500 animate-pulse')} />
+              <Mic className={cn('size-4', isRecording && 'animate-pulse text-red-500')} />
             </Button>
           </TooltipTrigger>
           <TooltipContent>语音输入</TooltipContent>
@@ -209,4 +215,3 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
     </div>
   );
 };
-

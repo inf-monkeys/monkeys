@@ -38,4 +38,3 @@ export type WorkflowShape = TLBaseShape<
     inputConnections: WorkflowInputConnection[]; // 输入连接列表
   }
 >;
-

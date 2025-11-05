@@ -680,7 +680,7 @@ export const DataUploadModule: React.FC<IDataUploadModuleProps> = ({ modelTraini
 
                 {/* 生成的URL显示区域 */}
                 {generatedUrl && (
-                  <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4 duration-300 animate-in slide-in-from-top-2">
+                  <div className="animate-in slide-in-from-top-2 mt-4 rounded-lg border border-green-200 bg-green-50 p-4 duration-300">
                     <div className="mb-2 flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-600" />
                       <span className="font-medium text-green-800">成功获取链接</span>

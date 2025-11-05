@@ -104,7 +104,7 @@ export const DesignProjectCard: React.FC<DesignProjectCardProps> = ({
             <>
               {/* 骨架屏 - 加载中显示 */}
               {!imgLoaded && <Skeleton className="absolute inset-0 h-full w-full" />}
-              
+
               {/* 实际图片 */}
               <img
                 ref={imgRef}

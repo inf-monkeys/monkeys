@@ -1,20 +1,27 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { mutate as swrMutate } from 'swr';
+
 import { useDebounceFn, useEventEmitter, useMemoizedFn } from 'ahooks';
 import { capitalize, get } from 'lodash';
 import { ArrowLeft, Clipboard, History, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { mutate as swrMutate } from 'swr';
 import { Editor, TLShapeId } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
 import { useWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
+import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
-import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { Button } from '@/components/ui/button';
-import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
@@ -390,7 +397,10 @@ const PageItem: React.FC<{
 };
 
 // 在黄色块中渲染的按钮组件的包装器
-const MiniTabularButtonsWrapper: React.FC<{ miniPage: any; useAbsolutePosition?: boolean }> = ({ miniPage, useAbsolutePosition = true }) => {
+const MiniTabularButtonsWrapper: React.FC<{ miniPage: any; useAbsolutePosition?: boolean }> = ({
+  miniPage,
+  useAbsolutePosition = true,
+}) => {
   const [tabular$, setTabular$] = useState<any>(null);
 
   useEffect(() => {
@@ -412,7 +422,14 @@ const MiniTabularButtonsWrapper: React.FC<{ miniPage: any; useAbsolutePosition?:
           {tabular$ ? (
             <MiniTabularButtons tabular$={tabular$} useAbsolutePosition={useAbsolutePosition} />
           ) : (
-            <div style={{ position: useAbsolutePosition ? 'absolute' : 'relative', bottom: useAbsolutePosition ? 0 : undefined, height: '60px', background: '#fff' }}>
+            <div
+              style={{
+                position: useAbsolutePosition ? 'absolute' : 'relative',
+                bottom: useAbsolutePosition ? 0 : undefined,
+                height: '60px',
+                background: '#fff',
+              }}
+            >
               {/* Tabular buttons will render here */}
             </div>
           )}
@@ -423,7 +440,10 @@ const MiniTabularButtonsWrapper: React.FC<{ miniPage: any; useAbsolutePosition?:
 };
 
 // 在黄色块中渲染的按钮组件
-const MiniTabularButtons: React.FC<{ tabular$: any; useAbsolutePosition?: boolean }> = ({ tabular$, useAbsolutePosition = true }) => {
+const MiniTabularButtons: React.FC<{ tabular$: any; useAbsolutePosition?: boolean }> = ({
+  tabular$,
+  useAbsolutePosition = true,
+}) => {
   const { t } = useTranslation();
   const { data: oem } = useSystemConfig();
   const { vines } = useVinesFlow();
@@ -462,23 +482,27 @@ const MiniTabularButtons: React.FC<{ tabular$: any; useAbsolutePosition?: boolea
   return (
     <div
       style={{
-        ...(useAbsolutePosition ? {
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-        } : {
-          position: 'relative',
-          marginTop: '12px',
-        }),
+        ...(useAbsolutePosition
+          ? {
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }
+          : {
+              position: 'relative',
+              marginTop: '12px',
+            }),
         width: '100%',
         minHeight: '60px',
         background: '#fff',
         borderTop: '1px solid #e5e7eb',
-        ...(useAbsolutePosition ? {
-          borderBottomLeftRadius: '20px',
-          borderBottomRightRadius: '20px',
-        } : {}),
+        ...(useAbsolutePosition
+          ? {
+              borderBottomLeftRadius: '20px',
+              borderBottomRightRadius: '20px',
+            }
+          : {}),
         zIndex: 10,
         padding: '12px',
         display: 'flex',
@@ -583,7 +607,9 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
   const [historyPageSize, setHistoryPageSize] = useState(8);
   const miniEvent$ = useEventEmitter<any>();
   // 等待中历史占位（任务创建后、结果返回前）
-  const [pendingHistory, setPendingHistory] = useState<Array<{ instanceId: string; workflowId?: string | null; time: number; renderData?: any }>>([]);
+  const [pendingHistory, setPendingHistory] = useState<
+    Array<{ instanceId: string; workflowId?: string | null; time: number; renderData?: any }>
+  >([]);
   // agent 嵌入：在左侧 sidebar 内显示
   const [agentVisible, setAgentVisible] = useState(false);
   // 等待占位动画样式仅注入一次（正方形+中心旋转）
@@ -603,7 +629,10 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
       const instanceId = e?.detail?.instanceId;
       const workflowId = e?.detail?.workflowId ?? (miniPage?.workflowId || miniPage?.workflow?.id);
       if (!instanceId || !workflowId) return;
-      setPendingHistory((list) => [{ instanceId, workflowId, time: Date.now() }, ...list.filter((i) => i.instanceId !== instanceId)]);
+      setPendingHistory((list) => [
+        { instanceId, workflowId, time: Date.now() },
+        ...list.filter((i) => i.instanceId !== instanceId),
+      ]);
     };
     const onCompleted = (e: any) => {
       const instanceId = e?.detail?.instanceId;
@@ -690,9 +719,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
       const next = e?.detail?.page || e?.detail || null;
       setMiniPage(next);
       const workflowId = next?.workflowId || next?.workflow?.id || null;
-      window.dispatchEvent(
-        new CustomEvent('vines:mini-state', { detail: { pageId: next?.id || null, workflowId } }),
-      );
+      window.dispatchEvent(new CustomEvent('vines:mini-state', { detail: { pageId: next?.id || null, workflowId } }));
     };
     const closeHandler = () => {
       setMiniPage(null);
@@ -2761,7 +2788,17 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
         </div>
       ) : miniPage && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', position: 'relative' }}>
-          <div style={{ flex: 1, minHeight: 0, overflowY: historyOpen ? 'hidden' : 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column' , paddingBottom: historyOpen ? '0px' : '50px' }}>
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: historyOpen ? 'hidden' : 'auto',
+              overflowX: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              paddingBottom: historyOpen ? '0px' : '50px',
+            }}
+          >
             {/* 迷你应用顶部信息栏：显示当前工作流名称与描述 */}
             <div
               style={{
@@ -2907,7 +2944,15 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
               </div>
             </div>
             {!historyOpen && (
-              <div style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '111.111111%', flex: 1, minHeight: 0 }}>
+              <div
+                style={{
+                  transform: 'scale(0.9)',
+                  transformOrigin: 'top left',
+                  width: '111.111111%',
+                  flex: 1,
+                  minHeight: 0,
+                }}
+              >
                 <VinesFlowProvider workflowId={miniPage?.workflowId || miniPage?.workflow?.id || ''}>
                   <FlowStoreProvider createStore={createFlowStore}>
                     <CanvasStoreProvider createStore={createCanvasStore}>
@@ -2939,8 +2984,19 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
             )}
             {historyOpen && (
               <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                <div style={{ fontSize: 12, color: '#6b7280', padding: '12px 12px 8px 12px', flexShrink: 0 }}>历史记录</div>
-                <div style={{ flex: 1, overflow: 'auto', columnCount: 2, columnGap: 8, padding: '0 12px 8px 12px', minHeight: 0 }}>
+                <div style={{ fontSize: 12, color: '#6b7280', padding: '12px 12px 8px 12px', flexShrink: 0 }}>
+                  历史记录
+                </div>
+                <div
+                  style={{
+                    flex: 1,
+                    overflow: 'auto',
+                    columnCount: 2,
+                    columnGap: 8,
+                    padding: '0 12px 8px 12px',
+                    minHeight: 0,
+                  }}
+                >
                   {(() => {
                     try {
                       const items = newConvertExecutionResultToItemList(allOutputsPages ?? []);
@@ -2976,7 +3032,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                       };
 
                       // 辅助函数：提取显示内容（只返回图片或包含outputtext的文本，其他返回null）
-                      const extractDisplayContent = (data: any): { type: 'image' | 'text', content: string } | null => {
+                      const extractDisplayContent = (data: any): { type: 'image' | 'text'; content: string } | null => {
                         // 如果是字符串，检查是否是图片URL
                         if (typeof data === 'string') {
                           if (isImageUrl(data)) {
@@ -3022,22 +3078,75 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                           const displayContent = extractDisplayContent(p.renderData);
                           if (displayContent?.type === 'image') {
                             return (
-                              <div key={`pending-${p.instanceId}-${idx}`} style={{ position: 'relative', overflow: 'hidden', border: '1px solid #e5e7eb', borderRadius: 8, marginBottom: 8, breakInside: 'avoid', display: 'inline-block', width: '100%' }}>
-                                <img src={displayContent.content} style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }} alt="历史记录" />
+                              <div
+                                key={`pending-${p.instanceId}-${idx}`}
+                                style={{
+                                  position: 'relative',
+                                  overflow: 'hidden',
+                                  border: '1px solid #e5e7eb',
+                                  borderRadius: 8,
+                                  marginBottom: 8,
+                                  breakInside: 'avoid',
+                                  display: 'inline-block',
+                                  width: '100%',
+                                }}
+                              >
+                                <img
+                                  src={displayContent.content}
+                                  style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
+                                  alt="历史记录"
+                                />
                                 {timeStr && (
-                                  <div style={{ padding: '6px 8px', fontSize: 10, color: '#9ca3af', backgroundColor: '#f9fafb', textAlign: 'center', borderTop: '1px solid #e5e7eb' }}>{timeStr}</div>
+                                  <div
+                                    style={{
+                                      padding: '6px 8px',
+                                      fontSize: 10,
+                                      color: '#9ca3af',
+                                      backgroundColor: '#f9fafb',
+                                      textAlign: 'center',
+                                      borderTop: '1px solid #e5e7eb',
+                                    }}
+                                  >
+                                    {timeStr}
+                                  </div>
                                 )}
                               </div>
                             );
                           }
                           if (displayContent?.type === 'text') {
                             return (
-                              <div key={`pending-${p.instanceId}-${idx}`} style={{ border: '1px solid #e5e7eb', borderRadius: 8, marginBottom: 8, breakInside: 'avoid', display: 'inline-block', width: '100%', overflow: 'hidden' }}>
+                              <div
+                                key={`pending-${p.instanceId}-${idx}`}
+                                style={{
+                                  border: '1px solid #e5e7eb',
+                                  borderRadius: 8,
+                                  marginBottom: 8,
+                                  breakInside: 'avoid',
+                                  display: 'inline-block',
+                                  width: '100%',
+                                  overflow: 'hidden',
+                                }}
+                              >
                                 <div style={{ padding: 8, fontSize: 12, maxHeight: 120, overflow: 'auto' }}>
-                                  <pre style={{ margin: 0, fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{displayContent.content}</pre>
+                                  <pre
+                                    style={{ margin: 0, fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                                  >
+                                    {displayContent.content}
+                                  </pre>
                                 </div>
                                 {timeStr && (
-                                  <div style={{ padding: '6px 8px', fontSize: 10, color: '#9ca3af', backgroundColor: '#f9fafb', textAlign: 'center', borderTop: '1px solid #e5e7eb' }}>{timeStr}</div>
+                                  <div
+                                    style={{
+                                      padding: '6px 8px',
+                                      fontSize: 10,
+                                      color: '#9ca3af',
+                                      backgroundColor: '#f9fafb',
+                                      textAlign: 'center',
+                                      borderTop: '1px solid #e5e7eb',
+                                    }}
+                                  >
+                                    {timeStr}
+                                  </div>
                                 )}
                               </div>
                             );
@@ -3066,82 +3175,143 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                               <div className="spinner" />
                             </div>
                             {timeStr && (
-                              <div style={{ padding: '6px 8px', fontSize: 10, color: '#9ca3af', backgroundColor: '#f9fafb', textAlign: 'center', borderTop: '1px solid #e5e7eb' }}>{timeStr}</div>
+                              <div
+                                style={{
+                                  padding: '6px 8px',
+                                  fontSize: 10,
+                                  color: '#9ca3af',
+                                  backgroundColor: '#f9fafb',
+                                  textAlign: 'center',
+                                  borderTop: '1px solid #e5e7eb',
+                                }}
+                              >
+                                {timeStr}
+                              </div>
                             )}
                           </div>
                         );
                       });
 
                       // 若某个 instanceId 已经出现在完成列表里，则不再渲染其等待项（避免重复）
-                      const doneInstanceSet = new Set<string>((list || []).map((it: any) => String(it?.instanceId || '')));
+                      const doneInstanceSet = new Set<string>(
+                        (list || []).map((it: any) => String(it?.instanceId || '')),
+                      );
                       waitingList = waitingList.filter((p) => !doneInstanceSet.has(String(p.instanceId)));
 
-                      const doneNodes = list.map((it: any, idx: number) => {
-                        const data = it?.render?.data;
-                        const displayContent = extractDisplayContent(data);
+                      const doneNodes = list
+                        .map((it: any, idx: number) => {
+                          const data = it?.render?.data;
+                          const displayContent = extractDisplayContent(data);
 
-                        if (!displayContent) return null;
+                          if (!displayContent) return null;
 
-                        // 格式化时间
-                        const formatTime = (timestamp: number | string | undefined) => {
-                          if (!timestamp) return '';
-                          // 处理时间戳，可能是字符串或数字，可能不是毫秒
-                          let ts = timestamp;
-                          if (typeof ts === 'string') {
-                            ts = parseInt(ts, 10);
-                            if (isNaN(ts)) return '';
+                          // 格式化时间
+                          const formatTime = (timestamp: number | string | undefined) => {
+                            if (!timestamp) return '';
+                            // 处理时间戳，可能是字符串或数字，可能不是毫秒
+                            let ts = timestamp;
+                            if (typeof ts === 'string') {
+                              ts = parseInt(ts, 10);
+                              if (isNaN(ts)) return '';
+                            }
+                            // 如果是秒级时间戳（小于13位），转换为毫秒
+                            if (ts < 1e12) {
+                              ts = ts * 1000;
+                            }
+                            const date = new Date(ts);
+                            if (isNaN(date.getTime())) return '';
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                            const seconds = String(date.getSeconds()).padStart(2, '0');
+                            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                          };
+
+                          const timeStr = formatTime(it?.endTime || it?.createTime || it?.startTime);
+
+                          // 显示图片
+                          if (displayContent.type === 'image') {
+                            return (
+                              <div
+                                key={idx}
+                                draggable
+                                onDragStart={(e) => {
+                                  e.dataTransfer.setData('text/plain', displayContent.content);
+                                  e.dataTransfer.effectAllowed = 'copy';
+                                }}
+                                style={{
+                                  position: 'relative',
+                                  overflow: 'hidden',
+                                  border: '1px solid #e5e7eb',
+                                  borderRadius: 8,
+                                  cursor: 'grab',
+                                  marginBottom: 8,
+                                  breakInside: 'avoid',
+                                  display: 'inline-block',
+                                  width: '100%',
+                                }}
+                                onMouseDown={(e) => {
+                                  e.currentTarget.style.cursor = 'grabbing';
+                                }}
+                                onMouseUp={(e) => {
+                                  e.currentTarget.style.cursor = 'grab';
+                                }}
+                              >
+                                {/* 图片等比例缩放，保持宽高比 */}
+                                <img
+                                  src={displayContent.content}
+                                  style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
+                                  alt="历史记录"
+                                />
+                                {/* 时间标签 */}
+                                {timeStr && (
+                                  <div
+                                    style={{
+                                      padding: '6px 8px',
+                                      fontSize: 10,
+                                      color: '#9ca3af',
+                                      backgroundColor: '#f9fafb',
+                                      textAlign: 'center',
+                                      borderTop: '1px solid #e5e7eb',
+                                    }}
+                                  >
+                                    {timeStr}
+                                  </div>
+                                )}
+                              </div>
+                            );
                           }
-                          // 如果是秒级时间戳（小于13位），转换为毫秒
-                          if (ts < 1e12) {
-                            ts = ts * 1000;
-                          }
-                          const date = new Date(ts);
-                          if (isNaN(date.getTime())) return '';
-                          const year = date.getFullYear();
-                          const month = String(date.getMonth() + 1).padStart(2, '0');
-                          const day = String(date.getDate()).padStart(2, '0');
-                          const hours = String(date.getHours()).padStart(2, '0');
-                          const minutes = String(date.getMinutes()).padStart(2, '0');
-                          const seconds = String(date.getSeconds()).padStart(2, '0');
-                          return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-                        };
 
-                        const timeStr = formatTime(it?.endTime || it?.createTime || it?.startTime);
-
-                        // 显示图片
-                        if (displayContent.type === 'image') {
+                          // 显示文本
                           return (
                             <div
                               key={idx}
-                              draggable
-                              onDragStart={(e) => {
-                                e.dataTransfer.setData('text/plain', displayContent.content);
-                                e.dataTransfer.effectAllowed = 'copy';
-                              }}
                               style={{
-                                position: 'relative',
-                                overflow: 'hidden',
                                 border: '1px solid #e5e7eb',
                                 borderRadius: 8,
-                                cursor: 'grab',
                                 marginBottom: 8,
                                 breakInside: 'avoid',
                                 display: 'inline-block',
                                 width: '100%',
-                              }}
-                              onMouseDown={(e) => {
-                                e.currentTarget.style.cursor = 'grabbing';
-                              }}
-                              onMouseUp={(e) => {
-                                e.currentTarget.style.cursor = 'grab';
+                                overflow: 'hidden',
                               }}
                             >
-                              {/* 图片等比例缩放，保持宽高比 */}
-                              <img
-                                src={displayContent.content}
-                                style={{ width: '100%', height: 'auto', display: 'block', pointerEvents: 'none' }}
-                                alt="历史记录"
-                              />
+                              <div
+                                style={{
+                                  padding: 8,
+                                  fontSize: 12,
+                                  maxHeight: 120,
+                                  overflow: 'auto',
+                                }}
+                              >
+                                <pre
+                                  style={{ margin: 0, fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                                >
+                                  {displayContent.content}
+                                </pre>
+                              </div>
                               {/* 时间标签 */}
                               {timeStr && (
                                 <div
@@ -3159,52 +3329,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                               )}
                             </div>
                           );
-                        }
-
-                        // 显示文本
-                        return (
-                          <div
-                            key={idx}
-                            style={{
-                              border: '1px solid #e5e7eb',
-                              borderRadius: 8,
-                              marginBottom: 8,
-                              breakInside: 'avoid',
-                              display: 'inline-block',
-                              width: '100%',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            <div
-                              style={{
-                                padding: 8,
-                                fontSize: 12,
-                                maxHeight: 120,
-                                overflow: 'auto',
-                              }}
-                            >
-                              <pre style={{ margin: 0, fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                {displayContent.content}
-                              </pre>
-                            </div>
-                            {/* 时间标签 */}
-                            {timeStr && (
-                              <div
-                                style={{
-                                  padding: '6px 8px',
-                                  fontSize: 10,
-                                  color: '#9ca3af',
-                                  backgroundColor: '#f9fafb',
-                                  textAlign: 'center',
-                                  borderTop: '1px solid #e5e7eb',
-                                }}
-                              >
-                                {timeStr}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }).filter(Boolean);
+                        })
+                        .filter(Boolean);
 
                       return [...waitingNodes, ...doneNodes];
                     } catch {
@@ -3227,19 +3353,41 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
                     if (totalPages <= 1) return null;
 
                     return (
-                      <div style={{ padding: '8px 12px 12px 12px', borderTop: '1px solid #e5e7eb', width: '100%', flexShrink: 0, backgroundColor: '#fff', borderBottomLeftRadius: '20px', borderBottomRightRadius: '20px' }}>
-                        <Pagination className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                          <PaginationContent className="w-full" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                      <div
+                        style={{
+                          padding: '8px 12px 12px 12px',
+                          borderTop: '1px solid #e5e7eb',
+                          width: '100%',
+                          flexShrink: 0,
+                          backgroundColor: '#fff',
+                          borderBottomLeftRadius: '20px',
+                          borderBottomRightRadius: '20px',
+                        }}
+                      >
+                        <Pagination
+                          className="w-full"
+                          style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+                        >
+                          <PaginationContent
+                            className="w-full"
+                            style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+                          >
                             <PaginationItem>
                               <PaginationPrevious
                                 onClick={() => setHistoryPage(Math.max(1, historyPage - 1))}
-                                style={{ cursor: historyPage === 1 ? 'not-allowed' : 'pointer', opacity: historyPage === 1 ? 0.5 : 1 }}
+                                style={{
+                                  cursor: historyPage === 1 ? 'not-allowed' : 'pointer',
+                                  opacity: historyPage === 1 ? 0.5 : 1,
+                                }}
                               />
                             </PaginationItem>
                             <PaginationItem>
                               <PaginationNext
                                 onClick={() => setHistoryPage(Math.min(totalPages, historyPage + 1))}
-                                style={{ cursor: historyPage === totalPages ? 'not-allowed' : 'pointer', opacity: historyPage === totalPages ? 0.5 : 1 }}
+                                style={{
+                                  cursor: historyPage === totalPages ? 'not-allowed' : 'pointer',
+                                  opacity: historyPage === totalPages ? 0.5 : 1,
+                                }}
                               />
                             </PaginationItem>
                           </PaginationContent>

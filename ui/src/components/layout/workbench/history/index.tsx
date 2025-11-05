@@ -502,9 +502,7 @@ const CarouselItemImage = React.memo(
 
     return (
       <div className="relative h-full w-full">
-        {isLoading && (
-          <div className="absolute inset-0 animate-pulse bg-slate-3 rounded-md" />
-        )}
+        {isLoading && <div className="absolute inset-0 animate-pulse rounded-md bg-slate-3" />}
         <img
           ref={imgRef}
           draggable

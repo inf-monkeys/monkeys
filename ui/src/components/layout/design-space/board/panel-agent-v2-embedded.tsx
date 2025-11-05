@@ -1,6 +1,8 @@
-import { useTldrawAgentV2 } from '@/agent/useTldrawAgentV2';
 import React, { useRef, useState } from 'react';
+
 import type { Editor } from 'tldraw';
+
+import { useTldrawAgentV2 } from '@/agent/useTldrawAgentV2';
 
 interface TldrawAgentV2EmbeddedPanelProps {
   editor: Editor | null;
@@ -137,15 +139,12 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.15)] w-full h-full flex flex-col overflow-hidden">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
       <style>{`@keyframes agent-spinner { from { transform: rotate(0); } to { transform: rotate(360deg); } }`}</style>
-      <div className="flex flex-col gap-0 h-full">
-        <div
-          ref={scrollRef}
-          className="flex-1 overflow-auto p-3 flex flex-col gap-2.5"
-        >
+      <div className="flex h-full flex-col gap-0">
+        <div ref={scrollRef} className="flex flex-1 flex-col gap-2.5 overflow-auto p-3">
           {(agentApi?.history ?? []).length === 0 && (
-            <div className="text-gray-400 text-xs">开始与 Agent V2 对话，它会理解画布并执行操作。</div>
+            <div className="text-xs text-gray-400">开始与 Agent V2 对话，它会理解画布并执行操作。</div>
           )}
           {(agentApi?.history ?? []).map((m, idx) => {
             const matchedVoice =
@@ -156,8 +155,8 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
             return (
               <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {isVoice ? (
-                  <div className="max-w-[80%] px-3 py-2.5 rounded-[10px] bg-[rgb(65,104,135)] text-white text-[13px] whitespace-pre-wrap">
-                    <div className="flex items-center gap-1.5 mb-1">
+                  <div className="max-w-[80%] whitespace-pre-wrap rounded-[10px] bg-[rgb(65,104,135)] px-3 py-2.5 text-[13px] text-white">
+                    <div className="mb-1 flex items-center gap-1.5">
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                           d="M10.5438301421875,1.20522402375C10.2612226621875,0.9127117917500001,9.7924292421875,0.9127117917500001,9.5098224121875,1.20522402375C9.2496899361875,1.48194375375,9.2496899361875,1.91327315375,9.5098224121875,2.18999294375C12.6789412421875,5.36530444375,12.6789412421875,10.50693514375,9.5098224121875,13.68224584375C9.2218237221875,13.97060384375,9.2218237221875,14.43774284375,9.5098224121875,14.72610184375C9.7981799821875,15.01410084375,10.2653193521875,15.01410084375,10.5536774421875,14.72610184375C14.2622752421875,10.98047544375,14.2578797421875,4.94544484375,10.5438301421875,1.20522402375Z"
@@ -170,34 +169,36 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
                           fillOpacity="0.8"
                         />
                       </svg>
-                      <span className="opacity-90 text-white">{(matchedVoice?.duration ?? 0) + '"'}</span>
+                      <span className="text-white opacity-90">{(matchedVoice?.duration ?? 0) + '"'}</span>
                     </div>
-                    <div className="opacity-95 text-white">{m.content}</div>
+                    <div className="text-white opacity-95">{m.content}</div>
                   </div>
                 ) : (
                   <div
-                    className={`max-w-[80%] px-2.5 py-2 rounded-[10px] text-[13px] whitespace-pre-wrap ${
+                    className={`max-w-[80%] whitespace-pre-wrap rounded-[10px] px-2.5 py-2 text-[13px] ${
                       m.role === 'user' ? 'bg-[#416887] text-white' : 'bg-gray-100 text-gray-900'
                     }`}
                   >
                     {m.role === 'assistant' ? renderContent(m.content) : m.content}
-                    {m.role === 'assistant' && agentApi?.isStreaming && idx === (agentApi?.history?.length ?? 1) - 1 && (
-                      <span className="inline-block ml-1.5 w-3 h-3 border-2 border-gray-300 border-t-gray-500 rounded-full animate-[agent-spinner_0.9s_linear_infinite] align-middle" />
-                    )}
+                    {m.role === 'assistant' &&
+                      agentApi?.isStreaming &&
+                      idx === (agentApi?.history?.length ?? 1) - 1 && (
+                        <span className="ml-1.5 inline-block h-3 w-3 animate-[agent-spinner_0.9s_linear_infinite] rounded-full border-2 border-gray-300 border-t-gray-500 align-middle" />
+                      )}
                   </div>
                 )}
               </div>
             );
           })}
         </div>
-        <div className="p-3 border-t border-gray-200">
-          <div className="relative bg-gray-100 border border-gray-200 rounded-xl">
+        <div className="border-t border-gray-200 p-3">
+          <div className="relative rounded-xl border border-gray-200 bg-gray-100">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="输入您的需求…"
               rows={3}
-              className="w-full resize-none outline-none border-none bg-transparent py-3 px-11 pr-12 text-[13px]"
+              className="w-full resize-none border-none bg-transparent px-11 py-3 pr-12 text-[13px] outline-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -208,7 +209,7 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
             {/* 左侧加号 */}
             <button
               title="更多"
-              className="absolute left-2.5 bottom-2.5 w-6 h-6 rounded-full border border-gray-200 bg-white text-gray-500 flex items-center justify-center cursor-pointer"
+              className="absolute bottom-2.5 left-2.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500"
               onClick={() => {
                 /* 预留：打开更多操作 */
               }}
@@ -218,7 +219,7 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
             {/* 右侧语音图标，点击开始/结束录音 */}
             <button
               title={isRecording ? '停止' : '语音'}
-              className={`absolute right-12 bottom-2.5 w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center cursor-pointer ${
+              className={`absolute bottom-2.5 right-12 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-gray-200 ${
                 isRecording ? 'bg-yellow-200 text-yellow-700' : 'bg-white text-gray-500'
               }`}
               onClick={toggleRecord}
@@ -243,7 +244,7 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
             <button
               title="发送"
               onClick={run}
-              className="absolute right-2.5 bottom-2.5 w-7 h-7 rounded-full border-none bg-[#4D8F9D] text-white flex items-center justify-center cursor-pointer"
+              className="absolute bottom-2.5 right-2.5 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-none bg-[#4D8F9D] text-white"
             >
               <svg
                 width="14"
