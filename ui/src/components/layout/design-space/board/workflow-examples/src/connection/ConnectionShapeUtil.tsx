@@ -348,13 +348,24 @@ function ConnectionCenterHandle({
 }) {
 	const editor = useEditor()
 
-	// Only show the center handle when zoomed in and the connection is fully bound
+	// Only show the center handle when zoomed in, the connection is fully bound,
+	// AND both ends are connected to NodeShape (not Instruction/Output/Workflow)
 	const shouldShowCenterHandle = useValue(
 		'shouldShowCenterHandle',
 		() => {
 			const bindings = getConnectionBindings(editor, connection)
 			const isFullyBound = !!bindings.start && !!bindings.end
-			return editor.getZoomLevel() > 0.5 && isFullyBound
+			if (!isFullyBound) return false
+			
+			// Check if both ends are NodeShape types
+			const startShape = bindings.start ? editor.getShape(bindings.start.toId) : null
+			const endShape = bindings.end ? editor.getShape(bindings.end.toId) : null
+			
+			const bothAreNodes = 
+				startShape && editor.isShapeOfType<NodeShape>(startShape, 'node') &&
+				endShape && editor.isShapeOfType<NodeShape>(endShape, 'node')
+			
+			return editor.getZoomLevel() > 0.5 && bothAreNodes
 		},
 		[editor, connection.id]
 	)
