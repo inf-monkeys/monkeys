@@ -19,12 +19,13 @@ import {
 	useValue,
 	vecModelValidator,
 } from 'tldraw'
+import { getAllConnectedShapes } from '../../../shapes/ports/getAllConnectedShapes'
 import { onCanvasComponentPickerState } from '../../../workflow-ui/OnCanvasComponentPicker'
 import {
 	CONNECTION_CENTER_HANDLE_HOVER_SIZE_PX,
 	CONNECTION_CENTER_HANDLE_SIZE_PX,
 } from '../constants'
-import { getAllConnectedNodes, getNodeOutputPortInfo, getNodePorts } from '../nodes/nodePorts'
+import { getNodeOutputPortInfo, getNodePorts } from '../nodes/nodePorts'
 import { NodeShape } from '../nodes/NodeShapeUtil'
 import { STOP_EXECUTION } from '../nodes/types/shared'
 import { getPortAtPoint } from '../ports/getPortAtPoint'
@@ -36,7 +37,6 @@ import {
 	removeConnectionBinding,
 } from './ConnectionBindingUtil'
 import { insertNodeWithinConnection } from './insertNodeWithinConnection'
-import { getAllConnectedShapes } from '../../../shapes/ports/getAllConnectedShapes'
 
 /**
  * A connection shape is a directed connection between two node shapes. It has a start point, and an
@@ -195,7 +195,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		})
 
 		// create or update the connection binding for this connection terminal
-		createOrUpdateConnectionBinding(this.editor, connection, target.shape, {
+		createOrUpdateConnectionBinding(this.editor, connection, target.shape.id, {
 			portId: target.port.id,
 			terminal: draggingTerminal,
 		})
@@ -220,53 +220,64 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 			return
 		}
 
-		// If we were creating a new connection and didn't attach it to anything, open the component
-		// picker to let the user choose a node to create.
+		// If we were creating a new connection and didn't attach it to anything, 
+		// check if we should open the component picker.
+		// Only open the picker for NodeShape connections, not for Instruction/Output/Workflow
 		if (isCreatingShape && draggingTerminal === 'end') {
-			this.editor.selectNone()
-			onCanvasComponentPickerState.set(this.editor, {
-				connectionShapeId: connection.id,
-				location: draggingTerminal,
-				onClose: () => {
-					// if we didn't attach the connection to anything, delete it
-					const bindings = getConnectionBindings(this.editor, connection)
-					if (!bindings.start || !bindings.end) {
-						this.editor.deleteShapes([connection.id])
-					}
-				},
-				onPick: (nodeType, terminalInPageSpace) => {
-					// create the node based on the user's selection:
-					const newNodeId = createShapeId()
-					this.editor.createShape({
-						type: 'node',
-						id: newNodeId,
-						x: terminalInPageSpace.x,
-						y: terminalInPageSpace.y,
-						props: {
-							node: nodeType,
-						},
-					})
-					this.editor.select(newNodeId)
-
-					// Position the node so its input port aligns with the connection end
-					const ports = getNodePorts(this.editor, newNodeId)
-					const firstInputPort = Object.values(ports).find((p) => p.terminal === 'end')
-					if (firstInputPort) {
-						this.editor.updateShape({
-							id: newNodeId,
+			// Check if the start binding is connected to a NodeShape
+			const startShape = bindings.start ? this.editor.getShape(bindings.start.toId) : null
+			const isNodeShapeConnection = startShape && this.editor.isShapeOfType<NodeShape>(startShape, 'node')
+			
+			if (isNodeShapeConnection) {
+				// Only open the component picker for NodeShape connections
+				this.editor.selectNone()
+				onCanvasComponentPickerState.set(this.editor, {
+					connectionShapeId: connection.id,
+					location: draggingTerminal,
+					onClose: () => {
+						// if we didn't attach the connection to anything, delete it
+						const bindings = getConnectionBindings(this.editor, connection)
+						if (!bindings.start || !bindings.end) {
+							this.editor.deleteShapes([connection.id])
+						}
+					},
+					onPick: (nodeType, terminalInPageSpace) => {
+						// create the node based on the user's selection:
+						const newNodeId = createShapeId()
+						this.editor.createShape({
 							type: 'node',
-							x: terminalInPageSpace.x - firstInputPort.x,
-							y: terminalInPageSpace.y - firstInputPort.y,
+							id: newNodeId,
+							x: terminalInPageSpace.x,
+							y: terminalInPageSpace.y,
+							props: {
+								node: nodeType,
+							},
 						})
+						this.editor.select(newNodeId)
 
-						// bind the connection to the node's first input port
-						createOrUpdateConnectionBinding(this.editor, connection, newNodeId, {
-							portId: firstInputPort.id,
-							terminal: draggingTerminal,
-						})
-					}
-				},
-			})
+						// Position the node so its input port aligns with the connection end
+						const ports = getNodePorts(this.editor, newNodeId)
+						const firstInputPort = Object.values(ports).find((p) => p.terminal === 'end')
+						if (firstInputPort) {
+							this.editor.updateShape({
+								id: newNodeId,
+								type: 'node',
+								x: terminalInPageSpace.x - firstInputPort.x,
+								y: terminalInPageSpace.y - firstInputPort.y,
+							})
+
+							// bind the connection to the node's first input port
+							createOrUpdateConnectionBinding(this.editor, connection, newNodeId, {
+								portId: firstInputPort.id,
+								terminal: draggingTerminal,
+							})
+						}
+					},
+				})
+			} else {
+				// For Instruction/Output/Workflow connections, just delete the unfinished connection
+				this.editor.deleteShapes([connection.id])
+			}
 		} else {
 			// if we're not creating a new connection and we just let go, there must be bindings. If
 			// not, let's interpret this as the user disconnecting the shape.
