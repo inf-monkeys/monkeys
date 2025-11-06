@@ -25,6 +25,7 @@ import {
 	CONNECTION_CENTER_HANDLE_SIZE_PX,
 } from '../constants'
 import { getAllConnectedNodes, getNodeOutputPortInfo, getNodePorts } from '../nodes/nodePorts'
+import { NodeShape } from '../nodes/NodeShapeUtil'
 import { STOP_EXECUTION } from '../nodes/types/shared'
 import { getPortAtPoint } from '../ports/getPortAtPoint'
 import { updatePortState } from '../ports/portState'
@@ -35,6 +36,7 @@ import {
 	removeConnectionBinding,
 } from './ConnectionBindingUtil'
 import { insertNodeWithinConnection } from './insertNodeWithinConnection'
+import { getAllConnectedShapes } from '../../../shapes/ports/getAllConnectedShapes'
 
 /**
  * A connection shape is a directed connection between two node shapes. It has a start point, and an
@@ -154,10 +156,10 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		const hasExistingConnection =
 			target?.existingConnections.some((c) => c.connectionId !== connection.id) ?? false
 
-		// find out which nodes would create a cycle based on what the other end of the connection
-		// is bound to
+		// find out which shapes would create a cycle based on what the other end of the connection
+		// is bound to - use generic version that works with all shape types
 		const nodesWhichWouldCreateACycle = oppositeTerminalShapeId
-			? getAllConnectedNodes(this.editor, oppositeTerminalShapeId, draggingTerminal)
+			? getAllConnectedShapes(this.editor, oppositeTerminalShapeId, draggingTerminal)
 			: null
 
 		// update our port UI state to highlight which ports are eligible to connect to
@@ -305,6 +307,7 @@ function ConnectionShape({ connection }: { connection: ConnectionShape }) {
 	])
 
 	// Check if this connection is inactive (carrying STOP_EXECUTION signal)
+	// Only applies to NodeShape connections
 	const isInactive = useValue(
 		'isInactive',
 		() => {
@@ -312,9 +315,16 @@ function ConnectionShape({ connection }: { connection: ConnectionShape }) {
 			if (!bindings.start) return false
 			const originShapeId = bindings.start?.toId
 			if (!originShapeId) return false
+			
+			// Only check for STOP_EXECUTION on NodeShape types
+			const originShape = editor.getShape(originShapeId)
+			if (!originShape || !editor.isShapeOfType<NodeShape>(originShape, 'node')) {
+				return false
+			}
+			
 			const outputs = getNodeOutputPortInfo(editor, originShapeId)
 			const output = outputs[bindings.start.props.portId]
-			return output.value === STOP_EXECUTION
+			return output?.value === STOP_EXECUTION
 		},
 		[connection.id, editor]
 	)

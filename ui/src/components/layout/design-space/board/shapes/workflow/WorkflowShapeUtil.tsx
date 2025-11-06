@@ -1,11 +1,16 @@
 import React from 'react';
 
-import { BaseBoxShapeUtil, Editor, HTMLContainer, resizeBox } from 'tldraw';
+import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d, resizeBox } from 'tldraw';
 
 import { vinesHeader } from '@/apis/utils';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 
+import { GenericPort } from '../ports/GenericPort';
+import { getShapePortConnections } from '../ports/portConnections';
+import { getWorkflowPorts } from '../ports/shapePorts';
 import { WorkflowShape } from './WorkflowShape.types';
+
+const PORT_RADIUS_PX = 8;
 
 // 形状级别的运行中请求控制器
 const workflowAbortControllers = new Map<string, AbortController>();
@@ -36,6 +41,33 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
     return resizeBox(shape, info);
   };
 
+  // Define geometry including ports
+  getGeometry(shape: WorkflowShape) {
+    const ports = getWorkflowPorts(this.editor, shape);
+
+    const portGeometries = Object.values(ports).map(
+      (port) =>
+        new Circle2d({
+          x: port.x - PORT_RADIUS_PX,
+          y: port.y - PORT_RADIUS_PX,
+          radius: PORT_RADIUS_PX,
+          isFilled: true,
+          isLabel: true,
+          excludeFromShapeBounds: true,
+        })
+    );
+
+    const bodyGeometry = new Rectangle2d({
+      width: shape.props.w,
+      height: shape.props.h,
+      isFilled: true,
+    });
+
+    return new Group2d({
+      children: [bodyGeometry, ...portGeometries],
+    });
+  }
+
   component(shape: WorkflowShape) {
     const bounds = this.editor.getShapeGeometry(shape).bounds;
 
@@ -55,7 +87,15 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
   }
 
   indicator(shape: WorkflowShape) {
-    return <rect width={shape.props.w} height={shape.props.h} />;
+    const ports = Object.values(getWorkflowPorts(this.editor, shape));
+    return (
+      <>
+        <rect width={shape.props.w} height={shape.props.h} />
+        {ports.map((port) => (
+          <circle key={port.id} cx={port.x} cy={port.y} r={PORT_RADIUS_PX} />
+        ))}
+      </>
+    );
   }
 }
 
@@ -63,26 +103,49 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
   // 获取参数连接点的引用
   const paramConnectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // 检测连接的Instruction并自动填充参数
+  // 使用新的 ConnectionBinding 系统检测连接的 Instruction 并自动填充参数
   const detectAndFillInstructionInputs = () => {
-    const allShapes = editor.getCurrentPageShapes();
-    const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
-    const selfBounds = editor.getShapePageBounds(shape.id as any);
-
-    if (!selfBounds) return;
-
-    const isPointInRect = (p: { x: number; y: number }, r: { x: number; y: number; w: number; h: number }) =>
-      p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
-    const expandRect = (r: { x: number; y: number; w: number; h: number }, padding = 16) => ({
-      x: r.x - padding,
-      y: r.y - padding,
-      w: r.w + padding * 2,
-      h: r.h + padding * 2,
-    });
-
     const newConnections: Array<{ paramName: string; instructionId: string }> = [];
+    
+    // 使用新的端口连接系统
+    const connections = getShapePortConnections(editor, shape.id);
+    
+    for (const connection of connections) {
+      // 查找连接到 Workflow 输入端口的连接（terminal === 'end'）
+      if (connection.terminal === 'end') {
+        const connectedShape = editor.getShape(connection.connectedShapeId);
+        
+        // 检查是否连接到 Instruction
+        if (connectedShape?.type === 'instruction') {
+          // 从端口 ID 中提取参数名称 (格式: "param_xxx")
+          const paramName = connection.ownPortId.replace('param_', '');
+          
+          newConnections.push({
+            paramName,
+            instructionId: connection.connectedShapeId as string,
+          });
+        }
+      }
+    }
+    
+    // 如果没有找到新连接，回退检查旧的箭头连接（兼容性）
+    if (newConnections.length === 0) {
+      const allShapes = editor.getCurrentPageShapes();
+      const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
+      const selfBounds = editor.getShapePageBounds(shape.id as any);
+      
+      if (!selfBounds) return;
+      
+      const isPointInRect = (p: { x: number; y: number }, r: { x: number; y: number; w: number; h: number }) =>
+        p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+      const expandRect = (r: { x: number; y: number; w: number; h: number }, padding = 16) => ({
+        x: r.x - padding,
+        y: r.y - padding,
+        w: r.w + padding * 2,
+        h: r.h + padding * 2,
+      });
 
-    arrows.forEach((arrow) => {
+      arrows.forEach((arrow) => {
       const start = arrow.props.start as any;
       const end = arrow.props.end as any;
 
@@ -141,7 +204,8 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           }
         });
       }
-    });
+      });
+    }
 
     // 填充参数值
     if (newConnections.length > 0) {
@@ -204,41 +268,41 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
     });
   };
 
+  // 使用新的 ConnectionBinding 系统检测连接的 Output
   const detectConnectedOutputs = (): string[] => {
-    // 宽松判定（端点在矩形内+padding）
-    const isPointInRect = (p: { x: number; y: number }, r: { x: number; y: number; w: number; h: number }) =>
-      p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
-    const expandRect = (r: { x: number; y: number; w: number; h: number }, padding = 24) => ({
-      x: r.x - padding,
-      y: r.y - padding,
-      w: r.w + padding * 2,
-      h: r.h + padding * 2,
-    });
     const outputs: string[] = [];
-    const allShapes = editor.getCurrentPageShapes();
-    const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
-    const selfBounds = editor.getShapePageBounds(shape.id as any);
-    arrows.forEach((arrow) => {
-      const start = arrow.props.start as any;
-      const end = arrow.props.end as any;
-      // 绑定优先
-      if (start?.type === 'binding' && start.boundShapeId === shape.id && end?.type === 'binding') {
-        const endShape = editor.getShape(end.boundShapeId);
-        if (endShape?.type === 'output') outputs.push(end.boundShapeId);
-        return;
-      }
-      // 宽松：判断端点是否位于本 Workflow 和某个 Output 区域
-      const startAbs = { x: arrow.x + (start?.x ?? 0), y: arrow.y + (start?.y ?? 0) };
-      const endAbs = { x: arrow.x + (end?.x ?? 0), y: arrow.y + (end?.y ?? 0) };
-      if (selfBounds && isPointInRect(startAbs, expandRect(selfBounds))) {
-        for (const s of allShapes) {
-          if (s.type !== 'output') continue;
-          const b = editor.getShapePageBounds(s.id as any);
-          if (!b) continue;
-          if (isPointInRect(endAbs, expandRect(b))) outputs.push(s.id as any);
+    
+    // 使用新的端口连接系统
+    const connections = getShapePortConnections(editor, shape.id);
+    
+    for (const connection of connections) {
+      // 查找从 Workflow 的 output 端口出发的连接（terminal === 'start'）
+      if (connection.terminal === 'start' && connection.ownPortId === 'output') {
+        const connectedShape = editor.getShape(connection.connectedShapeId);
+        if (connectedShape?.type === 'output') {
+          outputs.push(connection.connectedShapeId as string);
         }
       }
-    });
+    }
+    
+    // 如果没有找到新连接，回退检查旧的箭头连接（兼容性）
+    if (outputs.length === 0) {
+      const allShapes = editor.getCurrentPageShapes();
+      const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
+      
+      arrows.forEach((arrow) => {
+        const start = arrow.props.start as any;
+        const end = arrow.props.end as any;
+        
+        if (start?.type === 'binding' && start.boundShapeId === shape.id && end?.type === 'binding') {
+          const endShape = editor.getShape(end.boundShapeId);
+          if (endShape?.type === 'output') {
+            outputs.push(end.boundShapeId);
+          }
+        }
+      });
+    }
+    
     return Array.from(new Set(outputs));
   };
 
@@ -261,7 +325,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
       if (detected.length === 0) {
         console.warn('[Workflow] 没有连接的 Output 框');
-        alert('请先用箭头工具连接到 Output 框');
+        alert('请先连接到 Output 框');
         return;
       }
       // 同步存储 connections
@@ -315,7 +379,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           type: 'workflow',
           props: { ...shape.props, isRunning: false },
         });
-        alert('请先用箭头工具连接到 Output 框');
+        alert('请先连接到 Output 框');
         return;
       }
 
@@ -450,11 +514,6 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
     }
   };
 
-  const handleConnectionPoint = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // 触发连线模式
-    editor.setCurrentTool('arrow');
-  };
 
   return (
     <div
@@ -466,7 +525,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'visible',
+        overflow: 'hidden',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         pointerEvents: 'all',
       }}
@@ -547,7 +606,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       </div>
 
       {/* 内容区域 */}
-      <div style={{ flex: 1, padding: '12px 12px 12px 24px', position: 'relative', overflow: 'visible' }}>
+      <div style={{ flex: 1, padding: '12px 12px 12px 24px', position: 'relative', overflow: 'auto' }}>
         <div style={{ marginBottom: '8px' }}>
           <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
             {shape.props.workflowName || '未命名工作流'}
@@ -569,33 +628,6 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
               return (
                 <div key={param.name} style={{ marginBottom: '8px', position: 'relative', paddingLeft: '4px' }}>
-                  {/* 参数连接点 */}
-                  <div
-                    ref={(el) => {
-                      if (el) {
-                        paramConnectionRefs.current.set(param.name, el);
-                      }
-                    }}
-                    onPointerDown={(e) => e.stopPropagation()}
-                    style={{
-                      position: 'absolute',
-                      left: '-28px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      width: '14px',
-                      height: '14px',
-                      backgroundColor: isConnected ? '#10B981' : '#9CA3AF',
-                      border: '2px solid white',
-                      borderRadius: '50%',
-                      cursor: 'crosshair',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                      zIndex: 100,
-                      pointerEvents: 'auto',
-                      transition: 'background-color 0.2s',
-                    }}
-                    title={`连接点: ${param.displayName || param.name}`}
-                  />
-
                   <label
                     style={{
                       display: 'flex',
@@ -780,29 +812,13 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         </div>
       </div>
 
-      {/* 右侧连接点（输出到Output） */}
-      <div
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          handleConnectionPoint(e as any);
-        }}
-        style={{
-          position: 'absolute',
-          right: '-8px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '16px',
-          height: '16px',
-          backgroundColor: '#8B5CF6',
-          border: '2px solid white',
-          borderRadius: '50%',
-          cursor: 'crosshair',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          zIndex: 10,
-          pointerEvents: 'auto',
-        }}
-        title="输出到Output框"
-      />
+      {/* 输入参数端口 - 在顶层渲染 */}
+      {shape.props.inputParams && shape.props.inputParams.map((param, index) => (
+        <GenericPort key={param.name} shapeId={shape.id} portId={`param_${param.name}`} />
+      ))}
+
+      {/* Output Port - 使用通用的 Port 组件 */}
+      <GenericPort shapeId={shape.id} portId="output" />
     </div>
   );
 }

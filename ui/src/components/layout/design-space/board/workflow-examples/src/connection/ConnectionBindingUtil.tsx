@@ -11,6 +11,7 @@ import {
 	TLBaseBinding,
 	TLShapeId,
 } from 'tldraw'
+import { getShapePorts } from '../../../shapes/ports/shapePorts'
 import { getNodePorts } from '../nodes/nodePorts'
 import { NodeShape } from '../nodes/NodeShapeUtil'
 import { onNodePortConnect, onNodePortDisconnect } from '../nodes/nodeTypes'
@@ -52,9 +53,14 @@ export class ConnectionBindingUtil extends BindingUtil<ConnectionBinding> {
 
 	onAfterCreate({ binding }: BindingOnCreateOptions<ConnectionBinding>): void {
 		// Our ports system has an `onConnect` callback - call it when we create a connection
-		const node = this.editor.getShape(binding.toId)
-		if (!node || !this.editor.isShapeOfType<NodeShape>(node, 'node')) return
-		onNodePortConnect(this.editor, node, binding.props.portId)
+		const shape = this.editor.getShape(binding.toId)
+		if (!shape) return
+		
+		// Support node shapes
+		if (this.editor.isShapeOfType<NodeShape>(shape, 'node')) {
+			onNodePortConnect(this.editor, shape, binding.props.portId)
+		}
+		// Support instruction, output, workflow shapes (they don't have connect callbacks currently)
 	}
 
 	onAfterChange({ bindingBefore, bindingAfter }: BindingOnChangeOptions<ConnectionBinding>): void {
@@ -63,26 +69,34 @@ export class ConnectionBindingUtil extends BindingUtil<ConnectionBinding> {
 			bindingBefore.props.portId !== bindingAfter.props.portId ||
 			bindingBefore.toId !== bindingAfter.toId
 		) {
-			const nodeBefore = this.editor.getShape(bindingBefore.toId)
-			const nodeAfter = this.editor.getShape(bindingAfter.toId)
-			if (
-				!nodeBefore ||
-				!nodeAfter ||
-				!this.editor.isShapeOfType<NodeShape>(nodeBefore, 'node') ||
-				!this.editor.isShapeOfType<NodeShape>(nodeAfter, 'node')
-			) {
+			const shapeBefore = this.editor.getShape(bindingBefore.toId)
+			const shapeAfter = this.editor.getShape(bindingAfter.toId)
+			if (!shapeBefore || !shapeAfter) {
 				return
 			}
-			onNodePortDisconnect(this.editor, nodeBefore, bindingBefore.props.portId)
-			onNodePortConnect(this.editor, nodeAfter, bindingAfter.props.portId)
+			
+			// Support node shapes
+			if (
+				this.editor.isShapeOfType<NodeShape>(shapeBefore, 'node') &&
+				this.editor.isShapeOfType<NodeShape>(shapeAfter, 'node')
+			) {
+				onNodePortDisconnect(this.editor, shapeBefore, bindingBefore.props.portId)
+				onNodePortConnect(this.editor, shapeAfter, bindingAfter.props.portId)
+			}
+			// Support instruction, output, workflow shapes (they don't have connect callbacks currently)
 		}
 	}
 
 	onAfterDelete({ binding }: BindingOnDeleteOptions<ConnectionBinding>): void {
-		// When we're deleting a connection, we need to call the node's port disconnect callback
-		const node = this.editor.getShape(binding.toId)
-		if (!node || !this.editor.isShapeOfType<NodeShape>(node, 'node')) return
-		onNodePortDisconnect(this.editor, node, binding.props.portId)
+		// When we're deleting a connection, we need to call the shape's port disconnect callback
+		const shape = this.editor.getShape(binding.toId)
+		if (!shape) return
+		
+		// Support node shapes
+		if (this.editor.isShapeOfType<NodeShape>(shape, 'node')) {
+			onNodePortDisconnect(this.editor, shape, binding.props.portId)
+		}
+		// Support instruction, output, workflow shapes (they don't have connect callbacks currently)
 	}
 }
 
@@ -130,10 +144,21 @@ export function getConnectionBindingPositionInPageSpace(
 ) {
 	// Find the shape that this binding is bound to
 	const targetShape = editor.getShape(binding.toId)
-	if (!targetShape || !editor.isShapeOfType<NodeShape>(targetShape, 'node')) return null
+	if (!targetShape) return null
 
-	// Find the port in the shape that the connection is bound to
-	const port = getNodePorts(editor, targetShape)?.[binding.props.portId]
+	let port = null
+	
+	// Get ports for different shape types
+	if (editor.isShapeOfType<NodeShape>(targetShape, 'node')) {
+		port = getNodePorts(editor, targetShape)?.[binding.props.portId]
+	} else if (
+		targetShape.type === 'instruction' ||
+		targetShape.type === 'output' ||
+		targetShape.type === 'workflow'
+	) {
+		port = getShapePorts(editor, targetShape as any)?.[binding.props.portId]
+	}
+	
 	if (!port) return null
 
 	// Transform the port position from shape space to page space

@@ -1,6 +1,10 @@
-import { BaseBoxShapeUtil, Editor, HTMLContainer, resizeBox } from 'tldraw';
+import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d, resizeBox } from 'tldraw';
 
 import { OutputShape } from '../instruction/InstructionShape.types';
+import { getOutputPorts } from '../ports/shapePorts';
+import { GenericPort } from '../ports/GenericPort';
+
+const PORT_RADIUS_PX = 8;
 
 export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
   static override type = 'output' as const;
@@ -24,6 +28,33 @@ export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
     return resizeBox(shape, info);
   };
 
+  // Define geometry including ports
+  getGeometry(shape: OutputShape) {
+    const ports = getOutputPorts(this.editor, shape);
+
+    const portGeometries = Object.values(ports).map(
+      (port) =>
+        new Circle2d({
+          x: port.x - PORT_RADIUS_PX,
+          y: port.y - PORT_RADIUS_PX,
+          radius: PORT_RADIUS_PX,
+          isFilled: true,
+          isLabel: true,
+          excludeFromShapeBounds: true,
+        })
+    );
+
+    const bodyGeometry = new Rectangle2d({
+      width: shape.props.w,
+      height: shape.props.h,
+      isFilled: true,
+    });
+
+    return new Group2d({
+      children: [bodyGeometry, ...portGeometries],
+    });
+  }
+
   component(shape: OutputShape) {
     const bounds = this.editor.getShapeGeometry(shape).bounds;
 
@@ -43,15 +74,19 @@ export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
   }
 
   indicator(shape: OutputShape) {
-    return <rect width={shape.props.w} height={shape.props.h} />;
+    const ports = Object.values(getOutputPorts(this.editor, shape));
+    return (
+      <>
+        <rect width={shape.props.w} height={shape.props.h} />
+        {ports.map((port) => (
+          <circle key={port.id} cx={port.x} cy={port.y} r={PORT_RADIUS_PX} />
+        ))}
+      </>
+    );
   }
 }
 
 function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: Editor }) {
-  const handleConnectionPoint = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // 连接点可以用于接收连线
-  };
 
   const hasImage = shape.props.imageUrl && shape.props.imageUrl.length > 0 && shape.props.imageUrl.startsWith('http');
   const hasContent = shape.props.content && shape.props.content.length > 0;
@@ -155,24 +190,8 @@ function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: E
         )}
       </div>
 
-      {/* 左侧连接点 */}
-      <div
-        onMouseDown={handleConnectionPoint}
-        style={{
-          position: 'absolute',
-          left: '-8px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '16px',
-          height: '16px',
-          backgroundColor: '#059669',
-          border: '2px solid white',
-          borderRadius: '50%',
-          cursor: 'crosshair',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          zIndex: 10,
-        }}
-      />
+      {/* Input Port - 使用通用的 Port 组件 */}
+      <GenericPort shapeId={shape.id} portId="input" />
     </div>
   );
 }

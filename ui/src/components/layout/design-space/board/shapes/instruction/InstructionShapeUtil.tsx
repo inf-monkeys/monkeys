@@ -1,9 +1,14 @@
-import { BaseBoxShapeUtil, Editor, HTMLContainer, resizeBox } from 'tldraw';
+import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d, resizeBox } from 'tldraw';
 
 import { vinesHeader } from '@/apis/utils';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 
+import { GenericPort } from '../ports/GenericPort';
+import { getShapePortConnections } from '../ports/portConnections';
+import { getInstructionPorts } from '../ports/shapePorts';
 import { InstructionShape } from './InstructionShape.types';
+
+const PORT_RADIUS_PX = 8;
 
 // 形状级别的运行中请求控制器
 const instructionAbortControllers = new Map<string, AbortController>();
@@ -32,6 +37,33 @@ export class InstructionShapeUtil extends BaseBoxShapeUtil<InstructionShape> {
     return resizeBox(shape, info);
   };
 
+  // Define geometry including ports
+  getGeometry(shape: InstructionShape) {
+    const ports = getInstructionPorts(this.editor, shape);
+
+    const portGeometries = Object.values(ports).map(
+      (port) =>
+        new Circle2d({
+          x: port.x - PORT_RADIUS_PX,
+          y: port.y - PORT_RADIUS_PX,
+          radius: PORT_RADIUS_PX,
+          isFilled: true,
+          isLabel: true,
+          excludeFromShapeBounds: true,
+        })
+    );
+
+    const bodyGeometry = new Rectangle2d({
+      width: shape.props.w,
+      height: shape.props.h,
+      isFilled: true,
+    });
+
+    return new Group2d({
+      children: [bodyGeometry, ...portGeometries],
+    });
+  }
+
   component(shape: InstructionShape) {
     const bounds = this.editor.getShapeGeometry(shape).bounds;
 
@@ -51,7 +83,15 @@ export class InstructionShapeUtil extends BaseBoxShapeUtil<InstructionShape> {
   }
 
   indicator(shape: InstructionShape) {
-    return <rect width={shape.props.w} height={shape.props.h} />;
+    const ports = Object.values(getInstructionPorts(this.editor, shape));
+    return (
+      <>
+        <rect width={shape.props.w} height={shape.props.h} />
+        {ports.map((port) => (
+          <circle key={port.id} cx={port.x} cy={port.y} r={PORT_RADIUS_PX} />
+        ))}
+      </>
+    );
   }
 }
 
@@ -78,41 +118,41 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
     });
   };
 
+  // 使用新的 ConnectionBinding 系统检测连接的 Output
   const detectConnectedOutputs = (): string[] => {
-    // 宽松判定（端点在矩形内+padding）
-    const isPointInRect = (p: { x: number; y: number }, r: { x: number; y: number; w: number; h: number }) =>
-      p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
-    const expandRect = (r: { x: number; y: number; w: number; h: number }, padding = 24) => ({
-      x: r.x - padding,
-      y: r.y - padding,
-      w: r.w + padding * 2,
-      h: r.h + padding * 2,
-    });
     const outputs: string[] = [];
-    const allShapes = editor.getCurrentPageShapes();
-    const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
-    const selfBounds = editor.getShapePageBounds(shape.id as any);
-    arrows.forEach((arrow) => {
-      const start = arrow.props.start as any;
-      const end = arrow.props.end as any;
-      // 绑定优先
-      if (start?.type === 'binding' && start.boundShapeId === shape.id && end?.type === 'binding') {
-        const endShape = editor.getShape(end.boundShapeId);
-        if (endShape?.type === 'output') outputs.push(end.boundShapeId);
-        return;
-      }
-      // 宽松：判断端点是否位于本 Instruction 和某个 Output 区域
-      const startAbs = { x: arrow.x + (start?.x ?? 0), y: arrow.y + (start?.y ?? 0) };
-      const endAbs = { x: arrow.x + (end?.x ?? 0), y: arrow.y + (end?.y ?? 0) };
-      if (selfBounds && isPointInRect(startAbs, expandRect(selfBounds))) {
-        for (const s of allShapes) {
-          if (s.type !== 'output') continue;
-          const b = editor.getShapePageBounds(s.id as any);
-          if (!b) continue;
-          if (isPointInRect(endAbs, expandRect(b))) outputs.push(s.id as any);
+    
+    // 使用新的端口连接系统
+    const connections = getShapePortConnections(editor, shape.id);
+    
+    for (const connection of connections) {
+      // 查找从 Instruction 的 output 端口出发的连接（terminal === 'start'）
+      if (connection.terminal === 'start' && connection.ownPortId === 'output') {
+        const connectedShape = editor.getShape(connection.connectedShapeId);
+        if (connectedShape?.type === 'output') {
+          outputs.push(connection.connectedShapeId as string);
         }
       }
-    });
+    }
+    
+    // 如果没有找到新连接，回退检查旧的箭头连接（兼容性）
+    if (outputs.length === 0) {
+      const allShapes = editor.getCurrentPageShapes();
+      const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
+      
+      arrows.forEach((arrow) => {
+        const start = arrow.props.start as any;
+        const end = arrow.props.end as any;
+        
+        if (start?.type === 'binding' && start.boundShapeId === shape.id && end?.type === 'binding') {
+          const endShape = editor.getShape(end.boundShapeId);
+          if (endShape?.type === 'output') {
+            outputs.push(end.boundShapeId);
+          }
+        }
+      });
+    }
+    
     return Array.from(new Set(outputs));
   };
 
@@ -140,23 +180,23 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
       }
     }
 
-    if (!shape.props.connections || shape.props.connections.length === 0) {
-      const detected = detectConnectedOutputs();
-
-      if (detected.length === 0) {
-        console.warn('[Instruction] 没有连接的 Output 框');
-        alert('请先用箭头工具连接到 Output 框');
-        return;
-      }
-      // 同步存储 connections，后续也用运行时 detected 为准
-      try {
-        editor.updateShape<InstructionShape>({
-          id: shape.id,
-          type: 'instruction',
-          props: { ...shape.props, connections: detected },
-        });
-      } catch {}
+    // 检测连接的 Output（使用新的 ConnectionBinding 系统）
+    const detected = detectConnectedOutputs();
+    
+    if (detected.length === 0) {
+      console.warn('[Instruction] 没有连接的 Output 框');
+      alert('请先连接到 Output 框');
+      return;
     }
+    
+    // 同步存储 connections，后续也用运行时 detected 为准
+    try {
+      editor.updateShape<InstructionShape>({
+        id: shape.id,
+        type: 'instruction',
+        props: { ...shape.props, connections: detected },
+      });
+    } catch {}
 
     // 如果已在运行，则执行“停止”逻辑
     if (shape.props.isRunning) {
@@ -398,11 +438,6 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
     }
   };
 
-  const handleConnectionPoint = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // 触发连线模式
-    editor.setCurrentTool('arrow');
-  };
 
   return (
     <div
@@ -535,28 +570,8 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         )}
       </div>
 
-      {/* 右侧连接点 */}
-      <div
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          handleConnectionPoint(e as any);
-        }}
-        style={{
-          position: 'absolute',
-          right: '-8px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: '16px',
-          height: '16px',
-          backgroundColor: '#3B82F6',
-          border: '2px solid white',
-          borderRadius: '50%',
-          cursor: 'crosshair',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          zIndex: 10,
-          pointerEvents: 'auto',
-        }}
-      />
+      {/* Output Port - 使用通用的 Port 组件 */}
+      <GenericPort shapeId={shape.id} portId="output" />
     </div>
   );
 }

@@ -14,6 +14,8 @@ import {
 } from '../constants.tsx'
 import { getNodePortConnections, getNodePorts } from '../nodes/nodePorts'
 import { PortId } from '../ports/Port'
+import { getShapePortConnections } from '../../../shapes/ports/portConnections'
+import { NodeShape } from '../nodes/NodeShapeUtil'
 
 // Information about which port is being pointed at
 interface PointingPortInfo {
@@ -38,7 +40,8 @@ export class PointingPort extends StateNode {
 		// we treat the pointer as a click.
 		if (this.editor.inputs.isDragging) {
 			const allowsMultipleConnections = this.info?.terminal === 'start'
-			const hasExistingConnection = getNodePortConnections(this.editor, this.info!.shapeId).find(
+			// Use generic connection getter that works with all shape types
+			const hasExistingConnection = getShapePortConnections(this.editor, this.info!.shapeId).find(
 				(c) => c.ownPortId === this.info!.portId
 			)
 
@@ -110,10 +113,18 @@ export class PointingPort extends StateNode {
 		if (this.info?.terminal !== 'start') return
 
 		// Don't create new connections if one already exists
-		const hasExistingConnection = getNodePortConnections(this.editor, this.info!.shapeId).find(
+		// Use generic connection getter that works with all shape types
+		const hasExistingConnection = getShapePortConnections(this.editor, this.info!.shapeId).find(
 			(c) => c.ownPortId === this.info!.portId
 		)
 		if (hasExistingConnection) return
+		
+		// Only create new nodes for NodeShape types
+		// For other shapes (Instruction, Output, Workflow), just allow manual dragging
+		const sourceShape = this.editor.getShape(this.info!.shapeId)
+		if (!sourceShape || !this.editor.isShapeOfType<NodeShape>(sourceShape, 'node')) {
+			return
+		}
 
 		// Get the bounds of the source node
 		const bounds = this.editor.getShapePageBounds(this.info!.shapeId)
