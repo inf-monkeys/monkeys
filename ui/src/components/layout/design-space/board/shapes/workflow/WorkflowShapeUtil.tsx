@@ -395,15 +395,16 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
       console.log('[Workflow] 执行参数:', inputs);
 
-      // 调用工作流执行API
-      const response = await fetch(`/api/workflow/${shape.props.workflowId}/execute`, {
+      // 调用工作流执行API（正确的路由）
+      const response = await fetch(`/api/workflow/executions/${shape.props.workflowId}/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...vinesHeader({ useToast: true }),
         },
         body: JSON.stringify({
-          inputs: inputs,
+          inputData: inputs,
+          waitForWorkflowFinished: true, // 等待工作流完成
         }),
         signal: controller.signal,
       });
