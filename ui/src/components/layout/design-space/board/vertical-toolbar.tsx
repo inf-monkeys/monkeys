@@ -124,6 +124,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
 
   // 定义工具栏中要显示的工具列表 - 使用正确的工具ID
   const oneOnOne = (oem as any)?.theme?.designProjects?.oneOnOne === true;
+  // 基础工具栏工具（不包含 workflow 相关工具）
   const toolbarTools = [
     { id: 'select', label: '选择', icon: 'tool-pointer' },
     { id: 'hand', label: '拖动', icon: 'tool-hand' },
@@ -134,6 +135,10 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     { id: 'eraser', label: '橡皮擦', icon: 'tool-eraser' },
     { id: 'text', label: '文本', icon: 'tool-text' },
     { id: 'note', label: '便签', icon: 'tool-note' },
+  ];
+
+  // Workflow 相关工具（独立工具栏）
+  const workflowTools = [
     { id: 'instruction', label: 'Instruction', icon: 'tool-text' },
     { id: 'output', label: 'Output', icon: 'tool-frame' },
     { id: 'workflow', label: '工作流', icon: 'tool-workflow' },
@@ -387,6 +392,53 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
               );
             }
 
+            // instruction, output, workflow, workflow-node 已移到独立的 workflow 工具栏
+            if (tool.id === 'instruction' || tool.id === 'output' || tool.id === 'workflow' || tool.id === 'workflow-node') {
+              return null;
+            }
+
+            if (tool.id === 'style-panel') {
+              return (
+                <button
+                  key={tool.id}
+                  ref={stylePanelButtonRef}
+                  className={`tool-button ${isStylePanelVisible ? 'selected' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsStylePanelVisible((prev) => !prev);
+                  }}
+                  title={tool.label}
+                  style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                >
+                  <VinesIcon size="xs">lucide:palette</VinesIcon>
+                </button>
+              );
+            }
+
+            return (
+              <button
+                key={tool.id}
+                className={`tool-button ${currentToolId === tool.id ? 'selected' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  editor.setCurrentTool(tool.id);
+                  setCurrentToolId(tool.id);
+                  setIsDrawMenuOpen(false);
+                }}
+                title={tool.label}
+                style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+              >
+                <TldrawUiIcon icon={tool.icon} label={tool.label || tool.id} />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Workflow 工具栏（独立） */}
+        <div className="custom-toolbar" style={{ marginLeft: 20 }}>
+          {workflowTools.map((tool) => {
             if (tool.id === 'instruction') {
               const activeId = instructionVariant;
               const isActive = currentToolId === 'instruction';
@@ -491,6 +543,26 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     </div>
                   )}
                 </div>
+              );
+            }
+
+            if (tool.id === 'output') {
+              const isActive = currentToolId === 'output';
+              return (
+                <button
+                  key={tool.id}
+                  className={`tool-button ${isActive ? 'selected' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    editor.setCurrentTool('output');
+                    setCurrentToolId('output');
+                  }}
+                  title={tool.label}
+                  style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                >
+                  <span style={{ fontSize: '16px', fontWeight: 'bold' }}>O</span>
+                </button>
               );
             }
 
@@ -791,46 +863,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
               );
             }
 
-            if (tool.id === 'style-panel') {
-              return (
-                <button
-                  key={tool.id}
-                  ref={stylePanelButtonRef}
-                  className={`tool-button ${isStylePanelVisible ? 'selected' : ''}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setIsStylePanelVisible((prev) => !prev);
-                  }}
-                  title={tool.label}
-                  style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
-                >
-                  <VinesIcon size="xs">lucide:palette</VinesIcon>
-                </button>
-              );
-            }
-
-            return (
-              <button
-                key={tool.id}
-                className={`tool-button ${currentToolId === tool.id ? 'selected' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  editor.setCurrentTool(tool.id);
-                  setCurrentToolId(tool.id);
-                  setIsDrawMenuOpen(false);
-                }}
-                title={tool.label}
-                style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
-              >
-                {tool.id === 'output' ? (
-                  <span style={{ fontSize: '16px', fontWeight: 'bold' }}>O</span>
-                ) : (
-                  <TldrawUiIcon icon={tool.icon} label={tool.label || tool.id} />
-                )}
-              </button>
-            );
+            return null;
           })}
         </div>
 
