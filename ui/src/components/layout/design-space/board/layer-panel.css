@@ -382,20 +382,7 @@
 	background-color: rgb(237, 237, 237) !important;
 }
 
-/* 隐藏 tldraw 右下角的水印图标 - 多种选择器 */
-.tl-watermark,
-div[class*="watermark"],
-div[class*="tl-watermark"],
-[data-testid*="watermark"],
-.tlui-watermark,
-.tldraw-watermark {
-	display: none !important;
-	visibility: hidden !important;
-	opacity: 0 !important;
-	width: 0 !important;
-	height: 0 !important;
-	overflow: hidden !important;
-}
+/* tldraw 右下角的水印图标已恢复显示 */
 
 /* 通用：隐藏左侧 layer-panel 内所有滚动条，但保留滚动功能 */
 .layer-panel,
