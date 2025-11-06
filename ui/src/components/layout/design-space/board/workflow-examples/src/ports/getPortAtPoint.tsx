@@ -35,6 +35,7 @@ export function getPortAtPoint(
 
 	// transform the ports to page space
 	const shapeTransform = editor.getShapePageTransform(shape)
+	if (!shapeTransform) return null
 
 	// find the port closest to the point
 	let bestPort: ShapePort | null = null
@@ -42,6 +43,9 @@ export function getPortAtPoint(
 
 	for (const port of Object.values(ports)) {
 		if (opts?.terminal && port.terminal !== opts.terminal) continue
+		
+		// Ensure port has valid x and y properties
+		if (typeof port.x !== 'number' || typeof port.y !== 'number') continue
 
 		const portInPageSpace = shapeTransform.applyToPoint(port)
 		const distance = Vec.Dist(point, portInPageSpace)

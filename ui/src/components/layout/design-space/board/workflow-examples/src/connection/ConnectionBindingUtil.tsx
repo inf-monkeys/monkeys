@@ -162,7 +162,13 @@ export function getConnectionBindingPositionInPageSpace(
 	if (!port) return null
 
 	// Transform the port position from shape space to page space
-	return editor.getShapePageTransform(targetShape).applyToPoint(port)
+	const shapeTransform = editor.getShapePageTransform(targetShape)
+	if (!shapeTransform) return null
+	
+	// Ensure port has valid x and y properties
+	if (typeof port.x !== 'number' || typeof port.y !== 'number') return null
+	
+	return shapeTransform.applyToPoint(port)
 }
 
 /**

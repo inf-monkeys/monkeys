@@ -34,7 +34,9 @@ export function getInstructionPorts(
 
 /**
  * Get ports for an Output shape
- * Output has one input port on the left side
+ * Output has:
+ * - One input port on the left side
+ * - One output port on the right side (so it can be used as input for next workflow)
  */
 export function getOutputPorts(
   editor: Editor,
@@ -44,6 +46,7 @@ export function getOutputPorts(
   if (!outputShape) return {};
 
   // Use shape props directly to avoid circular dependency with getGeometry
+  const width = outputShape.props.w;
   const height = outputShape.props.h;
   const centerY = height / 2;
 
@@ -53,6 +56,12 @@ export function getOutputPorts(
       x: 0, // Left side
       y: centerY,
       terminal: 'end', // Input port
+    },
+    output: {
+      id: 'output',
+      x: width, // Right side
+      y: centerY,
+      terminal: 'start', // Output port
     },
   };
 }

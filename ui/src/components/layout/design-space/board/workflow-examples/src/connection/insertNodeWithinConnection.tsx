@@ -23,13 +23,14 @@ export function insertNodeWithinConnection(editor: Editor, connection: Connectio
 			// get the original bindings of the connection
 			const originalBindings = getConnectionBindings(editor, connection)
 
-			// if the connection doesn't have bindings, we can't insert a node in the middle of it
-			if (!originalBindings.start || !originalBindings.end) return
+		// if the connection doesn't have bindings, we can't insert a node in the middle of it
+		if (!originalBindings.start || !originalBindings.end) return
 
-			// find the ideal position for the new node:
-			const startBounds = editor.getShapePageBounds(originalBindings.start.toId)!
-			const endBounds = editor.getShapePageBounds(originalBindings.end.toId)!
-			const newNodeY = (startBounds.top + endBounds.top) / 2
+		// find the ideal position for the new node:
+		const startBounds = editor.getShapePageBounds(originalBindings.start.toId)
+		const endBounds = editor.getShapePageBounds(originalBindings.end.toId)
+		if (!startBounds || !endBounds) return
+		const newNodeY = (startBounds.top + endBounds.top) / 2
 			const newNodeIdealX = (startBounds.right + endBounds.left - NODE_WIDTH_PX) / 2
 			const newNodeMin = startBounds.right + DEFAULT_NODE_SPACING_PX
 			const newNodeX = Math.max(newNodeIdealX, newNodeMin)
@@ -110,8 +111,9 @@ function moveNodesIfNeeded(editor: Editor, newNodeId: TLShapeId, rootNodeId: TLS
 	const toNudgeRight = new Map<TLShapeId, { initialX: number; amount: number }>()
 
 	// we start with the expanded bounds of the newly added node:
-	const newNodeBounds = editor.getShapePageBounds(newNodeId)!.clone()
-	visit(rootNodeId, newNodeBounds.expandBy(DEFAULT_NODE_SPACING_PX))
+	const newNodeBounds = editor.getShapePageBounds(newNodeId)
+	if (!newNodeBounds) return
+	visit(rootNodeId, newNodeBounds.clone().expandBy(DEFAULT_NODE_SPACING_PX))
 
 	function visit(nodeId: TLShapeId, parentExpandedBounds: Box) {
 		const node = editor.getShape(nodeId)
@@ -120,8 +122,9 @@ function moveNodesIfNeeded(editor: Editor, newNodeId: TLShapeId, rootNodeId: TLS
 		// if this node has already been visited, we need to continue on from the nudge we
 		// calculated last time:
 		const currentNudge = toNudgeRight.get(nodeId) ?? { initialX: node.x, amount: 0 }
-		const nodeBounds = editor
-			.getShapePageBounds(nodeId)!
+		const nodeBoundsRaw = editor.getShapePageBounds(nodeId)
+		if (!nodeBoundsRaw) return
+		const nodeBounds = nodeBoundsRaw
 			.clone()
 			.translate({ x: currentNudge.amount, y: 0 })
 

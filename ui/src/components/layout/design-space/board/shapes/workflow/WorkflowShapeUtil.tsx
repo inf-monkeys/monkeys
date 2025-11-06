@@ -57,9 +57,13 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
         })
     );
 
+    // Ensure valid dimensions
+    const width = Math.max(shape.props.w || 300, 1);
+    const height = Math.max(shape.props.h || 200, 1);
+
     const bodyGeometry = new Rectangle2d({
-      width: shape.props.w,
-      height: shape.props.h,
+      width,
+      height,
       isFilled: true,
     });
 
@@ -103,9 +107,9 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
   // 获取参数连接点的引用
   const paramConnectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
-  // 使用新的 ConnectionBinding 系统检测连接的 Instruction 并自动填充参数
+  // 使用新的 ConnectionBinding 系统检测连接的 Instruction 或 Output 并自动填充参数
   const detectAndFillInstructionInputs = () => {
-    const newConnections: Array<{ paramName: string; instructionId: string }> = [];
+    const newConnections: Array<{ paramName: string; instructionId?: string; outputId?: string }> = [];
     
     // 使用新的端口连接系统
     const connections = getShapePortConnections(editor, shape.id);
@@ -115,14 +119,21 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       if (connection.terminal === 'end') {
         const connectedShape = editor.getShape(connection.connectedShapeId);
         
+        // 从端口 ID 中提取参数名称 (格式: "param_xxx")
+        const paramName = connection.ownPortId.replace('param_', '');
+        
         // 检查是否连接到 Instruction
         if (connectedShape?.type === 'instruction') {
-          // 从端口 ID 中提取参数名称 (格式: "param_xxx")
-          const paramName = connection.ownPortId.replace('param_', '');
-          
           newConnections.push({
             paramName,
             instructionId: connection.connectedShapeId as string,
+          });
+        }
+        // 检查是否连接到 Output
+        else if (connectedShape?.type === 'output') {
+          newConnections.push({
+            paramName,
+            outputId: connection.connectedShapeId as string,
           });
         }
       }
@@ -212,22 +223,44 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       const updatedParams = shape.props.inputParams.map((param) => {
         const connection = newConnections.find((c) => c.paramName === param.name);
         if (connection) {
-          const instructionShape = editor.getShape(connection.instructionId as any) as any;
-          if (instructionShape && instructionShape.type === 'instruction') {
-            // 根据Instruction的输入模式获取值
-            if (instructionShape.props.inputMode === 'image') {
-              return { ...param, value: instructionShape.props.imageUrl || param.value };
-            } else {
-              return { ...param, value: instructionShape.props.content || param.value };
+          // 如果连接到 Instruction
+          if (connection.instructionId) {
+            const instructionShape = editor.getShape(connection.instructionId as any) as any;
+            if (instructionShape && instructionShape.type === 'instruction') {
+              // 根据Instruction的输入模式获取值
+              if (instructionShape.props.inputMode === 'image') {
+                return { ...param, value: instructionShape.props.imageUrl || param.value };
+              } else {
+                return { ...param, value: instructionShape.props.content || param.value };
+              }
+            }
+          }
+          // 如果连接到 Output
+          else if (connection.outputId) {
+            const outputShape = editor.getShape(connection.outputId as any) as any;
+            if (outputShape && outputShape.type === 'output') {
+              // 优先使用图片，如果没有图片则使用文本内容
+              if (outputShape.props.imageUrl && outputShape.props.imageUrl.trim()) {
+                return { ...param, value: outputShape.props.imageUrl };
+              } else if (outputShape.props.content && outputShape.props.content.trim()) {
+                return { ...param, value: outputShape.props.content };
+              }
             }
           }
         }
         return param;
       });
 
-      // 更新inputConnections
+      // 更新inputConnections（转换为兼容格式）
+      const compatibleConnections = newConnections
+        .filter((c) => c.instructionId) // 只保留有 instructionId 的连接（兼容旧格式）
+        .map((c) => ({
+          paramName: c.paramName,
+          instructionId: c.instructionId!,
+        }));
+      
       const currentConnectionsStr = JSON.stringify(shape.props.inputConnections || []);
-      const newConnectionsStr = JSON.stringify(newConnections);
+      const newConnectionsStr = JSON.stringify(compatibleConnections);
 
       if (
         currentConnectionsStr !== newConnectionsStr ||
@@ -239,7 +272,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           props: {
             ...shape.props,
             inputParams: updatedParams,
-            inputConnections: newConnections,
+            inputConnections: compatibleConnections,
           },
         });
       }
@@ -417,48 +450,184 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
       const responseData = await response.json();
       const data = responseData?.data || responseData;
-      let result = '';
-      let imageUrl = '';
+      let result: string = '';
+      let imageUrl: string = '';
 
       console.log('[Workflow] API 响应数据:', data);
 
-      // 提取结果
-      if (typeof data === 'string') {
-        result = data;
-      } else if (data && typeof data === 'object') {
-        // 尝试提取output相关字段
-        for (const key in data) {
-          if (key.startsWith('output')) {
-            const value = data[key];
-            if (typeof value === 'string' && value.trim()) {
-              result = value;
-              break;
+      // 辅助函数：递归查找嵌套对象中的 images 和 text
+      const findImagesAndText = (obj: any): { images: string[]; text: string } => {
+        const found: { images: string[]; text: string } = { images: [], text: '' };
+        
+        if (!obj || typeof obj !== 'object') return found;
+        
+        // 检查当前层级的 images 和 text
+        if (Array.isArray(obj.images) && obj.images.length > 0) {
+          found.images.push(...obj.images);
+        }
+        if (obj.text && typeof obj.text === 'string' && obj.text.trim()) {
+          found.text = obj.text;
+        }
+        
+        // 递归查找嵌套对象和数组
+        for (const key in obj) {
+          if (key === 'images' || key === 'text') continue; // 已经处理过了
+          
+          const value = obj[key];
+          if (Array.isArray(value)) {
+            // 如果是数组，遍历每个元素
+            for (const item of value) {
+              if (item && typeof item === 'object') {
+                const nested = findImagesAndText(item);
+                if (nested.images.length > 0) found.images.push(...nested.images);
+                if (nested.text && !found.text) found.text = nested.text;
+              }
             }
+          } else if (value && typeof value === 'object') {
+            // 如果是对象，递归查找
+            const nested = findImagesAndText(value);
+            if (nested.images.length > 0) found.images.push(...nested.images);
+            if (nested.text && !found.text) found.text = nested.text;
+          }
+        }
+        
+        return found;
+      };
+
+      // 提取结果 - 优先处理 output 数组（格式化后的输出）
+      if (data && typeof data === 'object') {
+        // 0. 首先尝试递归查找嵌套结构中的 images 和 text（处理复杂的嵌套响应）
+        const nestedResult = findImagesAndText(data);
+        if (nestedResult.images.length > 0 && !imageUrl) {
+          imageUrl = nestedResult.images[0]; // 取第一张图片
+        }
+        if (nestedResult.text && !result) {
+          result = nestedResult.text;
+        }
+        
+        // 1. 优先处理直接返回的 images 和 text 字段（某些工作流 API 的直接格式）
+        if (Array.isArray(data.images) && data.images.length > 0 && !imageUrl) {
+          imageUrl = data.images[0]; // 取第一张图片
+        }
+        if (data.text && typeof data.text === 'string' && data.text.trim() && !result) {
+          result = data.text;
+        }
+
+        // 2. 如果 data.output 是数组（格式化后的输出）
+        if (!result && !imageUrl && Array.isArray(data.output) && data.output.length > 0) {
+          const outputItems = data.output;
+          const textParts: string[] = [];
+          // 提取文本和图片
+          for (const item of outputItems) {
+            if (item.type === 'image' && item.data) {
+              // 如果有多个图片，只取第一个
+              if (!imageUrl) {
+                imageUrl = item.data;
+              }
+              // 如果图片有 alt 文本，也添加到文本结果中
+              if (item.alt && typeof item.alt === 'string' && item.alt.trim()) {
+                textParts.push(item.alt);
+              }
+            } else if (item.type === 'text' && item.data) {
+              const textContent = typeof item.data === 'string' ? item.data : JSON.stringify(item.data);
+              if (textContent.trim()) {
+                textParts.push(textContent);
+              }
+            } else if (item.type === 'json' && item.data) {
+              const jsonContent = JSON.stringify(item.data, null, 2);
+              if (jsonContent.trim()) {
+                textParts.push(jsonContent);
+              }
+            }
+          }
+          // 合并所有文本部分
+          if (textParts.length > 0) {
+            result = textParts.join('\n\n');
           }
         }
 
-        // 如果还没有结果，尝试其他字段
-        if (!result) {
-          result = data.text || data.content || data.result || data.data || data.message || data.output || '';
+        // 如果没有从 output 数组提取到结果，尝试从 rawOutput 提取
+        if (!result && !imageUrl && data.rawOutput) {
+          const rawOutput = data.rawOutput;
+          // 尝试提取output相关字段
+          for (const key in rawOutput) {
+            if (key.startsWith('output')) {
+              const value = rawOutput[key];
+              if (typeof value === 'string' && value.trim()) {
+                result = value;
+                break;
+              }
+            }
+          }
+
+          // 如果还没有结果，尝试其他字段
+          if (!result) {
+            result =
+              rawOutput.text ||
+              rawOutput.content ||
+              rawOutput.result ||
+              rawOutput.data ||
+              rawOutput.message ||
+              rawOutput.output ||
+              '';
+          }
+
+          // 提取图片URL
+          if (!imageUrl) {
+            imageUrl =
+              rawOutput.imageUrl ||
+              rawOutput.image_url ||
+              rawOutput.image ||
+              rawOutput.imageURL ||
+              rawOutput.img ||
+              rawOutput.picture ||
+              rawOutput.photo ||
+              '';
+          }
         }
 
-        // 提取图片URL
-        imageUrl =
-          data.imageUrl ||
-          data.image_url ||
-          data.image ||
-          data.imageURL ||
-          data.img ||
-          data.picture ||
-          data.photo ||
-          '';
+        // 如果还是没有结果，尝试直接从 data 对象提取
+        if (!result && !imageUrl) {
+          // 尝试提取output相关字段
+          for (const key in data) {
+            if (key.startsWith('output') && typeof data[key] === 'string' && data[key].trim()) {
+              result = data[key];
+              break;
+            }
+          }
+
+          // 如果还没有结果，尝试其他字段
+          if (!result) {
+            result = data.text || data.content || data.result || data.data || data.message || '';
+          }
+
+          // 提取图片URL
+          if (!imageUrl) {
+            imageUrl =
+              data.imageUrl ||
+              data.image_url ||
+              data.image ||
+              data.imageURL ||
+              data.img ||
+              data.picture ||
+              data.photo ||
+              '';
+          }
+        }
+      } else if (typeof data === 'string') {
+        result = data;
+      }
+
+      // 确保 result 是字符串类型
+      if (result && typeof result !== 'string') {
+        result = JSON.stringify(result);
       }
 
       if (!result && !imageUrl) {
         result = `工作流 "${shape.props.workflowName}" 执行完成`;
       }
 
-      console.log('[Workflow] 执行结果:', result.substring(0, 100) + '...');
+      console.log('[Workflow] 执行结果:', typeof result === 'string' && result.length > 100 ? result.substring(0, 100) + '...' : result);
       if (imageUrl) {
         console.log('[Workflow] 图片 URL:', imageUrl);
       }

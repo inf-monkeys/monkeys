@@ -141,6 +141,7 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 
 		// Find the new position of the handle in page space
 		const shapeTransform = this.editor.getShapePageTransform(connection)
+		if (!shapeTransform) return
 		const handlePagePosition = shapeTransform.applyToPoint(handle)
 
 		// Find the port at the new position
@@ -431,7 +432,12 @@ export function getConnectionTerminals(editor: Editor, connection: ConnectionSha
 
 	// if possible, set the start and end points based on the bindings
 	const bindings = getConnectionBindings(editor, connection)
-	const shapeTransform = Mat.Inverse(editor.getShapePageTransform(connection))
+	const connectionTransform = editor.getShapePageTransform(connection)
+	if (!connectionTransform) {
+		// Fallback to shape props if transform is not available
+		return { start: connection.props.start, end: connection.props.end }
+	}
+	const shapeTransform = Mat.Inverse(connectionTransform)
 	if (bindings.start) {
 		const inPageSpace = getConnectionBindingPositionInPageSpace(editor, bindings.start)
 		if (inPageSpace) {

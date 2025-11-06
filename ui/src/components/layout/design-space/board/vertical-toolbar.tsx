@@ -6,7 +6,8 @@ import { GeoShapeGeoStyle } from '@tldraw/editor';
 import { DefaultStylePanel, TLComponents, TldrawUiIcon, useEditor } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
-import { getWorkflow, useWorkflowList } from '@/apis/workflow';
+import { useWorkspacePages } from '@/apis/pages';
+import { getWorkflow } from '@/apis/workflow';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
 
@@ -49,8 +50,22 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   const stylePanelRef = useRef<HTMLDivElement | null>(null);
   const stylePanelButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  // 获取团队工作流列表
-  const { data: workflowList } = useWorkflowList();
+  // 获取 pin 到工作台的工作流列表
+  const { data: pinnedPagesData } = useWorkspacePages();
+  // 从 pin 的页面中提取工作流列表（只包含有 workflow 的页面）
+  const workflowList = pinnedPagesData?.pages
+    ?.filter((page) => page.workflow && page.workflow.workflowId)
+    .map((page) => {
+      const workflow = page.workflow!;
+      return {
+        ...workflow,
+        workflowId: workflow.workflowId || workflow.id || '',
+        displayName: workflow.displayName,
+        description: workflow.description,
+        // 兼容 name 字段（如果 workflow 中没有 name，使用 displayName）
+        name: (workflow as any).name || getI18nContent(workflow.displayName) || '',
+      };
+    }) || [];
 
   // 监听工具变化
   useEffect(() => {
@@ -175,7 +190,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     title={`形状: ${String(activeId)}`}
                     style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                   >
-                    <TldrawUiIcon icon={`geo-${String(activeId)}` as any} />
+                    <TldrawUiIcon icon={`geo-${String(activeId)}` as any} label={`形状: ${String(activeId)}`} />
                     <span className="caret" />
                     <span
                       className="caret-hit"
@@ -230,7 +245,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                             setIsGeoMenuOpen(false);
                           }}
                         >
-                          <TldrawUiIcon icon={`geo-${String(id)}` as any} />
+                          <TldrawUiIcon icon={`geo-${String(id)}` as any} label={`形状: ${String(id)}`} />
                         </div>
                       ))}
                       {/* Extra tools in shapes menu: Arrow & Line */}
@@ -244,7 +259,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                           setIsGeoMenuOpen(false);
                         }}
                       >
-                        <TldrawUiIcon icon="tool-arrow" />
+                        <TldrawUiIcon icon="tool-arrow" label="箭头工具" />
                       </div>
                       <div
                         className={`dropdown-item ${currentToolId === 'line' ? 'active' : ''}`}
@@ -256,7 +271,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                           setIsGeoMenuOpen(false);
                         }}
                       >
-                        <TldrawUiIcon icon="tool-line" />
+                        <TldrawUiIcon icon="tool-line" label="直线工具" />
                       </div>
                     </div>
                   )}
@@ -284,6 +299,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                       icon={
                         activeId === 'draw' ? 'tool-pencil' : activeId === 'highlight' ? 'tool-highlight' : 'tool-laser'
                       }
+                      label={activeId === 'draw' ? '铅笔' : activeId === 'highlight' ? '荧光笔' : '激光笔'}
                     />
                     <span className="caret" />
                     <span
@@ -334,7 +350,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                           setIsDrawMenuOpen(false);
                         }}
                       >
-                        <TldrawUiIcon icon="tool-pencil" />
+                        <TldrawUiIcon icon="tool-pencil" label="铅笔" />
                         <span>铅笔</span>
                       </div>
                       <div
@@ -348,7 +364,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                           setIsDrawMenuOpen(false);
                         }}
                       >
-                        <TldrawUiIcon icon="tool-highlight" />
+                        <TldrawUiIcon icon="tool-highlight" label="荧光笔" />
                         <span>荧光笔</span>
                       </div>
                       <div
@@ -362,7 +378,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                           setIsDrawMenuOpen(false);
                         }}
                       >
-                        <TldrawUiIcon icon="tool-laser" />
+                        <TldrawUiIcon icon="tool-laser" label="激光笔" />
                         <span>激光笔</span>
                       </div>
                     </div>
@@ -394,7 +410,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                       setCurrentToolId('instruction');
                       setIsInstructionMenuOpen(false);
                     }}
-                    title={activeId === 'text' ? '文字输入' : '图片输入'}
+                    title={activeId === 'text' ? '文本节点' : '图片节点'}
                     style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                   >
                     <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{activeId === 'text' ? 'I' : '📷'}</span>
@@ -452,7 +468,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                         }}
                       >
                         <span style={{ fontSize: '16px', fontWeight: 'bold' }}>I</span>
-                        <span>文字输入</span>
+                        <span>文本节点</span>
                       </div>
                       <div
                         className={`dropdown-item ${instructionVariant === 'image' ? 'active' : ''}`}
@@ -470,7 +486,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                         }}
                       >
                         <span style={{ fontSize: '16px' }}>📷</span>
-                        <span>图片输入</span>
+                        <span>图片节点</span>
                       </div>
                     </div>
                   )}
@@ -811,7 +827,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                 {tool.id === 'output' ? (
                   <span style={{ fontSize: '16px', fontWeight: 'bold' }}>O</span>
                 ) : (
-                  <TldrawUiIcon icon={tool.icon} />
+                  <TldrawUiIcon icon={tool.icon} label={tool.label || tool.id} />
                 )}
               </button>
             );

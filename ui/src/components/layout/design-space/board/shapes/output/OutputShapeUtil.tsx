@@ -1,5 +1,7 @@
 import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d, resizeBox } from 'tldraw';
 
+import { VinesMarkdown } from '@/components/ui/markdown';
+
 import { OutputShape } from '../instruction/InstructionShape.types';
 import { getOutputPorts } from '../ports/shapePorts';
 import { GenericPort } from '../ports/GenericPort';
@@ -44,9 +46,13 @@ export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
         })
     );
 
+    // Ensure valid dimensions
+    const width = Math.max(shape.props.w || 300, 1);
+    const height = Math.max(shape.props.h || 200, 1);
+
     const bodyGeometry = new Rectangle2d({
-      width: shape.props.w,
-      height: shape.props.h,
+      width,
+      height,
       isFilled: true,
     });
 
@@ -90,6 +96,27 @@ function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: E
 
   const hasImage = shape.props.imageUrl && shape.props.imageUrl.length > 0 && shape.props.imageUrl.startsWith('http');
   const hasContent = shape.props.content && shape.props.content.length > 0;
+
+  // 检测内容是否是 markdown 格式
+  const isMarkdown = (text: string): boolean => {
+    if (!text || typeof text !== 'string') return false;
+    // 检查常见的 markdown 语法特征
+    const markdownPatterns = [
+      /^#{1,6}\s+.+$/m, // 标题
+      /\*\*.*?\*\*/, // 粗体
+      /\*.*?\*/, // 斜体
+      /`.*?`/, // 行内代码
+      /```[\s\S]*?```/, // 代码块
+      /^[-*+]\s+.+$/m, // 无序列表
+      /^\d+\.\s+.+$/m, // 有序列表
+      /\[.*?\]\(.*?\)/, // 链接
+      /^>\s+.+$/m, // 引用
+      /^\|.*\|.*\|$/m, // 表格
+    ];
+    return markdownPatterns.some((pattern) => pattern.test(text));
+  };
+
+  const contentIsMarkdown = hasContent && isMarkdown(shape.props.content);
 
   return (
     <div
@@ -181,17 +208,40 @@ function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: E
               fontSize: '14px',
               color: '#374151',
               lineHeight: '1.5',
-              whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
             }}
           >
-            {shape.props.content}
+            {contentIsMarkdown ? (
+              <div
+                style={{
+                  fontSize: '14px',
+                  color: '#374151',
+                }}
+              >
+                <VinesMarkdown
+                  className="prose prose-sm max-w-none prose-headings:text-gray-800 prose-headings:font-semibold prose-headings:mt-4 prose-headings:mb-2 prose-p:text-gray-700 prose-p:my-2 prose-p:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-gray-800 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-pre:rounded-md prose-pre:p-3 prose-pre:overflow-x-auto prose-pre:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-li:text-gray-700 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 prose-blockquote:my-2 prose-table:border-collapse prose-table:w-full prose-table:my-2 prose-th:border prose-th:border-gray-300 prose-th:bg-gray-50 prose-th:p-2 prose-th:text-left prose-th:font-semibold prose-td:border prose-td:border-gray-300 prose-td:p-2"
+                >
+                  {shape.props.content}
+                </VinesMarkdown>
+              </div>
+            ) : (
+              <div
+                style={{
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {shape.props.content}
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Input Port - 使用通用的 Port 组件 */}
+      {/* Input Port - 左侧输入端口 */}
       <GenericPort shapeId={shape.id} portId="input" />
+      
+      {/* Output Port - 右侧输出端口 */}
+      <GenericPort shapeId={shape.id} portId="output" />
     </div>
   );
 }

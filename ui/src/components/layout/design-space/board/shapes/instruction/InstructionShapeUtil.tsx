@@ -53,9 +53,13 @@ export class InstructionShapeUtil extends BaseBoxShapeUtil<InstructionShape> {
         })
     );
 
+    // Ensure valid dimensions
+    const width = Math.max(shape.props.w || 300, 1);
+    const height = Math.max(shape.props.h || 200, 1);
+
     const bodyGeometry = new Rectangle2d({
-      width: shape.props.w,
-      height: shape.props.h,
+      width,
+      height,
       isFilled: true,
     });
 
@@ -256,14 +260,14 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         };
         console.log('[Instruction] 使用图片输入 API:', apiEndpoint);
       } else {
-        // 文字输入模式 - 判断是文生图还是文本扩写
+        // 文本节点模式 - 判断是文生图还是文本扩写
         const isTextToImage = /[图画像]|image|picture|photo|生成图|画一|绘制/i.test(shape.props.content);
         apiEndpoint = isTextToImage ? '/api/text-expansion/text-to-image' : '/api/text-expansion/expand';
         requestBody = {
           text: shape.props.content,
           prompt: shape.props.content,
         };
-        console.log('[Instruction] 使用文字输入 API:', isTextToImage ? '文生图' : '文本扩写', apiEndpoint);
+        console.log('[Instruction] 使用文本节点 API:', isTextToImage ? '文生图' : '文本扩写', apiEndpoint);
       }
 
       // 调用 API
@@ -459,7 +463,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-start',
           padding: '8px 12px',
           borderBottom: '1px solid #E5E7EB',
           backgroundColor: '#F9FAFB',
@@ -480,9 +484,12 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
             <div style={{ width: '4px', height: '4px', backgroundColor: '#6B7280', borderRadius: '50%' }} />
             <div style={{ width: '4px', height: '4px', backgroundColor: '#6B7280', borderRadius: '50%' }} />
           </div>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Instruction</span>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>
+            {shape.props.inputMode === 'text' ? '文本节点' : '图片节点'}
+          </span>
         </div>
-        <button
+        {/* 运行按钮已隐藏 */}
+        {/* <button
           onPointerDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -523,7 +530,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
               <path d="M2 1L10 6L2 11V1Z" fill="currentColor" />
             </svg>
           )}
-        </button>
+        </button> */}
       </div>
 
       {/* 内容区域 */}

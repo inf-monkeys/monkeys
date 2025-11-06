@@ -104,9 +104,9 @@ function OnCanvasComponentPickerDialog({
           : terminals[state.location];
 
       // Transform the position from connection space to page space
-      const terminalInPageSpace = editor
-        .getShapePageTransform(connection)
-        .applyToPoint(terminalInConnectionSpace);
+      const connectionTransform = editor.getShapePageTransform(connection);
+      if (!connectionTransform) return;
+      const terminalInPageSpace = connectionTransform.applyToPoint(terminalInConnectionSpace);
 
       // Transform from page space to viewport space for positioning the dialog
       const terminalInViewportSpace = editor.pageToViewport(terminalInPageSpace);
@@ -175,9 +175,9 @@ function OnCanvasComponentPickerItem<T extends NodeType>({
             : terminals[state.location];
 
         // Transform from connection space to page space
-        const terminalInPageSpace = editor
-          .getShapePageTransform(connection)
-          .applyToPoint(terminalInConnectionSpace);
+        const connectionTransform = editor.getShapePageTransform(connection);
+        if (!connectionTransform) return;
+        const terminalInPageSpace = connectionTransform.applyToPoint(terminalInConnectionSpace);
 
         // Call the pick handler with the node type and position
         state.onPick(definition.getDefault(), terminalInPageSpace);

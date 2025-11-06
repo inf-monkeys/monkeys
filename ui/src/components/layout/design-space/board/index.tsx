@@ -299,7 +299,7 @@ function CustomContextMenu(props: TLUiContextMenuProps & { miniPage?: any }) {
               <TldrawUiMenuItem
                 key={`add-to-${field.name}`}
                 id={`add-to-${field.name}`}
-                label={`添加到 ${appName} - ${fieldDisplayName}（图片输入）`}
+                label={`添加到 ${appName} - ${fieldDisplayName}（图片节点）`}
                 icon="plus"
                 readonlyOk
                 onSelect={() => handleAddToApp(field.name, appName)}
@@ -626,6 +626,45 @@ export const Board: React.FC<BoardProps> = ({
     window.addEventListener('vines:open-pinned-page-mini', handler as any);
     return () => window.removeEventListener('vines:open-pinned-page-mini', handler as any);
   }, []);
+
+  // 确保 backspace 和 delete 键能正常删除选中的形状
+  React.useEffect(() => {
+    if (!editor) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 如果焦点在输入框、文本域或可编辑元素中，不处理删除操作
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        target.closest('input') ||
+        target.closest('textarea') ||
+        target.closest('[contenteditable="true"]')
+      ) {
+        return;
+      }
+
+      // 处理 backspace 和 delete 键
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        const selectedShapes = editor.getSelectedShapes();
+        if (selectedShapes.length > 0) {
+          e.preventDefault();
+          e.stopPropagation();
+          editor.deleteShapes(selectedShapes.map((shape) => shape.id));
+        }
+      }
+    };
+
+    // 在编辑器容器上添加键盘事件监听
+    const container = editor.getContainer();
+    if (container) {
+      container.addEventListener('keydown', handleKeyDown);
+      return () => {
+        container.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [editor]);
 
   // 监听shape变化，追踪最后修改的shape
   React.useEffect(() => {
@@ -1102,6 +1141,7 @@ export const Board: React.FC<BoardProps> = ({
               } catch (error) {
                 console.error('[Board] Workflow 节点系统初始化失败:', error);
               }
+
 
               editor.registerExternalContentHandler('url', async ({ url, point }) => {
                 // 检查是否是图片 URL
