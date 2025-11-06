@@ -1059,6 +1059,7 @@ export const Board: React.FC<BoardProps> = ({
       >
         <TldrawErrorBoundary>
           <Tldraw
+            licenseKey="tldraw-2026-02-14/WyJCdUxDb2ViWSIsWyIqIl0sMTYsIjIwMjYtMDItMTQiXQ.zIbZRsp7SDmrunQdvcnfK2mKnaom5bDUKudHgIWcY6KP8ckD4YZTphzGrwvW8sKAjyzdtIiXY9cFlBfQLfMKJA"
             persistenceKey={persistenceKey}
             onMount={(editor: Editor) => {
               setEditor(editor);
