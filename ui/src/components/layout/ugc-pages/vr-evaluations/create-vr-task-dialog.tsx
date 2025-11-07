@@ -120,47 +120,86 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
     return new File([arrayBuffer], sanitizedName, { type: 'model/vnd.usdz+zip' });
   }, []);
 
-  const convertSingleFile = useCallback(async (file: File) => {
-    const extension = file.name.split('.').pop()?.toLowerCase();
+  const createAssetManager = (assetMap: Map<string, File>) => {
+    const blobUrlCache = new Map<File, string>();
+    const manager = new LoadingManager();
 
-    if (!extension) {
-      throw new Error('无法识别的文件格式');
-    }
+    const resolveAsset = (requestUrl: string) => {
+      const clean = normalizePathKey(requestUrl.split(/[?#]/)[0]);
+      return (
+        assetMap.get(clean) ||
+        assetMap.get(clean.toLowerCase()) ||
+        assetMap.get(clean.split('/').pop() || '') ||
+        assetMap.get((clean.split('/').pop() || '').toLowerCase())
+      );
+    };
 
-    if (extension === 'usdz') {
-      const buffer = await file.arrayBuffer();
-      return new File([buffer], file.name, { type: 'model/vnd.usdz+zip' });
-    }
+    manager.setURLModifier((url) => {
+      const asset = resolveAsset(url);
+      if (asset) {
+        if (!blobUrlCache.has(asset)) {
+          blobUrlCache.set(asset, URL.createObjectURL(asset));
+        }
+        return blobUrlCache.get(asset)!;
+      }
+      return url;
+    });
 
-    const arrayBuffer = await file.arrayBuffer();
-    let loadedObject: Object3D | undefined;
+    return { manager, blobUrlCache };
+  };
 
-    if (extension === 'glb' || extension === 'gltf') {
-      const loader = new GLTFLoader();
-      loadedObject = await new Promise<Object3D>((resolve, reject) => {
-        loader.parse(
-          arrayBuffer,
-          '',
-          (gltf) => resolve(gltf.scene),
-          (error) => reject(error),
-        );
-      });
-    } else if (extension === 'obj') {
-      const loader = new OBJLoader();
-      loadedObject = loader.parse(await file.text());
-    } else if (extension === 'fbx') {
-      const loader = new FBXLoader();
-      loadedObject = loader.parse(arrayBuffer, '');
-    } else {
-      throw new Error(`暂不支持 ${extension} 格式的转换`);
-    }
+  const convertSingleFile = useCallback(
+    async (file: File) => {
+      const extension = file.name.split('.').pop()?.toLowerCase();
 
-    if (!loadedObject) {
-      throw new Error('模型加载失败');
-    }
+      if (!extension) {
+        throw new Error('无法识别的文件格式');
+      }
 
-    return convertSceneToUSDZ(loadedObject, file.name);
-  }, []);
+      if (extension === 'usdz') {
+        const buffer = await file.arrayBuffer();
+        return new File([buffer], file.name, { type: 'model/vnd.usdz+zip' });
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const assetMap = new Map<string, File>([[file.name, file]]);
+      const { manager, blobUrlCache } = createAssetManager(assetMap);
+      let loadedObject: Object3D | undefined;
+
+      try {
+        if (extension === 'glb' || extension === 'gltf') {
+          const loader = new GLTFLoader(manager);
+          loadedObject = await new Promise<Object3D>((resolve, reject) => {
+            loader.parse(
+              arrayBuffer,
+              '',
+              (gltf) => resolve(gltf.scene),
+              (error) => reject(error),
+            );
+          });
+        } else if (extension === 'obj') {
+          const loader = new OBJLoader(manager);
+          loadedObject = loader.parse(await file.text());
+        } else if (extension === 'fbx') {
+          const loader = new FBXLoader(manager);
+          // FBXLoader.parse() expects ArrayBuffer and optional path for relative resource resolution
+          loadedObject = loader.parse(arrayBuffer, file.name);
+        } else {
+          throw new Error(`暂不支持 ${extension} 格式的转换`);
+        }
+
+        if (!loadedObject) {
+          throw new Error('模型加载失败');
+        }
+
+        return await convertSceneToUSDZ(loadedObject, file.name);
+      } finally {
+        blobUrlCache.forEach((value) => URL.revokeObjectURL(value));
+        blobUrlCache.clear();
+      }
+    },
+    [convertSceneToUSDZ],
+  );
 
   const convertObjBundleToUSDZ = useCallback(
     async (files: File[], preferredName?: string) => {
@@ -170,29 +209,7 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
       }
 
       const assetMap = buildAssetMap(files);
-      const blobUrlCache = new Map<File, string>();
-      const manager = new LoadingManager();
-
-      const resolveAsset = (requestUrl: string) => {
-        const clean = normalizePathKey(requestUrl.split(/[?#]/)[0]);
-        return (
-          assetMap.get(clean) ||
-          assetMap.get(clean.toLowerCase()) ||
-          assetMap.get(clean.split('/').pop() || '') ||
-          assetMap.get((clean.split('/').pop() || '').toLowerCase())
-        );
-      };
-
-      manager.setURLModifier((url) => {
-        const asset = resolveAsset(url);
-        if (asset) {
-          if (!blobUrlCache.has(asset)) {
-            blobUrlCache.set(asset, URL.createObjectURL(asset));
-          }
-          return blobUrlCache.get(asset)!;
-        }
-        return url;
-      });
+      const { manager, blobUrlCache } = createAssetManager(assetMap);
 
       let materialsCreator;
       const mtlFile = files.find((file) => file.name.toLowerCase().endsWith('.mtl'));
