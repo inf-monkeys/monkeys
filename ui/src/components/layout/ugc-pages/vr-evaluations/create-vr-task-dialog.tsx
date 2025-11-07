@@ -125,24 +125,70 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
             roughness: (material as any).roughness || 0.5,
           });
 
-          // Copy maps if they exist
+          // Copy maps if they exist and are valid for USDZ export
+          const copyValidTexture = (sourceTexture: any) => {
+            if (!sourceTexture) return null;
+            // USDZExporter only supports standard Texture objects with image data
+            // Skip CompressedTexture or textures without valid image data
+            if (sourceTexture.isCompressedTexture) return null;
+            if (!sourceTexture.image || !sourceTexture.image.currentSrc) {
+              // Check if it has valid image data
+              if (typeof HTMLImageElement !== 'undefined' && sourceTexture.image instanceof HTMLImageElement) {
+                return sourceTexture;
+              }
+              if (typeof HTMLCanvasElement !== 'undefined' && sourceTexture.image instanceof HTMLCanvasElement) {
+                return sourceTexture;
+              }
+              if (typeof OffscreenCanvas !== 'undefined' && sourceTexture.image instanceof OffscreenCanvas) {
+                return sourceTexture;
+              }
+              if (typeof ImageBitmap !== 'undefined' && sourceTexture.image instanceof ImageBitmap) {
+                return sourceTexture;
+              }
+              return null;
+            }
+            return sourceTexture;
+          };
+
           if ((material as any).map) {
-            standardMaterial.map = (material as any).map;
+            const validMap = copyValidTexture((material as any).map);
+            if (validMap) standardMaterial.map = validMap;
           }
           if ((material as any).normalMap) {
-            standardMaterial.normalMap = (material as any).normalMap;
+            const validNormalMap = copyValidTexture((material as any).normalMap);
+            if (validNormalMap) standardMaterial.normalMap = validNormalMap;
           }
           if ((material as any).roughnessMap) {
-            standardMaterial.roughnessMap = (material as any).roughnessMap;
+            const validRoughnessMap = copyValidTexture((material as any).roughnessMap);
+            if (validRoughnessMap) standardMaterial.roughnessMap = validRoughnessMap;
           }
           if ((material as any).metalnessMap) {
-            standardMaterial.metalnessMap = (material as any).metalnessMap;
+            const validMetalnessMap = copyValidTexture((material as any).metalnessMap);
+            if (validMetalnessMap) standardMaterial.metalnessMap = validMetalnessMap;
           }
           if ((material as any).aoMap) {
-            standardMaterial.aoMap = (material as any).aoMap;
+            const validAoMap = copyValidTexture((material as any).aoMap);
+            if (validAoMap) standardMaterial.aoMap = validAoMap;
           }
 
           node.material = standardMaterial;
+        } else {
+          // For MeshStandardMaterial, also clean up invalid textures
+          if (material.map && material.map.isCompressedTexture) {
+            material.map = null;
+          }
+          if (material.normalMap && material.normalMap.isCompressedTexture) {
+            material.normalMap = null;
+          }
+          if (material.roughnessMap && material.roughnessMap.isCompressedTexture) {
+            material.roughnessMap = null;
+          }
+          if (material.metalnessMap && material.metalnessMap.isCompressedTexture) {
+            material.metalnessMap = null;
+          }
+          if (material.aoMap && material.aoMap.isCompressedTexture) {
+            material.aoMap = null;
+          }
         }
       }
     });
