@@ -556,9 +556,9 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
             </DialogHeader>
             <TooltipProvider>
               <Tabs value={activeL1 ?? undefined} onValueChange={setActiveL1}>
-                <TabsList>
+                <TabsList className="flex-wrap gap-2 overflow-x-auto">
                   {level1Keys.map((k) => (
-                    <TabsTrigger key={k} value={k}>
+                    <TabsTrigger key={k} value={k} className="flex-shrink-0 !w-auto">
                       {k}
                     </TabsTrigger>
                   ))}
