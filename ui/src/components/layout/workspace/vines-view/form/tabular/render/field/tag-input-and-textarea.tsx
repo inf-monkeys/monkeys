@@ -40,7 +40,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
   const displayName = getI18nContent(inputDisplayName);
 
   const placeholder =
-    typeOptions?.placeholder ??
+    getI18nContent(typeOptions?.placeholder) ??
     t('workspace.pre-view.actuator.execution-form.string', { displayName: getI18nContent(displayName) });
 
   // 监听 sidebar 宽度变化
@@ -85,7 +85,6 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
       <div className="relative">
         <textarea
           placeholder={placeholder}
-          // 目前是写的
           value={(value as string) ?? ''}
           onChange={(e) => {
             const newValue = e.target.value;

@@ -32,7 +32,7 @@ export const FieldTextInputWithButtons: React.FC<IFieldTextInputWithButtonsProps
   const displayName = getI18nContent(inputDisplayName);
 
   const placeholder =
-    typeOptions?.placeholder ??
+    getI18nContent(typeOptions?.placeholder) ??
     t('workspace.pre-view.actuator.execution-form.string', { displayName: getI18nContent(displayName) });
 
   return (

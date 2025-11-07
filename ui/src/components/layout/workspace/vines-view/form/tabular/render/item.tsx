@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { isUndefined } from 'lodash';
 import { HelpCircle } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -119,7 +118,10 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
   const selectList = (typeOptions?.selectList ?? []) as TSelectList;
   const enableSelectList = (typeOptions?.enableSelectList ?? false) && selectList.length > 0;
 
-  const enableReset = (typeOptions?.enableReset ?? false) && !isUndefined(defValues?.[name]);
+  const enableReset = typeOptions?.enableReset ?? false;
+  // const enableReset =
+  //   (typeOptions?.enableReset ?? false) &&
+  //   ((!isString(defValues?.[name]) && !isUndefined(defValues?.[name])) || isString(defValues?.[name]));
   const singleColumn = typeOptions?.singleColumn ?? false;
 
   const assetType = typeOptions?.assetType;
@@ -140,11 +142,10 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
           <FormItem className={cn('col-span-2', singleColumn && 'col-span-1', itemClassName)} card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
-                <FormLabel className="font-bold">
-                  {getI18nContent(displayName)}
+                <FormLabel className="flex flex-wrap items-center gap-1 font-bold">
+                  <span className="inline-block">{getI18nContent(displayName)}</span>
                   {!required && (
-                    <span className="text-xs text-[#3F3E39]/70 dark:text-[#EDEDED]/70">
-                      {' '}
+                    <span className="whitespace-nowrap text-xs text-[#3F3E39]/70 dark:text-[#EDEDED]/70">
                       ({t('common.utils.optional')})
                     </span>
                   )}
