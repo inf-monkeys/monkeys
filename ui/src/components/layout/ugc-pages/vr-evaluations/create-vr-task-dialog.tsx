@@ -49,6 +49,7 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
   const [convertedFileName, setConvertedFileName] = useState<string>();
   const [selectedAssetNames, setSelectedAssetNames] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<CreateVRTaskFormData>({
     resolver: zodResolver(createVRTaskSchema),
@@ -372,30 +373,50 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
             />
 
             <div className="space-y-2 rounded-lg border p-4">
-              <div className="flex items-center justify-between">
+              <div className="space-y-3">
                 <div className="space-y-1">
                   <h4 className="text-sm font-medium">模型转换</h4>
                   <p className="text-xs text-muted-foreground">
-                    支持上传 glb/gltf/obj/fbx/usdz，也可一次选择 OBJ+MTL+贴图或 ZIP 打包，转换后会自动上传并回填链接。
+                    支持上传 glb/gltf/obj/fbx/usdz 等单个文件，或同时选择多个文件（OBJ+MTL+贴图）或 ZIP
+                    打包，转换后会自动上传并回填链接。
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={conversionState !== 'idle'}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  选择文件
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept=".glb,.gltf,.obj,.fbx,.usdz,.zip"
-                  className="hidden"
-                  onChange={handleModelConversion}
-                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={conversionState !== 'idle'}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1"
+                  >
+                    选择文件
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={conversionState !== 'idle'}
+                    onClick={() => folderInputRef.current?.click()}
+                    className="flex-1"
+                  >
+                    选择文件夹
+                  </Button>
+                </div>
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".glb,.gltf,.obj,.fbx,.usdz,.zip"
+                className="hidden"
+                onChange={handleModelConversion}
+              />
+              <input
+                ref={folderInputRef}
+                type="file"
+                webkitdirectory
+                className="hidden"
+                onChange={handleModelConversion}
+              />
               {selectedAssetNames.length > 0 && (
                 <div className="max-h-28 overflow-y-auto rounded-md bg-muted px-3 py-2 text-[11px] text-muted-foreground">
                   <p className="mb-1 text-xs">已选择 {selectedAssetNames.length} 个文件：</p>
