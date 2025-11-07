@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { Check, ChevronsUpDown } from 'lucide-react';
-import { UseFormReturn } from 'react-hook-form';
+import { UseFormReturn, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { WORKFLOW_INPUT_TYPE_OPTION_LIST } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/consts.ts';
@@ -22,7 +22,8 @@ interface IFieldTypeProps extends React.ComponentPropsWithoutRef<'div'> {
 export const FieldType: React.FC<IFieldTypeProps> = ({ form, forceUpdate }) => {
   const { t } = useTranslation();
 
-  const { multipleValues, assetType } = form.getValues();
+  const multipleValues = useWatch({ control: form.control, name: 'multipleValues' }) ?? false;
+  const assetType = useWatch({ control: form.control, name: 'assetType' }) ?? '';
 
   const [visible, setVisible] = useState(false);
 
