@@ -5,7 +5,7 @@ import { unzipSync } from 'fflate';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { LoadingManager, Object3D, Scene } from 'three';
+import { LoadingManager, Mesh, MeshStandardMaterial, Object3D, Scene } from 'three';
 import { USDZExporter } from 'three/examples/jsm/exporters/USDZExporter.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -112,6 +112,41 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
 
   const convertSceneToUSDZ = useCallback(async (object: Object3D, fileName: string) => {
     const scene = new Scene();
+
+    // Convert all materials to MeshStandardMaterial for USDZ export compatibility
+    // (USDZExporter only supports MeshStandardMaterial)
+    object.traverse((node) => {
+      if (node instanceof Mesh && node.material) {
+        const material = node.material;
+        if (!material.isMeshStandardMaterial) {
+          const standardMaterial = new MeshStandardMaterial({
+            color: (material as any).color || 0xffffff,
+            metalness: (material as any).metalness || 0,
+            roughness: (material as any).roughness || 0.5,
+          });
+
+          // Copy maps if they exist
+          if ((material as any).map) {
+            standardMaterial.map = (material as any).map;
+          }
+          if ((material as any).normalMap) {
+            standardMaterial.normalMap = (material as any).normalMap;
+          }
+          if ((material as any).roughnessMap) {
+            standardMaterial.roughnessMap = (material as any).roughnessMap;
+          }
+          if ((material as any).metalnessMap) {
+            standardMaterial.metalnessMap = (material as any).metalnessMap;
+          }
+          if ((material as any).aoMap) {
+            standardMaterial.aoMap = (material as any).aoMap;
+          }
+
+          node.material = standardMaterial;
+        }
+      }
+    });
+
     scene.add(object);
 
     const exporter = new USDZExporter();
