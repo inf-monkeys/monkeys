@@ -1435,7 +1435,7 @@ ORDER BY
             })
           : [];
 
-      if (createAssociation.type !== 'to-workflow' && workflows.length !== 1) {
+      if (createAssociation.type === 'to-workflow' && workflows.length !== 1) {
         throw new NotFoundException('targetWorkflowId not found, targetWorkflowId: ' + createAssociation.targetWorkflowId);
       }
 
