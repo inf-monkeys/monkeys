@@ -142,13 +142,15 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
           <FormItem className={cn('col-span-2', singleColumn && 'col-span-1', itemClassName)} card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
-                <FormLabel className="flex flex-wrap items-center gap-1 font-bold">
-                  <span className="inline-block">{getI18nContent(displayName)}</span>
-                  {!required && (
-                    <span className="whitespace-nowrap text-xs text-[#3F3E39]/70 dark:text-[#EDEDED]/70">
-                      ({t('common.utils.optional')})
-                    </span>
-                  )}
+                <FormLabel className="items-center font-bold">
+                  <div className="flex flex-wrap items-center gap-1">
+                    <span className="inline-block">{getI18nContent(displayName)}</span>
+                    {!required && (
+                      <span className="whitespace-nowrap text-xs text-[#3F3E39]/70 dark:text-[#EDEDED]/70">
+                        ({t('common.utils.optional')})
+                      </span>
+                    )}
+                  </div>
                 </FormLabel>
                 {tips && (
                   <Tooltip>

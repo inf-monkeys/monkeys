@@ -37,7 +37,7 @@ export const FieldNumber: React.FC<IFieldNumberProps> = ({ input: { type, typeOp
       </NumberField>
     ) : (
       <Slider
-        className="pl-2"
+        className="mx-2"
         min={typeOptions.minValue}
         max={typeOptions.maxValue}
         step={typeOptions.numberPrecision}
