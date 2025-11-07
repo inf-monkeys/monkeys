@@ -1,13 +1,15 @@
 import React, { useCallback, useRef, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { unzipSync } from 'fflate';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Object3D, Scene } from 'three';
+import { LoadingManager, Object3D, Scene } from 'three';
 import { USDZExporter } from 'three/examples/jsm/exporters/USDZExporter.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import * as z from 'zod';
 
@@ -45,6 +47,7 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
   const [conversionState, setConversionState] = useState<'idle' | 'converting' | 'uploading'>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [convertedFileName, setConvertedFileName] = useState<string>();
+  const [selectedAssetNames, setSelectedAssetNames] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<CreateVRTaskFormData>({
@@ -59,9 +62,65 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
   const resetConversionIndicators = useCallback(() => {
     setConversionState('idle');
     setUploadProgress(0);
+    setSelectedAssetNames([]);
   }, []);
 
-  const convertFileToUSDZ = useCallback(async (file: File) => {
+  const normalizePathKey = (value: string) =>
+    value
+      .replace(/\\/g, '/')
+      .replace(/^(\.\/)+/, '')
+      .replace(/^\/+/, '');
+
+  const buildAssetMap = (files: File[]) => {
+    const map = new Map<string, File>();
+
+    files.forEach((file) => {
+      const rawPath = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+      const normalized = normalizePathKey(rawPath);
+      const lower = normalized.toLowerCase();
+      const baseName = normalized.split('/').pop() || normalized;
+      const lowerBase = baseName.toLowerCase();
+
+      map.set(normalized, file);
+      map.set(lower, file);
+      map.set(baseName, file);
+      map.set(lowerBase, file);
+    });
+
+    return map;
+  };
+
+  const extractZipEntries = async (zipFile: File) => {
+    const buffer = await zipFile.arrayBuffer();
+    const unzipped = unzipSync(new Uint8Array(buffer));
+    const extracted: File[] = [];
+
+    Object.entries(unzipped).forEach(([path, content]) => {
+      if (path.endsWith('/')) return;
+      const normalized = normalizePathKey(path);
+      const blob = new Blob([content], { type: 'application/octet-stream' });
+      extracted.push(new File([blob], normalized));
+    });
+
+    if (!extracted.length) {
+      throw new Error('压缩包中未找到可用的模型文件');
+    }
+
+    return extracted;
+  };
+
+  const convertSceneToUSDZ = useCallback(async (object: Object3D, fileName: string) => {
+    const scene = new Scene();
+    scene.add(object);
+
+    const exporter = new USDZExporter();
+    const arrayBuffer = await exporter.parseAsync(scene);
+    const sanitizedName = `${fileName.replace(/\.[^/.]+$/, '')}.usdz`;
+
+    return new File([arrayBuffer], sanitizedName, { type: 'model/vnd.usdz+zip' });
+  }, []);
+
+  const convertSingleFile = useCallback(async (file: File) => {
     const extension = file.name.split('.').pop()?.toLowerCase();
 
     if (!extension) {
@@ -73,12 +132,12 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
       return new File([buffer], file.name, { type: 'model/vnd.usdz+zip' });
     }
 
-    const scene = new Scene();
+    const arrayBuffer = await file.arrayBuffer();
+    let loadedObject: Object3D | undefined;
 
-    const loadWithGLTFLoader = async () => {
+    if (extension === 'glb' || extension === 'gltf') {
       const loader = new GLTFLoader();
-      const arrayBuffer = await file.arrayBuffer();
-      return await new Promise<Object3D>((resolve, reject) => {
+      loadedObject = await new Promise<Object3D>((resolve, reject) => {
         loader.parse(
           arrayBuffer,
           '',
@@ -86,28 +145,12 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
           (error) => reject(error),
         );
       });
-    };
-
-    const loadWithOBJLoader = async () => {
-      const loader = new OBJLoader();
-      const text = await file.text();
-      return loader.parse(text);
-    };
-
-    const loadWithFBXLoader = async () => {
-      const loader = new FBXLoader();
-      const arrayBuffer = await file.arrayBuffer();
-      return loader.parse(arrayBuffer, '');
-    };
-
-    let loadedObject: Object3D | undefined;
-
-    if (extension === 'glb' || extension === 'gltf') {
-      loadedObject = await loadWithGLTFLoader();
     } else if (extension === 'obj') {
-      loadedObject = await loadWithOBJLoader();
+      const loader = new OBJLoader();
+      loadedObject = loader.parse(await file.text());
     } else if (extension === 'fbx') {
-      loadedObject = await loadWithFBXLoader();
+      const loader = new FBXLoader();
+      loadedObject = loader.parse(arrayBuffer, '');
     } else {
       throw new Error(`暂不支持 ${extension} 格式的转换`);
     }
@@ -116,27 +159,99 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
       throw new Error('模型加载失败');
     }
 
-    scene.add(loadedObject);
-
-    const exporter = new USDZExporter();
-    const arrayBuffer = await exporter.parse(scene);
-    const fileName = `${file.name.replace(/\.[^/.]+$/, '')}.usdz`;
-
-    return new File([arrayBuffer], fileName, { type: 'model/vnd.usdz+zip' });
+    return convertSceneToUSDZ(loadedObject, file.name);
   }, []);
+
+  const convertObjBundleToUSDZ = useCallback(
+    async (files: File[], preferredName?: string) => {
+      const objFile = files.find((file) => file.name.toLowerCase().endsWith('.obj'));
+      if (!objFile) {
+        throw new Error('多文件上传时必须包含 OBJ 模型文件');
+      }
+
+      const assetMap = buildAssetMap(files);
+      const blobUrlCache = new Map<File, string>();
+      const manager = new LoadingManager();
+
+      const resolveAsset = (requestUrl: string) => {
+        const clean = normalizePathKey(requestUrl.split(/[?#]/)[0]);
+        return (
+          assetMap.get(clean) ||
+          assetMap.get(clean.toLowerCase()) ||
+          assetMap.get(clean.split('/').pop() || '') ||
+          assetMap.get((clean.split('/').pop() || '').toLowerCase())
+        );
+      };
+
+      manager.setURLModifier((url) => {
+        const asset = resolveAsset(url);
+        if (asset) {
+          if (!blobUrlCache.has(asset)) {
+            blobUrlCache.set(asset, URL.createObjectURL(asset));
+          }
+          return blobUrlCache.get(asset)!;
+        }
+        return url;
+      });
+
+      let materialsCreator;
+      const mtlFile = files.find((file) => file.name.toLowerCase().endsWith('.mtl'));
+      if (mtlFile) {
+        const mtlLoader = new MTLLoader(manager);
+        materialsCreator = mtlLoader.parse(await mtlFile.text(), '');
+        materialsCreator.preload();
+      }
+
+      const objLoader = new OBJLoader(manager);
+      if (materialsCreator) {
+        objLoader.setMaterials(materialsCreator);
+      }
+
+      try {
+        const object = objLoader.parse(await objFile.text());
+        return await convertSceneToUSDZ(object, preferredName || objFile.name);
+      } finally {
+        blobUrlCache.forEach((value) => URL.revokeObjectURL(value));
+        blobUrlCache.clear();
+      }
+    },
+    [convertSceneToUSDZ],
+  );
+
+  const convertFilesToUSDZ = useCallback(
+    async (fileList: FileList) => {
+      const files = Array.from(fileList);
+      if (!files.length) {
+        throw new Error('请选择需要转换的模型文件');
+      }
+
+      if (files.length === 1) {
+        const single = files[0];
+        if (single.name.toLowerCase().endsWith('.zip')) {
+          const extracted = await extractZipEntries(single);
+          return convertObjBundleToUSDZ(extracted, single.name);
+        }
+        return convertSingleFile(single);
+      }
+
+      return convertObjBundleToUSDZ(files);
+    },
+    [convertObjBundleToUSDZ, convertSingleFile],
+  );
 
   const handleModelConversion = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) {
+      const files = event.target.files;
+      if (!files || files.length === 0) {
         return;
       }
 
+      setSelectedAssetNames(Array.from(files).map((f) => f.name));
       setConversionState('converting');
       setUploadProgress(0);
 
       try {
-        const usdzFile = await convertFileToUSDZ(file);
+        const usdzFile = await convertFilesToUSDZ(files);
 
         setConversionState('uploading');
         const { urls } = await uploadSingleFile(usdzFile, {
@@ -162,7 +277,7 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
         resetConversionIndicators();
       }
     },
-    [convertFileToUSDZ, form, resetConversionIndicators],
+    [convertFilesToUSDZ, form, resetConversionIndicators],
   );
 
   const onSubmit = async (data: CreateVRTaskFormData) => {
@@ -244,7 +359,7 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
                 <div className="space-y-1">
                   <h4 className="text-sm font-medium">模型转换</h4>
                   <p className="text-xs text-muted-foreground">
-                    支持上传 glb/gltf/obj/fbx/usdz，转换后会自动上传并回填链接。
+                    支持上传 glb/gltf/obj/fbx/usdz，也可一次选择 OBJ+MTL+贴图或 ZIP 打包，转换后会自动上传并回填链接。
                   </p>
                 </div>
                 <Button
@@ -258,11 +373,20 @@ export const CreateVRTaskDialog: React.FC<CreateVRTaskDialogProps> = ({ open, on
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".glb,.gltf,.obj,.fbx,.usdz"
+                  multiple
+                  accept=".glb,.gltf,.obj,.fbx,.usdz,.zip"
                   className="hidden"
                   onChange={handleModelConversion}
                 />
               </div>
+              {selectedAssetNames.length > 0 && (
+                <div className="max-h-28 overflow-y-auto rounded-md bg-muted px-3 py-2 text-[11px] text-muted-foreground">
+                  <p className="mb-1 text-xs">已选择 {selectedAssetNames.length} 个文件：</p>
+                  {selectedAssetNames.map((name) => (
+                    <div key={name}>{name}</div>
+                  ))}
+                </div>
+              )}
               <div className="text-xs text-muted-foreground">
                 {conversionState === 'converting' && <span>正在转换模型，请稍候...</span>}
                 {conversionState === 'uploading' && <span>正在上传 USDZ 文件（{uploadProgress.toFixed(0)}%）</span>}

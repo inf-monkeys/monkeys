@@ -121,22 +121,22 @@ export const VREvaluationTaskDetail: React.FC = () => {
                 <CardDescription>任务基础信息</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
                   {task.thumbnailUrl ? (
-                    <img src={task.thumbnailUrl} alt={task.taskName} className="h-20 w-20 rounded object-cover" />
+                    <img src={task.thumbnailUrl} alt={task.taskName} className="h-24 w-24 rounded-lg object-cover" />
                   ) : (
-                    <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 text-lg font-semibold text-white">
+                    <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 text-lg font-semibold text-white">
                       VR
                     </div>
                   )}
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-foreground">模型链接:</span>
+                  <div className="flex-1 space-y-3">
+                    <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">模型链接</span>
                       <a
                         href={task.modelUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="truncate text-primary hover:underline"
+                        className="break-all rounded bg-muted px-3 py-2 text-primary hover:underline"
                       >
                         {task.modelUrl}
                       </a>
@@ -147,7 +147,7 @@ export const VREvaluationTaskDetail: React.FC = () => {
                         {task.status === 'completed' ? '已完成' : '待评测'}
                       </Badge>
                     </div>
-                    <div className="grid gap-1">
+                    <div className="grid gap-1 text-sm text-muted-foreground">
                       <span>创建时间：{formatDateTime(task.createdTimestamp)}</span>
                       <span>更新时间：{formatDateTime(task.updatedTimestamp)}</span>
                       <span>完成时间：{formatDateTime(task.evaluatedAt)}</span>
@@ -177,33 +177,6 @@ export const VREvaluationTaskDetail: React.FC = () => {
               </CardContent>
             </Card>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>评分详情</CardTitle>
-              <CardDescription>各项指标的具体得分</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {task.evaluationResult ? (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {scoreLabels.map((label, index) => {
-                    const value = task.evaluationResult?.[`score_${index + 1}` as keyof typeof task.evaluationResult];
-                    return (
-                      <div key={label} className="flex items-center justify-between rounded-lg border p-3">
-                        <span className="text-sm text-muted-foreground">{label}</span>
-                        <span className="font-semibold text-foreground">
-                          {value}
-                          <span className="text-xs text-muted-foreground"> / 5</span>
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <span className="text-sm text-muted-foreground">暂无评测数据</span>
-              )}
-            </CardContent>
-          </Card>
         </>
       )}
     </main>
