@@ -3833,6 +3833,13 @@
             "tooltip": {
               "file-path": "文件路径："
             }
+          },
+          "neural-model": {
+            "placeholder": "请选择神经模型",
+            "no-model": "不使用模型",
+            "selected": "已选择神经模型（JSON内容）",
+            "current-value": "当前值：JSON内容（请重新选择以更改）",
+            "load-error": "加载神经模型内容失败"
           }
         },
         "detail": {

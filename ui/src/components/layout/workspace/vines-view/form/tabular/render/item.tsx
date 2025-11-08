@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NoticeInput } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { FieldImageModel } from '@/components/layout/workspace/vines-view/form/tabular/render/field/assets/image-model.tsx';
+import { FieldNeuralModel } from '@/components/layout/workspace/vines-view/form/tabular/render/field/assets/neural-model.tsx';
 import { FieldOneApiModels } from '@/components/layout/workspace/vines-view/form/tabular/render/field/assets/oneapi-models.tsx';
 import { FieldBoolean } from '@/components/layout/workspace/vines-view/form/tabular/render/field/boolean.tsx';
 import { CanvasAssistedInteraction } from '@/components/layout/workspace/vines-view/form/tabular/render/field/canvas-assisted-interaction';
@@ -207,6 +208,8 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                       />
                     ) : assetType === 'oneapi-model' ? (
                       <FieldOneApiModels input={it} value={value} onChange={form.setValue} extra={extra} />
+                    ) : assetType === 'neural-model' ? (
+                      <FieldNeuralModel input={it} value={value} onChange={onChange} />
                     ) : type === 'string' && !typeOptions?.multipleValues ? (
                       <FieldTextInputWithButtons
                         input={it}

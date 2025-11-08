@@ -99,7 +99,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
     // 设置加载标志，防止触发自动保存
     isLoadingSnapshotRef.current = true;
-    editor.loadSnapshot(metadata.snapshot);
+    // editor.loadSnapshot(metadata.snapshot);
 
     // 延迟重置标志位，确保加载完成（增加到500ms，给编辑器更多时间完成加载）
     setTimeout(() => {

@@ -3809,6 +3809,13 @@
             "tooltip": {
               "file-path": "File Path: "
             }
+          },
+          "neural-model": {
+            "placeholder": "Please select neural model",
+            "no-model": "Do not use model",
+            "selected": "Neural model selected (JSON content)",
+            "current-value": "Current value: JSON content (please reselect to change)",
+            "load-error": "Failed to load neural model content"
           }
         },
         "detail": {

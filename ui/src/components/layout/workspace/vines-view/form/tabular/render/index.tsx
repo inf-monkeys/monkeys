@@ -223,7 +223,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     });
 
     for (const inputDef of inputs) {
-      const { name, required, type, displayName } = inputDef;
+      const { name, required, type, displayName, typeOptions } = inputDef;
       const value = processedData[name];
 
       // 跳过隐藏字段的必填验证
@@ -234,6 +234,17 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
           t('workspace.flow-view.execution.workflow-input-is-required', { name: getI18nContent(displayName) }),
         );
         return;
+      }
+
+      // 处理神经模型字段：将存储的 JSON 字符串解析为对象
+      // 因为表单 schema 只支持基本类型，所以存储为字符串，提交时解析为对象
+      if (typeOptions?.assetType === 'neural-model' && typeof value === 'string' && value) {
+        try {
+          processedData[name] = JSON.parse(value);
+        } catch {
+          // 如果解析失败，保持原值
+          console.warn(`Failed to parse neural model JSON for field ${name}:`, value);
+        }
       }
 
       if (type === 'boolean' && isArray(value)) {
