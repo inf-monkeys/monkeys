@@ -43,7 +43,7 @@ export const FieldTextInputWithButtons: React.FC<IFieldTextInputWithButtonsProps
         onChange={(value) => {
           onChange(value);
         }}
-        minHeight={typeOptions?.textareaMiniHeight ?? 120}
+        minHeight={typeOptions?.textareaMiniHeight ?? 180}
         maxHeight={300}
         promptDictionary={typeOptions?.promptDictionary as Record<string, string[]> | undefined}
         enableVoice={typeOptions?.enableVoice}

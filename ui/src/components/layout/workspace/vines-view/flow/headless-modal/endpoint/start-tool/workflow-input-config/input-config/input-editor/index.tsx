@@ -93,7 +93,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       type: currentVariable.type as IWorkflowInput['type'],
       default: currentVariable.default as IWorkflowInput['default'],
       required: get(currentVariable, 'required', false),
-      textareaMiniHeight: get(currentVariable, 'typeOptions.textareaMiniHeight', 40),
+      textareaMiniHeight: get(currentVariable, 'typeOptions.textareaMiniHeight', 180),
       multipleValues: get(currentVariable, 'typeOptions.multipleValues', false),
       assetType: get(currentVariable, 'typeOptions.assetType', ''),
       enableImageMask: get(currentVariable, 'typeOptions.enableImageMask', undefined),
