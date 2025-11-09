@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { Book, Mic, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Book, Mic, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -448,7 +448,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   };
 
   return (
-    <div className="relative p-1">
+    <div className="relative min-w-0 p-1">
       <textarea
         ref={textareaRef}
         placeholder={placeholder}
@@ -555,14 +555,115 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
               <DialogTitle>{t('workspace.pre-view.actuator.execution-form.knowledge-graph.title')}</DialogTitle>
             </DialogHeader>
             <TooltipProvider>
+              <div className="min-w-0 w-full">
               <Tabs value={activeL1 ?? undefined} onValueChange={setActiveL1}>
-                <TabsList className="flex-wrap gap-2 overflow-x-auto">
-                  {level1Keys.map((k) => (
-                    <TabsTrigger key={k} value={k} className="flex-shrink-0 !w-auto">
-                      {k}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+                {/** 上方一级分类：改为可视区域宽度翻页，避免“按钮长度”造成溢出 */}
+                {(() => {
+                  // 滚动容器设在外层包装，避免 TabsList 自身的 inline-flex 影响宽度约束
+                  const listRef = React.useRef<HTMLDivElement | null>(null);
+                  const [canLeft, setCanLeft] = React.useState(false);
+                  const [canRight, setCanRight] = React.useState(false);
+                  const EPS = 2; // 容差，避免由于取整/动画导致的 0 边界误判
+                  const updateArrows = React.useCallback(() => {
+                    const el = listRef.current;
+                    if (!el) return;
+                    const { scrollLeft, clientWidth, scrollWidth } = el;
+                    setCanLeft(scrollLeft > EPS);
+                    setCanRight(scrollLeft + clientWidth < scrollWidth - EPS);
+                  }, []);
+                  React.useEffect(() => {
+                    updateArrows();
+                    const el = listRef.current;
+                    if (!el) return;
+                    const onScroll = () => updateArrows();
+                    el.addEventListener('scroll', onScroll, { passive: true });
+                    const ro = new ResizeObserver(() => updateArrows());
+                    ro.observe(el);
+                    return () => {
+                      el.removeEventListener('scroll', onScroll as any);
+                      ro.disconnect();
+                    };
+                  }, [updateArrows]);
+                  // 重新打开弹窗或数据变更后，等待一帧再更新箭头状态，避免初始测量为 0
+                  React.useEffect(() => {
+                    const id = requestAnimationFrame(() => updateArrows());
+                    const tid = setTimeout(() => updateArrows(), 0);
+                    return () => {
+                      cancelAnimationFrame(id);
+                      clearTimeout(tid);
+                    };
+                  }, [updateArrows, open, level1Keys.length]);
+                  const scrollByViewport = (dir: number) => {
+                    const el = listRef.current;
+                    if (!el) return;
+                    const delta = Math.max(80, el.clientWidth - 48); // 近似“翻一页”，留出边距
+                    el.scrollBy({ left: dir * delta, behavior: 'smooth' });
+                    // 平滑滚动过程可能导致滚动事件滞后，这里补一帧刷新
+                    requestAnimationFrame(updateArrows);
+                    setTimeout(updateArrows, 200);
+                  };
+                  // 激活项变化时，自动滚动到可视范围
+                  React.useEffect(() => {
+                    if (!activeL1) return;
+                    const el = listRef.current;
+                    if (!el) return;
+                    const idx = level1Keys.indexOf(activeL1);
+                    if (idx < 0) return;
+                    const target = el.querySelector<HTMLButtonElement>(`[data-l1-idx="${idx}"]`);
+                    target?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+                  }, [activeL1, level1Keys]);
+                  // 没有激活时默认选中第一个
+                  React.useEffect(() => {
+                    if (!activeL1 && level1Keys.length) setActiveL1(level1Keys[0]);
+                  }, [activeL1, level1Keys]);
+                  return (
+                    <div className="mb-2 flex w-full min-w-0 items-center gap-2">
+                      <Button
+                        size="xs"
+                        variant="borderless"
+                        className="opacity-70 hover:opacity-100"
+                        disabled={!canLeft}
+                        onClick={() => scrollByViewport(-1)}
+                        icon={<ArrowLeft className="h-4 w-4" />}
+                      />
+                      <div
+                        ref={listRef}
+                        className="min-w-0 flex-1 overflow-x-auto overflow-y-hidden"
+                        style={{
+                          scrollBehavior: 'smooth',
+                          // 隐藏不同浏览器的横向滚动条，仅保留程序控制
+                          scrollbarWidth: 'none',
+                          msOverflowStyle: 'none',
+                        }}
+                        data-hide-x-scrollbar
+                      >
+                        <TabsList className="inline-flex w-max flex-nowrap gap-2 whitespace-nowrap">
+                          {level1Keys.map((k, i) => (
+                            <TabsTrigger key={k} value={k} data-l1-idx={i} className="flex-shrink-0 !w-auto">
+                              {k}
+                            </TabsTrigger>
+                          ))}
+                        </TabsList>
+                        <style
+                          dangerouslySetInnerHTML={{
+                            __html: `
+                              /* Chrome / Safari */
+                              [data-hide-x-scrollbar]::-webkit-scrollbar { display: none; height: 0; }
+                            `,
+                          }}
+                        />
+                      </div>
+                      <Button
+                        size="xs"
+                        variant="borderless"
+                        className="opacity-70 hover:opacity-100"
+                        disabled={!canRight}
+                        onClick={() => scrollByViewport(1)}
+                        icon={<ArrowRight className="h-4 w-4" />}
+                      />
+                    </div>
+                  );
+                })()}
                 {level1Keys.map((k2) => {
                   const l2Dict = normalizedDict[k2] || {};
                   const l2Keys = Object.keys(l2Dict);
@@ -706,6 +807,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                   );
                 })}
               </Tabs>
+              </div>
             </TooltipProvider>
           </DialogContent>
         </Dialog>
