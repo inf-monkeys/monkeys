@@ -110,7 +110,10 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
         let needRefresh = false;
         finalInputs?.forEach((def) => {
           const { name, typeOptions, default: defaultValue } = def;
-          if (defaultValue !== void 0 && get(task, `inputParameters.${name}`) === void 0) {
+          // 对特殊字段使用顶层路径读取，避免在刷新时被错误回填默认值
+          const isTopLevelField = ['loopCondition', 'evaluatorType', 'expression'].includes(name);
+          const existedValue = isTopLevelField ? get(task, name) : get(task, `inputParameters.${name}`);
+          if (defaultValue !== void 0 && existedValue === void 0) {
             if (typeOptions?.multipleValues) {
               handleUpdate(isArray(defaultValue) ? defaultValue : [defaultValue], name, false);
             } else {
