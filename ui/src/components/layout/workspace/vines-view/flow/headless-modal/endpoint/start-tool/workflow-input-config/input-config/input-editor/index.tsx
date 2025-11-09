@@ -304,7 +304,14 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
           <form
             onSubmit={handleSubmit}
             className="flex flex-col gap-2"
-            onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+            onKeyDown={(e) => {
+              if (e.key !== 'Enter') return;
+              const target = e.target as HTMLElement;
+              const tag = target?.tagName?.toLowerCase?.();
+              const isTextarea = tag === 'textarea';
+              // 允许在多行文本框中回车换行，其他控件仍阻止提交
+              if (!isTextarea) e.preventDefault();
+            }}
           >
             <div className="flex gap-2">
               <ScrollArea className="-mx-3 h-[25rem] px-3">
