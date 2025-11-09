@@ -194,6 +194,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   });
 
   const [workflowAssociationList, setWorkflowAssociationList] = useState<IWorkflowAssociation[]>([]);
+  const [tabularEvent$, setTabularEvent$] = useState<any>(null);
 
   const baseWidth = showFormInImageDetail ? '70vw' : '100vw';
   const spacingFormula =
@@ -298,10 +299,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                       onProcessedInputsChange={setProcessedInputs}
                       onShowInputDiffBannerChange={setShowInputDiffBanner}
                       onOriginalInputValuesChange={setOriginalInputValues}
+                      onTabularEventCreated={setTabularEvent$}
                     />
                   </ScrollArea>
                   <div className="z-20 dark:bg-[#111113]">
-                    <TabularFooterButtons processedInputs={processedInputs} />
+                    <TabularFooterButtons processedInputs={processedInputs} event$={tabularEvent$} />
                   </div>
                 </div>
               )}

@@ -1,8 +1,11 @@
 import React, { useEffect } from 'react';
 
 import { useEventEmitter } from 'ahooks';
+import { isBoolean } from 'lodash';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings';
 
@@ -17,6 +20,7 @@ interface TabularRenderWrapperProps {
   onProcessedInputsChange: (inputs: any[]) => void;
   onShowInputDiffBannerChange: (show: boolean) => void;
   onOriginalInputValuesChange: (values: Record<string, any>) => void;
+  onTabularEventCreated?: (event$: ReturnType<typeof useEventEmitter<TTabularEvent>>) => void;
 }
 
 // TabularRender包装组件，用于获取工作流输入参数
@@ -29,10 +33,12 @@ export const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
   onProcessedInputsChange,
   onShowInputDiffBannerChange,
   onOriginalInputValuesChange,
+  onTabularEventCreated,
 }) => {
   const { vines } = useVinesFlow();
   const tabular$ = useEventEmitter<TTabularEvent>();
   const { t } = useTranslation();
+  const { data: oem } = useSystemConfig();
   const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
 
   // 监听窗口大小变化
@@ -97,6 +103,25 @@ export const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
     onShowInputDiffBannerChange(hasChanged);
   }, [processedInputs, originalInputValues, execution, onShowInputDiffBannerChange]);
 
+  // 暴露 Tabular 事件总线给父组件（底部按钮使用）
+  useEffect(() => {
+    onTabularEventCreated?.(tabular$);
+  }, [tabular$, onTabularEventCreated]);
+
+  // 表单提交：与表单视图一致，创建执行
+  const handleSubmit = async (values: any) => {
+    try {
+      const instanceId = await vines.start({ inputData: values, onlyStart: true });
+      if (instanceId) {
+        if (!isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) || oem?.theme?.views?.form?.toast?.afterCreate !== false) {
+          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+        }
+      }
+    } catch (error) {
+      toast.error(t('workspace.pre-view.actuator.execution.error'));
+    }
+  };
+
   if (!processedInputs.length) {
     return (
       <div className="vines-center size-full text-center text-xl text-muted-foreground">
@@ -117,6 +142,7 @@ export const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
         height={dynamicHeight}
         event$={tabular$}
         workflowId={workflowId}
+        onSubmit={handleSubmit}
         scrollAreaClassName=""
       ></TabularRender>
     </div>

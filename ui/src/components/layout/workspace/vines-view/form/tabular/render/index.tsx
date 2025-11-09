@@ -26,8 +26,8 @@ import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
-import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import {
   useResetWorkbenchCacheVal,
   useSetWorkbenchCacheVal,
@@ -43,7 +43,10 @@ export type TTabularEvent =
   | 'reset'
   | 'restore-previous-param'
   | 'submit'
-  | { type: 'paste-param'; data: VinesWorkflowExecutionInput[] };
+  | { type: 'paste-param'; data: VinesWorkflowExecutionInput[] }
+  // 请求当前表单值（用于外部复制参数）
+  // 回传 form.getValues() 的快照
+  | { type: 'get-values'; callback: (values: IWorkflowInputForm) => void };
 
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];
@@ -238,7 +241,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
 
       // 处理神经模型字段：将存储的 JSON 字符串解析为对象
       // 因为表单 schema 只支持基本类型，所以存储为字符串，提交时解析为对象
-      if (typeOptions?.assetType === 'neural-model' && typeof value === 'string' && value) {
+      if ((typeOptions as any)?.assetType === 'neural-model' && typeof value === 'string' && value) {
         try {
           processedData[name] = JSON.parse(value);
         } catch {
@@ -302,6 +305,13 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
           form.setValue(id, data as unknown as any);
         }
         toast.success(t('common.toast.paste-success'));
+      } else if (event.type === 'get-values') {
+        try {
+          const values = form.getValues();
+          (event as any).callback?.(values);
+        } catch {
+          /* empty */
+        }
       }
     }
   });

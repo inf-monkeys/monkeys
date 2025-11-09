@@ -1,60 +1,53 @@
 import { useState } from 'react';
 
-import { isBoolean } from 'lodash';
 import { CopyIcon, SparklesIcon } from 'lucide-react';
-import { useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
+import type { TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { useCopy } from '@/hooks/use-copy';
 import { useVinesFlow } from '@/package/vines-flow';
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 
 interface TabularFooterButtonsProps {
   processedInputs: any[];
+  event$?: EventEmitter<TTabularEvent> | null;
 }
 
-export const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedInputs }) => {
+export const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedInputs, event$ }) => {
   const { t } = useTranslation();
   const { copy } = useCopy();
   const { vines } = useVinesFlow();
   const { data: oem } = useSystemConfig();
   const [loading, setLoading] = useState(false);
-  const form = useFormContext();
 
   // 生成按钮通过事件触发提交
   const handleGenerate = () => {
-    form.handleSubmit(async (values) => {
-      setLoading(true);
-      try {
-        await vines.start({ inputData: values, onlyStart: true });
-        if (
-          !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
-          oem?.theme?.views?.form?.toast?.afterCreate != false
-        )
-          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
-      } catch (error) {
-        // console.error('生成失败:', error);
-        toast.error(t('workspace.pre-view.actuator.execution.error'));
-      } finally {
-        setLoading(false);
-      }
-    })();
+    if (!event$) return;
+    setLoading(true);
+    event$.emit('submit');
+    setTimeout(() => setLoading(false), 400);
   };
 
   // 复制当前表单参数
   const handleCopy = () => {
-    const values = form.getValues();
-    const data = processedInputs.map((input) => ({
-      id: input.name,
-      displayName: input.displayName,
-      description: input.description,
-      data: values[input.name],
-      type: input.type,
-    }));
-    copy(JSON.stringify({ type: 'input-parameters', data }));
-    toast.success(t('workspace.pre-view.actuator.detail.form-render.actions.copy-input-success'));
+    if (!event$) return;
+    event$.emit({
+      type: 'get-values',
+      callback: (values: Record<string, any>) => {
+        const data = processedInputs.map((input) => ({
+          id: input.name,
+          displayName: input.displayName,
+          description: input.description,
+          data: values[input.name],
+          type: input.type,
+        }));
+        copy(JSON.stringify({ type: 'input-parameters', data }));
+        toast.success(t('workspace.pre-view.actuator.detail.form-render.actions.copy-input-success'));
+      },
+    } as any);
   };
 
   return (
