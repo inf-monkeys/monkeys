@@ -49,6 +49,8 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   expandButtonText,
   knowledgeGraphButtonText,
 }) => {
+  const ensureString = (v: unknown): string => (typeof v === 'string' ? v : String(v ?? ''));
+  const valueStr = ensureString(value);
   const shouldShouldFormButtons = useShouldShowFormButton();
   const { t } = useTranslation();
 
@@ -132,7 +134,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
 
   const insertText = (text: string) => {
     const el = textareaRef.current;
-    const current = value ?? '';
+    const current = valueStr;
     const leftClean = current.replace(/[\s,]+$/g, '');
     const newValue = leftClean ? `${leftClean}, ${text}` : `${text}`;
     onChange(newValue);
@@ -158,7 +160,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   };
 
   const applyFromSelected = (label: string) => {
-    const currentValue = (value ?? '').trim();
+    const currentValue = valueStr.trim();
 
     // 检查是否已经包含这个词
     if (currentValue.includes(label)) {
@@ -278,7 +280,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
 
   // 同步 selected 状态和输入框内容
   React.useEffect(() => {
-    const currentValue = (value ?? '').trim();
+    const currentValue = valueStr.trim();
     if (currentValue && level1Keys.length > 0) {
       const updatedSelected: Record<string, boolean> = {};
 
@@ -352,7 +354,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
 
   // 扩写处理函数
   const handleExpand = async () => {
-    if (!value.trim()) {
+    if (!valueStr.trim()) {
       toast.error('请先输入内容');
       return;
     }
@@ -367,7 +369,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
         },
         credentials: 'include',
         body: JSON.stringify({
-          text: value,
+          text: valueStr,
         }),
       });
 
@@ -432,8 +434,9 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
         }
       }
 
-      if (expandedText && expandedText.trim()) {
-        onChange(expandedText);
+      const expandedTextStr = ensureString(expandedText);
+      if (expandedTextStr.trim()) {
+        onChange(expandedTextStr);
         toast.success('扩写完成');
       } else {
         console.error('扩写响应结构:', data);
@@ -452,7 +455,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
       <textarea
         ref={textareaRef}
         placeholder={placeholder}
-        value={value}
+        value={valueStr}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
           'flex w-full resize-none rounded-md border border-input bg-[#FFFFFF] px-3 py-2 pr-global text-sm text-gray-500 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#111113]',
@@ -674,7 +677,7 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                           const l3Dict = l2Dict[l2];
                           const l3Keys = Object.keys(l3Dict);
                           const hideL2Header = l2Keys.length === 1 && l2Keys[0] === '默认';
-                          const currentValue = (value ?? '').trim();
+                          const currentValue = valueStr.trim();
 
                           // 分离有 level4 和没有 level4 的 l3
                           const l3WithL4: string[] = [];
