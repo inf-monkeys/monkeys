@@ -1,0 +1,104 @@
+spec:
+  inputs:
+    tag:
+      default: ""
+      type: string
+      description: "镜像标签"
+
+    image_target:
+      type: string
+      description: "构建镜像目标，ui / multi-tenancy / server"
+      default: "ui"
+      options:
+        - ui
+        - multi-tenancy
+        - server
+
+    build_enabled:
+      type: boolean
+      default: false
+      description: "构建镜像，并推送到内部 registry"
+
+    release_enabled:
+      type: boolean
+      default: true
+      description: "构建镜像后发布"
+
+    mirror_to_harbor_enabled:
+      type: boolean
+      default: false
+      description: "推送镜像，将内部 registry 的镜像推送到 Harbor"
+
+    mirror_to_docker_enabled:
+      type: boolean
+      default: false
+      description: "推送镜像，将内部 registry 的镜像推送到 Docker"
+
+    deploy_to_dev_enabled:
+      type: boolean
+      default: false
+      description: "部署镜像至开发环境"
+
+    deploy_to_prod_1_enabled:
+      type: boolean
+      default: false
+      description: "部署镜像至生产环境 #1 (Harbor)"
+
+    deploy_to_prod_2_enabled:
+      type: boolean
+      default: false
+      description: "部署镜像至生产环境 #2 (Harbor)"
+
+    deploy_to_prod_3_enabled:
+      type: boolean
+      default: false
+      description: "部署镜像至生产环境 #3 (Docker)"
+
+    deploy_to_prod_4_enabled:
+      type: boolean
+      default: false
+      description: "部署镜像至生产环境 #4 (Harbor)"
+---
+
+stages:
+  - preprocess
+  - validate
+  - build
+  - release
+  - mirror
+  - deploy
+
+generate_env:
+  stage: preprocess
+  script:
+    - if [ "$[[ inputs.image_target ]]" = "ui" ]; then
+        echo "DOCKERFILE_CONTEXT=./ui" >> build.env
+      elif [ "$[[ inputs.image_target ]]" = "multi-tenancy" ]; then
+        echo "DOCKERFILE_CONTEXT=." >> build.env
+      elif [ "$[[ inputs.image_target ]]" = "server" ]; then
+        echo "DOCKERFILE_CONTEXT=." >> build.env
+      fi
+    - if [ "$[[ inputs.image_target ]]" = "ui" ]; then
+        echo "DOCKERFILE_PATH=./docker/ui/Dockerfile" >> build.env
+      elif [ "$[[ inputs.image_target ]]" = "multi-tenancy" ]; then
+        echo "DOCKERFILE_CONTEXT=./docker/server/Dockerfile" >> build.env
+      elif [ "$[[ inputs.image_target ]]" = "server" ]; then
+        echo "DOCKERFILE_CONTEXT=./docker/server/Dockerfile-multi-tenancy" >> build.env
+      fi
+  artifacts:
+    reports:
+      dotenv: build.env
+
+include:
+  - component: $CI_SERVER_FQDN/colour93/ci-cd-pipeline/ci-cd@~latest
+    inputs:
+      tag: $[[ inputs.tag ]]
+      release_enabled: $[[ inputs.release_enabled ]]
+      build_enabled: $[[ inputs.build_enabled ]]
+      mirror_to_harbor_enabled: $[[ inputs.mirror_to_harbor_enabled ]]
+      mirror_to_docker_enabled: $[[ inputs.mirror_to_docker_enabled ]]
+      deploy_to_dev_enabled: $[[ inputs.deploy_to_dev_enabled ]]
+      deploy_to_prod_1_enabled: $[[ inputs.deploy_to_prod_1_enabled ]]
+      deploy_to_prod_2_enabled: $[[ inputs.deploy_to_prod_2_enabled ]]
+      deploy_to_prod_3_enabled: $[[ inputs.deploy_to_prod_3_enabled ]]
+      deploy_to_prod_4_enabled: $[[ inputs.deploy_to_prod_4_enabled ]]
