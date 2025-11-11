@@ -145,6 +145,9 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     { id: 'workflow-node', label: '流程节点', icon: 'tool-frame' },
   ];
 
+  // Draw Fast 相关工具（独立工具栏）
+  const drawfastTools = [{ id: 'live-image', label: '极速绘图', icon: 'tool-frame' }];
+
   return (
     <div
       className="vertical-toolbar"
@@ -426,6 +429,29 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                   editor.setCurrentTool(tool.id);
                   setCurrentToolId(tool.id);
                   setIsDrawMenuOpen(false);
+                }}
+                title={tool.label}
+                style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+              >
+                <TldrawUiIcon icon={tool.icon} label={tool.label || tool.id} />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Draw Fast 工具栏（独立） */}
+        <div className="custom-toolbar" style={{ marginLeft: 20 }}>
+          {drawfastTools.map((tool) => {
+            const isActive = currentToolId === tool.id;
+            return (
+              <button
+                key={tool.id}
+                className={`tool-button ${isActive ? 'selected' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  editor.setCurrentTool(tool.id);
+                  setCurrentToolId(tool.id);
                 }}
                 title={tool.label}
                 style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}

@@ -139,6 +139,7 @@
     "tailwindcss-animate": "^1.0.7",
     "three": "0.180.0",
     "tldraw": "^4.1.2",
+    "@fal-ai/serverless-client": "^0.6.1",
     "tokenlens": "^1.2.1",
     "unfetch": "^5.0.0",
     "use-stick-to-bottom": "^1.1.1",

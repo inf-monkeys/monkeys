@@ -24,6 +24,7 @@ import {
   TLShape,
   TLShapeId,
   TLUiContextMenuProps,
+  track,
   useEditor,
   useToasts,
 } from 'tldraw';
@@ -66,6 +67,10 @@ import { OnCanvasComponentPicker } from './workflow-ui/OnCanvasComponentPicker';
 import 'tldraw/tldraw.css';
 import './layer-panel.css';
 import './workflow-nodes.css';
+import { LiveImageShapeUtil } from './shapes/live-image/LiveImageShapeUtil';
+import { LiveImageTool } from './shapes/tools/LiveImageTool';
+import { LiveImageProvider } from './hooks/useLiveImage';
+import { createPortal } from 'react-dom';
 
 class FixedFrameShapeUtil extends FrameShapeUtil {
   // override canResize() {
@@ -1058,7 +1063,8 @@ export const Board: React.FC<BoardProps> = ({
         }}
       >
         <TldrawErrorBoundary>
-          <Tldraw
+          <LiveImageProvider appId={'110602490-lcm-sd15-i2i'}>
+            <Tldraw
             licenseKey="tldraw-2026-02-14/WyJCdUxDb2ViWSIsWyIqIl0sMTYsIjIwMjYtMDItMTQiXQ.zIbZRsp7SDmrunQdvcnfK2mKnaom5bDUKudHgIWcY6KP8ckD4YZTphzGrwvW8sKAjyzdtIiXY9cFlBfQLfMKJA"
             persistenceKey={persistenceKey}
             onMount={(editor: Editor) => {
@@ -1203,9 +1209,10 @@ export const Board: React.FC<BoardProps> = ({
               WorkflowShapeUtil,
               NodeShapeUtil,
               WorkflowConnectionShapeUtil,
+              LiveImageShapeUtil,
             ]}
             bindingUtils={[...defaultBindingUtils, WorkflowConnectionBindingUtil]}
-            tools={[...defaultShapeTools, ...defaultTools, InstructionTool, OutputTool, WorkflowTool, NodeTool]}
+            tools={[...defaultShapeTools, ...defaultTools, InstructionTool, OutputTool, WorkflowTool, NodeTool, LiveImageTool]}
             assetUrls={defaultEditorAssetUrls}
             overrides={{
               tools: (_editor, tools) => {
@@ -1227,7 +1234,10 @@ export const Board: React.FC<BoardProps> = ({
           >
             {/* 小工具工具栏 - 根据 OEM 配置控制显示 */}
             {get(oem, 'theme.designProjects.showMiniToolsToolbar', false) && <MiniToolsToolbar />}
+            <SneakySideEffects />
+            <LiveImageAssets />
           </Tldraw>
+          </LiveImageProvider>
         </TldrawErrorBoundary>
       </div>
 
@@ -1235,3 +1245,72 @@ export const Board: React.FC<BoardProps> = ({
     </div>
   );
 };
+
+const LiveImageAssets = track(function LiveImageAssets() {
+  const editor = useEditor()
+  return (
+    <Inject selector=".tl-overlays .tl-html-layer">
+      {editor
+        .getCurrentPageShapes()
+        .filter((shape): shape is any => (shape as any).type === 'live-image')
+        .map((shape: any) => (
+          <LiveImageAsset key={shape.id} shape={shape} />
+        ))}
+    </Inject>
+  )
+})
+
+function LiveImageAsset({ shape }: { shape: any }) {
+  const editor = useEditor()
+  if (!shape?.props?.overlayResult) return null
+  const transform = editor.getShapePageTransform(shape).toCssString()
+  const assetId = (AssetRecordType as any).createId(shape.id.split(':')[1])
+  const asset = editor.getAsset(assetId)
+  return asset && (asset as any).props?.src ? (
+    <img
+      src={(asset as any).props.src!}
+      alt={shape.props.name}
+      width={shape.props.w}
+      height={shape.props.h}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: shape.props.w,
+        height: shape.props.h,
+        maxWidth: 'none',
+        transform,
+        transformOrigin: 'top left',
+        opacity: (shape as any).opacity,
+      }}
+    />
+  ) : null
+}
+
+function Inject({ children, selector }: { children: React.ReactNode; selector: string }) {
+  const [parent, setParent] = React.useState<Element | null>(null)
+  const target = React.useMemo(() => parent?.querySelector(selector) ?? null, [parent, selector])
+
+  return (
+    <>
+      <div ref={(el) => setParent(el?.parentElement ?? null)} style={{ display: 'none' }} />
+      {target ? createPortal(children as any, target) : null}
+    </>
+  )
+}
+
+function SneakySideEffects() {
+  const editor = useEditor()
+  React.useEffect(() => {
+    editor.sideEffects.registerAfterChangeHandler('shape', () => {
+      editor.emit('update-drawings' as any)
+    })
+    editor.sideEffects.registerAfterCreateHandler('shape', () => {
+      editor.emit('update-drawings' as any)
+    })
+    editor.sideEffects.registerAfterDeleteHandler('shape', () => {
+      editor.emit('update-drawings' as any)
+    })
+  }, [editor])
+  return null
+}
