@@ -9,6 +9,7 @@ import { MediaToolsModule } from './media/media.module';
 import { OneAPIModule } from './oneapi/oneapi.module';
 import { ReActController } from './react.controller';
 import { TextExpansionController } from './text-expansion.controller';
+import { FalProxyController } from './fal.controller';
 import { ToolsController } from './tools.controller';
 import { ToolsCredentialsController } from './tools.credential.controller';
 import { ToolsCredentialsService } from './tools.credential.service';
@@ -17,7 +18,7 @@ import { ToolsPollingService } from './tools.polling.service';
 import { ToolsRegistryService } from './tools.registry.service';
 
 @Module({
-  controllers: [ToolsController, ToolsCredentialsController, ReActController, TextExpansionController],
+  controllers: [ToolsController, ToolsCredentialsController, ReActController, TextExpansionController, FalProxyController],
   providers: [ToolsPollingService, ToolsRegistryService, ToolsForwardService, ToolsCredentialsService, ReActToolsService, ReActStepManager],
   imports: [ExampleToolsModule, HttpModule, ComfyUIModule, OneAPIModule, TranslateToolsModule, MediaToolsModule],
   exports: [ToolsRegistryService, ToolsForwardService, ReActStepManager],

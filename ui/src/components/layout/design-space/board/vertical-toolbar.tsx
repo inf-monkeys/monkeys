@@ -131,6 +131,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
     ...(!oneOnOne ? [{ id: 'frame', label: '画板', icon: 'tool-frame' }] : []),
     { id: 'shape', label: '形状', icon: 'geo-rectangle' },
     { id: 'draw', label: '绘制', icon: 'tool-pencil' },
+    { id: 'live-image', label: '快画', icon: 'tool-frame' },
     { id: 'style-panel', label: '样式面板', icon: 'palette' },
     { id: 'eraser', label: '橡皮擦', icon: 'tool-eraser' },
     { id: 'text', label: '文本', icon: 'tool-text' },

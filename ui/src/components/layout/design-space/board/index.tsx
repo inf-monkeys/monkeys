@@ -12,6 +12,7 @@ import {
   DefaultContextMenuContent,
   defaultEditorAssetUrls,
   defaultShapeTools,
+  DefaultSizeStyle,
   defaultTools,
   Editor,
   FrameShapeUtil,
@@ -37,6 +38,7 @@ import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
 import { newConvertExecutionResultToItemList } from '@/utils/execution';
 import { getImageSize } from '@/utils/file';
 
+import { getDefaultCdnBaseUrl, LANGUAGES } from '@tldraw/editor';
 import { ExternalLayerPanel } from './ExternalLayerPanel';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
@@ -62,6 +64,237 @@ import { PointingPort } from './workflow-examples/src/ports/PointingPort';
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 import { WorkflowRegions } from './workflow-examples/src/components/WorkflowRegions';
 import { OnCanvasComponentPicker } from './workflow-ui/OnCanvasComponentPicker';
+// Draw Fast: Live Image tool & provider
+import * as TldrawPkg from 'tldraw';
+import { LiveImageShapeUtil } from './draw-fast-examples/src/components/LiveImageShapeUtil';
+import { LiveImageTool } from './draw-fast-examples/src/components/LiveImageTool';
+import { LiveImageProvider } from './draw-fast-examples/src/hooks/useLiveImage';
+const {
+  AssetUrlsProvider: ImportedAssetUrlsProvider,
+  defaultUiAssetUrls: importedDefaultUiAssetUrls,
+} = TldrawPkg as Record<string, any>;
+
+const FALLBACK_ICON_TYPES = [
+  'align-bottom',
+  'align-center-horizontal',
+  'align-center-vertical',
+  'align-left',
+  'align-right',
+  'align-top',
+  'alt',
+  'arrow-arc',
+  'arrow-cycle',
+  'arrow-elbow',
+  'arrow-left',
+  'arrowhead-arrow',
+  'arrowhead-bar',
+  'arrowhead-diamond',
+  'arrowhead-dot',
+  'arrowhead-none',
+  'arrowhead-square',
+  'arrowhead-triangle-inverted',
+  'arrowhead-triangle',
+  'blob',
+  'bold',
+  'bookmark',
+  'bring-forward',
+  'bring-to-front',
+  'broken',
+  'bulletList',
+  'check-circle',
+  'check',
+  'chevron-down',
+  'chevron-left',
+  'chevron-right',
+  'chevron-up',
+  'chevrons-ne',
+  'chevrons-sw',
+  'clipboard-copied',
+  'clipboard-copy',
+  'code',
+  'color',
+  'comment',
+  'corners',
+  'crop',
+  'cross-2',
+  'cross-circle',
+  'dash-dashed',
+  'dash-dotted',
+  'dash-draw',
+  'dash-solid',
+  'disconnected',
+  'discord',
+  'distribute-horizontal',
+  'distribute-vertical',
+  'dot',
+  'dots-horizontal',
+  'dots-vertical',
+  'download',
+  'drag-handle-dots',
+  'duplicate',
+  'edit',
+  'external-link',
+  'fill-fill',
+  'fill-none',
+  'fill-pattern',
+  'fill-semi',
+  'fill-solid',
+  'follow',
+  'following',
+  'font-draw',
+  'font-mono',
+  'font-sans',
+  'font-serif',
+  'geo-arrow-down',
+  'geo-arrow-left',
+  'geo-arrow-right',
+  'geo-arrow-up',
+  'geo-check-box',
+  'geo-cloud',
+  'geo-diamond',
+  'geo-ellipse',
+  'geo-heart',
+  'geo-hexagon',
+  'geo-octagon',
+  'geo-oval',
+  'geo-pentagon',
+  'geo-rectangle',
+  'geo-rhombus-2',
+  'geo-rhombus',
+  'geo-star',
+  'geo-trapezoid',
+  'geo-triangle',
+  'geo-x-box',
+  'github',
+  'group',
+  'heading',
+  'help-circle',
+  'highlight',
+  'horizontal-align-end',
+  'horizontal-align-middle',
+  'horizontal-align-start',
+  'info-circle',
+  'italic',
+  'leading',
+  'link',
+  'list',
+  'lock',
+  'manual',
+  'menu',
+  'minus',
+  'mixed',
+  'pack',
+  'plus',
+  'question-mark-circle',
+  'question-mark',
+  'redo',
+  'reset-zoom',
+  'rotate-ccw',
+  'rotate-cw',
+  'send-backward',
+  'send-to-back',
+  'share-1',
+  'size-extra-large',
+  'size-large',
+  'size-medium',
+  'size-small',
+  'spline-cubic',
+  'spline-line',
+  'stack-horizontal',
+  'stack-vertical',
+  'status-offline',
+  'stretch-horizontal',
+  'stretch-vertical',
+  'strike',
+  'text-align-center',
+  'text-align-left',
+  'text-align-right',
+  'toggle-off',
+  'toggle-on',
+  'tool-arrow',
+  'tool-eraser',
+  'tool-frame',
+  'tool-hand',
+  'tool-highlight',
+  'tool-laser',
+  'tool-line',
+  'tool-media',
+  'tool-note',
+  'tool-pencil',
+  'tool-pointer',
+  'tool-screenshot',
+  'tool-text',
+  'trash',
+  'twitter',
+  'underline',
+  'undo',
+  'ungroup',
+  'unlock',
+  'vertical-align-end',
+  'vertical-align-middle',
+  'vertical-align-start',
+  'warning-triangle',
+  'zoom-in',
+  'zoom-out',
+] as const;
+
+const FALLBACK_EMBED_TYPES = [
+  'tldraw',
+  'figma',
+  'google_maps',
+  'val_town',
+  'codesandbox',
+  'codepen',
+  'scratch',
+  'youtube',
+  'google_calendar',
+  'google_slides',
+  'github_gist',
+  'replit',
+  'felt',
+  'spotify',
+  'vimeo',
+  'excalidraw',
+  'observable',
+  'desmos',
+] as const;
+
+const ensureUiAssetUrls = (baseUrls?: {
+  fonts?: Record<string, string>;
+  icons?: Record<string, string>;
+  translations?: Record<string, string>;
+  embedIcons?: Record<string, string>;
+}) => {
+  const cdnBase = getDefaultCdnBaseUrl?.() ?? 'https://cdn.tldraw.com';
+  const fonts = { ...defaultEditorAssetUrls.fonts, ...(baseUrls?.fonts ?? {}) };
+  const icons =
+    baseUrls?.icons && Object.keys(baseUrls.icons).length > 0
+      ? baseUrls.icons
+      : Object.fromEntries(FALLBACK_ICON_TYPES.map((name) => [name, `${cdnBase}/icons/icon/0_merged.svg#${name}`]));
+  const translations =
+    baseUrls?.translations && Object.keys(baseUrls.translations).length > 0
+      ? baseUrls.translations
+      : Object.fromEntries(LANGUAGES.map((lang) => [lang.locale, `${cdnBase}/translations/${lang.locale}.json`]));
+  const embedIcons =
+    baseUrls?.embedIcons && Object.keys(baseUrls.embedIcons).length > 0
+      ? baseUrls.embedIcons
+      : Object.fromEntries(FALLBACK_EMBED_TYPES.map((type) => [type, `${cdnBase}/embed-icons/${type}.png`]));
+
+  return {
+    ...defaultEditorAssetUrls,
+    ...baseUrls,
+    fonts,
+    icons,
+    translations,
+    embedIcons,
+  };
+};
+
+const AssetUrlsProvider: React.FC<{ assetUrls: any; children: React.ReactNode }> =
+  ImportedAssetUrlsProvider ??
+  (({ children }) => <>{children}</>);
+
+const uiAssetUrls = ensureUiAssetUrls(importedDefaultUiAssetUrls);
 
 import 'tldraw/tldraw.css';
 import './layer-panel.css';
@@ -1057,12 +1290,41 @@ export const Board: React.FC<BoardProps> = ({
           e.dataTransfer.dropEffect = 'copy';
         }}
       >
-        <TldrawErrorBoundary>
-          <Tldraw
+        <LiveImageProvider appId="110602490-lcm-sd15-i2i">
+          <AssetUrlsProvider assetUrls={uiAssetUrls}>
+            <TldrawErrorBoundary>
+              <Tldraw
             licenseKey="tldraw-2026-02-14/WyJCdUxDb2ViWSIsWyIqIl0sMTYsIjIwMjYtMDItMTQiXQ.zIbZRsp7SDmrunQdvcnfK2mKnaom5bDUKudHgIWcY6KP8ckD4YZTphzGrwvW8sKAjyzdtIiXY9cFlBfQLfMKJA"
             persistenceKey={persistenceKey}
             onMount={(editor: Editor) => {
               setEditor(editor);
+              // 将 live-image 视为 frame，便于作为容器使用
+              const originalIsShapeOfType =
+                (editor.isShapeOfType?.bind(editor) as ((arg: any, type: any) => boolean) | undefined) ?? undefined;
+              (editor as any).isShapeOfType = function (arg: any, type: any) {
+                const shape = typeof arg === 'string' ? this.getShape(arg as TLShapeId)! : arg;
+                if (shape?.type === 'live-image' && type === 'frame') {
+                  return true;
+                }
+                return originalIsShapeOfType ? originalIsShapeOfType(arg, type) : shape?.type === type;
+              };
+
+              const hasLiveImage = editor
+                .getCurrentPageShapes()
+                .some((shape: TLShape | undefined) => shape?.type === 'live-image');
+              if (!hasLiveImage) {
+                editor.createShape({
+                  type: 'live-image',
+                  x: 120,
+                  y: 180,
+                  props: {
+                    w: 512,
+                    h: 512,
+                    name: '',
+                  },
+                } as any);
+              }
+              editor.setStyleForNextShapes(DefaultSizeStyle, 'xl');
               // 只在单画板模式下保护默认画板不被删除
               if (oneOnOne) {
                 editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
@@ -1095,6 +1357,20 @@ export const Board: React.FC<BoardProps> = ({
                   }
                 } catch {}
                 return nextShape;
+              });
+
+              // Live Image: 在形状变更/增删后发出更新事件，触发实时生成
+              editor.sideEffects.registerAfterChangeHandler('shape', () => {
+                // @ts-ignore
+                editor.emit('update-drawings');
+              });
+              editor.sideEffects.registerAfterCreateHandler('shape', () => {
+                // @ts-ignore
+                editor.emit('update-drawings');
+              });
+              editor.sideEffects.registerAfterDeleteHandler('shape', () => {
+                // @ts-ignore
+                editor.emit('update-drawings');
               });
 
               // 如果提供了画布尺寸且启用自动创建，则创建有界 frame
@@ -1198,6 +1474,7 @@ export const Board: React.FC<BoardProps> = ({
             components={components}
             shapeUtils={[
               FixedFrameShapeUtil,
+              LiveImageShapeUtil,
               InstructionShapeUtil,
               OutputShapeUtil,
               WorkflowShapeUtil,
@@ -1205,8 +1482,16 @@ export const Board: React.FC<BoardProps> = ({
               WorkflowConnectionShapeUtil,
             ]}
             bindingUtils={[...defaultBindingUtils, WorkflowConnectionBindingUtil]}
-            tools={[...defaultShapeTools, ...defaultTools, InstructionTool, OutputTool, WorkflowTool, NodeTool]}
-            assetUrls={defaultEditorAssetUrls}
+            tools={[
+              ...defaultShapeTools,
+              ...defaultTools,
+              LiveImageTool,
+              InstructionTool,
+              OutputTool,
+              WorkflowTool,
+              NodeTool,
+            ]}
+            assetUrls={uiAssetUrls}
             overrides={{
               tools: (_editor, tools) => {
                 // Remove the text tool
@@ -1227,8 +1512,10 @@ export const Board: React.FC<BoardProps> = ({
           >
             {/* 小工具工具栏 - 根据 OEM 配置控制显示 */}
             {get(oem, 'theme.designProjects.showMiniToolsToolbar', false) && <MiniToolsToolbar />}
-          </Tldraw>
-        </TldrawErrorBoundary>
+            </Tldraw>
+            </TldrawErrorBoundary>
+          </AssetUrlsProvider>
+        </LiveImageProvider>
       </div>
 
       {/* Agent 面板已迁移至左侧 ExternalLayerPanel */}
