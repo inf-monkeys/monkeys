@@ -16,6 +16,11 @@ interface IFieldNumberProps {
 }
 
 export const FieldNumber: React.FC<IFieldNumberProps> = ({ input: { type, typeOptions }, value, onChange, field }) => {
+  const getNumberValue = (val: any, fallback: number) => {
+    const num = Number(val);
+    return isNaN(num) ? fallback : num;
+  };
+
   return (
     type === 'number' &&
     (isUndefined(typeOptions?.minValue) || isUndefined(typeOptions?.maxValue) || typeOptions?.numberPrecision === 0 ? (
@@ -41,8 +46,8 @@ export const FieldNumber: React.FC<IFieldNumberProps> = ({ input: { type, typeOp
         min={typeOptions.minValue}
         max={typeOptions.maxValue}
         step={typeOptions.numberPrecision}
-        defaultValue={[Number(value) || 0]}
-        value={[Number(value) || 0]}
+        defaultValue={[getNumberValue(value, typeOptions.minValue ?? 0)]}
+        value={[getNumberValue(value, typeOptions.minValue ?? 0)]}
         onValueChange={(v) => onChange(v[0])}
         {...field}
       />
