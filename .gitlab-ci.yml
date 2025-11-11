@@ -104,3 +104,5 @@ include:
       deploy_to_prod_2_enabled: $[[ inputs.deploy_to_prod_2_enabled ]]
       deploy_to_prod_3_enabled: $[[ inputs.deploy_to_prod_3_enabled ]]
       deploy_to_prod_4_enabled: $[[ inputs.deploy_to_prod_4_enabled ]]
+      extra_needs_jobs:
+        - job: generate_env
