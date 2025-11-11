@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { useAsyncEffect } from 'ahooks';
 import { get } from 'lodash';
@@ -31,7 +31,7 @@ interface HistoryResultProps {
   setSize: Dispatch<SetStateAction<number>>;
 }
 
-const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, setSize, loading }) => {
+const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, setSize }) => {
   // 折叠态改为原生横向滚动
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,19 +50,39 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   const [rowViewportWidth, setRowViewportWidth] = useState(0);
   const [rowScrollLeft, setRowScrollLeft] = useState(0);
 
-  useEffect(() => {
+  // 使用 useLayoutEffect 确保在渲染前同步测量容器宽度
+  useLayoutEffect(() => {
     const el = rowScrollRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setRowViewportWidth(el.clientWidth));
+
+    // 直接设置初始宽度
+    const width = el.clientWidth;
+    if (width > 0) {
+      setRowViewportWidth(width);
+    }
+
+    // ResizeObserver 监听后续尺寸变化
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const newWidth = entry.contentRect.width;
+        if (newWidth > 0) {
+          setRowViewportWidth(newWidth);
+        }
+      }
+    });
     ro.observe(el);
-    setRowViewportWidth(el.clientWidth);
     return () => ro.disconnect();
   }, []);
 
   const totalRowWidth = images.length * ITEM_SIZE + Math.max(0, images.length - 1) * GAP;
+  // 计算视口内可见的项目数
   const rowVisibleCount = Math.max(1, Math.ceil(rowViewportWidth / (ITEM_SIZE + GAP)));
-  const rowFirstIndex = Math.max(0, Math.floor(rowScrollLeft / (ITEM_SIZE + GAP)) - ROW_BUFFER);
-  const rowLastIndex = Math.min(images.length - 1, rowFirstIndex + rowVisibleCount + ROW_BUFFER * 2);
+  // 计算当前滚动位置对应的起始索引
+  const scrollItemIndex = Math.floor(rowScrollLeft / (ITEM_SIZE + GAP));
+  // 加入缓冲区，确保滚动时有预加载
+  const rowFirstIndex = Math.max(0, scrollItemIndex - ROW_BUFFER);
+  // 计算末尾索引：可见项数 + 缓冲项数 * 2
+  const rowLastIndex = Math.min(images.length - 1, rowFirstIndex + rowVisibleCount + ROW_BUFFER * 2 - 1);
   const rowSlice = images.slice(rowFirstIndex, rowLastIndex + 1);
   const rowLeftSpacer = Math.max(0, rowFirstIndex * (ITEM_SIZE + GAP));
   const rowSliceWidth = rowSlice.length * ITEM_SIZE + Math.max(0, rowSlice.length - 1) * GAP;
@@ -176,16 +196,29 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   const [gridViewportHeight, setGridViewportHeight] = useState(0);
   const [gridScrollTop, setGridScrollTop] = useState(0);
 
-  useEffect(() => {
+  // 使用 useLayoutEffect 确保初始化时准确测量网格容器
+  useLayoutEffect(() => {
+    if (!expanded) return;
+
     const root = popupScrollRef.current;
     if (!root) return;
-    const ro = new ResizeObserver(() => {
-      setGridViewportWidth(root.clientWidth);
-      setGridViewportHeight(root.clientHeight);
+
+    // 直接设置初始尺寸
+    const width = root.clientWidth;
+    const height = root.clientHeight;
+    if (width > 0) setGridViewportWidth(width);
+    if (height > 0) setGridViewportHeight(height);
+
+    // ResizeObserver 监听后续尺寸变化
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const newWidth = entry.contentRect.width;
+        const newHeight = entry.contentRect.height;
+        if (newWidth > 0) setGridViewportWidth(newWidth);
+        if (newHeight > 0) setGridViewportHeight(newHeight);
+      }
     });
     ro.observe(root);
-    setGridViewportWidth(root.clientWidth);
-    setGridViewportHeight(root.clientHeight);
     return () => ro.disconnect();
   }, [expanded]);
 
