@@ -9,6 +9,16 @@ export const CustomNavSubModule: React.FC = () => {
 
   const CustomNavSubModule = CUSTOM_NAV_SUB_MODULE_MAP[routeCustomNavId]?.[routeCustomSubModuleId];
 
+  // 调试信息
+  if (!CustomNavSubModule) {
+    console.warn('CustomNavSubModule not found:', {
+      routeCustomNavId,
+      routeCustomSubModuleId,
+      availableNavIds: Object.keys(CUSTOM_NAV_SUB_MODULE_MAP),
+      availableSubModuleIds: routeCustomNavId ? Object.keys(CUSTOM_NAV_SUB_MODULE_MAP[routeCustomNavId] || {}) : [],
+    });
+  }
+
   return CustomNavSubModule ? <CustomNavSubModule /> : <Page404 />;
 };
 

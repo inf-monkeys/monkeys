@@ -56,6 +56,9 @@ export class DesignProjectRepository {
         if (start) queryBuilder.andWhere('dp.created_timestamp >= :start', { start });
         if (end) queryBuilder.andWhere('dp.created_timestamp <= :end', { end });
       }
+      if (filter.isTemplate !== undefined) {
+        queryBuilder.andWhere('dp.is_template = :isTemplate', { isTemplate: filter.isTemplate });
+      }
     }
 
     if (searchText) {

@@ -29,9 +29,14 @@ import {
   useToasts,
 } from 'tldraw';
 
+import { useParams } from '@tanstack/react-router';
+
+import { useUser } from '@/apis/authz/user';
 import { useSystemConfig } from '@/apis/common';
+import { useGetDesignProject } from '@/apis/designs';
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { useUniImagePreview } from '@/components/layout-wrapper/main/uni-image-preview';
+import { useVinesTeam } from '@/components/router/guard/team';
 import { uploadSingleFile } from '@/components/ui/vines-uploader/standalone';
 import type { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
 import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
@@ -64,13 +69,13 @@ import { VerticalToolbar } from './vertical-toolbar.tsx';
 import { WorkflowRegions } from './workflow-examples/src/components/WorkflowRegions';
 import { OnCanvasComponentPicker } from './workflow-ui/OnCanvasComponentPicker';
 
+import { createPortal } from 'react-dom';
 import 'tldraw/tldraw.css';
+import { LiveImageProvider } from './hooks/useLiveImage';
 import './layer-panel.css';
-import './workflow-nodes.css';
 import { LiveImageShapeUtil } from './shapes/live-image/LiveImageShapeUtil';
 import { LiveImageTool } from './shapes/tools/LiveImageTool';
-import { LiveImageProvider } from './hooks/useLiveImage';
-import { createPortal } from 'react-dom';
+import './workflow-nodes.css';
 
 class FixedFrameShapeUtil extends FrameShapeUtil {
   // override canResize() {
@@ -392,6 +397,26 @@ export const Board: React.FC<BoardProps> = ({
   const frameShapeId = instance?.frameShapeId || createShapeId();
   const { data: oem } = useSystemConfig();
 
+  // 获取设计项目信息，用于判断是否为模板以及用户权限
+  // 使用可选链和默认值来安全获取路由参数
+  let designProjectId: string | undefined;
+  try {
+    const params = useParams({ from: '/$teamId/design/$designProjectId/$designBoardId/' });
+    designProjectId = params?.designProjectId;
+  } catch {
+    // 如果不在设计画板路由中，designProjectId 为 undefined
+    designProjectId = undefined;
+  }
+  const { data: designProject } = useGetDesignProject(designProjectId);
+  const { data: user } = useUser();
+  const { isTeamOwner } = useVinesTeam();
+
+  // 检查是否为普通用户打开设计模板
+  const isTemplate = designProject?.isTemplate;
+  const canEditTemplate = user?.id ? isTeamOwner(user.id) : false;
+  const shouldHideToolbarForTemplate = isTemplate && !canEditTemplate;
+  const isReadonlyMode = isTemplate && !canEditTemplate; // 普通用户打开设计模板时为只读模式
+
   const { setBoardCanvasSize, width, height } = useBoardCanvasSizeStore();
   const [leftCollapsed, setLeftCollapsed] = React.useState(false);
   const [miniPage, setMiniPage] = React.useState<any | null>(null);
@@ -412,8 +437,8 @@ export const Board: React.FC<BoardProps> = ({
 
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
-  // 是否展示左侧 页面+图层 sidebar（默认 false）
-  const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false);
+  // 是否展示左侧 页面+图层 sidebar（默认 false，只读模式下隐藏）
+  const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false) && !isReadonlyMode;
   // 是否自动创建默认画板（默认 true）
   const createDefaultFrame = get(oem, 'theme.designProjects.createDefaultFrame', true);
 
@@ -521,7 +546,9 @@ export const Board: React.FC<BoardProps> = ({
     }
 
     // 使用自定义的竖向工具栏
-    if (!get(oem, 'theme.designProjects.showToolbar', false)) {
+    // 如果是普通用户打开设计模板，隐藏 toolbar
+    const showToolbar = get(oem, 'theme.designProjects.showToolbar', false) && !shouldHideToolbarForTemplate;
+    if (!showToolbar) {
       comps.Toolbar = () => null;
     } else {
       comps.Toolbar = VerticalToolbar;
@@ -534,7 +561,7 @@ export const Board: React.FC<BoardProps> = ({
     }
 
     return comps;
-  }, [oem, miniPage, createDefaultFrame]); // 当oem或miniPage发生变化时重新创建
+  }, [oem, miniPage, createDefaultFrame, shouldHideToolbarForTemplate]); // 当oem、miniPage或权限变化时重新创建
 
   // 创建 frame 函数引用 createDefaultFrame
   const createFrameWithConfig = useCallback(
@@ -1069,42 +1096,82 @@ export const Board: React.FC<BoardProps> = ({
             persistenceKey={persistenceKey}
             onMount={(editor: Editor) => {
               setEditor(editor);
-              // 只在单画板模式下保护默认画板不被删除
-              if (oneOnOne) {
-                editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
-                  if (shape.id === frameShapeId) {
-                    return false;
+              
+              // 重新检查只读模式（因为 onMount 可能在数据加载前执行）
+              const currentIsReadonly = isTemplate && !canEditTemplate;
+              
+              // 如果是只读模式（普通用户打开设计模板），设置编辑器为只读并拦截所有修改操作
+              if (currentIsReadonly) {
+                // 设置编辑器为只读状态
+                editor.updateInstanceState({ isReadonly: true });
+                
+                // 拦截所有删除操作
+                editor.sideEffects.registerBeforeDeleteHandler('shape', () => {
+                  return false; // 阻止删除
+                });
+                
+                // 拦截所有修改操作
+                editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
+                  return prevShape; // 返回原始形状，阻止修改
+                });
+                
+                // 拦截所有创建操作
+                editor.sideEffects.registerBeforeCreateHandler('shape', () => {
+                  return undefined as any; // 阻止创建
+                });
+                
+                // 拦截页面创建
+                editor.sideEffects.registerBeforeCreateHandler('page', () => {
+                  return undefined as any; // 阻止创建页面
+                });
+                
+                // 拦截页面删除
+                editor.sideEffects.registerBeforeDeleteHandler('page', () => {
+                  return false; // 阻止删除页面
+                });
+                
+                // 拦截资产创建
+                editor.sideEffects.registerBeforeCreateHandler('asset', () => {
+                  return undefined as any; // 阻止创建资产
+                });
+              } else {
+                // 只在单画板模式下保护默认画板不被删除
+                if (oneOnOne) {
+                  editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
+                    if (shape.id === frameShapeId) {
+                      return false;
+                    }
+                  });
+                }
+
+                editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
+                  if (prevShape.id === frameShapeId) {
+                    if (nextShape.type === 'frame' && 'w' in nextShape.props && 'h' in nextShape.props) {
+                      startTransition(() => {
+                        // @ts-ignore
+                        setBoardCanvasSize(nextShape.props.w as number, nextShape.props.h as number);
+                      });
+                    }
+                    return nextShape;
                   }
+                  // 若是新创建或默认名仍为英文 Frame 的画板，自动改成中文"画板"
+                  try {
+                    if (nextShape.type === 'frame') {
+                      const name = (nextShape as any)?.props?.name;
+                      if (!name || String(name).toLowerCase() === 'frame') {
+                        return {
+                          ...nextShape,
+                          props: { ...(nextShape as any).props, name: '画板' },
+                        } as TLShape;
+                      }
+                    }
+                  } catch {}
+                  return nextShape;
                 });
               }
 
-              editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
-                if (prevShape.id === frameShapeId) {
-                  if (nextShape.type === 'frame' && 'w' in nextShape.props && 'h' in nextShape.props) {
-                    startTransition(() => {
-                      // @ts-ignore
-                      setBoardCanvasSize(nextShape.props.w as number, nextShape.props.h as number);
-                    });
-                  }
-                  return nextShape;
-                }
-                // 若是新创建或默认名仍为英文 Frame 的画板，自动改成中文“画板”
-                try {
-                  if (nextShape.type === 'frame') {
-                    const name = (nextShape as any)?.props?.name;
-                    if (!name || String(name).toLowerCase() === 'frame') {
-                      return {
-                        ...nextShape,
-                        props: { ...(nextShape as any).props, name: '画板' },
-                      } as TLShape;
-                    }
-                  }
-                } catch {}
-                return nextShape;
-              });
-
-              // 如果提供了画布尺寸且启用自动创建，则创建有界 frame
-              if (canvasWidth && canvasHeight) {
+              // 如果提供了画布尺寸且启用自动创建，则创建有界 frame（只在非只读模式下）
+              if (canvasWidth && canvasHeight && !currentIsReadonly) {
                 createFrameWithConfig(editor, canvasWidth, canvasHeight);
               }
 
@@ -1150,56 +1217,59 @@ export const Board: React.FC<BoardProps> = ({
               }
 
 
-              editor.registerExternalContentHandler('url', async ({ url, point }) => {
-                // 检查是否是图片 URL
-                try {
-                  // 获取图片数据
+              // 只在非只读模式下注册外部内容处理器
+              if (!currentIsReadonly) {
+                editor.registerExternalContentHandler('url', async ({ url, point }) => {
+                  // 检查是否是图片 URL
+                  try {
+                    // 获取图片数据
 
-                  // 创建 asset
-                  const imageUrl = url;
-                  const { width, height } = await getImageSize(imageUrl);
-                  const assetData = {
-                    id: AssetRecordType.createId(),
-                    url: imageUrl,
-                    width: width,
-                    height: height,
-                  };
+                    // 创建 asset
+                    const imageUrl = url;
+                    const { width, height } = await getImageSize(imageUrl);
+                    const assetData = {
+                      id: AssetRecordType.createId(),
+                      url: imageUrl,
+                      width: width,
+                      height: height,
+                    };
 
-                  editor.createAssets([
-                    {
-                      id: assetData.id,
-                      type: 'image',
-                      typeName: 'asset',
-                      props: {
-                        name: assetData.id,
-                        src: assetData.url,
-                        mimeType: 'image/png',
-                        isAnimated: false,
-                        h: assetData.height,
-                        w: assetData.width,
+                    editor.createAssets([
+                      {
+                        id: assetData.id,
+                        type: 'image',
+                        typeName: 'asset',
+                        props: {
+                          name: assetData.id,
+                          src: assetData.url,
+                          mimeType: 'image/png',
+                          isAnimated: false,
+                          h: assetData.height,
+                          w: assetData.width,
+                        },
+                        meta: {},
                       },
-                      meta: {},
-                    },
-                  ]);
+                    ]);
 
-                  editor.createShape({
-                    type: 'image',
-                    x: point ? point.x - width / 2 : 0,
-                    y: point ? point.y - height / 2 : 0,
-                    props: {
-                      assetId: assetData.id,
-                      w: assetData.width,
-                      h: assetData.height,
-                    },
-                  });
+                    editor.createShape({
+                      type: 'image',
+                      x: point ? point.x - width / 2 : 0,
+                      y: point ? point.y - height / 2 : 0,
+                      props: {
+                        assetId: assetData.id,
+                        w: assetData.width,
+                        h: assetData.height,
+                      },
+                    });
 
-                  return true; // 表示已处理
-                } catch (e) {
-                  console.error(e);
-                }
+                    return true; // 表示已处理
+                  } catch (e) {
+                    console.error(e);
+                  }
 
-                return false; // 未处理,使用默认行为
-              });
+                  return false; // 未处理,使用默认行为
+                });
+              }
             }}
             components={components}
             shapeUtils={[

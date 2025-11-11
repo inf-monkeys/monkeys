@@ -85,7 +85,8 @@
       "previous": "上一步",
       "tips": "提示",
       "optional": "可选",
-      "rollback": "回滚"
+      "rollback": "回滚",
+      "start": "开始"
     },
     "status": {
       "active": "活跃",
@@ -706,7 +707,9 @@
         "tabs": {
           "workbench": "工作台",
           "app-store": "应用市场",
-          "workspace": "工作空间"
+          "workspace": "工作空间",
+          "designs": "设计项目",
+          "designs-templates": "设计模板"
         }
       }
     }

@@ -9,4 +9,12 @@ export class DesignProjectEntity extends BaseAssetEntity {
     nullable: true,
   })
   sortIndex: number;
+
+  @Column({
+    name: 'is_template',
+    type: 'boolean',
+    default: false,
+    nullable: false,
+  })
+  isTemplate: boolean;
 }

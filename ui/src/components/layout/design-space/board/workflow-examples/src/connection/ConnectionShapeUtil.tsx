@@ -133,6 +133,11 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 
 	// Handle dragging of connection terminals to connect/disconnect from ports
 	onHandleDrag(connection: ConnectionShape, { handle }: TLHandleDragInfo<ConnectionShape>) {
+		// 如果是只读模式，禁止拖拽连线
+		if (this.editor.getInstanceState().isReadonly) {
+			return connection
+		}
+
 		// First, get some info about the connection and the terminal we're dragging
 		const existingBindings = getConnectionBindings(this.editor, connection)
 		const draggingTerminal = handle.id as 'start' | 'end'
@@ -210,6 +215,12 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 		connection: ConnectionShape,
 		{ handle, isCreatingShape }: TLHandleDragInfo<ConnectionShape>
 	) {
+		// 如果是只读模式，只清理状态，不执行任何操作
+		if (this.editor.getInstanceState().isReadonly) {
+			updatePortState(this.editor, { hintingPort: null, eligiblePorts: null })
+			return
+		}
+
 		// clear our port UI state
 		updatePortState(this.editor, { hintingPort: null, eligiblePorts: null })
 

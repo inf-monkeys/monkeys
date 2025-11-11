@@ -27,12 +27,14 @@ interface ICreateDesignProjectDialogProps {
   visible?: boolean;
   setVisible?: (visible: boolean) => void;
   afterCreate?: () => void;
+  isTemplate?: boolean;
 }
 
 export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps> = ({
   visible,
   setVisible,
   afterCreate,
+  isTemplate = false,
 }) => {
   const { t } = useTranslation();
 
@@ -48,6 +50,7 @@ export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps
       displayName: t('common.utils.untitled') + t('common.type.design-project'),
       description: '',
       iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
+      isTemplate,
     },
   });
 
@@ -65,7 +68,10 @@ export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps
     setIsCreating(true);
     toast.promise(
       async (): Promise<IAssetItem<IDesignProject>> => {
-        const designProject = await createDesignProject(data);
+        const designProject = await createDesignProject({
+          ...data,
+          isTemplate: isTemplate || data.isTemplate,
+        });
         if (!designProject) throw new Error('design project created failed');
         return designProject;
       },

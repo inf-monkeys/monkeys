@@ -4,7 +4,7 @@ import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { DesignAssociationEntity } from '@/database/entities/design/design-association';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DesignAssociationService } from './design.association.service';
 import { DesignMetadataService } from './design.metadata.service';
@@ -34,6 +34,13 @@ export class DesignController {
   })
   async createProject(@Req() req: IRequest, @Body() createDesignProjectDto: CreateDesignProjectDto) {
     const { teamId, userId } = req;
+    // 如果创建的是模板，检查是否为团队所有者
+    if (createDesignProjectDto.isTemplate) {
+      const isOwner = await this.designProjectService.checkIsTeamOwner(teamId, userId);
+      if (!isOwner) {
+        throw new ForbiddenException('只有团队所有者才能创建设计模板');
+      }
+    }
     const result = await this.designProjectService.create({
       ...createDesignProjectDto,
       teamId,
@@ -77,11 +84,14 @@ export class DesignController {
     summary: '更新设计项目',
     description: '更新设计项目',
   })
-  async updateProject(@Param('projectId') projectId: string, @Body() updateDesignProjectDto: UpdateDesignProjectDto) {
+  async updateProject(@Req() req: IRequest, @Param('projectId') projectId: string, @Body() updateDesignProjectDto: UpdateDesignProjectDto) {
+    const { userId } = req;
     const project = await this.designProjectService.findById(projectId);
     if (!project) {
       throw new NotFoundException('设计项目不存在');
     }
+    // 如果项目是模板，检查权限
+    await this.designProjectService.checkTemplatePermission(project, userId);
     const updatedProject = new DesignProjectEntity();
     Object.assign(updatedProject, {
       ...project,
@@ -96,13 +106,27 @@ export class DesignController {
     summary: '删除设计项目',
     description: '删除设计项目',
   })
-  async removeProject(@Param('projectId') projectId: string) {
+  async removeProject(@Req() req: IRequest, @Param('projectId') projectId: string) {
+    const { userId } = req;
     const project = await this.designProjectService.findById(projectId);
     if (!project) {
       throw new NotFoundException('设计项目不存在');
     }
+    // 如果项目是模板，检查权限
+    await this.designProjectService.checkTemplatePermission(project, userId);
     // will delete all related metadata
     const result = await this.designProjectService.delete(projectId);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Post('project/:projectId/fork')
+  @ApiOperation({
+    summary: 'Fork 设计模板',
+    description: '复制设计模板及其所有画板到新的设计项目',
+  })
+  async forkTemplate(@Req() req: IRequest, @Param('projectId') projectId: string) {
+    const { teamId, userId } = req;
+    const result = await this.designProjectService.forkTemplate(projectId, teamId, userId);
     return new SuccessResponse({ data: result });
   }
 
@@ -112,11 +136,13 @@ export class DesignController {
     description: '创建设计画板',
   })
   async createDesignMetadata(@Req() req: IRequest, @Param('projectId') projectId: string, @Body() createDesignMetadataDto: CreateDesignMetadataDto) {
-    const { teamId } = req;
+    const { teamId, userId } = req;
     const designProject = await this.designProjectService.findById(projectId);
     if (!designProject) {
       throw new NotFoundException('设计项目不存在');
     }
+    // 如果项目是模板，检查权限
+    await this.designProjectService.checkTemplatePermission(designProject, userId);
     const result = await this.designMetadataService.create(projectId, teamId, createDesignMetadataDto);
     return new SuccessResponse({ data: result });
   }
@@ -149,7 +175,17 @@ export class DesignController {
   @ApiOperation({
     summary: '更新设计',
   })
-  async updateDesignMetadata(@Param('metadataId') metadataId: string, @Body() updateDesignMetadataDto: UpdateDesignMetadataDto) {
+  async updateDesignMetadata(@Req() req: IRequest, @Param('metadataId') metadataId: string, @Body() updateDesignMetadataDto: UpdateDesignMetadataDto) {
+    const { userId } = req;
+    const metadata = await this.designMetadataService.findByMetadataId(metadataId);
+    if (!metadata) {
+      throw new NotFoundException('设计画板不存在');
+    }
+    // 检查画板所属的项目是否为模板
+    const designProject = await this.designProjectService.findById(metadata.designProjectId);
+    if (designProject) {
+      await this.designProjectService.checkTemplatePermission(designProject, userId);
+    }
     const result = await this.designMetadataService.update(metadataId, updateDesignMetadataDto);
     return new SuccessResponse({ data: result });
   }
@@ -158,7 +194,17 @@ export class DesignController {
   @ApiOperation({
     summary: '删除设计',
   })
-  async deleteDesignMetadata(@Param('metadataId') metadataId: string) {
+  async deleteDesignMetadata(@Req() req: IRequest, @Param('metadataId') metadataId: string) {
+    const { userId } = req;
+    const metadata = await this.designMetadataService.findByMetadataId(metadataId);
+    if (!metadata) {
+      throw new NotFoundException('设计画板不存在');
+    }
+    // 检查画板所属的项目是否为模板
+    const designProject = await this.designProjectService.findById(metadata.designProjectId);
+    if (designProject) {
+      await this.designProjectService.checkTemplatePermission(designProject, userId);
+    }
     const result = await this.designMetadataService.remove(metadataId);
     return new SuccessResponse({ data: result });
   }

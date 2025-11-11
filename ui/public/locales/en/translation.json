@@ -85,7 +85,8 @@
       "previous": "Previous",
       "tips": "Tips",
       "optional": "Opt.",
-      "rollback": "Rollback"
+      "rollback": "Rollback",
+      "start": "Start"
     },
     "status": {
       "active": "Active",
@@ -712,7 +713,9 @@
         "tabs": {
           "workbench": "Workbench",
           "app-store": "App Store",
-          "workspace": "Workspace"
+          "workspace": "Workspace",
+          "designs": "Design Projects",
+          "designs-templates": "Design Templates"
         }
       }
     }

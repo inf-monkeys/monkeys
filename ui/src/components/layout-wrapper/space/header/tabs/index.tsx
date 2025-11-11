@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
 import { CustomizationHeadbarTheme, VinesSpaceHeadbarModules } from '@/apis/common/typings';
+import { useGetDesignProject } from '@/apis/designs';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { Tabs, TabsList, TabsTrigger, TabsVariant } from '@/components/ui/tabs';
@@ -42,8 +43,9 @@ const TAB_LIST: VinesSpaceHeadbarModules = [
   },
 ];
 
-const EXTRA_INFO_MAP: Record<string, React.FC> = {
+const EXTRA_INFO_MAP: Record<string, React.FC<{ tabId?: string }>> = {
   designs: DesignsExtraInfo,
+  'designs-templates': DesignsExtraInfo,
 };
 
 export interface ISpaceHeaderTabsProps {
@@ -60,7 +62,10 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
 
   const headbarTheme: CustomizationHeadbarTheme = get(oem, 'theme.headbar.theme', 'card');
 
-  const { isUseWorkbench, isUseAppStore, isUsePanel, isUseCustomNav, routeCustomNavId, isUseDesign } = useVinesRoute();
+  const { isUseWorkbench, isUseAppStore, isUsePanel, isUseCustomNav, routeCustomNavId, isUseDesign, routeDesignProjectId } = useVinesRoute();
+
+  // 获取当前设计项目信息，用于判断是否为模板
+  const { data: currentDesignProject } = useGetDesignProject(routeDesignProjectId);
 
   const [value, setValue] = useState(defaultValue || 'workbench');
 
@@ -74,9 +79,14 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
     } else if (isUsePanel) {
       setValue('workspace');
     } else if (isUseDesign) {
-      setValue('designs');
+      // 如果当前项目是模板，显示设计模板标签，否则显示设计项目标签
+      if (currentDesignProject?.isTemplate) {
+        setValue('designs-templates');
+      } else {
+        setValue('designs');
+      }
     }
-  }, [isUseWorkbench, isUseAppStore, isUsePanel, isUseCustomNav, routeCustomNavId, isUseDesign]);
+  }, [isUseWorkbench, isUseAppStore, isUsePanel, isUseCustomNav, routeCustomNavId, isUseDesign, currentDesignProject?.isTemplate]);
 
   const tabsList: VinesSpaceHeadbarModules = unionBy(oemVinesSpaceHeadbarModules, TAB_LIST, 'id');
 
@@ -115,6 +125,8 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
                 onClick={() => {
                   if (item.id === 'designs') {
                     VinesEvent.emit('vines-nav', '/$teamId/nav/designs', { teamId });
+                  } else if (item.id === 'designs-templates') {
+                    VinesEvent.emit('vines-nav', '/$teamId/nav/designs-templates', { teamId });
                   }
                 }}
               >
@@ -129,7 +141,7 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
                   />
                 )}
                 {getI18nContent(item.displayName, t(`components.layout.header.tabs.${item.id}`))}
-                {ExtraInfo && <ExtraInfo />}
+                {ExtraInfo && <ExtraInfo tabId={item.id} />}
               </TabsTrigger>
             );
           })}

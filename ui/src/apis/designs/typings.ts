@@ -10,6 +10,7 @@ export interface IDesignProject {
   updatedTimestamp: number;
   boardIds?: string[];
   iconUrl?: string;
+  isTemplate?: boolean;
 }
 
 export interface IDesignBoardMetadata {

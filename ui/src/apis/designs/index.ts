@@ -90,3 +90,9 @@ export const generateDesignBoardThumbnail = (designBoardId: string, imageData: s
     method: 'POST',
     simple: true,
   })(`/api/design/metadata/${designBoardId}/generate-thumbnail`, { imageData });
+
+export const forkDesignTemplate = (templateProjectId: string) =>
+  vinesFetcher<IAssetItem<IDesignProject>>({
+    method: 'POST',
+    simple: true,
+  })(`/api/design/project/${templateProjectId}/fork`);

@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { get } from 'lodash';
-import { Link, Pencil, Trash } from 'lucide-react';
+import { Link, Pencil, Play, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useUser } from '@/apis/authz/user';
 import { useSystemConfig } from '@/apis/common';
-import { deleteDesignProject } from '@/apis/designs';
+import { deleteDesignProject, forkDesignTemplate } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor.tsx';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createDesignProjectsColumns } from '@/components/layout/ugc-pages/design-project/consts.tsx';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { DesignAssociationEditorDialog } from '@/components/layout/ugc-pages/design-project/design-association-editor';
 import { DesignProjectCardWrapper } from '@/components/layout/ugc-pages/design-project/design-project-card-wrapper';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -31,6 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,14 +48,15 @@ import { useCopy } from '@/hooks/use-copy.ts';
 import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
-export const Designs: React.FC = () => {
+export const DesignTemplates: React.FC = () => {
   const { t } = useTranslation();
   const { data: oem } = useSystemConfig();
   const newTabOpenBoard = get(oem, 'theme.designProjects.newTabOpenBoard', true) as boolean;
 
   const navigate = useNavigate();
   const { copy } = useCopy({ timeout: 500 });
-  const { teamId } = useVinesTeam();
+  const { teamId, team, isTeamOwner } = useVinesTeam();
+  const { data: user } = useUser();
   const mutateDesignProjects = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/design/project'));
 
   const [currentDesignProject, setCurrentDesignProject] = useState<IAssetItem<IDesignProject>>();
@@ -109,6 +112,7 @@ export const Designs: React.FC = () => {
   };
 
   const navigateHelper = (item: IAssetItem<IDesignProject>) => {
+    // 普通用户点击卡片时，也可以打开模板进行预览（只读模式）
     if (newTabOpenBoard) {
       open(`/${item.teamId}/design/${item.id}`, '_blank');
     } else {
@@ -116,36 +120,64 @@ export const Designs: React.FC = () => {
     }
   };
 
-  // 自定义 useUgcDesignProjects，过滤只显示非模板项目
-  const useUgcNonTemplateDesignProjects = (dto: any) => {
+  // 自定义 useUgcDesignProjects，过滤只显示模板
+  const useUgcDesignTemplates = (dto: any) => {
     return useUgcDesignProjects({
       ...dto,
       filter: {
         ...dto?.filter,
-        isTemplate: false,
+        isTemplate: true,
       },
     });
   };
 
-  const preloadUgcNonTemplateDesignProjects = (dto: any) => {
+  const preloadUgcDesignTemplates = (dto: any) => {
     return preloadUgcDesignProjects({
       ...dto,
       filter: {
         ...dto?.filter,
-        isTemplate: false,
+        isTemplate: true,
       },
     });
+  };
+
+  // 检查当前用户是否为团队所有者
+  const canEdit = user?.id ? isTeamOwner(user.id) : false;
+
+  // 处理 fork 模板
+  const handleForkTemplate = async (template: IAssetItem<IDesignProject>) => {
+    if (!template.id) {
+      toast.warning(t('common.toast.loading'));
+      return;
+    }
+
+    try {
+      const newProject = await forkDesignTemplate(template.id);
+      if (newProject) {
+        toast.success(t('common.create.success'));
+        void mutateDesignProjects();
+        // 导航到新创建的设计项目
+        if (newTabOpenBoard) {
+          open(`/${teamId}/design/${newProject.id}`, '_blank');
+        } else {
+          navigate({ to: `/$teamId/design/$designProjectId`, params: { teamId, designProjectId: newProject.id } });
+        }
+      }
+    } catch (error) {
+      toast.error(t('common.create.error'));
+      console.error('Fork template failed:', error);
+    }
   };
 
   return (
     <main className="flex size-full flex-col">
       <UgcView
-        assetKey="design-project"
+        assetKey="design-template"
         assetType="design-project"
         assetIdKey="id"
         assetName={t('components.layout.main.sidebar.list.apps.designs.label')}
-        useUgcFetcher={useUgcNonTemplateDesignProjects}
-        preloadUgcFetcher={preloadUgcNonTemplateDesignProjects}
+        useUgcFetcher={useUgcDesignTemplates}
+        preloadUgcFetcher={preloadUgcDesignTemplates}
         createColumns={() => createDesignProjectsColumns(navigateHelper)}
         renderOptions={{
           subtitle: (item) => (
@@ -160,7 +192,88 @@ export const Designs: React.FC = () => {
               key={item.id}
               project={item}
               onItemClick={navigateHelper}
-              operateArea={(item, trigger, tooltipTriggerContent) => (
+              operateArea={
+                canEdit
+                  ? (item, trigger, tooltipTriggerContent) => (
+                      <DropdownMenu>
+                        {tooltipTriggerContent ? (
+                          <Tooltip content={tooltipTriggerContent}>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+                            </TooltipTrigger>
+                          </Tooltip>
+                        ) : (
+                          <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+                        )}
+
+                        <DropdownMenuContent
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }}
+                        >
+                          <DropdownMenuLabel>
+                            {t('ugc-page.design-project.ugc-view.operate-area.dropdown-label')}
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                setCurrentDesignProject(item);
+                                setDesignProjectEditorVisible(true);
+                              }}
+                            >
+                              <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                                <Pencil size={15} />
+                              </DropdownMenuShortcut>
+                              {t('ugc-page.design-project.ugc-view.operate-area.options.edit-info')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() => copy(location.origin.concat(`/${item.teamId}/design/${item.id}`))}
+                            >
+                              <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                                <Link size={15} />
+                              </DropdownMenuShortcut>
+                              {t('ugc-page.design-project.ugc-view.operate-area.options.copy-link')}
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              className="text-red-10"
+                              onSelect={() => {
+                                setCurrentDesignProject(item);
+                                setDeleteAlertDialogVisible(true);
+                              }}
+                            >
+                              <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                                <Trash size={15} />
+                              </DropdownMenuShortcut>
+                              {t('common.utils.delete')}
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )
+                  : (item, trigger, tooltipTriggerContent) => (
+                      <Button
+                        variant="solid"
+                        size="small"
+                        icon={<Play size={15} />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          void handleForkTemplate(item);
+                        }}
+                      >
+                        {t('common.utils.start')}
+                      </Button>
+                    )
+              }
+            />
+          ),
+        }}
+        operateArea={
+          canEdit
+            ? (item, trigger, tooltipTriggerContent) => (
                 <DropdownMenu>
                   {tooltipTriggerContent ? (
                     <Tooltip content={tooltipTriggerContent}>
@@ -178,9 +291,7 @@ export const Designs: React.FC = () => {
                       e.preventDefault();
                     }}
                   >
-                    <DropdownMenuLabel>
-                      {t('ugc-page.design-project.ugc-view.operate-area.dropdown-label')}
-                    </DropdownMenuLabel>
+                    <DropdownMenuLabel>{t('ugc-page.design-project.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                       <DropdownMenuItem
@@ -194,9 +305,7 @@ export const Designs: React.FC = () => {
                         </DropdownMenuShortcut>
                         {t('ugc-page.design-project.ugc-view.operate-area.options.edit-info')}
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() => copy(location.origin.concat(`/${item.teamId}/design/${item.id}`))}
-                      >
+                      <DropdownMenuItem onSelect={() => copy(location.origin.concat(`/${item.teamId}/design/${item.id}`))}>
                         <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                           <Link size={15} />
                         </DropdownMenuShortcut>
@@ -218,71 +327,30 @@ export const Designs: React.FC = () => {
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
-            />
-          ),
-        }}
-        operateArea={(item, trigger, tooltipTriggerContent) => (
-          <DropdownMenu>
-            {tooltipTriggerContent ? (
-              <Tooltip content={tooltipTriggerContent}>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-                </TooltipTrigger>
-              </Tooltip>
-            ) : (
-              <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-            )}
-
-            <DropdownMenuContent
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-            >
-              <DropdownMenuLabel>{t('ugc-page.design-project.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem
-                  onSelect={() => {
-                    setCurrentDesignProject(item);
-                    setDesignProjectEditorVisible(true);
+              )
+            : (item, trigger, tooltipTriggerContent) => (
+                <Button
+                  variant="solid"
+                  size="small"
+                  icon={<Play size={15} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    void handleForkTemplate(item);
                   }}
                 >
-                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <Pencil size={15} />
-                  </DropdownMenuShortcut>
-                  {t('ugc-page.design-project.ugc-view.operate-area.options.edit-info')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => copy(location.origin.concat(`/${item.teamId}/design/${item.id}`))}>
-                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <Link size={15} />
-                  </DropdownMenuShortcut>
-                  {t('ugc-page.design-project.ugc-view.operate-area.options.copy-link')}
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  className="text-red-10"
-                  onSelect={() => {
-                    setCurrentDesignProject(item);
-                    setDeleteAlertDialogVisible(true);
-                  }}
-                >
-                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <Trash size={15} />
-                  </DropdownMenuShortcut>
-                  {t('common.utils.delete')}
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+                  {t('common.utils.start')}
+                </Button>
+              )
+        }
         onItemClick={(item) => navigateHelper(item)}
         subtitle={
-          <>
-            <DesignAssociationEditorDialog />
-            <CreateDesignProjectDialog />
-          </>
+          canEdit ? (
+            <>
+              <DesignAssociationEditorDialog />
+              <CreateDesignProjectDialog isTemplate={true} />
+            </>
+          ) : undefined
         }
       />
       <DesignProjectInfoEditor
@@ -325,6 +393,7 @@ export const Designs: React.FC = () => {
   );
 };
 
-export const Route = createLazyFileRoute('/$teamId/designs/')({
-  component: Designs,
+export const Route = createLazyFileRoute('/$teamId/design-templates/')({
+  component: DesignTemplates,
 });
+

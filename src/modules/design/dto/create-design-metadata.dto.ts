@@ -11,8 +11,8 @@ export class CreateDesignMetadataDto extends BaseEntityDto {
   displayName: string;
 
   @IsObject()
-  @IsNotEmpty()
-  snapshot: Record<string, any>;
+  @IsOptional()
+  snapshot?: Record<string, any>;
 
   @IsBoolean()
   @IsNotEmpty()

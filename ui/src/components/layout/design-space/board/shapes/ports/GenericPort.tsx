@@ -90,6 +90,10 @@ export function GenericPort({ shapeId, portId }: { shapeId: TLShapeId; portId: P
         right: 'auto', // 覆盖 CSS 的 right 设置
       }}
       onPointerDown={() => {
+        // 如果是只读模式，禁用连线操作
+        if (editor.getInstanceState().isReadonly) {
+          return;
+        }
         editor.setCurrentTool('select.pointing_port', {
           shapeId,
           portId,

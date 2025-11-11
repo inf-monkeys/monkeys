@@ -1,4 +1,5 @@
 import { DesignMetadataRepository } from '@/database/repositories/design-metadata.repository';
+import { DesignProjectService } from '@/modules/design/design.project.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import _ from 'lodash';
 import { DesignThumbnailService } from './design-thumbnail.service';
@@ -10,6 +11,7 @@ export class DesignMetadataService {
   constructor(
     private readonly designMetadataRepository: DesignMetadataRepository,
     private readonly designThumbnailService: DesignThumbnailService,
+    private readonly designProjectService: DesignProjectService,
   ) {}
 
   async create(designProjectId: string, teamId: string, createDesignMetadataDto: CreateDesignMetadataDto) {

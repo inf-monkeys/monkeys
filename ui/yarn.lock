@@ -1690,6 +1690,11 @@
   dependencies:
     "@essentials/raf" "^1.2.0"
 
+"@fal-ai/serverless-client@0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@fal-ai/serverless-client/-/serverless-client-0.6.1.tgz#de34cb4abc291cd1a628640a6572f0eb69e76101"
+  integrity sha512-MwVR/J9yfZIGUT004Qp1ns6JP55FO8Veg6XTK28jzYkvqYBtPuv0H5AaGlfig4JIiPWGLE9EgA+wZxeEB6ZTRA==
+
 "@floating-ui/core@^1.0.0":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.6.1.tgz#a4e6fef1b069cda533cbc7a4998c083a37f37573"

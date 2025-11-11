@@ -32,10 +32,21 @@ export class PointingPort extends StateNode {
 	info?: PointingPortInfo
 
 	override onEnter(info: PointingPortInfo): void {
+		// 如果是只读模式，直接返回，不进入连线状态
+		if (this.editor.getInstanceState().isReadonly) {
+			this.parent.transition('idle', { type: 'pointer', name: 'pointer_up' } as any)
+			return
+		}
 		this.info = info
 	}
 
 	override onPointerMove(info: TLPointerEventInfo): void {
+		// 如果是只读模式，直接返回
+		if (this.editor.getInstanceState().isReadonly) {
+			this.parent.transition('idle', info)
+			return
+		}
+
 		// isDragging is true if the user has moved the pointer sufficiently. below this threshold,
 		// we treat the pointer as a click.
 		if (this.editor.inputs.isDragging) {
@@ -100,6 +111,12 @@ export class PointingPort extends StateNode {
 	}
 
 	override onPointerUp(info: TLPointerEventInfo): void {
+		// 如果是只读模式，直接返回
+		if (this.editor.getInstanceState().isReadonly) {
+			this.parent.transition('idle', info)
+			return
+		}
+
 		// if we get a pointer up while we're still in this state, it means we haven't transitioned
 		// into a dragging state so we'll treat this as a click:
 		this.onClick()
@@ -109,6 +126,10 @@ export class PointingPort extends StateNode {
 
 	// Handle clicks on ports (without dragging)
 	private onClick() {
+		// 如果是只读模式，直接返回
+		if (this.editor.getInstanceState().isReadonly) {
+			return
+		}
 		// Only handle clicks on start ports (output ports)
 		if (this.info?.terminal !== 'start') return
 

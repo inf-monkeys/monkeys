@@ -78,6 +78,10 @@ export function Port({ shapeId, portId }: { shapeId: TLShapeId; portId: PortId }
 				isHinting ? 'Port_hinting' : isEligible ? 'Port_eligible' : undefined
 			)}
 			onPointerDown={() => {
+				// 如果是只读模式，禁用连线操作
+				if (editor.getInstanceState().isReadonly) {
+					return
+				}
 				editor.setCurrentTool('select.pointing_port', {
 					shapeId,
 					portId,

@@ -10,8 +10,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { AssetRecordType, createShapeId, getSnapshot, TLShapeId } from 'tldraw';
 
+import { useUser } from '@/apis/authz/user';
 import { useSystemConfig } from '@/apis/common';
-import { generateDesignBoardThumbnail, updateDesignBoardMetadata, useDesignBoardMetadata } from '@/apis/designs';
+import { generateDesignBoardThumbnail, updateDesignBoardMetadata, useDesignBoardMetadata, useGetDesignProject } from '@/apis/designs';
 import { useWorkspacePages } from '@/apis/pages';
 import { Board } from '@/components/layout/design-space/board';
 import { MiniHistoryRightSidebar } from '@/components/layout/design-space/board/mini-history-right-sidebar';
@@ -30,6 +31,7 @@ import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 import { IVinesExecutionResultItem } from '@/utils/execution';
 import { downloadFile, getImageSize } from '@/utils/file.ts';
+import { useParams } from '@tanstack/react-router';
 
 interface DesignBoardViewProps {
   embed?: boolean;
@@ -44,6 +46,23 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
     designProjectId?: string;
     activePageFromType?: string;
   };
+
+  // 获取设计项目信息，用于判断是否为模板以及用户权限
+  let routeDesignProjectId: string | undefined;
+  try {
+    const params = useParams({ from: '/$teamId/design/$designProjectId/$designBoardId/' });
+    routeDesignProjectId = params?.designProjectId;
+  } catch {
+    routeDesignProjectId = designProjectId;
+  }
+  const { data: designProject } = useGetDesignProject(routeDesignProjectId);
+  const { data: user } = useUser();
+  const { isTeamOwner } = useVinesTeam();
+
+  // 检查是否为普通用户打开设计模板
+  const isTemplate = designProject?.isTemplate;
+  const canEditTemplate = user?.id ? isTeamOwner(user.id) : false;
+  const isReadonlyMode = isTemplate && !canEditTemplate; // 普通用户打开设计模板时为只读模式
 
   const { data: workspaceData } = useWorkspacePages();
 
@@ -95,11 +114,23 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       return; // 数据没有变化，不重新加载
     }
 
+    // 如果 snapshot 为空或无效，不加载
+    if (!metadata.snapshot || (typeof metadata.snapshot === 'object' && Object.keys(metadata.snapshot).length === 0)) {
+      lastSnapshotRef.current = metadata.snapshot;
+      return;
+    }
+
     lastSnapshotRef.current = metadata.snapshot;
 
     // 设置加载标志，防止触发自动保存
     isLoadingSnapshotRef.current = true;
-    // editor.loadSnapshot(metadata.snapshot);
+    
+    // 加载 snapshot（特别是对于 fork 的新项目）
+    try {
+      editor.loadSnapshot(metadata.snapshot);
+    } catch (error) {
+      console.error('[DesignBoard] Failed to load snapshot:', error);
+    }
 
     // 延迟重置标志位，确保加载完成（增加到500ms，给编辑器更多时间完成加载）
     setTimeout(() => {
@@ -204,9 +235,9 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   };
 
   // OEM：是否显示左右侧边栏，统一由 showPageAndLayerSidebar 控制
-  const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false);
-  // OEM：是否显示右侧边栏，单独控制
-  const showRightSidebar = get(oem, 'theme.designProjects.showRightSidebar', true);
+  const showPageAndLayerSidebar = get(oem, 'theme.designProjects.showPageAndLayerSidebar', false) && !isReadonlyMode;
+  // OEM：是否显示右侧边栏，单独控制（只读模式下隐藏）
+  const showRightSidebar = get(oem, 'theme.designProjects.showRightSidebar', true) && !isReadonlyMode;
 
   // 仅在 MiniTools 显示时展示的右侧历史侧栏：监听 mini 状态事件
   const [miniWorkflowId, setMiniWorkflowId] = useState<string | null>(null);
