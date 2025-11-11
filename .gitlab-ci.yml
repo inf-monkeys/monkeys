@@ -74,20 +74,18 @@ generate_env:
   - if: '"$[[ inputs.tag ]]" != ""'
   script:
     - |
-      if [ "$TARGET" = "ui" ]; then
-        echo "DOCKERFILE_CONTEXT=./ui" >> build.env
-      elif [ "$TARGET" = "multi-tenancy" ]; then
-        echo "DOCKERFILE_CONTEXT=." >> build.env
-      elif [ "$TARGET" = "server" ]; then
-        echo "DOCKERFILE_CONTEXT=." >> build.env
-      fi
-    - |
       if [ "$[[ inputs.image_target ]]" = "ui" ]; then
+        echo "DOCKERFILE_CONTEXT=./ui" >> build.env
         echo "DOCKERFILE_PATH=./docker/ui/Dockerfile" >> build.env
+        echo "IMAGE_BASE_NAME=monkeys-ui" >> build.env
       elif [ "$[[ inputs.image_target ]]" = "multi-tenancy" ]; then
+        echo "DOCKERFILE_CONTEXT=." >> build.env
         echo "DOCKERFILE_PATH=./docker/server/Dockerfile" >> build.env
+        echo "IMAGE_BASE_NAME=monkeys-multi-tenancy" >> build.env
       elif [ "$[[ inputs.image_target ]]" = "server" ]; then
+        echo "DOCKERFILE_CONTEXT=." >> build.env
         echo "DOCKERFILE_PATH=./docker/server/Dockerfile-multi-tenancy" >> build.env
+        echo "IMAGE_BASE_NAME=monkeys" >> build.env
       fi
 
   artifacts:
