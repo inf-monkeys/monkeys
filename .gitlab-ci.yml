@@ -70,6 +70,8 @@ stages:
 
 generate_env:
   stage: preprocess
+  rules:
+  - if: '"$[[ inputs.tag ]]" != ""'
   script:
     - if [ "$[[ inputs.image_target ]]" = "ui" ]; then
         echo "DOCKERFILE_CONTEXT=./ui" >> build.env
