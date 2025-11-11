@@ -48,7 +48,6 @@ import { ExternalLayerPanel } from './ExternalLayerPanel';
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
 import {
-  ConnectionManager,
   InstructionShapeUtil,
   InstructionTool,
   // Workflow 节点系统
@@ -59,7 +58,7 @@ import {
   WorkflowConnectionBindingUtil,
   WorkflowConnectionShapeUtil,
   WorkflowShapeUtil,
-  WorkflowTool,
+  WorkflowTool
 } from './shapes';
 // Workflow 交互和工具函数
 import { keepConnectionsAtBottom } from './workflow-examples/src/connection/keepConnectionsAtBottom';
@@ -1196,14 +1195,6 @@ export const Board: React.FC<BoardProps> = ({
               renameDefaultPages();
               setTimeout(renameDefaultPages, 0);
 
-              // 初始化 ConnectionManager 来监听 Instruction 和 Output 的连接
-              try {
-                const connectionManager = new ConnectionManager(editor);
-                connectionManager.watchArrowConnections();
-                console.log('[Board] ConnectionManager 已初始化');
-              } catch (error) {
-                console.error('[Board] ConnectionManager 初始化失败:', error);
-              }
 
               // 初始化 Workflow 节点系统
               try {

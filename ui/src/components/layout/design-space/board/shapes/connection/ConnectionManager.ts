@@ -1,4 +1,4 @@
-import { Editor, TLArrowShape } from 'tldraw';
+import { Editor } from 'tldraw';
 
 import { InstructionShape, OutputShape } from '../instruction/InstructionShape.types';
 
@@ -95,79 +95,6 @@ export class ConnectionManager {
     }
   }
 
-  /**
-   * 监听箭头形状的变化，自动建立连接
-   */
-  watchArrowConnections(): void {
-    console.log('[ConnectionManager] 开始监听箭头连接');
-
-    const handleArrowChange = () => {
-      try {
-        const arrows = this.editor.getCurrentPageShapes().filter((shape) => shape.type === 'arrow') as TLArrowShape[];
-
-        const isPointInRect = (p: { x: number; y: number }, r: { x: number; y: number; w: number; h: number }) => {
-          return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
-        };
-
-        const expandRect = (r: { x: number; y: number; w: number; h: number }, padding = 24) => ({
-          x: r.x - padding,
-          y: r.y - padding,
-          w: r.w + padding * 2,
-          h: r.h + padding * 2,
-        });
-
-        arrows.forEach((arrow) => {
-          const start = arrow.props.start as any;
-          const end = arrow.props.end as any;
-
-          // 优先使用绑定判定
-          if (start?.type === 'binding' && end?.type === 'binding') {
-            const startShape = this.editor.getShape(start.boundShapeId);
-            const endShape = this.editor.getShape(end.boundShapeId);
-            if (startShape?.type === 'instruction' && endShape?.type === 'output') {
-              this.createConnection(startShape.id, endShape.id);
-              return;
-            }
-          }
-
-          // 宽松判定：若端点落在矩形区域内（带 padding），也认为已连接
-          try {
-            const startAbs = { x: arrow.x + (start?.x ?? 0), y: arrow.y + (start?.y ?? 0) };
-            const endAbs = { x: arrow.x + (end?.x ?? 0), y: arrow.y + (end?.y ?? 0) };
-
-            // 找到与端点最近的 instruction / output
-            const shapes = this.editor.getCurrentPageShapes();
-            const instructions = shapes.filter((s) => s.type === 'instruction');
-            const outputs = shapes.filter((s) => s.type === 'output');
-
-            const findHit = (candidates: any[], point: { x: number; y: number }) => {
-              for (const s of candidates) {
-                const b = this.editor.getShapePageBounds(s.id as any);
-                if (!b) continue;
-                if (isPointInRect(point, expandRect(b))) return s;
-              }
-              return null;
-            };
-
-            const startHit = findHit(instructions as any, startAbs);
-            const endHit = findHit(outputs as any, endAbs);
-
-            if (startHit && endHit) {
-              this.createConnection(startHit.id, endHit.id);
-            }
-          } catch {}
-        });
-      } catch (error) {
-        console.error('[ConnectionManager] 处理箭头变化时出错:', error);
-      }
-    };
-
-    // 监听编辑器变化
-    this.editor.on('change', handleArrowChange);
-
-    // 初始检查一次现有的箭头
-    handleArrowChange();
-  }
 
   /**
    * 获取 Instruction 的所有连接的 Output
