@@ -43,7 +43,6 @@ import { ExternalLayerPanel } from './ExternalLayerPanel';
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
 import {
-  ConnectionManager,
   InstructionShapeUtil,
   InstructionTool,
   // Workflow 节点系统
@@ -54,7 +53,7 @@ import {
   WorkflowConnectionBindingUtil,
   WorkflowConnectionShapeUtil,
   WorkflowShapeUtil,
-  WorkflowTool,
+  WorkflowTool
 } from './shapes';
 // Workflow 交互和工具函数
 import { keepConnectionsAtBottom } from './workflow-examples/src/connection/keepConnectionsAtBottom';
@@ -64,13 +63,13 @@ import { VerticalToolbar } from './vertical-toolbar.tsx';
 import { WorkflowRegions } from './workflow-examples/src/components/WorkflowRegions';
 import { OnCanvasComponentPicker } from './workflow-ui/OnCanvasComponentPicker';
 
+import { createPortal } from 'react-dom';
 import 'tldraw/tldraw.css';
+import { LiveImageProvider } from './hooks/useLiveImage';
 import './layer-panel.css';
-import './workflow-nodes.css';
 import { LiveImageShapeUtil } from './shapes/live-image/LiveImageShapeUtil';
 import { LiveImageTool } from './shapes/tools/LiveImageTool';
-import { LiveImageProvider } from './hooks/useLiveImage';
-import { createPortal } from 'react-dom';
+import './workflow-nodes.css';
 
 class FixedFrameShapeUtil extends FrameShapeUtil {
   // override canResize() {
@@ -1129,14 +1128,6 @@ export const Board: React.FC<BoardProps> = ({
               renameDefaultPages();
               setTimeout(renameDefaultPages, 0);
 
-              // 初始化 ConnectionManager 来监听 Instruction 和 Output 的连接
-              try {
-                const connectionManager = new ConnectionManager(editor);
-                connectionManager.watchArrowConnections();
-                console.log('[Board] ConnectionManager 已初始化');
-              } catch (error) {
-                console.error('[Board] ConnectionManager 初始化失败:', error);
-              }
 
               // 初始化 Workflow 节点系统
               try {
