@@ -1,6 +1,9 @@
 let _canvas: HTMLCanvasElement | null = null
 let _ctx: CanvasRenderingContext2D | null = null
 
+const TRANSPARENT_PIXEL =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=='
+
 async function inlineExternalImages(svgString: string): Promise<string> {
   try {
     const parser = new DOMParser()
@@ -24,8 +27,10 @@ async function inlineExternalImages(svgString: string): Promise<string> {
         img.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', base64)
         // Ensure crossOrigin-safe rendering
         img.setAttribute('crossorigin', 'anonymous')
-      } catch {
-        // Ignore a single image failure and continue
+      } catch (error) {
+        console.warn('[screenshot] inline image failed, fallback to transparent placeholder', hrefAttr, error)
+        img.setAttribute('href', TRANSPARENT_PIXEL)
+        img.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', TRANSPARENT_PIXEL)
       }
     }
     const serializer = new XMLSerializer()
@@ -77,6 +82,7 @@ export async function fastGetSvgAsImage(
     }
 
     image.onerror = () => {
+      URL.revokeObjectURL(svgUrl)
       resolve(null)
     }
 
@@ -85,20 +91,45 @@ export async function fastGetSvgAsImage(
 
   if (!canvas) return null
 
-  const blobPromise = new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          resolve(null)
-        }
-        resolve(blob)
-      },
-      'image/' + options.type,
-      options.quality,
-    ),
-  )
+  const ensureNotTainted = () => {
+    if (!_canvas || !_ctx) return false
+    try {
+      // 尝试读取一个像素或导出数据，如果失败说明画布被污染
+      _ctx.getImageData(0, 0, 1, 1)
+      return true
+    } catch (error) {
+      console.warn('[screenshot] canvas is tainted, skip exporting', error)
+      return false
+    }
+  }
 
-  return blobPromise
+  if (!ensureNotTainted()) {
+    _canvas = null
+    _ctx = null
+    return null
+  }
+
+  try {
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(null)
+            return
+          }
+          resolve(blob)
+        },
+        'image/' + options.type,
+        options.quality,
+      ),
+    )
+    return blob
+  } catch (error) {
+    console.warn('[screenshot] canvas.toBlob failed, return null', error)
+    _canvas = null
+    _ctx = null
+    return null
+  }
 }
 
 
