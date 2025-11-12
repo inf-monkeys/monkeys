@@ -3,8 +3,8 @@ import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d
 import { VinesMarkdown } from '@/components/ui/markdown';
 
 import { OutputShape } from '../instruction/InstructionShape.types';
-import { getOutputPorts } from '../ports/shapePorts';
 import { GenericPort } from '../ports/GenericPort';
+import { getOutputPorts } from '../ports/shapePorts';
 
 const PORT_RADIUS_PX = 8;
 
@@ -23,6 +23,7 @@ export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
       color: 'green',
       sourceId: '',
       imageUrl: '',
+      images: [],
     };
   }
 
@@ -94,8 +95,45 @@ export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
 
 function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: Editor }) {
 
-  const hasImage = shape.props.imageUrl && shape.props.imageUrl.length > 0 && shape.props.imageUrl.startsWith('http');
+  const images = (Array.isArray(shape.props.images) ? shape.props.images : [])
+    .filter((it) => typeof it === 'string' && it.length > 0);
+  // 兼容旧字段 imageUrl
+  if ((!images || images.length === 0) && shape.props.imageUrl && shape.props.imageUrl.length > 0) {
+    images.push(shape.props.imageUrl);
+  }
+  const hasImages = images.length > 0;
   const hasContent = shape.props.content && shape.props.content.length > 0;
+
+  // 从 Markdown/HTML 文本中尝试提取图片链接（当 props.images 未提供但内容里内嵌了图片或下载链接时）
+  const extractImageUrlsFromContent = (content: string): string[] => {
+    if (!content) return [];
+    const urls = new Set<string>();
+
+    // 1) Markdown 图片语法: ![alt](url)
+    for (const m of content.matchAll(/!\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi)) {
+      urls.add(m[1]);
+    }
+    // 2) Markdown 链接（当链接目标是图片时）: [text](url)
+    for (const m of content.matchAll(/\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi)) {
+      const u = m[1];
+      if (/\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(u)) urls.add(u);
+    }
+    // 3) HTML 图片: <img src="url" ...>
+    for (const m of content.matchAll(/<img[^>]+src=["'](https?:\/\/[^"']+)["'][^>]*>/gi)) {
+      urls.add(m[1]);
+    }
+    // 4) 文本中的裸链接（以图片扩展名结尾）
+    for (const m of content.matchAll(/https?:\/\/[^\s"'')]+/gi)) {
+      const u = m[0];
+      if (/\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(u)) urls.add(u);
+    }
+
+    return Array.from(urls);
+  };
+
+  const derivedImages = !hasImages && hasContent ? extractImageUrlsFromContent(shape.props.content) : [];
+  const imagesToShow = hasImages ? images : derivedImages;
+  const showImages = imagesToShow.length > 0;
 
   // 检测内容是否是 markdown 格式
   const isMarkdown = (text: string): boolean => {
@@ -171,7 +209,7 @@ function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: E
           position: 'relative',
         }}
       >
-        {!hasContent && !hasImage && (
+        {!hasContent && !showImages && (
           <div
             style={{
               width: '100%',
@@ -187,22 +225,25 @@ function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: E
           </div>
         )}
 
-        {hasImage && (
-          <div style={{ marginBottom: hasContent ? '12px' : 0 }}>
-            <img
-              src={shape.props.imageUrl}
-              alt="Output"
-              style={{
-                maxWidth: '100%',
-                maxHeight: hasContent ? '200px' : '100%',
-                objectFit: 'contain',
-                borderRadius: '4px',
-              }}
-            />
+        {showImages && (
+          <div style={{ marginBottom: hasContent ? '12px' : 0, display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
+            {imagesToShow.map((url, idx) => (
+              <img
+                key={`${url}_${idx}`}
+                src={url}
+                alt={`Output_${idx + 1}`}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: hasContent ? '200px' : '100%',
+                  objectFit: 'contain',
+                  borderRadius: '4px',
+                }}
+              />
+            ))}
           </div>
         )}
 
-        {hasContent && (
+        {hasContent && !showImages && (
           <div
             style={{
               fontSize: '14px',

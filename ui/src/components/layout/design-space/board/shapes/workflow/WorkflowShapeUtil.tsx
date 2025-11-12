@@ -428,8 +428,8 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
       console.log('[Workflow] 执行参数:', inputs);
 
-      // 调用工作流执行API（正确的路由）
-      const response = await fetch(`/api/workflow/executions/${shape.props.workflowId}/start`, {
+      // 异步启动工作流（不等待完成）
+      const startResp = await fetch(`/api/workflow/executions/${shape.props.workflowId}/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -437,23 +437,79 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         },
         body: JSON.stringify({
           inputData: inputs,
-          waitForWorkflowFinished: true, // 等待工作流完成
+          // 不再同步等待结果，避免 504
         }),
         signal: controller.signal,
       });
 
-      if (!response.ok) {
-        throw new Error(`工作流执行失败: ${response.status}`);
+      if (!startResp.ok) {
+        throw new Error(`工作流启动失败: ${startResp.status}`);
       }
 
-      console.log('[Workflow] API 响应状态:', response.status);
+      const startData = await startResp.json();
+      const workflowInstanceId =
+        startData?.data?.workflowInstanceId ?? startData?.workflowInstanceId ?? '';
+      if (!workflowInstanceId) {
+        throw new Error('无法获取工作流实例 ID');
+      }
+      console.log('[Workflow] 已启动实例：', workflowInstanceId);
 
-      const responseData = await response.json();
-      const data = responseData?.data || responseData;
+      // 轮询获取执行结果
+      const finishedStatuses = ['COMPLETED', 'FAILED', 'TERMINATED', 'TIMED_OUT', 'CANCELED', 'PAUSED'];
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      const maxWaitMs = 10 * 60 * 1000; // 与后端默认上限保持一致
+      const startAt = Date.now();
+
+      let executionDetail: any = null;
+      // 首次立即拉取一次
+      while (true) {
+        try {
+          const detailResp = await fetch(`/api/workflow/executions/${workflowInstanceId}`, {
+            method: 'GET',
+            headers: {
+              ...vinesHeader({ useToast: false }),
+            },
+            signal: controller.signal,
+          });
+          if (detailResp.ok) {
+            executionDetail = await detailResp.json();
+            // vinesFetcher 风格通常包装 { data }, 但这里直接防御两种
+            const detail = executionDetail?.data ?? executionDetail;
+            const status = detail?.status ?? '';
+            if (finishedStatuses.includes(status)) {
+              executionDetail = detail;
+              break;
+            }
+          } else {
+            console.warn('[Workflow] 获取执行详情失败: ', detailResp.status);
+          }
+        } catch (e: any) {
+          if (e?.name === 'AbortError') {
+            console.log('[Workflow] 轮询已中断');
+            throw e;
+          }
+          console.warn('[Workflow] 轮询异常，稍后重试: ', e);
+        }
+        if (Date.now() - startAt >= maxWaitMs) {
+          console.warn('[Workflow] 轮询超时');
+          break;
+        }
+        await sleep(1000);
+      }
+
+      // 如果没有拿到详情，给出简要提示并结束
+      if (!executionDetail) {
+        console.warn('[Workflow] 未能获取到执行详情');
+        return;
+      }
+
+      // 提取可展示的数据（优先使用 output）
+      const data = executionDetail?.output ?? executionDetail;
       let result: string = '';
       let imageUrl: string = '';
+      let imageUrls: string[] = [];
 
-      console.log('[Workflow] API 响应数据:', data);
+      console.log('[Workflow] 执行完成，准备提取展示结果');
 
       // 辅助函数：递归查找嵌套对象中的 images 和 text
       const findImagesAndText = (obj: any): { images: string[]; text: string } => {
@@ -463,7 +519,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         
         // 检查当前层级的 images 和 text
         if (Array.isArray(obj.images) && obj.images.length > 0) {
-          found.images.push(...obj.images);
+          found.images.push(...obj.images.filter((it: any) => typeof it === 'string'));
         }
         if (obj.text && typeof obj.text === 'string' && obj.text.trim()) {
           found.text = obj.text;
@@ -498,32 +554,33 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       if (data && typeof data === 'object') {
         // 0. 首先尝试递归查找嵌套结构中的 images 和 text（处理复杂的嵌套响应）
         const nestedResult = findImagesAndText(data);
-        if (nestedResult.images.length > 0 && !imageUrl) {
-          imageUrl = nestedResult.images[0]; // 取第一张图片
+        if (nestedResult.images.length > 0) {
+          imageUrls.push(...nestedResult.images);
+          if (!imageUrl) imageUrl = nestedResult.images[0]; // 取第一张图片
         }
         if (nestedResult.text && !result) {
           result = nestedResult.text;
         }
         
         // 1. 优先处理直接返回的 images 和 text 字段（某些工作流 API 的直接格式）
-        if (Array.isArray(data.images) && data.images.length > 0 && !imageUrl) {
-          imageUrl = data.images[0]; // 取第一张图片
+        if (Array.isArray(data.images) && data.images.length > 0) {
+          imageUrls.push(...data.images.filter((it: any) => typeof it === 'string'));
+          if (!imageUrl) imageUrl = data.images[0]; // 取第一张图片
         }
         if (data.text && typeof data.text === 'string' && data.text.trim() && !result) {
           result = data.text;
         }
 
         // 2. 如果 data.output 是数组（格式化后的输出）
-        if (!result && !imageUrl && Array.isArray(data.output) && data.output.length > 0) {
+        if (Array.isArray(data.output) && data.output.length > 0) {
           const outputItems = data.output;
           const textParts: string[] = [];
           // 提取文本和图片
           for (const item of outputItems) {
             if (item.type === 'image' && item.data) {
-              // 如果有多个图片，只取第一个
-              if (!imageUrl) {
-                imageUrl = item.data;
-              }
+              // 支持多图
+              if (typeof item.data === 'string') imageUrls.push(item.data);
+              if (!imageUrl && typeof item.data === 'string') imageUrl = item.data;
               // 如果图片有 alt 文本，也添加到文本结果中
               if (item.alt && typeof item.alt === 'string' && item.alt.trim()) {
                 textParts.push(item.alt);
@@ -547,15 +604,14 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         }
 
         // 如果没有从 output 数组提取到结果，尝试从 rawOutput 提取
-        if (!result && !imageUrl && data.rawOutput) {
+        if (data.rawOutput) {
           const rawOutput = data.rawOutput;
           // 尝试提取output相关字段
           for (const key in rawOutput) {
             if (key.startsWith('output')) {
               const value = rawOutput[key];
               if (typeof value === 'string' && value.trim()) {
-                result = value;
-                break;
+                if (!result) result = value;
               }
             }
           }
@@ -573,21 +629,20 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           }
 
           // 提取图片URL
-          if (!imageUrl) {
-            imageUrl =
-              rawOutput.imageUrl ||
-              rawOutput.image_url ||
-              rawOutput.image ||
-              rawOutput.imageURL ||
-              rawOutput.img ||
-              rawOutput.picture ||
-              rawOutput.photo ||
-              '';
-          }
+          const candidateImage =
+            rawOutput.imageUrl ||
+            rawOutput.image_url ||
+            rawOutput.image ||
+            rawOutput.imageURL ||
+            rawOutput.img ||
+            rawOutput.picture ||
+            rawOutput.photo ||
+            '';
+          if (typeof candidateImage === 'string' && candidateImage) imageUrls.push(candidateImage);
         }
 
         // 如果还是没有结果，尝试直接从 data 对象提取
-        if (!result && !imageUrl) {
+        if (!result) {
           // 尝试提取output相关字段
           for (const key in data) {
             if (key.startsWith('output') && typeof data[key] === 'string' && data[key].trim()) {
@@ -602,21 +657,24 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           }
 
           // 提取图片URL
-          if (!imageUrl) {
-            imageUrl =
-              data.imageUrl ||
-              data.image_url ||
-              data.image ||
-              data.imageURL ||
-              data.img ||
-              data.picture ||
-              data.photo ||
-              '';
-          }
+          const candidateImage2 =
+            (data as any).imageUrl ||
+            (data as any).image_url ||
+            (data as any).image ||
+            (data as any).imageURL ||
+            (data as any).img ||
+            (data as any).picture ||
+            (data as any).photo ||
+            '';
+          if (typeof candidateImage2 === 'string' && candidateImage2) imageUrls.push(candidateImage2);
         }
       } else if (typeof data === 'string') {
         result = data;
       }
+
+      // 去重图片列表，并兼容单图字段
+      imageUrls = Array.from(new Set(imageUrls.filter((it) => typeof it === 'string' && it.length > 0)));
+      if (!imageUrl && imageUrls.length > 0) imageUrl = imageUrls[0];
 
       // 确保 result 是字符串类型
       if (result && typeof result !== 'string') {
@@ -647,9 +705,10 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
               ...outputShape.props,
               content: result,
               imageUrl: imageUrl,
+              images: imageUrls,
             },
           });
-          console.log('[Workflow] Output 框已更新:', outputId, { hasImage: !!imageUrl });
+          console.log('[Workflow] Output 框已更新:', outputId, { images: imageUrls.length, hasImage: !!imageUrl });
         }
       }
 
