@@ -62,8 +62,13 @@ export const useVinesDropzone = ({
       };
     }
 
+    // Only validate when there are explicit accepted extensions
     if (accept?.length) {
-      if (!accept?.includes(extension ?? '')) {
+      // Normalize extension: drop leading dot and compare case-insensitively
+      const normalizedExtension = (extension?.startsWith('.') ? extension.slice(1) : extension)?.toLowerCase();
+      const acceptSet = new Set((accept || []).map((ext) => ext.toLowerCase()).filter(Boolean));
+
+      if (!normalizedExtension || !acceptSet.has(normalizedExtension)) {
         return {
           code: 'file-invalid-type',
           message: '',

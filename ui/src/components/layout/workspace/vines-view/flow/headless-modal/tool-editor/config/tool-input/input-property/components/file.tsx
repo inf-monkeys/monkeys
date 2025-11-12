@@ -11,7 +11,16 @@ export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onCh
   const multipleValues = get(def, 'typeOptions.multipleValues', isArray(value));
   const maxSize = get(def, 'typeOptions.maxSize', void 0);
 
-  const finalAccept = accept.split(',').map((it: string) => it.replace('.', ''));
+  // Normalize accept list:
+  // - split by comma
+  // - trim whitespace
+  // - remove leading dot
+  // - lower-case
+  // - drop empty entries
+  const finalAcceptList = (typeof accept === 'string' ? accept.split(',') : [])
+    .map((it: string) => it.trim().replace(/^\./, '').toLowerCase())
+    .filter(Boolean);
+  const finalAccept = finalAcceptList.length ? finalAcceptList : null;
   const finalMaxSize = maxSize ? maxSize / 1024 / 1024 : void 0;
 
   return (

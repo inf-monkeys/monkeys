@@ -422,6 +422,11 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     true,
   ) as ISystemConfig['theme']['uploader']['pasteButton'];
 
+  // Convert accept extensions to Dropzone accept object format
+  // If accept is provided as ['png', 'jpg', 'pdf'], convert to { '': ['.png', '.jpg', '.pdf'] }
+  // This tells Dropzone to accept files with these extensions without MIME type restrictions
+  const dropzoneAccept = accept?.length ? { '': accept.map((ext) => `.${ext}`) } : undefined;
+
   return (
     <Dropzone
       onDrop={(files, _rejected, event) => {
@@ -438,6 +443,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         setIsHovering(false);
       }}
       onDropRejected={onDropRejected}
+      accept={dropzoneAccept}
       validator={validator}
       maxSize={maxFileSize}
       maxFiles={max}
@@ -501,7 +507,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                           : t('components.ui.updater.click-or-drag-area')}
                       </h1>
                       <p className="break-words text-xs text-muted-foreground text-opacity-85">
-                        {accept
+                        {accept?.length
                           ? t('components.ui.updater.hint.accept.custom', {
                               acceptString: accept.map((it) => `.${it}`).join('、'),
                               count: max,
