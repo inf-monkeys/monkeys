@@ -567,25 +567,8 @@ export const Board: React.FC<BoardProps> = ({
     (editor: Editor, width: number, height: number) => {
       if (!createDefaultFrame) return;
 
-      // 在多画板模式下，检查是否应该创建默认画板
-      if (!oneOnOne) {
-        // 检查是否已经有任何画板存在
-        const allShapes = editor.getCurrentPageShapes();
-        const hasAnyFrame = allShapes.some((shape) => shape.type === 'frame');
-
-        // 如果已经有画板，说明用户已经在使用，不需要创建默认画板
-        if (hasAnyFrame) return;
-
-        // 如果没有任何画板，检查存储中是否有内容
-        // 如果有内容但没有画板，说明用户可能删除了所有画板，尊重用户的选择
-        try {
-          const allShapesCount = allShapes.length;
-          // 如果页面中有其他形状但没有画板，说明用户是有意删除画板的
-          if (allShapesCount > 0) return;
-        } catch (error) {
-          // 忽略错误
-        }
-      }
+      // 多画板模式完全由用户自行创建画板，不再自动生成默认画板
+      if (!oneOnOne) return;
 
       createFrame(editor, width, height);
     },
@@ -1363,14 +1346,87 @@ function Inject({ children, selector }: { children: React.ReactNode; selector: s
 function SneakySideEffects() {
   const editor = useEditor()
   React.useEffect(() => {
-    editor.sideEffects.registerAfterChangeHandler('shape', () => {
+    const FRAME_PADDING = 64
+
+    const normalizeBounds = (bounds: any) => {
+      if (!bounds) return null
+      const x = bounds.x ?? bounds.minX ?? 0
+      const y = bounds.y ?? bounds.minY ?? 0
+      const width =
+        bounds.width ?? bounds.w ?? (typeof bounds.maxX === 'number' && typeof bounds.minX === 'number' ? bounds.maxX - bounds.minX : 0)
+      const height =
+        bounds.height ?? bounds.h ?? (typeof bounds.maxY === 'number' && typeof bounds.minY === 'number' ? bounds.maxY - bounds.minY : 0)
+      return { x, y, width, height }
+    }
+
+    const avoidFrameOverlap = (created: any) => {
+      const createdShapes: TLShape[] = Array.isArray(created) ? (created as TLShape[]) : created ? [created as TLShape] : []
+      if (!createdShapes.length) return
+
+      createdShapes.forEach((shape) => {
+        if (!shape) return
+        if (shape.type !== 'frame' && shape.type !== 'live-image') return
+
+        const bounds = normalizeBounds(editor.getShapePageBounds(shape.id))
+        if (!bounds) return
+
+        const existingFrames = editor
+          .getCurrentPageShapes()
+          .filter((s) => s.id !== shape.id && (s.type === 'frame' || s.type === 'live-image'))
+          .map((s) => normalizeBounds(editor.getShapePageBounds(s.id)))
+          .filter((b): b is { x: number; y: number; width: number; height: number } => Boolean(b))
+
+        const overlaps = (testX: number, testY: number) =>
+          existingFrames.some((other) => {
+            return (
+              testX < other.x + other.width + FRAME_PADDING &&
+              testX + bounds.width + FRAME_PADDING > other.x &&
+              testY < other.y + other.height + FRAME_PADDING &&
+              testY + bounds.height + FRAME_PADDING > other.y
+            )
+          })
+
+        if (!overlaps(bounds.x, bounds.y)) return
+
+        let attemptX = bounds.x
+        let attemptY = bounds.y
+        const originX = bounds.x
+        const stepX = bounds.width + FRAME_PADDING
+        const stepY = bounds.height + FRAME_PADDING
+        const maxAttempts = 200
+
+        let attempts = 0
+        while (attempts < maxAttempts && overlaps(attemptX, attemptY)) {
+          attemptX += stepX
+          if (attemptX - originX > stepX * 6) {
+            attemptX = originX
+            attemptY += stepY
+          }
+          attempts += 1
+        }
+
+        if (attempts >= maxAttempts) return
+
+        editor.updateShapes([
+          {
+            id: shape.id,
+            type: shape.type as any,
+            x: attemptX,
+            y: attemptY,
+          } as any,
+        ])
+      })
+    }
+
+    const emitUpdate = () => {
       editor.emit('update-drawings' as any)
-    })
-    editor.sideEffects.registerAfterCreateHandler('shape', () => {
-      editor.emit('update-drawings' as any)
-    })
-    editor.sideEffects.registerAfterDeleteHandler('shape', () => {
-      editor.emit('update-drawings' as any)
+    }
+
+    editor.sideEffects.registerAfterChangeHandler('shape', emitUpdate)
+    editor.sideEffects.registerAfterDeleteHandler('shape', emitUpdate)
+    editor.sideEffects.registerAfterCreateHandler('shape', (created: any) => {
+      avoidFrameOverlap(created)
+      emitUpdate()
     })
   }, [editor])
   return null
