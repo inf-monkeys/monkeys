@@ -148,7 +148,22 @@ export class MediaUploadController {
       forceRegenerate: shouldForceRegenerate,
     });
 
-    const shouldRedirect = redirect === 'false' ? false : result.shouldRedirect;
+    const parseBoolean = (value?: string) => {
+      if (value === undefined || value === null) {
+        return undefined;
+      }
+      const normalized = value.trim().toLowerCase();
+      if (['true', '1', 'yes', 'y'].includes(normalized)) {
+        return true;
+      }
+      if (['false', '0', 'no', 'n'].includes(normalized)) {
+        return false;
+      }
+      return undefined;
+    };
+
+    const redirectPreference = parseBoolean(redirect);
+    const shouldRedirect = redirectPreference ?? true;
 
     if (shouldRedirect && res) {
       res.redirect(301, result.url);
