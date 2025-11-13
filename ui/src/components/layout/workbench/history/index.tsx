@@ -7,18 +7,17 @@ import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
-import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
+import { useInfiniteWorkflowAllArtifacts, WorkflowArtifactListItem } from '@/apis/workflow/execution/output';
 import { ImagePreview } from '@/components/layout-wrapper/main/image-preview';
 import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-image-preview';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
-import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
+import type { VinesWorkflowExecutionType } from '@/package/vines-flow/core/typings';
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { ImagesResult } from '@/store/useExecutionImageResultStore';
 import { useEmbedSidebar } from '@/store/useGlobalViewStore';
 import { cn } from '@/utils';
-import { newConvertExecutionResultToItemList } from '@/utils/execution';
 import { getThumbUrl } from '@/utils/file';
 
 // Swiper 已移除，使用原生横向滚动
@@ -71,21 +70,26 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [images.length]);
 
+  const hasRowMeasurement = rowViewportWidth > 0;
   const totalRowWidth = images.length * ITEM_SIZE + Math.max(0, images.length - 1) * GAP;
   // 计算视口内可见的项目数
-  const rowVisibleCount = Math.max(1, Math.ceil(rowViewportWidth / (ITEM_SIZE + GAP)));
+  const rowVisibleCount = hasRowMeasurement
+    ? Math.max(1, Math.ceil(rowViewportWidth / (ITEM_SIZE + GAP)))
+    : images.length;
   // 计算当前滚动位置对应的起始索引
-  const scrollItemIndex = Math.floor(rowScrollLeft / (ITEM_SIZE + GAP));
+  const scrollItemIndex = hasRowMeasurement ? Math.floor(rowScrollLeft / (ITEM_SIZE + GAP)) : 0;
   // 加入缓冲区，确保滚动时有预加载
-  const rowFirstIndex = Math.max(0, scrollItemIndex - ROW_BUFFER);
+  const rowFirstIndex = hasRowMeasurement ? Math.max(0, scrollItemIndex - ROW_BUFFER) : 0;
   // 计算末尾索引：可见项数 + 缓冲项数 * 2
-  const rowLastIndex = Math.min(images.length - 1, rowFirstIndex + rowVisibleCount + ROW_BUFFER * 2 - 1);
+  const rowLastIndex = hasRowMeasurement
+    ? Math.min(images.length - 1, rowFirstIndex + rowVisibleCount + ROW_BUFFER * 2 - 1)
+    : images.length - 1;
   const rowSlice = images.slice(rowFirstIndex, rowLastIndex + 1);
-  const rowLeftSpacer = Math.max(0, rowFirstIndex * (ITEM_SIZE + GAP));
+  const rowLeftSpacer = hasRowMeasurement ? Math.max(0, rowFirstIndex * (ITEM_SIZE + GAP)) : 0;
   const rowSliceWidth = rowSlice.length * ITEM_SIZE + Math.max(0, rowSlice.length - 1) * GAP;
-  const rowRightSpacer = Math.max(0, totalRowWidth - rowLeftSpacer - rowSliceWidth);
+  const rowRightSpacer = hasRowMeasurement ? Math.max(0, totalRowWidth - rowLeftSpacer - rowSliceWidth) : 0;
 
   const onRowScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
@@ -219,27 +223,46 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
     });
     ro.observe(root);
     return () => ro.disconnect();
-  }, [expanded]);
+  }, [expanded, images.length]);
 
   const onGridScroll = (e: React.UIEvent<HTMLDivElement>) => {
     setGridScrollTop(e.currentTarget.scrollTop);
   };
 
+  const hasGridMeasurement = gridViewportWidth > 0 && gridViewportHeight > 0;
+  const fallbackColumns = Math.max(1, Math.ceil(Math.sqrt(Math.max(images.length, 1))));
   // 根据容器宽度估算列数与单元尺寸（保持方形）
-  const gridColumns = Math.max(1, Math.floor((gridViewportWidth + GAP) / (ITEM_SIZE + GAP)));
-  const computedItemSize = Math.max(1, Math.floor((gridViewportWidth - GAP * (gridColumns - 1)) / gridColumns));
+  const gridColumns = hasGridMeasurement
+    ? Math.max(1, Math.floor((gridViewportWidth + GAP) / (ITEM_SIZE + GAP)))
+    : fallbackColumns;
+  const computedItemSize = hasGridMeasurement
+    ? Math.max(1, Math.floor((gridViewportWidth - GAP * (gridColumns - 1)) / gridColumns))
+    : ITEM_SIZE;
   const rowHeight = computedItemSize; // 方形
   const totalRows = Math.max(1, Math.ceil(images.length / gridColumns));
   const totalGridHeight = totalRows * rowHeight + Math.max(0, totalRows - 1) * GAP;
-  const visibleRows = Math.max(1, Math.ceil((gridViewportHeight || 1) / (rowHeight + GAP)));
-  const firstVisibleRow = Math.max(0, Math.floor(gridScrollTop / (rowHeight + GAP)) - GRID_BUFFER_ROWS);
-  const lastVisibleRow = Math.min(totalRows - 1, firstVisibleRow + visibleRows + GRID_BUFFER_ROWS * 2);
-  const firstVisibleIndex = Math.min(images.length - 1, firstVisibleRow * gridColumns);
-  const lastVisibleIndex = Math.min(images.length - 1, (lastVisibleRow + 1) * gridColumns - 1);
-  const gridTopSpacer = Math.max(0, firstVisibleRow * rowHeight + Math.max(0, firstVisibleRow) * GAP);
-  const gridVisibleBlockHeight =
-    (lastVisibleRow - firstVisibleRow + 1) * rowHeight + (lastVisibleRow - firstVisibleRow) * GAP;
-  const gridBottomSpacer = Math.max(0, totalGridHeight - gridTopSpacer - gridVisibleBlockHeight);
+  const visibleRows = hasGridMeasurement
+    ? Math.max(1, Math.ceil((gridViewportHeight || 1) / (rowHeight + GAP)))
+    : totalRows;
+  const firstVisibleRow = hasGridMeasurement
+    ? Math.max(0, Math.floor(gridScrollTop / (rowHeight + GAP)) - GRID_BUFFER_ROWS)
+    : 0;
+  const lastVisibleRow = hasGridMeasurement
+    ? Math.min(totalRows - 1, firstVisibleRow + visibleRows + GRID_BUFFER_ROWS * 2)
+    : totalRows - 1;
+  const firstVisibleIndex = hasGridMeasurement ? Math.min(images.length - 1, firstVisibleRow * gridColumns) : 0;
+  const lastVisibleIndex = hasGridMeasurement
+    ? Math.min(images.length - 1, (lastVisibleRow + 1) * gridColumns - 1)
+    : images.length - 1;
+  const gridTopSpacer = hasGridMeasurement
+    ? Math.max(0, firstVisibleRow * rowHeight + Math.max(0, firstVisibleRow) * GAP)
+    : 0;
+  const gridVisibleBlockHeight = hasGridMeasurement
+    ? (lastVisibleRow - firstVisibleRow + 1) * rowHeight + (lastVisibleRow - firstVisibleRow) * GAP
+    : totalGridHeight;
+  const gridBottomSpacer = hasGridMeasurement
+    ? Math.max(0, totalGridHeight - gridTopSpacer - gridVisibleBlockHeight)
+    : 0;
 
   return (
     <div
@@ -448,7 +471,7 @@ type ImagesResultWithOrigin = ImagesResult & {
 
 const HistoryResultOg = () => {
   const { teamId } = useVinesTeam();
-  const { data: imagesResult, setSize, mutate: RefreshAll } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
+  const { data: artifactPages, setSize, mutate: refreshArtifacts } = useInfiniteWorkflowAllArtifacts({ limit: 20 });
 
   const { data: oem } = useSystemConfig();
   const enableSystemImageThumbnail = get(oem, ['theme', 'imageThumbnail'], false);
@@ -456,23 +479,63 @@ const HistoryResultOg = () => {
   const lastTeamId = useRef<string | null>(null);
   useEffect(() => {
     if (teamId !== lastTeamId.current) {
-      RefreshAll();
+      refreshArtifacts();
       lastTeamId.current = teamId;
     }
-  }, [teamId]);
+  }, [teamId, refreshArtifacts]);
 
-  const executionResultList = newConvertExecutionResultToItemList(
-    (imagesResult?.flat() ?? []).filter(Boolean) as VinesWorkflowExecutionOutputListItem[],
-  );
-  const allImages = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
-  // const filerMap = new Map<string, any>();
-  const thumbImages: ImagesResultWithOrigin[] = [];
-  for (const image of allImages) {
-    const url = image.render.data as string;
+  const artifacts = (artifactPages?.flat() ?? []).filter(Boolean) as WorkflowArtifactListItem[];
+
+  const imageItems: ImagesResultWithOrigin[] = artifacts
+    .filter((artifact) => artifact.type === 'image' && artifact.url)
+    .map((artifact, index) => {
+      const status = (artifact.status ?? 'COMPLETED') as VinesWorkflowExecutionType;
+      const key = `artifact-${artifact.instanceId}-${index}`;
+      return {
+        status,
+        startTime: artifact.startTime ?? 0,
+        createTime: artifact.createdTimestamp ?? 0,
+        updateTime: artifact.updateTime ?? 0,
+        endTime: artifact.endTime ?? 0,
+        instanceId: artifact.instanceId,
+        workflowId: artifact.workflowId ?? '',
+        input: [],
+        output: [
+          {
+            key,
+            type: 'image',
+            data: artifact.url,
+          },
+        ],
+        rawOutput: {
+          artifactUrl: artifact.url,
+          artifactType: artifact.type,
+        },
+        taskId: '',
+        userId: artifact.userId ?? '',
+        teamId: artifact.teamId ?? teamId ?? '',
+        render: {
+          type: 'image',
+          data: artifact.url,
+          origin: artifact.url,
+          key,
+          status,
+        },
+      } as ImagesResultWithOrigin;
+    });
+
+  const thumbImages: ImagesResultWithOrigin[] = imageItems.map((image) => {
+    const url = image.render.origin as string;
     const thumbUrl = getThumbUrl(url, enableSystemImageThumbnail);
-
-    thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl, origin: url } } as ImagesResultWithOrigin);
-  }
+    return {
+      ...image,
+      render: {
+        ...image.render,
+        data: thumbUrl,
+        origin: url,
+      },
+    };
+  });
 
   return <HistoryResultInner loading={false} images={thumbImages} setSize={setSize} />;
 };

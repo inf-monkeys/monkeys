@@ -2,6 +2,7 @@ import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base/base';
 import { ToolsExecutionEntity } from '../tools/tools-execution';
+import { WorkflowArtifactEntity } from './workflow-artifact.entity';
 import { WorkflowTriggerType } from './workflow-trigger';
 
 @Entity({ name: 'workflow_execution' })
@@ -153,4 +154,7 @@ export class WorkflowExecutionEntity extends BaseEntity {
 
   @OneToMany(() => ToolsExecutionEntity, (toolsExecution) => toolsExecution.workflowExecution)
   toolsExecutions: ToolsExecutionEntity[];
+
+  @OneToMany(() => WorkflowArtifactEntity, (artifact) => artifact.execution)
+  artifacts: WorkflowArtifactEntity[];
 }

@@ -1,8 +1,8 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
-import { SuccessResponse } from '@/common/response';
+import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WorkflowArtifactService } from './workflow.artifact.service';
 
@@ -10,6 +10,26 @@ import { WorkflowArtifactService } from './workflow.artifact.service';
 @Controller('/workflow/artifact')
 export class WorkflowArtifactController {
   constructor(private readonly artifactService: WorkflowArtifactService) {}
+
+  @ApiOperation({
+    summary: '获取团队所有工作流产物',
+    description: '分页获取当前团队下的所有工作流产物',
+  })
+  @UseGuards(CompatibleAuthGuard)
+  @Get('all')
+  async listTeamArtifacts(@Req() request: IRequest, @Query() query: { page?: string; limit?: string; orderBy?: 'DESC' | 'ASC' }) {
+    const { teamId } = request;
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const orderBy = query.orderBy === 'ASC' ? 'ASC' : 'DESC';
+    const result = await this.artifactService.getTeamArtifacts(teamId, { page, limit, orderBy });
+    return new SuccessListResponse({
+      page: result.page,
+      limit: result.limit,
+      total: result.total,
+      data: result.data,
+    });
+  }
 
   @ApiOperation({
     summary: '获取工作流某次执行结果的产物',

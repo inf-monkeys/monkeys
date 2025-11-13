@@ -3,6 +3,21 @@ import useSWRInfinite, { SWRInfiniteResponse } from 'swr/infinite';
 
 import { vinesFetcher } from '@/apis/fetcher';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
+
+export type WorkflowArtifactListItem = {
+  url: string;
+  type: 'image' | 'video' | 'file';
+  instanceId: string;
+  workflowId?: string;
+  status?: string | null;
+  userId?: string;
+  startTime?: number | null;
+  endTime?: number | null;
+  updateTime?: number | null;
+  createdTimestamp?: number;
+  updatedTimestamp?: number;
+  teamId?: string;
+};
 export const useWorkflowExecutionOutputs = (workflowId: string) =>
   useSWR<VinesWorkflowExecutionOutputListItem[] | undefined>(
     `/api/workflow/executions/${workflowId}/outputs`,
@@ -40,6 +55,30 @@ export const useInfiniteWorkflowExecutionAllOutputs = ({
     (index, previousPageData) => {
       if (previousPageData && !previousPageData.length) return null;
       return `/api/workflow/executions/all/outputs?limit=${limit}&page=${index + 1}&orderBy=${orderBy}`;
+    },
+    vinesFetcher({ method: 'GET' }),
+    {
+      initialSize: 1,
+      revalidateFirstPage: true,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      revalidateIfStale: true,
+      refreshInterval: 1000 * 2,
+      revalidateAll: false,
+    },
+  );
+
+export const useInfiniteWorkflowAllArtifacts = ({
+  limit = 10,
+  orderBy = 'DESC',
+}: {
+  limit?: number;
+  orderBy?: string;
+}): SWRInfiniteResponse<WorkflowArtifactListItem[] | undefined> =>
+  useSWRInfinite<WorkflowArtifactListItem[] | undefined>(
+    (index, previousPageData) => {
+      if (previousPageData && !previousPageData.length) return null;
+      return `/api/workflow/artifact/all?limit=${limit}&page=${index + 1}&orderBy=${orderBy}`;
     },
     vinesFetcher({ method: 'GET' }),
     {

@@ -5,6 +5,7 @@ import { DesignMetadataEntity } from '@/database/entities/design/design-metatdat
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { WorkflowArtifactEntity } from '@/database/entities/workflow/workflow-artifact.entity';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
+import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { forwardRef, Module } from '@nestjs/common';
@@ -95,6 +96,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
       DesignProjectEntity,
       WorkflowExecutionEntity,
       WorkflowArtifactEntity,
+      WorkflowMetadataEntity,
     ]),
     ToolsModule,
     CommonModule,
