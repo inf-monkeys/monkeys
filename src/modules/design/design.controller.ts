@@ -11,12 +11,12 @@ import { DesignMetadataService } from './design.metadata.service';
 import { DesignProjectService } from './design.project.service';
 import { CreateDesignAssociationDto } from './dto/create-design-association.dto';
 import { CreateDesignMetadataDto } from './dto/create-design-metadata.dto';
+import { CreateDesignProjectVersionDto } from './dto/create-design-project-version.dto';
 import { CreateDesignProjectDto } from './dto/create-design-project.dto';
 import { GenerateThumbnailDto } from './dto/generate-thumbnail.dto';
 import { UpdateDesignAssociationDto } from './dto/update-design-association.dto';
 import { UpdateDesignMetadataDto } from './dto/update-design-metadata.dto';
 import { UpdateDesignProjectDto } from './dto/update-design-project.dto';
-import { CreateDesignProjectVersionDto } from './dto/create-design-project-version.dto';
 
 @Controller('design')
 @ApiTags('Design/CRUD')
@@ -354,5 +354,21 @@ export class DesignController {
     }
     const versionProject = await this.designProjectService.findById(project.id);
     return new SuccessResponse({ data: versionProject });
+  }
+
+  @Delete('project/:projectId/version/:version')
+  @ApiOperation({
+    summary: '删除设计项目的指定版本',
+    description: '删除指定版本，至少需要保留一个版本',
+  })
+  async deleteProjectVersion(
+    @Req() req: IRequest,
+    @Param('projectId') projectId: string,
+    @Param('version') version: string,
+  ) {
+    const { teamId, userId } = req;
+    const versionNum = parseInt(version, 10);
+    await this.designProjectService.deleteProjectVersion(projectId, versionNum, teamId, userId);
+    return new SuccessResponse({ data: { success: true } });
   }
 }

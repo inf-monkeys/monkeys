@@ -355,4 +355,36 @@ export class DesignProjectService {
     const versions = await this.designProjectRepository.findAllVersionsByProjectId(projectId);
     return versions.length > 0 ? versions[0] : null;
   }
+
+  /**
+   * 删除指定版本
+   * 注意：不能删除当前正在使用的版本，需要至少保留一个版本
+   */
+  async deleteProjectVersion(
+    projectId: string,
+    version: number,
+    teamId: string,
+    userId: string,
+  ): Promise<void> {
+    // 获取该 projectId 的所有版本
+    const versions = await this.designProjectRepository.findAllVersionsByProjectId(projectId);
+    
+    if (versions.length <= 1) {
+      throw new ForbiddenException('至少需要保留一个版本');
+    }
+
+    // 查找要删除的版本
+    const versionToDelete = versions.find(v => v.version === version);
+    if (!versionToDelete) {
+      throw new NotFoundException('版本不存在');
+    }
+
+    // 检查权限
+    if (versionToDelete.teamId !== teamId) {
+      throw new ForbiddenException('无权删除此版本');
+    }
+
+    // 删除该版本（软删除）
+    await this.delete(versionToDelete.id);
+  }
 }

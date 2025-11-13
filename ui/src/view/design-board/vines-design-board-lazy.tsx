@@ -679,10 +679,6 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
           project={designProject}
           open={versionManagerVisible}
           onOpenChange={setVersionManagerVisible}
-          onVersionChange={(version) => {
-            setVersionManagerVisible(false);
-            toast.success(`已切换到版本 ${version}`);
-          }}
         />
       )}
     </div>

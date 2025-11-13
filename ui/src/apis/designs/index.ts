@@ -135,3 +135,8 @@ export const getDesignProjectByVersion = (projectId: string, version: number) =>
     method: 'GET',
     simple: true,
   })(`/api/design/project/${projectId}/version/${version}`);
+
+export const deleteDesignProjectVersion = (projectId: string, version: number) =>
+  vinesFetcher({
+    method: 'DELETE',
+  })(`/api/design/project/${projectId}/version/${version}`);

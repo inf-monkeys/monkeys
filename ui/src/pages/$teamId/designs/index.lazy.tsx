@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { get } from 'lodash';
 import { Download, GitBranch, Link, Pencil, Trash, Upload } from 'lucide-react';
@@ -14,13 +14,13 @@ import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor.tsx';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createDesignProjectsColumns } from '@/components/layout/ugc-pages/design-project/consts.tsx';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { DesignAssociationEditorDialog } from '@/components/layout/ugc-pages/design-project/design-association-editor';
 import { DesignProjectCardWrapper } from '@/components/layout/ugc-pages/design-project/design-project-card-wrapper';
 import { DesignProjectVersionManager } from '@/components/layout/ugc-pages/design-project/version-manager';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -41,7 +41,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label.tsx';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +51,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { Label } from '@/components/ui/label.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { getI18nContent } from '@/utils';
@@ -541,10 +541,6 @@ export const Designs: React.FC = () => {
           project={versionManagerProject}
           open={versionManagerVisible}
           onOpenChange={setVersionManagerVisible}
-          onVersionChange={(version) => {
-            void mutateDesignProjects();
-            setVersionManagerVisible(false);
-          }}
         />
       )}
     </main>
