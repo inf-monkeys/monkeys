@@ -442,7 +442,7 @@ export const UgcView = <E extends object>({
           </AnimatePresence>
           <div className="flex size-full flex-col">
             <div
-              className="relative w-full overflow-y-auto p-global"
+              className="relative w-full overflow-y-auto p-global pt-global-1/2"
               style={{ height: showPagination ? 'calc(100% - 4.9rem)' : 'calc(100% - 1.7rem)' }}
             >
               {displayMode === 'folder' ? (

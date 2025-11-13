@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { IUgcCustomProps } from '@/components/layout/ugc/typings.ts';
 import { IUgcViewFilterListProps, UgcViewFilterList } from '@/components/layout/ugc/view/filter/list';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,16 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, is
   const { t } = useTranslation();
 
   const [visible, setVisible] = useState(true);
+
+  const { data: oem } = useSystemConfig();
+  const titleStyle =
+    oem?.theme.id === 'haier'
+      ? {
+          fontSize: '14px',
+          fontWeight: 900,
+          lineHeight: '18px',
+        }
+      : undefined;
 
   return (
     <div className="flex h-full max-w-64">
@@ -38,7 +49,9 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, is
             </TooltipTrigger>
             <TooltipContent>{t('common.sidebar.hide')}</TooltipContent>
           </Tooltip>
-          <h1 className="text-base font-bold">{title}</h1>
+          <h1 style={titleStyle} className="text-base font-bold">
+            {title}
+          </h1>
         </div>
         <UgcViewFilterList assetType={assetType} assetKey={assetKey} isMarket={isMarket} {...filterListProps} />
       </motion.div>

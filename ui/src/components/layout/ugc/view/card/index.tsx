@@ -70,10 +70,10 @@ export const UgcViewCard = <E extends object>({
       <CardHeader className="p-global">
         <CardTitle className={cn('flex gap-3 font-medium', operateAreaNode && 'justify-between')}>
           <div>{logo}</div>
-          <div className={cn('flex flex-col', operateAreaNode && 'max-w-[55%]')}>
+          <div className={cn('flex flex-col justify-center', operateAreaNode && 'max-w-[55%]')}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="line-clamp-1 text-base font-bold">{title}</span>
+                <span className="text-base font-bold">{title}</span>
               </TooltipTrigger>
               <TooltipContent>{title}</TooltipContent>
             </Tooltip>
