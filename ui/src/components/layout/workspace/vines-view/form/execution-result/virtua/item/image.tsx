@@ -1,8 +1,7 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
-import { useAsyncEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { get, isObject } from 'lodash';
 import { Copy } from 'lucide-react';
@@ -14,7 +13,6 @@ import { ExectuionResultGridDisplayType } from '@/apis/common/typings';
 import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-image-preview';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { useCopy } from '@/hooks/use-copy.ts';
 import useUrlState from '@/hooks/use-url-state';
 import { useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
@@ -47,6 +45,8 @@ interface IVirtuaExecutionResultGridImageItemProps {
   displayType?: ExectuionResultGridDisplayType;
 }
 
+const thumbnailStatusCache = new Map<string, 'success' | 'error'>();
+
 const VirtuaExecutionResultGridImageItemComponent: React.FC<IVirtuaExecutionResultGridImageItemProps> = ({
   src,
   alt,
@@ -73,18 +73,30 @@ const VirtuaExecutionResultGridImageItemComponent: React.FC<IVirtuaExecutionResu
   const altLabel = isObject(alt) ? alt.label.toString() : alt;
 
   const altContent = isObject(alt) ? alt.value : alt;
-  const [previewSrc, setPreviewSrc] = React.useState(src);
+  const thumbUrl = useMemo(() => getThumbUrl(src, enableSystemImageThumbnail), [src, enableSystemImageThumbnail]);
+  const [previewSrc, setPreviewSrc] = React.useState(() => {
+    if (!enableSystemImageThumbnail) return src;
+    return thumbnailStatusCache.get(src) === 'error' ? src : thumbUrl;
+  });
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
   const isMiniFrame = mode === 'mini';
-  useAsyncEffect(async () => {
-    if (!src) return;
-    const thumbnailSrc = getThumbUrl(src, enableSystemImageThumbnail);
-    if (await checkImageUrlAvailable(thumbnailSrc)) {
-      setPreviewSrc(thumbnailSrc);
-    } else {
-      setPreviewSrc(src);
+  React.useEffect(() => {
+    const nextSrc = !enableSystemImageThumbnail || thumbnailStatusCache.get(src) === 'error' ? src : thumbUrl;
+    setPreviewSrc((prev) => (prev === nextSrc ? prev : nextSrc));
+  }, [src, thumbUrl, enableSystemImageThumbnail]);
+
+  const handleImageLoad = useCallback(() => {
+    if (previewSrc === src) return;
+    thumbnailStatusCache.set(src, 'success');
+  }, [previewSrc, src]);
+
+  const handleImageError = useCallback(() => {
+    if (previewSrc === src) return;
+    if (thumbnailStatusCache.get(src) !== 'error') {
+      thumbnailStatusCache.set(src, 'error');
     }
-  }, [src]);
+    setPreviewSrc((prev) => (prev === src ? prev : src));
+  }, [previewSrc, src]);
 
   // 处理图片点击，跳转到详情页面
   const handleImageClick = (e: React.MouseEvent) => {
@@ -144,6 +156,8 @@ const VirtuaExecutionResultGridImageItemComponent: React.FC<IVirtuaExecutionResu
             onDragStart={handleDragStart}
             draggable
             onClick={handleImageClick}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
           />
         ) : (
           <Image
@@ -159,6 +173,8 @@ const VirtuaExecutionResultGridImageItemComponent: React.FC<IVirtuaExecutionResu
             onDragStart={handleDragStart}
             draggable
             onClick={handleImageClick}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
           />
         )}
       </UniImagePreviewWrapper>
@@ -190,6 +206,16 @@ const imageItemAreEqual = (
   prev: IVirtuaExecutionResultGridImageItemProps,
   next: IVirtuaExecutionResultGridImageItemProps,
 ) => {
+  const getAltKey = (alt: IVinesExecutionResultImageAlt) => {
+    if (!alt) return '';
+    if (typeof alt === 'string') return alt;
+    if (isObject(alt) && 'label' in alt && 'value' in alt) {
+      return `${(alt as { label?: string }).label ?? ''}||${(alt as { value?: string }).value ?? ''}`;
+    }
+    return JSON.stringify(alt);
+  };
+  const isAltEqual = getAltKey(prev.alt) === getAltKey(next.alt);
+
   return (
     prev.src === next.src &&
     prev.renderKey === next.renderKey &&
@@ -197,7 +223,7 @@ const imageItemAreEqual = (
     prev.clickBehavior === next.clickBehavior &&
     prev.workflowId === next.workflowId &&
     prev.displayType === next.displayType &&
-    prev.alt === next.alt &&
+    isAltEqual &&
     prev.instanceId === next.instanceId &&
     prev.outputIndex === next.outputIndex &&
     prev.onSelect === next.onSelect &&
