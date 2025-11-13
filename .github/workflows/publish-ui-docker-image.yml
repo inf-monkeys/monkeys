@@ -43,6 +43,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GIT_COMMIT_HASH=$GITHUB_SHA
+            GIT_TAG=${{ github.ref_name }}
 
       - name: Save Docker image to a tar file
         run: |
@@ -84,4 +87,4 @@ jobs:
           ci_target: UI
           ci_target_image: infmonkeys/monkeys-ui
           ci_target_tag: ${GITHUB_REF#refs/tags/}
-          build_time: ${{ needs.push_to_registry.outputs.build_time }} 
+          build_time: ${{ needs.push_to_registry.outputs.build_time }}

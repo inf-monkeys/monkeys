@@ -16,14 +16,7 @@ dotenv.config();
 export default defineConfig(() => {
   const resolveCommitHash = () => {
     const envSource =
-      process.env.GIT_COMMIT ||
-      process.env.GITHUB_SHA ||
-      process.env.CI_COMMIT_SHA ||
-      process.env.VERCEL_GIT_COMMIT_SHA ||
-      process.env.CF_PAGES_COMMIT_SHA ||
-      process.env.BUILD_SOURCEVERSION ||
-      process.env.CIRCLE_SHA1 ||
-      process.env.TRAVIS_COMMIT;
+      process.env.GIT_TAG || process.env.GIT_COMMIT_HASH;
 
     if (envSource) {
       return envSource.substring(0, 7);
