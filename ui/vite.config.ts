@@ -14,13 +14,34 @@ dotenv.config();
 
 // https://vitejs.dev/config/
 export default defineConfig(() => {
-  let commitHash = 'dev';
-  try {
-    commitHash = execSync('git rev-parse --short HEAD').toString().trim();
-    console.log('commitHash', commitHash);
-  } catch {
-    // ignore when git is unavailable
-  }
+  const resolveCommitHash = () => {
+    const envSource =
+      process.env.GIT_COMMIT ||
+      process.env.GITHUB_SHA ||
+      process.env.CI_COMMIT_SHA ||
+      process.env.VERCEL_GIT_COMMIT_SHA ||
+      process.env.CF_PAGES_COMMIT_SHA ||
+      process.env.BUILD_SOURCEVERSION ||
+      process.env.CIRCLE_SHA1 ||
+      process.env.TRAVIS_COMMIT;
+
+    if (envSource) {
+      return envSource.substring(0, 7);
+    }
+
+    try {
+      return execSync('git rev-parse --short HEAD', {
+        cwd: resolve(__dirname, '..'),
+        stdio: ['ignore', 'pipe', 'ignore'],
+      })
+        .toString()
+        .trim();
+    } catch {
+      return undefined;
+    }
+  };
+
+  const commitHash = resolveCommitHash() ?? process.env.npm_package_version ?? 'dev';
 
   return {
     plugins: [
