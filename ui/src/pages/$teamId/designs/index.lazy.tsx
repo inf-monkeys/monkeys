@@ -4,7 +4,7 @@ import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { get } from 'lodash';
-import { Download, Link, Pencil, Trash, Upload } from 'lucide-react';
+import { Download, GitBranch, Link, Pencil, Trash, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -20,6 +20,7 @@ import { createDesignProjectsColumns } from '@/components/layout/ugc-pages/desig
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { DesignAssociationEditorDialog } from '@/components/layout/ugc-pages/design-project/design-association-editor';
 import { DesignProjectCardWrapper } from '@/components/layout/ugc-pages/design-project/design-project-card-wrapper';
+import { DesignProjectVersionManager } from '@/components/layout/ugc-pages/design-project/version-manager';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -159,6 +160,8 @@ export const Designs: React.FC = () => {
   const [designProjectEditorVisible, setDesignProjectEditorVisible] = useState(false);
   const [deleteAlertDialogVisible, setDeleteAlertDialogVisible] = useState(false);
   const [importDialogVisible, setImportDialogVisible] = useState(false);
+  const [versionManagerVisible, setVersionManagerVisible] = useState(false);
+  const [versionManagerProject, setVersionManagerProject] = useState<IAssetItem<IDesignProject>>();
 
   const handleAfterUpdateDesignProject = () => {
     void mutateDesignProjects();
@@ -373,6 +376,18 @@ export const Designs: React.FC = () => {
                       </DropdownMenuItem>
 
                       <DropdownMenuItem
+                        onSelect={() => {
+                          setVersionManagerProject(item);
+                          setVersionManagerVisible(true);
+                        }}
+                      >
+                        <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                          <GitBranch size={15} />
+                        </DropdownMenuShortcut>
+                        版本管理
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
                         className="text-red-10"
                         onSelect={() => {
                           setCurrentDesignProject(item);
@@ -511,6 +526,27 @@ export const Designs: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 导入对话框 */}
+      <ImportDesignProjectDialog
+        visible={importDialogVisible}
+        setVisible={setImportDialogVisible}
+        onImport={handleImportProject}
+      />
+
+      {/* 版本管理器 */}
+      {versionManagerProject && (
+        <DesignProjectVersionManager
+          key={versionManagerProject.id}
+          project={versionManagerProject}
+          open={versionManagerVisible}
+          onOpenChange={setVersionManagerVisible}
+          onVersionChange={(version) => {
+            void mutateDesignProjects();
+            setVersionManagerVisible(false);
+          }}
+        />
+      )}
     </main>
   );
 };

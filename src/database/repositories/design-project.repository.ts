@@ -17,11 +17,14 @@ export class DesignProjectRepository {
     private readonly designMetadataRepository: DesignMetadataRepository,
   ) {}
 
-  public async create(designProject: Omit<DesignProjectEntity, 'id'>) {
+  public async create(designProject: Omit<DesignProjectEntity, 'id'>, useExistProjectId?: string) {
     const id = generateDbId();
+    const projectId = useExistProjectId || generateDbId();
     const projectToSave = {
       ...designProject,
       id,
+      projectId,
+      version: designProject.version || 1,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,
@@ -43,7 +46,11 @@ export class DesignProjectRepository {
     const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp', filter, search } = dto;
     const searchText = typeof search === 'string' ? search.trim() : '';
 
-    const queryBuilder = this.designProjectRepository.createQueryBuilder('dp').where('dp.team_id = :teamId', { teamId }).andWhere('dp.is_deleted = false');
+    // 先获取所有符合条件的项目
+    const queryBuilder = this.designProjectRepository
+      .createQueryBuilder('dp')
+      .where('dp.team_id = :teamId', { teamId })
+      .andWhere('dp.is_deleted = false');
 
     // Apply filtering if provided
     if (filter) {
@@ -67,22 +74,42 @@ export class DesignProjectRepository {
       });
     }
 
-    // Count total number of projects
-    const totalCount = await queryBuilder.getCount();
+    // 先获取所有项目，然后在应用层过滤出每个 projectId 的最新版本
+    const allProjects = await queryBuilder.getMany();
+    
+    // 按 projectId 分组，保留每组中 version 最大的
+    const projectMap = new Map<string, DesignProjectEntity>();
+    for (const project of allProjects) {
+      const existing = projectMap.get(project.projectId);
+      if (!existing || project.version > existing.version) {
+        projectMap.set(project.projectId, project);
+      }
+    }
+    
+    // 转换为数组
+    let projects = Array.from(projectMap.values());
+    
+    // 计数
+    const totalCount = projects.length;
 
-    // Apply ordering
+    // 排序
     const validOrderColumns = {
-      createdTimestamp: 'dp.created_timestamp',
-      updatedTimestamp: 'dp.updated_timestamp',
+      createdTimestamp: 'createdTimestamp',
+      updatedTimestamp: 'updatedTimestamp',
     };
-    const orderColumnSql = validOrderColumns[orderColumn] || 'dp.created_timestamp';
+    const orderField = validOrderColumns[orderColumn] || 'createdTimestamp';
+    projects.sort((a, b) => {
+      const aVal = a[orderField];
+      const bVal = b[orderField];
+      if (orderBy.toUpperCase() === 'ASC') {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
 
-    // Apply pagination
-    const projects = await queryBuilder
-      .orderBy(orderColumnSql, orderBy.toUpperCase() === 'ASC' ? 'ASC' : 'DESC')
-      .limit(limit)
-      .offset((page - 1) * limit)
-      .getMany();
+    // 分页
+    projects = projects.slice((page - 1) * limit, page * limit);
 
     // 🚀 性能优化：批量获取每个项目的第一个画板元数据，避免 N+1 查询
     if (projects.length > 0) {
@@ -132,5 +159,78 @@ export class DesignProjectRepository {
   public async delete(id: string) {
     await this.designMetadataRepository.deleteAllByProjectId(id);
     await this.designProjectRepository.update(id, { isDeleted: true });
+  }
+
+  /**
+   * 根据 projectId 和 version 查找设计项目
+   */
+  public async findByProjectIdAndVersion(projectId: string, version: number) {
+    return this.designProjectRepository.findOne({
+      where: { projectId, version, isDeleted: false },
+    });
+  }
+
+  /**
+   * 获取设计项目的所有版本
+   */
+  public async findAllVersionsByProjectId(projectId: string): Promise<DesignProjectEntity[]> {
+    return this.designProjectRepository.find({
+      where: { projectId, isDeleted: false },
+      order: { version: 'DESC' },
+    });
+  }
+
+  /**
+   * 获取设计项目的最新版本号
+   */
+  public async getLatestVersion(projectId: string): Promise<number> {
+    const result = await this.designProjectRepository
+      .createQueryBuilder('dp')
+      .select('MAX(dp.version)', 'maxVersion')
+      .where('dp.project_id = :projectId', { projectId })
+      .andWhere('dp.is_deleted = false')
+      .getRawOne();
+    return result?.maxVersion || 1;
+  }
+
+  /**
+   * 创建新版本（复制现有版本）
+   */
+  public async createNewVersion(
+    sourceProjectId: string,
+    sourceVersion: number,
+    newVersion: number,
+    updates?: Partial<DesignProjectEntity>,
+  ): Promise<DesignProjectEntity> {
+    const sourceProject = await this.findByProjectIdAndVersion(sourceProjectId, sourceVersion);
+    if (!sourceProject) {
+      throw new Error('Source project not found');
+    }
+
+    const newId = generateDbId();
+    const newProject = {
+      ...sourceProject,
+      ...updates,
+      id: newId,
+      projectId: sourceProjectId,
+      version: newVersion,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      isDeleted: false,
+    };
+
+    delete (newProject as any).firstBoard; // 删除查询时附加的字段
+
+    return this.designProjectRepository.save(newProject);
+  }
+
+  /**
+   * 删除设计项目的所有版本
+   */
+  public async deleteAllVersions(projectId: string) {
+    const versions = await this.findAllVersionsByProjectId(projectId);
+    for (const version of versions) {
+      await this.delete(version.id);
+    }
   }
 }

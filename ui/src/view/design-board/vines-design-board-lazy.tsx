@@ -5,7 +5,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, GitBranch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { AssetRecordType, createShapeId, getSnapshot, TLShapeId } from 'tldraw';
@@ -17,8 +17,10 @@ import { useWorkspacePages } from '@/apis/pages';
 import { Board } from '@/components/layout/design-space/board';
 import { MiniHistoryRightSidebar } from '@/components/layout/design-space/board/mini-history-right-sidebar';
 import { DesignBoardRightSidebar } from '@/components/layout/design-space/board/right-sidebar';
+import { DesignProjectVersionManager } from '@/components/layout/ugc-pages/design-project/version-manager';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
@@ -93,6 +95,8 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
   const [canvasWidth, setCanvasWidth] = useState<number>(1280);
   const [canvasHeight, setCanvasHeight] = useState<number>(720);
+
+  const [versionManagerVisible, setVersionManagerVisible] = useState(false);
 
   // 避免重复加载相同的数据
   const lastSnapshotRef = useRef<any>(null);
@@ -571,6 +575,25 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
   return (
     <div className={cn('relative flex h-full max-h-full')}>
+      {/* 右上角工具栏 - 版本管理 */}
+      {designProject && !isReadonlyMode && (
+        <Card className="absolute right-0 top-0 z-40 m-4 p-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline"
+                size="small"
+                onClick={() => setVersionManagerVisible(true)}
+                icon={<GitBranch size={16} />}
+              >
+                v{designProject.version}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>版本管理</TooltipContent>
+          </Tooltip>
+        </Card>
+      )}
+      
       <div className="flex h-full max-w-64">
         {!embed && get(oem, 'theme.designProjects.showBoardOperationSidebar', true) && (
           <>
@@ -649,6 +672,19 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         width={miniHistoryRightSidebarWidth}
         onResizeWidth={(w) => setMiniHistoryRightSidebarWidth(w)}
       />
+      
+      {/* 版本管理器 */}
+      {designProject && (
+        <DesignProjectVersionManager
+          project={designProject}
+          open={versionManagerVisible}
+          onOpenChange={setVersionManagerVisible}
+          onVersionChange={(version) => {
+            setVersionManagerVisible(false);
+            toast.success(`已切换到版本 ${version}`);
+          }}
+        />
+      )}
     </div>
   );
 };

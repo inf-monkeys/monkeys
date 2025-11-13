@@ -14,14 +14,15 @@ export class DesignProjectService {
     private readonly teamRepository: TeamRepository,
   ) {}
 
-  async create(createDesignProjectDto: CreateDesignProjectDto & { teamId: string; creatorUserId: string }) {
+  async create(createDesignProjectDto: CreateDesignProjectDto & { teamId: string; creatorUserId: string }, useExistProjectId?: string) {
     const projectEntity = new DesignProjectEntity();
 
     Object.assign(projectEntity, createDesignProjectDto, {
       assetType: 'design-project',
+      version: createDesignProjectDto.version || 1,
     });
 
-    const createdProject = await this.designProjectRepository.create(projectEntity);
+    const createdProject = await this.designProjectRepository.create(projectEntity, useExistProjectId);
 
     // Create a default design metadata for the new project
     await this.designMetadataRepository.createDesignMetadata(createdProject.id, {
@@ -268,5 +269,90 @@ export class DesignProjectService {
     }
 
     return newProject;
+  }
+
+  /**
+   * 获取设计项目的所有版本
+   */
+  async getProjectVersions(projectId: string): Promise<DesignProjectEntity[]> {
+    return this.designProjectRepository.findAllVersionsByProjectId(projectId);
+  }
+
+  /**
+   * 创建设计项目的新版本
+   * 类似于工作流的版本管理，会复制当前版本的所有内容到新版本
+   */
+  async createProjectVersion(
+    projectId: string,
+    currentVersion: number,
+    teamId: string,
+    creatorUserId: string,
+    updates?: {
+      displayName?: string;
+      description?: string;
+      iconUrl?: string;
+    },
+  ): Promise<DesignProjectEntity> {
+    // 获取源项目
+    const sourceProject = await this.designProjectRepository.findByProjectIdAndVersion(projectId, currentVersion);
+    if (!sourceProject) {
+      throw new NotFoundException('源设计项目不存在');
+    }
+
+    // 检查权限
+    if (sourceProject.teamId !== teamId) {
+      throw new ForbiddenException('无权操作此设计项目');
+    }
+
+    // 获取下一个版本号
+    const nextVersion = (await this.designProjectRepository.getLatestVersion(projectId)) + 1;
+
+    // 创建新版本的项目
+    const newProject = await this.designProjectRepository.createNewVersion(projectId, currentVersion, nextVersion, {
+      ...updates,
+      teamId,
+      creatorUserId,
+    });
+
+    // 复制所有画板到新版本
+    const sourceBoards = await this.designMetadataRepository.findAllByProjectId(sourceProject.id);
+    for (const board of sourceBoards) {
+      // 深拷贝 snapshot
+      let snapshotCopy: any = null;
+      if (board.snapshot) {
+        try {
+          if (typeof board.snapshot === 'string') {
+            snapshotCopy = JSON.parse(board.snapshot);
+          } else {
+            snapshotCopy = JSON.parse(JSON.stringify(board.snapshot));
+          }
+        } catch (error) {
+          snapshotCopy = board.snapshot;
+        }
+      } else {
+        snapshotCopy = {};
+      }
+
+      await this.designMetadataRepository.createDesignMetadata(newProject.id, {
+        displayName: board.displayName,
+        snapshot: snapshotCopy,
+        pinned: board.pinned,
+        thumbnailUrl: board.thumbnailUrl,
+        teamId,
+        designProjectId: newProject.id,
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
+      });
+    }
+
+    return newProject;
+  }
+
+  /**
+   * 根据 projectId 查找最新版本的设计项目
+   */
+  async findLatestByProjectId(projectId: string): Promise<DesignProjectEntity | null> {
+    const versions = await this.designProjectRepository.findAllVersionsByProjectId(projectId);
+    return versions.length > 0 ? versions[0] : null;
   }
 }

@@ -4,7 +4,8 @@ import { IsBoolean, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateDesignProjectDto extends BaseAssetEntityDto {
   @IsNumber()
-  sortIndex: number;
+  @IsOptional()
+  sortIndex?: number;
 
   @ApiProperty({
     description: '是否为设计模板',
@@ -14,4 +15,13 @@ export class CreateDesignProjectDto extends BaseAssetEntityDto {
   @IsBoolean()
   @IsOptional()
   isTemplate?: boolean;
+
+  @ApiProperty({
+    description: '版本号',
+    default: 1,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  version?: number;
 }

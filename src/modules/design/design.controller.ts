@@ -16,6 +16,7 @@ import { GenerateThumbnailDto } from './dto/generate-thumbnail.dto';
 import { UpdateDesignAssociationDto } from './dto/update-design-association.dto';
 import { UpdateDesignMetadataDto } from './dto/update-design-metadata.dto';
 import { UpdateDesignProjectDto } from './dto/update-design-project.dto';
+import { CreateDesignProjectVersionDto } from './dto/create-design-project-version.dto';
 
 @Controller('design')
 @ApiTags('Design/CRUD')
@@ -303,5 +304,55 @@ export class DesignController {
     const { teamId, userId } = req;
     const result = await this.designProjectService.importProject(importData, teamId, userId);
     return new SuccessResponse({ data: result });
+  }
+
+  @Get('project/:projectId/versions')
+  @ApiOperation({
+    summary: '获取设计项目的所有版本',
+    description: '获取设计项目的所有版本历史',
+  })
+  async getProjectVersions(@Param('projectId') projectId: string) {
+    const versions = await this.designProjectService.getProjectVersions(projectId);
+    return new SuccessResponse({ data: versions });
+  }
+
+  @Post('project/:projectId/versions')
+  @ApiOperation({
+    summary: '创建设计项目新版本',
+    description: '基于当前版本创建新版本，会复制所有画板内容',
+  })
+  async createProjectVersion(
+    @Req() req: IRequest,
+    @Param('projectId') projectId: string,
+    @Body() body: CreateDesignProjectVersionDto,
+  ) {
+    const { teamId, userId } = req;
+    const result = await this.designProjectService.createProjectVersion(
+      projectId,
+      body.currentVersion,
+      teamId,
+      userId,
+      {
+        displayName: body.displayName,
+        description: body.description,
+        iconUrl: body.iconUrl,
+      },
+    );
+    return new SuccessResponse({ data: result });
+  }
+
+  @Get('project/:projectId/version/:version')
+  @ApiOperation({
+    summary: '获取设计项目的指定版本',
+    description: '根据 projectId 和版本号获取设计项目',
+  })
+  async getProjectByVersion(@Param('projectId') projectId: string, @Param('version') version: string) {
+    const versionNum = parseInt(version, 10);
+    const project = await this.designProjectService.findLatestByProjectId(projectId);
+    if (!project) {
+      throw new NotFoundException('设计项目不存在');
+    }
+    const versionProject = await this.designProjectService.findById(project.id);
+    return new SuccessResponse({ data: versionProject });
   }
 }

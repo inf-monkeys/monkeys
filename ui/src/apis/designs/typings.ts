@@ -4,6 +4,8 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 
 export interface IDesignProject {
   id: string;
+  projectId: string;
+  version: number;
   displayName: string | Record<string, string>;
   description?: string | Record<string, string>;
   createdTimestamp: number;

@@ -108,3 +108,30 @@ export const importDesignProject = (importData: any) =>
     method: 'POST',
     simple: true,
   })('/api/design/project/import', importData);
+
+// 版本管理相关 API
+export const useDesignProjectVersions = (projectId?: string | null) =>
+  useSWR<IAssetItem<IDesignProject>[] | undefined>(
+    projectId ? `/api/design/project/${projectId}/versions` : null,
+    vinesFetcher({ wrapper: (data) => data?.reverse() }),
+  );
+
+export const createDesignProjectVersion = (
+  projectId: string,
+  data: {
+    currentVersion: number;
+    displayName?: string;
+    description?: string;
+    iconUrl?: string;
+  },
+) =>
+  vinesFetcher<IAssetItem<IDesignProject>>({
+    method: 'POST',
+    simple: true,
+  })(`/api/design/project/${projectId}/versions`, data);
+
+export const getDesignProjectByVersion = (projectId: string, version: number) =>
+  vinesFetcher<IAssetItem<IDesignProject>>({
+    method: 'GET',
+    simple: true,
+  })(`/api/design/project/${projectId}/version/${version}`);
