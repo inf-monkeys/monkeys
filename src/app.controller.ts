@@ -181,6 +181,7 @@ export class AppController {
         serverUrl: config.server.appUrl,
       },
       module,
+      behavior: config.server.behavior,
     };
     return new SuccessResponse({
       data,

@@ -20,3 +20,23 @@ export const useWorkbenchFormInputsCacheStore = create<IWorkbenchFormInputsCache
 export const useWorkbenchCacheVal = (key: string) => useWorkbenchFormInputsCacheStore((store) => store.data[key]);
 export const useSetWorkbenchCacheVal = () => useWorkbenchFormInputsCacheStore((store) => store.setKeyVal);
 export const useResetWorkbenchCacheVal = () => useWorkbenchFormInputsCacheStore((store) => store.reset);
+
+export const clearWorkbenchFormInputsCache = () => {
+  const persistApi = (
+    useWorkbenchFormInputsCacheStore as typeof useWorkbenchFormInputsCacheStore & {
+      persist?: {
+        clearStorage: () => Promise<void> | void;
+        rehydrate?: () => Promise<void>;
+      };
+    }
+  ).persist;
+
+  try {
+    persistApi?.clearStorage?.();
+  } catch (error) {
+    console.error('Failed to clear persisted workflow form storage:', error);
+  } finally {
+    useWorkbenchFormInputsCacheStore.setState({ data: {} });
+    void persistApi?.rehydrate?.();
+  }
+};

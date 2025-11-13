@@ -12,6 +12,7 @@ import {
   CustomizationUploader,
   CustomizationWorkbench,
   ExtraLanguageURL,
+  SystemConfigBehavior,
   WorkflowPreviewExecutionGrid,
 } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
@@ -99,4 +100,5 @@ export interface ISystemConfig {
     [name: string]: string;
   };
   module: OemModule[] | '*';
+  behavior: SystemConfigBehavior;
 }

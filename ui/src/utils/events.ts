@@ -34,7 +34,7 @@ export type FlowEventType =
 
 export type DesignBoardEventType = 'design-board-export' | 'design-board-save';
 
-export type FromEventType = 'form-fill-data-by-image-url';
+export type FromEventType = 'form-fill-data-by-image-url' | 'form-clear-workflow-input-cache';
 
 export type ViewEventType = 'view-toggle-active-view-by-workflow-id';
 

@@ -26,8 +26,8 @@ import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
-import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
+import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import {
   useResetWorkbenchCacheVal,
   useSetWorkbenchCacheVal,
@@ -345,6 +345,25 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
       VinesEvent.off('form-fill-data-by-image-url', handleFillDataByImageUrl);
     };
   }, []);
+
+  useEffect(() => {
+    const handleClearFormCache = () => {
+      if (inImageDetailRoute) return;
+      useFormResetRef.current = true;
+      if (workflowId) {
+        resetWorkbenchCacheVal(workflowId);
+      }
+      form.reset(latestValues.current);
+      setInitValues({});
+      setHasRestoreValues(false);
+      useFormResetRef.current = false;
+    };
+
+    VinesEvent.on('form-clear-workflow-input-cache', handleClearFormCache);
+    return () => {
+      VinesEvent.off('form-clear-workflow-input-cache', handleClearFormCache);
+    };
+  }, [form, workflowId, resetWorkbenchCacheVal, inImageDetailRoute, latestValues, setInitValues, setHasRestoreValues]);
 
   const { foldInputs, defInputs } = useMemo(
     () =>

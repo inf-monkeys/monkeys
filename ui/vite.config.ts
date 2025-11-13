@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { execSync } from 'node:child_process';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
@@ -12,48 +13,61 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 dotenv.config();
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    legacy({
-      targets: ['defaults and fully supports es6-module', 'maintained node versions', 'not IE 11'],
-      modernPolyfills: ['es.array.at'],
-    }),
-    mdx({
-      // See https://mdxjs.com/advanced/plugins
-      remarkPlugins: [
-        // E.g. `remark-frontmatter`
-      ],
-      rehypePlugins: [],
-    }),
-    tsconfigPaths(),
-    react(),
-    svgr(),
-    TanStackRouterVite({
-      routesDirectory: resolve(__dirname, './src/pages'),
-    }),
-  ],
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, './src'),
-    },
-  },
-  server: {
-    port: process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : 2048,
-    host: '::',
-    proxy: {
-      '/api': {
-        target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',
-        changeOrigin: true,
-        secure: false,
-      },
-      '/v1': {
-        target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',
-        changeOrigin: true,
-        secure: false,
+export default defineConfig(() => {
+  let commitHash = 'dev';
+  try {
+    commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+    console.log('commitHash', commitHash);
+  } catch {
+    // ignore when git is unavailable
+  }
+
+  return {
+    plugins: [
+      legacy({
+        targets: ['defaults and fully supports es6-module', 'maintained node versions', 'not IE 11'],
+        modernPolyfills: ['es.array.at'],
+      }),
+      mdx({
+        // See https://mdxjs.com/advanced/plugins
+        remarkPlugins: [
+          // E.g. `remark-frontmatter`
+        ],
+        rehypePlugins: [],
+      }),
+      tsconfigPaths(),
+      react(),
+      svgr(),
+      TanStackRouterVite({
+        routesDirectory: resolve(__dirname, './src/pages'),
+      }),
+    ],
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, './src'),
       },
     },
-  },
-  build: {
-    target: 'es2015',
-  },
+    server: {
+      port: process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : 2048,
+      host: '::',
+      proxy: {
+        '/api': {
+          target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/v1': {
+          target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
+    build: {
+      target: 'es2015',
+    },
+    define: {
+      __APP_VERSION__: JSON.stringify(commitHash),
+    },
+  };
 });

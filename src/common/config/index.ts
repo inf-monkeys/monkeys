@@ -151,6 +151,10 @@ export type CustomIcons = {
   empty?: CustomIcon;
 };
 
+export type SystemConfigBehavior = {
+  clearWorkflowFormStorageAfterUpdate: boolean;
+};
+
 export interface ServerConfig {
   port: number;
   appId: string;
@@ -232,6 +236,7 @@ export interface ServerConfig {
     backendBaseUrl?: string;
     initTeam?: string;
   };
+  behavior: SystemConfigBehavior;
 }
 
 export enum RedisMode {
@@ -748,6 +753,9 @@ export const config: Config = {
       token: readConfig('server.webhook.token', undefined),
       backendBaseUrl: readConfig('server.webhook.backendBaseUrl', undefined),
       initTeam: readConfig('server.webhook.initTeam', undefined),
+    },
+    behavior: {
+      clearWorkflowFormStorageAfterUpdate: readConfig('server.behavior.clearWorkflowFormStorageAfterUpdate', false),
     },
   },
   conductor: {

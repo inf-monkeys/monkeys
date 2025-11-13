@@ -32,6 +32,8 @@ import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
 import i18n from '@/i18n';
 import { initializeGlobalViewStore } from '@/store/useGlobalViewStore';
+import { clearWorkbenchFormInputsCache } from '@/store/workbenchFormInputsCacheStore';
+import { APP_VERSION, APP_VERSION_STORAGE_KEY } from '@/utils/app-version.ts';
 import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {
@@ -129,6 +131,26 @@ const RootComponent: React.FC = () => {
   }, [oem, i18n.language]);
 
   const designNewTabOpenBoard = get(oem, 'theme.designProjects.newTabOpenBoard', true);
+
+  const hasHandledVersionRef = useRef(false);
+  useEffect(() => {
+    console.log('前端版本', APP_VERSION);
+
+    if (!oem || hasHandledVersionRef.current) return;
+    hasHandledVersionRef.current = true;
+
+    if (typeof window === 'undefined') return;
+
+    const storedVersion = window.localStorage.getItem(APP_VERSION_STORAGE_KEY);
+    const shouldClear = oem.behavior?.clearWorkflowFormStorageAfterUpdate;
+
+    if (shouldClear && storedVersion !== APP_VERSION) {
+      clearWorkbenchFormInputsCache();
+      VinesEvent.emit('form-clear-workflow-input-cache');
+    }
+
+    window.localStorage.setItem(APP_VERSION_STORAGE_KEY, APP_VERSION);
+  }, [oem]);
 
   return (
     <>

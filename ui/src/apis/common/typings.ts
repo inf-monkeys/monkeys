@@ -146,6 +146,10 @@ export type CustomIcons = {
   empty?: CustomIcon;
 };
 
+export type SystemConfigBehavior = {
+  clearWorkflowFormStorageAfterUpdate: boolean;
+};
+
 export interface ISystemConfig {
   theme: {
     id?: string;
@@ -229,4 +233,5 @@ export interface ISystemConfig {
     [name: string]: string;
   };
   module: SystemModule[] | '*';
+  behavior: SystemConfigBehavior;
 }
