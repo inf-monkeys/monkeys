@@ -124,6 +124,10 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
 
   // 定义工具栏中要显示的工具列表 - 使用正确的工具ID
   const oneOnOne = (oem as any)?.theme?.designProjects?.oneOnOne === true;
+  const showRealtimeDrawing = (oem as any)?.theme?.designProjects?.showRealtimeDrawing === true;
+  const showWorkflow = (oem as any)?.theme?.designProjects?.showWorkflow === true;
+  const showAgent = (oem as any)?.theme?.designProjects?.showAgent === true;
+
   // 基础工具栏工具（不包含 workflow 相关工具）
   const toolbarTools = [
     { id: 'select', label: '选择', icon: 'tool-pointer' },
@@ -439,31 +443,34 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
           })}
         </div>
 
-        {/* Draw Fast 工具栏（独立） */}
-        <div className="custom-toolbar" style={{ marginLeft: 20 }}>
-          {drawfastTools.map((tool) => {
-            const isActive = currentToolId === tool.id;
-            return (
-              <button
-                key={tool.id}
-                className={`tool-button ${isActive ? 'selected' : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  editor.setCurrentTool(tool.id);
-                  setCurrentToolId(tool.id);
-                }}
-                title={tool.label}
-                style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
-              >
-                <TldrawUiIcon icon={tool.icon} label={tool.label || tool.id} />
-              </button>
-            );
-          })}
-        </div>
+        {/* Draw Fast 工具栏（独立） - 根据 OEM 配置控制显示 */}
+        {showRealtimeDrawing && (
+          <div className="custom-toolbar" style={{ marginLeft: 20 }}>
+            {drawfastTools.map((tool) => {
+              const isActive = currentToolId === tool.id;
+              return (
+                <button
+                  key={tool.id}
+                  className={`tool-button ${isActive ? 'selected' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    editor.setCurrentTool(tool.id);
+                    setCurrentToolId(tool.id);
+                  }}
+                  title={tool.label}
+                  style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                >
+                  <TldrawUiIcon icon={tool.icon} label={tool.label || tool.id} />
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-        {/* Workflow 工具栏（独立） */}
-        <div className="custom-toolbar" style={{ marginLeft: 20 }}>
+        {/* Workflow 工具栏（独立） - 根据 OEM 配置控制显示 */}
+        {showWorkflow && (
+          <div className="custom-toolbar" style={{ marginLeft: 20 }}>
           {workflowTools.map((tool) => {
             if (tool.id === 'instruction') {
               const activeId = instructionVariant;
@@ -891,25 +898,28 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
 
             return null;
           })}
-        </div>
-
-        {/* Agent toggle button */}
-        <div className="custom-toolbar" style={{ marginLeft: 20 }}>
-          <div className="tool-group">
-            <button
-              className="tool-button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                window.dispatchEvent(new CustomEvent('vines:toggle-agent-embed'));
-              }}
-              title="Agent"
-              style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
-            >
-              <VinesIcon size="xs">lucide:bot</VinesIcon>
-            </button>
           </div>
-        </div>
+        )}
+
+        {/* Agent toggle button - 根据 OEM 配置控制显示 */}
+        {showAgent && (
+          <div className="custom-toolbar" style={{ marginLeft: 20 }}>
+            <div className="tool-group">
+              <button
+                className="tool-button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent('vines:toggle-agent-embed'));
+                }}
+                title="Agent"
+                style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+              >
+                <VinesIcon size="xs">lucide:bot</VinesIcon>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

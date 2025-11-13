@@ -117,6 +117,9 @@ export type CustomizationDesignProjects = {
   showContextMenu: boolean;
   showPageAndLayerSidebar?: boolean; // 是否显示左侧 页面+图层 sidebar，默认 false
   showMiniToolsToolbar?: boolean; // 是否显示小工具工具栏，默认 false
+  showRealtimeDrawing?: boolean; // 是否显示实时绘画工具栏，默认 false
+  showWorkflow?: boolean; // 是否显示 Workflow 工具栏，默认 false
+  showAgent?: boolean; // 是否显示 Agent 按钮，默认 false
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;

@@ -122,6 +122,9 @@ export type CustomizationDesignProjects = {
   showBoardOperationSidebar?: boolean; // 是否显示画板操作侧边栏（宽/高、导出、保存）
   showMiniToolsToolbar?: boolean; // 是否显示小工具工具栏
   showRightSidebar?: boolean; // 是否显示右侧边栏
+  showRealtimeDrawing?: boolean; // 是否显示实时绘画工具栏
+  showWorkflow?: boolean; // 是否显示 Workflow 工具栏
+  showAgent?: boolean; // 是否显示 Agent 按钮
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
@@ -725,6 +728,9 @@ export const config: Config = {
         showActionsMenu: readConfig('server.customization.designProjects.showActionsMenu', true),
         showMiniToolsToolbar: readConfig('server.customization.designProjects.showMiniToolsToolbar', false),
         showRightSidebar: readConfig('server.customization.designProjects.showRightSidebar', false),
+        showRealtimeDrawing: readConfig('server.customization.designProjects.showRealtimeDrawing', false),
+        showWorkflow: readConfig('server.customization.designProjects.showWorkflow', false),
+        showAgent: readConfig('server.customization.designProjects.showAgent', false),
       },
       marketplace: {
         presetAppSortFileUrl: readConfig('server.customization.marketplace.presetAppSortFileUrl', undefined),
