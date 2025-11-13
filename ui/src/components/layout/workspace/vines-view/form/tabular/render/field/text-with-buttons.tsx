@@ -33,6 +33,119 @@ interface TextWithButtonsProps {
   knowledgeGraphButtonText?: string;
 }
 
+interface Level1TabsScrollerProps {
+  level1Keys: string[];
+  activeL1: string | null;
+  open: boolean;
+}
+
+const Level1TabsScroller: React.FC<Level1TabsScrollerProps> = ({ level1Keys, activeL1, open }) => {
+  const listRef = React.useRef<HTMLDivElement | null>(null);
+  const [canLeft, setCanLeft] = React.useState(false);
+  const [canRight, setCanRight] = React.useState(false);
+  const EPS = 2;
+
+  const updateArrows = React.useCallback(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const { scrollLeft, clientWidth, scrollWidth } = el;
+    setCanLeft(scrollLeft > EPS);
+    setCanRight(scrollLeft + clientWidth < scrollWidth - EPS);
+  }, []);
+
+  React.useEffect(() => {
+    updateArrows();
+    const el = listRef.current;
+    if (!el) return;
+    const onScroll = () => updateArrows();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    const ro = new ResizeObserver(() => updateArrows());
+    ro.observe(el);
+    return () => {
+      el.removeEventListener('scroll', onScroll as any);
+      ro.disconnect();
+    };
+  }, [updateArrows]);
+
+  React.useEffect(() => {
+    const id = requestAnimationFrame(() => updateArrows());
+    const tid = window.setTimeout(() => updateArrows(), 0);
+    return () => {
+      cancelAnimationFrame(id);
+      clearTimeout(tid);
+    };
+  }, [updateArrows, open, level1Keys]);
+
+  const scrollByViewport = React.useCallback(
+    (dir: number) => {
+      const el = listRef.current;
+      if (!el) return;
+      const delta = Math.max(80, el.clientWidth - 48);
+      el.scrollBy({ left: dir * delta, behavior: 'smooth' });
+      requestAnimationFrame(updateArrows);
+      window.setTimeout(updateArrows, 200);
+    },
+    [updateArrows],
+  );
+
+  React.useEffect(() => {
+    if (!activeL1 || !level1Keys.length) return;
+    const el = listRef.current;
+    if (!el) return;
+    const idx = level1Keys.indexOf(activeL1);
+    if (idx < 0) return;
+    const target = el.querySelector<HTMLButtonElement>(`[data-l1-idx="${idx}"]`);
+    target?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+  }, [activeL1, level1Keys]);
+
+  return (
+    <div className="mb-2 flex w-full min-w-0 items-center gap-2">
+      <Button
+        size="xs"
+        variant="borderless"
+        className="opacity-70 hover:opacity-100"
+        disabled={!canLeft}
+        onClick={() => scrollByViewport(-1)}
+        icon={<ArrowLeft className="h-4 w-4" />}
+      />
+      <div
+        ref={listRef}
+        className="min-w-0 flex-1 overflow-x-auto overflow-y-hidden"
+        style={{
+          scrollBehavior: 'smooth',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+        data-hide-x-scrollbar
+      >
+        <TabsList className="inline-flex w-max flex-nowrap gap-2 whitespace-nowrap">
+          {level1Keys.map((k, i) => (
+            <TabsTrigger key={k} value={k} data-l1-idx={i} className="!w-auto flex-shrink-0">
+              {k}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+                              /* Chrome / Safari */
+                              [data-hide-x-scrollbar]::-webkit-scrollbar { display: none; height: 0; }
+                            `,
+          }}
+        />
+      </div>
+      <Button
+        size="xs"
+        variant="borderless"
+        className="opacity-70 hover:opacity-100"
+        disabled={!canRight}
+        onClick={() => scrollByViewport(1)}
+        icon={<ArrowRight className="h-4 w-4" />}
+      />
+    </div>
+  );
+};
+
 export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
   value,
   onChange,
@@ -306,7 +419,9 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
     if (isRecording) {
       try {
         mediaRecorderRef.current?.stop();
-      } catch {}
+      } catch (error) {
+        void error;
+      }
       setIsRecording(false);
       return;
     }
@@ -558,220 +673,60 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
               <DialogTitle>{t('workspace.pre-view.actuator.execution-form.knowledge-graph.title')}</DialogTitle>
             </DialogHeader>
             <TooltipProvider>
-              <div className="min-w-0 w-full">
-              <Tabs value={activeL1 ?? undefined} onValueChange={setActiveL1}>
-                {/** 上方一级分类：改为可视区域宽度翻页，避免“按钮长度”造成溢出 */}
-                {(() => {
-                  // 滚动容器设在外层包装，避免 TabsList 自身的 inline-flex 影响宽度约束
-                  const listRef = React.useRef<HTMLDivElement | null>(null);
-                  const [canLeft, setCanLeft] = React.useState(false);
-                  const [canRight, setCanRight] = React.useState(false);
-                  const EPS = 2; // 容差，避免由于取整/动画导致的 0 边界误判
-                  const updateArrows = React.useCallback(() => {
-                    const el = listRef.current;
-                    if (!el) return;
-                    const { scrollLeft, clientWidth, scrollWidth } = el;
-                    setCanLeft(scrollLeft > EPS);
-                    setCanRight(scrollLeft + clientWidth < scrollWidth - EPS);
-                  }, []);
-                  React.useEffect(() => {
-                    updateArrows();
-                    const el = listRef.current;
-                    if (!el) return;
-                    const onScroll = () => updateArrows();
-                    el.addEventListener('scroll', onScroll, { passive: true });
-                    const ro = new ResizeObserver(() => updateArrows());
-                    ro.observe(el);
-                    return () => {
-                      el.removeEventListener('scroll', onScroll as any);
-                      ro.disconnect();
-                    };
-                  }, [updateArrows]);
-                  // 重新打开弹窗或数据变更后，等待一帧再更新箭头状态，避免初始测量为 0
-                  React.useEffect(() => {
-                    const id = requestAnimationFrame(() => updateArrows());
-                    const tid = setTimeout(() => updateArrows(), 0);
-                    return () => {
-                      cancelAnimationFrame(id);
-                      clearTimeout(tid);
-                    };
-                  }, [updateArrows, open, level1Keys.length]);
-                  const scrollByViewport = (dir: number) => {
-                    const el = listRef.current;
-                    if (!el) return;
-                    const delta = Math.max(80, el.clientWidth - 48); // 近似“翻一页”，留出边距
-                    el.scrollBy({ left: dir * delta, behavior: 'smooth' });
-                    // 平滑滚动过程可能导致滚动事件滞后，这里补一帧刷新
-                    requestAnimationFrame(updateArrows);
-                    setTimeout(updateArrows, 200);
-                  };
-                  // 激活项变化时，自动滚动到可视范围
-                  React.useEffect(() => {
-                    if (!activeL1) return;
-                    const el = listRef.current;
-                    if (!el) return;
-                    const idx = level1Keys.indexOf(activeL1);
-                    if (idx < 0) return;
-                    const target = el.querySelector<HTMLButtonElement>(`[data-l1-idx="${idx}"]`);
-                    target?.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
-                  }, [activeL1, level1Keys]);
-                  // 没有激活时默认选中第一个
-                  React.useEffect(() => {
-                    if (!activeL1 && level1Keys.length) setActiveL1(level1Keys[0]);
-                  }, [activeL1, level1Keys]);
-                  return (
-                    <div className="mb-2 flex w-full min-w-0 items-center gap-2">
-                      <Button
-                        size="xs"
-                        variant="borderless"
-                        className="opacity-70 hover:opacity-100"
-                        disabled={!canLeft}
-                        onClick={() => scrollByViewport(-1)}
-                        icon={<ArrowLeft className="h-4 w-4" />}
-                      />
-                      <div
-                        ref={listRef}
-                        className="min-w-0 flex-1 overflow-x-auto overflow-y-hidden"
-                        style={{
-                          scrollBehavior: 'smooth',
-                          // 隐藏不同浏览器的横向滚动条，仅保留程序控制
-                          scrollbarWidth: 'none',
-                          msOverflowStyle: 'none',
-                        }}
-                        data-hide-x-scrollbar
-                      >
-                        <TabsList className="inline-flex w-max flex-nowrap gap-2 whitespace-nowrap">
-                          {level1Keys.map((k, i) => (
-                            <TabsTrigger key={k} value={k} data-l1-idx={i} className="flex-shrink-0 !w-auto">
-                              {k}
-                            </TabsTrigger>
-                          ))}
-                        </TabsList>
-                        <style
-                          dangerouslySetInnerHTML={{
-                            __html: `
-                              /* Chrome / Safari */
-                              [data-hide-x-scrollbar]::-webkit-scrollbar { display: none; height: 0; }
-                            `,
-                          }}
-                        />
-                      </div>
-                      <Button
-                        size="xs"
-                        variant="borderless"
-                        className="opacity-70 hover:opacity-100"
-                        disabled={!canRight}
-                        onClick={() => scrollByViewport(1)}
-                        icon={<ArrowRight className="h-4 w-4" />}
-                      />
-                    </div>
-                  );
-                })()}
-                {level1Keys.map((k2) => {
-                  const l2Dict = normalizedDict[k2] || {};
-                  const l2Keys = Object.keys(l2Dict);
-                  return (
-                    <TabsContent key={k2} value={k2}>
-                      <div className="max-h-[60vh] overflow-auto pr-1">
-                        {l2Keys.map((l2) => {
-                          const l3Dict = l2Dict[l2];
-                          const l3Keys = Object.keys(l3Dict);
-                          const hideL2Header = l2Keys.length === 1 && l2Keys[0] === '默认';
-                          const currentValue = valueStr.trim();
+              <div className="w-full min-w-0">
+                <Tabs value={activeL1 ?? undefined} onValueChange={setActiveL1}>
+                  {/** 上方一级分类：改为可视区域宽度翻页，避免“按钮长度”造成溢出 */}
+                  <Level1TabsScroller level1Keys={level1Keys} activeL1={activeL1} open={open} />
+                  {level1Keys.map((k2) => {
+                    const l2Dict = normalizedDict[k2] || {};
+                    const l2Keys = Object.keys(l2Dict);
+                    return (
+                      <TabsContent key={k2} value={k2}>
+                        <div className="max-h-[60vh] overflow-auto pr-1">
+                          {l2Keys.map((l2) => {
+                            const l3Dict = l2Dict[l2];
+                            const l3Keys = Object.keys(l3Dict);
+                            const hideL2Header = l2Keys.length === 1 && l2Keys[0] === '默认';
+                            const currentValue = valueStr.trim();
 
-                          // 分离有 level4 和没有 level4 的 l3
-                          const l3WithL4: string[] = [];
-                          const l3WithoutL4: string[] = [];
-                          l3Keys.forEach((l3) => {
-                            const items = l3Dict[l3];
-                            const hasL4 = (items || []).some((it) => it.level4);
-                            if (hasL4) {
-                              l3WithL4.push(l3);
-                            } else {
-                              l3WithoutL4.push(l3);
-                            }
-                          });
+                            // 分离有 level4 和没有 level4 的 l3
+                            const l3WithL4: string[] = [];
+                            const l3WithoutL4: string[] = [];
+                            l3Keys.forEach((l3) => {
+                              const items = l3Dict[l3];
+                              const hasL4 = (items || []).some((it) => it.level4);
+                              if (hasL4) {
+                                l3WithL4.push(l3);
+                              } else {
+                                l3WithoutL4.push(l3);
+                              }
+                            });
 
-                          return (
-                            <div key={l2} className="mb-4">
-                              {!hideL2Header && (
-                                <div className="mb-2 text-base font-medium text-muted-foreground">{l2}</div>
-                              )}
+                            return (
+                              <div key={l2} className="mb-4">
+                                {!hideL2Header && (
+                                  <div className="mb-2 text-base font-medium text-muted-foreground">{l2}</div>
+                                )}
 
-                              {/* 先渲染所有没有 level4 的 L3 按钮在同一排 */}
-                              {l3WithoutL4.length > 0 && (
-                                <div className="mb-3">
-                                  <div className="flex flex-wrap gap-2">
-                                    {l3WithoutL4.map((l3) => {
-                                      const k = keyOf(k2, l2, l3, '');
-                                      const isSelected = currentValue.includes(l3);
-
-                                      // 获取 description
-                                      const items = l3Dict[l3];
-                                      const item = (items || []).find((it) => !it.level4);
-                                      const description = item?.description;
-
-                                      const toggleButton = (
-                                        <Toggle
-                                          key={k}
-                                          pressed={isSelected}
-                                          onPressedChange={() => {
-                                            applyFromSelected(l3);
-                                          }}
-                                          className={cn(
-                                            'rounded-full border px-3 py-1 text-sm',
-                                            isSelected
-                                              ? 'border-vines-500 bg-vines-500 text-white'
-                                              : 'bg-transparent hover:bg-muted',
-                                          )}
-                                        >
-                                          {l3}
-                                        </Toggle>
-                                      );
-
-                                      // 如果有描述，则用 Tooltip 包裹
-                                      if (description) {
-                                        return (
-                                          <Tooltip key={k}>
-                                            <TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
-                                            <TooltipContent className="max-w-xs">
-                                              <p className="text-xs">{description}</p>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        );
-                                      }
-
-                                      return toggleButton;
-                                    })}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* 再渲染有 level4 的 L3 */}
-                              {l3WithL4.map((l3) => {
-                                const items = l3Dict[l3];
-                                const hideL3Header = l3Keys.length === 1 && l3Keys[0] === '默认';
-
-                                const itemsWithL4 = (items || []).filter((it) => it.level4);
-
-                                return (
-                                  <div key={l3} className="mb-3">
-                                    {/* 显示 level4 的标题 */}
-                                    {!hideL3Header && (
-                                      <div className="mb-2 text-[13px] text-muted-foreground">{l3}</div>
-                                    )}
+                                {/* 先渲染所有没有 level4 的 L3 按钮在同一排 */}
+                                {l3WithoutL4.length > 0 && (
+                                  <div className="mb-3">
                                     <div className="flex flex-wrap gap-2">
-                                      {/* 显示 level4 按钮 */}
-                                      {itemsWithL4.map((it, idx) => {
-                                        const displayLabel = it.level4 || '';
-                                        const k = keyOf(k2, l2, it.label, it.level4);
-                                        const isSelected = currentValue.includes(displayLabel);
+                                      {l3WithoutL4.map((l3) => {
+                                        const k = keyOf(k2, l2, l3, '');
+                                        const isSelected = currentValue.includes(l3);
+
+                                        // 获取 description
+                                        const items = l3Dict[l3];
+                                        const item = (items || []).find((it) => !it.level4);
+                                        const description = item?.description;
+
                                         const toggleButton = (
                                           <Toggle
                                             key={k}
                                             pressed={isSelected}
                                             onPressedChange={() => {
-                                              applyFromSelected(displayLabel);
+                                              applyFromSelected(l3);
                                             }}
                                             className={cn(
                                               'rounded-full border px-3 py-1 text-sm',
@@ -780,17 +735,17 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                                                 : 'bg-transparent hover:bg-muted',
                                             )}
                                           >
-                                            {displayLabel}
+                                            {l3}
                                           </Toggle>
                                         );
 
                                         // 如果有描述，则用 Tooltip 包裹
-                                        if (it.description) {
+                                        if (description) {
                                           return (
                                             <Tooltip key={k}>
                                               <TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
                                               <TooltipContent className="max-w-xs">
-                                                <p className="text-xs">{it.description}</p>
+                                                <p className="text-xs">{description}</p>
                                               </TooltipContent>
                                             </Tooltip>
                                           );
@@ -800,16 +755,71 @@ export const TextWithButtons: React.FC<TextWithButtonsProps> = ({
                                       })}
                                     </div>
                                   </div>
-                                );
-                              })}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </TabsContent>
-                  );
-                })}
-              </Tabs>
+                                )}
+
+                                {/* 再渲染有 level4 的 L3 */}
+                                {l3WithL4.map((l3) => {
+                                  const items = l3Dict[l3];
+                                  const hideL3Header = l3Keys.length === 1 && l3Keys[0] === '默认';
+
+                                  const itemsWithL4 = (items || []).filter((it) => it.level4);
+
+                                  return (
+                                    <div key={l3} className="mb-3">
+                                      {/* 显示 level4 的标题 */}
+                                      {!hideL3Header && (
+                                        <div className="mb-2 text-[13px] text-muted-foreground">{l3}</div>
+                                      )}
+                                      <div className="flex flex-wrap gap-2">
+                                        {/* 显示 level4 按钮 */}
+                                        {itemsWithL4.map((it, idx) => {
+                                          const displayLabel = it.level4 || '';
+                                          const k = keyOf(k2, l2, it.label, it.level4);
+                                          const isSelected = currentValue.includes(displayLabel);
+                                          const toggleButton = (
+                                            <Toggle
+                                              key={k}
+                                              pressed={isSelected}
+                                              onPressedChange={() => {
+                                                applyFromSelected(displayLabel);
+                                              }}
+                                              className={cn(
+                                                'rounded-full border px-3 py-1 text-sm',
+                                                isSelected
+                                                  ? 'border-vines-500 bg-vines-500 text-white'
+                                                  : 'bg-transparent hover:bg-muted',
+                                              )}
+                                            >
+                                              {displayLabel}
+                                            </Toggle>
+                                          );
+
+                                          // 如果有描述，则用 Tooltip 包裹
+                                          if (it.description) {
+                                            return (
+                                              <Tooltip key={k}>
+                                                <TooltipTrigger asChild>{toggleButton}</TooltipTrigger>
+                                                <TooltipContent className="max-w-xs">
+                                                  <p className="text-xs">{it.description}</p>
+                                                </TooltipContent>
+                                              </Tooltip>
+                                            );
+                                          }
+
+                                          return toggleButton;
+                                        })}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </TabsContent>
+                    );
+                  })}
+                </Tabs>
               </div>
             </TooltipProvider>
           </DialogContent>
