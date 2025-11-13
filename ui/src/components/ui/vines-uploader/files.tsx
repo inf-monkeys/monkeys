@@ -46,6 +46,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
   const { data: oem } = useSystemConfig();
 
   const isUniImagePreview = oem?.theme.uniImagePreview ?? false;
+  const showStatusText = oem?.theme.uploader.statusText ?? true;
 
   return (
     <motion.div
@@ -105,15 +106,17 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                     ) : (
                       <Loader2 size={13} className="animate-spin" />
                     )}
-                    <p className="text-xs leading-none">
-                      {isError
-                        ? t('components.ui.updater.status.upload-failed')
-                        : isUploadComplete
-                          ? t('components.ui.updater.status.upload-success')
-                          : uploadStarted
-                            ? t('components.ui.updater.status.uploading', { percentage })
-                            : t('components.ui.updater.status.wait')}
-                    </p>
+                    {showStatusText && (
+                      <p className="text-xs leading-none">
+                        {isError
+                          ? t('components.ui.updater.status.upload-failed')
+                          : isUploadComplete
+                            ? t('components.ui.updater.status.upload-success')
+                            : uploadStarted
+                              ? t('components.ui.updater.status.uploading', { percentage })
+                              : t('components.ui.updater.status.wait')}
+                      </p>
+                    )}
                     {(meta.isRapidUploaded as boolean) && (
                       <Tooltip>
                         <TooltipTrigger asChild>

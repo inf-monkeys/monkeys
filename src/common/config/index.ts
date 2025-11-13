@@ -94,6 +94,7 @@ export type CustomizationForm = {
 export type CustomizationUploader = {
   orientation: 'vertical' | 'horizontal';
   pasteButton: boolean;
+  statusText: boolean;
 };
 
 export type CustomizationFormView = {
@@ -713,6 +714,7 @@ export const config: Config = {
       uploader: {
         orientation: readConfig('server.customization.uploader.orientation', 'horizontal'),
         pasteButton: readConfig('server.customization.uploader.pasteButton', true),
+        statusText: readConfig('server.customization.uploader.statusText', true),
       },
       designProjects: {
         oneOnOne: readConfig('server.customization.designProjects.oneOnOne', true),
