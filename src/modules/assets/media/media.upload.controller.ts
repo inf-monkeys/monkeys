@@ -2,12 +2,26 @@ import { config } from '@/common/config';
 import { SuccessResponse } from '@/common/response';
 import { S3Helpers } from '@/common/s3';
 import { getMimeType } from '@/common/utils/file';
-import { Body, Controller, Get, Head, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Head, NotFoundException, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { nanoid } from 'ai';
 import { Response } from 'express';
 import { Readable } from 'stream';
 import { MediaFileService } from './media.service';
+
+const parseBoolean = (value?: string) => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (['true', '1', 'yes', 'y'].includes(normalized)) {
+    return true;
+  }
+  if (['false', '0', 'no', 'n'].includes(normalized)) {
+    return false;
+  }
+  return undefined;
+};
 
 @Controller('medias')
 export class MediaUploadController {
@@ -84,6 +98,7 @@ export class MediaUploadController {
     @Query('height') height?: string,
     @Query('longestSide') longestSide?: string,
     @Query('mode') mode?: string,
+    @Query('fallback') fallback: string = 'true',
     @Query('forceRegenerate') forceRegenerate?: string,
     @Res({ passthrough: true }) res?: Response,
   ) {
@@ -100,14 +115,25 @@ export class MediaUploadController {
     const parsedLongestSide = parseOptionalNumber(longestSide);
     const shouldForceRegenerate = forceRegenerate === 'true';
 
-    await this.mediaFileService.getThumbnailByUrl({
-      url,
-      mode: mode === 'exact' || mode === 'longest-edge' ? (mode as 'exact' | 'longest-edge') : undefined,
-      width: parsedWidth,
-      height: parsedHeight,
-      longestSide: parsedLongestSide,
-      forceRegenerate: shouldForceRegenerate,
-    });
+    try {
+      await this.mediaFileService.getThumbnailByUrl({
+        url,
+        mode: mode === 'exact' || mode === 'longest-edge' ? (mode as 'exact' | 'longest-edge') : undefined,
+        width: parsedWidth,
+        height: parsedHeight,
+        longestSide: parsedLongestSide,
+        forceRegenerate: shouldForceRegenerate,
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        if (parseBoolean(fallback)) {
+          res.status(200).end();
+          return;
+        }
+        throw error;
+      }
+      throw error;
+    }
 
     if (res) {
       res.status(200).end();
@@ -122,6 +148,7 @@ export class MediaUploadController {
     @Query('height') height?: string,
     @Query('longestSide') longestSide?: string,
     @Query('mode') mode?: string,
+    @Query('fallback') fallback: string = 'true',
     @Query('forceRegenerate') forceRegenerate?: string,
     @Query('redirect') redirect?: string,
     @Res({ passthrough: true }) res?: Response,
@@ -139,45 +166,53 @@ export class MediaUploadController {
     const parsedLongestSide = parseOptionalNumber(longestSide);
     const shouldForceRegenerate = forceRegenerate === 'true';
 
-    const result = await this.mediaFileService.getThumbnailByUrl({
-      url,
-      mode: mode === 'exact' || mode === 'longest-edge' ? (mode as 'exact' | 'longest-edge') : undefined,
-      width: parsedWidth,
-      height: parsedHeight,
-      longestSide: parsedLongestSide,
-      forceRegenerate: shouldForceRegenerate,
-    });
-
-    const parseBoolean = (value?: string) => {
-      if (value === undefined || value === null) {
-        return undefined;
-      }
-      const normalized = value.trim().toLowerCase();
-      if (['true', '1', 'yes', 'y'].includes(normalized)) {
-        return true;
-      }
-      if (['false', '0', 'no', 'n'].includes(normalized)) {
-        return false;
-      }
-      return undefined;
-    };
-
     const redirectPreference = parseBoolean(redirect);
     const shouldRedirect = redirectPreference ?? true;
 
-    if (shouldRedirect && res) {
-      res.redirect(301, result.url);
-      return;
-    }
+    try {
+      const result = await this.mediaFileService.getThumbnailByUrl({
+        url,
+        mode: mode === 'exact' || mode === 'longest-edge' ? (mode as 'exact' | 'longest-edge') : undefined,
+        width: parsedWidth,
+        height: parsedHeight,
+        longestSide: parsedLongestSide,
+        forceRegenerate: shouldForceRegenerate,
+      });
 
-    return new SuccessResponse({
-      data: {
-        url: result.url,
-        etag: result.etag,
-        isNewlyGenerated: result.isNewlyGenerated,
-        bucketId: result.bucketId,
-      },
-    });
+      if (shouldRedirect && res) {
+        res.redirect(301, result.url);
+        return;
+      }
+
+      return new SuccessResponse({
+        data: {
+          url: result.url,
+          etag: result.etag,
+          isNewlyGenerated: result.isNewlyGenerated,
+          bucketId: result.bucketId,
+        },
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        if (parseBoolean(fallback)) {
+          if (shouldRedirect && res) {
+            res.redirect(301, url);
+            return;
+          } else {
+            return new SuccessResponse({
+              data: {
+                url: url,
+                etag: '',
+                isNewlyGenerated: false,
+                bucketId: '',
+              },
+            });
+          }
+        }
+        throw error;
+      }
+      throw error;
+    }
   }
 
   @Post('/s3/file')
