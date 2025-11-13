@@ -22,12 +22,7 @@ export class ThumbnailCoreService {
     }
 
     const targetFormat = ThumbnailGenerator.determineTargetFormat(request.imagePath);
-    const thumbnailPath = ThumbnailGenerator.getThumbnailPath(
-      request.imagePath,
-      size,
-      bucket.thumbnailPrefix || '.thumbnails/',
-      targetFormat.extension,
-    );
+    const thumbnailPath = ThumbnailGenerator.getThumbnailPath(request.imagePath, size, bucket.thumbnailPrefix || '.thumbnails/', targetFormat.extension);
 
     const originalMetadata = await StorageOperations.getMetadata(bucket, request.imagePath);
     if (!originalMetadata) {
@@ -112,12 +107,7 @@ export class ThumbnailCoreService {
 
   private resolveThumbnailSize(request: ThumbnailRequest): ThumbnailSize {
     const sanitizedMode = typeof request.mode === 'string' ? request.mode.toLowerCase() : undefined;
-    const explicitMode =
-      sanitizedMode === 'longest-edge' || sanitizedMode === 'long'
-        ? 'longest-edge'
-        : sanitizedMode === 'exact'
-        ? 'exact'
-        : undefined;
+    const explicitMode = sanitizedMode === 'longest-edge' || sanitizedMode === 'long' ? 'longest-edge' : sanitizedMode === 'exact' ? 'exact' : undefined;
 
     const normalizeDimension = (value?: number) => {
       if (value === undefined || value === null) {
@@ -153,5 +143,3 @@ export class ThumbnailCoreService {
     };
   }
 }
-
-

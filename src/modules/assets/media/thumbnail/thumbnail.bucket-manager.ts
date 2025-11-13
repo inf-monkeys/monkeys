@@ -1,5 +1,5 @@
-import { BucketConfig, BucketResolution } from './thumbnail.types';
 import { extractImagePathFromUrl, ResolvedBucketUrlPattern } from './thumbnail.bucket-url';
+import { BucketConfig, BucketResolution } from './thumbnail.types';
 
 export class BucketManager {
   private readonly buckets = new Map<string, BucketConfig>();
@@ -52,5 +52,3 @@ export class BucketManager {
     return Array.from(this.buckets.values());
   }
 }
-
-

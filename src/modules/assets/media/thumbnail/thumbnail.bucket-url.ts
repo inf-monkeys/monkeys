@@ -9,9 +9,7 @@ export interface ResolvedBucketUrlPattern {
 }
 
 export const getPreferredUrlPattern = (bucket: BucketConfig): ResolvedBucketUrlPattern => {
-  const preferred =
-    bucket.urlPatterns.find((pattern) => pattern.id === bucket.preferredUrlPatternId) ||
-    bucket.urlPatterns.find((pattern) => pattern.preferred);
+  const preferred = bucket.urlPatterns.find((pattern) => pattern.id === bucket.preferredUrlPatternId) || bucket.urlPatterns.find((pattern) => pattern.preferred);
 
   if (!preferred) {
     throw new Error(`Bucket ${bucket.id} 未配置首选 URL 样式`);
@@ -27,8 +25,7 @@ export const getUrlPatternById = (bucket: BucketConfig, patternId: string): Reso
 export const buildPublicUrl = (bucket: BucketConfig, objectPath: string, options?: { patternId?: string }) => {
   const pattern = options?.patternId ? getUrlPatternById(bucket, options.patternId) || getPreferredUrlPattern(bucket) : getPreferredUrlPattern(bucket);
 
-  const cleanPath =
-    objectPath.startsWith('/') && objectPath.length > 1 ? objectPath.slice(1) : objectPath === '/' ? '' : objectPath;
+  const cleanPath = objectPath.startsWith('/') && objectPath.length > 1 ? objectPath.slice(1) : objectPath === '/' ? '' : objectPath;
 
   const baseUrl = `https://${pattern.hostname}`;
 
@@ -82,5 +79,3 @@ export const extractImagePathFromUrl = (pattern: ResolvedBucketUrlPattern, url: 
 
   return null;
 };
-
-

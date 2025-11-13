@@ -24,7 +24,7 @@ export const storageClientCache = new StorageClientCache();
 export class StorageOperations {
   static async readFile(bucket: BucketConfig, path: string): Promise<Uint8Array> {
     const operator = await storageClientCache.getOperator(bucket);
-    return operator.read(path);
+    return operator.read(path) as unknown as Uint8Array;
   }
 
   static async writeFile(bucket: BucketConfig, path: string, data: Uint8Array | Buffer, options?: { contentType?: string }) {
@@ -79,5 +79,3 @@ export class StorageOperations {
     return files;
   }
 }
-
-

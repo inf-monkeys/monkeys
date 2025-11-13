@@ -40,5 +40,3 @@ export interface BucketResolution {
 export interface ThumbnailAppConfig {
   quality: number;
 }
-
-

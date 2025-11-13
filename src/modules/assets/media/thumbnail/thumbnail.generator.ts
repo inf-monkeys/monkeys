@@ -163,5 +163,3 @@ export class ThumbnailGenerator {
     return undefined;
   }
 }
-
-
