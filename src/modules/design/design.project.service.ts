@@ -148,4 +148,125 @@ export class DesignProjectService {
 
     return newProject;
   }
+
+  /**
+   * 导出设计项目：获取项目及其所有画板的完整数据
+   */
+  async exportProject(projectId: string, userId: string) {
+    const project = await this.findById(projectId);
+    if (!project) {
+      throw new NotFoundException('设计项目不存在');
+    }
+
+    // 如果是模板，检查权限：只有团队所有者才能导出模板
+    if (project.isTemplate) {
+      await this.checkTemplatePermission(project, userId);
+    }
+    // 普通设计项目允许所有人导出
+
+    // 获取所有画板（包括snapshot）
+    const boards = await this.designMetadataRepository.findAllByProjectId(projectId);
+
+    // 构建导出数据
+    return {
+      version: '1.0',
+      exportTime: Date.now(),
+      project: {
+        displayName: project.displayName,
+        description: project.description,
+        iconUrl: project.iconUrl,
+        isTemplate: project.isTemplate,
+      },
+      boards: boards.map((board) => ({
+        displayName: board.displayName,
+        snapshot: board.snapshot,
+        pinned: board.pinned,
+        thumbnailUrl: board.thumbnailUrl,
+      })),
+    };
+  }
+
+  /**
+   * 导入设计项目：从JSON数据创建新的设计项目
+   */
+  async importProject(
+    importData: {
+      version?: string;
+      project: {
+        displayName: string | Record<string, string>;
+        description?: string | Record<string, string>;
+        iconUrl?: string;
+        isTemplate?: boolean;
+      };
+      boards: Array<{
+        displayName: string | Record<string, string>;
+        snapshot: any;
+        pinned?: boolean;
+        thumbnailUrl?: string;
+      }>;
+    },
+    teamId: string,
+    creatorUserId: string,
+  ): Promise<DesignProjectEntity> {
+    // 如果导入的是模板，检查权限：只有团队所有者才能导入模板
+    if (importData.project.isTemplate) {
+      const isOwner = await this.checkIsTeamOwner(teamId, creatorUserId);
+      if (!isOwner) {
+        throw new ForbiddenException('只有团队所有者才能导入设计模板');
+      }
+    }
+    // 普通设计项目允许所有人导入
+
+    // 创建新的设计项目
+    const projectEntity = new DesignProjectEntity();
+    Object.assign(projectEntity, {
+      displayName: importData.project.displayName,
+      description: importData.project.description,
+      iconUrl: importData.project.iconUrl,
+      isTemplate: importData.project.isTemplate ?? false,
+      teamId,
+      creatorUserId,
+      assetType: 'design-project',
+    });
+
+    const newProject = await this.designProjectRepository.create(projectEntity);
+
+    // 导入所有画板
+    for (const boardData of importData.boards) {
+      // 深拷贝 snapshot
+      let snapshotCopy: any = null;
+      if (boardData.snapshot) {
+        try {
+          if (typeof boardData.snapshot === 'string') {
+            snapshotCopy = JSON.parse(boardData.snapshot);
+          } else {
+            snapshotCopy = JSON.parse(JSON.stringify(boardData.snapshot));
+          }
+        } catch (error) {
+          snapshotCopy = boardData.snapshot;
+        }
+      } else {
+        snapshotCopy = {};
+      }
+
+      // 处理 displayName：如果是对象，转换为字符串；如果是字符串，直接使用
+      const displayNameStr =
+        typeof boardData.displayName === 'string'
+          ? boardData.displayName
+          : JSON.stringify(boardData.displayName);
+
+      await this.designMetadataRepository.createDesignMetadata(newProject.id, {
+        displayName: displayNameStr,
+        snapshot: snapshotCopy,
+        pinned: boardData.pinned ?? false,
+        thumbnailUrl: boardData.thumbnailUrl,
+        teamId,
+        designProjectId: newProject.id,
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
+      });
+    }
+
+    return newProject;
+  }
 }

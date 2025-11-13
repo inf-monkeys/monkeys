@@ -96,3 +96,15 @@ export const forkDesignTemplate = (templateProjectId: string) =>
     method: 'POST',
     simple: true,
   })(`/api/design/project/${templateProjectId}/fork`);
+
+export const exportDesignProject = (projectId: string) =>
+  vinesFetcher<any>({
+    method: 'GET',
+    simple: true,
+  })(`/api/design/project/${projectId}/export`);
+
+export const importDesignProject = (importData: any) =>
+  vinesFetcher<IAssetItem<IDesignProject>>({
+    method: 'POST',
+    simple: true,
+  })('/api/design/project/import', importData);

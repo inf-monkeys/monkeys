@@ -282,4 +282,26 @@ export class DesignController {
     await this.designMetadataService.generateThumbnail(metadataId, generateThumbnailDto.imageData);
     return new SuccessResponse({ data: { success: true } });
   }
+
+  @Get('project/:projectId/export')
+  @ApiOperation({
+    summary: '导出设计项目',
+    description: '导出设计项目及其所有画板的完整数据',
+  })
+  async exportProject(@Req() req: IRequest, @Param('projectId') projectId: string) {
+    const { userId } = req;
+    const exportData = await this.designProjectService.exportProject(projectId, userId);
+    return new SuccessResponse({ data: exportData });
+  }
+
+  @Post('project/import')
+  @ApiOperation({
+    summary: '导入设计项目',
+    description: '从JSON数据导入设计项目及其所有画板',
+  })
+  async importProject(@Req() req: IRequest, @Body() importData: any) {
+    const { teamId, userId } = req;
+    const result = await this.designProjectService.importProject(importData, teamId, userId);
+    return new SuccessResponse({ data: result });
+  }
 }

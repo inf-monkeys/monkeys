@@ -4,12 +4,12 @@ import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { get } from 'lodash';
-import { Link, Pencil, Trash } from 'lucide-react';
+import { Download, Link, Pencil, Trash, Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
-import { deleteDesignProject } from '@/apis/designs';
+import { deleteDesignProject, exportDesignProject, importDesignProject } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -31,6 +31,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label.tsx';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +56,95 @@ import { useCopy } from '@/hooks/use-copy.ts';
 import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
+// 导入对话框组件
+interface ImportDesignProjectDialogProps {
+  visible: boolean;
+  setVisible: (v: boolean) => void;
+  onImport: (file: File) => Promise<void>;
+}
+
+const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({
+  visible,
+  setVisible,
+  onImport,
+}) => {
+  const { t } = useTranslation();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const fileName = file.name.toLowerCase();
+      if (!fileName.endsWith('.json')) {
+        toast.error('请选择有效的 JSON 文件');
+        return;
+      }
+      setSelectedFile(file);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!selectedFile) {
+      toast.warning('请先选择要导入的文件');
+      return;
+    }
+
+    setImporting(true);
+    try {
+      await onImport(selectedFile);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  return (
+    <Dialog open={visible} onOpenChange={setVisible}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('common.utils.import', { defaultValue: '导入设计项目' })}</DialogTitle>
+          <DialogDescription>
+            {t('common.import.description', { defaultValue: '选择导出的 JSON 文件来导入设计项目' })}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>{t('common.import.file.label', { defaultValue: '选择文件' })}</Label>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" className="relative w-full" disabled={importing} asChild>
+                <label className="cursor-pointer">
+                  <Upload className="mr-2 h-4 w-4" />
+                  {selectedFile
+                    ? selectedFile.name
+                    : t('common.import.file.placeholder', { defaultValue: '点击选择文件' })}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".json"
+                    onChange={handleFileChange}
+                    disabled={importing}
+                  />
+                </label>
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t('common.import.file.hint', { defaultValue: '支持 .json 格式' })}
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setVisible(false)} disabled={importing}>
+            {t('common.utils.cancel')}
+          </Button>
+          <Button onClick={handleImport} disabled={!selectedFile || importing}>
+            {importing ? t('common.import.loading', { defaultValue: '导入中...' }) : t('common.utils.import', { defaultValue: '导入' })}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export const Designs: React.FC = () => {
   const { t } = useTranslation();
   const { data: oem } = useSystemConfig();
@@ -59,6 +158,7 @@ export const Designs: React.FC = () => {
   const [currentDesignProject, setCurrentDesignProject] = useState<IAssetItem<IDesignProject>>();
   const [designProjectEditorVisible, setDesignProjectEditorVisible] = useState(false);
   const [deleteAlertDialogVisible, setDeleteAlertDialogVisible] = useState(false);
+  const [importDialogVisible, setImportDialogVisible] = useState(false);
 
   const handleAfterUpdateDesignProject = () => {
     void mutateDesignProjects();
@@ -137,6 +237,65 @@ export const Designs: React.FC = () => {
     });
   };
 
+  // 处理导出设计项目
+  const handleExportProject = async (project: IAssetItem<IDesignProject>) => {
+    if (!project.id) {
+      toast.warning(t('common.toast.loading'));
+      return;
+    }
+
+    try {
+      const exportData = await exportDesignProject(project.id);
+      const fileName = `${getI18nContent(project.displayName) || 'design-project'}-${Date.now()}.json`;
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success(t('common.export.success', { defaultValue: '导出成功' }));
+    } catch (error) {
+      toast.error(t('common.export.error', { defaultValue: '导出失败' }));
+      console.error('Export project failed:', error);
+    }
+  };
+
+  // 处理导入设计项目
+  const handleImportProject = async (file: File) => {
+    try {
+      const fileContent = await file.text();
+      let importData: any;
+      try {
+        importData = JSON.parse(fileContent);
+      } catch (error) {
+        toast.error('JSON 文件格式错误，请检查文件内容');
+        return;
+      }
+
+      // 验证导入数据格式
+      if (!importData.project || !importData.boards) {
+        toast.error('导入文件格式不正确，缺少必要的数据');
+        return;
+      }
+
+      // 导入时强制设置为非模板（普通设计项目）
+      importData.project.isTemplate = false;
+
+      const newProject = await importDesignProject(importData);
+      if (newProject) {
+        toast.success(t('common.import.success', { defaultValue: '导入成功' }));
+        void mutateDesignProjects();
+        setImportDialogVisible(false);
+      }
+    } catch (error: any) {
+      toast.error(error?.message || t('common.import.error', { defaultValue: '导入失败' }));
+      console.error('Import project failed:', error);
+    }
+  };
+
   return (
     <main className="flex size-full flex-col">
       <UgcView
@@ -202,6 +361,16 @@ export const Designs: React.FC = () => {
                         </DropdownMenuShortcut>
                         {t('ugc-page.design-project.ugc-view.operate-area.options.copy-link')}
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          void handleExportProject(item);
+                        }}
+                      >
+                        <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                          <Download size={15} />
+                        </DropdownMenuShortcut>
+                        {t('common.utils.export', { defaultValue: '导出' })}
+                      </DropdownMenuItem>
 
                       <DropdownMenuItem
                         className="text-red-10"
@@ -260,6 +429,16 @@ export const Designs: React.FC = () => {
                   </DropdownMenuShortcut>
                   {t('ugc-page.design-project.ugc-view.operate-area.options.copy-link')}
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    void handleExportProject(item);
+                  }}
+                >
+                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                    <Download size={15} />
+                  </DropdownMenuShortcut>
+                  {t('common.utils.export', { defaultValue: '导出' })}
+                </DropdownMenuItem>
 
                 <DropdownMenuItem
                   className="text-red-10"
@@ -280,6 +459,15 @@ export const Designs: React.FC = () => {
         onItemClick={(item) => navigateHelper(item)}
         subtitle={
           <>
+            <ImportDesignProjectDialog visible={importDialogVisible} setVisible={setImportDialogVisible} onImport={handleImportProject} />
+            <Button
+              variant="outline"
+              size="small"
+              icon={<Upload size={15} />}
+              onClick={() => setImportDialogVisible(true)}
+            >
+              {t('common.utils.import', { defaultValue: '导入' })}
+            </Button>
             <DesignAssociationEditorDialog />
             <CreateDesignProjectDialog />
           </>
