@@ -31,10 +31,11 @@ export class ThumbnailCoreService {
     const originalETag = ThumbnailGenerator.extractEtag(originalMetadata);
 
     if (!request.forceRegenerate) {
-      const cacheETag = await this.checkCache(bucket, thumbnailPath);
-      if (cacheETag) {
-        const cachedMetadata = await StorageOperations.getMetadata(bucket, thumbnailPath);
-        if (cachedMetadata && this.isCacheValid(originalETag, cacheETag)) {
+      const cachedMetadata = await this.checkCache(bucket, thumbnailPath);
+
+      if (cachedMetadata) {
+        const cacheETag = ThumbnailGenerator.extractEtag(cachedMetadata);
+        if (cacheETag && this.isCacheValid(originalETag, cacheETag, cachedMetadata)) {
           const url = buildPublicUrl(bucket, thumbnailPath);
           return {
             url,
@@ -62,11 +63,16 @@ export class ThumbnailCoreService {
 
     const processedImage = await ThumbnailGenerator.processImage(originalBuffer, size, this.appConfig.quality, targetFormat);
 
+    const thumbnailETag = ThumbnailGenerator.generateThumbnailETag(originalETag, size, processedImage.buffer);
+
     await StorageOperations.writeFile(bucket, thumbnailPath, processedImage.buffer, {
       contentType: processedImage.contentType,
+      metadata: {
+        'thumbnail-etag': thumbnailETag,
+        'source-etag': originalETag,
+      },
     });
 
-    const thumbnailETag = ThumbnailGenerator.generateThumbnailETag(originalETag, size, processedImage.buffer);
     const url = buildPublicUrl(bucket, thumbnailPath);
 
     return {
@@ -94,15 +100,33 @@ export class ThumbnailCoreService {
     if (!exists) {
       return null;
     }
-    const metadata = await StorageOperations.getMetadata(bucket, thumbnailPath);
-    if (!metadata) {
-      return null;
-    }
-    return ThumbnailGenerator.extractEtag(metadata);
+    return StorageOperations.getMetadata(bucket, thumbnailPath);
   }
 
-  private isCacheValid(originalETag: string, cachedETag: string) {
-    return cachedETag.includes(originalETag.substring(0, Math.min(originalETag.length, 10)));
+  private isCacheValid(originalETag: string, cachedETag: string, cacheMetadata?: Record<string, any>) {
+    if (!originalETag || !cachedETag) {
+      return false;
+    }
+
+    const userMetadata = cacheMetadata?.userMetadata as Record<string, string> | undefined;
+    const storedSourceETag = userMetadata?.['source-etag'] || userMetadata?.['source_etag'] || userMetadata?.sourceEtag;
+    if (storedSourceETag && storedSourceETag === originalETag) {
+      return true;
+    }
+
+    const comparisonSeed = originalETag.substring(0, Math.min(originalETag.length, 10));
+    if (!comparisonSeed) {
+      return false;
+    }
+    if (cachedETag.includes(comparisonSeed)) {
+      return true;
+    }
+    try {
+      const decoded = Buffer.from(cachedETag, 'base64').toString('utf-8');
+      return decoded.includes(comparisonSeed);
+    } catch {
+      return false;
+    }
   }
 
   private resolveThumbnailSize(request: ThumbnailRequest): ThumbnailSize {

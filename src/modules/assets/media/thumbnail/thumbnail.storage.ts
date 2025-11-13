@@ -1,4 +1,4 @@
-import { Operator } from 'opendal';
+import { Operator, type WriteOptions } from 'opendal';
 import { BucketConfig } from './thumbnail.types';
 
 class StorageClientCache {
@@ -27,11 +27,19 @@ export class StorageOperations {
     return operator.read(path) as unknown as Uint8Array;
   }
 
-  static async writeFile(bucket: BucketConfig, path: string, data: Uint8Array | Buffer, options?: { contentType?: string }) {
+  static async writeFile(bucket: BucketConfig, path: string, data: Uint8Array | Buffer, options?: { contentType?: string; metadata?: Record<string, string> }) {
     const operator = await storageClientCache.getOperator(bucket);
     const bufferData = Buffer.isBuffer(data) ? data : Buffer.from(data);
-    const writeOptions = options?.contentType ? { contentType: options.contentType } : undefined;
-    await operator.write(path, bufferData, writeOptions);
+    const writeOptions: WriteOptions = {};
+
+    if (options?.contentType) {
+      writeOptions.contentType = options.contentType;
+    }
+    if (options?.metadata && Object.keys(options.metadata).length > 0) {
+      writeOptions.userMetadata = options.metadata;
+    }
+
+    await operator.write(path, bufferData, Object.keys(writeOptions).length > 0 ? writeOptions : undefined);
   }
 
   static async getMetadata(bucket: BucketConfig, path: string): Promise<Record<string, any> | null> {
@@ -43,6 +51,7 @@ export class StorageOperations {
         lastModified: stat.lastModified,
         etag: stat.etag,
         versionId: (stat as any).versionId,
+        userMetadata: stat.userMetadata ?? undefined,
       };
     } catch (error: any) {
       const message = typeof error?.message === 'string' ? error.message.toLowerCase() : '';

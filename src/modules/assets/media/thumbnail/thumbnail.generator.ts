@@ -27,6 +27,23 @@ export class ThumbnailGenerator {
   }
 
   static extractEtag(metadata: Record<string, any>): string {
+    if (metadata.userMetadata && typeof metadata.userMetadata === 'object') {
+      const userMetadata = metadata.userMetadata as Record<string, string>;
+      const customKeys = ['thumbnail-etag', 'thumbnail_etag', 'monkeys-thumbnail-etag'];
+      for (const key of customKeys) {
+        const value = userMetadata[key];
+        if (typeof value === 'string' && value.length > 0) {
+          return value;
+        }
+      }
+      const direct = userMetadata.thumbnailEtag;
+      if (typeof direct === 'string' && direct.length > 0) {
+        return direct;
+      }
+    }
+    if (typeof metadata.thumbnailEtag === 'string' && metadata.thumbnailEtag.length > 0) {
+      return metadata.thumbnailEtag;
+    }
     if (metadata.etag) {
       return metadata.etag;
     }
