@@ -1769,6 +1769,46 @@
     consola "^2.15.0"
     node-fetch "^2.6.1"
 
+"@opendal/lib-darwin-arm64@0.49.1":
+  version "0.49.1"
+  resolved "https://registry.npmmirror.com/@opendal/lib-darwin-arm64/-/lib-darwin-arm64-0.49.1.tgz#7a386b7b25bbddc6040eee758924ab388b3212ac"
+  integrity sha512-08x/Z5JR2Vncf8FDRHcI/96sm3My/MLdTpfqvYkr0jmbdasYOHv2c/K6Bg/aV8jqe9OLx5XDeq5I3gZn5qPUgw==
+
+"@opendal/lib-darwin-x64@0.49.1":
+  version "0.49.1"
+  resolved "https://registry.npmmirror.com/@opendal/lib-darwin-x64/-/lib-darwin-x64-0.49.1.tgz#89761804834d23679ccbc08bb96921f49a46583d"
+  integrity sha512-DdHzSeNjJKOnNmZeFRn4oppDDDsGudewDXQCBIv1923xYwOx6IP0/jYp/N5oAxfaMW8jqSZ9iCovWCSHtQFf0Q==
+
+"@opendal/lib-linux-arm64-gnu@0.49.1":
+  version "0.49.1"
+  resolved "https://registry.npmmirror.com/@opendal/lib-linux-arm64-gnu/-/lib-linux-arm64-gnu-0.49.1.tgz#8010de62f18b127748a82c77ed21e19dcb3a77fe"
+  integrity sha512-XrjUsZFIJ/1gezf3CHWS1I5tRhUdWcb/NBuzBxCtOwMs4rMCpgPrrR9lhMRGnw5FJ2+GMWxJXyA9jWY7au9NrA==
+
+"@opendal/lib-linux-arm64-musl@0.49.1":
+  version "0.49.1"
+  resolved "https://registry.npmmirror.com/@opendal/lib-linux-arm64-musl/-/lib-linux-arm64-musl-0.49.1.tgz#7e256b13b4b75721d2e70681f074280d39f0eb63"
+  integrity sha512-EOEdmjGXKvia+rq9Q/jH72ovznFy8Nf61zmKBOvkt22V4Pjg5qr6zfkYitDhcxDKl/wfnSTL8a3vNdX2gU1aTg==
+
+"@opendal/lib-linux-x64-gnu@0.49.1":
+  version "0.49.1"
+  resolved "https://registry.npmmirror.com/@opendal/lib-linux-x64-gnu/-/lib-linux-x64-gnu-0.49.1.tgz#90dd526814ed9d55a8aedeca9c66c814aaf6ea05"
+  integrity sha512-hGglSmNCtHr0gYRnSZ3vWhnschtvoNZ5Mo4YXPIpTaruqS5Slg7DXTO7gbtohthQD3zXiI+ZQLN7+3LFdSrAGg==
+
+"@opendal/lib-linux-x64-musl@0.49.1":
+  version "0.49.1"
+  resolved "https://registry.npmmirror.com/@opendal/lib-linux-x64-musl/-/lib-linux-x64-musl-0.49.1.tgz#cd5e5d8bbfe20906adaa6e050a31959749b0da19"
+  integrity sha512-F2AMkw8gHLa0fCnz6DCT2TxgfTGrNFRoA7e7SRfIbnkvGeoNWAR5bQh1+smTX1OpzVts4YGUn9+MDQcg8uH4MA==
+
+"@opendal/lib-win32-arm64-msvc@0.49.1":
+  version "0.49.1"
+  resolved "https://registry.npmmirror.com/@opendal/lib-win32-arm64-msvc/-/lib-win32-arm64-msvc-0.49.1.tgz#65571e0c4810c7c34caba82acbbbfbc89655e237"
+  integrity sha512-gIQZCarr7jOt9VopI9l0lmrdpTRapAI4+A/1jD/3m6Exrv3Wg8FNE1TDmvSplWCX7DO+cSqZ+FU6PNNmCOtuPg==
+
+"@opendal/lib-win32-x64-msvc@0.49.1":
+  version "0.49.1"
+  resolved "https://registry.npmmirror.com/@opendal/lib-win32-x64-msvc/-/lib-win32-x64-msvc-0.49.1.tgz#c3724daca1c62f1bd30420d83c2818628be6df23"
+  integrity sha512-G2vwtWgHSlfOY5eOKu/bSTkB4rRkZ9SGnqVkA2A40Aef+KctTIVScKa1FtD3MYd65TD5yxQGHGeYC0n06kxmBA==
+
 "@opentelemetry/api@^1.4.0":
   version "1.9.0"
   resolved "https://registry.npmjs.org/@opentelemetry/api/-/api-1.9.0.tgz"
@@ -6302,6 +6342,20 @@ openapi-merge@^1.3.2:
     atlassian-openapi "^1.0.8"
     lodash "^4.17.15"
     ts-is-present "^1.1.1"
+
+opendal@^0.49.1:
+  version "0.49.1"
+  resolved "https://registry.npmmirror.com/opendal/-/opendal-0.49.1.tgz#4e3ea73ab6cc94db223175360470fb92a92e9ab0"
+  integrity sha512-bbWCDNEHD/RGdMX76MBUgcic6FhzSetPIIOee+Y3Y9KDwsBdcOUKL393ow+qPxU8CbWTECTbDzMO3lICReTGCA==
+  optionalDependencies:
+    "@opendal/lib-darwin-arm64" "0.49.1"
+    "@opendal/lib-darwin-x64" "0.49.1"
+    "@opendal/lib-linux-arm64-gnu" "0.49.1"
+    "@opendal/lib-linux-arm64-musl" "0.49.1"
+    "@opendal/lib-linux-x64-gnu" "0.49.1"
+    "@opendal/lib-linux-x64-musl" "0.49.1"
+    "@opendal/lib-win32-arm64-msvc" "0.49.1"
+    "@opendal/lib-win32-x64-msvc" "0.49.1"
 
 openid-client@^5.6.5:
   version "5.6.5"

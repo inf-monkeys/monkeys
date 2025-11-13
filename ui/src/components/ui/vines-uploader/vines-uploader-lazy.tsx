@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import Uppy, { Meta, UppyFile } from '@uppy/core';
-import ThumbnailGenerator from '@uppy/thumbnail-generator';
 import { useClickAway, useCreation, useDrop, useLatest, useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get, isEmpty } from 'lodash';
@@ -52,11 +51,6 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         restrictions: { maxFileSize, maxNumberOfFiles: max, minNumberOfFiles: min },
       })
         .use(RemoteUrlToFile)
-        .use(ThumbnailGenerator, {
-          waitForThumbnailsBeforeUpload: true,
-          thumbnailType: 'image/png',
-          thumbnailHeight: 192,
-        })
         .use(FileMd5)
         .use(RapidUpload)
         .use(VinesUpload, { ...(basePath && { basePath }) }),
@@ -122,6 +116,61 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         });
       }
     }
+  });
+
+  const addRemoteUrlAsFile = useMemoizedFn(async (rawUrl: string | null | undefined) => {
+    const trimmed = rawUrl?.trim();
+    if (!trimmed) {
+      return false;
+    }
+    const cleanUrl = addProtocolToURL(trimmed);
+    if (!checkIfCorrectURL(cleanUrl)) {
+      return false;
+    }
+
+    const ensureSingleSlot = () => {
+      if (max === 1) {
+        const existingFiles = uppy.getFiles();
+        existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
+      }
+    };
+
+    try {
+      const response = await fetch(cleanUrl, {
+        mode: 'cors',
+        credentials: 'omit',
+        headers: {
+          Accept: 'image/*,*/*;q=0.9',
+        },
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.type.startsWith('image/') || blob.size > 0) {
+          ensureSingleSlot();
+          const filename = getFileNameByOssUrl(cleanUrl) || `image_${Date.now()}.png`;
+          const file = new File([blob], filename, {
+            type: blob.type || 'image/png',
+          }) as File & { meta?: Record<string, any> };
+          file.meta = {
+            ...(file.meta || {}),
+            originUrl: cleanUrl,
+          };
+          uppy.addFile(handleConvertFile(file));
+          return true;
+        }
+      }
+    } catch (error) {
+      // ignore fetch errors, fall back to remote url
+    }
+
+    ensureSingleSlot();
+    const file = new File([], getFileNameByOssUrl(cleanUrl) || `remote_${Date.now()}.txt`, {
+      type: 'text/plain',
+    }) as File & { meta?: { remoteUrl: string } };
+    file.meta = { remoteUrl: cleanUrl };
+    uppy.addFile(handleConvertFile(file));
+    return true;
   });
 
   const lastPropFiles = useRef<UppyFile<Meta, Record<string, never>>[]>([]);
@@ -227,50 +276,8 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         // 处理文本内容（可能包含URL）
         if (item.types.includes('text/plain')) {
           const text = await (await item.getType('text/plain')).text();
-          const cleanUrl = addProtocolToURL(text.trim());
-
-          if (checkIfCorrectURL(cleanUrl)) {
-            try {
-              // 尝试获取图片数据
-              const response = await fetch(cleanUrl, {
-                mode: 'cors',
-                credentials: 'omit',
-                headers: {
-                  Accept: 'image/*,*/*;q=0.9',
-                },
-              });
-
-              if (response.ok) {
-                const blob = await response.blob();
-                if (blob.type.startsWith('image/') || blob.size > 0) {
-                  const filename = getFileNameByOssUrl(cleanUrl) || `image_${Date.now()}.png`;
-                  const file = new File([blob], filename, {
-                    type: blob.type || 'image/png',
-                  });
-
-                  if (max === 1 && !isEmpty(filesMapper)) {
-                    const existingFiles = uppy.getFiles();
-                    existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
-                  }
-
-                  uppy.addFile(handleConvertFile(file));
-                  return;
-                }
-              }
-            } catch (error) {
-              // 如果无法作为文件下载，作为远程URL处理
-              const file = new File([], getFileNameByOssUrl(cleanUrl), {
-                type: 'text/plain',
-              }) as File & { meta?: { remoteUrl: string } };
-              file.meta = { remoteUrl: cleanUrl };
-
-              if (max === 1 && !isEmpty(filesMapper)) {
-                const existingFiles = uppy.getFiles();
-                existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
-              }
-
-              uppy.addFile(handleConvertFile(file));
-            }
+          if (await addRemoteUrlAsFile(text)) {
+            return;
           }
         }
       }
@@ -304,106 +311,28 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
       return;
     }
 
-    // 处理网页图片拖拽
-    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-      const items = Array.from(e.dataTransfer.items);
-      // console.log('Processing dataTransfer items:', items);
+    const plainTextData = e.dataTransfer.getData('text/plain');
+    if (plainTextData) {
+      const candidates = plainTextData
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+      for (const candidate of candidates) {
+        if (await addRemoteUrlAsFile(candidate)) {
+          return;
+        }
+      }
+    }
 
-      for (const item of items) {
-        // console.log('Item kind:', item.kind, 'type:', item.type);
-        // console.log('item', item.type, item);
-
-        if (item.kind === 'string') {
-          // 处理各种字符串类型的数据
-          if (item.type === 'text/uri-list') {
-            item.getAsString(async (data) => {
-              // console.log(`Got data:`, data);
-              // console.log('item string data', data);
-              const url = data;
-
-              // 根据数据类型提取URL
-              // if (item.type === 'text/uri-list') {
-              //   url = data.trim();
-              // } else if (item.type === 'text/plain') {
-              //   // 检查是否是URL
-              //   url = data.trim();
-              // } else if (item.type === 'text/html') {
-              //   // 从HTML中提取图片URL
-              //   const imgMatch = data.match(/<img[^>]+src=['"]+([^'"]*)['"]/i);
-              //   if (imgMatch) {
-              //     url = imgMatch[1];
-              //   }
-              // }
-
-              if (url) {
-                // console.log('Extracted URL:', url);
-                const cleanUrl = addProtocolToURL(url);
-
-                if (checkIfCorrectURL(cleanUrl)) {
-                  try {
-                    // console.log('Attempting to fetch:', cleanUrl);
-
-                    // 尝试获取图片数据
-                    const response = await fetch(cleanUrl, {
-                      mode: 'cors',
-                      credentials: 'omit',
-                      headers: {
-                        Accept: 'image/*,*/*;q=0.9',
-                      },
-                    });
-
-                    if (response.ok) {
-                      const blob = await response.blob();
-                      // console.log('Fetched blob:', blob.type, blob.size);
-
-                      if (blob.type.startsWith('image/') || blob.size > 0) {
-                        const filename = getFileNameByOssUrl(cleanUrl) || `image_${Date.now()}.png`;
-                        const file = new File([blob], filename, {
-                          type: blob.type || 'image/png',
-                        });
-
-                        file['meta'] = {
-                          originUrl: url,
-                        };
-
-                        // console.log('Created file:', file.name, file.type, file.size);
-
-                        if (max === 1 && !isEmpty(filesMapper)) {
-                          const existingFiles = uppy.getFiles();
-                          existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
-                        }
-
-                        const convertedFile = handleConvertFile(file);
-                        // console.log('Adding file to uppy:', convertedFile);
-                        uppy.addFile(convertedFile);
-
-                        return; // 成功处理，退出
-                      }
-                    }
-                  } catch (error) {
-                    // console.error('Failed to fetch image:', error);
-                    // console.error('Failed url', url);
-                  }
-
-                  // 如果无法作为文件下载，作为远程URL处理
-                  // console.log('Fallback: treating as remote URL');
-                  const file = new File([], getFileNameByOssUrl(cleanUrl), {
-                    type: 'text/plain',
-                  }) as File & { meta?: { remoteUrl: string } };
-                  file.meta = { remoteUrl: cleanUrl };
-
-                  if (max === 1 && !isEmpty(filesMapper)) {
-                    const existingFiles = uppy.getFiles();
-                    existingFiles.forEach((existingFile) => uppy.removeFile(existingFile.id));
-                  }
-
-                  const convertedFile = handleConvertFile(file);
-                  // console.log('Adding remote URL file to uppy:', convertedFile);
-                  uppy.addFile(convertedFile);
-                }
-              }
-            });
-          }
+    const uriListData = e.dataTransfer.getData('text/uri-list');
+    if (uriListData) {
+      const candidates = uriListData
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith('#'));
+      for (const candidate of candidates) {
+        if (await addRemoteUrlAsFile(candidate)) {
+          return;
         }
       }
     }

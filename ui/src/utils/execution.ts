@@ -1,10 +1,10 @@
-import { getThumbUrl } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image';
 import { JSONValue } from '@/components/ui/code-editor';
 import {
   VinesWorkflowExecutionInput,
   VinesWorkflowExecutionOutputListItem,
   VinesWorkflowExecutionType,
 } from '@/package/vines-flow/core/typings.ts';
+import { getThumbUrl } from '@/utils/file';
 
 type IVinesExecutionResultImageAltCopy = {
   type: 'copy-param';
