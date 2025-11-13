@@ -285,12 +285,29 @@ const useScroller = (scrollRef: React.RefObject<HTMLElement>, workflowId: string
   const [isScrolling, setIsScrolling] = useState(false);
   const setStoreScrollTop = useSetScrollTop();
   const lastScrollTop = useLastScrollTop(workflowId);
-  const [scrollTop, setScrollTop] = useState(lastScrollTop ?? 0);
+  const [scrollTop, setScrollTopState] = useState(lastScrollTop ?? 0);
   const lastUpdateTimeRef = useRef(0);
   const currentScrollTopRef = useRef(lastScrollTop ?? 0);
   const frameRef = useRef<number | null>(null);
   const scrollTimeoutRef = useRef<any>(null);
   const fps = 12; // 提高帧率以获得更流畅的滚动体验
+
+  const setScrollTop = useCallback((value: number) => {
+    setScrollTopState((prev) => {
+      if (Math.abs(prev - value) < 0.5) {
+        return prev;
+      }
+      return value;
+    });
+  }, []);
+
+  const commitScrollPosition = useCallback(
+    (value: number) => {
+      setScrollTop(value);
+      setStoreScrollTop(workflowId, value);
+    },
+    [setStoreScrollTop, workflowId, setScrollTop],
+  );
 
   const throttledUpdate = useCallback(() => {
     if (frameRef.current) return;
@@ -298,13 +315,12 @@ const useScroller = (scrollRef: React.RefObject<HTMLElement>, workflowId: string
     frameRef.current = requestAnimationFrame(() => {
       const now = Date.now();
       if (now - lastUpdateTimeRef.current >= 1000 / fps) {
-        setScrollTop(currentScrollTopRef.current);
-        setStoreScrollTop(workflowId, currentScrollTopRef.current);
+        commitScrollPosition(currentScrollTopRef.current);
         lastUpdateTimeRef.current = now;
       }
       frameRef.current = null;
     });
-  }, [fps]);
+  }, [fps, commitScrollPosition]);
 
   useEffect(() => {
     const scrollElement = scrollRef.current;
@@ -322,7 +338,7 @@ const useScroller = (scrollRef: React.RefObject<HTMLElement>, workflowId: string
       scrollTimeoutRef.current = setTimeout(
         () => {
           setIsScrolling(false);
-          setScrollTop(currentScrollTopRef.current);
+          commitScrollPosition(currentScrollTopRef.current);
         },
         100 + 1000 / fps,
       );

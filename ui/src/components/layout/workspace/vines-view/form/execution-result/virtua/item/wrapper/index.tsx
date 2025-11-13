@@ -38,7 +38,7 @@ interface IVirtuaExecutionResultGridWrapperProps {
   displayType?: ExectuionResultGridDisplayType;
 }
 
-export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGridWrapperProps> = ({
+const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResultGridWrapperProps> = ({
   data,
   children,
   src,
@@ -246,3 +246,24 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
     </div>
   );
 };
+
+const wrapperAreEqual = (
+  prev: IVirtuaExecutionResultGridWrapperProps,
+  next: IVirtuaExecutionResultGridWrapperProps,
+) => {
+  return (
+    prev.data.render.key === next.data.render.key &&
+    prev.data.render.status === next.data.render.status &&
+    prev.data.render.data === next.data.render.data &&
+    prev.isSelected === next.isSelected &&
+    prev.selectionModeDisplayType === next.selectionModeDisplayType &&
+    prev.src === next.src &&
+    prev.displayType === next.displayType &&
+    prev.onSelect === next.onSelect
+  );
+};
+
+export const VirtuaExecutionResultGridWrapper = React.memo(
+  VirtuaExecutionResultGridWrapperComponent,
+  wrapperAreEqual,
+);

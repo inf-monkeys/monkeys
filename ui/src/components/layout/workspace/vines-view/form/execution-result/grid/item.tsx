@@ -39,7 +39,7 @@ interface IExecutionResultItemProps {
 export type IClickBehavior = 'preview' | 'select' | 'fill-form' | 'none';
 export type ISelectionModeDisplayType = 'operation-button' | 'dropdown-menu';
 
-export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
+const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
   result,
   event$,
   isDeleted = false,
@@ -187,3 +187,26 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
       );
   }
 };
+
+const areEqual = (prev: IExecutionResultItemProps, next: IExecutionResultItemProps) => {
+  const prevRender = prev.result.render;
+  const nextRender = next.result.render;
+
+  return (
+    prevRender.key === nextRender.key &&
+    prevRender.status === nextRender.status &&
+    prevRender.type === nextRender.type &&
+    prevRender.data === nextRender.data &&
+    prevRender.isDeleted === nextRender.isDeleted &&
+    prev.result.status === next.result.status &&
+    prev.result.instanceId === next.result.instanceId &&
+    prev.isDeleted === next.isDeleted &&
+    prev.isSelectionMode === next.isSelectionMode &&
+    prev.isSelected === next.isSelected &&
+    prev.clickBehavior === next.clickBehavior &&
+    prev.selectionModeDisplayType === next.selectionModeDisplayType &&
+    prev.workflowId === next.workflowId
+  );
+};
+
+export const ExecutionResultItem = React.memo(ExecutionResultItemComponent, areEqual);

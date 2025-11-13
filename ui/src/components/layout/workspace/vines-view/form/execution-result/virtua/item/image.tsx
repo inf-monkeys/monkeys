@@ -47,7 +47,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   displayType?: ExectuionResultGridDisplayType;
 }
 
-export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResultGridImageItemProps> = ({
+const VirtuaExecutionResultGridImageItemComponent: React.FC<IVirtuaExecutionResultGridImageItemProps> = ({
   src,
   alt,
   instanceId: _instanceId,
@@ -64,7 +64,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { copy } = useCopy();
-  const { images, setPosition } = useExecutionImageResultStore();
+  const images = useExecutionImageResultStore((state) => state.images);
+  const setPosition = useExecutionImageResultStore((state) => state.setPosition);
 
   const { data: oem } = useSystemConfig();
   const enableSystemImageThumbnail = get(oem, ['theme', 'imageThumbnail'], false);
@@ -184,3 +185,27 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
     </div>
   );
 };
+
+const imageItemAreEqual = (
+  prev: IVirtuaExecutionResultGridImageItemProps,
+  next: IVirtuaExecutionResultGridImageItemProps,
+) => {
+  return (
+    prev.src === next.src &&
+    prev.renderKey === next.renderKey &&
+    prev.isSelectionMode === next.isSelectionMode &&
+    prev.clickBehavior === next.clickBehavior &&
+    prev.workflowId === next.workflowId &&
+    prev.displayType === next.displayType &&
+    prev.alt === next.alt &&
+    prev.instanceId === next.instanceId &&
+    prev.outputIndex === next.outputIndex &&
+    prev.onSelect === next.onSelect &&
+    prev.event$ === next.event$
+  );
+};
+
+export const VirtuaExecutionResultGridImageItem = React.memo(
+  VirtuaExecutionResultGridImageItemComponent,
+  imageItemAreEqual,
+);
