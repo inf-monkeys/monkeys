@@ -7,7 +7,7 @@ const CACHE_TTL_SUCCESS = 10 * 60 * 1000; // 成功结果缓存 10 分钟
 const CACHE_TTL_FAILURE = 60 * 1000; // 失败结果缓存 1 分钟
 
 export const checkImageUrlAvailable = async (url: string) => {
-  // console.log(new URL(url).search);
+  console.log('check', url);
   if (url.startsWith('blob:')) {
     return true;
   }

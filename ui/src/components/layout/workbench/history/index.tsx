@@ -19,8 +19,7 @@ import { ImagesResult } from '@/store/useExecutionImageResultStore';
 import { useEmbedSidebar } from '@/store/useGlobalViewStore';
 import { cn } from '@/utils';
 import { newConvertExecutionResultToItemList } from '@/utils/execution';
-
-import { getThumbUrl } from '../../workspace/vines-view/form/execution-result/virtua/item/image';
+import { getThumbUrl } from '@/utils/file';
 
 // Swiper 已移除，使用原生横向滚动
 interface HistoryResultProps {
@@ -451,6 +450,9 @@ const HistoryResultOg = () => {
   const { teamId } = useVinesTeam();
   const { data: imagesResult, setSize, mutate: RefreshAll } = useInfiniteWorkflowExecutionAllOutputs({ limit: 20 });
 
+  const { data: oem } = useSystemConfig();
+  const enableSystemImageThumbnail = get(oem, ['theme', 'imageThumbnail'], false);
+
   const lastTeamId = useRef<string | null>(null);
   useEffect(() => {
     if (teamId !== lastTeamId.current) {
@@ -467,7 +469,7 @@ const HistoryResultOg = () => {
   const thumbImages: ImagesResultWithOrigin[] = [];
   for (const image of allImages) {
     const url = image.render.data as string;
-    const thumbUrl = getThumbUrl(url);
+    const thumbUrl = getThumbUrl(url, enableSystemImageThumbnail);
 
     thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl, origin: url } } as ImagesResultWithOrigin);
   }

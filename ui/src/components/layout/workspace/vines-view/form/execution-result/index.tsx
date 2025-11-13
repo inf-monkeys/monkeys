@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
+import { get } from 'lodash';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -22,10 +23,10 @@ import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem, newConvertExecutionResultToItemList, removeRepeatKey } from '@/utils/execution.ts';
+import { getThumbUrl } from '@/utils/file';
 
 import { ErrorFilter } from './grid/error-filter';
 import { useVinesIframeMessage } from './iframe-message';
-import { getThumbUrl } from './virtua/item/image';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -78,6 +79,8 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     executionListData?.[currentPage - 1]?.data.length == LOAD_LIMIT;
 
   const totalCount = firstPageExecutionListData?.total ?? 0;
+
+  const enableSystemImageThumbnail = get(oem, ['theme', 'imageThumbnail'], false);
 
   // 统一的数据更新和转换逻辑
   useEffect(() => {
@@ -156,7 +159,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     const thumbImages: ImagesResult[] = [];
     for (const image of allImages) {
       const url = image.render.data as string;
-      const thumbUrl = getThumbUrl(url);
+      const thumbUrl = getThumbUrl(url, enableSystemImageThumbnail);
       thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl } } as ImagesResult);
     }
     setImages(allImages as ImagesResult[]);

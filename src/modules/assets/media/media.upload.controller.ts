@@ -2,15 +2,17 @@ import { config } from '@/common/config';
 import { SuccessResponse } from '@/common/response';
 import { S3Helpers } from '@/common/s3';
 import { getMimeType } from '@/common/utils/file';
-import { generateThumbnail } from '@/common/utils/image';
-import { Body, Controller, Get, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Head, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { nanoid } from 'ai';
 import { Response } from 'express';
 import { Readable } from 'stream';
+import { MediaFileService } from './media.service';
 
 @Controller('medias')
 export class MediaUploadController {
+  constructor(private readonly mediaFileService: MediaFileService) {}
+
   @Get('/s3/configs')
   async genStsToken() {
     return new SuccessResponse({
@@ -75,28 +77,103 @@ export class MediaUploadController {
     });
   }
 
+  @Head('/s3/thumbnail')
+  async getThumbnailHead(
+    @Query('url') url: string,
+    @Query('width') width?: string,
+    @Query('height') height?: string,
+    @Query('longestSide') longestSide?: string,
+    @Query('mode') mode?: string,
+    @Query('forceRegenerate') forceRegenerate?: string,
+    @Res({ passthrough: true }) res?: Response,
+  ) {
+    const parseOptionalNumber = (value?: string) => {
+      if (value === undefined || value === null || value === '') {
+        return undefined;
+      }
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    };
+
+    const parsedWidth = parseOptionalNumber(width);
+    const parsedHeight = parseOptionalNumber(height);
+    const parsedLongestSide = parseOptionalNumber(longestSide);
+    const shouldForceRegenerate = forceRegenerate === 'true';
+
+    await this.mediaFileService.getThumbnailByUrl({
+      url,
+      mode: mode === 'exact' || mode === 'longest-edge' ? (mode as 'exact' | 'longest-edge') : undefined,
+      width: parsedWidth,
+      height: parsedHeight,
+      longestSide: parsedLongestSide,
+      forceRegenerate: shouldForceRegenerate,
+    });
+
+    if (res) {
+      res.status(200).end();
+    }
+    return;
+  }
+
+  @Get('/s3/thumbnail')
+  async getThumbnailByUrl(
+    @Query('url') url: string,
+    @Query('width') width?: string,
+    @Query('height') height?: string,
+    @Query('longestSide') longestSide?: string,
+    @Query('mode') mode?: string,
+    @Query('forceRegenerate') forceRegenerate?: string,
+    @Query('redirect') redirect?: string,
+    @Res({ passthrough: true }) res?: Response,
+  ) {
+    const parseOptionalNumber = (value?: string) => {
+      if (value === undefined || value === null || value === '') {
+        return undefined;
+      }
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    };
+
+    const parsedWidth = parseOptionalNumber(width);
+    const parsedHeight = parseOptionalNumber(height);
+    const parsedLongestSide = parseOptionalNumber(longestSide);
+    const shouldForceRegenerate = forceRegenerate === 'true';
+
+    const result = await this.mediaFileService.getThumbnailByUrl({
+      url,
+      mode: mode === 'exact' || mode === 'longest-edge' ? (mode as 'exact' | 'longest-edge') : undefined,
+      width: parsedWidth,
+      height: parsedHeight,
+      longestSide: parsedLongestSide,
+      forceRegenerate: shouldForceRegenerate,
+    });
+
+    const shouldRedirect = redirect === 'false' ? false : result.shouldRedirect;
+
+    if (shouldRedirect && res) {
+      res.redirect(301, result.url);
+      return;
+    }
+
+    return new SuccessResponse({
+      data: {
+        url: result.url,
+        etag: result.etag,
+        isNewlyGenerated: result.isNewlyGenerated,
+        bucketId: result.bucketId,
+      },
+    });
+  }
+
   @Post('/s3/file')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFileStream(@UploadedFile() file: any, @Body('key') key: string) {
     const s3Helpers = new S3Helpers();
-    let thumbKey: string | undefined = undefined;
+    // NOTE: 原有的缩略图生成逻辑已交由独立服务处理，这里禁用本地生成与上传缩略图。
     const suffix = key.split('.').pop()?.toLowerCase();
     if (config.s3.randomFilename) {
       const id = nanoid();
       key = `r/${id}.${suffix}`;
-      if (['jpeg', 'png', 'webp', 'avif', 'gif', 'heic', 'heif', 'jpg'].includes(suffix) && config.s3.autoGenerateThumbnail) {
-        thumbKey = `r_thumb/${id}.${suffix}`;
-      }
-    } else if (['jpeg', 'png', 'webp', 'avif', 'gif', 'heic', 'heif', 'jpg'].includes(suffix) && config.s3.autoGenerateThumbnail) {
-      thumbKey = key
-        .split('/')
-        .map((it, i, arr) => (i === arr.length - 2 ? `${it}_thumb` : it))
-        .join('/');
-    }
-
-    if (thumbKey) {
-      const thumbFile = await generateThumbnail(file.buffer);
-      await s3Helpers.uploadFile(thumbFile.buffer, thumbKey);
     }
     const url = await s3Helpers.uploadFile(file.buffer, key);
     const data = config.s3.isPrivate ? await s3Helpers.getSignedUrl(key) : url;

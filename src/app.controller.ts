@@ -161,6 +161,7 @@ export class AppController {
         workbench: config.server.customization.workbench,
         visionProWorkflows: config.server.customization.visionProWorkflows,
         initTeam: Boolean(config.server.webhook.initTeam),
+        imageThumbnail: config.s3ThumbnailBuckets?.length > 0,
       },
       auth: {
         enabled: config.auth.enabled,

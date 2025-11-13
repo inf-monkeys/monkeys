@@ -10,6 +10,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { createHash } from 'crypto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
+import { GetThumbnailOptions, MediaThumbnailService, ThumbnailWithMeta } from './media.thumbnail.service';
 
 @Injectable()
 export class MediaFileService {
@@ -18,6 +19,7 @@ export class MediaFileService {
   constructor(
     private readonly mediaRepository: MediaFileRepository,
     private readonly toolsForwardService: ToolsForwardService,
+    private readonly mediaThumbnailService: MediaThumbnailService,
   ) {}
 
   public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[], filterNeuralModel?: 'only' | 'exclude' | 'all') {
@@ -691,5 +693,9 @@ export class MediaFileService {
     });
 
     return createdMedia;
+  }
+
+  public async getThumbnailByUrl(options: GetThumbnailOptions): Promise<ThumbnailWithMeta> {
+    return this.mediaThumbnailService.getThumbnailByUrl(options);
   }
 }

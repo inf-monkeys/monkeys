@@ -364,6 +364,110 @@ export interface S3Config {
   publicAccessUrl: string;
 }
 
+export interface S3ThumbnailConfig {
+  quality: number;
+}
+
+export type S3ThumbnailUrlPatternType = 'bucket-hostname' | 'provider-hostname';
+
+export interface S3ThumbnailUrlPattern {
+  id: string;
+  type: S3ThumbnailUrlPatternType;
+  hostname: string;
+  preferred?: boolean;
+  bucketSegment?: string;
+}
+
+export interface S3ThumbnailBucketConfig {
+  id: string;
+  name: string;
+  provider: string;
+  config: Record<string, any>;
+  hostname: string;
+  urlPatterns: S3ThumbnailUrlPattern[];
+  preferredUrlPatternId: string;
+  thumbnailPrefix?: string;
+}
+
+type RawS3ThumbnailUrlPattern = {
+  id: string;
+  type: S3ThumbnailUrlPatternType;
+  hostname: string;
+  preferred?: boolean;
+  bucketSegment?: string;
+};
+
+type RawS3ThumbnailBucketConfig = {
+  id: string;
+  name: string;
+  provider: string;
+  config?: Record<string, any>;
+  urlPatterns?: RawS3ThumbnailUrlPattern[];
+  thumbnailPrefix?: string;
+};
+
+const normalizeS3ThumbnailUrlPatterns = (bucketId: string, patterns?: RawS3ThumbnailUrlPattern[]): S3ThumbnailUrlPattern[] => {
+  if (!patterns || patterns.length === 0) {
+    throw new Error(`Bucket ${bucketId} 缺少 urlPatterns 配置`);
+  }
+
+  return patterns.map((pattern, index) => {
+    if (!pattern || typeof pattern !== 'object') {
+      throw new Error(`Bucket ${bucketId} 的 urlPatterns[${index}] 配置无效`);
+    }
+    if (!pattern.id) {
+      throw new Error(`Bucket ${bucketId} 的 urlPattern 缺少 id`);
+    }
+    if (!pattern.hostname) {
+      throw new Error(`Bucket ${bucketId} 的 urlPattern ${pattern.id} 缺少 hostname`);
+    }
+    if (pattern.type === 'provider-hostname' && !pattern.bucketSegment) {
+      throw new Error(`Bucket ${bucketId} 的 urlPattern ${pattern.id} 缺少 bucketSegment`);
+    }
+
+    return {
+      id: pattern.id,
+      type: pattern.type,
+      hostname: pattern.hostname,
+      preferred: pattern.preferred ?? false,
+      bucketSegment: pattern.bucketSegment,
+    };
+  });
+};
+
+const normalizeS3ThumbnailBucketConfig = (rawBucket: RawS3ThumbnailBucketConfig): S3ThumbnailBucketConfig => {
+  if (!rawBucket || typeof rawBucket !== 'object') {
+    throw new Error('存在无效的 s3-thumb-buckets 配置');
+  }
+  if (!rawBucket.id) {
+    throw new Error('存在缺少 id 的 s3-thumb-bucket 配置');
+  }
+  if (!rawBucket.name) {
+    throw new Error(`Bucket ${rawBucket.id} 缺少 name 配置`);
+  }
+  if (!rawBucket.provider) {
+    throw new Error(`Bucket ${rawBucket.id} 缺少 provider 配置`);
+  }
+
+  const urlPatterns = normalizeS3ThumbnailUrlPatterns(rawBucket.id, rawBucket.urlPatterns);
+  const preferredPattern = urlPatterns.find((pattern) => pattern.preferred) || urlPatterns[0];
+
+  if (!preferredPattern) {
+    throw new Error(`Bucket ${rawBucket.id} 至少需要一个 urlPattern`);
+  }
+
+  return {
+    id: rawBucket.id,
+    name: rawBucket.name,
+    provider: rawBucket.provider,
+    config: rawBucket.config || {},
+    hostname: preferredPattern.hostname,
+    urlPatterns,
+    preferredUrlPatternId: preferredPattern.id,
+    thumbnailPrefix: rawBucket.thumbnailPrefix,
+  };
+};
+
 export enum LlmModelEndpointType {
   CHAT_COMPLETIONS = 'chat_completions',
   COMPLITIONS = 'completions',
@@ -474,6 +578,8 @@ export interface Config {
   comfyui: ComfyUICofig;
   auth: AuthConfig;
   s3: S3Config;
+  s3Thumbnail: S3ThumbnailConfig;
+  s3ThumbnailBuckets: S3ThumbnailBucketConfig[];
   models: LlmModelConfig[];
   proxy: ProxyConfig;
   llm: LLmConfig;
@@ -486,6 +592,9 @@ export interface Config {
   agentv2: AgentV2Config;
   modelTraining: ModelTrainingConfig;
 }
+
+const rawS3ThumbnailBuckets = readConfig('s3-thumb-buckets', []);
+const resolvedS3ThumbnailBuckets = Array.isArray(rawS3ThumbnailBuckets) ? rawS3ThumbnailBuckets.map((bucket) => normalizeS3ThumbnailBucketConfig(bucket as RawS3ThumbnailBucketConfig)) : [];
 
 const port = readConfig('server.port', 3000);
 const appUrl = readConfig('server.appUrl', `http://127.0.0.1:${port}`);
@@ -731,6 +840,10 @@ export const config: Config = {
     bucket: readConfig('s3.bucket'),
     publicAccessUrl: readConfig('s3.publicAccessUrl'),
   },
+  s3Thumbnail: {
+    quality: readConfig('s3-thumbnail.quality', 80),
+  },
+  s3ThumbnailBuckets: resolvedS3ThumbnailBuckets,
   models: readConfig('models', []),
   proxy: {
     enabled: readConfig('proxy.enabled', false),

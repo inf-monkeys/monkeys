@@ -27,3 +27,16 @@ export const getImageSize = (url: string): Promise<{ width: number; height: numb
     img.src = url;
   });
 };
+
+export const getThumbUrl = (url: string, enableSystemImageThumbnail: boolean = false) => {
+  if (enableSystemImageThumbnail) {
+    const systemPrefixAPIPath = '/api/medias/s3/thumbnail';
+    const systemPrefixAPIUrl = new URL(systemPrefixAPIPath, window.location.origin);
+    systemPrefixAPIUrl.searchParams.set('url', url);
+    return systemPrefixAPIUrl.toString();
+  } else {
+    const urlPath = url.split('/');
+    const urlPathLength = urlPath.length;
+    return urlPath.map((it, i) => (i === urlPathLength - 2 ? `${it}_thumb` : it)).join('/');
+  }
+};

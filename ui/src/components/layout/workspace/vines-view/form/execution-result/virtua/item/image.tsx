@@ -4,11 +4,12 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { useAsyncEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isObject } from 'lodash';
+import { get, isObject } from 'lodash';
 import { Copy } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { ExectuionResultGridDisplayType } from '@/apis/common/typings';
 import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-image-preview';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import { useCopy } from '@/hooks/use-copy.ts';
 import useUrlState from '@/hooks/use-url-state';
 import { useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
+import { getThumbUrl } from '@/utils/file';
 
 import { IClickBehavior } from '../../grid/item';
 
@@ -45,12 +47,6 @@ interface IVirtuaExecutionResultGridImageItemProps {
   displayType?: ExectuionResultGridDisplayType;
 }
 
-export function getThumbUrl(url: string) {
-  const urlPath = url.split('/');
-  const urlPathLength = urlPath.length;
-  return urlPath.map((it, i) => (i === urlPathLength - 2 ? `${it}_thumb` : it)).join('/');
-}
-
 export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResultGridImageItemProps> = ({
   src,
   alt,
@@ -70,6 +66,9 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const { copy } = useCopy();
   const { images, setPosition } = useExecutionImageResultStore();
 
+  const { data: oem } = useSystemConfig();
+  const enableSystemImageThumbnail = get(oem, ['theme', 'imageThumbnail'], false);
+
   const altLabel = isObject(alt) ? alt.label.toString() : alt;
 
   const altContent = isObject(alt) ? alt.value : alt;
@@ -78,7 +77,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const isMiniFrame = mode === 'mini';
   useAsyncEffect(async () => {
     if (!src) return;
-    const thumbnailSrc = getThumbUrl(src);
+    const thumbnailSrc = getThumbUrl(src, enableSystemImageThumbnail);
     if (await checkImageUrlAvailable(thumbnailSrc)) {
       setPreviewSrc(thumbnailSrc);
     } else {

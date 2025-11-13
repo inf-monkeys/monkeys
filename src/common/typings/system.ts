@@ -80,6 +80,7 @@ export interface ISystemConfig {
     workbench: CustomizationWorkbench;
     visionProWorkflows?: string[];
     initTeam: boolean;
+    imageThumbnail?: boolean;
   };
   auth: {
     enabled: AuthMethod[];
