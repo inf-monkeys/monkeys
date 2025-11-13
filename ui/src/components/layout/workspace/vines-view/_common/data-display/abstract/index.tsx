@@ -72,8 +72,8 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
             {isResultFailed && (
               <div className="flex h-40 w-full flex-col items-center justify-center gap-2">
                 <CircleX
-                  className={cn(!oem?.theme?.icons?.error && 'stroke-red-10')}
-                  style={oem?.theme?.icons?.error ? { stroke: oem.theme.icons.error } : {}}
+                  className={cn(!oem?.theme?.icons?.error?.color && 'stroke-red-10')}
+                  style={oem?.theme?.icons?.error?.color ? { stroke: oem?.theme?.icons?.error?.color } : {}}
                   size={36}
                 />
                 <h1 className="text-sm font-bold">{t('common.workflow.status.FAILED')}</h1>

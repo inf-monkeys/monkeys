@@ -131,6 +131,17 @@ export type CustomizationUgc = {
   subtitle: boolean;
 };
 
+export type CustomIcon = {
+  color?: string;
+  url?: string;
+  type?: 'svg' | 'image';
+};
+
+export type CustomIcons = {
+  error?: CustomIcon;
+  empty?: CustomIcon;
+};
+
 export interface ISystemConfig {
   theme: {
     id?: string;
@@ -155,9 +166,7 @@ export interface ISystemConfig {
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
-    icons?: {
-      error?: string;
-    };
+    icons?: CustomIcons;
     views: {
       form: CustomizationFormView;
     };

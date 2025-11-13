@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { ChevronDown, Inbox } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { Empty } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Spinner } from '@/components/ui/spinner';
@@ -129,14 +130,7 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
         <ScrollArea className="h-72">
           {!searchResult.length && (
             <div className="mb-4 flex h-64 w-full flex-col items-center justify-center">
-              {isLoading ? (
-                <Spinner />
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Inbox size={24} />
-                  <p>{t('common.load.empty')}</p>
-                </div>
-              )}
+              {isLoading ? <Spinner /> : <Empty />}
             </div>
           )}
           <div className="flex flex-col gap-2">

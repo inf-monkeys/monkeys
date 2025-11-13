@@ -13,7 +13,7 @@ import {
 import { useDebounceEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import _, { get, isNull } from 'lodash';
-import { CircleSlash, MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
@@ -37,6 +37,7 @@ import { RenderTags } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { RemoteDataTable } from '@/components/ui/data-table/remote';
+import { Empty } from '@/components/ui/empty';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
@@ -458,10 +459,11 @@ export const UgcView = <E extends object>({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: { delay: 0.3 } }}
                   >
-                    <CircleSlash size={64} />
+                    {/* <CircleSlash size={64} />
                     <div className="mt-4 flex flex-col text-center">
                       <h2 className="font-bold">{t('common.load.empty')}</h2>
-                    </div>
+                    </div> */}
+                    <Empty size={64} customIconSize={128} />
                   </motion.div>
                 )
               ) : (

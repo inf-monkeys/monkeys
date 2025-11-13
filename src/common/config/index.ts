@@ -136,6 +136,17 @@ export type CustomizationUgc = {
   subtitle?: boolean;
 };
 
+export type CustomIcon = {
+  color?: string;
+  url?: string;
+  type?: 'svg' | 'image';
+};
+
+export type CustomIcons = {
+  error?: CustomIcon;
+  empty?: CustomIcon;
+};
+
 export interface ServerConfig {
   port: number;
   appId: string;
@@ -168,9 +179,7 @@ export interface ServerConfig {
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
-    icons: {
-      error?: string;
-    };
+    icons: CustomIcons;
     views: {
       form: CustomizationFormView;
     };
@@ -635,9 +644,7 @@ export const config: Config = {
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),
       },
-      icons: {
-        error: readConfig('server.customization.icons.error', undefined),
-      },
+      icons: readConfig('server.customization.icons', {}),
       views: {
         form: {
           toast: {

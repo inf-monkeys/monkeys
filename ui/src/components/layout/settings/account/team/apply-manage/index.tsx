@@ -8,6 +8,7 @@ import { updateTeamApply, useTeamJoinRequests, useTeamUsers } from '@/apis/authz
 import { ApplyItem } from '@/components/layout/settings/account/team/apply-manage/apply-item.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Empty } from '@/components/ui/empty';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Spinner } from '@/components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
@@ -74,14 +75,7 @@ export const ApplyManage: React.FC<IApplyManageProps> = ({ teamId }) => {
         <ScrollArea className="h-72">
           {(!applyListData || !applyListData.applyUserList || applyListData.applyUserList.length === 0) && (
             <div className="mb-4 flex h-64 w-full flex-col items-center justify-center">
-              {isLoading ? (
-                <Spinner />
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Inbox size={24} />
-                  <p>{t('common.load.empty')}</p>
-                </div>
-              )}
+              {isLoading ? <Spinner /> : <Empty />}
             </div>
           )}
           {applyListData?.applyUserList && (

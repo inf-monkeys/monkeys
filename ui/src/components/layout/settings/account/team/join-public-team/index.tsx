@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Inbox, PlusCircle } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -9,6 +9,7 @@ import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { JoinPublicTeamItem } from '@/components/layout/settings/account/team/join-public-team/team-item.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Empty } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Spinner } from '@/components/ui/spinner';
@@ -92,14 +93,7 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
         <ScrollArea className="h-72">
           {!searchResult.length && (
             <div className="mb-4 flex h-64 w-full flex-col items-center justify-center">
-              {isLoading ? (
-                <Spinner />
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Inbox size={24} />
-                  <p>{t('common.load.empty')}</p>
-                </div>
-              )}
+              {isLoading ? <Spinner /> : <Empty />}
             </div>
           )}
           <div className="flex flex-col gap-2">
