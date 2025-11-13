@@ -526,14 +526,16 @@ export const DesignTemplates: React.FC = () => {
           canEdit ? (
             <>
               <ImportDesignTemplateDialog visible={importDialogVisible} setVisible={setImportDialogVisible} onImport={handleImportProject} />
-              <Button
-                variant="outline"
-                size="small"
-                icon={<Upload size={15} />}
-                onClick={() => setImportDialogVisible(true)}
-              >
-                {t('common.utils.import', { defaultValue: '导入' })}
-              </Button>
+              <Tooltip content={t('common.utils.import', { defaultValue: '导入' })}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    icon={<Upload size={15} />}
+                    onClick={() => setImportDialogVisible(true)}
+                  />
+                </TooltipTrigger>
+              </Tooltip>
               <DesignAssociationEditorDialog />
               <CreateDesignProjectDialog isTemplate={true} />
             </>
