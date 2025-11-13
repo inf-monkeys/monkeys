@@ -63,11 +63,15 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
               preview,
               name,
               src,
+              uploadURL,
               progress: { uploadComplete, uploadStarted, percentage },
               isRemote,
               error,
               meta,
             }) => {
+              const originalSrc =
+                (meta.originUrl as string | undefined) || (meta.remoteUrl as string | undefined) || uploadURL || src;
+              const thumbSrc = preview || src || originalSrc;
               const isError = error && !isRemote;
               const isUploadComplete = uploadComplete || isRemote;
               return (
@@ -76,17 +80,17 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                   className="vines-center group relative h-48 min-w-28 overflow-hidden dark:bg-card-dark [&_.rc-image-mask]:absolute [&_.rc-image-mask]:z-[1] [&_.rc-image-mask]:h-full [&_.rc-image]:static"
                 >
                   {isUniImagePreview ? (
-                    <UniImagePreviewWrapper imageUrl={(meta.originUrl as string | undefined) || src}>
-                      <img src={preview} alt={name} />
+                    <UniImagePreviewWrapper imageUrl={originalSrc}>
+                      <img src={thumbSrc} alt={name} className="max-h-full max-w-full object-contain" />
                     </UniImagePreviewWrapper>
                   ) : (
                     <Image
-                      src={preview}
+                      src={thumbSrc}
                       fallback={isDarkMode ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
-                      className="border-0"
-                      style={{ border: 'none' }}
+                      className="max-h-full max-w-full border-0 object-contain [&_img]:max-h-full [&_img]:max-w-full [&_img]:object-contain"
+                      style={{ border: 'none', width: '100%', height: '100%' }}
                       preview={{
-                        src,
+                        src: originalSrc,
                         icons,
                         closeIcon,
                         mask: <Eye className="stroke-white" />,

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import Uppy, { Meta, UppyFile } from '@uppy/core';
+import ThumbnailGenerator from '@uppy/thumbnail-generator/src';
 import { useClickAway, useCreation, useDrop, useLatest, useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get, isEmpty } from 'lodash';
@@ -51,6 +52,11 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         restrictions: { maxFileSize, maxNumberOfFiles: max, minNumberOfFiles: min },
       })
         .use(RemoteUrlToFile)
+        .use(ThumbnailGenerator, {
+          waitForThumbnailsBeforeUpload: true,
+          thumbnailType: 'image/png',
+          thumbnailHeight: 192,
+        })
         .use(FileMd5)
         .use(RapidUpload)
         .use(VinesUpload, { ...(basePath && { basePath }) }),
