@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import dayjs from 'dayjs';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -33,6 +34,12 @@ export const ExportAssetConfig: React.FC<IExportAssetConfigProps> = ({ selectedA
     }
   };
 
+  const handleGenerateUniversalVersion = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const version = dayjs().format('YYYYMMDDHHmmss');
+    setUniversalVersion(version);
+  };
   return (
     <Form {...form}>
       <form>
@@ -54,6 +61,9 @@ export const ExportAssetConfig: React.FC<IExportAssetConfigProps> = ({ selectedA
                   </div>
                   <Button variant="outline" onClick={handleUpdateUniversalVersion}>
                     {t('common.utils.update')}
+                  </Button>
+                  <Button variant="outline" onClick={handleGenerateUniversalVersion}>
+                    {t('common.utils.generate')}
                   </Button>
                 </div>
                 {selectedAssets.map((asset, index) => (

@@ -89,8 +89,10 @@ export const ExportTeamAsBuiltInMarket: React.FC<IExportTeamAsBuiltInMarketProps
         toast.promise(exportAssetsByAssetList(queryData), {
           loading: t('common.operate.loading'),
           success: (data) => {
+            const ts = new Date().getTime();
+
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            downloadFile(blob, `presetApp.${new Date().getTime()}.json`);
+            downloadFile(blob, `presetApp.${ts}.json`);
 
             // pinned pages
             const workflowPinnedPages = pageWithGroups?.pages.filter((page) => page.workflowId && page.workflow) ?? [];
@@ -124,7 +126,7 @@ export const ExportTeamAsBuiltInMarket: React.FC<IExportTeamAsBuiltInMarketProps
             }));
 
             const pinnedBlob = new Blob([JSON.stringify(exportPages, null, 2)], { type: 'application/json' });
-            downloadFile(pinnedBlob, `presetAppSort.${new Date().getTime()}.json`);
+            downloadFile(pinnedBlob, `presetAppSort.${ts}.json`);
 
             return t('common.operate.success');
           },

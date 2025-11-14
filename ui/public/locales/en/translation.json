@@ -86,7 +86,8 @@
       "tips": "Tips",
       "optional": "Opt.",
       "rollback": "Rollback",
-      "start": "Start"
+      "start": "Start",
+      "generate": "Generate"
     },
     "status": {
       "active": "Active",

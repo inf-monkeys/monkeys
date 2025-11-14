@@ -86,7 +86,8 @@
       "tips": "提示",
       "optional": "可选",
       "rollback": "回滚",
-      "start": "开始"
+      "start": "开始",
+      "generate": "生成"
     },
     "status": {
       "active": "活跃",
