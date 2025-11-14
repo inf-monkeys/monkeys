@@ -59,45 +59,6 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
     return (
       <ScrollArea className={cn('[&>div>div]:h-full', className)} style={style} disabledOverflowMask={!overflowMask}>
         <div className="flex h-full w-full flex-col gap-1">
-<<<<<<< Updated upstream
-          <VinesImageGroup>
-            {!isResultFailed &&
-              previewData.map(({ name, type, value }, i) => {
-                return (
-                  <div key={name} className="flex flex-col items-start justify-center">
-                    {visibleKey && <h1 className="break-all text-sm font-medium">{name}</h1>}
-                    {type === 'string' && <VinesAbstractString>{value}</VinesAbstractString>}
-                    {type === 'boolean' && <VinesAbstractBoolean>{value}</VinesAbstractBoolean>}
-                    {type === 'url' && <VinesAbstractUrl>{value}</VinesAbstractUrl>}
-                    {type === 'image' && <VinesAbstractImage>{value}</VinesAbstractImage>}
-                    {type === 'pdb' && (
-                      <VinesAbstractPDB height={(style?.height as number) ?? void 0}>{value}</VinesAbstractPDB>
-                    )}
-                    {type === 'video' && <VinesAbstractVideo>{value?.toString() ?? ''}</VinesAbstractVideo>}
-                    {i !== previewDataLength - 1 && <Separator className="mt-3" />}
-                  </div>
-                );
-              })}
-            {!isResultFailed && (!previewDataLength || isValueEmpty) && (
-              <div className="flex h-40 w-full flex-col items-center justify-center gap-2">
-                <CircleSlash className="stroke-gray-10" size={36} />
-                <h1 className="text-sm font-bold">
-                  {t('workspace.pre-view.actuator.detail.abstract-data-preview.empty')}
-                </h1>
-              </div>
-            )}
-            {isResultFailed && (
-              <div className="flex h-40 w-full flex-col items-center justify-center gap-2">
-                <CircleX
-                  className={cn(!oem?.theme?.icons?.error?.color && 'stroke-red-10')}
-                  style={oem?.theme?.icons?.error?.color ? { stroke: oem?.theme?.icons?.error?.color } : {}}
-                  size={36}
-                />
-                <h1 className="text-sm font-bold">{t('common.workflow.status.FAILED')}</h1>
-              </div>
-            )}
-          </VinesImageGroup>
-=======
           {/* POM Measurement Table Display */}
           {isPomData && (
             <VinesImageGroup>
@@ -136,8 +97,8 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
               {isResultFailed && (
                 <div className="flex h-40 w-full flex-col items-center justify-center gap-2">
                   <CircleX
-                    className={cn(!oem?.theme?.icons?.error && 'stroke-red-10')}
-                    style={oem?.theme?.icons?.error ? { stroke: oem.theme.icons.error } : {}}
+                    className={cn(!oem?.theme?.icons?.error?.color && 'stroke-red-10')}
+                    style={oem?.theme?.icons?.error?.color ? { stroke: oem?.theme?.icons?.error?.color } : {}}
                     size={36}
                   />
                   <h1 className="text-sm font-bold">{t('common.workflow.status.FAILED')}</h1>
@@ -145,7 +106,6 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
               )}
             </VinesImageGroup>
           )}
->>>>>>> Stashed changes
         </div>
       </ScrollArea>
     );
