@@ -341,14 +341,16 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                       )}
                     >
                       {isUniImagePreview ? (
-                        <UniImagePreviewWrapper>
+                        <UniImagePreviewWrapper
+                          imageUrl={item.render.origin as string}
+                          onClick={() => {
+                            setPosition(index);
+                          }}
+                        >
                           <CarouselItemImage
                             image={item as ImagesResultWithOrigin}
                             index={index}
                             handleDragStart={handleDragStart}
-                            onClick={() => {
-                              setPosition(index);
-                            }}
                           />
                         </UniImagePreviewWrapper>
                       ) : (
@@ -415,14 +417,16 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                 return (
                   <div key={item.render.key} className="aspect-square w-full overflow-hidden rounded-md">
                     {isUniImagePreview ? (
-                      <UniImagePreviewWrapper>
+                      <UniImagePreviewWrapper
+                        imageUrl={item.render.origin as string}
+                        onClick={() => {
+                          setPosition(index);
+                        }}
+                      >
                         <CarouselItemImage
                           image={item as ImagesResultWithOrigin}
                           index={index}
                           handleDragStart={handleDragStart}
-                          onClick={() => {
-                            setPosition(index);
-                          }}
                         />
                       </UniImagePreviewWrapper>
                     ) : (

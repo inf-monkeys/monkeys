@@ -21,29 +21,32 @@ export const UniImagePreviewWrapper: React.FC<UniImagePreviewWrapperProps> = ({
   const { data: oem } = useSystemConfig();
   const enableUniImagePreview = oem?.theme.uniImagePreview ?? false;
 
+  if (!enableUniImagePreview) {
+    return <>{children}</>;
+  }
+
+  const childElement = React.Children.only(children) as React.ReactElement;
+  const childOnClick = childElement.props.onClick as ((e: React.MouseEvent) => void) | undefined;
+
   const handleClick = (e: React.MouseEvent) => {
+    childOnClick?.(e);
     onClick?.(e);
+    if (e.defaultPrevented) return;
 
     // 尝试从子元素中获取图片URL
-    const imgElement = e.target as HTMLElement;
-    const img = imgElement.tagName === 'IMG' ? imgElement : imgElement.querySelector('img');
+    const target = e.target as HTMLElement | null;
+    const img = target instanceof HTMLElement ? (target.tagName === 'IMG' ? target : target.closest('img')) : null;
 
     if (img instanceof HTMLImageElement) {
       openPreview(imageUrl || img.src);
     }
   };
 
-  if (!enableUniImagePreview) {
-    return children;
-  }
-
-  return React.cloneElement(React.Children.only(children) as React.ReactElement, {
+  return React.cloneElement(childElement, {
     onClick: handleClick,
-    className: className
-      ? `${(children as React.ReactElement).props.className || ''} ${className}`.trim()
-      : (children as React.ReactElement).props.className,
+    className: className ? `${childElement.props.className || ''} ${className}`.trim() : childElement.props.className,
     style: {
-      ...(children as React.ReactElement).props.style,
+      ...childElement.props.style,
       cursor: 'pointer',
     },
   });
