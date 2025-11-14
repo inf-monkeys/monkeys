@@ -9,10 +9,11 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   onChange?: (value: string) => void;
   onEnterPress?: () => void;
   onDelPress?: () => void;
+  wrapperClassName?: string; // optional wrapper style for inline sizing
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, onChange, onEnterPress, onDelPress, type, ...props }, ref) => {
+  ({ className, onChange, onEnterPress, onDelPress, wrapperClassName, type, ...props }, ref) => {
     const { data: oem } = useSystemConfig();
     const themeMode = get(oem, 'theme.themeMode', 'shadow');
 
@@ -21,7 +22,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const roundedClass = isShadowMode ? 'rounded-lg' : 'rounded-md';
 
     return (
-      <div className="p-1">
+      <div className={cn('p-1', wrapperClassName)}>
         <input
           type={type}
           className={cn(

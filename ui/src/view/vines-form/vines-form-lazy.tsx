@@ -71,7 +71,7 @@ const VinesForm: React.FC = () => {
       <div
         ref={ref}
         className={cn(
-          'relative grid size-full grid-cols-5 p-global',
+          'relative grid size-full grid-cols-6 p-global',
           workbenchVisible && 'p-global',
           isMiniFrame && 'h-[calc(100%-(var(--global-spacing)*8))] grid-cols-1 p-2',
           vinesIFrameVisible && 'p-global',
@@ -97,7 +97,7 @@ const VinesForm: React.FC = () => {
         )}
         <VinesExecutionResult
           className={cn(
-            onlyResult ? 'col-span-5' : 'col-span-3',
+            onlyResult ? 'col-span-6' : 'col-span-4',
             isMiniFrame && !historyVisible ? 'pointer-events-none z-0 opacity-0 [&_*]:pointer-events-none' : '',
           )}
           event$={event$}

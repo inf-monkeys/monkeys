@@ -105,9 +105,10 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         isUseWorkbench && (associations?.filter((it) => it.enabled).length ?? 0) > 0
           ? containerWidth - 80
           : containerWidth,
-      columnGutter: 8,
+      // 适当增大列间距，避免相邻卡片边框在视觉上“重叠”
+      columnGutter: 12,
       columnWidth: 200,
-      rowGutter: 8,
+      rowGutter: 12,
       columnCount: isMiniFrame ? 2 : void 0,
     },
     [data.length, workflowId, shouldFilterError, displayType],
@@ -225,24 +226,40 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         : containerWidth;
 
     const itemSize = 200;
-    const gap = 8;
+    // 网格布局下也同步增大间距
+    const gap = 12;
     const columnsCount = Math.floor((containerWidthValue + gap) / (itemSize + gap));
+
+    const isPomItem = (item: IVinesExecutionResultItem) => {
+      const d: any = item?.render?.data as any;
+      const payload = d && typeof d === 'object' ? (d.data ? d.data : d) : null;
+      return !!(payload && Array.isArray(payload.measurements_table) && payload.measurements_table.length > 0);
+    };
 
     return (
       <div
-        className="grid gap-2 overflow-auto"
+        className="grid overflow-y-auto overflow-x-hidden"
         style={{
           gridTemplateColumns: `repeat(${Math.max(1, columnsCount)}, 1fr)`,
           padding: '8px',
           height: '100%',
+          gap,
         }}
         onScroll={handleGridScroll}
       >
-        {data.map((item, index) => (
-          <div key={`${index}-${item.render.key}`} className="aspect-square" style={{ minHeight: '200px' }}>
-            {renderItem(item)}
-          </div>
-        ))}
+        {data.map((item, index) => {
+          const isPom = isPomItem(item);
+          const span2 = isPom && columnsCount >= 2;
+          return (
+            <div
+              key={`${index}-${item.render.key}`}
+              className={`${span2 ? 'col-span-2 aspect-[3/2]' : 'aspect-square'}`}
+              style={{ minHeight: isPom ? '320px' : '200px' }}
+            >
+              {renderItem(item)}
+            </div>
+          );
+        })}
       </div>
     );
   }, [data, containerWidth, isUseWorkbench, associations, renderItem, handleGridScroll]);

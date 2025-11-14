@@ -63,6 +63,13 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
 
   const progressType = get(oem, 'theme.views.form.progress', 'infinite');
 
+  // Detect POM result (to enlarge in grid layout)
+  const isPom = (() => {
+    const obj: any = data as any;
+    const payload = obj && typeof obj === 'object' ? (obj.data ? obj.data : obj) : null;
+    return !!(payload && Array.isArray(payload.measurements_table) && payload.measurements_table.length > 0);
+  })();
+
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
     onSelect?.(render.key);
@@ -129,6 +136,8 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
           className={`relative overflow-hidden rounded-lg border border-input shadow-sm ${
             displayType === 'grid' ? 'aspect-square h-full' : ''
           }`}
+          // 为每个卡片增加左右外边距，避免相邻边框在视觉上贴合产生“重叠线”
+          style={{ marginLeft: 6, marginRight: 6 }}
         >
           <VirtuaExecutionResultGridWrapper
             data={result}
@@ -164,9 +173,11 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
       return (
         <div
           className={`relative overflow-hidden rounded-lg border border-input shadow-sm ${
-            displayType === 'grid' ? 'aspect-square h-full' : ''
+            displayType === 'grid' ? (isPom ? 'aspect-[3/2] h-full' : 'aspect-square h-full') : ''
           }`}
           onClick={handleSelect}
+          // 同步为非图片卡片增加左右外边距，避免边框贴合
+          style={{ marginLeft: 6, marginRight: 6 }}
         >
           <VirtuaExecutionResultGridWrapper
             data={result}
