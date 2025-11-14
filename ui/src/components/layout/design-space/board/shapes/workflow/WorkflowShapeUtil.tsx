@@ -504,12 +504,81 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       }
 
       // 提取可展示的数据（优先使用 output）
-      const data = executionDetail?.output ?? executionDetail;
+      const rawData = executionDetail?.output ?? executionDetail;
       let result: string = '';
       let imageUrl: string = '';
       let imageUrls: string[] = [];
+      // 支持多段结果（例如一个 workflow 输出多段文本，分别分发到多个 Output 框）
+      let multiSegments: Array<{ text?: string; imageUrl?: string; images?: string[] }> = [];
 
       console.log('[Workflow] 执行完成，准备提取展示结果');
+
+      // 辅助函数：在任意嵌套结构中查找 output 数组（或其字符串形式）
+      const extractOutputArray = (obj: any): any[] | null => {
+        if (!obj) return null;
+
+        // 如果本身就是数组且长得像 [{ type, data }]
+        if (Array.isArray(obj) && obj.length > 0 && obj[0] && typeof obj[0] === 'object') {
+          const first = obj[0] as any;
+          if (typeof first.type === 'string' && 'data' in first) {
+            return obj;
+          }
+        }
+
+        // 如果是对象
+        if (typeof obj === 'object') {
+          // 1) 直接的 output 字段
+          if (Array.isArray((obj as any).output)) {
+            return (obj as any).output as any[];
+          }
+
+          // 2) output 是字符串形式的 JSON
+          if (typeof (obj as any).output === 'string') {
+            const str = (obj as any).output as string;
+            try {
+              const parsed = JSON.parse(str);
+              const fromParsed = extractOutputArray(parsed);
+              if (fromParsed) return fromParsed;
+            } catch {
+              // ignore
+            }
+          }
+
+          // 3) 在所有字段中递归查找
+          for (const key in obj) {
+            if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+            const val = (obj as any)[key];
+            if (val && (typeof val === 'object' || typeof val === 'string')) {
+              const found = extractOutputArray(val);
+              if (found) return found;
+            }
+          }
+        }
+
+        // 如果是字符串，尝试直接解析
+        if (typeof obj === 'string') {
+          const trimmed = obj.trim();
+          const start = Math.min(
+            ...['{', '['].map((ch) => {
+              const idx = trimmed.indexOf(ch);
+              return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
+            }),
+          );
+          const end = Math.max(trimmed.lastIndexOf('}'), trimmed.lastIndexOf(']'));
+          if (start !== Number.MAX_SAFE_INTEGER && end > start) {
+            const jsonCandidate = trimmed.slice(start, end + 1);
+            try {
+              const parsed = JSON.parse(jsonCandidate);
+              const fromParsed = extractOutputArray(parsed);
+              if (fromParsed) return fromParsed;
+            } catch {
+              // ignore
+            }
+          }
+        }
+
+        return null;
+      };
 
       // 辅助函数：递归查找嵌套对象中的 images 和 text
       const findImagesAndText = (obj: any): { images: string[]; text: string } => {
@@ -518,18 +587,18 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         if (!obj || typeof obj !== 'object') return found;
         
         // 检查当前层级的 images 和 text
-        if (Array.isArray(obj.images) && obj.images.length > 0) {
-          found.images.push(...obj.images.filter((it: any) => typeof it === 'string'));
+        if (Array.isArray((obj as any).images) && (obj as any).images.length > 0) {
+          found.images.push(...(obj as any).images.filter((it: any) => typeof it === 'string'));
         }
-        if (obj.text && typeof obj.text === 'string' && obj.text.trim()) {
-          found.text = obj.text;
+        if ((obj as any).text && typeof (obj as any).text === 'string' && (obj as any).text.trim()) {
+          found.text = (obj as any).text;
         }
         
         // 递归查找嵌套对象和数组
         for (const key in obj) {
           if (key === 'images' || key === 'text') continue; // 已经处理过了
           
-          const value = obj[key];
+          const value = (obj as any)[key];
           if (Array.isArray(value)) {
             // 如果是数组，遍历每个元素
             for (const item of value) {
@@ -549,6 +618,49 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         
         return found;
       };
+
+      // 从 Markdown/HTML 文本中尝试提取图片链接（用于多图拆分到多个 Output）
+      const extractImageUrlsFromContent = (content: string): string[] => {
+        if (!content) return [];
+        const urls = new Set<string>();
+
+        // 1) Markdown 图片语法: ![alt](url)
+        for (const m of content.matchAll(/!\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi)) {
+          urls.add(m[1]);
+        }
+        // 2) Markdown 链接（当链接目标是图片时）: [text](url)
+        for (const m of content.matchAll(/\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi)) {
+          const u = m[1];
+          if (/\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(u)) urls.add(u);
+        }
+        // 3) HTML 图片: <img src="url" ...>
+        for (const m of content.matchAll(/<img[^>]+src=["'](https?:\/\/[^"']+)["'][^>]*>/gi)) {
+          urls.add(m[1]);
+        }
+        // 4) 文本中的裸链接（以图片扩展名结尾）
+        for (const m of content.matchAll(/https?:\/\/[^\s"'')]+/gi)) {
+          const u = m[0];
+          if (/\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(u)) urls.add(u);
+        }
+
+        return Array.from(urls);
+      };
+
+      // 如果能直接从执行结果中解析出 output 数组，优先使用它进行多段分发
+      const directOutputArray = extractOutputArray(rawData);
+
+      // 如果 output 是 JSON 字符串（例如 sandbox 返回对象被序列化了），尝试解析
+      let data: any = rawData;
+      if (typeof data === 'string') {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed && typeof parsed === 'object') {
+            data = parsed;
+          }
+        } catch {
+          // 不是合法 JSON，则按普通字符串处理，后面会走 string 分支
+        }
+      }
 
       // 提取结果 - 优先处理 output 数组（格式化后的输出）
       if (data && typeof data === 'object') {
@@ -571,30 +683,47 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           result = data.text;
         }
 
-        // 2. 如果 data.output 是数组（格式化后的输出）
-        if (Array.isArray(data.output) && data.output.length > 0) {
-          const outputItems = data.output;
+        // 2. 如果能够解析到 output 数组（格式化后的输出）
+        const outputArrayFromData = directOutputArray ?? extractOutputArray(data);
+
+        if (outputArrayFromData && outputArrayFromData.length > 0) {
+          const outputItems = outputArrayFromData;
           const textParts: string[] = [];
           // 提取文本和图片
           for (const item of outputItems) {
+            const segment: { text?: string; imageUrl?: string; images?: string[] } = {};
             if (item.type === 'image' && item.data) {
               // 支持多图
               if (typeof item.data === 'string') imageUrls.push(item.data);
               if (!imageUrl && typeof item.data === 'string') imageUrl = item.data;
+              if (typeof item.data === 'string') {
+                segment.imageUrl = item.data;
+                segment.images = [item.data];
+              }
               // 如果图片有 alt 文本，也添加到文本结果中
               if (item.alt && typeof item.alt === 'string' && item.alt.trim()) {
                 textParts.push(item.alt);
+                if (item.alt.trim()) {
+                  segment.text = item.alt.trim();
+                }
               }
             } else if (item.type === 'text' && item.data) {
               const textContent = typeof item.data === 'string' ? item.data : JSON.stringify(item.data);
               if (textContent.trim()) {
                 textParts.push(textContent);
+                segment.text = textContent.trim();
               }
             } else if (item.type === 'json' && item.data) {
               const jsonContent = JSON.stringify(item.data, null, 2);
               if (jsonContent.trim()) {
                 textParts.push(jsonContent);
+                segment.text = jsonContent.trim();
               }
+            }
+
+            // 记录每一段，用于多 Output 分发
+            if (segment.text || segment.imageUrl || (segment.images && segment.images.length > 0)) {
+              multiSegments.push(segment);
             }
           }
           // 合并所有文本部分
@@ -672,9 +801,25 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         result = data;
       }
 
+      // 额外：从结果文本中提取图片 URL（用于 HTML / Markdown 中内嵌多图的场景）
+      if (typeof result === 'string' && result) {
+        const urlsFromContent = extractImageUrlsFromContent(result);
+        if (urlsFromContent.length > 0) {
+          imageUrls.push(...urlsFromContent);
+        }
+      }
+
       // 去重图片列表，并兼容单图字段
       imageUrls = Array.from(new Set(imageUrls.filter((it) => typeof it === 'string' && it.length > 0)));
       if (!imageUrl && imageUrls.length > 0) imageUrl = imageUrls[0];
+
+      // 如果没有多段文本，但存在多张图片且有多个 Output，按图片拆分为多段
+      if (!multiSegments.length && imageUrls.length > 1 && currentConnectedOutputs.length > 1) {
+        multiSegments = imageUrls.map((url) => ({
+          imageUrl: url,
+          images: [url],
+        }));
+      }
 
       // 确保 result 是字符串类型
       if (result && typeof result !== 'string') {
@@ -685,7 +830,10 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         result = `工作流 "${shape.props.workflowName}" 执行完成`;
       }
 
-      console.log('[Workflow] 执行结果:', typeof result === 'string' && result.length > 100 ? result.substring(0, 100) + '...' : result);
+      console.log(
+        '[Workflow] 执行结果:',
+        typeof result === 'string' && result.length > 100 ? result.substring(0, 100) + '...' : result,
+      );
       if (imageUrl) {
         console.log('[Workflow] 图片 URL:', imageUrl);
       }
@@ -693,22 +841,64 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       // 更新连接的 Output 框
       console.log('[Workflow] 更新连接的 Output 框:', currentConnectedOutputs);
 
-      for (const outputId of currentConnectedOutputs) {
-        const outputShape = editor.getShape(outputId as any) as any;
-        console.log('[Workflow] 找到 Output 框:', outputId, outputShape?.type);
+      const hasMultiSegments = multiSegments.length > 1 && currentConnectedOutputs.length > 1;
 
-        if (outputShape && outputShape.type === 'output') {
+      if (hasMultiSegments) {
+        console.log(
+          '[Workflow] 检测到多段输出，将按顺序分发到多个 Output 框',
+          multiSegments.length,
+          'segments ->',
+          currentConnectedOutputs.length,
+          'outputs',
+        );
+
+        currentConnectedOutputs.forEach((outputId, index) => {
+          const outputShape = editor.getShape(outputId as any) as any;
+          if (!outputShape || outputShape.type !== 'output') return;
+
+          const segment = multiSegments[Math.min(index, multiSegments.length - 1)];
+          const segText = segment.text || result || '';
+          const segImages =
+            (segment.images && segment.images.length > 0
+              ? segment.images
+              : segment.imageUrl
+                ? [segment.imageUrl]
+                : imageUrls) || [];
+          const segImageUrl = segment.imageUrl || segImages[0] || imageUrl || '';
+
           editor.updateShape({
             id: outputId as any,
             type: 'output',
             props: {
               ...outputShape.props,
-              content: result,
-              imageUrl: imageUrl,
-              images: imageUrls,
+              content: segText,
+              imageUrl: segImageUrl,
+              images: segImages,
             },
           });
-          console.log('[Workflow] Output 框已更新:', outputId, { images: imageUrls.length, hasImage: !!imageUrl });
+          console.log('[Workflow] Output 框已更新(多段):', outputId, {
+            index,
+            segTextPreview: typeof segText === 'string' && segText.length > 40 ? segText.slice(0, 40) + '...' : segText,
+          });
+        });
+      } else {
+        for (const outputId of currentConnectedOutputs) {
+          const outputShape = editor.getShape(outputId as any) as any;
+          console.log('[Workflow] 找到 Output 框:', outputId, outputShape?.type);
+
+          if (outputShape && outputShape.type === 'output') {
+            editor.updateShape({
+              id: outputId as any,
+              type: 'output',
+              props: {
+                ...outputShape.props,
+                content: result,
+                imageUrl: imageUrl,
+                images: imageUrls,
+              },
+            });
+            console.log('[Workflow] Output 框已更新:', outputId, { images: imageUrls.length, hasImage: !!imageUrl });
+          }
         }
       }
 
