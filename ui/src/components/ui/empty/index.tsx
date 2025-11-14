@@ -17,8 +17,7 @@ export const Empty = ({ icon, size = 24, customIconSize = size, ...props }: IEmp
   const { data: oem, isLoading, error } = useSystemConfig();
   const showIcon = !isLoading && !error;
   const emptyIcon = oem?.theme?.icons?.empty?.url;
-
-  console.log(showIcon, emptyIcon);
+  const hintTextColor = oem?.theme?.icons?.empty?.hintTextColor;
   return (
     <div className="flex flex-col items-center gap-2" {...props}>
       {showIcon ? (
@@ -34,7 +33,7 @@ export const Empty = ({ icon, size = 24, customIconSize = size, ...props }: IEmp
           <Inbox size={size} />
         )
       ) : null}
-      <p>{t('common.load.empty')}</p>
+      <p style={{ color: hintTextColor }}>{t('common.load.empty')}</p>
     </div>
   );
 };

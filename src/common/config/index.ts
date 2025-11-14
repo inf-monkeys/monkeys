@@ -144,6 +144,7 @@ export type CustomIcon = {
   color?: string;
   url?: string;
   type?: 'svg' | 'image';
+  hintTextColor?: string;
 };
 
 export type CustomIcons = {
