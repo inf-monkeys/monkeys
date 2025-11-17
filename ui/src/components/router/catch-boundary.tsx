@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { clearAllLocalData } from '@/hooks/use-local-storage';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@radix-ui/react-collapsible';
 
 interface ErrorBoundaryProps {
   error: Error;
@@ -28,16 +29,23 @@ export function ErrorComponent({ error }: ErrorBoundaryProps) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.92 }}
     >
-      <div className="flex items-center gap-2 font-bold text-black">
-        <h1 className="leading-tight text-black">{t('system.error.title')}</h1>
+      <div className="flex items-center gap-2 font-bold text-black-500">
+        <h1 className="leading-tight text-black-10">{t('system.error.title')}</h1>
       </div>
       <span className="-mt-4 text-sm text-muted-foreground">{t('system.error.desc')}</span>
       {showDetails && (
         <div className="max-w-full overflow-hidden rounded bg-gray-10 bg-opacity-10 p-2 backdrop-blur-sm">
-          <Separator className="my-2" />
-          <ScrollArea className="h-40" disabledOverflowMask>
-            <pre className="text-xs">{error?.stack}</pre>
-          </ScrollArea>
+          <Collapsible defaultOpen>
+            <CollapsibleTrigger asChild>
+              <p className="text-sm text-black-500">{t('system.error.show-detail')}</p>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <Separator className="my-2" />
+              <ScrollArea className="h-40" disabledOverflowMask>
+                <pre className="text-xs">{error?.stack}</pre>
+              </ScrollArea>
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       )}
       <TooltipProvider delayDuration={100}>
