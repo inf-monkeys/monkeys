@@ -5,7 +5,7 @@ import { MediaSource } from '@/database/entities/assets/media/media-file';
 import { CreateRichMediaDto } from '@/modules/assets/media/dto/req/create-rich-media.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Like, Not, Repository } from 'typeorm';
+import { In, IsNull, Like, Not, Raw, Repository } from 'typeorm';
 import { MediaFileEntity } from '../entities/assets/media/media-file';
 import { MediaFileAssetRepositroy } from './assets-media-file.repository';
 
@@ -46,9 +46,10 @@ export class MediaFileRepository {
         params: Like('%"type":"neural-model"%'),
       };
     } else if (filterNeuralModel === 'exclude') {
-      // 排除 neural-model：使用 NOT LIKE
+      // 排除 neural-model：需要包含 params 为 NULL 或不包含 neural-model 的记录
+      // 使用 Raw 查询来正确处理 NULL 值
       extraWhere = {
-        params: Not(Like('%"type":"neural-model"%')),
+        params: Raw((alias) => `(${alias} IS NULL OR ${alias} NOT LIKE '%"type":"neural-model"%')`),
       };
     }
     // filterNeuralModel === 'all' 时，extraWhere 保持 undefined
