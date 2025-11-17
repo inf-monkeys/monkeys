@@ -10,12 +10,13 @@ export function getPortAtPoint(editor: Editor, point: VecLike, opts?: { terminal
   // find the shape at that point - now support all shape types with ports
   const shape = editor.getShapeAtPoint(point, {
     hitInside: true,
-    // Allow node shapes and custom shapes (instruction, output, workflow)
+    // Allow node shapes and custom shapes (instruction, output, workflow, live-image)
     filter: (shape) =>
       editor.isShapeOfType<NodeShape>(shape, 'node') ||
       shape.type === 'instruction' ||
       shape.type === 'output' ||
-      shape.type === 'workflow',
+      shape.type === 'workflow' ||
+      shape.type === 'live-image',
     ...opts,
   });
   if (!shape) return null;
@@ -24,7 +25,12 @@ export function getPortAtPoint(editor: Editor, point: VecLike, opts?: { terminal
   let ports: Record<string, ShapePort> | null = null;
   if (editor.isShapeOfType<NodeShape>(shape, 'node')) {
     ports = getNodePorts(editor, shape);
-  } else if (shape.type === 'instruction' || shape.type === 'output' || shape.type === 'workflow') {
+  } else if (
+    shape.type === 'instruction' ||
+    shape.type === 'output' ||
+    shape.type === 'workflow' ||
+    shape.type === 'live-image'
+  ) {
     ports = getShapePorts(editor, shape as any);
   }
 

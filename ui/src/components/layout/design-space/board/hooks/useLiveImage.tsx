@@ -143,9 +143,10 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
 
       // 读取所有输出连线的 label，用于构成配置签名（同一草图+同一提示词集合则跳过）
       const connections = getShapePortConnections(editor, frame.id);
-      const outputConns = connections.filter(
-        (c) => c.terminal === 'start' && c.ownPortId === 'output',
-      );
+      // 这里不再强制要求 terminal === 'start'，这样无论是从实时转绘框拉线到 Output，
+      // 还是从 Output 左侧反向拉线到实时转绘，只要连到了 live-image 的 output 端口，
+      // 都会被视为实时转绘的输出连接。
+      const outputConns = connections.filter((c) => c.ownPortId === 'output');
       const labelsSignature = outputConns
         .map((conn) => {
           const connectionShape = editor.getShape(conn.connectionId as any) as any;
