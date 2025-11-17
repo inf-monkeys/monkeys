@@ -214,6 +214,7 @@ export const useUgcTools = (dto: IListUgcDto) => {
   const sliceList = sortedList.slice(limit * (page - 1), limit * page);
 
   const data: IPaginationListData<ICommonTool> = {
+    list: sliceList,
     page,
     limit,
     total: filteredList.length,
@@ -263,6 +264,9 @@ export const preloadUgcMediaData = (dto: IListUgcDto, filterNeuralModel?: 'only'
   const fetcher = vinesFetcher({ wrapper: paginationWrapper });
   return preload(swrUrl, fetcher);
 };
+
+export const useUgcMediaDataById = (assetId: string) =>
+  useSWR<IAssetItem<IMediaData> | undefined>(assetId ? `/api/media-files/${assetId}` : null, vinesFetcher());
 
 export const useUgcApplicationStore = (dto: IListUgcDto) =>
   useUgcItems<IApplicationStoreItemDetail>(dto, '/api/assets/workflow/marketplace');

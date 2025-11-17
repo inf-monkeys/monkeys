@@ -4,7 +4,7 @@ import { createLazyFileRoute, useNavigate, useParams } from '@tanstack/react-rou
 
 import { useTranslation } from 'react-i18next';
 
-import { useUgcMediaData } from '@/apis/ugc';
+import { useUgcMediaDataById } from '@/apis/ugc';
 import { AssetDetailPage } from '@/components/layout/ugc/detail/asset-detail-page';
 import { Button } from '@/components/ui/button';
 
@@ -13,19 +13,12 @@ export const AssetDetail: React.FC = () => {
   const navigate = useNavigate();
   const { navId, assetId } = useParams({ from: '/$teamId/nav/$navId/asset/$assetId/' });
 
-  // 获取资产数据
+  // 直接通过 ID 获取单个资产数据（优化：从加载10000条记录改为加载1条）
   const {
-    data: assetsData,
+    data: currentAsset,
     mutate,
     isLoading,
-  } = useUgcMediaData({
-    page: 1,
-    limit: 10000,
-    filter: {},
-  });
-
-  // 查找当前资产
-  const currentAsset = assetsData?.data?.find((asset) => asset.id === assetId);
+  } = useUgcMediaDataById(assetId);
 
   const handleBack = () => {
     if (navId === 'concept-design:design-models') {

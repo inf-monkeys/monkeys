@@ -5,7 +5,7 @@ import { MediaSource } from '@/database/entities/assets/media/media-file';
 import { CreateRichMediaDto } from '@/modules/assets/media/dto/req/create-rich-media.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Like, Not, Repository } from 'typeorm';
 import { MediaFileEntity } from '../entities/assets/media/media-file';
 import { MediaFileAssetRepositroy } from './assets-media-file.repository';
 
@@ -36,41 +36,24 @@ export class MediaFileRepository {
   }
 
   public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[], filterNeuralModel?: 'only' | 'exclude' | 'all') {
-    const needPreciseFilter = filterNeuralModel === 'only' || filterNeuralModel === 'exclude';
+    // 构建 extraWhere 条件，使用 LIKE 查询在数据库层过滤 JSON 字符串
+    let extraWhere: any = undefined;
 
-    // 精确分页：当存在神经模型过滤时，先获取足够大的数据集（已排序），在内存中过滤并精确分页
-    if (needPreciseFilter) {
-      const { page = 1, limit = 24 } = dto || {};
-
-      const { list: allList } = await this.mediaFileAssetRepositroy.listAssets(
-        'media-file',
-        teamId,
-        { ...dto, page: 1, limit: 100000 },
-        {
-          withTags: true,
-          withTeam: true,
-          withUser: true,
-        },
-        undefined,
-        undefined,
-        excludeIds,
-      );
-
-      const filteredAll = filterNeuralModel === 'only' ? allList.filter((item) => item.params?.type === 'neural-model') : allList.filter((item) => item.params?.type !== 'neural-model');
-
-      const totalCount = filteredAll.length;
-      const start = (Number(page) - 1) * Number(limit);
-      const end = start + Number(limit);
-      const pageList = filteredAll.slice(start, end);
-
-      await this.preprocess(pageList);
-      return {
-        list: pageList,
-        totalCount,
+    if (filterNeuralModel === 'only') {
+      // 只显示 neural-model：使用 LIKE 匹配 JSON 字符串中的 type 字段
+      // params 存储格式: {"type":"neural-model",...}
+      extraWhere = {
+        params: Like('%"type":"neural-model"%'),
+      };
+    } else if (filterNeuralModel === 'exclude') {
+      // 排除 neural-model：使用 NOT LIKE
+      extraWhere = {
+        params: Not(Like('%"type":"neural-model"%')),
       };
     }
+    // filterNeuralModel === 'all' 时，extraWhere 保持 undefined
 
-    // 常规分页：无神经模型过滤时，直接按数据库分页
+    // 使用数据库层的过滤和分页
     const { list, totalCount } = await this.mediaFileAssetRepositroy.listAssets(
       'media-file',
       teamId,
@@ -81,7 +64,7 @@ export class MediaFileRepository {
         withUser: true,
       },
       undefined,
-      undefined,
+      extraWhere,
       excludeIds,
     );
 
