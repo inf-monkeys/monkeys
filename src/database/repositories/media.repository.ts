@@ -184,14 +184,45 @@ export class MediaFileRepository {
   }
 
   public async getMediaByIdAndTeamId(id: string, teamId: string) {
+    console.log('🔍 [DEBUG] getMediaByIdAndTeamId called with:', { id, teamId });
+
     const data = await this.mediaFileRepository.findOne({
       where: {
         id: id,
         teamId: teamId,
       },
     });
+
+    if (!data) {
+      console.log('❌ [DEBUG] Media file not found');
+      return null;
+    }
+
+    console.log('✅ [DEBUG] Found media file:', {
+      id: data.id,
+      displayName: data.displayName,
+      assetType: data.assetType,
+    });
+
     await this.preprocess([data]);
-    return data;
+
+    // 填充额外信息（标签、团队、用户），与列表查询保持一致
+    const [enrichedData] = await this.mediaFileAssetRepositroy.assetCommonRepository.fillAdditionalInfoList([data], {
+      withTags: true,
+      withTeam: true,
+      withUser: true,
+    });
+
+    console.log('📦 [DEBUG] Enriched data:', {
+      id: enrichedData?.id,
+      hasAssetTags: !!enrichedData?.assetTags,
+      assetTagsCount: enrichedData?.assetTags?.length || 0,
+      assetTags: enrichedData?.assetTags,
+      hasUser: !!enrichedData?.user,
+      hasTeam: !!enrichedData?.team,
+    });
+
+    return enrichedData;
   }
 
   public async togglePin(mediaId: string, teamId: string, pinned: boolean) {
