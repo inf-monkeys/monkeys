@@ -27,8 +27,7 @@ export const DesignsExtraInfo = ({ tabId }: DesignsExtraInfoProps) => {
 
   // 根据标签页 ID 和项目的 isTemplate 属性来决定是否显示
   const isTemplate = designProjectMetadata.isTemplate;
-  const shouldShow =
-    (tabId === 'designs' && !isTemplate) || (tabId === 'designs-templates' && isTemplate);
+  const shouldShow = (tabId === 'designs' && !isTemplate) || (tabId === 'designs-templates' && isTemplate);
 
   if (!shouldShow) {
     return null;

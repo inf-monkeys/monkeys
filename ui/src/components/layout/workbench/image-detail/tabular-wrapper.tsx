@@ -113,7 +113,10 @@ export const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
     try {
       const instanceId = await vines.start({ inputData: values, onlyStart: true });
       if (instanceId) {
-        if (!isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) || oem?.theme?.views?.form?.toast?.afterCreate !== false) {
+        if (
+          !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
+          oem?.theme?.views?.form?.toast?.afterCreate !== false
+        ) {
           toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
         }
       }

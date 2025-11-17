@@ -35,13 +35,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
     // Check if this is POM measurement data
     // Handle both direct format and nested in 'data' property
     const checkPomData = (obj: any) => {
-      return (
-        obj &&
-        typeof obj === 'object' &&
-        'measurements_table' in obj &&
-        Array.isArray(obj.measurements_table) &&
-        obj.measurements_table.length > 0
-      );
+      return obj && typeof obj === 'object' && 'measurements_table' in obj && Array.isArray(obj.measurements_table);
     };
 
     const isPomData = checkPomData(data) || (data?.data && checkPomData(data.data));

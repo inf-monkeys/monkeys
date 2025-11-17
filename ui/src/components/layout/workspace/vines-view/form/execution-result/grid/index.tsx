@@ -128,6 +128,15 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   };
   const hasUsedCacheScrollTop = useRef(false);
 
+  // 检测当前工作流是否为 POM 输出（任意结果包含 measurements_table 即视为 POM 工作流）
+  const detectPomItem = useCallback((item: IVinesExecutionResultItem) => {
+    const d: any = item?.render?.data as any;
+    const payload = d && typeof d === 'object' ? (d.data ? d.data : d) : null;
+    return !!(payload && Array.isArray(payload.measurements_table));
+  }, []);
+
+  const isPomWorkflow = React.useMemo(() => data.some((item) => detectPomItem(item)), [data, detectPomItem]);
+
   useEffect(() => {
     const tryRestorePosition = () => {
       startTransition(() => {
@@ -170,6 +179,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         selectionModeDisplayType={selectionModeDisplayType}
         workflowId={workflowId ?? undefined}
         displayType={displayType}
+        pomLayoutHint={isPomWorkflow}
       />
     ),
     [
@@ -185,6 +195,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       selectionModeDisplayType,
       workflowId,
       displayType,
+      isPomWorkflow,
     ],
   );
 
@@ -200,7 +211,8 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     render: useCallback(({ data: item }) => renderItem(item), [renderItem]),
     itemKey: (item, index) => `${index}-${item.render.key}`,
     onRender: loadMore,
-    itemHeightEstimate: displayType === 'grid' ? 300 : 400,
+    // POM 卡片包含大量测量数据的表格，需要更大的高度估算值避免重叠
+    itemHeightEstimate: displayType === 'grid' ? 300 : isPomWorkflow ? 550 : 400,
     resizeObserver: displayType === 'masonry' ? resizeObserver : undefined,
   });
 
@@ -233,14 +245,25 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     const isPomItem = (item: IVinesExecutionResultItem) => {
       const d: any = item?.render?.data as any;
       const payload = d && typeof d === 'object' ? (d.data ? d.data : d) : null;
-      return !!(payload && Array.isArray(payload.measurements_table) && payload.measurements_table.length > 0);
+      const hasMeasurementsTable =
+        !!(payload && Array.isArray(payload.measurements_table) && payload.measurements_table.length > 0);
+
+      // 已经有测量表格输出的结果，直接按 POM 结果处理
+      if (hasMeasurementsTable) return true;
+
+      // 对于已识别为 POM 的工作流，为运行中 / 暂停中的 JSON 结果预留同样的布局空间，
+      // 确保「运行中」卡片组与最终结果卡片组宽高保持一致
+      if (isPomWorkflow && item.render.type === 'json' && ['SCHEDULED', 'RUNNING', 'PAUSED'].includes(item.render.status))
+        return true;
+
+      return false;
     };
 
     return (
       <div
         className="grid overflow-y-auto overflow-x-hidden"
         style={{
-          gridTemplateColumns: `repeat(${Math.max(1, columnsCount)}, 1fr)`,
+          gridTemplateColumns: `repeat(${Math.max(1, columnsCount)}, minmax(0, 1fr))`,
           padding: '8px',
           height: '100%',
           gap,
@@ -253,8 +276,8 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           return (
             <div
               key={`${index}-${item.render.key}`}
-              className={`${span2 ? 'col-span-2 aspect-[3/2]' : 'aspect-square'}`}
-              style={{ minHeight: isPom ? '320px' : '200px' }}
+              className={cn(span2 && 'col-span-2', !isPom && 'aspect-square')}
+              style={{ minHeight: isPom ? 320 : 200 }}
             >
               {renderItem(item)}
             </div>
@@ -262,7 +285,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         })}
       </div>
     );
-  }, [data, containerWidth, isUseWorkbench, associations, renderItem, handleGridScroll]);
+  }, [data, containerWidth, isUseWorkbench, associations, renderItem, handleGridScroll, isPomWorkflow]);
 
   return (
     <div className="flex flex-col gap-2 p-2">

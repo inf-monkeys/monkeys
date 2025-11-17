@@ -34,6 +34,7 @@ interface IExecutionResultItemProps {
   workflowId?: string;
   estimatedTime?: number;
   displayType?: ExectuionResultGridDisplayType;
+  pomLayoutHint?: boolean;
 }
 
 export type IClickBehavior = 'preview' | 'select' | 'fill-form' | 'none';
@@ -53,6 +54,7 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
   workflowId,
   estimatedTime = 180,
   displayType = 'masonry',
+  pomLayoutHint = false,
 }) => {
   const { render, startTime } = result;
   const { type, data, status } = render;
@@ -63,12 +65,22 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
 
   const progressType = get(oem, 'theme.views.form.progress', 'infinite');
 
-  // Detect POM result (to enlarge in grid layout)
-  const isPom = (() => {
+  // 检测是否为 POM 相关结果：
+  // - 当前条目直接包含 measurements_table
+  // - 或者当前工作流已被识别为 POM（pomLayoutHint），且该条目处于运行中/排队/暂停状态
+  const isPom = React.useMemo(() => {
     const obj: any = data as any;
     const payload = obj && typeof obj === 'object' ? (obj.data ? obj.data : obj) : null;
-    return !!(payload && Array.isArray(payload.measurements_table) && payload.measurements_table.length > 0);
-  })();
+    const hasMeasurementsTable = !!(payload && Array.isArray(payload.measurements_table));
+
+    if (hasMeasurementsTable) return true;
+
+    if (pomLayoutHint && ['SCHEDULED', 'RUNNING', 'PAUSED'].includes(status)) {
+      return true;
+    }
+
+    return false;
+  }, [data, status, pomLayoutHint]);
 
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -90,7 +102,12 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
     return (
       <div
         className={`flex items-center justify-center gap-1 rounded-lg border border-input shadow-sm ${
-          displayType === 'grid' ? 'aspect-square h-full' : 'h-10'
+          displayType === 'grid'
+            ? // 网格模式下，非 POM 仍保持方形比例，POM 使用内容自适应高度避免与相邻卡片重叠
+              isPom
+              ? 'h-full'
+              : 'aspect-square h-full'
+            : 'h-10'
         }`}
       >
         <FileMinus className="stroke-gray-11" size={16} />
@@ -105,7 +122,15 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
         <div
           key={render.key}
           className={`relative flex flex-col items-center justify-center gap-4 rounded-lg border border-input p-4 shadow-sm ${
-            displayType === 'grid' ? 'aspect-square h-full' : 'h-40'
+            displayType === 'grid'
+              ? // 网格模式下，非 POM 使用固定方形比例，POM 根据内容自适应高度，避免结果表格被压缩后与下方卡片重叠
+                isPom
+                ? 'h-full'
+                : 'aspect-square h-full'
+              : // 非网格（masonry 等）模式下，POM 运行中卡片组固定高度避免重叠
+                isPom
+                ? 'h-[500px]'
+                : 'h-40'
           }`}
         >
           {progressType === 'estimate' ? (
@@ -120,7 +145,15 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
         <div
           key={render.key}
           className={`relative flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-input shadow-sm ${
-            displayType === 'grid' ? 'aspect-square h-full' : 'h-40'
+            displayType === 'grid'
+              ? // 网格模式下，非 POM 使用固定方形比例，POM 根据内容自适应高度
+                isPom
+                ? 'h-full'
+                : 'aspect-square h-full'
+              : // 非网格（masonry 等）模式下，POM 暂停卡片组固定高度避免重叠
+                isPom
+                ? 'h-[500px]'
+                : 'h-40'
           }`}
         >
           <CirclePause className="stroke-yellow-10" size={36} />
@@ -173,7 +206,15 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
       return (
         <div
           className={`relative overflow-hidden rounded-lg border border-input shadow-sm ${
-            displayType === 'grid' ? (isPom ? 'aspect-[3/2] h-full' : 'aspect-square h-full') : ''
+            displayType === 'grid'
+              ? // 网格模式下，非 POM 使用固定方形比例，POM 根据内容自适应高度
+                isPom
+                ? 'h-full'
+                : 'aspect-square h-full'
+              : // 非 grid 模式下，POM 卡片固定高度避免重叠
+                isPom
+                ? 'h-[500px]'
+                : ''
           }`}
           onClick={handleSelect}
           // 同步为非图片卡片增加左右外边距，避免边框贴合
@@ -189,7 +230,16 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
             selectionModeDisplayType={selectionModeDisplayType}
             displayType={displayType}
           >
-            <div className={`overflow-auto p-2 ${displayType === 'grid' ? 'h-full' : 'max-h-96 min-h-40'}`}>
+            <div
+              className={`p-2 ${
+                displayType === 'grid'
+                  ? 'h-full'
+                  : // 非 grid 模式下，POM 内容区占满固定高度；非 POM 使用原来的自适应高度
+                    isPom
+                    ? 'h-full'
+                    : 'max-h-96 min-h-40'
+              } ${isPom ? 'overflow-hidden' : 'overflow-auto'}`}
+            >
               {renderSelectionOverlay()}
               <VinesAbstractDataPreview data={data} className="h-full" />
             </div>
@@ -216,7 +266,8 @@ const areEqual = (prev: IExecutionResultItemProps, next: IExecutionResultItemPro
     prev.isSelected === next.isSelected &&
     prev.clickBehavior === next.clickBehavior &&
     prev.selectionModeDisplayType === next.selectionModeDisplayType &&
-    prev.workflowId === next.workflowId
+    prev.workflowId === next.workflowId &&
+    prev.pomLayoutHint === next.pomLayoutHint
   );
 };
 

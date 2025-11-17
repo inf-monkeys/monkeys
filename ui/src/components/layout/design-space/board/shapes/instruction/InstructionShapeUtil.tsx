@@ -50,7 +50,7 @@ export class InstructionShapeUtil extends BaseBoxShapeUtil<InstructionShape> {
           isFilled: true,
           isLabel: true,
           excludeFromShapeBounds: true,
-        })
+        }),
     );
 
     // Ensure valid dimensions
@@ -125,10 +125,10 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
   // 使用新的 ConnectionBinding 系统检测连接的 Output
   const detectConnectedOutputs = (): string[] => {
     const outputs: string[] = [];
-    
+
     // 使用新的端口连接系统
     const connections = getShapePortConnections(editor, shape.id);
-    
+
     for (const connection of connections) {
       // 查找从 Instruction 的 output 端口出发的连接（terminal === 'start'）
       if (connection.terminal === 'start' && connection.ownPortId === 'output') {
@@ -138,16 +138,16 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         }
       }
     }
-    
+
     // 如果没有找到新连接，回退检查旧的箭头连接（兼容性）
     if (outputs.length === 0) {
       const allShapes = editor.getCurrentPageShapes();
       const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
-      
+
       arrows.forEach((arrow) => {
         const start = arrow.props.start as any;
         const end = arrow.props.end as any;
-        
+
         if (start?.type === 'binding' && start.boundShapeId === shape.id && end?.type === 'binding') {
           const endShape = editor.getShape(end.boundShapeId);
           if (endShape?.type === 'output') {
@@ -156,7 +156,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         }
       });
     }
-    
+
     return Array.from(new Set(outputs));
   };
 
@@ -186,13 +186,13 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
 
     // 检测连接的 Output（使用新的 ConnectionBinding 系统）
     const detected = detectConnectedOutputs();
-    
+
     if (detected.length === 0) {
       console.warn('[Instruction] 没有连接的 Output 框');
       alert('请先连接到 Output 框');
       return;
     }
-    
+
     // 同步存储 connections，后续也用运行时 detected 为准
     try {
       editor.updateShape<InstructionShape>({
@@ -441,7 +441,6 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
       instructionAbortControllers.delete(shape.id as any);
     }
   };
-
 
   return (
     <div

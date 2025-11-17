@@ -2,6 +2,7 @@
  * Port definitions for Instruction, Output, and Workflow shapes
  */
 import { Editor, TLShapeId } from 'tldraw';
+
 import { ShapePort } from '../../workflow-examples/src/ports/Port';
 import { InstructionShape, OutputShape } from '../instruction/InstructionShape.types';
 import { WorkflowShape } from '../workflow/WorkflowShape.types';
@@ -10,10 +11,7 @@ import { WorkflowShape } from '../workflow/WorkflowShape.types';
  * Get ports for an Instruction shape
  * Instruction has one output port on the right side
  */
-export function getInstructionPorts(
-  editor: Editor,
-  shape: InstructionShape | TLShapeId
-): Record<string, ShapePort> {
+export function getInstructionPorts(editor: Editor, shape: InstructionShape | TLShapeId): Record<string, ShapePort> {
   const instructionShape = typeof shape === 'string' ? (editor.getShape(shape) as InstructionShape | undefined) : shape;
   if (!instructionShape) return {};
 
@@ -38,10 +36,7 @@ export function getInstructionPorts(
  * - One input port on the left side
  * - One output port on the right side (so it can be used as input for next workflow)
  */
-export function getOutputPorts(
-  editor: Editor,
-  shape: OutputShape | TLShapeId
-): Record<string, ShapePort> {
+export function getOutputPorts(editor: Editor, shape: OutputShape | TLShapeId): Record<string, ShapePort> {
   const outputShape = typeof shape === 'string' ? (editor.getShape(shape) as OutputShape | undefined) : shape;
   if (!outputShape) return {};
 
@@ -72,10 +67,7 @@ export function getOutputPorts(
  * - Input ports on the left side for each parameter
  * - One output port on the right side
  */
-export function getWorkflowPorts(
-  editor: Editor,
-  shape: WorkflowShape | TLShapeId
-): Record<string, ShapePort> {
+export function getWorkflowPorts(editor: Editor, shape: WorkflowShape | TLShapeId): Record<string, ShapePort> {
   const workflowShape = typeof shape === 'string' ? (editor.getShape(shape) as WorkflowShape | undefined) : shape;
   if (!workflowShape) return {};
 
@@ -94,7 +86,7 @@ export function getWorkflowPorts(
 
   // Input ports on the left side for each parameter
   const params = workflowShape.props.inputParams || [];
-  
+
   if (params.length > 0) {
     // 精确计算端口位置，与实际 DOM 布局完全匹配
     // 布局结构分析：
@@ -104,32 +96,38 @@ export function getWorkflowPorts(
     // 4. 工作流描述: fontSize: '12px', marginBottom: '8px' → 约20px (如果有描述)
     // 5. 参数区域: marginTop: '12px', paddingTop: '12px', borderTop
     // 6. "输入参数"标题: fontSize: '12px', marginBottom: '8px' → 约20px
-    
-    const headerBarHeight = 40;           // 标题栏（Workflow + 播放按钮）
-    const contentPaddingTop = 12;         // 内容区域上padding
-    const workflowNameHeight = 24;        // 工作流名称
+
+    const headerBarHeight = 40; // 标题栏（Workflow + 播放按钮）
+    const contentPaddingTop = 12; // 内容区域上padding
+    const workflowNameHeight = 24; // 工作流名称
     const workflowDescHeight = workflowShape.props.workflowDescription ? 20 : 0; // 工作流描述（可选）
-    const beforeParamsMargin = 12;        // marginTop
-    const beforeParamsPadding = 12;       // paddingTop
-    const paramsSectionTitleHeight = 20;  // "输入参数"标题
-    const paramsTitleMarginBottom = 8;    // 标题下margin
-    
+    const beforeParamsMargin = 12; // marginTop
+    const beforeParamsPadding = 12; // paddingTop
+    const paramsSectionTitleHeight = 20; // "输入参数"标题
+    const paramsTitleMarginBottom = 8; // 标题下margin
+
     // 参数区域开始的 Y 坐标
-    let currentY = headerBarHeight + contentPaddingTop + workflowNameHeight + 
-                   workflowDescHeight + beforeParamsMargin + beforeParamsPadding + 
-                   paramsSectionTitleHeight + paramsTitleMarginBottom;
-    
+    let currentY =
+      headerBarHeight +
+      contentPaddingTop +
+      workflowNameHeight +
+      workflowDescHeight +
+      beforeParamsMargin +
+      beforeParamsPadding +
+      paramsSectionTitleHeight +
+      paramsTitleMarginBottom;
+
     params.forEach((param, index) => {
       // 每个参数的结构：
       // - label: fontSize: '11px', marginBottom: '4px' → 约16px
       // - input/uploader: 高度根据类型变化
       // - marginBottom: '8px'
-      
+
       const labelHeight = 16;
       const labelMarginBottom = 4;
       let inputHeight = 28; // 默认输入框高度（padding: 4px 8px + fontSize: 11px）
       const paramMarginBottom = 8;
-      
+
       if (param.type === 'file') {
         // VinesUploader 高度: h-[12rem] = 192px
         inputHeight = 192;
@@ -143,10 +141,10 @@ export function getWorkflowPorts(
         // 文本输入、选择框等
         inputHeight = 28;
       }
-      
+
       // 端口应该在 label 的中间位置（与红箭头对齐）
       const portYPosition = currentY + labelHeight / 2;
-      
+
       const portId = `param_${param.name}`;
       ports[portId] = {
         id: portId,
@@ -154,7 +152,7 @@ export function getWorkflowPorts(
         y: portYPosition,
         terminal: 'end', // Input port
       };
-      
+
       // 移动到下一个参数
       currentY += labelHeight + labelMarginBottom + inputHeight + paramMarginBottom;
     });
@@ -168,10 +166,10 @@ export function getWorkflowPorts(
  */
 export function getShapePorts(
   editor: Editor,
-  shape: InstructionShape | OutputShape | WorkflowShape | TLShapeId
+  shape: InstructionShape | OutputShape | WorkflowShape | TLShapeId,
 ): Record<string, ShapePort> {
   let targetShape: InstructionShape | OutputShape | WorkflowShape | undefined;
-  
+
   if (typeof shape === 'string') {
     const s = editor.getShape(shape);
     if (s && (s.type === 'instruction' || s.type === 'output' || s.type === 'workflow')) {
@@ -194,4 +192,3 @@ export function getShapePorts(
       return {};
   }
 }
-

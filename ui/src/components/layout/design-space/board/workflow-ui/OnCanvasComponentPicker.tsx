@@ -2,9 +2,10 @@
  * OnCanvasComponentPicker - 画布上的节点选择器
  * 简化版本，用于 Monkey 项目的 workflow 集成
  */
+import { useCallback, useMemo, useState } from 'react';
+
 import * as Dialog from '@radix-ui/react-dialog';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
-import { useCallback, useMemo, useState } from 'react';
 import {
   TldrawUiButton,
   TldrawUiButtonIcon,
@@ -19,6 +20,7 @@ import {
   Vec,
   VecModel,
 } from 'tldraw';
+
 import type { ConnectionShape } from '../workflow-examples/src/connection/ConnectionShapeUtil';
 import { getConnectionTerminals } from '../workflow-examples/src/connection/ConnectionShapeUtil';
 import { NODE_WIDTH_PX } from '../workflow-examples/src/constants';
@@ -35,7 +37,7 @@ export interface OnCanvasComponentPickerState {
 
 export const onCanvasComponentPickerState = new EditorAtom<OnCanvasComponentPickerState | null>(
   'on canvas component picker',
-  () => null
+  () => null,
 );
 
 // Component picker that appears when users drag connection handles without connecting to existing ports
@@ -65,17 +67,9 @@ export function OnCanvasComponentPicker() {
 }
 
 // Dialog component that positions itself at the connection terminal
-function OnCanvasComponentPickerDialog({
-  children,
-  onClose,
-}: {
-  children: React.ReactNode;
-  onClose: () => void;
-}) {
+function OnCanvasComponentPickerDialog({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   const editor = useEditor();
-  const location = useValue('location', () => onCanvasComponentPickerState.get(editor)?.location, [
-    editor,
-  ]);
+  const location = useValue('location', () => onCanvasComponentPickerState.get(editor)?.location, [editor]);
   const shouldRender = !!location;
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   // Allow wheel events to pass through to the canvas
@@ -99,9 +93,7 @@ function OnCanvasComponentPickerDialog({
       // Get the connection terminals in connection space
       const terminals = getConnectionTerminals(editor, connection);
       const terminalInConnectionSpace =
-        state.location === 'middle'
-          ? Vec.Lrp(terminals.start, terminals.end, 0.5)
-          : terminals[state.location];
+        state.location === 'middle' ? Vec.Lrp(terminals.start, terminals.end, 0.5) : terminals[state.location];
 
       // Transform the position from connection space to page space
       const connectionTransform = editor.getShapePageTransform(connection);
@@ -112,7 +104,7 @@ function OnCanvasComponentPickerDialog({
       const terminalInViewportSpace = editor.pageToViewport(terminalInPageSpace);
       container.style.transform = `translate(${terminalInViewportSpace.x}px, ${terminalInViewportSpace.y}px) scale(${editor.getZoomLevel()}) `;
     },
-    [editor, container]
+    [editor, container],
   );
 
   return (
@@ -170,9 +162,7 @@ function OnCanvasComponentPickerItem<T extends NodeType>({
         // Calculate the position where the new node should be created
         const terminals = getConnectionTerminals(editor, connection);
         const terminalInConnectionSpace =
-          state.location === 'middle'
-            ? Vec.Lrp(terminals.start, terminals.end, 0.5)
-            : terminals[state.location];
+          state.location === 'middle' ? Vec.Lrp(terminals.start, terminals.end, 0.5) : terminals[state.location];
 
         // Transform from connection space to page space
         const connectionTransform = editor.getShapePageTransform(connection);
@@ -190,4 +180,3 @@ function OnCanvasComponentPickerItem<T extends NodeType>({
     </TldrawUiButton>
   );
 }
-

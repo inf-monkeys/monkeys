@@ -1,8 +1,7 @@
 import { ConversationApps } from '@/pages/$teamId/agents/index.lazy';
-import { ApplicationStore } from '@/pages/$teamId/application-store/index.lazy';
 import { DesignSoftwareEvaluations } from '@/pages/$teamId/design-software-evaluations/index.lazy';
-import { Designs } from '@/pages/$teamId/designs/index.lazy';
 import { DesignTemplates } from '@/pages/$teamId/design-templates/index.lazy';
+import { Designs } from '@/pages/$teamId/designs/index.lazy';
 import { EvaluationModules } from '@/pages/$teamId/evaluations';
 import { ImageModels } from '@/pages/$teamId/image-models/index.lazy';
 import { MediaData } from '@/pages/$teamId/media-data/index.lazy';

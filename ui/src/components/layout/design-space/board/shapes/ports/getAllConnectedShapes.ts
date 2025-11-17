@@ -2,6 +2,7 @@
  * Generic version of getAllConnectedNodes that works with all shape types
  */
 import { Editor, TLShapeId } from 'tldraw';
+
 import { getShapePortConnections } from './portConnections';
 
 /**
@@ -12,7 +13,7 @@ import { getShapePortConnections } from './portConnections';
 export function getAllConnectedShapes(
   editor: Editor,
   startingShape: TLShapeId | { id: TLShapeId },
-  direction?: 'start' | 'end'
+  direction?: 'start' | 'end',
 ): Set<TLShapeId> {
   const toVisit = [typeof startingShape === 'string' ? startingShape : startingShape.id];
   const found = new Set<TLShapeId>();
@@ -38,4 +39,3 @@ export function getAllConnectedShapes(
 
   return found;
 }
-

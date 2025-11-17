@@ -53,19 +53,20 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   // 获取 pin 到工作台的工作流列表
   const { data: pinnedPagesData } = useWorkspacePages();
   // 从 pin 的页面中提取工作流列表（只包含有 workflow 的页面）
-  const workflowList = pinnedPagesData?.pages
-    ?.filter((page) => page.workflow && page.workflow.workflowId)
-    .map((page) => {
-      const workflow = page.workflow!;
-      return {
-        ...workflow,
-        workflowId: workflow.workflowId || workflow.id || '',
-        displayName: workflow.displayName,
-        description: workflow.description,
-        // 兼容 name 字段（如果 workflow 中没有 name，使用 displayName）
-        name: (workflow as any).name || getI18nContent(workflow.displayName) || '',
-      };
-    }) || [];
+  const workflowList =
+    pinnedPagesData?.pages
+      ?.filter((page) => page.workflow && page.workflow.workflowId)
+      .map((page) => {
+        const workflow = page.workflow!;
+        return {
+          ...workflow,
+          workflowId: workflow.workflowId || workflow.id || '',
+          displayName: workflow.displayName,
+          description: workflow.description,
+          // 兼容 name 字段（如果 workflow 中没有 name，使用 displayName）
+          name: (workflow as any).name || getI18nContent(workflow.displayName) || '',
+        };
+      }) || [];
 
   // 监听工具变化
   useEffect(() => {
@@ -400,7 +401,12 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
             }
 
             // instruction, output, workflow, workflow-node 已移到独立的 workflow 工具栏
-            if (tool.id === 'instruction' || tool.id === 'output' || tool.id === 'workflow' || tool.id === 'workflow-node') {
+            if (
+              tool.id === 'instruction' ||
+              tool.id === 'output' ||
+              tool.id === 'workflow' ||
+              tool.id === 'workflow-node'
+            ) {
               return null;
             }
 
@@ -471,433 +477,457 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
         {/* Workflow 工具栏（独立） - 根据 OEM 配置控制显示 */}
         {showWorkflow && (
           <div className="custom-toolbar" style={{ marginLeft: 20 }}>
-          {workflowTools.map((tool) => {
-            if (tool.id === 'instruction') {
-              const activeId = instructionVariant;
-              const isActive = currentToolId === 'instruction';
-              return (
-                <div
-                  key="instruction-group"
-                  className={`tool-group ${isActive ? 'selected' : ''}`}
-                  ref={instructionGroupRef}
-                >
-                  <button
-                    className={`tool-button ${isActive ? 'selected' : ''} ${isInstructionMenuOpen ? 'menu-open' : ''}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      // 设置输入模式并激活工具
-                      const instructionTool = editor.getStateDescendant('instruction') as any;
-                      if (instructionTool && instructionTool.setInputMode) {
-                        instructionTool.setInputMode(activeId);
-                      }
-                      editor.setCurrentTool('instruction');
-                      setCurrentToolId('instruction');
-                      setIsInstructionMenuOpen(false);
-                    }}
-                    title={activeId === 'text' ? '文本节点' : '图片节点'}
-                    style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+            {workflowTools.map((tool) => {
+              if (tool.id === 'instruction') {
+                const activeId = instructionVariant;
+                const isActive = currentToolId === 'instruction';
+                return (
+                  <div
+                    key="instruction-group"
+                    className={`tool-group ${isActive ? 'selected' : ''}`}
+                    ref={instructionGroupRef}
                   >
-                    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{activeId === 'text' ? 'I' : '📷'}</span>
-                    <span className="caret" />
-                    <span
-                      className="caret-hit"
-                      title="更多输入模式"
-                      onMouseEnter={() => {
-                        if (instructionCloseTimerRef.current !== undefined) {
-                          window.clearTimeout(instructionCloseTimerRef.current);
-                          instructionCloseTimerRef.current = undefined;
-                        }
-                        setIsInstructionMenuOpen(true);
-                      }}
-                      onMouseLeave={() => {
-                        instructionCloseTimerRef.current = window.setTimeout(() => {
-                          setIsInstructionMenuOpen(false);
-                          instructionCloseTimerRef.current = undefined;
-                        }, 150);
-                      }}
+                    <button
+                      className={`tool-button ${isActive ? 'selected' : ''} ${isInstructionMenuOpen ? 'menu-open' : ''}`}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setIsInstructionMenuOpen((v) => !v);
-                      }}
-                    />
-                  </button>
-                  {isInstructionMenuOpen && (
-                    <div
-                      className="dropdown-menu"
-                      onMouseEnter={() => {
-                        if (instructionCloseTimerRef.current !== undefined) {
-                          window.clearTimeout(instructionCloseTimerRef.current);
-                          instructionCloseTimerRef.current = undefined;
+                        // 设置输入模式并激活工具
+                        const instructionTool = editor.getStateDescendant('instruction') as any;
+                        if (instructionTool && instructionTool.setInputMode) {
+                          instructionTool.setInputMode(activeId);
                         }
-                        setIsInstructionMenuOpen(true);
-                      }}
-                      onMouseLeave={() => {
+                        editor.setCurrentTool('instruction');
+                        setCurrentToolId('instruction');
                         setIsInstructionMenuOpen(false);
                       }}
+                      title={activeId === 'text' ? '文本节点' : '图片节点'}
+                      style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                     >
-                      <div
-                        className={`dropdown-item ${instructionVariant === 'text' ? 'active' : ''}`}
+                      <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{activeId === 'text' ? 'I' : '📷'}</span>
+                      <span className="caret" />
+                      <span
+                        className="caret-hit"
+                        title="更多输入模式"
+                        onMouseEnter={() => {
+                          if (instructionCloseTimerRef.current !== undefined) {
+                            window.clearTimeout(instructionCloseTimerRef.current);
+                            instructionCloseTimerRef.current = undefined;
+                          }
+                          setIsInstructionMenuOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          instructionCloseTimerRef.current = window.setTimeout(() => {
+                            setIsInstructionMenuOpen(false);
+                            instructionCloseTimerRef.current = undefined;
+                          }, 150);
+                        }}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setInstructionVariant('text');
-                          const instructionTool = editor.getStateDescendant('instruction') as any;
-                          if (instructionTool && instructionTool.setInputMode) {
-                            instructionTool.setInputMode('text');
-                          }
-                          editor.setCurrentTool('instruction');
-                          setCurrentToolId('instruction');
-                          setIsInstructionMenuOpen(false);
+                          setIsInstructionMenuOpen((v) => !v);
                         }}
-                      >
-                        <span style={{ fontSize: '16px', fontWeight: 'bold' }}>I</span>
-                        <span>文本节点</span>
-                      </div>
+                      />
+                    </button>
+                    {isInstructionMenuOpen && (
                       <div
-                        className={`dropdown-item ${instructionVariant === 'image' ? 'active' : ''}`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setInstructionVariant('image');
-                          const instructionTool = editor.getStateDescendant('instruction') as any;
-                          if (instructionTool && instructionTool.setInputMode) {
-                            instructionTool.setInputMode('image');
+                        className="dropdown-menu"
+                        onMouseEnter={() => {
+                          if (instructionCloseTimerRef.current !== undefined) {
+                            window.clearTimeout(instructionCloseTimerRef.current);
+                            instructionCloseTimerRef.current = undefined;
                           }
-                          editor.setCurrentTool('instruction');
-                          setCurrentToolId('instruction');
+                          setIsInstructionMenuOpen(true);
+                        }}
+                        onMouseLeave={() => {
                           setIsInstructionMenuOpen(false);
                         }}
                       >
-                        <span style={{ fontSize: '16px' }}>📷</span>
-                        <span>图片节点</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            if (tool.id === 'output') {
-              const isActive = currentToolId === 'output';
-              return (
-                <button
-                  key={tool.id}
-                  className={`tool-button ${isActive ? 'selected' : ''}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    editor.setCurrentTool('output');
-                    setCurrentToolId('output');
-                  }}
-                  title={tool.label}
-                  style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
-                >
-                  <span style={{ fontSize: '16px', fontWeight: 'bold' }}>O</span>
-                </button>
-              );
-            }
-
-            if (tool.id === 'workflow') {
-              const isActive = currentToolId === 'workflow';
-              return (
-                <div key="workflow-group" className={`tool-group ${isActive ? 'selected' : ''}`} ref={workflowGroupRef}>
-                  <button
-                    className={`tool-button ${isActive ? 'selected' : ''} ${isWorkflowMenuOpen ? 'menu-open' : ''}`}
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (selectedWorkflow) {
-                        // 如果已选择工作流，激活工具并设置工作流数据
-                        try {
-                          // 获取工作流详细信息（包括输入参数）
-                          const workflowDetail = await getWorkflow(selectedWorkflow.workflowId);
-
-                          // 转换输入参数格式
-                          const inputParams = (workflowDetail?.variables || []).map((variable: any) => ({
-                            name: variable.name,
-                            displayName: getI18nContent(variable.displayName) || variable.name,
-                            type: variable.type || 'string',
-                            value: variable.default !== undefined ? variable.default : '',
-                            required: variable.required || false,
-                            description:
-                              getI18nContent(variable.description) || getI18nContent(variable.placeholder) || '',
-                            typeOptions: variable.typeOptions || undefined,
-                          }));
-
-                          const workflowTool = editor.getStateDescendant('workflow') as any;
-                          if (workflowTool && workflowTool.setWorkflowData) {
-                            workflowTool.setWorkflowData({
-                              workflowId: selectedWorkflow.workflowId,
-                              workflowName:
-                                getI18nContent(workflowDetail?.displayName || selectedWorkflow.displayName) ||
-                                selectedWorkflow.name ||
-                                '未命名工作流',
-                              workflowDescription:
-                                getI18nContent(workflowDetail?.description || selectedWorkflow.description) || '',
-                              inputParams: inputParams,
-                            });
-                          }
-                        } catch (error) {
-                          console.error('获取工作流详情失败:', error);
-                          const workflowTool = editor.getStateDescendant('workflow') as any;
-                          if (workflowTool && workflowTool.setWorkflowData) {
-                            workflowTool.setWorkflowData({
-                              workflowId: selectedWorkflow.workflowId,
-                              workflowName:
-                                getI18nContent(selectedWorkflow.displayName) || selectedWorkflow.name || '未命名工作流',
-                              workflowDescription: getI18nContent(selectedWorkflow.description) || '',
-                              inputParams: [],
-                            });
-                          }
-                        }
-                        editor.setCurrentTool('workflow');
-                        setCurrentToolId('workflow');
-                      } else {
-                        // 如果没有选择工作流，打开菜单
-                        setIsWorkflowMenuOpen(true);
-                      }
-                    }}
-                    title={
-                      selectedWorkflow
-                        ? `工作流: ${getI18nContent(selectedWorkflow.displayName) || selectedWorkflow.name}`
-                        : '工作流'
-                    }
-                    style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
-                  >
-                    <VinesIcon size="xs">lucide:workflow</VinesIcon>
-                    <span className="caret" />
-                    <span
-                      className="caret-hit"
-                      title="选择工作流"
-                      onMouseEnter={() => {
-                        if (workflowCloseTimerRef.current !== undefined) {
-                          window.clearTimeout(workflowCloseTimerRef.current);
-                          workflowCloseTimerRef.current = undefined;
-                        }
-                        setIsWorkflowMenuOpen(true);
-                      }}
-                      onMouseLeave={() => {
-                        workflowCloseTimerRef.current = window.setTimeout(() => {
-                          setIsWorkflowMenuOpen(false);
-                          workflowCloseTimerRef.current = undefined;
-                        }, 150);
-                      }}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setIsWorkflowMenuOpen((v) => !v);
-                      }}
-                    />
-                  </button>
-                  {isWorkflowMenuOpen && (
-                    <div
-                      className="dropdown-menu workflow-list"
-                      style={{ maxHeight: '300px', overflowY: 'auto' }}
-                      onMouseEnter={() => {
-                        if (workflowCloseTimerRef.current !== undefined) {
-                          window.clearTimeout(workflowCloseTimerRef.current);
-                          workflowCloseTimerRef.current = undefined;
-                        }
-                        setIsWorkflowMenuOpen(true);
-                      }}
-                      onMouseLeave={() => {
-                        setIsWorkflowMenuOpen(false);
-                      }}
-                    >
-                      {(!workflowList || workflowList.length === 0) && (
-                        <div className="dropdown-item" style={{ color: '#9CA3AF', cursor: 'default' }}>
-                          <span>暂无工作流</span>
+                        <div
+                          className={`dropdown-item ${instructionVariant === 'text' ? 'active' : ''}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setInstructionVariant('text');
+                            const instructionTool = editor.getStateDescendant('instruction') as any;
+                            if (instructionTool && instructionTool.setInputMode) {
+                              instructionTool.setInputMode('text');
+                            }
+                            editor.setCurrentTool('instruction');
+                            setCurrentToolId('instruction');
+                            setIsInstructionMenuOpen(false);
+                          }}
+                        >
+                          <span style={{ fontSize: '16px', fontWeight: 'bold' }}>I</span>
+                          <span>文本节点</span>
                         </div>
-                      )}
-                      {workflowList &&
-                        workflowList.map((workflow: any) => (
-                          <div
-                            key={workflow.workflowId}
-                            className={`dropdown-item ${selectedWorkflow?.workflowId === workflow.workflowId ? 'active' : ''}`}
-                            onClick={async (e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setSelectedWorkflow(workflow);
+                        <div
+                          className={`dropdown-item ${instructionVariant === 'image' ? 'active' : ''}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setInstructionVariant('image');
+                            const instructionTool = editor.getStateDescendant('instruction') as any;
+                            if (instructionTool && instructionTool.setInputMode) {
+                              instructionTool.setInputMode('image');
+                            }
+                            editor.setCurrentTool('instruction');
+                            setCurrentToolId('instruction');
+                            setIsInstructionMenuOpen(false);
+                          }}
+                        >
+                          <span style={{ fontSize: '16px' }}>📷</span>
+                          <span>图片节点</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
 
-                              try {
-                                // 获取工作流详细信息（包括输入参数）
-                                const workflowDetail = await getWorkflow(workflow.workflowId);
-
-                                // 转换输入参数格式
-                                const inputParams = (workflowDetail?.variables || []).map((variable: any) => ({
-                                  name: variable.name,
-                                  displayName: getI18nContent(variable.displayName) || variable.name,
-                                  type: variable.type || 'string',
-                                  value: variable.default !== undefined ? variable.default : '',
-                                  required: variable.required || false,
-                                  description:
-                                    getI18nContent(variable.description) || getI18nContent(variable.placeholder) || '',
-                                  typeOptions: variable.typeOptions || undefined,
-                                }));
-
-                                // 设置工作流数据并激活工具
-                                const workflowTool = editor.getStateDescendant('workflow') as any;
-                                if (workflowTool && workflowTool.setWorkflowData) {
-                                  workflowTool.setWorkflowData({
-                                    workflowId: workflow.workflowId,
-                                    workflowName:
-                                      getI18nContent(workflowDetail?.displayName || workflow.displayName) ||
-                                      workflow.name ||
-                                      '未命名工作流',
-                                    workflowDescription:
-                                      getI18nContent(workflowDetail?.description || workflow.description) || '',
-                                    inputParams: inputParams,
-                                  });
-                                }
-                                editor.setCurrentTool('workflow');
-                                setCurrentToolId('workflow');
-                              } catch (error) {
-                                console.error('获取工作流详情失败:', error);
-                                // 如果获取失败，使用基本信息
-                                const workflowTool = editor.getStateDescendant('workflow') as any;
-                                if (workflowTool && workflowTool.setWorkflowData) {
-                                  workflowTool.setWorkflowData({
-                                    workflowId: workflow.workflowId,
-                                    workflowName:
-                                      getI18nContent(workflow.displayName) || workflow.name || '未命名工作流',
-                                    workflowDescription: getI18nContent(workflow.description) || '',
-                                    inputParams: [],
-                                  });
-                                }
-                                editor.setCurrentTool('workflow');
-                                setCurrentToolId('workflow');
-                              }
-
-                              setIsWorkflowMenuOpen(false);
-                            }}
-                            title={getI18nContent(workflow.description) || ''}
-                          >
-                            <VinesIcon size="xs">lucide:workflow</VinesIcon>
-                            <span
-                              style={{
-                                maxWidth: '150px',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              {getI18nContent(workflow.displayName) || workflow.name || '未命名工作流'}
-                            </span>
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            if (tool.id === 'workflow-node') {
-              const isActive = currentToolId === 'workflow-node';
-              const nodeTypes = [
-                { type: 'add', label: '加法', IconComponent: AddIcon },
-                { type: 'subtract', label: '减法', IconComponent: SubtractIcon },
-                { type: 'multiply', label: '乘法', IconComponent: MultiplyIcon },
-                { type: 'divide', label: '除法', IconComponent: DivideIcon },
-                { type: 'slider', label: '滑块', IconComponent: SliderIcon },
-                { type: 'conditional', label: '条件', IconComponent: ConditionalIcon },
-              ];
-              const currentNode = nodeTypes.find((n) => n.type === selectedNodeType) || nodeTypes[0];
-              const CurrentIcon = currentNode.IconComponent;
-
-              return (
-                <div key="node-group" className={`tool-group ${isActive ? 'selected' : ''}`} ref={nodeGroupRef}>
+              if (tool.id === 'output') {
+                const isActive = currentToolId === 'output';
+                return (
                   <button
-                    className={`tool-button ${isActive ? 'selected' : ''} ${isNodeMenuOpen ? 'menu-open' : ''}`}
+                    key={tool.id}
+                    className={`tool-button ${isActive ? 'selected' : ''}`}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      const nodeTool = editor.getStateDescendant('workflow-node') as any;
-                      if (nodeTool && nodeTool.setNodeType) {
-                        nodeTool.setNodeType({ type: selectedNodeType });
-                      }
-                      editor.setCurrentTool('workflow-node');
-                      setCurrentToolId('workflow-node');
+                      editor.setCurrentTool('output');
+                      setCurrentToolId('output');
                     }}
-                    title={`流程节点: ${currentNode.label}`}
+                    title={tool.label}
                     style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                   >
-                    <div style={{ width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <CurrentIcon />
-                    </div>
-                    <span className="caret" />
-                    <span
-                      className="caret-hit"
-                      title="选择节点类型"
-                      onMouseEnter={() => {
-                        if (nodeCloseTimerRef.current !== undefined) {
-                          window.clearTimeout(nodeCloseTimerRef.current);
-                          nodeCloseTimerRef.current = undefined;
+                    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>O</span>
+                  </button>
+                );
+              }
+
+              if (tool.id === 'workflow') {
+                const isActive = currentToolId === 'workflow';
+                return (
+                  <div
+                    key="workflow-group"
+                    className={`tool-group ${isActive ? 'selected' : ''}`}
+                    ref={workflowGroupRef}
+                  >
+                    <button
+                      className={`tool-button ${isActive ? 'selected' : ''} ${isWorkflowMenuOpen ? 'menu-open' : ''}`}
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (selectedWorkflow) {
+                          // 如果已选择工作流，激活工具并设置工作流数据
+                          try {
+                            // 获取工作流详细信息（包括输入参数）
+                            const workflowDetail = await getWorkflow(selectedWorkflow.workflowId);
+
+                            // 转换输入参数格式
+                            const inputParams = (workflowDetail?.variables || []).map((variable: any) => ({
+                              name: variable.name,
+                              displayName: getI18nContent(variable.displayName) || variable.name,
+                              type: variable.type || 'string',
+                              value: variable.default !== undefined ? variable.default : '',
+                              required: variable.required || false,
+                              description:
+                                getI18nContent(variable.description) || getI18nContent(variable.placeholder) || '',
+                              typeOptions: variable.typeOptions || undefined,
+                            }));
+
+                            const workflowTool = editor.getStateDescendant('workflow') as any;
+                            if (workflowTool && workflowTool.setWorkflowData) {
+                              workflowTool.setWorkflowData({
+                                workflowId: selectedWorkflow.workflowId,
+                                workflowName:
+                                  getI18nContent(workflowDetail?.displayName || selectedWorkflow.displayName) ||
+                                  selectedWorkflow.name ||
+                                  '未命名工作流',
+                                workflowDescription:
+                                  getI18nContent(workflowDetail?.description || selectedWorkflow.description) || '',
+                                inputParams: inputParams,
+                              });
+                            }
+                          } catch (error) {
+                            console.error('获取工作流详情失败:', error);
+                            const workflowTool = editor.getStateDescendant('workflow') as any;
+                            if (workflowTool && workflowTool.setWorkflowData) {
+                              workflowTool.setWorkflowData({
+                                workflowId: selectedWorkflow.workflowId,
+                                workflowName:
+                                  getI18nContent(selectedWorkflow.displayName) ||
+                                  selectedWorkflow.name ||
+                                  '未命名工作流',
+                                workflowDescription: getI18nContent(selectedWorkflow.description) || '',
+                                inputParams: [],
+                              });
+                            }
+                          }
+                          editor.setCurrentTool('workflow');
+                          setCurrentToolId('workflow');
+                        } else {
+                          // 如果没有选择工作流，打开菜单
+                          setIsWorkflowMenuOpen(true);
                         }
-                        setIsNodeMenuOpen(true);
                       }}
-                      onMouseLeave={() => {
-                        nodeCloseTimerRef.current = window.setTimeout(() => {
-                          setIsNodeMenuOpen(false);
-                          nodeCloseTimerRef.current = undefined;
-                        }, 150);
-                      }}
+                      title={
+                        selectedWorkflow
+                          ? `工作流: ${getI18nContent(selectedWorkflow.displayName) || selectedWorkflow.name}`
+                          : '工作流'
+                      }
+                      style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                    >
+                      <VinesIcon size="xs">lucide:workflow</VinesIcon>
+                      <span className="caret" />
+                      <span
+                        className="caret-hit"
+                        title="选择工作流"
+                        onMouseEnter={() => {
+                          if (workflowCloseTimerRef.current !== undefined) {
+                            window.clearTimeout(workflowCloseTimerRef.current);
+                            workflowCloseTimerRef.current = undefined;
+                          }
+                          setIsWorkflowMenuOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          workflowCloseTimerRef.current = window.setTimeout(() => {
+                            setIsWorkflowMenuOpen(false);
+                            workflowCloseTimerRef.current = undefined;
+                          }, 150);
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsWorkflowMenuOpen((v) => !v);
+                        }}
+                      />
+                    </button>
+                    {isWorkflowMenuOpen && (
+                      <div
+                        className="dropdown-menu workflow-list"
+                        style={{ maxHeight: '300px', overflowY: 'auto' }}
+                        onMouseEnter={() => {
+                          if (workflowCloseTimerRef.current !== undefined) {
+                            window.clearTimeout(workflowCloseTimerRef.current);
+                            workflowCloseTimerRef.current = undefined;
+                          }
+                          setIsWorkflowMenuOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          setIsWorkflowMenuOpen(false);
+                        }}
+                      >
+                        {(!workflowList || workflowList.length === 0) && (
+                          <div className="dropdown-item" style={{ color: '#9CA3AF', cursor: 'default' }}>
+                            <span>暂无工作流</span>
+                          </div>
+                        )}
+                        {workflowList &&
+                          workflowList.map((workflow: any) => (
+                            <div
+                              key={workflow.workflowId}
+                              className={`dropdown-item ${selectedWorkflow?.workflowId === workflow.workflowId ? 'active' : ''}`}
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedWorkflow(workflow);
+
+                                try {
+                                  // 获取工作流详细信息（包括输入参数）
+                                  const workflowDetail = await getWorkflow(workflow.workflowId);
+
+                                  // 转换输入参数格式
+                                  const inputParams = (workflowDetail?.variables || []).map((variable: any) => ({
+                                    name: variable.name,
+                                    displayName: getI18nContent(variable.displayName) || variable.name,
+                                    type: variable.type || 'string',
+                                    value: variable.default !== undefined ? variable.default : '',
+                                    required: variable.required || false,
+                                    description:
+                                      getI18nContent(variable.description) ||
+                                      getI18nContent(variable.placeholder) ||
+                                      '',
+                                    typeOptions: variable.typeOptions || undefined,
+                                  }));
+
+                                  // 设置工作流数据并激活工具
+                                  const workflowTool = editor.getStateDescendant('workflow') as any;
+                                  if (workflowTool && workflowTool.setWorkflowData) {
+                                    workflowTool.setWorkflowData({
+                                      workflowId: workflow.workflowId,
+                                      workflowName:
+                                        getI18nContent(workflowDetail?.displayName || workflow.displayName) ||
+                                        workflow.name ||
+                                        '未命名工作流',
+                                      workflowDescription:
+                                        getI18nContent(workflowDetail?.description || workflow.description) || '',
+                                      inputParams: inputParams,
+                                    });
+                                  }
+                                  editor.setCurrentTool('workflow');
+                                  setCurrentToolId('workflow');
+                                } catch (error) {
+                                  console.error('获取工作流详情失败:', error);
+                                  // 如果获取失败，使用基本信息
+                                  const workflowTool = editor.getStateDescendant('workflow') as any;
+                                  if (workflowTool && workflowTool.setWorkflowData) {
+                                    workflowTool.setWorkflowData({
+                                      workflowId: workflow.workflowId,
+                                      workflowName:
+                                        getI18nContent(workflow.displayName) || workflow.name || '未命名工作流',
+                                      workflowDescription: getI18nContent(workflow.description) || '',
+                                      inputParams: [],
+                                    });
+                                  }
+                                  editor.setCurrentTool('workflow');
+                                  setCurrentToolId('workflow');
+                                }
+
+                                setIsWorkflowMenuOpen(false);
+                              }}
+                              title={getI18nContent(workflow.description) || ''}
+                            >
+                              <VinesIcon size="xs">lucide:workflow</VinesIcon>
+                              <span
+                                style={{
+                                  maxWidth: '150px',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {getI18nContent(workflow.displayName) || workflow.name || '未命名工作流'}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              if (tool.id === 'workflow-node') {
+                const isActive = currentToolId === 'workflow-node';
+                const nodeTypes = [
+                  { type: 'add', label: '加法', IconComponent: AddIcon },
+                  { type: 'subtract', label: '减法', IconComponent: SubtractIcon },
+                  { type: 'multiply', label: '乘法', IconComponent: MultiplyIcon },
+                  { type: 'divide', label: '除法', IconComponent: DivideIcon },
+                  { type: 'slider', label: '滑块', IconComponent: SliderIcon },
+                  { type: 'conditional', label: '条件', IconComponent: ConditionalIcon },
+                ];
+                const currentNode = nodeTypes.find((n) => n.type === selectedNodeType) || nodeTypes[0];
+                const CurrentIcon = currentNode.IconComponent;
+
+                return (
+                  <div key="node-group" className={`tool-group ${isActive ? 'selected' : ''}`} ref={nodeGroupRef}>
+                    <button
+                      className={`tool-button ${isActive ? 'selected' : ''} ${isNodeMenuOpen ? 'menu-open' : ''}`}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setIsNodeMenuOpen((v) => !v);
-                      }}
-                    />
-                  </button>
-                  {isNodeMenuOpen && (
-                    <div
-                      className="dropdown-menu"
-                      onMouseEnter={() => {
-                        if (nodeCloseTimerRef.current !== undefined) {
-                          window.clearTimeout(nodeCloseTimerRef.current);
-                          nodeCloseTimerRef.current = undefined;
+                        const nodeTool = editor.getStateDescendant('workflow-node') as any;
+                        if (nodeTool && nodeTool.setNodeType) {
+                          nodeTool.setNodeType({ type: selectedNodeType });
                         }
-                        setIsNodeMenuOpen(true);
+                        editor.setCurrentTool('workflow-node');
+                        setCurrentToolId('workflow-node');
                       }}
-                      onMouseLeave={() => {
-                        setIsNodeMenuOpen(false);
-                      }}
+                      title={`流程节点: ${currentNode.label}`}
+                      style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                     >
-                      {nodeTypes.map((nodeType) => {
-                        const NodeIcon = nodeType.IconComponent;
-                        return (
-                          <div
-                            key={nodeType.type}
-                            className={`dropdown-item ${selectedNodeType === nodeType.type ? 'active' : ''}`}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setSelectedNodeType(nodeType.type);
-                              const nodeTool = editor.getStateDescendant('workflow-node') as any;
-                              if (nodeTool && nodeTool.setNodeType) {
-                                nodeTool.setNodeType({ type: nodeType.type });
-                              }
-                              editor.setCurrentTool('workflow-node');
-                              setCurrentToolId('workflow-node');
-                              setIsNodeMenuOpen(false);
-                            }}
-                          >
-                            <div style={{ width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <NodeIcon />
+                      <div
+                        style={{
+                          width: '18px',
+                          height: '18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <CurrentIcon />
+                      </div>
+                      <span className="caret" />
+                      <span
+                        className="caret-hit"
+                        title="选择节点类型"
+                        onMouseEnter={() => {
+                          if (nodeCloseTimerRef.current !== undefined) {
+                            window.clearTimeout(nodeCloseTimerRef.current);
+                            nodeCloseTimerRef.current = undefined;
+                          }
+                          setIsNodeMenuOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          nodeCloseTimerRef.current = window.setTimeout(() => {
+                            setIsNodeMenuOpen(false);
+                            nodeCloseTimerRef.current = undefined;
+                          }, 150);
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsNodeMenuOpen((v) => !v);
+                        }}
+                      />
+                    </button>
+                    {isNodeMenuOpen && (
+                      <div
+                        className="dropdown-menu"
+                        onMouseEnter={() => {
+                          if (nodeCloseTimerRef.current !== undefined) {
+                            window.clearTimeout(nodeCloseTimerRef.current);
+                            nodeCloseTimerRef.current = undefined;
+                          }
+                          setIsNodeMenuOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          setIsNodeMenuOpen(false);
+                        }}
+                      >
+                        {nodeTypes.map((nodeType) => {
+                          const NodeIcon = nodeType.IconComponent;
+                          return (
+                            <div
+                              key={nodeType.type}
+                              className={`dropdown-item ${selectedNodeType === nodeType.type ? 'active' : ''}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedNodeType(nodeType.type);
+                                const nodeTool = editor.getStateDescendant('workflow-node') as any;
+                                if (nodeTool && nodeTool.setNodeType) {
+                                  nodeTool.setNodeType({ type: nodeType.type });
+                                }
+                                editor.setCurrentTool('workflow-node');
+                                setCurrentToolId('workflow-node');
+                                setIsNodeMenuOpen(false);
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: '18px',
+                                  height: '18px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                <NodeIcon />
+                              </div>
+                              <span>{nodeType.label}</span>
                             </div>
-                            <span>{nodeType.label}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            }
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
 
-            return null;
-          })}
+              return null;
+            })}
           </div>
         )}
 

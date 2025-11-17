@@ -99,16 +99,9 @@ export const PomPage: React.FC = () => {
               <CardHeader className="flex flex-row items-start gap-2">
                 <div className="flex-1">
                   <CardTitle>Upload Garment Image</CardTitle>
-                  <CardDescription>
-                    Upload a flat lay photo of the garment (PNG, JPEG, WEBP, JFIF)
-                  </CardDescription>
+                  <CardDescription>Upload a flat lay photo of the garment (PNG, JPEG, WEBP, JFIF)</CardDescription>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowUploader(false)}
-                  className="shrink-0"
-                >
+                <Button variant="ghost" size="sm" onClick={() => setShowUploader(false)} className="shrink-0">
                   Hide
                 </Button>
               </CardHeader>
@@ -173,12 +166,7 @@ export const PomPage: React.FC = () => {
                   {garmentType ? `Detected: ${garmentType}` : 'Results will appear here after measurement'}
                 </CardDescription>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowUploader((v) => !v)}
-                className="shrink-0"
-              >
+              <Button variant="outline" size="sm" onClick={() => setShowUploader((v) => !v)} className="shrink-0">
                 {showUploader ? 'Expand Results' : 'Show Uploader'}
               </Button>
             </CardHeader>

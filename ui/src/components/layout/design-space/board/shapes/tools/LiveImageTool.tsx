@@ -1,23 +1,22 @@
-import { useCallback } from 'react'
-import { FrameShapeTool, useEditor } from 'tldraw'
+import { useCallback } from 'react';
+
+import { FrameShapeTool, useEditor } from 'tldraw';
 
 export class LiveImageTool extends FrameShapeTool {
-  static override id = 'live-image'
-  static override initial = 'idle'
-  override shapeType = 'live-image'
+  static override id = 'live-image';
+  static override initial = 'idle';
+  override shapeType = 'live-image';
 }
 
 export function MakeLiveButton() {
-  const editor = useEditor()
+  const editor = useEditor();
   const makeLive = useCallback(() => {
-    editor.setCurrentTool('live-image')
-  }, [editor])
+    editor.setCurrentTool('live-image');
+  }, [editor]);
 
   return (
     <button onClick={makeLive} className="draw-fast-button">
       <div className="draw-fast-button__inner">Draw Fast</div>
     </button>
-  )
+  );
 }
-
-

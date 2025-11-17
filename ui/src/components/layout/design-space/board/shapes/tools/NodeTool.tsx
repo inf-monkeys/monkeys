@@ -3,6 +3,7 @@
  * 用于在画板上点击创建 Workflow 节点
  */
 import { createShapeId, StateNode, TLEventHandlers } from 'tldraw';
+
 import { getNodeDefinitions } from '../../workflow-examples/src/nodes/nodeTypes';
 
 export class NodeTool extends StateNode {
@@ -30,7 +31,7 @@ export class NodeTool extends StateNode {
     // 获取节点定义并生成默认数据
     const nodeDefinitions = getNodeDefinitions(this.editor);
     const nodeDefinition = nodeDefinitions[this.nodeTypeName as keyof typeof nodeDefinitions];
-    
+
     if (!nodeDefinition) {
       console.error(`未找到节点类型: ${this.nodeTypeName}`);
       return;
@@ -60,4 +61,3 @@ export class NodeTool extends StateNode {
     this.editor.setCurrentTool('select');
   };
 }
-

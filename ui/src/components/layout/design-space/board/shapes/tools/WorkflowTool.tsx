@@ -38,44 +38,48 @@ export class WorkflowTool extends StateNode {
 
     // 根据参数数量和类型动态调整高度（与 shapePorts.ts 保持一致）
     const params = this.workflowData?.inputParams || [];
-    
+
     // 基础高度计算
-    const headerBarHeight = 40;           // 标题栏
-    const contentPaddingTop = 12;         // 内容区域上padding
-    const contentPaddingBottom = 12;      // 内容区域下padding
-    const workflowNameHeight = 24;        // 工作流名称
+    const headerBarHeight = 40; // 标题栏
+    const contentPaddingTop = 12; // 内容区域上padding
+    const contentPaddingBottom = 12; // 内容区域下padding
+    const workflowNameHeight = 24; // 工作流名称
     const workflowDescHeight = this.workflowData?.workflowDescription ? 20 : 0; // 工作流描述
-    const workflowIdHeight = 20;          // ID 显示
-    
-    let baseHeight = headerBarHeight + contentPaddingTop + workflowNameHeight + 
-                     workflowDescHeight + workflowIdHeight + contentPaddingBottom;
-    
+    const workflowIdHeight = 20; // ID 显示
+
+    let baseHeight =
+      headerBarHeight +
+      contentPaddingTop +
+      workflowNameHeight +
+      workflowDescHeight +
+      workflowIdHeight +
+      contentPaddingBottom;
+
     // 计算参数区域高度
     if (params.length > 0) {
-      const beforeParamsMargin = 12;        // marginTop
-      const beforeParamsPadding = 12;       // paddingTop
-      const paramsSectionTitleHeight = 20;  // "输入参数"标题
+      const beforeParamsMargin = 12; // marginTop
+      const beforeParamsPadding = 12; // paddingTop
+      const paramsSectionTitleHeight = 20; // "输入参数"标题
       const paramsTitleMarginBottom = 8;
-      
-      baseHeight += beforeParamsMargin + beforeParamsPadding + 
-                    paramsSectionTitleHeight + paramsTitleMarginBottom;
-      
+
+      baseHeight += beforeParamsMargin + beforeParamsPadding + paramsSectionTitleHeight + paramsTitleMarginBottom;
+
       params.forEach((param: any) => {
         const labelHeight = 16;
         const labelMarginBottom = 4;
         const paramMarginBottom = 8;
         let inputHeight = 28;
-        
+
         if (param.type === 'file') {
           inputHeight = 192;
         } else if (param.type === 'number' && param.typeOptions?.uiType === 'slider') {
           inputHeight = 40;
         }
-        
+
         baseHeight += labelHeight + labelMarginBottom + inputHeight + paramMarginBottom;
       });
     }
-    
+
     const totalHeight = Math.max(200, baseHeight);
 
     this.editor.createShape({
