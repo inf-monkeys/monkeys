@@ -62,7 +62,15 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
 
   const headbarTheme: CustomizationHeadbarTheme = get(oem, 'theme.headbar.theme', 'card');
 
-  const { isUseWorkbench, isUseAppStore, isUsePanel, isUseCustomNav, routeCustomNavId, isUseDesign, routeDesignProjectId } = useVinesRoute();
+  const {
+    isUseWorkbench,
+    isUseAppStore,
+    isUsePanel,
+    isUseCustomNav,
+    routeCustomNavId,
+    isUseDesign,
+    routeDesignProjectId,
+  } = useVinesRoute();
 
   // 获取当前设计项目信息，用于判断是否为模板
   const { data: currentDesignProject } = useGetDesignProject(routeDesignProjectId);
@@ -86,7 +94,15 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
         setValue('designs');
       }
     }
-  }, [isUseWorkbench, isUseAppStore, isUsePanel, isUseCustomNav, routeCustomNavId, isUseDesign, currentDesignProject?.isTemplate]);
+  }, [
+    isUseWorkbench,
+    isUseAppStore,
+    isUsePanel,
+    isUseCustomNav,
+    routeCustomNavId,
+    isUseDesign,
+    currentDesignProject?.isTemplate,
+  ]);
 
   const tabsList: VinesSpaceHeadbarModules = unionBy(oemVinesSpaceHeadbarModules, TAB_LIST, 'id');
 

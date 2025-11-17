@@ -54,7 +54,7 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
           isFilled: true,
           isLabel: true,
           excludeFromShapeBounds: true,
-        })
+        }),
     );
 
     // Ensure valid dimensions
@@ -110,18 +110,18 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
   // 使用新的 ConnectionBinding 系统检测连接的 Instruction 或 Output 并自动填充参数
   const detectAndFillInstructionInputs = () => {
     const newConnections: Array<{ paramName: string; instructionId?: string; outputId?: string }> = [];
-    
+
     // 使用新的端口连接系统
     const connections = getShapePortConnections(editor, shape.id);
-    
+
     for (const connection of connections) {
       // 查找连接到 Workflow 输入端口的连接（terminal === 'end'）
       if (connection.terminal === 'end') {
         const connectedShape = editor.getShape(connection.connectedShapeId);
-        
+
         // 从端口 ID 中提取参数名称 (格式: "param_xxx")
         const paramName = connection.ownPortId.replace('param_', '');
-        
+
         // 检查是否连接到 Instruction
         if (connectedShape?.type === 'instruction') {
           newConnections.push({
@@ -138,15 +138,15 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         }
       }
     }
-    
+
     // 如果没有找到新连接，回退检查旧的箭头连接（兼容性）
     if (newConnections.length === 0) {
       const allShapes = editor.getCurrentPageShapes();
       const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
       const selfBounds = editor.getShapePageBounds(shape.id as any);
-      
+
       if (!selfBounds) return;
-      
+
       const isPointInRect = (p: { x: number; y: number }, r: { x: number; y: number; w: number; h: number }) =>
         p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
       const expandRect = (r: { x: number; y: number; w: number; h: number }, padding = 16) => ({
@@ -157,64 +157,64 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       });
 
       arrows.forEach((arrow) => {
-      const start = arrow.props.start as any;
-      const end = arrow.props.end as any;
+        const start = arrow.props.start as any;
+        const end = arrow.props.end as any;
 
-      // 检查箭头是否从Instruction指向本Workflow
-      if (start?.type === 'binding' && end?.type === 'binding' && end.boundShapeId === shape.id) {
-        const startShape = editor.getShape(start.boundShapeId) as any;
-        if (startShape?.type === 'instruction') {
-          // 使用第一个参数作为默认映射
-          if (shape.props.inputParams.length > 0) {
-            const firstParam = shape.props.inputParams[0];
-            newConnections.push({
-              paramName: firstParam.name,
-              instructionId: startShape.id,
-            });
-          }
-        }
-      } else {
-        // 精确判定：检查箭头终点是否在某个参数连接点附近
-        const endAbs = { x: arrow.x + (end?.x ?? 0), y: arrow.y + (end?.y ?? 0) };
-        const startAbs = { x: arrow.x + (start?.x ?? 0), y: arrow.y + (start?.y ?? 0) };
-
-        // 遍历所有参数的连接点
-        shape.props.inputParams.forEach((param) => {
-          const paramRef = paramConnectionRefs.current.get(param.name);
-          if (!paramRef) return;
-
-          const paramRect = paramRef.getBoundingClientRect();
-          const editorRect = editor.getContainer().getBoundingClientRect();
-
-          // 转换为画布坐标
-          const camera = editor.getCamera();
-          const paramPageX = (paramRect.left - editorRect.left) / camera.z - camera.x;
-          const paramPageY = (paramRect.top - editorRect.top) / camera.z - camera.y;
-
-          const paramBounds = {
-            x: paramPageX,
-            y: paramPageY,
-            w: paramRect.width / camera.z,
-            h: paramRect.height / camera.z,
-          };
-
-          // 检查箭头终点是否在这个参数连接点附近
-          if (isPointInRect(endAbs, expandRect(paramBounds))) {
-            // 检查起点是否是Instruction
-            for (const s of allShapes) {
-              if (s.type !== 'instruction') continue;
-              const b = editor.getShapePageBounds(s.id as any);
-              if (!b) continue;
-              if (isPointInRect(startAbs, expandRect(b))) {
-                newConnections.push({
-                  paramName: param.name,
-                  instructionId: s.id as string,
-                });
-              }
+        // 检查箭头是否从Instruction指向本Workflow
+        if (start?.type === 'binding' && end?.type === 'binding' && end.boundShapeId === shape.id) {
+          const startShape = editor.getShape(start.boundShapeId) as any;
+          if (startShape?.type === 'instruction') {
+            // 使用第一个参数作为默认映射
+            if (shape.props.inputParams.length > 0) {
+              const firstParam = shape.props.inputParams[0];
+              newConnections.push({
+                paramName: firstParam.name,
+                instructionId: startShape.id,
+              });
             }
           }
-        });
-      }
+        } else {
+          // 精确判定：检查箭头终点是否在某个参数连接点附近
+          const endAbs = { x: arrow.x + (end?.x ?? 0), y: arrow.y + (end?.y ?? 0) };
+          const startAbs = { x: arrow.x + (start?.x ?? 0), y: arrow.y + (start?.y ?? 0) };
+
+          // 遍历所有参数的连接点
+          shape.props.inputParams.forEach((param) => {
+            const paramRef = paramConnectionRefs.current.get(param.name);
+            if (!paramRef) return;
+
+            const paramRect = paramRef.getBoundingClientRect();
+            const editorRect = editor.getContainer().getBoundingClientRect();
+
+            // 转换为画布坐标
+            const camera = editor.getCamera();
+            const paramPageX = (paramRect.left - editorRect.left) / camera.z - camera.x;
+            const paramPageY = (paramRect.top - editorRect.top) / camera.z - camera.y;
+
+            const paramBounds = {
+              x: paramPageX,
+              y: paramPageY,
+              w: paramRect.width / camera.z,
+              h: paramRect.height / camera.z,
+            };
+
+            // 检查箭头终点是否在这个参数连接点附近
+            if (isPointInRect(endAbs, expandRect(paramBounds))) {
+              // 检查起点是否是Instruction
+              for (const s of allShapes) {
+                if (s.type !== 'instruction') continue;
+                const b = editor.getShapePageBounds(s.id as any);
+                if (!b) continue;
+                if (isPointInRect(startAbs, expandRect(b))) {
+                  newConnections.push({
+                    paramName: param.name,
+                    instructionId: s.id as string,
+                  });
+                }
+              }
+            }
+          });
+        }
       });
     }
 
@@ -258,7 +258,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           paramName: c.paramName,
           instructionId: c.instructionId!,
         }));
-      
+
       const currentConnectionsStr = JSON.stringify(shape.props.inputConnections || []);
       const newConnectionsStr = JSON.stringify(compatibleConnections);
 
@@ -304,10 +304,10 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
   // 使用新的 ConnectionBinding 系统检测连接的 Output
   const detectConnectedOutputs = (): string[] => {
     const outputs: string[] = [];
-    
+
     // 使用新的端口连接系统
     const connections = getShapePortConnections(editor, shape.id);
-    
+
     for (const connection of connections) {
       // 查找从 Workflow 的 output 端口出发的连接（terminal === 'start'）
       if (connection.terminal === 'start' && connection.ownPortId === 'output') {
@@ -317,16 +317,16 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         }
       }
     }
-    
+
     // 如果没有找到新连接，回退检查旧的箭头连接（兼容性）
     if (outputs.length === 0) {
       const allShapes = editor.getCurrentPageShapes();
       const arrows = allShapes.filter((s) => s.type === 'arrow') as any[];
-      
+
       arrows.forEach((arrow) => {
         const start = arrow.props.start as any;
         const end = arrow.props.end as any;
-        
+
         if (start?.type === 'binding' && start.boundShapeId === shape.id && end?.type === 'binding') {
           const endShape = editor.getShape(end.boundShapeId);
           if (endShape?.type === 'output') {
@@ -335,7 +335,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         }
       });
     }
-    
+
     return Array.from(new Set(outputs));
   };
 
@@ -447,8 +447,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       }
 
       const startData = await startResp.json();
-      const workflowInstanceId =
-        startData?.data?.workflowInstanceId ?? startData?.workflowInstanceId ?? '';
+      const workflowInstanceId = startData?.data?.workflowInstanceId ?? startData?.workflowInstanceId ?? '';
       if (!workflowInstanceId) {
         throw new Error('无法获取工作流实例 ID');
       }
@@ -583,9 +582,9 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       // 辅助函数：递归查找嵌套对象中的 images 和 text
       const findImagesAndText = (obj: any): { images: string[]; text: string } => {
         const found: { images: string[]; text: string } = { images: [], text: '' };
-        
+
         if (!obj || typeof obj !== 'object') return found;
-        
+
         // 检查当前层级的 images 和 text
         if (Array.isArray((obj as any).images) && (obj as any).images.length > 0) {
           found.images.push(...(obj as any).images.filter((it: any) => typeof it === 'string'));
@@ -593,11 +592,11 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         if ((obj as any).text && typeof (obj as any).text === 'string' && (obj as any).text.trim()) {
           found.text = (obj as any).text;
         }
-        
+
         // 递归查找嵌套对象和数组
         for (const key in obj) {
           if (key === 'images' || key === 'text') continue; // 已经处理过了
-          
+
           const value = (obj as any)[key];
           if (Array.isArray(value)) {
             // 如果是数组，遍历每个元素
@@ -615,7 +614,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
             if (nested.text && !found.text) found.text = nested.text;
           }
         }
-        
+
         return found;
       };
 
@@ -673,7 +672,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         if (nestedResult.text && !result) {
           result = nestedResult.text;
         }
-        
+
         // 1. 优先处理直接返回的 images 和 text 字段（某些工作流 API 的直接格式）
         if (Array.isArray(data.images) && data.images.length > 0) {
           imageUrls.push(...data.images.filter((it: any) => typeof it === 'string'));
@@ -932,7 +931,6 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       workflowAbortControllers.delete(shape.id as any);
     }
   };
-
 
   return (
     <div
@@ -1232,9 +1230,10 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       </div>
 
       {/* 输入参数端口 - 在顶层渲染 */}
-      {shape.props.inputParams && shape.props.inputParams.map((param, index) => (
-        <GenericPort key={param.name} shapeId={shape.id} portId={`param_${param.name}`} />
-      ))}
+      {shape.props.inputParams &&
+        shape.props.inputParams.map((param, index) => (
+          <GenericPort key={param.name} shapeId={shape.id} portId={`param_${param.name}`} />
+        ))}
 
       {/* Output Port - 使用通用的 Port 组件 */}
       <GenericPort shapeId={shape.id} portId="output" />

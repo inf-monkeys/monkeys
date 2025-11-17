@@ -3,6 +3,7 @@
  */
 import classNames from 'classnames';
 import { TLShapeId, useEditor, useValue } from 'tldraw';
+
 import { getNodePorts } from '../../workflow-examples/src/nodes/nodePorts';
 import { NodeShape } from '../../workflow-examples/src/nodes/NodeShapeUtil';
 import { PortId } from '../../workflow-examples/src/ports/Port';
@@ -35,7 +36,7 @@ export function GenericPort({ shapeId, portId }: { shapeId: TLShapeId; portId: P
 
       return null;
     },
-    [shapeId, portId, editor]
+    [shapeId, portId, editor],
   );
 
   if (!port) {
@@ -50,7 +51,7 @@ export function GenericPort({ shapeId, portId }: { shapeId: TLShapeId; portId: P
       const { hintingPort } = portState.get(editor);
       return hintingPort && hintingPort.portId === portId && hintingPort.shapeId === shapeId;
     },
-    [editor, shapeId, portId]
+    [editor, shapeId, portId],
   );
 
   // isEligible is true if the user is currently dragging a connection, and this port is eligible
@@ -70,7 +71,7 @@ export function GenericPort({ shapeId, portId }: { shapeId: TLShapeId; portId: P
 
       return true;
     },
-    [editor, shapeId, port.terminal, portId]
+    [editor, shapeId, port.terminal, portId],
   );
 
   // Port 大小为 12px，端口坐标 (x, y) 是中心点，需要转换为左上角
@@ -81,7 +82,7 @@ export function GenericPort({ shapeId, portId }: { shapeId: TLShapeId; portId: P
     <div
       className={classNames(
         `Port Port_${port.terminal}`,
-        isHinting ? 'Port_hinting' : isEligible ? 'Port_eligible' : undefined
+        isHinting ? 'Port_hinting' : isEligible ? 'Port_eligible' : undefined,
       )}
       style={{
         // 设置端口位置，使 (x, y) 对应端口中心
@@ -103,4 +104,3 @@ export function GenericPort({ shapeId, portId }: { shapeId: TLShapeId; portId: P
     />
   );
 }
-

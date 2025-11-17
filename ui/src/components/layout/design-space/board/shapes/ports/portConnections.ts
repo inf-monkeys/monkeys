@@ -2,6 +2,7 @@
  * Generic port connection utilities that work with all shape types
  */
 import { Editor, TLShapeId } from 'tldraw';
+
 import { ConnectionBinding } from '../../workflow-examples/src/connection/ConnectionBindingUtil';
 import { PortId } from '../../workflow-examples/src/ports/Port';
 
@@ -10,7 +11,7 @@ import { PortId } from '../../workflow-examples/src/ports/Port';
  */
 export function getShapePortConnections(
   editor: Editor,
-  shapeId: TLShapeId
+  shapeId: TLShapeId,
 ): Array<{
   connectedShapeId: TLShapeId;
   connectionId: TLShapeId;
@@ -45,4 +46,3 @@ export function getShapePortConnections(
 
   return connections;
 }
-

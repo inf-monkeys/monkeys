@@ -1,86 +1,84 @@
-import { TLFrameShape, TLShapeId, stopEventPropagation, useEditor } from 'tldraw'
-import { forwardRef, useCallback } from 'react'
+import { forwardRef, useCallback } from 'react';
 
-export const FrameLabelInput = forwardRef<
-  HTMLInputElement,
-  { id: TLShapeId; name: string; isEditing: boolean }
->(function FrameLabelInput({ id, name, isEditing }, ref) {
-  const editor = useEditor()
+import { stopEventPropagation, TLFrameShape, TLShapeId, useEditor } from 'tldraw';
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-        stopEventPropagation(e)
-        e.currentTarget.blur()
-        editor.setEditingShape(null)
-      }
-    },
-    [editor],
-  )
+export const FrameLabelInput = forwardRef<HTMLInputElement, { id: TLShapeId; name: string; isEditing: boolean }>(
+  function FrameLabelInput({ id, name, isEditing }, ref) {
+    const editor = useEditor();
 
-  const handleBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      const shape = editor.getShape<TLFrameShape>(id)
-      if (!shape) return
+    const handleKeyDown = useCallback(
+      (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+          stopEventPropagation(e);
+          e.currentTarget.blur();
+          editor.setEditingShape(null);
+        }
+      },
+      [editor],
+    );
 
-      const name = shape.props.name
-      const value = e.currentTarget.value.trim()
-      if (name === value) return
+    const handleBlur = useCallback(
+      (e: React.FocusEvent<HTMLInputElement>) => {
+        const shape = editor.getShape<TLFrameShape>(id);
+        if (!shape) return;
 
-      editor.updateShapes([
-        {
-          id,
-          type: 'frame',
-          props: { name: value },
-        } as any,
-      ])
-    },
-    [id, editor],
-  )
+        const name = shape.props.name;
+        const value = e.currentTarget.value.trim();
+        if (name === value) return;
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const shape = editor.getShape<TLFrameShape>(id)
-      if (!shape) return
+        editor.updateShapes([
+          {
+            id,
+            type: 'frame',
+            props: { name: value },
+          } as any,
+        ]);
+      },
+      [id, editor],
+    );
 
-      const name = shape.props.name
-      const value = e.currentTarget.value
-      if (name === value) return
+    const handleChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const shape = editor.getShape<TLFrameShape>(id);
+        if (!shape) return;
 
-      editor.updateShapes([
-        {
-          id,
-          type: 'frame',
-          props: { name: value },
-        } as any,
-      ])
-    },
-    [id, editor],
-  )
+        const name = shape.props.name;
+        const value = e.currentTarget.value;
+        if (name === value) return;
 
-  return (
-    <div className={`tl-frame-label ${isEditing ? 'tl-frame-label__editing' : ''}`}>
-      <input
-        className="tl-frame-name-input"
-        ref={ref}
-        style={{ display: isEditing ? undefined : 'none' }}
-        value={name}
-        autoFocus
-        onKeyDown={handleKeyDown}
-        onBlur={handleBlur}
-        onChange={handleChange}
-        onPointerDown={stopEventPropagation}
-      />
-      {defaultEmptyAs(name, 'Double click prompt to edit') + String.fromCharCode(8203)}
-    </div>
-  )
-})
+        editor.updateShapes([
+          {
+            id,
+            type: 'frame',
+            props: { name: value },
+          } as any,
+        ]);
+      },
+      [id, editor],
+    );
+
+    return (
+      <div className={`tl-frame-label ${isEditing ? 'tl-frame-label__editing' : ''}`}>
+        <input
+          className="tl-frame-name-input"
+          ref={ref}
+          style={{ display: isEditing ? undefined : 'none' }}
+          value={name}
+          autoFocus
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          onChange={handleChange}
+          onPointerDown={stopEventPropagation}
+        />
+        {defaultEmptyAs(name, 'Double click prompt to edit') + String.fromCharCode(8203)}
+      </div>
+    );
+  },
+);
 
 export function defaultEmptyAs(str: string, dflt: string) {
   if (str.match(/^\s*$/)) {
-    return dflt
+    return dflt;
   }
-  return str
+  return str;
 }
-
-

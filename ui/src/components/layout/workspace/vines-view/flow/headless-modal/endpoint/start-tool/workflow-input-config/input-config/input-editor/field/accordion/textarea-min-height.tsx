@@ -23,7 +23,7 @@ export const FieldTextareaMinHeight: React.FC<IFieldTextareaMinHeightProps> = ({
         <FormItem>
           <FormLabel>
             {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.textarea-mini-height.label')}
-            <span className="ml-2 text-xxs text-muted-foreground">范围 40-300，默认 180</span>
+            <span className="text-xxs ml-2 text-muted-foreground">范围 40-300，默认 180</span>
           </FormLabel>
           <div className="px-1">
             <FormControl>

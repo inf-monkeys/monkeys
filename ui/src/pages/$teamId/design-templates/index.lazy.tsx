@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 import { mutate } from 'swr';
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { get } from 'lodash';
 import { Download, Link, Pencil, Play, Trash, Upload } from 'lucide-react';
@@ -15,12 +15,12 @@ import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor.tsx';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createDesignProjectsColumns } from '@/components/layout/ugc-pages/design-project/consts.tsx';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { DesignAssociationEditorDialog } from '@/components/layout/ugc-pages/design-project/design-association-editor';
 import { DesignProjectCardWrapper } from '@/components/layout/ugc-pages/design-project/design-project-card-wrapper';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -64,11 +64,7 @@ interface ImportDesignTemplateDialogProps {
   onImport: (file: File) => Promise<void>;
 }
 
-const ImportDesignTemplateDialog: React.FC<ImportDesignTemplateDialogProps> = ({
-  visible,
-  setVisible,
-  onImport,
-}) => {
+const ImportDesignTemplateDialog: React.FC<ImportDesignTemplateDialogProps> = ({ visible, setVisible, onImport }) => {
   const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
@@ -138,7 +134,9 @@ const ImportDesignTemplateDialog: React.FC<ImportDesignTemplateDialogProps> = ({
             {t('common.utils.cancel')}
           </Button>
           <Button onClick={handleImport} disabled={!selectedFile || importing}>
-            {importing ? t('common.import.loading', { defaultValue: '导入中...' }) : t('common.utils.import', { defaultValue: '导入' })}
+            {importing
+              ? t('common.import.loading', { defaultValue: '导入中...' })
+              : t('common.utils.import', { defaultValue: '导入' })}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -173,7 +171,7 @@ export const DesignTemplates: React.FC = () => {
       document.querySelectorAll('[style*="pointer-events"]').forEach((element: any) => {
         element.style.pointerEvents = '';
       });
-      
+
       // 恢复 body 的样式
       document.body.style.pointerEvents = '';
       document.body.style.overflow = '';
@@ -188,7 +186,7 @@ export const DesignTemplates: React.FC = () => {
 
     // 立即关闭对话框
     setDeleteAlertDialogVisible(false);
-    
+
     // 强制清理
     forceCleanupDialog();
 
@@ -459,7 +457,9 @@ export const DesignTemplates: React.FC = () => {
                       e.preventDefault();
                     }}
                   >
-                    <DropdownMenuLabel>{t('ugc-page.design-project.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
+                    <DropdownMenuLabel>
+                      {t('ugc-page.design-project.ugc-view.operate-area.dropdown-label')}
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                       <DropdownMenuItem
@@ -473,7 +473,9 @@ export const DesignTemplates: React.FC = () => {
                         </DropdownMenuShortcut>
                         {t('ugc-page.design-project.ugc-view.operate-area.options.edit-info')}
                       </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => copy(location.origin.concat(`/${item.teamId}/design/${item.id}`))}>
+                      <DropdownMenuItem
+                        onSelect={() => copy(location.origin.concat(`/${item.teamId}/design/${item.id}`))}
+                      >
                         <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                           <Link size={15} />
                         </DropdownMenuShortcut>
@@ -525,7 +527,11 @@ export const DesignTemplates: React.FC = () => {
         subtitle={
           canEdit ? (
             <>
-              <ImportDesignTemplateDialog visible={importDialogVisible} setVisible={setImportDialogVisible} onImport={handleImportProject} />
+              <ImportDesignTemplateDialog
+                visible={importDialogVisible}
+                setVisible={setImportDialogVisible}
+                onImport={handleImportProject}
+              />
               <Tooltip content={t('common.utils.import', { defaultValue: '导入' })}>
                 <TooltipTrigger asChild>
                   <Button
@@ -569,9 +575,7 @@ export const DesignTemplates: React.FC = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDelete}>
-              {t('common.utils.cancel')}
-            </AlertDialogCancel>
+            <AlertDialogCancel onClick={handleCancelDelete}>{t('common.utils.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={() => void handleDeleteDesignProject(currentDesignProject?.id)}>
               {t('common.utils.confirm')}
             </AlertDialogAction>
@@ -585,4 +589,3 @@ export const DesignTemplates: React.FC = () => {
 export const Route = createLazyFileRoute('/$teamId/design-templates/')({
   component: DesignTemplates,
 });
-

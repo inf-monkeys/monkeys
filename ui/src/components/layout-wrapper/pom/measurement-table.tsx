@@ -71,9 +71,9 @@ export const MeasurementTable: React.FC<MeasurementTableProps> = ({ measurements
           <TableHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <TableRow>
               <TableHead className="w-9 py-2 text-[13px]">#</TableHead>
-              <TableHead className="w-[55%] py-2 text-[13px]">Name</TableHead>
-              <TableHead className="w-32 py-2 text-right text-[13px] lg:w-40">Size</TableHead>
-              <TableHead className="w-16 py-2 text-[13px]">Unit</TableHead>
+              <TableHead className="w-[65%] py-2 text-[13px]">Name</TableHead>
+              <TableHead className="w-28 py-2 text-right text-[13px] lg:w-32">Size</TableHead>
+              <TableHead className="w-14 py-2 text-[13px]">Unit</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

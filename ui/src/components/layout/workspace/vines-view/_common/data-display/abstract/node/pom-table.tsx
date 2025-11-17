@@ -52,7 +52,9 @@ export const VinesAbstractPomTable: React.FC<VinesAbstractPomTableProps> = ({ da
   const handleExport = () => {
     const headers = ['Name', 'Size', 'Unit'];
     const csvRows = validMeasurements.map((m) => [m.name, m.size !== null ? m.size.toString() : '', m.unit]);
-    const csvContent = [headers.join(','), ...csvRows.map((row) => row.map((cell) => `"${cell}"`).join(','))].join('\n');
+    const csvContent = [headers.join(','), ...csvRows.map((row) => row.map((cell) => `"${cell}"`).join(','))].join(
+      '\n',
+    );
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -78,38 +80,30 @@ export const VinesAbstractPomTable: React.FC<VinesAbstractPomTableProps> = ({ da
       {/* Toolbar: export at top-left to avoid crowding */}
       <div className="px-1 pt-0.5">
         <div className="flex items-center justify-start gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2.5 whitespace-nowrap"
-            onClick={handleExport}
-          >
+          <Button variant="outline" size="sm" className="h-7 whitespace-nowrap px-2.5" onClick={handleExport}>
             <Download className="mr-1 h-3.5 w-3.5" /> Export
           </Button>
           <span className="text-[11px] text-muted-foreground">{validMeasurements.length} items</span>
         </div>
       </div>
 
-      {/* Measurements Table */}
-      <div className="overflow-hidden rounded-md">
-        <Table className="table-fixed w-full">
+      {/* Measurements Table（内部滚动，而不是拖动整个结果区域） */}
+      <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden rounded-md">
+        <Table className="w-full table-fixed">
           <TableHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <TableRow>
               <TableHead className="w-9 py-2 text-[13px]">#</TableHead>
-              <TableHead className="w-[55%] py-2 text-[13px]">Name</TableHead>
-              <TableHead className="w-32 lg:w-40 py-2 text-right text-[13px]">Size</TableHead>
-              <TableHead className="w-16 py-2 text-[13px]">Unit</TableHead>
+              <TableHead className="w-[65%] py-2 text-[13px]">Name</TableHead>
+              <TableHead className="w-28 py-2 text-right text-[13px] lg:w-32">Size</TableHead>
+              <TableHead className="w-14 py-2 text-[13px]">Unit</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {validMeasurements.map((measurement, index) => (
-              <TableRow
-                key={`${measurement.name}-${measurement.__i}`}
-                className="odd:bg-muted/30"
-              >
+              <TableRow key={`${measurement.name}-${measurement.__i}`} className="odd:bg-muted/30">
                 <TableCell className="py-1.5 text-[11px] text-muted-foreground">{index + 1}</TableCell>
                 <TableCell
-                  className="py-1.5 text-[13px] leading-5 whitespace-normal break-words max-w-0"
+                  className="max-w-0 whitespace-normal break-words py-1.5 text-[13px] leading-5"
                   title={measurement.name}
                   onDoubleClick={() => {
                     setEditingKey(`${measurement.__i}:name`);
@@ -147,7 +141,7 @@ export const VinesAbstractPomTable: React.FC<VinesAbstractPomTableProps> = ({ da
                   {editingKey === `${measurement.__i}:size` ? (
                     <Input
                       type="number"
-                      className="!h-7 !w-full px-2 py-1 text-sm text-right"
+                      className="!h-7 !w-full px-2 py-1 text-right text-sm"
                       wrapperClassName="inline-block w-[9ch] sm:w-[10ch]"
                       value={tempValue}
                       onChange={setTempValue}
@@ -210,7 +204,7 @@ export const VinesAbstractPomTable: React.FC<VinesAbstractPomTableProps> = ({ da
       </div>
 
       {/* Footer Info */}
-      <div className="flex items-center justify-between text-[11px] text-muted-foreground px-1">
+      <div className="flex items-center justify-between px-1 text-[11px] text-muted-foreground">
         <span>
           Type: <span className="font-medium text-foreground">{garmentType}</span>
         </span>

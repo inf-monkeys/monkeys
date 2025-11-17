@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useParams } from '@tanstack/react-router';
 
 import { useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -12,7 +13,12 @@ import { AssetRecordType, createShapeId, getSnapshot, TLShapeId } from 'tldraw';
 
 import { useUser } from '@/apis/authz/user';
 import { useSystemConfig } from '@/apis/common';
-import { generateDesignBoardThumbnail, updateDesignBoardMetadata, useDesignBoardMetadata, useGetDesignProject } from '@/apis/designs';
+import {
+  generateDesignBoardThumbnail,
+  updateDesignBoardMetadata,
+  useDesignBoardMetadata,
+  useGetDesignProject,
+} from '@/apis/designs';
 import { useWorkspacePages } from '@/apis/pages';
 import { Board } from '@/components/layout/design-space/board';
 import { MiniHistoryRightSidebar } from '@/components/layout/design-space/board/mini-history-right-sidebar';
@@ -33,7 +39,6 @@ import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 import { IVinesExecutionResultItem } from '@/utils/execution';
 import { downloadFile, getImageSize } from '@/utils/file.ts';
-import { useParams } from '@tanstack/react-router';
 
 interface DesignBoardViewProps {
   embed?: boolean;
@@ -128,7 +133,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
     // 设置加载标志，防止触发自动保存
     isLoadingSnapshotRef.current = true;
-    
+
     // 加载 snapshot（特别是对于 fork 的新项目）
     try {
       editor.loadSnapshot(metadata.snapshot);
@@ -580,7 +585,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         <Card className="absolute right-0 top-0 z-40 m-4 p-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
+              <Button
                 variant="outline"
                 size="small"
                 onClick={() => setVersionManagerVisible(true)}
@@ -593,7 +598,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
           </Tooltip>
         </Card>
       )}
-      
+
       <div className="flex h-full max-w-64">
         {!embed && get(oem, 'theme.designProjects.showBoardOperationSidebar', true) && (
           <>
@@ -672,7 +677,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         width={miniHistoryRightSidebarWidth}
         onResizeWidth={(w) => setMiniHistoryRightSidebarWidth(w)}
       />
-      
+
       {/* 版本管理器 */}
       {designProject && (
         <DesignProjectVersionManager

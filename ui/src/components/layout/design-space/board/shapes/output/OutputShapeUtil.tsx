@@ -44,7 +44,7 @@ export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
           isFilled: true,
           isLabel: true,
           excludeFromShapeBounds: true,
-        })
+        }),
     );
 
     // Ensure valid dimensions
@@ -94,9 +94,9 @@ export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
 }
 
 function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: Editor }) {
-
-  const images = (Array.isArray(shape.props.images) ? shape.props.images : [])
-    .filter((it) => typeof it === 'string' && it.length > 0);
+  const images = (Array.isArray(shape.props.images) ? shape.props.images : []).filter(
+    (it) => typeof it === 'string' && it.length > 0,
+  );
   // 兼容旧字段 imageUrl
   if ((!images || images.length === 0) && shape.props.imageUrl && shape.props.imageUrl.length > 0) {
     images.push(shape.props.imageUrl);
@@ -226,7 +226,9 @@ function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: E
         )}
 
         {showImages && (
-          <div style={{ marginBottom: hasContent ? '12px' : 0, display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}>
+          <div
+            style={{ marginBottom: hasContent ? '12px' : 0, display: 'grid', gridTemplateColumns: '1fr', gap: '8px' }}
+          >
             {imagesToShow.map((url, idx) => (
               <img
                 key={`${url}_${idx}`}
@@ -259,9 +261,7 @@ function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: E
                   color: '#374151',
                 }}
               >
-                <VinesMarkdown
-                  className="prose prose-sm max-w-none prose-headings:text-gray-800 prose-headings:font-semibold prose-headings:mt-4 prose-headings:mb-2 prose-p:text-gray-700 prose-p:my-2 prose-p:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-gray-800 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-pre:rounded-md prose-pre:p-3 prose-pre:overflow-x-auto prose-pre:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-li:text-gray-700 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 prose-blockquote:my-2 prose-table:border-collapse prose-table:w-full prose-table:my-2 prose-th:border prose-th:border-gray-300 prose-th:bg-gray-50 prose-th:p-2 prose-th:text-left prose-th:font-semibold prose-td:border prose-td:border-gray-300 prose-td:p-2"
-                >
+                <VinesMarkdown className="prose prose-sm prose-headings:text-gray-800 prose-headings:font-semibold prose-headings:mt-4 prose-headings:mb-2 prose-p:text-gray-700 prose-p:my-2 prose-p:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-code:text-gray-800 prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:font-mono prose-pre:bg-gray-50 prose-pre:border prose-pre:border-gray-200 prose-pre:rounded-md prose-pre:p-3 prose-pre:overflow-x-auto prose-pre:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-li:text-gray-700 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 prose-blockquote:my-2 prose-table:border-collapse prose-table:w-full prose-table:my-2 prose-th:border prose-th:border-gray-300 prose-th:bg-gray-50 prose-th:p-2 prose-th:text-left prose-th:font-semibold prose-td:border prose-td:border-gray-300 prose-td:p-2 max-w-none">
                   {shape.props.content}
                 </VinesMarkdown>
               </div>
@@ -280,7 +280,7 @@ function OutputShapeComponent({ shape, editor }: { shape: OutputShape; editor: E
 
       {/* Input Port - 左侧输入端口 */}
       <GenericPort shapeId={shape.id} portId="input" />
-      
+
       {/* Output Port - 右侧输出端口 */}
       <GenericPort shapeId={shape.id} portId="output" />
     </div>

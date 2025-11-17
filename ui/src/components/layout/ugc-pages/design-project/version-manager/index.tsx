@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 
+import { mutate } from 'swr';
 import { useNavigate } from '@tanstack/react-router';
+
 import { GitBranch, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { mutate } from 'swr';
 
 import { createDesignProjectVersion, deleteDesignProjectVersion, useDesignProjectVersions } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings.ts';
@@ -58,7 +59,7 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
       document.querySelectorAll('[style*="pointer-events"]').forEach((element: any) => {
         element.style.pointerEvents = '';
       });
-      
+
       // 恢复 body 的样式
       document.body.style.pointerEvents = '';
       document.body.style.overflow = '';
@@ -98,13 +99,13 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
       });
 
       toast.success('新版本创建成功');
-      
+
       // 立即关闭对话框
       setOpen(false);
-      
+
       // 强制清理遮罩
       forceCleanupDialog();
-      
+
       // 跳转到新创建的版本
       if (newVersion?.id) {
         setTimeout(() => {
@@ -132,10 +133,10 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
 
     // 立即关闭对话框
     setOpen(false);
-    
+
     // 强制清理遮罩
     forceCleanupDialog();
-    
+
     // 切换到对应版本的设计项目
     // 因为不同版本有不同的 id，所以直接使用版本的 id 进行跳转
     setTimeout(() => {
@@ -155,12 +156,12 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
     setDeleting(true);
     try {
       await deleteDesignProjectVersion(project.projectId, versionToDelete);
-      
+
       toast.success(`版本 ${versionToDelete} 已删除`);
-      
+
       // 刷新版本列表
       await mutate(`/api/design/project/${project.projectId}/versions`);
-      
+
       // 如果删除的是当前版本，跳转到最新版本
       if (versionToDelete === project.version) {
         setTimeout(() => {
@@ -180,12 +181,7 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
   return (
     <>
       {controlledOpen === undefined && (
-        <Button
-          variant="outline"
-          size="small"
-          onClick={() => setOpen(true)}
-          className="gap-2"
-        >
+        <Button variant="outline" size="small" onClick={() => setOpen(true)} className="gap-2">
           <GitBranch className="h-4 w-4" />
           版本 {project.version}
         </Button>
@@ -195,9 +191,7 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>版本管理</DialogTitle>
-            <DialogDescription>
-              查看和管理设计项目的版本历史
-            </DialogDescription>
+            <DialogDescription>查看和管理设计项目的版本历史</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -205,9 +199,7 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
             <div className="rounded-lg border p-4">
               <div className="mb-2 flex items-center justify-between">
                 <h4 className="font-semibold">当前版本</h4>
-                <span className="text-sm text-muted-foreground">
-                  版本 {project.version}
-                </span>
+                <span className="text-sm text-muted-foreground">版本 {project.version}</span>
               </div>
               <div className="text-sm text-muted-foreground">
                 更新时间: {formatTimeDiffPrevious(project.updatedTimestamp)}
@@ -223,8 +215,8 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
                     key={version.id}
                     className={`rounded-lg border p-3 transition-all ${
                       version.version === project.version
-                        ? 'border-primary bg-primary/5 cursor-default'
-                        : 'hover:bg-accent hover:border-primary/50 cursor-pointer'
+                        ? 'cursor-default border-primary bg-primary/5'
+                        : 'cursor-pointer hover:border-primary/50 hover:bg-accent'
                     }`}
                     onClick={() => handleVersionSwitch(version)}
                   >
@@ -233,9 +225,7 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
                         <div className="flex items-center gap-2">
                           <span className="font-medium">版本 {version.version}</span>
                           {version.version === project.version && (
-                            <span className="rounded bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                              当前
-                            </span>
+                            <span className="rounded bg-primary px-2 py-0.5 text-xs text-primary-foreground">当前</span>
                           )}
                         </div>
                         <div className="mt-1 text-sm text-muted-foreground">
@@ -244,9 +234,7 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
                       </div>
                       <div className="flex items-center gap-2">
                         {version.version !== project.version && (
-                          <div className="text-xs text-muted-foreground">
-                            点击切换
-                          </div>
+                          <div className="text-xs text-muted-foreground">点击切换</div>
                         )}
                         {versions && versions.length > 1 && (
                           <Button
@@ -267,17 +255,10 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
           </div>
 
           <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setOpen(false)}>
               关闭
             </Button>
-            <Button
-              onClick={handleCreateVersion}
-              disabled={creating}
-              className="gap-2"
-            >
+            <Button onClick={handleCreateVersion} disabled={creating} className="gap-2">
               <Plus className="h-4 w-4" />
               {creating ? '创建中...' : '创建新版本'}
             </Button>
@@ -293,9 +274,7 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
             <AlertDialogDescription>
               你确定要删除版本 {versionToDelete} 吗？此操作无法撤销。
               {versionToDelete === project.version && (
-                <div className="mt-2 text-yellow-600">
-                  ⚠️ 注意：你正在删除当前版本，删除后页面将刷新。
-                </div>
+                <div className="mt-2 text-yellow-600">⚠️ 注意：你正在删除当前版本，删除后页面将刷新。</div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -314,4 +293,3 @@ export const DesignProjectVersionManager: React.FC<DesignProjectVersionManagerPr
     </>
   );
 };
-

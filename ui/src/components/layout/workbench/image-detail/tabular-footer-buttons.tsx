@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { CopyIcon, SparklesIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -9,7 +10,6 @@ import type { TTabularEvent } from '@/components/layout/workspace/vines-view/for
 import { Button } from '@/components/ui/button';
 import { useCopy } from '@/hooks/use-copy';
 import { useVinesFlow } from '@/package/vines-flow';
-import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 
 interface TabularFooterButtonsProps {
   processedInputs: any[];

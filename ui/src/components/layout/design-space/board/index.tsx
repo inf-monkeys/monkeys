@@ -1,4 +1,7 @@
 import React, { ErrorInfo, startTransition, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+
+import { useParams } from '@tanstack/react-router';
 
 import './index.scss';
 
@@ -29,8 +32,6 @@ import {
   useToasts,
 } from 'tldraw';
 
-import { useParams } from '@tanstack/react-router';
-
 import { useUser } from '@/apis/authz/user';
 import { useSystemConfig } from '@/apis/common';
 import { useGetDesignProject } from '@/apis/designs';
@@ -44,6 +45,7 @@ import { newConvertExecutionResultToItemList } from '@/utils/execution';
 import { getImageSize } from '@/utils/file';
 
 import { ExternalLayerPanel } from './ExternalLayerPanel';
+import { LiveImageProvider } from './hooks/useLiveImage';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
@@ -58,22 +60,20 @@ import {
   WorkflowConnectionBindingUtil,
   WorkflowConnectionShapeUtil,
   WorkflowShapeUtil,
-  WorkflowTool
+  WorkflowTool,
 } from './shapes';
-// Workflow 交互和工具函数
-import { keepConnectionsAtBottom } from './workflow-examples/src/connection/keepConnectionsAtBottom';
-import { PointingPort } from './workflow-examples/src/ports/PointingPort';
+import { LiveImageShapeUtil } from './shapes/live-image/LiveImageShapeUtil';
+import { LiveImageTool } from './shapes/tools/LiveImageTool';
 // Workflow UI 组件
 import { VerticalToolbar } from './vertical-toolbar.tsx';
 import { WorkflowRegions } from './workflow-examples/src/components/WorkflowRegions';
+// Workflow 交互和工具函数
+import { keepConnectionsAtBottom } from './workflow-examples/src/connection/keepConnectionsAtBottom';
+import { PointingPort } from './workflow-examples/src/ports/PointingPort';
 import { OnCanvasComponentPicker } from './workflow-ui/OnCanvasComponentPicker';
 
-import { createPortal } from 'react-dom';
 import 'tldraw/tldraw.css';
-import { LiveImageProvider } from './hooks/useLiveImage';
 import './layer-panel.css';
-import { LiveImageShapeUtil } from './shapes/live-image/LiveImageShapeUtil';
-import { LiveImageTool } from './shapes/tools/LiveImageTool';
 import './workflow-nodes.css';
 
 class FixedFrameShapeUtil extends FrameShapeUtil {
@@ -1074,213 +1074,219 @@ export const Board: React.FC<BoardProps> = ({
         <TldrawErrorBoundary>
           <LiveImageProvider appId={'110602490-lcm-sd15-i2i'}>
             <Tldraw
-            licenseKey="tldraw-2026-02-14/WyJCdUxDb2ViWSIsWyIqIl0sMTYsIjIwMjYtMDItMTQiXQ.zIbZRsp7SDmrunQdvcnfK2mKnaom5bDUKudHgIWcY6KP8ckD4YZTphzGrwvW8sKAjyzdtIiXY9cFlBfQLfMKJA"
-            persistenceKey={persistenceKey}
-            onMount={(editor: Editor) => {
-              setEditor(editor);
-              
-              // 重新检查只读模式（因为 onMount 可能在数据加载前执行）
-              const currentIsReadonly = isTemplate && !canEditTemplate;
-              
-              // 如果是只读模式（普通用户打开设计模板），设置编辑器为只读并拦截所有修改操作
-              if (currentIsReadonly) {
-                // 设置编辑器为只读状态
-                editor.updateInstanceState({ isReadonly: true });
-                
-                // 拦截所有删除操作
-                editor.sideEffects.registerBeforeDeleteHandler('shape', () => {
-                  return false; // 阻止删除
-                });
-                
-                // 拦截所有修改操作
-                editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
-                  return prevShape; // 返回原始形状，阻止修改
-                });
-                
-                // 拦截所有创建操作
-                editor.sideEffects.registerBeforeCreateHandler('shape', () => {
-                  return undefined as any; // 阻止创建
-                });
-                
-                // 拦截页面创建
-                editor.sideEffects.registerBeforeCreateHandler('page', () => {
-                  return undefined as any; // 阻止创建页面
-                });
-                
-                // 拦截页面删除
-                editor.sideEffects.registerBeforeDeleteHandler('page', () => {
-                  return false; // 阻止删除页面
-                });
-                
-                // 拦截资产创建
-                editor.sideEffects.registerBeforeCreateHandler('asset', () => {
-                  return undefined as any; // 阻止创建资产
-                });
-              } else {
-                // 只在单画板模式下保护默认画板不被删除
-                if (oneOnOne) {
-                  editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
-                    if (shape.id === frameShapeId) {
-                      return false;
-                    }
-                  });
-                }
+              licenseKey="tldraw-2026-02-14/WyJCdUxDb2ViWSIsWyIqIl0sMTYsIjIwMjYtMDItMTQiXQ.zIbZRsp7SDmrunQdvcnfK2mKnaom5bDUKudHgIWcY6KP8ckD4YZTphzGrwvW8sKAjyzdtIiXY9cFlBfQLfMKJA"
+              persistenceKey={persistenceKey}
+              onMount={(editor: Editor) => {
+                setEditor(editor);
 
-                editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
-                  if (prevShape.id === frameShapeId) {
-                    if (nextShape.type === 'frame' && 'w' in nextShape.props && 'h' in nextShape.props) {
-                      startTransition(() => {
-                        // @ts-ignore
-                        setBoardCanvasSize(nextShape.props.w as number, nextShape.props.h as number);
-                      });
-                    }
-                    return nextShape;
-                  }
-                  // 若是新创建或默认名仍为英文 Frame 的画板，自动改成中文"画板"
-                  try {
-                    if (nextShape.type === 'frame') {
-                      const name = (nextShape as any)?.props?.name;
-                      if (!name || String(name).toLowerCase() === 'frame') {
-                        return {
-                          ...nextShape,
-                          props: { ...(nextShape as any).props, name: '画板' },
-                        } as TLShape;
+                // 重新检查只读模式（因为 onMount 可能在数据加载前执行）
+                const currentIsReadonly = isTemplate && !canEditTemplate;
+
+                // 如果是只读模式（普通用户打开设计模板），设置编辑器为只读并拦截所有修改操作
+                if (currentIsReadonly) {
+                  // 设置编辑器为只读状态
+                  editor.updateInstanceState({ isReadonly: true });
+
+                  // 拦截所有删除操作
+                  editor.sideEffects.registerBeforeDeleteHandler('shape', () => {
+                    return false; // 阻止删除
+                  });
+
+                  // 拦截所有修改操作
+                  editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
+                    return prevShape; // 返回原始形状，阻止修改
+                  });
+
+                  // 拦截所有创建操作
+                  editor.sideEffects.registerBeforeCreateHandler('shape', () => {
+                    return undefined as any; // 阻止创建
+                  });
+
+                  // 拦截页面创建
+                  editor.sideEffects.registerBeforeCreateHandler('page', () => {
+                    return undefined as any; // 阻止创建页面
+                  });
+
+                  // 拦截页面删除
+                  editor.sideEffects.registerBeforeDeleteHandler('page', () => {
+                    return false; // 阻止删除页面
+                  });
+
+                  // 拦截资产创建
+                  editor.sideEffects.registerBeforeCreateHandler('asset', () => {
+                    return undefined as any; // 阻止创建资产
+                  });
+                } else {
+                  // 只在单画板模式下保护默认画板不被删除
+                  if (oneOnOne) {
+                    editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
+                      if (shape.id === frameShapeId) {
+                        return false;
                       }
-                    }
-                  } catch {}
-                  return nextShape;
-                });
-              }
-
-              // 如果提供了画布尺寸且启用自动创建，则创建有界 frame（只在非只读模式下）
-              if (canvasWidth && canvasHeight && !currentIsReadonly) {
-                createFrameWithConfig(editor, canvasWidth, canvasHeight);
-              }
-
-              // 将默认英文页面名（如 Page 1 / Page1）改为中文“页面1”
-              const renameDefaultPages = () => {
-                try {
-                  const pages = (editor as any).getPages?.() || [];
-                  pages.forEach((p: any, idx: number) => {
-                    const name: string = String(p?.name || '');
-                    const m = name.match(/^Page\s*(\d+)$/i) || name.match(/^Page(\d+)$/i);
-                    if (m && m[1]) {
-                      const num = Number(m[1]);
-                      const cn = `页面 ${Number.isFinite(num) ? num : idx + 1}`;
-                      try {
-                        (editor as any).renamePage?.(p.id, cn);
-                      } catch {}
-                    }
-                  });
-                } catch {}
-              };
-              // 立即执行一次，并在下一个宏任务再执行一次，避免初次渲染时覆盖
-              renameDefaultPages();
-              setTimeout(renameDefaultPages, 0);
-
-
-              // 初始化 Workflow 节点系统
-              try {
-                // 添加 PointingPort 交互状态到 select 工具
-                editor.getStateDescendant('select')!.addChild(PointingPort);
-                // 确保 workflow 连接线始终在底部
-                keepConnectionsAtBottom(editor);
-                console.log('[Board] Workflow 节点系统已初始化');
-              } catch (error) {
-                console.error('[Board] Workflow 节点系统初始化失败:', error);
-              }
-
-
-              // 只在非只读模式下注册外部内容处理器
-              if (!currentIsReadonly) {
-                editor.registerExternalContentHandler('url', async ({ url, point }) => {
-                  // 检查是否是图片 URL
-                  try {
-                    // 获取图片数据
-
-                    // 创建 asset
-                    const imageUrl = url;
-                    const { width, height } = await getImageSize(imageUrl);
-                    const assetData = {
-                      id: AssetRecordType.createId(),
-                      url: imageUrl,
-                      width: width,
-                      height: height,
-                    };
-
-                    editor.createAssets([
-                      {
-                        id: assetData.id,
-                        type: 'image',
-                        typeName: 'asset',
-                        props: {
-                          name: assetData.id,
-                          src: assetData.url,
-                          mimeType: 'image/png',
-                          isAnimated: false,
-                          h: assetData.height,
-                          w: assetData.width,
-                        },
-                        meta: {},
-                      },
-                    ]);
-
-                    editor.createShape({
-                      type: 'image',
-                      x: point ? point.x - width / 2 : 0,
-                      y: point ? point.y - height / 2 : 0,
-                      props: {
-                        assetId: assetData.id,
-                        w: assetData.width,
-                        h: assetData.height,
-                      },
                     });
-
-                    return true; // 表示已处理
-                  } catch (e) {
-                    console.error(e);
                   }
 
-                  return false; // 未处理,使用默认行为
-                });
-              }
-            }}
-            components={components}
-            shapeUtils={[
-              FixedFrameShapeUtil,
-              InstructionShapeUtil,
-              OutputShapeUtil,
-              WorkflowShapeUtil,
-              NodeShapeUtil,
-              WorkflowConnectionShapeUtil,
-              LiveImageShapeUtil,
-            ]}
-            bindingUtils={[...defaultBindingUtils, WorkflowConnectionBindingUtil]}
-            tools={[...defaultShapeTools, ...defaultTools, InstructionTool, OutputTool, WorkflowTool, NodeTool, LiveImageTool]}
-            assetUrls={defaultEditorAssetUrls}
-            overrides={{
-              tools: (_editor, tools) => {
-                // Remove the text tool
-                delete tools.text;
-
-                // 根据 OEM 配置控制 frame 工具（新建画板）
-                const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
-                if (oneOnOne === true) {
-                  // 单画板模式：隐藏 frame 工具
-                  delete tools.frame;
+                  editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
+                    if (prevShape.id === frameShapeId) {
+                      if (nextShape.type === 'frame' && 'w' in nextShape.props && 'h' in nextShape.props) {
+                        startTransition(() => {
+                          // @ts-ignore
+                          setBoardCanvasSize(nextShape.props.w as number, nextShape.props.h as number);
+                        });
+                      }
+                      return nextShape;
+                    }
+                    // 若是新创建或默认名仍为英文 Frame 的画板，自动改成中文"画板"
+                    try {
+                      if (nextShape.type === 'frame') {
+                        const name = (nextShape as any)?.props?.name;
+                        if (!name || String(name).toLowerCase() === 'frame') {
+                          return {
+                            ...nextShape,
+                            props: { ...(nextShape as any).props, name: '画板' },
+                          } as TLShape;
+                        }
+                      }
+                    } catch {}
+                    return nextShape;
+                  });
                 }
-                // 多画板模式：保留 frame 工具（默认行为）
 
-                return tools;
-              },
-            }}
-            assets={assetsStore}
-          >
-            {/* 小工具工具栏 - 根据 OEM 配置控制显示 */}
-            {get(oem, 'theme.designProjects.showMiniToolsToolbar', false) && <MiniToolsToolbar />}
-            <SneakySideEffects />
-            <LiveImageAssets />
-          </Tldraw>
+                // 如果提供了画布尺寸且启用自动创建，则创建有界 frame（只在非只读模式下）
+                if (canvasWidth && canvasHeight && !currentIsReadonly) {
+                  createFrameWithConfig(editor, canvasWidth, canvasHeight);
+                }
+
+                // 将默认英文页面名（如 Page 1 / Page1）改为中文“页面1”
+                const renameDefaultPages = () => {
+                  try {
+                    const pages = (editor as any).getPages?.() || [];
+                    pages.forEach((p: any, idx: number) => {
+                      const name: string = String(p?.name || '');
+                      const m = name.match(/^Page\s*(\d+)$/i) || name.match(/^Page(\d+)$/i);
+                      if (m && m[1]) {
+                        const num = Number(m[1]);
+                        const cn = `页面 ${Number.isFinite(num) ? num : idx + 1}`;
+                        try {
+                          (editor as any).renamePage?.(p.id, cn);
+                        } catch {}
+                      }
+                    });
+                  } catch {}
+                };
+                // 立即执行一次，并在下一个宏任务再执行一次，避免初次渲染时覆盖
+                renameDefaultPages();
+                setTimeout(renameDefaultPages, 0);
+
+                // 初始化 Workflow 节点系统
+                try {
+                  // 添加 PointingPort 交互状态到 select 工具
+                  editor.getStateDescendant('select')!.addChild(PointingPort);
+                  // 确保 workflow 连接线始终在底部
+                  keepConnectionsAtBottom(editor);
+                  console.log('[Board] Workflow 节点系统已初始化');
+                } catch (error) {
+                  console.error('[Board] Workflow 节点系统初始化失败:', error);
+                }
+
+                // 只在非只读模式下注册外部内容处理器
+                if (!currentIsReadonly) {
+                  editor.registerExternalContentHandler('url', async ({ url, point }) => {
+                    // 检查是否是图片 URL
+                    try {
+                      // 获取图片数据
+
+                      // 创建 asset
+                      const imageUrl = url;
+                      const { width, height } = await getImageSize(imageUrl);
+                      const assetData = {
+                        id: AssetRecordType.createId(),
+                        url: imageUrl,
+                        width: width,
+                        height: height,
+                      };
+
+                      editor.createAssets([
+                        {
+                          id: assetData.id,
+                          type: 'image',
+                          typeName: 'asset',
+                          props: {
+                            name: assetData.id,
+                            src: assetData.url,
+                            mimeType: 'image/png',
+                            isAnimated: false,
+                            h: assetData.height,
+                            w: assetData.width,
+                          },
+                          meta: {},
+                        },
+                      ]);
+
+                      editor.createShape({
+                        type: 'image',
+                        x: point ? point.x - width / 2 : 0,
+                        y: point ? point.y - height / 2 : 0,
+                        props: {
+                          assetId: assetData.id,
+                          w: assetData.width,
+                          h: assetData.height,
+                        },
+                      });
+
+                      return true; // 表示已处理
+                    } catch (e) {
+                      console.error(e);
+                    }
+
+                    return false; // 未处理,使用默认行为
+                  });
+                }
+              }}
+              components={components}
+              shapeUtils={[
+                FixedFrameShapeUtil,
+                InstructionShapeUtil,
+                OutputShapeUtil,
+                WorkflowShapeUtil,
+                NodeShapeUtil,
+                WorkflowConnectionShapeUtil,
+                LiveImageShapeUtil,
+              ]}
+              bindingUtils={[...defaultBindingUtils, WorkflowConnectionBindingUtil]}
+              tools={[
+                ...defaultShapeTools,
+                ...defaultTools,
+                InstructionTool,
+                OutputTool,
+                WorkflowTool,
+                NodeTool,
+                LiveImageTool,
+              ]}
+              assetUrls={defaultEditorAssetUrls}
+              overrides={{
+                tools: (_editor, tools) => {
+                  // Remove the text tool
+                  delete tools.text;
+
+                  // 根据 OEM 配置控制 frame 工具（新建画板）
+                  const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
+                  if (oneOnOne === true) {
+                    // 单画板模式：隐藏 frame 工具
+                    delete tools.frame;
+                  }
+                  // 多画板模式：保留 frame 工具（默认行为）
+
+                  return tools;
+                },
+              }}
+              assets={assetsStore}
+            >
+              {/* 小工具工具栏 - 根据 OEM 配置控制显示 */}
+              {get(oem, 'theme.designProjects.showMiniToolsToolbar', false) && <MiniToolsToolbar />}
+              <SneakySideEffects />
+              <LiveImageAssets />
+            </Tldraw>
           </LiveImageProvider>
         </TldrawErrorBoundary>
       </div>
@@ -1291,7 +1297,7 @@ export const Board: React.FC<BoardProps> = ({
 };
 
 const LiveImageAssets = track(function LiveImageAssets() {
-  const editor = useEditor()
+  const editor = useEditor();
   return (
     <Inject selector=".tl-overlays .tl-html-layer">
       {editor
@@ -1301,15 +1307,15 @@ const LiveImageAssets = track(function LiveImageAssets() {
           <LiveImageAsset key={shape.id} shape={shape} />
         ))}
     </Inject>
-  )
-})
+  );
+});
 
 function LiveImageAsset({ shape }: { shape: any }) {
-  const editor = useEditor()
-  if (!shape?.props?.overlayResult) return null
-  const transform = editor.getShapePageTransform(shape).toCssString()
-  const assetId = (AssetRecordType as any).createId(shape.id.split(':')[1])
-  const asset = editor.getAsset(assetId)
+  const editor = useEditor();
+  if (!shape?.props?.overlayResult) return null;
+  const transform = editor.getShapePageTransform(shape).toCssString();
+  const assetId = (AssetRecordType as any).createId(shape.id.split(':')[1]);
+  const asset = editor.getAsset(assetId);
   return asset && (asset as any).props?.src ? (
     <img
       src={(asset as any).props.src!}
@@ -1328,53 +1334,61 @@ function LiveImageAsset({ shape }: { shape: any }) {
         opacity: (shape as any).opacity,
       }}
     />
-  ) : null
+  ) : null;
 }
 
 function Inject({ children, selector }: { children: React.ReactNode; selector: string }) {
-  const [parent, setParent] = React.useState<Element | null>(null)
-  const target = React.useMemo(() => parent?.querySelector(selector) ?? null, [parent, selector])
+  const [parent, setParent] = React.useState<Element | null>(null);
+  const target = React.useMemo(() => parent?.querySelector(selector) ?? null, [parent, selector]);
 
   return (
     <>
       <div ref={(el) => setParent(el?.parentElement ?? null)} style={{ display: 'none' }} />
       {target ? createPortal(children as any, target) : null}
     </>
-  )
+  );
 }
 
 function SneakySideEffects() {
-  const editor = useEditor()
+  const editor = useEditor();
   React.useEffect(() => {
-    const FRAME_PADDING = 64
+    const FRAME_PADDING = 64;
 
     const normalizeBounds = (bounds: any) => {
-      if (!bounds) return null
-      const x = bounds.x ?? bounds.minX ?? 0
-      const y = bounds.y ?? bounds.minY ?? 0
+      if (!bounds) return null;
+      const x = bounds.x ?? bounds.minX ?? 0;
+      const y = bounds.y ?? bounds.minY ?? 0;
       const width =
-        bounds.width ?? bounds.w ?? (typeof bounds.maxX === 'number' && typeof bounds.minX === 'number' ? bounds.maxX - bounds.minX : 0)
+        bounds.width ??
+        bounds.w ??
+        (typeof bounds.maxX === 'number' && typeof bounds.minX === 'number' ? bounds.maxX - bounds.minX : 0);
       const height =
-        bounds.height ?? bounds.h ?? (typeof bounds.maxY === 'number' && typeof bounds.minY === 'number' ? bounds.maxY - bounds.minY : 0)
-      return { x, y, width, height }
-    }
+        bounds.height ??
+        bounds.h ??
+        (typeof bounds.maxY === 'number' && typeof bounds.minY === 'number' ? bounds.maxY - bounds.minY : 0);
+      return { x, y, width, height };
+    };
 
     const avoidFrameOverlap = (created: any) => {
-      const createdShapes: TLShape[] = Array.isArray(created) ? (created as TLShape[]) : created ? [created as TLShape] : []
-      if (!createdShapes.length) return
+      const createdShapes: TLShape[] = Array.isArray(created)
+        ? (created as TLShape[])
+        : created
+          ? [created as TLShape]
+          : [];
+      if (!createdShapes.length) return;
 
       createdShapes.forEach((shape) => {
-        if (!shape) return
-        if (shape.type !== 'frame' && shape.type !== 'live-image') return
+        if (!shape) return;
+        if (shape.type !== 'frame' && shape.type !== 'live-image') return;
 
-        const bounds = normalizeBounds(editor.getShapePageBounds(shape.id))
-        if (!bounds) return
+        const bounds = normalizeBounds(editor.getShapePageBounds(shape.id));
+        if (!bounds) return;
 
         const existingFrames = editor
           .getCurrentPageShapes()
           .filter((s) => s.id !== shape.id && (s.type === 'frame' || s.type === 'live-image'))
           .map((s) => normalizeBounds(editor.getShapePageBounds(s.id)))
-          .filter((b): b is { x: number; y: number; width: number; height: number } => Boolean(b))
+          .filter((b): b is { x: number; y: number; width: number; height: number } => Boolean(b));
 
         const overlaps = (testX: number, testY: number) =>
           existingFrames.some((other) => {
@@ -1383,29 +1397,29 @@ function SneakySideEffects() {
               testX + bounds.width + FRAME_PADDING > other.x &&
               testY < other.y + other.height + FRAME_PADDING &&
               testY + bounds.height + FRAME_PADDING > other.y
-            )
-          })
+            );
+          });
 
-        if (!overlaps(bounds.x, bounds.y)) return
+        if (!overlaps(bounds.x, bounds.y)) return;
 
-        let attemptX = bounds.x
-        let attemptY = bounds.y
-        const originX = bounds.x
-        const stepX = bounds.width + FRAME_PADDING
-        const stepY = bounds.height + FRAME_PADDING
-        const maxAttempts = 200
+        let attemptX = bounds.x;
+        let attemptY = bounds.y;
+        const originX = bounds.x;
+        const stepX = bounds.width + FRAME_PADDING;
+        const stepY = bounds.height + FRAME_PADDING;
+        const maxAttempts = 200;
 
-        let attempts = 0
+        let attempts = 0;
         while (attempts < maxAttempts && overlaps(attemptX, attemptY)) {
-          attemptX += stepX
+          attemptX += stepX;
           if (attemptX - originX > stepX * 6) {
-            attemptX = originX
-            attemptY += stepY
+            attemptX = originX;
+            attemptY += stepY;
           }
-          attempts += 1
+          attempts += 1;
         }
 
-        if (attempts >= maxAttempts) return
+        if (attempts >= maxAttempts) return;
 
         editor.updateShapes([
           {
@@ -1414,20 +1428,20 @@ function SneakySideEffects() {
             x: attemptX,
             y: attemptY,
           } as any,
-        ])
-      })
-    }
+        ]);
+      });
+    };
 
     const emitUpdate = () => {
-      editor.emit('update-drawings' as any)
-    }
+      editor.emit('update-drawings' as any);
+    };
 
-    editor.sideEffects.registerAfterChangeHandler('shape', emitUpdate)
-    editor.sideEffects.registerAfterDeleteHandler('shape', emitUpdate)
+    editor.sideEffects.registerAfterChangeHandler('shape', emitUpdate);
+    editor.sideEffects.registerAfterDeleteHandler('shape', emitUpdate);
     editor.sideEffects.registerAfterCreateHandler('shape', (created: any) => {
-      avoidFrameOverlap(created)
-      emitUpdate()
-    })
-  }, [editor])
-  return null
+      avoidFrameOverlap(created);
+      emitUpdate();
+    });
+  }, [editor]);
+  return null;
 }

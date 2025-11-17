@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 import { mutate } from 'swr';
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { get } from 'lodash';
 import { Download, GitBranch, Link, Pencil, Trash, Upload } from 'lucide-react';
@@ -14,13 +14,13 @@ import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor.tsx';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createDesignProjectsColumns } from '@/components/layout/ugc-pages/design-project/consts.tsx';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { DesignAssociationEditorDialog } from '@/components/layout/ugc-pages/design-project/design-association-editor';
 import { DesignProjectCardWrapper } from '@/components/layout/ugc-pages/design-project/design-project-card-wrapper';
 import { DesignProjectVersionManager } from '@/components/layout/ugc-pages/design-project/version-manager';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -64,11 +64,7 @@ interface ImportDesignProjectDialogProps {
   onImport: (file: File) => Promise<void>;
 }
 
-const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({
-  visible,
-  setVisible,
-  onImport,
-}) => {
+const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ visible, setVisible, onImport }) => {
   const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
@@ -138,7 +134,9 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({
             {t('common.utils.cancel')}
           </Button>
           <Button onClick={handleImport} disabled={!selectedFile || importing}>
-            {importing ? t('common.import.loading', { defaultValue: '导入中...' }) : t('common.utils.import', { defaultValue: '导入' })}
+            {importing
+              ? t('common.import.loading', { defaultValue: '导入中...' })
+              : t('common.utils.import', { defaultValue: '导入' })}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -174,7 +172,7 @@ export const Designs: React.FC = () => {
       document.querySelectorAll('[style*="pointer-events"]').forEach((element: any) => {
         element.style.pointerEvents = '';
       });
-      
+
       // 恢复 body 的样式
       document.body.style.pointerEvents = '';
       document.body.style.overflow = '';
@@ -189,7 +187,7 @@ export const Designs: React.FC = () => {
 
     // 立即关闭对话框
     setDeleteAlertDialogVisible(false);
-    
+
     // 强制清理
     forceCleanupDialog();
 
@@ -474,7 +472,11 @@ export const Designs: React.FC = () => {
         onItemClick={(item) => navigateHelper(item)}
         subtitle={
           <>
-            <ImportDesignProjectDialog visible={importDialogVisible} setVisible={setImportDialogVisible} onImport={handleImportProject} />
+            <ImportDesignProjectDialog
+              visible={importDialogVisible}
+              setVisible={setImportDialogVisible}
+              onImport={handleImportProject}
+            />
             <Tooltip content={t('common.utils.import', { defaultValue: '导入' })}>
               <TooltipTrigger asChild>
                 <Button
@@ -517,9 +519,7 @@ export const Designs: React.FC = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDelete}>
-              {t('common.utils.cancel')}
-            </AlertDialogCancel>
+            <AlertDialogCancel onClick={handleCancelDelete}>{t('common.utils.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={() => void handleDeleteDesignProject(currentDesignProject?.id)}>
               {t('common.utils.confirm')}
             </AlertDialogAction>

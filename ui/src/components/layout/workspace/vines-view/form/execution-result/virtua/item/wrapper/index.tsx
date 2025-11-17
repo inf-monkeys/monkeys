@@ -263,7 +263,4 @@ const wrapperAreEqual = (
   );
 };
 
-export const VirtuaExecutionResultGridWrapper = React.memo(
-  VirtuaExecutionResultGridWrapperComponent,
-  wrapperAreEqual,
-);
+export const VirtuaExecutionResultGridWrapper = React.memo(VirtuaExecutionResultGridWrapperComponent, wrapperAreEqual);
