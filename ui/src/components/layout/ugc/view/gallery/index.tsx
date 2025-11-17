@@ -11,6 +11,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
+// 支持跳转到详情页（新页面）的 assetType 白名单
+const DETAIL_PAGE_WHITELIST = ['design-assets', 'asset-library', 'neural-models'];
+
 export const UgcViewGalleryItem = <E extends object>({
   row,
   columns,
@@ -39,19 +42,17 @@ export const UgcViewGalleryItem = <E extends object>({
     navigate({ to: `/$teamId/nav/${currentNavId}/asset/${row.original.id}` as any });
   };
 
-  // 判断是否应该显示查看信息按钮
-  // 只显示在：concept-design:design-assets 和 concept-design:design-models/neural-models
+  // 判断是否应该显示查看信息按钮（跳转到新的详情页 vs 显示简单的 Popover）
   const shouldShowInfoButton = React.useMemo(() => {
     if (typeof window === 'undefined') return false;
     const path = window.location.pathname;
+    const match = path.match(/\/[^/]+\/nav\/([^/]+)/);
+    const navId = match?.[1] ?? '';
 
-    // 检查是否是 concept-design:design-assets
-    const isDesignAssets = path.includes('/nav/concept-design:design-assets');
+    // 提取 assetType（和文件夹视角的逻辑一致）
+    const assetType = navId.includes(':') ? navId.split(':')[1] : navId;
 
-    // 检查是否是 concept-design:design-models/neural-models
-    const isNeuralModels = path.includes('/nav/concept-design:design-models/neural-models');
-
-    return isDesignAssets || isNeuralModels;
+    return DETAIL_PAGE_WHITELIST.includes(assetType);
   }, []);
 
   return (

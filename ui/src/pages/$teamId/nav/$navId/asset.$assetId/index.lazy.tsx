@@ -9,7 +9,7 @@ import { AssetDetailPage } from '@/components/layout/ugc/detail/asset-detail-pag
 import { Button } from '@/components/ui/button';
 
 // 隐藏转换功能的 assetType 白名单
-const HIDE_CONVERSION_WHITELIST = ['design-models', 'neural-models'];
+const HIDE_CONVERSION_WHITELIST = ['design-models'];
 
 export const AssetDetail: React.FC = () => {
   const { t } = useTranslation();
