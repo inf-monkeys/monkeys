@@ -47,7 +47,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const { data: oem } = useSystemConfig();
 
-  const { status, setStatus } = useExecutionStore();
+  const { setStatus } = useExecutionStore();
 
   const showErrorFilter = oem?.theme?.workflowPreviewExecutionGrid?.showErrorFilter ?? true;
 
@@ -62,6 +62,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const [updateExecutionResultList, setUpdateExecutionResultList] = useState<VinesWorkflowExecutionOutputListItem[]>(
     [],
   );
+  const [iframeOutputs, setIframeOutputs] = useState<VinesWorkflowExecutionOutputListItem[]>([]);
 
   const {
     data: executionListData,
@@ -101,6 +102,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
     // 如果有第一页数据，进行原始数据层面的更新
     let finalRawData = allExistingItems;
+    let nextIframeOutputs: VinesWorkflowExecutionOutputListItem[] = [];
     if (firstPageExecutionList.length > 0) {
       // 创建现有数据的映射（基于 instanceId）
       const existingMap = new Map(allExistingItems.map((item) => [item.instanceId, item]));
@@ -138,8 +140,19 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
         const timeB = b.startTime || 0;
         return timeB - timeA; // 降序：新的在前
       });
-      setUpdateExecutionResultList([...updateItems, ...newItems]);
+      const updates = [...updateItems, ...newItems];
+      setUpdateExecutionResultList(updates);
+      nextIframeOutputs = updates;
+    } else {
+      setUpdateExecutionResultList([]);
     }
+
+    if (finalRawData.length === 0 && updateExecutionResultList.length > 0) {
+      finalRawData = updateExecutionResultList;
+    }
+
+    const fallbackIframeOutputs = nextIframeOutputs.length > 0 ? nextIframeOutputs : finalRawData.slice(0, 16);
+    setIframeOutputs(fallbackIframeOutputs);
 
     setStatus(finalRawData.find((item) => item.status === 'RUNNING') ? 'running' : 'idle');
 
@@ -167,7 +180,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   }, [executionResultList, setImages, setThumbImages]);
 
   useVinesIframeMessage({
-    outputs: updateExecutionResultList,
+    outputs: iframeOutputs,
     mutate: mutateExecutionList,
     enable: enablePostMessage,
   });
