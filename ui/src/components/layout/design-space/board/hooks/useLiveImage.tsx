@@ -140,7 +140,6 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
       }
       const shapes = getShapesTouching(shapeId, editor);
       const hash = getHashForObject([...shapes]);
-      const frameName = frame.props.name || '';
 
       // 读取所有输出连线的 label，用于构成配置签名（同一草图+同一提示词集合则跳过）
       const connections = getShapePortConnections(editor, frame.id);
@@ -155,7 +154,8 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
         .sort()
         .join('|');
 
-      const configSignature = `${frameName}|${labelsSignature}`;
+      // 草图的提示词完全来自每条连线的 label，框本身名称只作为备注，不参与签名
+      const configSignature = labelsSignature;
 
       if (hash === prevHash && configSignature === prevPromptSignature) return;
 
@@ -219,7 +219,8 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
           const label = (connectionShape?.props?.label as string) || '';
           const trimmedLabel = label.trim();
 
-          let promptBase = trimmedLabel || frameName;
+          // 提示词仅来自连线 label；如果为空则使用通用默认提示词
+          let promptBase = trimmedLabel;
           let prompt: string;
           if (promptBase) {
             prompt = promptBase + ' hd award-winning impressive';

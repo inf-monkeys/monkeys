@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   clamp,
   createShapeId,
@@ -8,6 +9,7 @@ import {
   Mat,
   RecordProps,
   ShapeUtil,
+  stopEventPropagation,
   SVGContainer,
   T,
   TLBaseShape,
@@ -320,6 +322,9 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 // Main connection component that renders the SVG path
 function ConnectionShape({ connection }: { connection: ConnectionShape }) {
   const editor = useEditor();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Get the connection terminals
   const { start, end } = useValue('terminals', () => getConnectionTerminals(editor, connection), [editor, connection]);
@@ -357,59 +362,138 @@ function ConnectionShape({ connection }: { connection: ConnectionShape }) {
   );
 
   const center = Vec.Lrp(start, end, 0.5);
-
   const rawLabel = (connection.props as any).label as string | undefined;
   const displayLabel = rawLabel && rawLabel.trim().length > 0 ? rawLabel.trim() : 'Double click prompt to edit';
 
-  const handleLabelPointerDown = (e: React.PointerEvent<SVGTextElement>) => {
-    // 标记事件已被处理，避免被 tldraw 当作其它工具交互（例如文本工具）
-    editor.markEventAsHandled(e);
+  const handleLabelDoubleClick = useCallback(
+    (e: React.MouseEvent<SVGTextElement>) => {
+      editor.markEventAsHandled(e);
+      e.stopPropagation();
+      e.preventDefault();
+
+      setEditValue(rawLabel || '');
+      setIsEditing(true);
+    },
+    [rawLabel, editor],
+  );
+
+  const handleLabelPointerDown = useCallback((e: React.PointerEvent<SVGTextElement>) => {
     e.stopPropagation();
+  }, []);
 
-    // 只在双击时弹出编辑框（detail === 2）
-    if (e.detail !== 2) return;
+  const handleInputKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+        stopEventPropagation(e);
+        e.currentTarget.blur();
+      } else if (e.key === 'Escape') {
+        stopEventPropagation(e);
+        setIsEditing(false);
+        setEditValue(rawLabel || '');
+      }
+    },
+    [rawLabel],
+  );
 
+  const handleInputBlur = useCallback(() => {
+    const trimmed = editValue.trim();
+    const finalValue = trimmed.length > 0 ? trimmed : '';
     const prev = rawLabel || '';
-    const next = window.prompt('编辑提示词', prev) ?? prev;
-    if (next !== prev) {
+
+    if (finalValue !== prev) {
       editor.updateShape<ConnectionShape>({
         id: connection.id,
         type: 'connection',
         props: {
           ...connection.props,
-          label: next,
+          label: finalValue,
         },
       });
     }
-  };
+
+    setIsEditing(false);
+  }, [editValue, rawLabel, connection.id, connection.props, editor]);
+
+  // 当进入编辑模式时，聚焦 input
+  useEffect(() => {
+    if (isEditing) {
+      // 使用 requestAnimationFrame 确保 DOM 已完全渲染
+      const rafId = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+          }
+        });
+      });
+      return () => cancelAnimationFrame(rafId);
+    }
+  }, [isEditing]);
 
   return (
-    <SVGContainer
-      className={classNames(
-        'ConnectionShape',
-        isInactive && 'ConnectionShape_inactive',
-        isRealtime && 'ConnectionShape_realtime',
-      )}
-    >
-      <path d={getConnectionPath(start, end)} />
-      {isRealtime && (
-        <text
-          x={center.x}
-          y={center.y - 6}
-          textAnchor="middle"
-          dominantBaseline="central"
-          style={{
-            fontSize: 10,
-            fill: '#4B5563',
-            stroke: 'none',
-            pointerEvents: 'all',
-          }}
-          onPointerDown={handleLabelPointerDown}
-        >
-          {displayLabel}
-        </text>
-      )}
-    </SVGContainer>
+    <>
+      <SVGContainer
+        className={classNames(
+          'ConnectionShape',
+          isInactive && 'ConnectionShape_inactive',
+          isRealtime && 'ConnectionShape_realtime',
+        )}
+      >
+        <path d={getConnectionPath(start, end)} />
+        {isRealtime && !isEditing && (
+          <text
+            x={center.x}
+            y={center.y - 6}
+            textAnchor="middle"
+            dominantBaseline="central"
+            style={{
+              fontSize: 10,
+              fill: '#4B5563',
+              stroke: 'none',
+              pointerEvents: 'all',
+              cursor: 'text',
+            }}
+            onDoubleClick={handleLabelDoubleClick}
+            onPointerDown={handleLabelPointerDown}
+          >
+            {displayLabel}
+          </text>
+        )}
+        {isRealtime && isEditing && (
+          <foreignObject
+            x={center.x - 60}
+            y={center.y - 16}
+            width="120"
+            height="20"
+            style={{ pointerEvents: 'all' }}
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={handleInputKeyDown}
+              onBlur={handleInputBlur}
+              onPointerDown={stopEventPropagation}
+              style={{
+                width: '100%',
+                height: '100%',
+                fontSize: 10,
+                color: '#4B5563',
+                background: 'white',
+                border: '1px solid #CBD5E1',
+                borderRadius: '2px',
+                padding: '2px 4px',
+                textAlign: 'center',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+              placeholder="输入提示词"
+            />
+          </foreignObject>
+        )}
+      </SVGContainer>
+    </>
   );
 }
 

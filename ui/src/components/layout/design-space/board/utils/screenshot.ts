@@ -33,6 +33,13 @@ async function inlineExternalImages(svgString: string): Promise<string> {
         img.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', TRANSPARENT_PIXEL);
       }
     }
+
+    // foreignObject 里可能包含任意 HTML / 图片，容易导致跨域污染；
+    // 对于实时转绘的草图截图，我们并不需要这些内容，直接移除可以避免 canvas 被 tainted。
+    const foreignObjects = Array.from(doc.querySelectorAll('foreignObject'));
+    for (const fo of foreignObjects) {
+      fo.parentNode?.removeChild(fo);
+    }
     const serializer = new XMLSerializer();
     return serializer.serializeToString(doc);
   } catch {
@@ -90,24 +97,6 @@ export async function fastGetSvgAsImage(
   });
 
   if (!canvas) return null;
-
-  const ensureNotTainted = () => {
-    if (!_canvas || !_ctx) return false;
-    try {
-      // 尝试读取一个像素或导出数据，如果失败说明画布被污染
-      _ctx.getImageData(0, 0, 1, 1);
-      return true;
-    } catch (error) {
-      console.warn('[screenshot] canvas is tainted, skip exporting', error);
-      return false;
-    }
-  };
-
-  if (!ensureNotTainted()) {
-    _canvas = null;
-    _ctx = null;
-    return null;
-  }
 
   try {
     const blob = await new Promise<Blob | null>((resolve) =>

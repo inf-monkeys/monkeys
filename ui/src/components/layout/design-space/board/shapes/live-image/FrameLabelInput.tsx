@@ -72,7 +72,9 @@ export const FrameLabelInput = forwardRef<HTMLInputElement, { id: TLShapeId; nam
           onChange={handleChange}
           onPointerDown={stopEventPropagation}
         />
-        {defaultEmptyAs(name, 'Double click prompt to edit') + String.fromCharCode(8203)}
+        {/* {defaultEmptyAs(name, 'Double click to name sketch') + String.fromCharCode(8203)} */}
+        {/* 非编辑态下不再显示任何提示文本，仅保留零宽字符占位 */}
+        {String.fromCharCode(8203)}
       </div>
     );
   },
