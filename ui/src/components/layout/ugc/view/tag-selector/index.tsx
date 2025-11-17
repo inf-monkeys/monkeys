@@ -18,13 +18,22 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
 export interface IUgcTagSelectorProps {
-  assetId: string;
+  assetId?: string; // 可选，用于上传场景
   assetType: AssetType;
   assetTags?: IAssetTag[];
-  mutate: KeyedMutator<any>;
+  mutate?: KeyedMutator<any>; // 可选，用于上传场景
+  onTagsChange?: (tags: IAssetTag[]) => void; // 用于上传场景的回调
+  mode?: 'edit' | 'select'; // 'edit' 用于编辑已有资源，'select' 用于上传时选择
 }
 
-export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTagSelectorProps) => {
+export const UgcTagSelector = ({
+  assetType,
+  assetTags,
+  assetId,
+  mutate,
+  onTagsChange,
+  mode = 'edit',
+}: IUgcTagSelectorProps) => {
   const { t } = useTranslation();
 
   const [visible, setVisible] = useState(false);
@@ -56,6 +65,16 @@ export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTa
       const tagCreated = await createTag(searchValue);
       if (tagCreated) {
         setLocalTags((prev) => [...prev, tagCreated]);
+        // 在 select 模式下，创建新标签后自动选中
+        if (mode === 'select') {
+          setSelectedTags((prev) => {
+            const exists = prev.find((t) => t.id === tagCreated.id);
+            if (!exists) {
+              return [...prev, tagCreated];
+            }
+            return prev;
+          });
+        }
       }
     } else {
       handleTagClick(tag.id);
@@ -63,10 +82,25 @@ export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTa
   };
 
   const handleConfirmClick = () => {
+    if (mode === 'select' && onTagsChange) {
+      // 上传场景：直接通过回调返回选中的标签
+      onTagsChange(selectedTags);
+      setVisible(false);
+      return;
+    }
+
+    // 编辑场景：更新已有资源的标签
+    if (!assetId) {
+      console.warn('[UgcTagSelector] assetId 未提供，无法更新标签');
+      return;
+    }
+
     toast.promise(updateAssetTag(assetType, assetId, { tagIds: selectedTags.map((x) => x.id) }), {
       success: () => {
         setVisible(false);
-        void mutate();
+        if (mutate) {
+          void mutate();
+        }
         return t('common.update.success');
       },
       loading: t('common.update.loading'),

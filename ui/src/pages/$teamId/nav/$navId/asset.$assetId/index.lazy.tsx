@@ -8,17 +8,18 @@ import { useUgcMediaDataById } from '@/apis/ugc';
 import { AssetDetailPage } from '@/components/layout/ugc/detail/asset-detail-page';
 import { Button } from '@/components/ui/button';
 
+// 隐藏转换功能的 assetType 白名单
+const HIDE_CONVERSION_WHITELIST = ['design-models'];
+
 export const AssetDetail: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { navId, assetId } = useParams({ from: '/$teamId/nav/$navId/asset/$assetId/' });
 
+  const assetType = navId.includes(':') ? navId.split(':')[1] : navId;
+
   // 直接通过 ID 获取单个资产数据（优化：从加载10000条记录改为加载1条）
-  const {
-    data: currentAsset,
-    mutate,
-    isLoading,
-  } = useUgcMediaDataById(assetId);
+  const { data: currentAsset, mutate, isLoading } = useUgcMediaDataById(assetId);
 
   const handleBack = () => {
     if (navId === 'concept-design:design-models') {
@@ -56,7 +57,7 @@ export const AssetDetail: React.FC = () => {
     );
   }
 
-  const hideConversion = navId === 'concept-design:design-models';
+  const hideConversion = HIDE_CONVERSION_WHITELIST.includes(assetType);
 
   return (
     <AssetDetailPage

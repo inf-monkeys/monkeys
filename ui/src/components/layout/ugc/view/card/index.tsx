@@ -73,7 +73,7 @@ export const UgcViewCard = <E extends object>({
           <div className={cn('flex flex-col justify-center', operateAreaNode && 'max-w-[55%]')}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-base font-bold">{title}</span>
+                <span className="truncate text-base font-bold">{title}</span>
               </TooltipTrigger>
               <TooltipContent>{title}</TooltipContent>
             </Tooltip>
