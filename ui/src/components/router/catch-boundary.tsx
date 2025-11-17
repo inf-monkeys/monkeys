@@ -1,10 +1,11 @@
+import { useState } from 'react';
+
 import { motion } from 'framer-motion';
 import { Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible.tsx';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -17,6 +18,7 @@ interface ErrorBoundaryProps {
 
 export function ErrorComponent({ error }: ErrorBoundaryProps) {
   const { t } = useTranslation();
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <motion.div
@@ -26,23 +28,18 @@ export function ErrorComponent({ error }: ErrorBoundaryProps) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.92 }}
     >
-      <div className="flex items-center gap-2 font-bold text-red-500">
-        <h1 className="leading-tight text-red-10">{t('system.error.title')}</h1>
+      <div className="flex items-center gap-2 font-bold text-black">
+        <h1 className="leading-tight text-black">{t('system.error.title')}</h1>
       </div>
       <span className="-mt-4 text-sm text-muted-foreground">{t('system.error.desc')}</span>
-      <div className="max-w-full overflow-hidden rounded bg-gray-10 bg-opacity-10 p-2 backdrop-blur-sm">
-        <Collapsible defaultOpen>
-          <CollapsibleTrigger asChild>
-            <p className="text-sm text-red-500">{error.message}</p>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <Separator className="my-2" />
-            <ScrollArea className="h-40" disabledOverflowMask>
-              <pre className="text-xs">{error?.stack}</pre>
-            </ScrollArea>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
+      {showDetails && (
+        <div className="max-w-full overflow-hidden rounded bg-gray-10 bg-opacity-10 p-2 backdrop-blur-sm">
+          <Separator className="my-2" />
+          <ScrollArea className="h-40" disabledOverflowMask>
+            <pre className="text-xs">{error?.stack}</pre>
+          </ScrollArea>
+        </div>
+      )}
       <TooltipProvider delayDuration={100}>
         <div className="flex items-center gap-2">
           <VinesDarkMode />
@@ -57,6 +54,13 @@ export function ErrorComponent({ error }: ErrorBoundaryProps) {
             }}
           >
             {t('system.error.try-to-fix')}
+          </Button>
+          <Button
+            size="small"
+            variant="outline"
+            onClick={() => setShowDetails((prev) => !prev)}
+          >
+            {showDetails ? t('system.error.hide-detail') : t('system.error.show-detail')}
           </Button>
         </div>
       </TooltipProvider>

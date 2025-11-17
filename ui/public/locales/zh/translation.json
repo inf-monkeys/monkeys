@@ -13,7 +13,9 @@
       "title": "出现了一些问题",
       "desc": "请清理所有缓存后刷新页面重试",
       "try-to-fix": "尝试修复",
-      "network-refresh": "遇到网络错误，请刷新整个页面重试"
+      "network-refresh": "遇到网络错误，请刷新整个页面重试",
+      "show-detail": "查看详情",
+      "hide-detail": "隐藏详情"
     }
   },
   "common": {
