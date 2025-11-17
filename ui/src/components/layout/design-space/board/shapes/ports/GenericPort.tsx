@@ -29,8 +29,13 @@ export function GenericPort({ shapeId, portId }: { shapeId: TLShapeId; portId: P
         return getNodePorts(editor, shape)?.[portId];
       }
 
-      // Try to get port from custom shapes (instruction, output, workflow)
-      if (shape.type === 'instruction' || shape.type === 'output' || shape.type === 'workflow') {
+      // Try to get port from custom shapes (instruction, output, workflow, live-image)
+      if (
+        shape.type === 'instruction' ||
+        shape.type === 'output' ||
+        shape.type === 'workflow' ||
+        shape.type === 'live-image'
+      ) {
         return getShapePorts(editor, shape as any)?.[portId];
       }
 

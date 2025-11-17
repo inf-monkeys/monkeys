@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import * as fal from '@fal-ai/serverless-client';
-import { AssetRecordType, Editor, FileHelpers, getHashForObject, TLShape, TLShapeId, useEditor } from 'tldraw';
+import { Editor, FileHelpers, getHashForObject, TLShape, TLShapeId, useEditor } from 'tldraw';
 import { v4 as uuid } from 'uuid';
 
 import { LiveImageShape } from '../shapes/live-image/LiveImageShapeUtil';
+import { getShapePortConnections } from '../shapes/ports/portConnections';
 import { fastGetSvgAsImage } from '../utils/screenshot';
 
 // Configure fal client to use backend proxy
@@ -122,7 +123,7 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
     const fetchImageFn = fetchImage;
 
     let prevHash = '';
-    let prevPrompt = '';
+    let prevPromptSignature = '';
 
     let startedIteration = 0;
     let finishedIteration = 0;
@@ -133,16 +134,31 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
         return;
       }
       const shapes = getShapesTouching(shapeId, editor);
-
       const hash = getHashForObject([...shapes]);
-      const frameName = frame.props.name;
-      if (hash === prevHash && frameName === prevPrompt) return;
+      const frameName = frame.props.name || '';
+
+      // 读取所有输出连线的 label，用于构成配置签名（同一草图+同一提示词集合则跳过）
+      const connections = getShapePortConnections(editor, frame.id);
+      const outputConns = connections.filter(
+        (c) => c.terminal === 'start' && c.ownPortId === 'output',
+      );
+      const labelsSignature = outputConns
+        .map((conn) => {
+          const connectionShape = editor.getShape(conn.connectionId as any) as any;
+          return ((connectionShape?.props?.label as string) || '').trim();
+        })
+        .sort()
+        .join('|');
+
+      const configSignature = `${frameName}|${labelsSignature}`;
+
+      if (hash === prevHash && configSignature === prevPromptSignature) return;
 
       startedIteration += 1;
       const iteration = startedIteration;
 
       prevHash = hash;
-      prevPrompt = frame.props.name;
+      prevPromptSignature = configSignature;
 
       try {
         const bounds = editor.getShapePageBounds(shapeId);
@@ -187,23 +203,60 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
 
         if (iteration <= finishedIteration) return;
 
-        const prompt = frameName
-          ? frameName + ' hd award-winning impressive'
-          : 'A random image that is safe for work and not surprising—something boring like a city or shoe watercolor';
+        if (outputConns.length === 0) {
+          updateImage(editor, frame.id, null);
+          return;
+        }
 
-        const result = await fetchImageFn({
-          prompt,
-          image_url: imageUrl,
-          sync_mode: true,
-          strength: 0.65,
-          seed: 42,
-          enable_safety_checks: false,
+        // 针对每一条连线使用独立的提示词（连线 label > 草图框标题 > 默认）
+        const tasks = outputConns.map(async (conn) => {
+          const connectionShape = editor.getShape(conn.connectionId as any) as any;
+          const label = (connectionShape?.props?.label as string) || '';
+          const trimmedLabel = label.trim();
+
+          let promptBase = trimmedLabel || frameName;
+          let prompt: string;
+          if (promptBase) {
+            prompt = promptBase + ' hd award-winning impressive';
+          } else {
+            prompt =
+              'A random image that is safe for work and not surprising—something boring like a city or shoe watercolor';
+          }
+
+          const result = await fetchImageFn({
+            prompt,
+            image_url: imageUrl,
+            sync_mode: true,
+            strength: 0.65,
+            seed: 42,
+            enable_safety_checks: false,
+          });
+
+          return { conn, url: result.url as string };
         });
+
+        const settled = await Promise.allSettled(tasks);
 
         if (iteration <= finishedIteration) return;
 
         finishedIteration = iteration;
-        updateImage(editor, frame.id, result.url);
+
+        // 按连线分别更新各自的 Output
+        settled.forEach((res) => {
+          if (res.status !== 'fulfilled') return;
+          const { conn, url } = res.value;
+          const target = editor.getShape(conn.connectedShapeId as any) as any;
+          if (!target || target.type !== 'output') return;
+          editor.updateShape({
+            id: target.id,
+            type: 'output',
+            props: {
+              ...target.props,
+              imageUrl: url || '',
+              images: url ? [url] : [],
+            },
+          });
+        });
       } catch (e: any) {
         const msg = e instanceof Error ? e.message : String(e);
         const isTimeout = msg === 'Timeout';
@@ -239,56 +292,45 @@ function updateImage(editor: Editor, shapeId: TLShapeId, url: string | null) {
   if (!shape) {
     return;
   }
-  const id = AssetRecordType.createId(shape.id.split(':')[1]);
 
-  const asset = editor.getAsset(id);
+  // 查找从实时转绘框输出端口连出去的 Output 节点
+  const connections = getShapePortConnections(editor, shapeId);
+  const outputs = connections.filter(
+    (c) => c.terminal === 'start' && c.ownPortId === 'output',
+  );
 
-  if (!asset) {
-    editor.createAssets([
-      AssetRecordType.create({
-        id,
-        type: 'image',
-        props: {
-          name: shape.props.name,
-          w: shape.props.w,
-          h: shape.props.h,
-          src: url,
-          isAnimated: false,
-          mimeType: 'image/jpeg',
-        },
-      }),
-    ]);
-  } else {
-    editor.updateAssets([
-      {
-        ...asset,
-        type: 'image',
-        props: {
-          ...asset.props,
-          w: shape.props.w,
-          h: shape.props.h,
-          src: url,
-        },
-      } as any,
-    ]);
+  if (outputs.length === 0) {
+    return;
   }
+
+  outputs.forEach((conn) => {
+    const target = editor.getShape(conn.connectedShapeId as any) as any;
+    if (!target || target.type !== 'output') return;
+
+    editor.updateShape({
+      id: target.id,
+      type: 'output',
+      props: {
+        ...target.props,
+        imageUrl: url || '',
+        images: url ? [url] : [],
+      },
+    });
+  });
 }
 
 function getShapesTouching(shapeId: TLShapeId, editor: Editor) {
-  const shapeIdsOnPage = editor.getCurrentPageShapeIds();
   const shapesTouching: TLShape[] = [];
-  const targetBounds = editor.getShapePageBounds(shapeId);
-  if (!targetBounds) return shapesTouching;
-  for (const id of [...shapeIdsOnPage]) {
-    if (id === shapeId) continue;
-    const bounds = editor.getShapePageBounds(id);
-    if (!bounds) continue;
-    if (bounds.collides(targetBounds)) {
-      const shape = editor.getShape(id);
-      if (shape) {
-        shapesTouching.push(shape);
-      }
-    }
+
+  // 只截取实时转绘框内的子图层内容，避免把外面的 Output / Workflow 等节点一起渲染进 SVG
+  const childIds = editor.getSortedChildIdsForParent(shapeId);
+  for (const id of childIds) {
+    const shape = editor.getShape(id);
+    if (!shape) continue;
+    // 忽略位图图片，避免跨域图片污染 canvas
+    if (shape.type === 'image') continue;
+    shapesTouching.push(shape);
   }
+
   return shapesTouching;
 }

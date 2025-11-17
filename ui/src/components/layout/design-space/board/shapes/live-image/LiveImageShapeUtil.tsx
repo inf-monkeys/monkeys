@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import {
-  AssetRecordType,
   Geometry2d,
   getDefaultColorTheme,
   Group2d,
@@ -9,7 +8,6 @@ import {
   ShapeUtil,
   SVGContainer,
   TLBaseShape,
-  TldrawUiButton,
   TLGroupShape,
   TLResizeInfo,
   TLShape,
@@ -20,6 +18,8 @@ import {
 } from 'tldraw';
 
 import { useLiveImage } from '../../hooks/useLiveImage';
+import { GenericPort } from '../ports/GenericPort';
+import { getLiveImagePorts } from '../ports/liveImagePorts';
 import { FrameHeading } from './FrameHeading';
 
 export type LiveImageShape = TLBaseShape<
@@ -35,7 +35,7 @@ export type LiveImageShape = TLBaseShape<
 export class LiveImageShapeUtil extends ShapeUtil<LiveImageShape> {
   static type = 'live-image' as any;
 
-  override canBind = () => false;
+  override canBind = () => true;
   override canEdit = () => true;
   override isAspectRatioLocked = () => true;
 
@@ -67,7 +67,7 @@ export class LiveImageShapeUtil extends ShapeUtil<LiveImageShape> {
     return true;
   }
 
-  override canDropShapes = (shape: LiveImageShape, _shapes: TLShape[]): boolean => {
+  canDropShapes = (shape: LiveImageShape, _shapes: TLShape[]): boolean => {
     return !shape.isLocked;
   };
 
@@ -119,13 +119,19 @@ export class LiveImageShapeUtil extends ShapeUtil<LiveImageShape> {
 
   indicator(shape: LiveImageShape) {
     const bounds = this.editor.getShapeGeometry(shape).bounds;
+    const ports = Object.values(getLiveImagePorts(this.editor, shape));
 
     return (
-      <rect
-        width={toDomPrecision(bounds.width)}
-        height={toDomPrecision(bounds.height)}
-        className={`tl-frame-indicator`}
-      />
+      <>
+        <rect
+          width={toDomPrecision(bounds.width)}
+          height={toDomPrecision(bounds.height)}
+          className={`tl-frame-indicator`}
+        />
+        {ports.map((port) => (
+          <circle key={port.id} cx={port.x} cy={port.y} r={8} />
+        ))}
+      </>
     );
   }
 
@@ -135,8 +141,6 @@ export class LiveImageShapeUtil extends ShapeUtil<LiveImageShape> {
     useLiveImage(shape.id);
 
     const bounds = this.editor.getShapeGeometry(shape).bounds;
-    const assetId = AssetRecordType.createId(shape.id.split(':')[1]);
-    const asset = editor.getAsset(assetId);
 
     const theme = getDefaultColorTheme({ isDarkMode: useIsDarkMode() });
 
@@ -152,57 +156,9 @@ export class LiveImageShapeUtil extends ShapeUtil<LiveImageShape> {
           />
         </SVGContainer>
         <FrameHeading id={shape.id} name={shape.props.name} width={bounds.width} height={bounds.height} />
-        {!shape.props.overlayResult && asset && asset.props.src && (
-          <img
-            src={asset.props.src!}
-            alt={shape.props.name}
-            width={shape.props.w}
-            height={shape.props.h}
-            style={{
-              position: 'relative',
-              left: shape.props.w,
-              width: shape.props.w,
-              height: shape.props.h,
-            }}
-          />
-        )}
-        <TldrawUiButton
-          type="icon"
-          style={{
-            position: 'absolute',
-            top: -4,
-            left: shape.props.overlayResult ? shape.props.w : shape.props.w * 2,
-            pointerEvents: 'auto',
-            transform: 'scale(var(--tl-scale))',
-            transformOrigin: '0 4px',
-          }}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-          }}
-          onClick={() => {
-            editor.updateShape<LiveImageShape>({
-              id: shape.id,
-              type: 'live-image',
-              props: { overlayResult: !shape.props.overlayResult },
-            });
-          }}
-          aria-label="Toggle overlay result"
-        >
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 16,
-              height: 16,
-              fontSize: 12,
-              lineHeight: 1,
-            }}
-            aria-hidden="true"
-          >
-            {shape.props.overlayResult ? '>' : '<'}
-          </span>
-        </TldrawUiButton>
+
+        {/* Output Port - 用于连接到 Output / Workflow */}
+        <GenericPort shapeId={shape.id} portId="output" />
       </>
     );
   }

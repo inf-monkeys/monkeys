@@ -143,7 +143,12 @@ export function getConnectionBindingPositionInPageSpace(editor: Editor, binding:
   // Get ports for different shape types
   if (editor.isShapeOfType<NodeShape>(targetShape, 'node')) {
     port = getNodePorts(editor, targetShape)?.[binding.props.portId];
-  } else if (targetShape.type === 'instruction' || targetShape.type === 'output' || targetShape.type === 'workflow') {
+  } else if (
+    targetShape.type === 'instruction' ||
+    targetShape.type === 'output' ||
+    targetShape.type === 'workflow' ||
+    targetShape.type === 'live-image'
+  ) {
     port = getShapePorts(editor, targetShape as any)?.[binding.props.portId];
   }
 

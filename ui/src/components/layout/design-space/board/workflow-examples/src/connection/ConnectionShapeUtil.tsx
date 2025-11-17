@@ -9,6 +9,7 @@ import {
   RecordProps,
   ShapeUtil,
   SVGContainer,
+  T,
   TLBaseShape,
   TLHandle,
   TLHandleDragInfo,
@@ -50,6 +51,7 @@ export type ConnectionShape = TLBaseShape<
   {
     start: VecModel;
     end: VecModel;
+    label?: string;
   }
 >;
 
@@ -58,12 +60,14 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
   static override props: RecordProps<ConnectionShape> = {
     start: vecModelValidator,
     end: vecModelValidator,
+    label: T.string,
   };
 
   getDefaultProps(): ConnectionShape['props'] {
     return {
       start: { x: 0, y: 0 },
       end: { x: 100, y: 100 },
+      label: '',
     };
   }
 
@@ -320,32 +324,91 @@ function ConnectionShape({ connection }: { connection: ConnectionShape }) {
   // Get the connection terminals
   const { start, end } = useValue('terminals', () => getConnectionTerminals(editor, connection), [editor, connection]);
 
-  // Check if this connection is inactive (carrying STOP_EXECUTION signal)
-  // Only applies to NodeShape connections
-  const isInactive = useValue(
-    'isInactive',
+  const { isInactive, isRealtime } = useValue(
+    'connectionMeta',
     () => {
       const bindings = getConnectionBindings(editor, connection.id);
-      if (!bindings.start) return false;
       const originShapeId = bindings.start?.toId;
-      if (!originShapeId) return false;
+      const targetShapeId = bindings.end?.toId;
 
-      // Only check for STOP_EXECUTION on NodeShape types
-      const originShape = editor.getShape(originShapeId);
-      if (!originShape || !editor.isShapeOfType<NodeShape>(originShape, 'node')) {
-        return false;
+      let inactive = false;
+      let realtime = false;
+
+      if (originShapeId) {
+        const originShape = editor.getShape(originShapeId);
+        if (originShape && editor.isShapeOfType<NodeShape>(originShape, 'node')) {
+          const outputs = getNodeOutputPortInfo(editor, originShapeId);
+          const output = outputs[bindings.start!.props.portId];
+          inactive = output?.value === STOP_EXECUTION;
+        }
       }
 
-      const outputs = getNodeOutputPortInfo(editor, originShapeId);
-      const output = outputs[bindings.start.props.portId];
-      return output?.value === STOP_EXECUTION;
+      // 实时转绘连线：任一端是 live-image，则视作实时转绘连接
+      const startShape = originShapeId ? editor.getShape(originShapeId) : null;
+      const endShape = targetShapeId ? editor.getShape(targetShapeId) : null;
+
+      if (startShape?.type === 'live-image' || endShape?.type === 'live-image') {
+        realtime = true;
+      }
+
+      return { isInactive: inactive, isRealtime: realtime };
     },
     [connection.id, editor],
   );
 
+  const center = Vec.Lrp(start, end, 0.5);
+
+  const rawLabel = (connection.props as any).label as string | undefined;
+  const displayLabel = rawLabel && rawLabel.trim().length > 0 ? rawLabel.trim() : 'Double click prompt to edit';
+
+  const handleLabelPointerDown = (e: React.PointerEvent<SVGTextElement>) => {
+    // 标记事件已被处理，避免被 tldraw 当作其它工具交互（例如文本工具）
+    editor.markEventAsHandled(e);
+    e.stopPropagation();
+
+    // 只在双击时弹出编辑框（detail === 2）
+    if (e.detail !== 2) return;
+
+    const prev = rawLabel || '';
+    const next = window.prompt('编辑提示词', prev) ?? prev;
+    if (next !== prev) {
+      editor.updateShape<ConnectionShape>({
+        id: connection.id,
+        type: 'connection',
+        props: {
+          ...connection.props,
+          label: next,
+        },
+      });
+    }
+  };
+
   return (
-    <SVGContainer className={classNames('ConnectionShape', isInactive && 'ConnectionShape_inactive')}>
+    <SVGContainer
+      className={classNames(
+        'ConnectionShape',
+        isInactive && 'ConnectionShape_inactive',
+        isRealtime && 'ConnectionShape_realtime',
+      )}
+    >
       <path d={getConnectionPath(start, end)} />
+      {isRealtime && (
+        <text
+          x={center.x}
+          y={center.y - 6}
+          textAnchor="middle"
+          dominantBaseline="central"
+          style={{
+            fontSize: 10,
+            fill: '#4B5563',
+            stroke: 'none',
+            pointerEvents: 'all',
+          }}
+          onPointerDown={handleLabelPointerDown}
+        >
+          {displayLabel}
+        </text>
+      )}
     </SVGContainer>
   );
 }
