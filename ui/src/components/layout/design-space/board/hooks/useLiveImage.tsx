@@ -4,6 +4,8 @@ import * as fal from '@fal-ai/serverless-client';
 import { Editor, FileHelpers, getHashForObject, TLShape, TLShapeId, useEditor } from 'tldraw';
 import { v4 as uuid } from 'uuid';
 
+import { uploadSingleFile } from '@/components/ui/vines-uploader/standalone';
+
 import { LiveImageShape } from '../shapes/live-image/LiveImageShapeUtil';
 import { getShapePortConnections } from '../shapes/ports/portConnections';
 import { fastGetSvgAsImage } from '../utils/screenshot';
@@ -26,6 +28,9 @@ type LiveImageRequest = {
 };
 type LiveImageContextType = null | ((req: LiveImageRequest) => Promise<LiveImageResult>);
 const LiveImageContext = createContext<LiveImageContextType>(null);
+
+// 缓存 dataURL -> 远程 URL，避免重复上传
+const dataUrlCache = new Map<string, string>();
 
 export function LiveImageProvider({
   children,
@@ -176,7 +181,7 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
 
         if (!svgStringResult) {
           console.warn('No SVG');
-          updateImage(editor, frame.id, null);
+          await updateImage(editor, frame.id, null);
           return;
         }
 
@@ -195,7 +200,7 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
 
         if (!blob) {
           console.warn('No Blob');
-          updateImage(editor, frame.id, null);
+          await updateImage(editor, frame.id, null);
           return;
         }
 
@@ -204,7 +209,7 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
         if (iteration <= finishedIteration) return;
 
         if (outputConns.length === 0) {
-          updateImage(editor, frame.id, null);
+          await updateImage(editor, frame.id, null);
           return;
         }
 
@@ -242,21 +247,11 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
         finishedIteration = iteration;
 
         // 按连线分别更新各自的 Output
-        settled.forEach((res) => {
-          if (res.status !== 'fulfilled') return;
+        for (const res of settled) {
+          if (res.status !== 'fulfilled') continue;
           const { conn, url } = res.value;
-          const target = editor.getShape(conn.connectedShapeId as any) as any;
-          if (!target || target.type !== 'output') return;
-          editor.updateShape({
-            id: target.id,
-            type: 'output',
-            props: {
-              ...target.props,
-              imageUrl: url || '',
-              images: url ? [url] : [],
-            },
-          });
-        });
+          await updateImage(editor, frame.id, url, conn.connectedShapeId as any);
+        }
       } catch (e: any) {
         const msg = e instanceof Error ? e.message : String(e);
         const isTimeout = msg === 'Timeout';
@@ -287,7 +282,48 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
   }, [editor, fetchImage, shapeId, throttleTime]);
 }
 
-function updateImage(editor: Editor, shapeId: TLShapeId, url: string | null) {
+async function ensureRemoteImageUrl(dataOrUrl: string): Promise<string> {
+  if (!dataOrUrl || typeof dataOrUrl !== 'string') return dataOrUrl;
+
+  // 非 dataURL，直接返回（已经是远程 URL）
+  if (!dataOrUrl.startsWith('data:image/')) return dataOrUrl;
+
+  // 命中缓存
+  const cached = dataUrlCache.get(dataOrUrl);
+  if (cached) return cached;
+
+  try {
+    // 解析 dataURL
+    const [meta, base64] = dataOrUrl.split(',');
+    const mimeMatch = meta.match(/data:(.*);base64/);
+    const mimeType = mimeMatch?.[1] || 'image/jpeg';
+
+    const binary = atob(base64);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: mimeType });
+
+    const ext = mimeType.split('/')[1] || 'jpg';
+    const file = new File([blob], `live-image-${Date.now()}.${ext}`, { type: mimeType });
+
+    const result = await uploadSingleFile(file, {
+      basePath: 'user-files/workflow-input',
+      autoUpload: true,
+    });
+
+    const remoteUrl = result.urls[0] || dataOrUrl;
+    dataUrlCache.set(dataOrUrl, remoteUrl);
+    return remoteUrl;
+  } catch (error) {
+    console.warn('[LiveImage] Failed to upload data URL, fallback to original', error);
+    return dataOrUrl;
+  }
+}
+
+async function updateImage(editor: Editor, shapeId: TLShapeId, url: string | null, targetOutputId?: TLShapeId) {
   const shape = editor.getShape<LiveImageShape>(shapeId);
   if (!shape) {
     return;
@@ -295,13 +331,17 @@ function updateImage(editor: Editor, shapeId: TLShapeId, url: string | null) {
 
   // 查找从实时转绘框输出端口连出去的 Output 节点
   const connections = getShapePortConnections(editor, shapeId);
-  const outputs = connections.filter(
-    (c) => c.terminal === 'start' && c.ownPortId === 'output',
-  );
+  let outputs = connections.filter((c) => c.terminal === 'start' && c.ownPortId === 'output');
+
+  if (targetOutputId) {
+    outputs = outputs.filter((c) => c.connectedShapeId === targetOutputId);
+  }
 
   if (outputs.length === 0) {
     return;
   }
+
+  const finalUrl = url ? await ensureRemoteImageUrl(url) : '';
 
   outputs.forEach((conn) => {
     const target = editor.getShape(conn.connectedShapeId as any) as any;
@@ -312,8 +352,8 @@ function updateImage(editor: Editor, shapeId: TLShapeId, url: string | null) {
       type: 'output',
       props: {
         ...target.props,
-        imageUrl: url || '',
-        images: url ? [url] : [],
+        imageUrl: finalUrl,
+        images: finalUrl ? [finalUrl] : [],
       },
     });
   });
