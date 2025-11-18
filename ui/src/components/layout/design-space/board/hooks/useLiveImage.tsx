@@ -150,7 +150,7 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
       const labelsSignature = outputConns
         .map((conn) => {
           const connectionShape = editor.getShape(conn.connectionId as any) as any;
-          return ((connectionShape?.props?.label as string) || '').trim();
+          return ((connectionShape?.props?.label as string | null) ?? '').trim();
         })
         .sort()
         .join('|');
@@ -217,7 +217,7 @@ export function useLiveImage(shapeId: TLShapeId, { throttleTime = 64 }: { thrott
         // 针对每一条连线使用独立的提示词（连线 label > 草图框标题 > 默认）
         const tasks = outputConns.map(async (conn) => {
           const connectionShape = editor.getShape(conn.connectionId as any) as any;
-          const label = (connectionShape?.props?.label as string) || '';
+          const label = (connectionShape?.props?.label as string | null) ?? '';
           const trimmedLabel = label.trim();
 
           // 提示词仅来自连线 label；如果为空则使用通用默认提示词
