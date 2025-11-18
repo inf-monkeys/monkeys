@@ -39,11 +39,19 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       const assetIds = await this.assetCommonRepository.findAssetIdsByTagIds(assetType, filter.tagIds);
       if (assetIds.length) {
         condition[assetIdField] = In(assetIds);
+      } else {
+        // 如果指定了tagIds但找不到匹配的资产，返回空结果
+        condition[assetIdField] = In([]);
       }
     }
     if (filter.marketPlaceTagIds?.length) {
       const assetIds = await this.assetCommonRepository.findAssetIdsByMarketplaceTagIds(assetType, filter.marketPlaceTagIds);
-      if (assetIds.length) condition[assetIdField] = In(assetIds);
+      if (assetIds.length) {
+        condition[assetIdField] = In(assetIds);
+      } else {
+        // 如果指定了marketPlaceTagIds但找不到匹配的资产，返回空结果
+        condition[assetIdField] = In([]);
+      }
     }
     if (filter.userIds?.length) {
       condition.creatorUserId = In(filter.userIds);

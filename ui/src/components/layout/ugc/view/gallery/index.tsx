@@ -11,8 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
-// 支持跳转到详情页（新页面）的 assetType 白名单
-const DETAIL_PAGE_WHITELIST = ['design-assets', 'asset-library', 'neural-models'];
+// 支持跳转到详情页（新页面）的 navId 白名单（检查 navId 是否包含这些关键词）
+const DETAIL_PAGE_WHITELIST = ['design-assets', 'asset-library', 'media-data'];
 
 export const UgcViewGalleryItem = <E extends object>({
   row,
@@ -49,10 +49,13 @@ export const UgcViewGalleryItem = <E extends object>({
     const match = path.match(/\/[^/]+\/nav\/([^/]+)/);
     const navId = match?.[1] ?? '';
 
-    // 提取 assetType（和文件夹视角的逻辑一致）
-    const assetType = navId.includes(':') ? navId.split(':')[1] : navId;
+    // 检查 navId 是否包含白名单中的任何一个关键词
+    const isInWhitelist = DETAIL_PAGE_WHITELIST.some((keyword) => navId.includes(keyword));
 
-    return DETAIL_PAGE_WHITELIST.includes(assetType);
+    // 特殊处理：神经模型页面（URL 路径中包含 neural-models）
+    const isNeuralModelsPage = path.includes('neural-models');
+
+    return isInWhitelist || isNeuralModelsPage;
   }, []);
 
   return (
