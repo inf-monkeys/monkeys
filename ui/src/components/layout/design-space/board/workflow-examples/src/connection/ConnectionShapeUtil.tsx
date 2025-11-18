@@ -20,7 +20,7 @@ import {
   Vec,
   VecLike,
   VecModel,
-  vecModelValidator,
+  vecModelValidator
 } from 'tldraw';
 
 import { getAllConnectedShapes } from '../../../shapes/ports/getAllConnectedShapes';
@@ -53,7 +53,8 @@ export type ConnectionShape = TLBaseShape<
   {
     start: VecModel;
     end: VecModel;
-    label?: string;
+    // 提示词文案，null 表示未设置，string 表示已设置
+    label: string | null;
   }
 >;
 
@@ -62,14 +63,43 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
   static override props: RecordProps<ConnectionShape> = {
     start: vecModelValidator,
     end: vecModelValidator,
-    label: T.string,
+    // 暂时使用 any 来兼容旧数据中的 undefined，在运行时处理
+    label: T.any as any,
+  };
+
+  // 处理旧数据迁移：将 undefined 转换为 null
+  override onBeforeCreate = (next: ConnectionShape): ConnectionShape => {
+    if (next.props.label === undefined) {
+      return {
+        ...next,
+        props: {
+          ...next.props,
+          label: null,
+        },
+      };
+    }
+    return next;
+  };
+
+  // 处理旧数据迁移：在更新时也将 undefined 转换为 null
+  override onBeforeUpdate = (prev: ConnectionShape, next: ConnectionShape): ConnectionShape => {
+    if (next.props.label === undefined) {
+      return {
+        ...next,
+        props: {
+          ...next.props,
+          label: null,
+        },
+      };
+    }
+    return next;
   };
 
   getDefaultProps(): ConnectionShape['props'] {
     return {
       start: { x: 0, y: 0 },
       end: { x: 100, y: 100 },
-      label: '',
+      label: null, // 默认 null，表示未设置提示词
     };
   }
 
@@ -362,7 +392,7 @@ function ConnectionShape({ connection }: { connection: ConnectionShape }) {
   );
 
   const center = Vec.Lrp(start, end, 0.5);
-  const rawLabel = (connection.props as any).label as string | undefined;
+  const rawLabel = (connection.props.label as string | null | undefined) ?? null;
   const displayLabel = rawLabel && rawLabel.trim().length > 0 ? rawLabel.trim() : 'Double click prompt to edit';
 
   const handleLabelDoubleClick = useCallback(
@@ -371,7 +401,7 @@ function ConnectionShape({ connection }: { connection: ConnectionShape }) {
       e.stopPropagation();
       e.preventDefault();
 
-      setEditValue(rawLabel || '');
+      setEditValue(rawLabel ?? '');
       setIsEditing(true);
     },
     [rawLabel, editor],
@@ -389,7 +419,7 @@ function ConnectionShape({ connection }: { connection: ConnectionShape }) {
       } else if (e.key === 'Escape') {
         stopEventPropagation(e);
         setIsEditing(false);
-        setEditValue(rawLabel || '');
+        setEditValue(rawLabel ?? '');
       }
     },
     [rawLabel],
@@ -397,8 +427,8 @@ function ConnectionShape({ connection }: { connection: ConnectionShape }) {
 
   const handleInputBlur = useCallback(() => {
     const trimmed = editValue.trim();
-    const finalValue = trimmed.length > 0 ? trimmed : '';
-    const prev = rawLabel || '';
+    const finalValue = trimmed.length > 0 ? trimmed : null; // 空字符串转为 null
+    const prev = rawLabel ?? null;
 
     if (finalValue !== prev) {
       editor.updateShape<ConnectionShape>({
