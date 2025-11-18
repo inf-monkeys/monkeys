@@ -36,6 +36,19 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
   isMiniFrame?: boolean;
 }
 
+const isSameIframeOutputs = (
+  prev: VinesWorkflowExecutionOutputListItem[],
+  next: VinesWorkflowExecutionOutputListItem[],
+) => {
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < next.length; i += 1) {
+    if (prev[i]?.instanceId !== next[i]?.instanceId || prev[i]?.status !== next[i]?.status) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export const LOAD_LIMIT = 50;
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   className,
@@ -63,6 +76,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     [],
   );
   const [iframeOutputs, setIframeOutputs] = useState<VinesWorkflowExecutionOutputListItem[]>([]);
+  const [hasSentIframeBase, setHasSentIframeBase] = useState(false);
 
   const {
     data: executionListData,
@@ -151,8 +165,16 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       finalRawData = updateExecutionResultList;
     }
 
-    const fallbackIframeOutputs = nextIframeOutputs.length > 0 ? nextIframeOutputs : finalRawData.slice(0, 16);
-    setIframeOutputs(fallbackIframeOutputs);
+    const initialIframeOutputs = finalRawData.slice(0, 4);
+    const hadBaseOutputs = hasSentIframeBase;
+    if (!hadBaseOutputs && initialIframeOutputs.length > 0) {
+      setIframeOutputs((prev) => (isSameIframeOutputs(prev, initialIframeOutputs) ? prev : initialIframeOutputs));
+      setHasSentIframeBase(true);
+    }
+
+    if (hadBaseOutputs && nextIframeOutputs.length > 0) {
+      setIframeOutputs((prev) => (isSameIframeOutputs(prev, nextIframeOutputs) ? prev : nextIframeOutputs));
+    }
 
     setStatus(finalRawData.find((item) => item.status === 'RUNNING') ? 'running' : 'idle');
 
@@ -161,7 +183,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
     // 去重并设置最终结果
     setExecutionResultList(removeRepeatKey(renderList));
-  }, [executionListData, firstPageExecutionList]);
+  }, [executionListData, firstPageExecutionList, hasSentIframeBase]);
 
   const setImages = useSetExecutionImages();
   const setThumbImages = useSetThumbImages();
