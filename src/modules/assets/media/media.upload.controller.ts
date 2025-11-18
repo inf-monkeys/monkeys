@@ -4,7 +4,7 @@ import { S3Helpers } from '@/common/s3';
 import { getMimeType } from '@/common/utils/file';
 import { Body, Controller, Get, Head, NotFoundException, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { nanoid } from 'ai';
+import { generateId } from 'ai';
 import { Response } from 'express';
 import { Readable } from 'stream';
 import { MediaFileService } from './media.service';
@@ -222,7 +222,7 @@ export class MediaUploadController {
     // NOTE: 原有的缩略图生成逻辑已交由独立服务处理，这里禁用本地生成与上传缩略图。
     const suffix = key.split('.').pop()?.toLowerCase();
     if (config.s3.randomFilename) {
-      const id = nanoid();
+      const id = generateId();
       key = `r/${id}.${suffix}`;
     }
     const url = await s3Helpers.uploadFile(file.buffer, key);
