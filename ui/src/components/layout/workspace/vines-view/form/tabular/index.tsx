@@ -179,7 +179,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
           onSubmit={handleSubmit}
           event$={tabular$}
           workflowId={vines.workflowId}
-        ></TabularRender>
+        />
       </div>
       {/* 根据 showButtons 条件渲染：有按钮或无按钮（透明占位） */}
       {showButtons ? (
