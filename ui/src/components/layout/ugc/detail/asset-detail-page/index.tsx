@@ -186,7 +186,7 @@ export const AssetDetailPage = <E extends object>({
               if (blob) {
                 const url = await uploadBlobForUrl(blob, `${pending3DThumb.name.replace(/\.[^.]+$/, '')}_thumb.png`);
                 await updateMediaIcon(pending3DThumb.id, url);
-                toast.success(t('asset.detail.imageGenerated') || '缩略图已更新');
+                toast.success(t('asset.detail.3dThumbnailGenerated') || '3D模型缩略图生成成功');
                 if (mutate) await mutate();
               }
             } catch (e) {
