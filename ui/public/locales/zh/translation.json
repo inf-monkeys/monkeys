@@ -659,7 +659,9 @@
               },
               "tag": {
                 "label": "标签",
-                "placeholder": "请选择标签"
+                "placeholder": "请选择标签",
+                "and-logic": "且",
+                "or-logic": "或"
               },
               "created-time": {
                 "label": "创建时间",

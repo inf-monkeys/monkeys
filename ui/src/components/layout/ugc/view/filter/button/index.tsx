@@ -105,7 +105,27 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
           />
         </div>
         <div className="flex flex-col gap-3">
-          <Label>{t('components.layout.ugc.view.filter.button.tag.label')}</Label>
+          <div className="flex items-center justify-between">
+            <Label>{t('components.layout.ugc.view.filter.button.tag.label')}</Label>
+            {filter?.tagIds && filter.tagIds.length > 1 && (
+              <div className="flex items-center gap-2">
+                <Label className="text-xs text-muted-foreground">
+                  {filter?.tagIdsAnd
+                    ? t('components.layout.ugc.view.filter.button.tag.and-logic')
+                    : t('components.layout.ugc.view.filter.button.tag.or-logic')}
+                </Label>
+                <Switch
+                  checked={filter?.tagIdsAnd ?? false}
+                  onCheckedChange={(checked) =>
+                    onFilterChange({
+                      ...filter,
+                      tagIdsAnd: checked,
+                    })
+                  }
+                />
+              </div>
+            )}
+          </div>
           <MultiSelect
             options={defaultTagsOptions}
             value={filter?.tagIds ?? []}
@@ -113,6 +133,8 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
               onFilterChange({
                 ...filter,
                 tagIds,
+                // 当只有一个标签时，清除 tagIdsAnd（因为单个标签不需要 And/Or 逻辑）
+                tagIdsAnd: tagIds.length > 1 ? filter?.tagIdsAnd : undefined,
               })
             }
             placeholder={t('components.layout.ugc.view.filter.button.tag.placeholder')}

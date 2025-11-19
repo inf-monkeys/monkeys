@@ -665,7 +665,9 @@
               },
               "tag": {
                 "label": "Tag",
-                "placeholder": "Select tag"
+                "placeholder": "Select tag",
+                "and-logic": "And",
+                "or-logic": "Or"
               },
               "created-time": {
                 "label": "Created Time",
