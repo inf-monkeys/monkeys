@@ -91,6 +91,7 @@
     "socket.io": "^4.8.1",
     "totp-generator": "^1.0.0",
     "typeorm": "^0.3.20",
+    "nanoid": "^3.3.7",
     "yaml": "^2.4.0",
     "zod": "^4.1.9"
   },
