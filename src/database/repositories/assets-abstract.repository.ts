@@ -37,7 +37,9 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     }
     if (filter.tagIds?.length) {
       // 检查是否使用 AND 逻辑（通过 filter.tagIdsAnd 标志或直接使用 tagIdsAnd 字段）
-      const useAndLogic = (filter as any).tagIdsAnd === true;
+      // 注意：query 参数中的 boolean 可能被解析为字符串 "true"/"false"，需要处理
+      const tagIdsAndValue = (filter as any).tagIdsAnd;
+      const useAndLogic = tagIdsAndValue === true || tagIdsAndValue === 'true' || tagIdsAndValue === '1';
       const assetIds = useAndLogic
         ? await this.assetCommonRepository.findAssetIdsByTagIdsAnd(assetType, filter.tagIds)
         : await this.assetCommonRepository.findAssetIdsByTagIds(assetType, filter.tagIds);

@@ -419,6 +419,7 @@ export class AssetsCommonRepository {
       result.assetTags = await this.assetTagRepo.find({
         where: {
           id: In(tagIds),
+          isDeleted: false,
         },
       });
     }
@@ -453,6 +454,7 @@ export class AssetsCommonRepository {
           ? (await this?.[isMarketplace ? 'assetMarketPlaceTagRepo' : 'assetTagRepo'].find({
               where: {
                 id: In(allTagIds),
+                isDeleted: false,
               },
             })) || []
           : [];
