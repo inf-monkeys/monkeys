@@ -52,7 +52,7 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
 
           const form = new FormData();
           form.append('file', blob, 'audio.webm');
-          const resp = await fetch('/api/tldraw-agent/transcribe', {
+          const resp = await fetch('/api/STT', {
             method: 'POST',
             body: form,
             credentials: 'include',
@@ -64,7 +64,7 @@ export const QuickFeatures: React.FC<IQuickFeaturesProps> = ({
             onChange(text);
             toast.success('语音输入成功');
           }
-        } catch (e) {
+        } catch (error) {
           toast.error('语音转写失败');
         } finally {
           recordedChunksRef.current = [];

@@ -19,9 +19,11 @@ import { ChatModule } from './modules/chat/chat.module';
 import { DesignModule } from './modules/design/design.module';
 import { EvaluationModule } from './modules/evaluation/evaluation.module';
 import { ExportModule } from './modules/export/export.module';
+import { FalModule } from './modules/fal/fal.module';
 import { MarketplaceModule } from './modules/marketplace/marketplace.module';
 import { ModelTrainingModule } from './modules/model-training/model-training.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { SttModule } from './modules/stt/stt.module';
 import { TemporaryWorkflowModule } from './modules/temporary-workflow/temporary-workflow.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { TldrawAgentV2Module } from './modules/tldraw-agent-v2/tldraw-agent-v2.module';
@@ -32,7 +34,6 @@ import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
 import { PrometheusModule } from './prometheus/prometheus.module';
-import { FalModule } from './modules/fal/fal.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { FalModule } from './modules/fal/fal.module';
     TldrawAgentModule,
     TldrawAgentV2Module,
     FalModule,
+    SttModule,
   ],
   controllers: [AppController],
   providers: [AppService],

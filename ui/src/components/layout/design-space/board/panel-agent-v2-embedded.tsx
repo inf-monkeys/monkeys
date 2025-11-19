@@ -103,7 +103,7 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
           if (!blob.size) return;
           const form = new FormData();
           form.append('file', blob, 'audio.webm');
-          const resp = await fetch('/api/tldraw-agent/transcribe', {
+          const resp = await fetch('/api/STT', {
             method: 'POST',
             body: form,
             credentials: 'include',
