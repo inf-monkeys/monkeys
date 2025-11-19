@@ -66,3 +66,12 @@ admin:
   username: "admin"
   email: "admin@example.com"
   password: "123456"
+
+agentv3:
+  defaultModelId: 'openai-compatible:gpt-5-mini'
+
+  openaiCompatible:
+    baseUrl: ''
+    apiKey: ''
+    models:
+      - 'gpt-5-mini'

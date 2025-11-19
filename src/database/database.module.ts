@@ -19,6 +19,8 @@ import { AgentV2MessageEntity } from './entities/agent-v2/agent-v2-message.entit
 import { AgentV2SessionEntity } from './entities/agent-v2/agent-v2-session.entity';
 import { AgentV2MessageQueueEntity, AgentV2TaskStateEntity } from './entities/agent-v2/agent-v2-task-state.entity';
 import { AgentV2Entity } from './entities/agent-v2/agent-v2.entity';
+import { AgentV3SessionEntity } from './entities/agent-v3/agent-v3-session.entity';
+import { AgentV3MessageEntity } from './entities/agent-v3/agent-v3-message.entity';
 import { ApiKeyEntity } from './entities/apikey/apikey';
 import { AssetsAuthorizationEntity } from './entities/assets/asset-authorization';
 import { AssetFilterEntity } from './entities/assets/asset-filter';
@@ -141,6 +143,8 @@ export const entities: EntityClassOrSchema[] = [
   AgentV2MessageEntity,
   AgentV2TaskStateEntity,
   AgentV2MessageQueueEntity,
+  AgentV3SessionEntity,
+  AgentV3MessageEntity,
   ModelTrainingEntity,
   ModelTrainingConfigEntity,
 ];

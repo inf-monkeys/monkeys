@@ -118,7 +118,7 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
         stringify({
           'v-event': 'vines-execution-image-outputs',
           // 'v-data': msg.slice(0, 4),
-          'v-data': data.slice(0, 4),
+          'v-data': data.slice(0, 16),
         }),
         '*',
       );

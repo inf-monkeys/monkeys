@@ -5,7 +5,9 @@ import { Editor, TLShapeId } from 'tldraw';
 
 import { ShapePort } from '../../workflow-examples/src/ports/Port';
 import { InstructionShape, OutputShape } from '../instruction/InstructionShape.types';
+import type { LiveImageShape } from '../live-image/LiveImageShapeUtil';
 import { WorkflowShape } from '../workflow/WorkflowShape.types';
+import { getLiveImagePorts } from './liveImagePorts';
 
 /**
  * Get ports for an Instruction shape
@@ -166,14 +168,17 @@ export function getWorkflowPorts(editor: Editor, shape: WorkflowShape | TLShapeI
  */
 export function getShapePorts(
   editor: Editor,
-  shape: InstructionShape | OutputShape | WorkflowShape | TLShapeId,
+  shape: InstructionShape | OutputShape | WorkflowShape | LiveImageShape | TLShapeId,
 ): Record<string, ShapePort> {
-  let targetShape: InstructionShape | OutputShape | WorkflowShape | undefined;
+  let targetShape: InstructionShape | OutputShape | WorkflowShape | LiveImageShape | undefined;
 
   if (typeof shape === 'string') {
     const s = editor.getShape(shape);
-    if (s && (s.type === 'instruction' || s.type === 'output' || s.type === 'workflow')) {
-      targetShape = s as InstructionShape | OutputShape | WorkflowShape;
+    if (
+      s &&
+      (s.type === 'instruction' || s.type === 'output' || s.type === 'workflow' || s.type === 'live-image')
+    ) {
+      targetShape = s as InstructionShape | OutputShape | WorkflowShape | LiveImageShape;
     }
   } else {
     targetShape = shape;
@@ -188,6 +193,8 @@ export function getShapePorts(
       return getOutputPorts(editor, targetShape as OutputShape);
     case 'workflow':
       return getWorkflowPorts(editor, targetShape as WorkflowShape);
+    case 'live-image':
+      return getLiveImagePorts(editor, targetShape as LiveImageShape);
     default:
       return {};
   }

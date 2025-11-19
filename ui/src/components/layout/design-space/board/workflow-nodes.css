@@ -151,6 +151,10 @@
 	fill: none;
 }
 
+.ConnectionShape.ConnectionShape_realtime {
+	stroke-dasharray: 4 4;
+}
+
 .ConnectionShape.ConnectionShape_inactive {
 	stroke: var(--tl-color-hint);
 	opacity: 0.5;

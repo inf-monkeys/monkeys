@@ -1,6 +1,8 @@
 import { forwardRef, useCallback } from 'react';
 
-import { stopEventPropagation, TLFrameShape, TLShapeId, useEditor } from 'tldraw';
+import { stopEventPropagation, TLShapeId, useEditor } from 'tldraw';
+
+import type { LiveImageShape } from './LiveImageShapeUtil';
 
 export const FrameLabelInput = forwardRef<HTMLInputElement, { id: TLShapeId; name: string; isEditing: boolean }>(
   function FrameLabelInput({ id, name, isEditing }, ref) {
@@ -19,7 +21,7 @@ export const FrameLabelInput = forwardRef<HTMLInputElement, { id: TLShapeId; nam
 
     const handleBlur = useCallback(
       (e: React.FocusEvent<HTMLInputElement>) => {
-        const shape = editor.getShape<TLFrameShape>(id);
+        const shape = editor.getShape<LiveImageShape>(id);
         if (!shape) return;
 
         const name = shape.props.name;
@@ -29,7 +31,7 @@ export const FrameLabelInput = forwardRef<HTMLInputElement, { id: TLShapeId; nam
         editor.updateShapes([
           {
             id,
-            type: 'frame',
+            type: 'live-image',
             props: { name: value },
           } as any,
         ]);
@@ -39,7 +41,7 @@ export const FrameLabelInput = forwardRef<HTMLInputElement, { id: TLShapeId; nam
 
     const handleChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
-        const shape = editor.getShape<TLFrameShape>(id);
+        const shape = editor.getShape<LiveImageShape>(id);
         if (!shape) return;
 
         const name = shape.props.name;
@@ -49,7 +51,7 @@ export const FrameLabelInput = forwardRef<HTMLInputElement, { id: TLShapeId; nam
         editor.updateShapes([
           {
             id,
-            type: 'frame',
+            type: 'live-image',
             props: { name: value },
           } as any,
         ]);
@@ -70,7 +72,9 @@ export const FrameLabelInput = forwardRef<HTMLInputElement, { id: TLShapeId; nam
           onChange={handleChange}
           onPointerDown={stopEventPropagation}
         />
-        {defaultEmptyAs(name, 'Double click prompt to edit') + String.fromCharCode(8203)}
+        {/* {defaultEmptyAs(name, 'Double click to name sketch') + String.fromCharCode(8203)} */}
+        {/* 非编辑态下不再显示任何提示文本，仅保留零宽字符占位 */}
+        {String.fromCharCode(8203)}
       </div>
     );
   },

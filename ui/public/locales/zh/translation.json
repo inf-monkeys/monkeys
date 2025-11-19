@@ -4438,7 +4438,8 @@
       "3dModelGenerated": "3D模型生成成功",
       "markdownGenerated": "Markdown描述生成成功",
       "neuralModelGenerated": "神经模型生成成功",
-      "neuralModelGeneratedFailed": "生成神经模型失败"
+      "neuralModelGeneratedFailed": "生成神经模型失败",
+      "3dThumbnailGenerated": "3D模型缩略图生成成功"
     }
   }
 }

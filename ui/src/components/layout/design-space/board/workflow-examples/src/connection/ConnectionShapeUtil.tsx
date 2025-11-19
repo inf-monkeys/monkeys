@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   clamp,
   createShapeId,
@@ -8,7 +9,9 @@ import {
   Mat,
   RecordProps,
   ShapeUtil,
+  stopEventPropagation,
   SVGContainer,
+  T,
   TLBaseShape,
   TLHandle,
   TLHandleDragInfo,
@@ -17,7 +20,7 @@ import {
   Vec,
   VecLike,
   VecModel,
-  vecModelValidator,
+  vecModelValidator
 } from 'tldraw';
 
 import { getAllConnectedShapes } from '../../../shapes/ports/getAllConnectedShapes';
@@ -50,6 +53,8 @@ export type ConnectionShape = TLBaseShape<
   {
     start: VecModel;
     end: VecModel;
+    // 提示词文案，null 表示未设置，string 表示已设置
+    label: string | null;
   }
 >;
 
@@ -58,12 +63,43 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
   static override props: RecordProps<ConnectionShape> = {
     start: vecModelValidator,
     end: vecModelValidator,
+    // 暂时使用 any 来兼容旧数据中的 undefined，在运行时处理
+    label: T.any as any,
+  };
+
+  // 处理旧数据迁移：将 undefined 转换为 null
+  override onBeforeCreate = (next: ConnectionShape): ConnectionShape => {
+    if (next.props.label === undefined) {
+      return {
+        ...next,
+        props: {
+          ...next.props,
+          label: null,
+        },
+      };
+    }
+    return next;
+  };
+
+  // 处理旧数据迁移：在更新时也将 undefined 转换为 null
+  override onBeforeUpdate = (prev: ConnectionShape, next: ConnectionShape): ConnectionShape => {
+    if (next.props.label === undefined) {
+      return {
+        ...next,
+        props: {
+          ...next.props,
+          label: null,
+        },
+      };
+    }
+    return next;
   };
 
   getDefaultProps(): ConnectionShape['props'] {
     return {
       start: { x: 0, y: 0 },
       end: { x: 100, y: 100 },
+      label: null, // 默认 null，表示未设置提示词
     };
   }
 
@@ -316,37 +352,178 @@ export class ConnectionShapeUtil extends ShapeUtil<ConnectionShape> {
 // Main connection component that renders the SVG path
 function ConnectionShape({ connection }: { connection: ConnectionShape }) {
   const editor = useEditor();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Get the connection terminals
   const { start, end } = useValue('terminals', () => getConnectionTerminals(editor, connection), [editor, connection]);
 
-  // Check if this connection is inactive (carrying STOP_EXECUTION signal)
-  // Only applies to NodeShape connections
-  const isInactive = useValue(
-    'isInactive',
+  const { isInactive, isRealtime } = useValue(
+    'connectionMeta',
     () => {
       const bindings = getConnectionBindings(editor, connection.id);
-      if (!bindings.start) return false;
       const originShapeId = bindings.start?.toId;
-      if (!originShapeId) return false;
+      const targetShapeId = bindings.end?.toId;
 
-      // Only check for STOP_EXECUTION on NodeShape types
-      const originShape = editor.getShape(originShapeId);
-      if (!originShape || !editor.isShapeOfType<NodeShape>(originShape, 'node')) {
-        return false;
+      let inactive = false;
+      let realtime = false;
+
+      if (originShapeId) {
+        const originShape = editor.getShape(originShapeId);
+        if (originShape && editor.isShapeOfType<NodeShape>(originShape, 'node')) {
+          const outputs = getNodeOutputPortInfo(editor, originShapeId);
+          const output = outputs[bindings.start!.props.portId];
+          inactive = output?.value === STOP_EXECUTION;
+        }
       }
 
-      const outputs = getNodeOutputPortInfo(editor, originShapeId);
-      const output = outputs[bindings.start.props.portId];
-      return output?.value === STOP_EXECUTION;
+      // 实时转绘连线：任一端是 live-image，则视作实时转绘连接
+      const startShape = originShapeId ? editor.getShape(originShapeId) : null;
+      const endShape = targetShapeId ? editor.getShape(targetShapeId) : null;
+
+      if (startShape?.type === 'live-image' || endShape?.type === 'live-image') {
+        realtime = true;
+      }
+
+      return { isInactive: inactive, isRealtime: realtime };
     },
     [connection.id, editor],
   );
 
+  const center = Vec.Lrp(start, end, 0.5);
+  const rawLabel = (connection.props.label as string | null | undefined) ?? null;
+  const displayLabel = rawLabel && rawLabel.trim().length > 0 ? rawLabel.trim() : 'Double click prompt to edit';
+
+  const handleLabelDoubleClick = useCallback(
+    (e: React.MouseEvent<SVGTextElement>) => {
+      editor.markEventAsHandled(e);
+      e.stopPropagation();
+      e.preventDefault();
+
+      setEditValue(rawLabel ?? '');
+      setIsEditing(true);
+    },
+    [rawLabel, editor],
+  );
+
+  const handleLabelPointerDown = useCallback((e: React.PointerEvent<SVGTextElement>) => {
+    e.stopPropagation();
+  }, []);
+
+  const handleInputKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+        stopEventPropagation(e);
+        e.currentTarget.blur();
+      } else if (e.key === 'Escape') {
+        stopEventPropagation(e);
+        setIsEditing(false);
+        setEditValue(rawLabel ?? '');
+      }
+    },
+    [rawLabel],
+  );
+
+  const handleInputBlur = useCallback(() => {
+    const trimmed = editValue.trim();
+    const finalValue = trimmed.length > 0 ? trimmed : null; // 空字符串转为 null
+    const prev = rawLabel ?? null;
+
+    if (finalValue !== prev) {
+      editor.updateShape<ConnectionShape>({
+        id: connection.id,
+        type: 'connection',
+        props: {
+          ...connection.props,
+          label: finalValue,
+        },
+      });
+    }
+
+    setIsEditing(false);
+  }, [editValue, rawLabel, connection.id, connection.props, editor]);
+
+  // 当进入编辑模式时，聚焦 input
+  useEffect(() => {
+    if (isEditing) {
+      // 使用 requestAnimationFrame 确保 DOM 已完全渲染
+      const rafId = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+          }
+        });
+      });
+      return () => cancelAnimationFrame(rafId);
+    }
+  }, [isEditing]);
+
   return (
-    <SVGContainer className={classNames('ConnectionShape', isInactive && 'ConnectionShape_inactive')}>
-      <path d={getConnectionPath(start, end)} />
-    </SVGContainer>
+    <>
+      <SVGContainer
+        className={classNames(
+          'ConnectionShape',
+          isInactive && 'ConnectionShape_inactive',
+          isRealtime && 'ConnectionShape_realtime',
+        )}
+      >
+        <path d={getConnectionPath(start, end)} />
+        {isRealtime && !isEditing && (
+          <text
+            x={center.x}
+            y={center.y - 6}
+            textAnchor="middle"
+            dominantBaseline="central"
+            style={{
+              fontSize: 10,
+              fill: '#4B5563',
+              stroke: 'none',
+              pointerEvents: 'all',
+              cursor: 'text',
+            }}
+            onDoubleClick={handleLabelDoubleClick}
+            onPointerDown={handleLabelPointerDown}
+          >
+            {displayLabel}
+          </text>
+        )}
+        {isRealtime && isEditing && (
+          <foreignObject
+            x={center.x - 60}
+            y={center.y - 16}
+            width="120"
+            height="20"
+            style={{ pointerEvents: 'all' }}
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={handleInputKeyDown}
+              onBlur={handleInputBlur}
+              onPointerDown={stopEventPropagation}
+              style={{
+                width: '100%',
+                height: '100%',
+                fontSize: 10,
+                color: '#4B5563',
+                background: 'white',
+                border: '1px solid #CBD5E1',
+                borderRadius: '2px',
+                padding: '2px 4px',
+                textAlign: 'center',
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+              placeholder="输入提示词"
+            />
+          </foreignObject>
+        )}
+      </SVGContainer>
+    </>
   );
 }
 

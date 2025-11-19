@@ -1242,6 +1242,73 @@ export const Board: React.FC<BoardProps> = ({
                     return false; // 未处理,使用默认行为
                   });
                 }
+
+                // 数据迁移：将旧 connection shape 的 undefined label 转换为 null
+                // 使用 sideEffects 拦截所有 connection shape 的创建和更新，在验证器运行前处理
+                editor.sideEffects.registerBeforeCreateHandler('shape', (shape: TLShape) => {
+                  if (shape.type === 'connection') {
+                    const connectionShape = shape as any;
+                    if (connectionShape.props && connectionShape.props.label === undefined) {
+                      return {
+                        ...shape,
+                        props: {
+                          ...connectionShape.props,
+                          label: null,
+                        },
+                      } as any;
+                    }
+                  }
+                  return shape;
+                });
+
+                editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
+                  if (nextShape.type === 'connection') {
+                    const connectionShape = nextShape as any;
+                    if (connectionShape.props && connectionShape.props.label === undefined) {
+                      return {
+                        ...nextShape,
+                        props: {
+                          ...connectionShape.props,
+                          label: null,
+                        },
+                      };
+                    }
+                  }
+                  return nextShape;
+                });
+
+                // 监听数据加载完成，执行批量迁移
+                const migrateConnectionLabels = () => {
+                  try {
+                    const allShapes = editor.getCurrentPageShapes();
+                    const connectionsToUpdate = allShapes.filter(
+                      (shape) => shape.type === 'connection' && (shape as any).props?.label === undefined,
+                    );
+
+                    if (connectionsToUpdate.length > 0) {
+                      editor.updateShapes(
+                        connectionsToUpdate.map((shape) => ({
+                          id: shape.id,
+                          type: 'connection' as const,
+                          props: {
+                            ...(shape as any).props,
+                            label: null,
+                          },
+                        })) as any,
+                      );
+                    }
+                  } catch (e) {
+                    console.warn('迁移 connection shape label 失败:', e);
+                  }
+                };
+
+                // 立即执行一次迁移（数据可能已经加载）
+                migrateConnectionLabels();
+
+                // 延迟执行批量迁移，确保数据已加载
+                setTimeout(migrateConnectionLabels, 100);
+                setTimeout(migrateConnectionLabels, 500);
+                setTimeout(migrateConnectionLabels, 1000);
               }}
               components={components}
               shapeUtils={[

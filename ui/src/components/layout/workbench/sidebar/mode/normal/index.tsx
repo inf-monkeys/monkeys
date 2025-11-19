@@ -281,8 +281,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
       if (!wrapperHeight) return;
       const calcHeight =
         globalViewSize != 'sm'
-          ? `calc(${wrapperHeight}px - var(--global-spacing) * 2 - 2.5rem - 0.5rem)`
-          : `calc(${wrapperHeight}px - 1.5rem - 2px)`;
+          ? `calc(${wrapperHeight}px - var(--global-spacing) * 2 - 3.5rem - 0.5rem)`
+          : `calc(${wrapperHeight}px - 2.5rem - 2px)`;
       setHeight(calcHeight);
     },
     [wrapperHeight, globalViewSize],

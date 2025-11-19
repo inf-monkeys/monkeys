@@ -11,6 +11,7 @@ import { CronJobModule } from './cronjobs/cron.module';
 import { DatabaseModule } from './database/database.module';
 import { RepositoryMoule } from './database/repositories.module';
 import { AgentV2Module } from './modules/agent-v2/agent-v2.module';
+import { AgentV3Module } from './modules/agent-v3/agent-v3.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
@@ -44,6 +45,7 @@ import { FalModule } from './modules/fal/fal.module';
     RepositoryMoule,
     WorkflowModule,
     AgentV2Module,
+    AgentV3Module,
     OpenapiModule,
     ScheduleModule.forRoot(),
     CronJobModule,

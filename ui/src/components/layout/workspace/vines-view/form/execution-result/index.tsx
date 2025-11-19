@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -36,7 +36,31 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
   isMiniFrame?: boolean;
 }
 
+const isSameIframeOutputs = (
+  prev: VinesWorkflowExecutionOutputListItem[],
+  next: VinesWorkflowExecutionOutputListItem[],
+) => {
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < next.length; i += 1) {
+    if (prev[i]?.instanceId !== next[i]?.instanceId || prev[i]?.status !== next[i]?.status) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export const LOAD_LIMIT = 50;
+const getUpdateTimestamp = (value?: number | string | Date) => {
+  if (!value) return 0;
+  if (typeof value === 'number') return value;
+  const ts = new Date(value).getTime();
+  return Number.isNaN(ts) ? 0 : ts;
+};
+
+const getItemTimestamp = (item: VinesWorkflowExecutionOutputListItem) =>
+  getUpdateTimestamp(item.updateTime ?? item.endTime ?? item.startTime);
+
+const FINAL_STATUSES = new Set(['COMPLETED', 'FAILED', 'TERMINATED', 'CANCELED', 'CANCELLED']);
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   className,
   event$,
@@ -47,7 +71,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const { data: oem } = useSystemConfig();
 
-  const { status, setStatus } = useExecutionStore();
+  const { setStatus } = useExecutionStore();
 
   const showErrorFilter = oem?.theme?.workflowPreviewExecutionGrid?.showErrorFilter ?? true;
 
@@ -62,6 +86,9 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const [updateExecutionResultList, setUpdateExecutionResultList] = useState<VinesWorkflowExecutionOutputListItem[]>(
     [],
   );
+  const [iframeOutputs, setIframeOutputs] = useState<VinesWorkflowExecutionOutputListItem[]>([]);
+  const latestInstanceMetaRef = useRef<Map<string, { status: string; timestamp: number }>>(new Map());
+  const pendingInstanceIdsRef = useRef<Set<string>>(new Set());
 
   const {
     data: executionListData,
@@ -101,23 +128,52 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
     // 如果有第一页数据，进行原始数据层面的更新
     let finalRawData = allExistingItems;
+    let nextIframeOutputs: VinesWorkflowExecutionOutputListItem[] = [];
     if (firstPageExecutionList.length > 0) {
       // 创建现有数据的映射（基于 instanceId）
       const existingMap = new Map(allExistingItems.map((item) => [item.instanceId, item]));
 
       // 处理第一页最新数据
       const newItems: VinesWorkflowExecutionOutputListItem[] = [];
-      const updateItems: VinesWorkflowExecutionOutputListItem[] = [];
+      const eventItems: VinesWorkflowExecutionOutputListItem[] = [];
+      const pushedInstanceIds = new Set<string>();
+      const pushEventItem = (item: VinesWorkflowExecutionOutputListItem) => {
+        if (pushedInstanceIds.has(item.instanceId)) return;
+        eventItems.push(item);
+        pushedInstanceIds.add(item.instanceId);
+      };
       for (const item of firstPageExecutionList) {
+        const incomingTimestamp = getItemTimestamp(item);
+        const meta = latestInstanceMetaRef.current.get(item.instanceId);
+        const hasStatusChanged = item.status !== meta?.status;
+        const isNewerTimestamp = incomingTimestamp >= (meta?.timestamp ?? 0);
+        const shouldUpdateMeta = !meta || isNewerTimestamp;
+
         if (existingMap.has(item.instanceId)) {
-          if (item.status !== existingMap.get(item.instanceId)?.status) {
-            // 当项目存在且状态变化时，整体替换已存在的项目（状态、时间等可能都更新了）
+          const existingItem = existingMap.get(item.instanceId);
+          if (shouldUpdateMeta) {
             existingMap.set(item.instanceId, item);
-            updateItems.push(item);
+          } else {
+            existingMap.set(item.instanceId, existingItem!);
           }
         } else {
-          // 收集新增项目
           newItems.push(item);
+        }
+
+        if (shouldUpdateMeta) {
+          const isRunning = item.status === 'RUNNING';
+          const isFinal = FINAL_STATUSES.has(item.status);
+          const isPending = pendingInstanceIdsRef.current.has(item.instanceId);
+
+          if (isRunning && !isPending) {
+            pendingInstanceIdsRef.current.add(item.instanceId);
+            pushEventItem(item);
+          } else if (isFinal && isPending && hasStatusChanged) {
+            pendingInstanceIdsRef.current.delete(item.instanceId);
+            pushEventItem(item);
+          }
+
+          latestInstanceMetaRef.current.set(item.instanceId, { status: item.status, timestamp: incomingTimestamp });
         }
       }
 
@@ -138,7 +194,18 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
         const timeB = b.startTime || 0;
         return timeB - timeA; // 降序：新的在前
       });
-      setUpdateExecutionResultList([...updateItems, ...newItems]);
+      setUpdateExecutionResultList(eventItems);
+      nextIframeOutputs = eventItems;
+    } else {
+      setUpdateExecutionResultList([]);
+    }
+
+    if (finalRawData.length === 0 && updateExecutionResultList.length > 0) {
+      finalRawData = updateExecutionResultList;
+    }
+
+    if (nextIframeOutputs.length > 0) {
+      setIframeOutputs((prev) => (isSameIframeOutputs(prev, nextIframeOutputs) ? prev : nextIframeOutputs));
     }
 
     setStatus(finalRawData.find((item) => item.status === 'RUNNING') ? 'running' : 'idle');
@@ -149,6 +216,13 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     // 去重并设置最终结果
     setExecutionResultList(removeRepeatKey(renderList));
   }, [executionListData, firstPageExecutionList]);
+
+  useEffect(() => {
+    latestInstanceMetaRef.current.clear();
+    pendingInstanceIdsRef.current.clear();
+    setUpdateExecutionResultList([]);
+    setIframeOutputs([]);
+  }, [workflowId]);
 
   const setImages = useSetExecutionImages();
   const setThumbImages = useSetThumbImages();
@@ -167,7 +241,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   }, [executionResultList, setImages, setThumbImages]);
 
   useVinesIframeMessage({
-    outputs: updateExecutionResultList,
+    outputs: iframeOutputs,
     mutate: mutateExecutionList,
     enable: enablePostMessage,
   });

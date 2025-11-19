@@ -151,7 +151,8 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   ];
 
   // Draw Fast 相关工具（独立工具栏）
-  const drawfastTools = [{ id: 'live-image', label: '极速绘图', icon: 'tool-frame' }];
+  // 仅保留实时转绘草图框；结果沿用 Workflow 工具栏中的 Output 节点
+  const drawfastTools = [{ id: 'live-image', label: '实时转绘', icon: 'tool-frame' }];
 
   return (
     <div

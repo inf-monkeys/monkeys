@@ -588,6 +588,20 @@ export interface ModelTrainingConfig {
   endpoint: string; // Model training service endpoint
 }
 
+export interface AgentV3ProviderConfig {
+  apiKey?: string;
+  baseUrl?: string;
+  models?: string[];
+}
+
+export interface AgentV3Config {
+  defaultModelId?: string;
+  openai?: AgentV3ProviderConfig;
+  openaiCompatible?: AgentV3ProviderConfig;
+  anthropic?: AgentV3ProviderConfig;
+  google?: AgentV3ProviderConfig;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -610,6 +624,7 @@ export interface Config {
   admin: AdminConfig;
   evaluation: EvaluationConfig;
   agentv2: AgentV2Config;
+  agentv3: AgentV3Config;
   modelTraining: ModelTrainingConfig;
 }
 
@@ -914,6 +929,26 @@ When answer to user:
   paymentServer: {
     enabled: readConfig('paymentServer.enabled', false),
     baseUrl: readConfig('paymentServer.baseUrl'),
+  },
+  agentv3: {
+    defaultModelId: readConfig('agentv3.defaultModelId', undefined),
+    openai: {
+      apiKey: readConfig('agentv3.openai.apiKey', process.env.OPENAI_API_KEY),
+      models: readConfig('agentv3.openai.models', []),
+    },
+    openaiCompatible: {
+      baseUrl: readConfig('agentv3.openaiCompatible.baseUrl', process.env.OPENAI_COMPATIBLE_BASE_URL),
+      apiKey: readConfig('agentv3.openaiCompatible.apiKey', process.env.OPENAI_COMPATIBLE_API_KEY),
+      models: readConfig('agentv3.openaiCompatible.models', []),
+    },
+    anthropic: {
+      apiKey: readConfig('agentv3.anthropic.apiKey', process.env.ANTHROPIC_API_KEY),
+      models: readConfig('agentv3.anthropic.models', []),
+    },
+    google: {
+      apiKey: readConfig('agentv3.google.apiKey', process.env.GOOGLE_API_KEY),
+      models: readConfig('agentv3.google.models', []),
+    },
   },
   oneapi: {
     enabled: readConfig('oneapi.enabled', false),

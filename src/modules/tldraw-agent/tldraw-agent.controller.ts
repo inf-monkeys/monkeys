@@ -116,8 +116,13 @@ export class TldrawAgentController {
       return { text: '' }
     }
 
+    // 根据上传文件名动态选择后缀，避免写死为 .webm 导致部分上游服务按扩展名解析失败
+    // 前端目前在 FormData 里用的是 'audio.webm'，如果以后改成 mp3 / wav 等，这里会自动跟随
+    const extFromName = file.originalname ? path.extname(file.originalname) : ''
+    const safeExt = extFromName && typeof extFromName === 'string' ? extFromName : '.webm'
+
     // 将内存中的音频写入临时文件供 SDK 读取
-    const tmpFile = path.join(os.tmpdir(), `tldraw-audio-${Date.now()}.webm`)
+    const tmpFile = path.join(os.tmpdir(), `tldraw-audio-${Date.now()}${safeExt}`)
     await fs.promises.writeFile(tmpFile, file.buffer)
 
     try {

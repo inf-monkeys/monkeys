@@ -2,7 +2,7 @@ import { AssetFilter, ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { AssetType } from '@inf-monkeys/monkeys';
 import _ from 'lodash';
-import { And, Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Not, Repository, ILike } from 'typeorm';
+import { And, Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, ILike, In, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { AssetPublishConfig, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
 
@@ -36,14 +36,26 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       }
     }
     if (filter.tagIds?.length) {
-      const assetIds = await this.assetCommonRepository.findAssetIdsByTagIds(assetType, filter.tagIds);
+      // 检查是否使用 AND 逻辑（通过 filter.tagIdsAnd 标志或直接使用 tagIdsAnd 字段）
+      const useAndLogic = (filter as any).tagIdsAnd === true;
+      const assetIds = useAndLogic
+        ? await this.assetCommonRepository.findAssetIdsByTagIdsAnd(assetType, filter.tagIds)
+        : await this.assetCommonRepository.findAssetIdsByTagIds(assetType, filter.tagIds);
       if (assetIds.length) {
         condition[assetIdField] = In(assetIds);
+      } else {
+        // 如果指定了tagIds但找不到匹配的资产，返回空结果
+        condition[assetIdField] = In([]);
       }
     }
     if (filter.marketPlaceTagIds?.length) {
       const assetIds = await this.assetCommonRepository.findAssetIdsByMarketplaceTagIds(assetType, filter.marketPlaceTagIds);
-      if (assetIds.length) condition[assetIdField] = In(assetIds);
+      if (assetIds.length) {
+        condition[assetIdField] = In(assetIds);
+      } else {
+        // 如果指定了marketPlaceTagIds但找不到匹配的资产，返回空结果
+        condition[assetIdField] = In([]);
+      }
     }
     if (filter.userIds?.length) {
       condition.creatorUserId = In(filter.userIds);

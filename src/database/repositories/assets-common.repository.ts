@@ -278,6 +278,43 @@ export class AssetsCommonRepository {
     ).map((x) => x.assetId);
   }
 
+  /**
+   * 使用 AND 逻辑查找资产ID：返回同时包含所有指定标签的资产ID
+   * @param assetType 资产类型
+   * @param tagIds 标签ID数组
+   * @returns 同时包含所有标签的资产ID数组
+   */
+  public async findAssetIdsByTagIdsAnd(assetType: AssetType, tagIds: string[]) {
+    if (!tagIds.length) {
+      return [];
+    }
+    // 使用 AND 逻辑：找到同时包含所有指定标签的资产ID
+    // 对每个标签分别查询，然后取交集
+    const assetIdSets: Set<string>[] = [];
+    for (const tagId of tagIds) {
+      const assetIds = (
+        await this.assetsTagRelationsRepo.find({
+          where: {
+            assetType,
+            tagId,
+            isDeleted: false,
+          },
+          select: ['assetId'],
+        })
+      ).map((x) => x.assetId);
+      assetIdSets.push(new Set(assetIds));
+    }
+    // 如果任何一个标签没有匹配的资产，返回空数组
+    if (assetIdSets.some((set) => set.size === 0)) {
+      return [];
+    }
+    // 计算交集：找到出现在所有集合中的资产ID
+    const intersection = assetIdSets.reduce((acc, currentSet) => {
+      return new Set([...acc].filter((id) => currentSet.has(id)));
+    });
+    return Array.from(intersection);
+  }
+
   public async updateAssetMarketplaceTags(assetType: AssetType, assetId: string, tagIds: string[]) {
     const originalTags = await this.assetsMarketPlaceTagRelationsRepo.find({
       where: {
