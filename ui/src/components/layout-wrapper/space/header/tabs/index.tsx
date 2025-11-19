@@ -14,6 +14,7 @@ import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 import { DesignsExtraInfo } from '../extra-info/designs';
+import { WorkbenchQuickSwitcher } from './workbench-quick-switcher';
 
 const HEADBAR_THEME_MAP: Record<CustomizationHeadbarTheme, TabsVariant> = {
   card: 'default',
@@ -105,6 +106,8 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
   ]);
 
   const tabsList: VinesSpaceHeadbarModules = unionBy(oemVinesSpaceHeadbarModules, TAB_LIST, 'id');
+  const workbenchHeadbarModule = tabsList.find((item) => item.id === 'workbench');
+  const showWorkbenchQuickSwitcher = workbenchHeadbarModule?.showQuickSwitcher === true;
 
   return (
     <Tabs
@@ -157,6 +160,9 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
                   />
                 )}
                 {getI18nContent(item.displayName, t(`components.layout.header.tabs.${item.id}`))}
+                {item.id === 'workbench' && showWorkbenchQuickSwitcher && (
+                  <WorkbenchQuickSwitcher headbarTheme={headbarTheme} onEnsureWorkbench={() => setValue('workbench')} />
+                )}
                 {ExtraInfo && <ExtraInfo tabId={item.id} />}
               </TabsTrigger>
             );

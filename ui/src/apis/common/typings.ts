@@ -39,6 +39,7 @@ export type VinesSpaceHeadbarModule = {
   visible?: boolean;
   disabled?: boolean;
   icon?: string;
+  showQuickSwitcher?: boolean;
 };
 export type VinesSpaceHeadbarModules = VinesSpaceHeadbarModule[];
 
