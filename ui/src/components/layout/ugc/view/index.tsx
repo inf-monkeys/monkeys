@@ -192,6 +192,12 @@ export const UgcView = <E extends object>({
     setSearchInput(search);
   }, [search]);
 
+  // Clear search when assetKey changes to prevent search state leaking between pages
+  useEffect(() => {
+    setStoredSearch('');
+    setSearchInput('');
+  }, [assetKey, setStoredSearch]);
+
   // 处理文件夹点击
   const handleFolderClick = (folderId: string, folderFilter: Partial<IListUgcDto['filter']>) => {
     // 设置左侧分组选中状态
