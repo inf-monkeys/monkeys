@@ -212,7 +212,7 @@ export class AssetsCommonRepository {
     );
   }
 
-  public async updateAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
+  public async updateAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[], merge: boolean = true) {
     const originalTags = await this.assetsTagRelationsRepo.find({
       where: {
         isDeleted: false,
@@ -221,8 +221,13 @@ export class AssetsCommonRepository {
       },
     });
     const originalTagIds = originalTags.map((x) => x.tagId);
-    const toDelete = originalTags.filter((x) => !tagIds.includes(x.tagId));
-    const toAdd = tagIds.filter((x) => !originalTagIds.includes(x));
+
+    // 如果是合并模式，将新标签合并到现有标签中（去重）
+    const finalTagIds = merge ? [...new Set([...originalTagIds, ...tagIds])] : tagIds;
+
+    const toDelete = originalTags.filter((x) => !finalTagIds.includes(x.tagId));
+    const toAdd = finalTagIds.filter((x) => !originalTagIds.includes(x));
+
     for (const tag of toDelete) {
       await this.assetsTagRelationsRepo.update(
         {

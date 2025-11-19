@@ -8,7 +8,6 @@ import { Upload } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { getMediaAsset } from '@/apis/media-data';
 import { updateAssetTag } from '@/apis/ugc';
 import { IAssetTag } from '@/apis/ugc/typings';
 import { StepThumbnailGenerator } from '@/components/layout/ugc/step-thumbnail-generator';
@@ -102,33 +101,11 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
     if (selectedTags.length > 0 && uploadedFileIds.length > 0) {
       const newTagIds = selectedTags.map((tag) => tag.id);
       try {
-        // 对于每个上传的文件，先获取现有标签，然后合并新标签
+        // 对于每个上传的文件，使用合并模式更新标签（后端会自动合并现有标签和新标签）
         await Promise.all(
-          uploadedFileIds.map(async (mediaFileId) => {
-            try {
-              // 获取资产的现有信息（包含标签）
-              const asset = await getMediaAsset(mediaFileId);
-              // 获取现有标签ID列表（assetTags 可能是 IAssetTag[] 或 any[]）
-              const currentTagIds = (asset.assetTags || [])
-                .map((tag: IAssetTag | any) => {
-                  if (typeof tag === 'object' && tag.id) {
-                    return tag.id;
-                  }
-                  if (typeof tag === 'string') {
-                    return tag;
-                  }
-                  return null;
-                })
-                .filter((id): id is string => typeof id === 'string' && id.length > 0);
-              // 合并现有标签和新标签（去重）
-              const mergedTagIds = [...new Set([...currentTagIds, ...newTagIds])];
-              // 更新标签（使用合并后的标签列表）
-              await updateAssetTag('media-file', mediaFileId, { tagIds: mergedTagIds });
-            } catch (error) {
-              // 如果获取资产信息失败（可能是新上传的文件，还没有标签），直接使用新标签
-              await updateAssetTag('media-file', mediaFileId, { tagIds: newTagIds });
-            }
-          }),
+          uploadedFileIds.map((mediaFileId) =>
+            updateAssetTag('media-file', mediaFileId, { tagIds: newTagIds, merge: true }),
+          ),
         );
         toast.success(t('common.update.success'));
         // 上传成功后清空选中的标签，方便下次上传

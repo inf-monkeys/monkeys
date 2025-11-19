@@ -53,8 +53,8 @@ export class AssetsTagController {
   @Put('/:assetType/:assetId/tags')
   public async updateAssetTags(@Req() req: IRequest, @Param('assetType') assetType: AssetType, @Param('assetId') assetId: string, @Body() body: AddTagToAssetDto) {
     const { teamId } = req;
-    const { tagIds = [] } = body;
-    const data = await this.service.updateAssetTags(teamId, assetType, assetId, tagIds);
+    const { tagIds = [], merge = true } = body;
+    const data = await this.service.updateAssetTags(teamId, assetType, assetId, tagIds, merge);
     return new SuccessResponse({ data });
   }
 
