@@ -2,18 +2,174 @@ import React from 'react';
 
 import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d, resizeBox } from 'tldraw';
 
+import { IMediaData } from '@/apis/media-data/typings';
+import { useUgcMediaData } from '@/apis/ugc';
+import { IAssetItem } from '@/apis/ugc/typings';
 import { vinesHeader } from '@/apis/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesUploader } from '@/components/ui/vines-uploader';
+import { DEFAULT_ASSET_ICON_URL } from '@/consts/icons.ts';
+import { getI18nContent } from '@/utils';
 
 import { GenericPort } from '../ports/GenericPort';
 import { getShapePortConnections } from '../ports/portConnections';
 import { getWorkflowPorts } from '../ports/shapePorts';
-import { WorkflowShape } from './WorkflowShape.types';
+import { WorkflowInputParam, WorkflowShape } from './WorkflowShape.types';
 
 const PORT_RADIUS_PX = 8;
 
 // 形状级别的运行中请求控制器
 const workflowAbortControllers = new Map<string, AbortController>();
+
+type NeuralModelAsset = IAssetItem<IMediaData>;
+
+function WorkflowNeuralModelField({
+  param,
+  onChange,
+}: {
+  param: WorkflowInputParam;
+  onChange: (value: any) => void;
+}) {
+  const {
+    data: mediaData,
+    isLoading,
+  } = useUgcMediaData(
+    {
+      page: 1,
+      limit: 100,
+      search: (param.typeOptions as any)?.search || '',
+    },
+    'only',
+  );
+
+  const [isLoadingContent, setIsLoadingContent] = React.useState(false);
+  const [selectedAssetId, setSelectedAssetId] = React.useState<string | null>(null);
+
+  const neuralModels = (mediaData?.data ?? []) as NeuralModelAsset[];
+
+  const hasValue = param.value !== undefined && param.value !== null && param.value !== '';
+  const displayValue = selectedAssetId || (hasValue ? '__has_value__' : undefined);
+
+  const handleValueChange = React.useCallback(
+    async (assetId: string) => {
+      if (!assetId || assetId === ' ') {
+        // 对于 tldraw shape props，不能写入 undefined，否则会触发
+        // “Expected json serializable value, got undefined” 校验错误。
+        // 这里用空字符串表示“未选择模型”，和其他字符串输入保持一致。
+        onChange('');
+        setSelectedAssetId(null);
+        return;
+      }
+
+      setSelectedAssetId(assetId);
+      setIsLoadingContent(true);
+
+      try {
+        const selectedAsset = neuralModels.find((item) => item.id === assetId);
+        if (!selectedAsset?.url) {
+          throw new Error('Asset URL not found');
+        }
+
+        const response = await fetch(selectedAsset.url);
+        if (!response.ok) {
+          throw new Error('Failed to fetch JSON content');
+        }
+
+        const jsonText = await response.text();
+
+        let jsonContent: any;
+        try {
+          jsonContent = JSON.parse(jsonText);
+        } catch {
+          jsonContent = jsonText;
+        }
+
+        const jsonString = typeof jsonContent === 'string' ? jsonContent : JSON.stringify(jsonContent);
+        onChange(jsonString);
+      } catch (error) {
+        console.error('Failed to load neural model content:', error);
+        onChange('');
+        setSelectedAssetId(null);
+      } finally {
+        setIsLoadingContent(false);
+      }
+    },
+    [neuralModels, onChange],
+  );
+
+  if (isLoading || isLoadingContent) {
+    return (
+      <div
+        style={{
+          width: '100%',
+          padding: '4px 8px',
+          fontSize: '11px',
+          color: '#6B7280',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        正在加载神经模型...
+      </div>
+    );
+  }
+
+  const hasModels = neuralModels.length > 0;
+
+  return (
+    <div
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      style={{ pointerEvents: 'auto' }}
+    >
+      <Select onValueChange={handleValueChange} value={displayValue}>
+        <SelectTrigger className="h-7 w-full px-2 py-1 text-xs">
+          <SelectValue placeholder={hasValue && !selectedAssetId ? '已选择神经模型（JSON内容）' : '请选择神经模型'} />
+        </SelectTrigger>
+        <SelectContent className="max-h-60">
+          {hasValue && !selectedAssetId && (
+            <SelectItem value="__has_value__" disabled>
+              当前值：JSON内容（请重新选择以更改）
+            </SelectItem>
+          )}
+          <SelectItem value=" ">不使用模型</SelectItem>
+          {!hasModels && (
+            <SelectItem value="__empty__" disabled>
+              暂无神经模型，请先在设计资产中创建
+            </SelectItem>
+          )}
+          {neuralModels.map((asset) => {
+            const displayName = getI18nContent(asset.displayName || asset.name);
+            const description = getI18nContent(asset.description);
+            const iconUrl = asset.iconUrl || DEFAULT_ASSET_ICON_URL;
+
+            return (
+              <Tooltip key={asset.id}>
+                <TooltipTrigger asChild>
+                  <SelectItem value={asset.id}>
+                    <div className="flex w-full items-center gap-2">
+                      <VinesIcon src={iconUrl} size="xs" />
+                      <div className="flex-1">
+                        <p className="break-all text-sm font-bold leading-4">{displayName}</p>
+                        {description && (
+                          <p className="line-clamp-1 break-all text-xs text-muted-foreground">{description}</p>
+                        )}
+                      </div>
+                    </div>
+                  </SelectItem>
+                </TooltipTrigger>
+                {description && <TooltipContent>{description}</TooltipContent>}
+              </Tooltip>
+            );
+          })}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
 
 export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
   static override type = 'workflow' as const;
@@ -235,18 +391,18 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
               }
             }
           }
-          // 如果连接到 Output
-          else if (connection.outputId) {
-            const outputShape = editor.getShape(connection.outputId as any) as any;
-            if (outputShape && outputShape.type === 'output') {
-              // 优先使用图片，如果没有图片则使用文本内容
-              if (outputShape.props.imageUrl && outputShape.props.imageUrl.trim()) {
+        // 如果连接到 Output
+        else if (connection.outputId) {
+          const outputShape = editor.getShape(connection.outputId as any) as any;
+          if (outputShape && outputShape.type === 'output') {
+            // 优先使用图片，如果没有图片则使用文本内容
+            if (outputShape.props.imageUrl && outputShape.props.imageUrl.trim()) {
                 return { ...param, value: outputShape.props.imageUrl };
-              } else if (outputShape.props.content && outputShape.props.content.trim()) {
-                return { ...param, value: outputShape.props.content };
-              }
+            } else if (outputShape.props.content && outputShape.props.content.trim()) {
+              return { ...param, value: outputShape.props.content };
             }
           }
+        }
         }
         return param;
       });
@@ -1070,7 +1226,12 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                     {param.displayName || param.name}
                     {param.required && <span style={{ color: '#EF4444' }}>*</span>}
                   </label>
-                  {param.type === 'file' ? (
+                  {(param as any).typeOptions?.assetType === 'neural-model' ? (
+                    <WorkflowNeuralModelField
+                      param={param}
+                      onChange={(value) => handleParamChange(param.name, value)}
+                    />
+                  ) : param.type === 'file' ? (
                     <div
                       onClick={(e) => e.stopPropagation()}
                       onPointerDown={(e) => e.stopPropagation()}
