@@ -9,6 +9,7 @@ export type AssetFilter = {
   createdTimestamp?: (number | null)[];
   updatedTimestamp?: (number | null)[];
   tagIds?: string[];
+  tagIdsAnd?: boolean; // 如果为 true，使用 AND 逻辑（同时包含所有标签），否则使用 OR 逻辑（包含任意一个标签）
   marketPlaceTagIds?: string[];
   ids?: string[];
   [key: string]: any;
