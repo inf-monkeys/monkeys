@@ -14,6 +14,8 @@ export interface IUgcViewItemProps<E extends object> {
   onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   index: number;
   ugcOptions: CustomizationUgc;
+  assetType?: AssetType;
+  assetKey?: string;
 }
 
 export interface IUgcCreateColumnsProps {
