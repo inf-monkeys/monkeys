@@ -11,8 +11,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
-// 支持跳转到详情页（新页面）的 navId 白名单（检查 navId 是否包含这些关键词）
-const DETAIL_PAGE_WHITELIST = ['design-assets', 'asset-library', 'media-data'];
+// 支持跳转到详情页（新页面）的 assetType 白名单
+const DETAIL_PAGE_WHITELIST = ['media-data', 'neural-models'];
 
 export const UgcViewGalleryItem = <E extends object>({
   row,
@@ -21,6 +21,8 @@ export const UgcViewGalleryItem = <E extends object>({
   operateArea,
   onItemClick,
   ugcOptions,
+  assetType,
+  assetKey,
 }: IUgcViewItemProps<E>) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -37,26 +39,65 @@ export const UgcViewGalleryItem = <E extends object>({
     e.stopPropagation();
     // 跳转到资产详情页面（根据当前 URL 动态识别 navId，默认回退到 design-assets）
     const path = typeof window !== 'undefined' ? window.location.pathname : '';
-    const match = path.match(/\/[^/]+\/nav\/([^/]+)/);
-    const currentNavId = match?.[1] ?? 'concept-design:design-assets';
-    navigate({ to: `/$teamId/nav/${currentNavId}/asset/${row.original.id}` as any });
+
+    // 从 URL 中提取 teamId 和 navId
+    const teamIdMatch = path.match(/\/([^/]+)\//);
+    const teamId = teamIdMatch?.[1] ?? '';
+    const navMatch = path.match(/\/[^/]+\/nav\/([^/]+)/);
+    const currentNavId = navMatch?.[1] ?? 'concept-design:design-assets';
+    const targetUrl = `/${teamId}/nav/${currentNavId}/asset/${row.original.id}`;
+
+    // 调试日志
+    console.log('[Gallery Info Click Debug]', {
+      path,
+      teamId,
+      navMatch: navMatch?.[1],
+      currentNavId,
+      targetUrl,
+      assetId: row.original.id,
+      assetKey,
+      assetType,
+    });
+
+    navigate({ to: targetUrl as any });
   };
 
   // 判断是否应该显示查看信息按钮（跳转到新的详情页 vs 显示简单的 Popover）
+  // 优先使用 assetKey，因为白名单是基于 assetKey 的（如 media-data），而不是 assetType（如 media-file）
   const shouldShowInfoButton = React.useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    const path = window.location.pathname;
-    const match = path.match(/\/[^/]+\/nav\/([^/]+)/);
-    const navId = match?.[1] ?? '';
+    // 优先使用 assetKey（因为白名单是基于 assetKey 的）
+    let currentAssetType: string | undefined = assetKey
+      ? assetKey.includes(':')
+        ? assetKey.split(':')[1]
+        : assetKey
+      : undefined;
 
-    // 检查 navId 是否包含白名单中的任何一个关键词
-    const isInWhitelist = DETAIL_PAGE_WHITELIST.some((keyword) => navId.includes(keyword));
+    // 如果没有 assetKey，尝试使用传入的 assetType
+    if (!currentAssetType && assetType) {
+      currentAssetType = assetType as string | undefined;
+    }
 
-    // 特殊处理：神经模型页面（URL 路径中包含 neural-models）
-    const isNeuralModelsPage = path.includes('neural-models');
+    // 如果还是没有，从 URL 中提取（兼容旧逻辑）
+    if (!currentAssetType && typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      const match = path.match(/\/[^/]+\/nav\/([^/]+)/);
+      const navId = match?.[1] ?? '';
+      currentAssetType = navId.includes(':') ? navId.split(':')[1] : navId;
+    }
 
-    return isInWhitelist || isNeuralModelsPage;
-  }, []);
+    // 调试日志
+    console.log('[Gallery Info Button Debug]', {
+      assetKey,
+      assetType,
+      currentAssetType,
+      whitelist: DETAIL_PAGE_WHITELIST,
+      isInWhitelist: currentAssetType ? DETAIL_PAGE_WHITELIST.includes(currentAssetType) : false,
+      url: typeof window !== 'undefined' ? window.location.pathname : '',
+    });
+
+    // 检查 assetType 是否在白名单中
+    return currentAssetType ? DETAIL_PAGE_WHITELIST.includes(currentAssetType) : false;
+  }, [assetType, assetKey]);
 
   return (
     <div

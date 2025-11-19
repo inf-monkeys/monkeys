@@ -537,6 +537,8 @@ export const UgcView = <E extends object>({
                           operateArea={operateArea}
                           onItemClick={onItemClick}
                           ugcOptions={ugcConfig}
+                          assetType={assetType}
+                          assetKey={assetKey}
                         />
                       ))}
                     </div>
