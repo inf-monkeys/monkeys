@@ -579,7 +579,20 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       // 构建输入参数对象
       const inputs: Record<string, any> = {};
       shape.props.inputParams.forEach((param) => {
-        inputs[param.name] = param.value;
+        let value: any = param.value;
+
+        // 与表单提交流程对齐：神经模型字段在提交前需要把 JSON 字符串解析为对象
+        // 参考：workspace/vines-view/form/tabular/render/index.tsx 中的处理逻辑
+        const assetType = (param.typeOptions as any)?.assetType;
+        if (assetType === 'neural-model' && typeof value === 'string' && value) {
+          try {
+            value = JSON.parse(value);
+          } catch (e) {
+            console.warn('[Workflow] Failed to parse neural model JSON for param', param.name, value, e);
+          }
+        }
+
+        inputs[param.name] = value;
       });
 
       console.log('[Workflow] 执行参数:', inputs);
