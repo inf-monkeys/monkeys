@@ -20,7 +20,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Virtualizer, VListHandle } from 'virtua';
+import { VListHandle } from 'virtua';
 
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { Button } from '@/components/ui/button';
@@ -60,7 +60,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   const collapsedViewportRef = useRef<HTMLDivElement | null>(null);
   const expandedViewportRef = useRef<HTMLDivElement | null>(null);
   const syncingRef = useRef(false);
-  const [expand, setExpand] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const ref = useRef<VListHandle>(null);
   const lastPageId = useRef<string>();
 
@@ -122,9 +122,17 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
     };
   }, []);
 
+  useEffect(() => {
+    if (expanded && expandedViewportRef.current) {
+      expandedViewportRef.current.scrollTop = collapsedViewportRef.current?.scrollTop ?? 0;
+    }
+  }, [expanded]);
+
   const syncScroll = (source: 'collapsed' | 'expanded') => (position: { x: number; y: number }) => {
+    console.log(source, position);
     if (syncingRef.current) return;
     const targetRef = source === 'collapsed' ? expandedViewportRef : collapsedViewportRef;
+    console.log(syncingRef.current, targetRef.current);
     if (!targetRef.current) return;
     syncingRef.current = true;
     targetRef.current.scrollTop = position.y;
@@ -137,8 +145,8 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
     <Tooltip>
       <TooltipTrigger>
         <Button
-          onClick={() => setExpand((s) => !s)}
-          icon={expand ? <Minimize2Icon /> : <Maximize2Icon />}
+          onClick={() => setExpanded((s) => !s)}
+          icon={expanded ? <Minimize2Icon /> : <Maximize2Icon />}
           size="icon"
           variant="ghost"
           theme="black"
@@ -162,20 +170,22 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
             className={'w-[calc(var(--operation-bar-width))] flex-1'}
             ref={collapsedViewportRef}
             style={{ height }}
+            scrollBarDisabled
             disabledOverflowMask
             onScroll={handleScroll}
+            onScrollPositionChange={syncScroll('collapsed')}
           >
             <SortableContext items={localData.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-              <Virtualizer ref={ref} scrollRef={collapsedViewportRef}>
-                {localData.map((it, i) => (
-                  <ViewItem
-                    key={it.id ?? i}
-                    page={it as IWorkbenchViewItemPage}
-                    onClick={onChildClick}
-                    onlyShowWorkbenchIcon={true}
-                  />
-                ))}
-              </Virtualizer>
+              {/* <Virtualizer ref={ref} scrollRef={collapsedViewportRef}> */}
+              {localData.map((it, i) => (
+                <ViewItem
+                  key={it.id ?? i}
+                  page={it as IWorkbenchViewItemPage}
+                  onClick={onChildClick}
+                  onlyShowWorkbenchIcon={true}
+                />
+              ))}
+              {/* </Virtualizer> */}
             </SortableContext>
           </ScrollArea>
         </DndContext>
@@ -184,7 +194,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
 
       {/* 悬浮层 */}
       <AnimatePresence>
-        {expand && (
+        {expanded && (
           <motion.div
             initial={{ opacity: 0, width: 64 }}
             animate={{ opacity: 1, width: 240 }}
@@ -206,7 +216,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
                         key={it.id ?? i}
                         page={it as IWorkbenchViewItemPage}
                         onClick={onChildClick}
-                        onlyShowWorkbenchIcon={!expand}
+                        onlyShowWorkbenchIcon={!expanded}
                       />
                     </motion.div>
                   ))}

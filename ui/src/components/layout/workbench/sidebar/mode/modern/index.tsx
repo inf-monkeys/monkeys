@@ -27,11 +27,6 @@ import { GlobalDesignBoardOperationBarArea } from '@/components/ui/vines-iframe/
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
-import {
-  useOnlyShowWorkbenchIcon,
-  useSetOnlyShowWorkbenchIcon,
-  useToggleOnlyShowWorkbenchIcon,
-} from '@/store/showWorkbenchIcon';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { DesignBoardProvider } from '@/store/useDesignBoardStore';
@@ -61,8 +56,6 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
   const navigate = useNavigate();
 
   const { data: oem, isLoading: isOemLoading } = useSystemConfig();
-
-  const workbenchSidebarDefaultOpen = oem?.theme.workbenchSidebarDefaultOpen ?? true;
 
   const extraWorkbenchPages = get(oem, ['theme', 'workbench', 'pages'], []) as IPinPage[];
   const extraWorkbenchPageGroups = get(oem, ['theme', 'workbench', 'pageGroups'], []) as IPageGroup[];
@@ -117,8 +110,6 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
   const toggleToActivePageRef = useRef(activePage || workflowExecution ? false : null);
 
   const currentPage = useCurrentPage();
-
-  console.log(currentPage);
 
   const setCurrentPage = useSetCurrentPage();
   useEffect(() => {
@@ -263,19 +254,7 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
     { wait: 64 },
   );
 
-  const toggleOnlyShowWorkbenchIcon = useToggleOnlyShowWorkbenchIcon();
-  const setOnlyShowWorkbenchIcon = useSetOnlyShowWorkbenchIcon();
-
-  useEffect(() => {
-    if (activePageFromWorkflowDisplayName) {
-      setOnlyShowWorkbenchIcon(true);
-      return;
-    }
-    setOnlyShowWorkbenchIcon(!workbenchSidebarDefaultOpen);
-  }, [workbenchSidebarDefaultOpen, activePageFromWorkflowDisplayName]);
-
   const hasGroups = lists.length && !isLoading;
-  const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const onPageClick = useCallback(
     (page: IWorkbenchViewItemPage) => {
       startTransition(() => {
@@ -289,12 +268,6 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
     },
     [teamId, groupId, setCurrentPage, oem],
   );
-
-  useEffect(() => {
-    if (globalViewSize === 'sm') {
-      setOnlyShowWorkbenchIcon(true);
-    }
-  }, [globalViewSize]);
 
   const onPageGroupReorder = (
     newData: (Omit<IPageGroup, 'pageIds'> & {

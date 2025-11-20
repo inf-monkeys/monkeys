@@ -48,8 +48,8 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         {...(isGlobalItem ? {} : listeners)}
         key={pageId}
         className={cn(
-          'z-10 mb-global-1/2 flex cursor-pointer items-center gap-global-1/2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-          isActive && 'group bg-[#f2f3f4] text-accent-foreground dark:bg-[#393939]',
+          'group z-10 mb-global-1/2 flex cursor-pointer items-center gap-global-1/2 rounded-md bg-[#f2f3f4] transition-colors hover:bg-[#e2e8f0] hover:text-accent-foreground dark:bg-[#38393a] dark:hover:bg-[#32373d]',
+          isActive && 'bg-[#f1f5f9] text-accent-foreground dark:bg-[#000000]',
           isDragging && 'opacity-50',
         )}
         onClick={() => onClick?.(page)}
