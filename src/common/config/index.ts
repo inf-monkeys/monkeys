@@ -555,6 +555,17 @@ export interface EvaluationConfig {
   defaultLlmEvaluatorModel: string;
 }
 
+export type TelemetryConfig = {
+  enabled: boolean;
+  appDeployment?: string;
+  appGroup?: string;
+  appName?: string;
+  appOwnerTeam?: string;
+  functionGroup?: string;
+  loggingServiceUrl?: string;
+  loggingApiKey?: string;
+};
+
 export interface AgentV2Config {
   // OpenAI Compatible API configuration
   openaiCompatible: {
@@ -627,6 +638,7 @@ export interface Config {
   agentv2: AgentV2Config;
   agentv3: AgentV3Config;
   modelTraining: ModelTrainingConfig;
+  telemetry: TelemetryConfig;
 }
 
 const rawS3ThumbnailBuckets = readConfig('s3-thumb-buckets', []);
@@ -992,6 +1004,16 @@ When answer to user:
   },
   modelTraining: {
     endpoint: readConfig('models-training.endpoint', 'http://localhost:30025'),
+  },
+  telemetry: {
+    enabled: readConfig('telemetry.enabled', false),
+    appDeployment: readConfig('telemetry.appDeployment', ''),
+    appGroup: readConfig('telemetry.appGroup', ''),
+    appName: readConfig('telemetry.appName', ''),
+    appOwnerTeam: readConfig('telemetry.appOwnerTeam', ''),
+    functionGroup: readConfig('telemetry.functionGroup', 'workflow'),
+    loggingServiceUrl: readConfig('telemetry.loggingServiceUrl', ''),
+    loggingApiKey: readConfig('telemetry.loggingApiKey', ''),
   },
 };
 
