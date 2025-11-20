@@ -17,13 +17,14 @@ export type IVinesIconSize = 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' |
 
 export interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
   src?: string;
-  backgroundColor?: string;
   size?: IVinesIconSize;
   alt?: string;
   disabledPreview?: boolean;
   fallbackColor?: string;
   active?: boolean;
   showBackground?: boolean;
+  backgroundColor?: string;
+  backgroundClass?: string;
 }
 
 export const VinesIcon: React.FC<IVinesIconProps> = ({
@@ -37,6 +38,8 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
   fallbackColor,
   active,
   showBackground = true,
+  backgroundColor: propBackgroundColor,
+  backgroundClass,
 }) => {
   const src = (propSrc ?? children ?? '').toString().trim();
 
@@ -98,8 +101,8 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
         <div className="h-full w-full" />
       ) : (
         <div
-          className="flex h-full w-full items-center justify-center"
-          style={showBackground ? { backgroundColor } : {}}
+          className={cn('flex h-full w-full items-center justify-center', backgroundClass)}
+          style={showBackground ? { backgroundColor: propBackgroundColor || backgroundColor } : {}}
         >
           {iconType === 'img' && <VinesImage src={src} alt={alt} disabled={disabledPreview} />}
           {iconType === 'emoji' && emojiRenderer(text, { protocol: 'https', ext: '.png' })}

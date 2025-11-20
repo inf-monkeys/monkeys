@@ -210,6 +210,7 @@ export interface ServerConfig {
     workbenchSidebarToggleGroupDetail: boolean;
     workbenchSidebarViewType: boolean;
     workbenchSidebarFormViewEmbed: boolean;
+    workbenchSidebarModernMode: boolean;
     ugc: CustomizationUgc;
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
@@ -715,6 +716,7 @@ export const config: Config = {
       workbenchSidebarToggleGroupDetail: readConfig('server.customization.workbenchSidebarToggleGroupDetail', true),
       workbenchSidebarViewType: readConfig('server.customization.workbenchSidebarViewType', true),
       workbenchSidebarFormViewEmbed: readConfig('server.customization.workbenchSidebarFormViewEmbed', false),
+      workbenchSidebarModernMode: readConfig('server.customization.workbenchSidebarModernMode', false),
       ugc: {
         onItemClick: readConfig('server.customization.ugc.onItemClick', true),
         subtitle: readConfig('server.customization.ugc.subtitle', true),
