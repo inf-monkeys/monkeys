@@ -554,10 +554,14 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   };
 
   useEffect(() => {
-    if (operation === 'insert-images' && tid && editor) {
-      void handleInsertImages(operation, tid);
+    if (operation === 'insert-images' && tid && editor && designBoardId) {
+      // 验证当前画板是否属于目标设计项目
+      const isBoardMatchProject = metadata?.designProjectId === designProjectId;
+      if (isBoardMatchProject) {
+        void handleInsertImages(operation, tid);
+      }
     }
-  }, [operation, tid, editor]);
+  }, [operation, tid, editor, designBoardId, designProjectId, metadata]);
 
   const handleEventExport = useMemoizedFn((boardId?: string) => {
     if (boardId !== designBoardId) return;

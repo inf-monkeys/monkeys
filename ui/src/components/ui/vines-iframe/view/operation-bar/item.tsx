@@ -118,6 +118,7 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
             startTransition(() => {
               setCurrentPage({ [teamId]: { ...GLOBAL_DESIGN_BOARD_PAGE, groupId: 'global-design-board' } });
             });
+
             navigate({
               to: '/$teamId',
               params: {
@@ -132,7 +133,6 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
                 operation: 'insert-images',
                 tid,
                 designProjectId: designProject.id,
-                // activePageFromType: 'global-design-board',
               },
             });
             return t('common.create.success');
