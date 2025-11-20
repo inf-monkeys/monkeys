@@ -240,11 +240,12 @@ export const UgcView = <E extends object>({
   });
 
   // 获取所有数据用于文件夹视图
+  // 注意：文件夹视图需要所有数据，不应受筛选条件影响，只保留搜索条件
   const { data: allDataRaw } = useUgcFetcher({
     page: 1,
     limit: 100000, // 获取大量数据
     search: search || undefined,
-    filter,
+    filter: {}, // 文件夹视图不使用筛选条件，以获取所有数据
     orderBy: sortCondition.orderBy,
     orderColumn: sortCondition.orderColumn,
   });
