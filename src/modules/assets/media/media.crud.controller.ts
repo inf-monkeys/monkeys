@@ -66,10 +66,10 @@ export class MediaFileCrudController {
 
   @Put(':id')
   @ApiOperation({
-    summary: '更新媒体文件',
-    description: '更新媒体文件的信息，如缩略图、显示名称等',
+    summary: '更新设计资产信息',
+    description: '更新设计资产（媒体文件）的信息，如缩略图、显示名称、描述等',
   })
-  public async updateMedia(@Req() request: IRequest, @Param('id') id: string, @Body() updateDto: UpdateMediaDto) {
+  public async updateDesignAsset(@Req() request: IRequest, @Param('id') id: string, @Body() updateDto: UpdateMediaDto) {
     const { teamId } = request;
 
     // 验证媒体文件是否存在且属于当前团队
@@ -78,7 +78,7 @@ export class MediaFileCrudController {
       throw new NotFoundException('Media file not found or access denied');
     }
 
-    const updatedMedia = await this.service.updateMedia(id, teamId, updateDto);
+    const updatedMedia = await this.service.updateDesignAsset(id, teamId, updateDto);
     return new SuccessResponse({ data: updatedMedia });
   }
 

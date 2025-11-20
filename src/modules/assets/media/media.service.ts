@@ -57,7 +57,7 @@ export class MediaFileService {
     return data;
   }
 
-  public async updateMedia(id: string, teamId: string, updates: { iconUrl?: string; displayName?: string; description?: string; params?: any }) {
+  public async updateDesignAsset(id: string, teamId: string, updates: { iconUrl?: string; displayName?: string; description?: string; params?: any }) {
     return await this.mediaRepository.updateMedia(id, teamId, updates);
   }
 
@@ -204,7 +204,7 @@ export class MediaFileService {
     }
 
     // 更新媒体文件描述
-    await this.updateMedia(mediaId, teamId, {
+    await this.updateDesignAsset(mediaId, teamId, {
       description: generatedDescription,
     });
 
@@ -254,7 +254,7 @@ export class MediaFileService {
     };
 
     // 更新媒体文件，将 markdown 存储在 params 中
-    await this.updateMedia(mediaId, teamId, {
+    await this.updateDesignAsset(mediaId, teamId, {
       params: updatedParams,
     });
 
@@ -539,7 +539,7 @@ export class MediaFileService {
     };
 
     // 更新媒体文件，将 markdown 存储在 params 中
-    await this.updateMedia(mediaId, teamId, {
+    await this.updateDesignAsset(mediaId, teamId, {
       params: updatedParams,
     });
 
