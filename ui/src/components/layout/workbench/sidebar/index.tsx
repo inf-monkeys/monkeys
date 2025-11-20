@@ -23,7 +23,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({
 
   const showSidebarTeamSelector = oem?.theme.showSidebarTeamSelector ?? false;
 
-  const modern = oem?.theme.workbenchSidebarModernMode ?? false;
+  const modern = true;
 
   if (mode === 'mini') {
     return <WorkbenchMiniModeSidebar />;

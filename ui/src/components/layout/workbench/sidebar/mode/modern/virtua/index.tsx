@@ -108,7 +108,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
     timeoutId = setTimeout(() => ref.current?.scrollToIndex(index, { smooth: true, offset: -40 }), 100);
   }, [currentGroupId, currentPageId, localData]);
 
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+  const handleScroll = useCallback(() => {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
@@ -129,17 +129,15 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   }, [expanded]);
 
   const syncScroll = (source: 'collapsed' | 'expanded') => (position: { x: number; y: number }) => {
-    console.log(source, position);
     if (syncingRef.current) return;
     const targetRef = source === 'collapsed' ? expandedViewportRef : collapsedViewportRef;
-    console.log(syncingRef.current, targetRef.current);
     if (!targetRef.current) return;
     syncingRef.current = true;
     targetRef.current.scrollTop = position.y;
     syncingRef.current = false;
   };
 
-  const expandButtonMl = 'ml-[0.25rem]';
+  const expandButtonM = 'ml-[0.25rem]';
 
   const ToggleButton = (
     <Tooltip>
@@ -189,17 +187,24 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
             </SortableContext>
           </ScrollArea>
         </DndContext>
-        <div className={expandButtonMl}>{ToggleButton}</div>
+        <div className={expandButtonM}>{ToggleButton}</div>
       </div>
 
       {/* 悬浮层 */}
       <AnimatePresence>
         {expanded && (
           <motion.div
-            initial={{ opacity: 0, width: 64 }}
-            animate={{ opacity: 1, width: 240 }}
-            exit={{ opacity: 0, width: 64 }}
-            transition={{ duration: 0.2 }}
+            variants={{
+              visible: { opacity: 1, width: 240 },
+              hidden: { opacity: 0, width: 64 },
+            }}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            transition={{
+              visible: { duration: 0.2 },
+              hidden: { duration: 0 },
+            }}
             className="absolute left-0 top-0 z-50 h-full overflow-hidden rounded-lg border-r bg-slate-1 shadow-xl"
           >
             <div className="flex h-full flex-col p-global-1/2">
@@ -216,14 +221,14 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
                         key={it.id ?? i}
                         page={it as IWorkbenchViewItemPage}
                         onClick={onChildClick}
-                        onlyShowWorkbenchIcon={!expanded}
+                        onlyShowWorkbenchIcon={false}
                       />
                     </motion.div>
                   ))}
                 </div>
               </ScrollArea>
 
-              <div className={expandButtonMl}>{ToggleButton}</div>
+              <div className={expandButtonM}>{ToggleButton}</div>
             </div>
           </motion.div>
         )}
