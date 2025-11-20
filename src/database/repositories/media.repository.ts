@@ -5,7 +5,7 @@ import { MediaSource } from '@/database/entities/assets/media/media-file';
 import { CreateRichMediaDto } from '@/modules/assets/media/dto/req/create-rich-media.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, Like, Not, Raw, Repository } from 'typeorm';
+import { In, Like, Raw, Repository } from 'typeorm';
 import { MediaFileEntity } from '../entities/assets/media/media-file';
 import { MediaFileAssetRepositroy } from './assets-media-file.repository';
 
@@ -253,5 +253,176 @@ export class MediaFileRepository {
         updatedTimestamp: Date.now(),
       });
     }
+  }
+
+  /**
+   * 获取文件夹视图数据，每个分组返回4张预览图
+   */
+  public async listRichMediasForFolderView(teamId: string, search?: string) {
+    // 获取所有筛选规则
+    const assetCommonRepository = this.mediaFileAssetRepositroy.assetCommonRepository;
+    const filters = await assetCommonRepository.listFilters(teamId, 'media-file');
+
+    // 获取预览图的辅助函数
+    const getPreviewUrl = (item: any): string => {
+      // 优先使用 iconUrl（缩略图）
+      if (item?.iconUrl) {
+        return item.iconUrl;
+      }
+
+      // 先检查文件类型
+      const type = (item?.type || item?.mimeType || '') as string;
+      const isImage = typeof type === 'string' && type.startsWith('image/');
+
+      // 如果是图片类型，使用URL
+      if (isImage) {
+        const url = item && (item.url || item.cover || item.thumbnail);
+        if (url) {
+          return url;
+        }
+      }
+
+      // 如果不是图片类型，使用文件夹图标作为回退图标
+      if (!isImage) {
+        return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMyIgaGVpZ2h0PSIzIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0zIDVWOVYxOUMzIDE5LjU1MjMgMy40NDc3IDIwIDQgMjBIMjBDMjAuNTUyMyAyMCAyMSAxOS41NTIzIDIxIDE5VjlDMjEgOC40NDc3MiAyMC41NTIzIDggMjAgOEgxMkwxMCA2SDRDMy40NDc3MiA2IDMgNS40NDc3MiAzIDVaIiBmaWxsPSIjNjM2NkYxIi8+Cjwvc3ZnPg==';
+      }
+
+      return '';
+    };
+
+    // 判断是否置顶
+    const isPinned = (item: any): boolean => {
+      return (item?.sort ?? 0) > 0;
+    };
+
+    // 选择预览图（最多4张）
+    const pickPreviewImages = (items: any[]): string[] => {
+      // 分类文件：置顶文件、图片文件、其他文件
+      const pinnedItems = items.filter((it) => isPinned(it));
+      const imageItems = items.filter((it) => {
+        const type = (it?.type || it?.mimeType || '') as string;
+        return typeof type === 'string' && type.startsWith('image/') && !isPinned(it);
+      });
+      const otherItems = items.filter((it) => {
+        const type = (it?.type || it?.mimeType || '') as string;
+        return !(typeof type === 'string' && type.startsWith('image/')) && !isPinned(it);
+      });
+
+      // 优先级：置顶文件 > 图片文件 > 其他文件
+      const candidates = [...pinnedItems, ...imageItems, ...otherItems];
+
+      return candidates
+        .slice(0, 4)
+        .map((it) => getPreviewUrl(it))
+        .filter(Boolean);
+    };
+
+    // 选择预览资产（最多4个）
+    const pickPreviewAssets = (items: any[]): any[] => {
+      // 分类文件：置顶文件、图片文件、其他文件
+      const pinnedItems = items.filter((it) => isPinned(it));
+      const imageItems = items.filter((it) => {
+        const type = (it?.type || it?.mimeType || '') as string;
+        return typeof type === 'string' && type.startsWith('image/') && !isPinned(it);
+      });
+      const otherItems = items.filter((it) => {
+        const type = (it?.type || it?.mimeType || '') as string;
+        return !(typeof type === 'string' && type.startsWith('image/')) && !isPinned(it);
+      });
+
+      // 优先级：置顶文件 > 图片文件 > 其他文件
+      const candidates = [...pinnedItems, ...imageItems, ...otherItems];
+
+      return candidates.slice(0, 4);
+    };
+
+    const folders: Array<{
+      id: string;
+      name: string;
+      assetCount: number;
+      lastUpdated: string;
+      previewImages: string[];
+      previewAssets: any[];
+      filterRules: any;
+    }> = [];
+
+    const usedIds = new Set<string>();
+
+    // 遍历每个筛选规则
+    for (const rule of filters) {
+      const filterRules = rule.rules || {};
+
+      // 查询匹配的资产（只获取前100个用于预览图选择）
+      const { list: items } = await this.mediaFileAssetRepositroy.listAssets(
+        'media-file',
+        teamId,
+        {
+          page: 1,
+          limit: 100, // 只获取前100个用于选择预览图
+          search: search || undefined,
+          filter: filterRules,
+          orderBy: 'DESC',
+          orderColumn: 'createdTimestamp',
+        },
+        {
+          withTags: true,
+          withTeam: true,
+          withUser: true,
+        },
+      );
+
+      // 过滤掉已被其他规则使用的文件
+      const filteredItems = items.filter((item) => {
+        if (usedIds.has(item.id)) {
+          return false;
+        }
+        usedIds.add(item.id);
+        return true;
+      });
+
+      // 获取总数（用于显示资产数量）
+      // 注意：这里获取的是原始总数，不考虑去重，因为去重需要查询所有数据，性能较差
+      // 实际显示的数量可能会因为去重而略少，但这是可接受的性能权衡
+      const { totalCount: rawTotalCount } = await this.mediaFileAssetRepositroy.listAssets(
+        'media-file',
+        teamId,
+        {
+          page: 1,
+          limit: 1,
+          search: search || undefined,
+          filter: filterRules,
+          orderBy: 'DESC',
+          orderColumn: 'createdTimestamp',
+        },
+        {
+          withTags: true,
+          withTeam: true,
+          withUser: true,
+        },
+      );
+
+      // 预处理数据
+      await this.preprocess(filteredItems);
+
+      // 选择预览图
+      const previewImages = pickPreviewImages(filteredItems);
+      const previewAssets = pickPreviewAssets(filteredItems);
+
+      // 计算最后更新时间
+      const lastUpdatedTime = filteredItems.length > 0 ? Math.max(...filteredItems.map((item) => item.updatedTimestamp || 0)) : 0;
+      const lastUpdatedText = lastUpdatedTime > 0 ? new Date(lastUpdatedTime).toLocaleDateString('zh-CN') : '无';
+
+      folders.push({
+        id: rule.id,
+        name: rule.name || '未命名分组',
+        assetCount: rawTotalCount,
+        lastUpdated: lastUpdatedText,
+        previewImages,
+        previewAssets,
+        filterRules,
+      });
+    }
+
+    return folders;
   }
 }

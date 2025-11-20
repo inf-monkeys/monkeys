@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useSystemConfig } from '@/apis/common';
 import { CustomizationUgc } from '@/apis/common/typings';
 import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
-import { useAssetFilterRuleList } from '@/apis/ugc';
+import { useAssetFilterRuleList, useUgcMediaDataForFolderView, IFolderViewData } from '@/apis/ugc';
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import {
@@ -241,6 +241,10 @@ export const UgcView = <E extends object>({
 
   // 获取所有数据用于文件夹视图
   // 注意：文件夹视图需要所有数据，不应受筛选条件影响，只保留搜索条件
+  // 对于媒体文件，使用新的API接口直接获取分组数据
+  const isMediaFile = assetKey === 'media-data' || assetType === 'media-file';
+  const { data: folderViewData } = useUgcMediaDataForFolderView(isMediaFile ? search : undefined);
+  
   const { data: allDataRaw } = useUgcFetcher({
     page: 1,
     limit: 100000, // 获取大量数据
@@ -458,6 +462,7 @@ export const UgcView = <E extends object>({
                   filter={filter}
                   assetFilterRules={assetFilterRules || []}
                   onFolderClick={handleFolderClick}
+                  folderViewData={isMediaFile ? folderViewData : undefined}
                 />
               ) : rows.length === 0 ? (
                 !isLoading && (

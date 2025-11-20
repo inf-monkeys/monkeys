@@ -26,6 +26,10 @@ export class MediaFileService {
     return await this.mediaRepository.listRichMedias(teamId, dto, excludeIds, filterNeuralModel);
   }
 
+  public async listRichMediasForFolderView(teamId: string, search?: string) {
+    return await this.mediaRepository.listRichMediasForFolderView(teamId, search);
+  }
+
   public async deleteMedia(teamId: string, id: string) {
     return await this.mediaRepository.deleteMedia(teamId, id);
   }

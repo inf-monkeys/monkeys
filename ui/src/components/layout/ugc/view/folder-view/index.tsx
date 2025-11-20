@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { IAssetItem, IListUgcDto } from '@/apis/ugc/typings.ts';
+import { IFolderViewData } from '@/apis/ugc';
 import { UgcViewFolderCard } from '@/components/layout/ugc/view/folder';
 
 interface IFolderData {
@@ -20,6 +21,7 @@ interface IFolderViewProps<E extends object> {
   currentRuleId?: string; // 添加当前规则ID
   assetFilterRules?: any[]; // 添加筛选规则列表
   onFolderClick?: (folderId: string, folderFilter: Partial<IListUgcDto['filter']>) => void;
+  folderViewData?: IFolderViewData[]; // 后端返回的文件夹视图数据
 }
 
 export const UgcViewFolderView = <E extends object>({
@@ -28,9 +30,24 @@ export const UgcViewFolderView = <E extends object>({
   currentRuleId,
   assetFilterRules = [],
   onFolderClick,
+  folderViewData,
 }: IFolderViewProps<E>) => {
   // 生成文件夹数据
   const generateFolderData = useMemo((): IFolderData[] => {
+    // 如果提供了后端返回的文件夹视图数据，直接使用
+    if (folderViewData && folderViewData.length > 0) {
+      return folderViewData.map((folder) => ({
+        id: folder.id,
+        name: folder.name,
+        assetCount: folder.assetCount,
+        lastUpdated: folder.lastUpdated,
+        previewImages: folder.previewImages,
+        previewAssets: folder.previewAssets,
+        filterRules: folder.filterRules,
+      }));
+    }
+
+    // 否则使用原来的逻辑（前端计算）
     const folders: IFolderData[] = [];
 
     const hasSpecificFilter =
@@ -224,7 +241,7 @@ export const UgcViewFolderView = <E extends object>({
     }
 
     return folders;
-  }, [allData, filter, currentRuleId, assetFilterRules]);
+  }, [allData, filter, currentRuleId, assetFilterRules, folderViewData]);
 
   return (
     <div className="grid w-full grid-cols-1 gap-6 overflow-y-auto lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">

@@ -268,6 +268,21 @@ export const preloadUgcMediaData = (dto: IListUgcDto, filterNeuralModel?: 'only'
 export const useUgcMediaDataById = (assetId: string) =>
   useSWR<IAssetItem<IMediaData> | undefined>(assetId ? `/api/media-files/${assetId}` : null, vinesFetcher());
 
+export interface IFolderViewData {
+  id: string;
+  name: string;
+  assetCount: number;
+  lastUpdated: string;
+  previewImages: string[];
+  previewAssets: any[];
+  filterRules: Partial<IListUgcDto['filter']>;
+}
+
+export const useUgcMediaDataForFolderView = (search?: string) => {
+  const url = search ? `/api/media-files/folder-view?search=${encodeURIComponent(search)}` : '/api/media-files/folder-view';
+  return useSWR<IFolderViewData[] | undefined>(url, vinesFetcher());
+};
+
 export const useUgcApplicationStore = (dto: IListUgcDto) =>
   useUgcItems<IApplicationStoreItemDetail>(dto, '/api/assets/workflow/marketplace');
 export const preloadUgcApplicationStore = (dto: IListUgcDto) =>
