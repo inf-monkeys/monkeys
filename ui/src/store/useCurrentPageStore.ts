@@ -6,12 +6,16 @@ import { IPinPage } from '@/apis/pages/typings';
 interface ICurrentPageStore {
   currentPage: Partial<IPinPage>;
   setCurrentPage: (page: Partial<IPinPage>) => void;
+  currentGroupId: string;
+  setCurrentGroupId: (groupId: string) => void;
 }
 export const useCurrentPageStore = create<ICurrentPageStore>()(
   persist(
     (set) => ({
       currentPage: {},
       setCurrentPage: (page) => set({ currentPage: page }),
+      currentGroupId: 'default',
+      setCurrentGroupId: (groupId) => set({ currentGroupId: groupId }),
     }),
     {
       name: 'vines-ui-workbench-zustand-page',
@@ -25,4 +29,12 @@ export const useCurrentPage = () => {
 
 export const useSetCurrentPage = () => {
   return useCurrentPageStore((store) => store.setCurrentPage);
+};
+
+export const useCurrentGroupId = () => {
+  return useCurrentPageStore((store) => store.currentGroupId);
+};
+
+export const useSetCurrentGroupId = () => {
+  return useCurrentPageStore((store) => store.setCurrentGroupId);
 };

@@ -21,7 +21,7 @@ import { InitTeamButton } from '@/components/ui/init-team-button';
 import { VinesLoading } from '@/components/ui/loading';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
-import { useCurrentPage } from '@/store/useCurrentPageStore';
+import { useCurrentGroupId, useCurrentPage } from '@/store/useCurrentPageStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn, getI18nContent } from '@/utils';
 
@@ -50,6 +50,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const { teamId } = useVinesTeam();
   // const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
   const page = useCurrentPage();
+  const currentGroupId = useCurrentGroupId();
 
   const hasPages = (pages?.length ?? 0) > 0;
 
@@ -91,6 +92,23 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
     }
   }, [teamPage]);
 
+  // 计算 workspaceName：根据当前选中的分组名，否则用页面名
+  const workspaceName = React.useMemo(() => {
+    if (!teamPage?.id || !data?.groups || !currentGroupId) return undefined;
+    // 首先尝试从当前选中的组ID中获取组
+    const targetGroup = data.groups.find((g: any) => g.id === currentGroupId && g.pageIds?.includes(teamPage.id));
+    if (targetGroup?.displayName) {
+      return getI18nContent(targetGroup.displayName) || undefined;
+    }
+    // 如果当前组不包含该页面，则寻找任何包含该页面的组
+    const fallbackGroup = data.groups.find((g: any) => g.pageIds?.includes(teamPage.id));
+    if (fallbackGroup?.displayName) {
+      return getI18nContent(fallbackGroup.displayName) || undefined;
+    }
+    // 如果找不到分组，就用页面名
+    return getI18nContent(teamPage?.displayName) || undefined;
+  }, [teamPage?.id, teamPage?.displayName, data?.groups, currentGroupId]);
+
   return (
     <div
       ref={ref}
@@ -124,7 +142,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
             >
               {/*{mode !== 'mini' && <WorkbenchViewHeader page={teamPage} groupId={groupId} />}*/}
               <div className={cn('relative size-full overflow-hidden')}>
-                <VinesIFrame from="workbench" pages={pages ?? []} page={teamPage} />
+                <VinesIFrame from="workbench" pages={pages ?? []} page={teamPage} workspaceName={workspaceName} />
               </div>
             </motion.div>
           )

@@ -17,6 +17,7 @@ import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useMaskEditorStore } from '@/store/maskEditorStore';
 import { useExecutionStore } from '@/store/useExecutionStore';
+import { useViewStoreOptional } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
 interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -53,6 +54,11 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
 
   const { vines } = useVinesFlow();
 
+  // 从 ViewStore 读取 workspaceName（由 VinesIFrame 设置）
+  // 使用 useViewStore 的可选形式，如果不在 Provider 内返回 undefined
+  const workspaceName = useViewStoreOptional((s) => s?.workspaceName);
+  const from = useViewStoreOptional((s) => s?.from);
+
   const tabular$ = useEventEmitter<TTabularEvent>();
 
   // 暴露 tabular$ 给外部组件
@@ -64,6 +70,21 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   const openAIInterfaceEnabled = useOpenAIInterface.enable;
 
   const isInputNotEmpty = vines.workflowInput.length > 0;
+
+  // 仅当在 workbench 且有 workspaceName 时才附加遥测
+  const shouldAttachTelemetry = from === 'workbench' && Boolean(workspaceName);
+
+  React.useEffect(() => {
+    if (shouldAttachTelemetry) {
+      vines.setDefaultTelemetryContext({
+        enabled: true,
+        workspaceName,
+      });
+    } else {
+      // 清除默认遥测上下文
+      vines.setDefaultTelemetryContext(undefined);
+    }
+  }, [shouldAttachTelemetry, workspaceName, vines]);
 
   // 获取遮罩编辑器状态
   const { isEditorOpen } = useMaskEditorStore();
@@ -95,7 +116,16 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
 
     const runTask = async () => {
       try {
-        const instanceId = await vines.start({ inputData, onlyStart: true });
+        const telemetryContext = shouldAttachTelemetry
+          ? {
+              enabled: true,
+              workspaceName,
+            }
+          : undefined;
+        if (telemetryContext) {
+          vines.setNextTelemetryContext(telemetryContext);
+        }
+        const instanceId = await vines.start({ inputData, onlyStart: true, telemetry: telemetryContext });
         if (instanceId) {
           // 触发创建占位图事件
           if (appInfo) {

@@ -28,7 +28,7 @@ import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
-import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
+import { useCurrentPage, useSetCurrentGroupId, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { DesignBoardProvider } from '@/store/useDesignBoardStore';
 import { getGlobalDesignBoardStore } from '@/store/useDesignBoardStore/shared';
 import { createExecutionStore, ExecutionStoreProvider } from '@/store/useExecutionStore';
@@ -112,6 +112,13 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
   const currentPage = useCurrentPage();
 
   const setCurrentPage = useSetCurrentPage();
+  const setCurrentGroupId = useSetCurrentGroupId();
+
+  // Sync groupId to global store
+  useEffect(() => {
+    setCurrentGroupId(groupId);
+  }, [groupId, setCurrentGroupId]);
+
   useEffect(() => {
     if (!teamId) return;
     const currentTeamPage = currentPage?.[teamId];

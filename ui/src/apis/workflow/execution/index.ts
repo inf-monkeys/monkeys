@@ -25,11 +25,13 @@ export const executionWorkflow = (
   version = 1,
   chatSessionId?: string,
   extraMetadata?: string,
+  headers?: HeadersInit,
 ) =>
   vinesFetcher<string>({
     method: 'POST',
     simple: true,
     wrapper: (it) => (it as unknown as { workflowInstanceId: string })?.workflowInstanceId ?? '',
+    ...(headers ? { fetchOptions: { headers } } : {}),
   })(`/api/workflow/executions/${workflowId}/start`, {
     inputData,
     version,
@@ -41,10 +43,12 @@ export const executionWorkflowWithDebug = (
   workflowId: string,
   inputData: Record<string, unknown>,
   tasks: VinesTask[],
+  headers?: HeadersInit,
 ) =>
   vinesFetcher<string>({
     method: 'POST',
     simple: true,
+    ...(headers ? { fetchOptions: { headers } } : {}),
   })(`/api/workflow/executions/${workflowId}/debug`, {
     inputData,
     tasks,

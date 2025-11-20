@@ -40,7 +40,18 @@ export interface IVinesFlowRunParams {
   onlyStart?: boolean;
   tasks?: MonkeyTaskDefTypes[];
   extraMetadata?: string;
+  telemetry?: {
+    enabled?: boolean;
+    workspaceName?: string;
+  };
 }
+
+export type VinesTelemetryContext =
+  | {
+      enabled?: boolean;
+      workspaceName?: string;
+    }
+  | undefined;
 
 export type VinesWorkflowExecutionType =
   | 'SCHEDULED' // Vines 内置状态
