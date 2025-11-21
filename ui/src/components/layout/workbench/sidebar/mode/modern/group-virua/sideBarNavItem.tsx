@@ -6,7 +6,7 @@ import { get } from 'lodash';
 import { LucideIcon } from 'lucide-react';
 
 import { useSystemConfig } from '@/apis/common';
-import { WorkbenchViewItemCurrentData } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
+import { WorkbenchViewItemCurrentData } from '@/components/layout/workbench/sidebar/mode/modern/virtua/item.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn, getI18nContent } from '@/utils';
@@ -55,7 +55,7 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
         onlyShowWorkbenchIcon
           ? 'flex size-[var(--operation-bar-width)] items-center justify-center'
           : 'mb-global-1/2 flex w-full shrink-0 items-center justify-start gap-global-1/2 px-global-1/2',
-        isActive && cn('group border border-input text-accent-foreground dark:bg-[#393939]', backgroundClass),
+        isActive && cn('group text-accent-foreground dark:bg-[#393939]', backgroundClass),
       )}
       {...attr}
     >
@@ -85,7 +85,7 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
   return onlyShowWorkbenchIcon ? (
     <Tooltip>
       <TooltipTrigger>{child}</TooltipTrigger>
-      <TooltipContent>{getI18nContent(displayName)}</TooltipContent>
+      <TooltipContent side="right">{getI18nContent(displayName)}</TooltipContent>
     </Tooltip>
   ) : (
     child

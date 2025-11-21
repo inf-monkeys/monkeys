@@ -5,41 +5,28 @@ import { useNavigate } from '@tanstack/react-router';
 import { useEventEmitter, useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence } from 'framer-motion';
 import { get, keyBy } from 'lodash';
-import { CircleSlash, Maximize2Icon, Minimize2Icon } from 'lucide-react';
+import { CircleSlash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
-import { CustomizationFormView, ISystemConfig } from '@/apis/common/typings';
+import { CustomizationFormView } from '@/apis/common/typings';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
-import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
+import {
+  GLOBAL_DESIGN_BOARD_PAGE,
+  GLOBAL_DESIGN_BOARD_PAGE_GROUP,
+} from '@/components/layout/workbench/sidebar/mode/normal/consts';
 import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog.tsx';
-import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { GlobalDesignBoardOperationBarArea } from '@/components/ui/vines-iframe/view/global-design-board-operation-bar/area';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
-import {
-  useOnlyShowWorkbenchIcon,
-  useSetOnlyShowWorkbenchIcon,
-  useToggleOnlyShowWorkbenchIcon,
-} from '@/store/showWorkbenchIcon';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { useCurrentPage, useSetCurrentGroupId, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { DesignBoardProvider } from '@/store/useDesignBoardStore';
@@ -50,41 +37,25 @@ import { useGlobalViewSize, useSetEmbedSidebar } from '@/store/useGlobalViewStor
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cloneDeep, cn, getI18nContent } from '@/utils';
 
-import { GLOBAL_DESIGN_BOARD_PAGE, GLOBAL_DESIGN_BOARD_PAGE_GROUP } from './consts';
 import { WorkbenchSidebarNormalModeEmbedContent } from './embed-content';
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
+import { VirtuaWorkbenchViewList } from './virtua';
 import { IWorkbenchViewItemPage, WorkbenchViewItemCurrentData } from './virtua/item';
 
 const EMBED_TYPE_LIST = ['preview', 'global-design-board'];
 
-interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
-  showGroup?: boolean;
+interface IWorkbenchModernModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   collapsed?: boolean;
 }
 
-export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarProps> = ({
-  showGroup = true,
-  collapsed = false,
-}) => {
-  const { t, i18n } = useTranslation();
+export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarProps> = ({ collapsed = false }) => {
+  const { t } = useTranslation();
 
   const { teamId } = useVinesTeam();
 
   const navigate = useNavigate();
 
   const { data: oem, isLoading: isOemLoading } = useSystemConfig();
-
-  const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
-
-  const workbenchSidebarApart = get(oem, 'theme.workbenchSidebarApart', false) as boolean;
-
-  const workbenchSidebarFormViewEmbed = get(oem, 'theme.workbenchSidebarFormViewEmbed', false) as boolean;
-
-  const newTabOpenBoard = get(oem, 'theme.designProjects.newTabOpenBoard', true) as boolean;
-
-  const density = oem?.theme.density ?? 'default';
-
-  const workbenchSidebarDefaultOpen = oem?.theme.workbenchSidebarDefaultOpen ?? true;
 
   const extraWorkbenchPages = get(oem, ['theme', 'workbench', 'pages'], []) as IPinPage[];
   const extraWorkbenchPageGroups = get(oem, ['theme', 'workbench', 'pageGroups'], []) as IPageGroup[];
@@ -107,18 +78,16 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const [groupId, setGroupId] = useState<string>('default');
   const [pageId, setPageId] = useState<string>('');
-  const [visionProAlertVisible, setVisionProAlertVisible] = useState(false);
-  // const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const originalPages: IPinPage[] = useMemo(() => {
     const pages = [...(data?.pages ?? [])];
 
     pages.unshift(...extraWorkbenchPages);
-    if (!pages.some((page) => page.id === 'global-design-board') && !isOemLoading && newTabOpenBoard) {
+    if (!pages.some((page) => page.id === 'global-design-board') && !isOemLoading) {
       pages.unshift(GLOBAL_DESIGN_BOARD_PAGE);
     }
 
     return pages;
-  }, [data?.pages, isOemLoading, newTabOpenBoard]);
+  }, [data?.pages, isOemLoading]);
   const originalGroups = useMemo(() => {
     return [
       GLOBAL_DESIGN_BOARD_PAGE_GROUP,
@@ -130,27 +99,18 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         }))
         ?.filter((group) => group.pageIds.length) ?? []),
     ];
-    // data?.groups
-    //   ?.map((group) => ({
-    //     ...group,
-    //     pageIds: group.isBuiltIn
-    //       ? ['global-design-board', ...group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId))]
-    //       : group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId)),
-    //   }))
-    //   ?.filter((group) => group.pageIds.length) ?? []
   }, [data?.groups, originalPages, data, extraWorkbenchPageGroups, extraWorkbenchPages]);
 
   const { trigger: updateGroupPageSortTrigger } = useUpdateGroupPageSort(groupId);
 
   const pagesMap = keyBy(originalPages, 'id');
-  // const groupMap = new Map(originalGroups.map((item, index) => [item.id, index]));
   const lists = pageGroupProcess(originalGroups, pagesMap);
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
   const toggleToActivePageRef = useRef(activePage || workflowExecution ? false : null);
 
-  // const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
   const currentPage = useCurrentPage();
+
   const setCurrentPage = useSetCurrentPage();
   const setCurrentGroupId = useSetCurrentGroupId();
 
@@ -159,6 +119,11 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     setCurrentGroupId(groupId);
   }, [groupId, setCurrentGroupId]);
 
+  useEffect(() => {
+    if (!teamId) return;
+    const currentTeamPage = currentPage?.[teamId];
+    setPageId(currentTeamPage?.id ?? '');
+  }, [currentPage?.[teamId]?.id, teamId]);
   const latestOriginalPages = useLatest(originalPages);
   const latestOriginalGroups = useLatest(originalGroups);
   useEffect(() => {
@@ -296,30 +261,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     { wait: 64 },
   );
 
-  const toggleOnlyShowWorkbenchIcon = useToggleOnlyShowWorkbenchIcon();
-  const setOnlyShowWorkbenchIcon = useSetOnlyShowWorkbenchIcon();
-
-  useEffect(() => {
-    if (activePageFromWorkflowDisplayName) {
-      setOnlyShowWorkbenchIcon(true);
-      return;
-    }
-    setOnlyShowWorkbenchIcon(!workbenchSidebarDefaultOpen);
-  }, [workbenchSidebarDefaultOpen, activePageFromWorkflowDisplayName]);
-
   const hasGroups = lists.length && !isLoading;
-  const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const onPageClick = useCallback(
     (page: IWorkbenchViewItemPage) => {
-      const pageName = getI18nContent(page.displayName) ?? '';
-      const visionProWorkflows = oem?.theme?.visionProWorkflows ?? [];
-
-      // 检查是否在 Vision Pro 工作流列表中
-      if (visionProWorkflows.includes(pageName)) {
-        setVisionProAlertVisible(true);
-        return;
-      }
-
       startTransition(() => {
         navigate({
           search: {
@@ -331,12 +275,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     },
     [teamId, groupId, setCurrentPage, oem],
   );
-
-  useEffect(() => {
-    if (globalViewSize === 'sm') {
-      setOnlyShowWorkbenchIcon(true);
-    }
-  }, [globalViewSize]);
 
   const onPageGroupReorder = (
     newData: (Omit<IPageGroup, 'pageIds'> & {
@@ -361,9 +299,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const event$ = useEventEmitter();
 
   const showFormEmbed =
-    workbenchSidebarFormViewEmbed &&
-    EMBED_TYPE_LIST.includes(currentPage?.[teamId]?.type ?? '') &&
-    currentPage?.[teamId]?.workflowId;
+    EMBED_TYPE_LIST.includes(currentPage?.[teamId]?.type ?? '') && currentPage?.[teamId]?.workflowId;
 
   const setEmbedSidebar = useSetEmbedSidebar();
 
@@ -379,12 +315,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   return (
     <div
-      className={cn(
-        `flex h-full items-center justify-center`,
-        workbenchSidebarApart ? 'gap-global-1/2' : 'rounded-lg bg-slate-1',
-        !workbenchSidebarApart && themeMode === 'border' && 'border border-input',
-        !workbenchSidebarApart && themeMode === 'shadow' && 'shadow-around',
-      )}
+      data-collapsed={collapsed || undefined}
+      className={cn('flex h-full items-center justify-center', 'gap-global-1/2')}
       ref={wrapperRef}
     >
       {isLoading ? (
@@ -394,23 +326,14 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
       ) : (
         <WorkbenchViewItemCurrentData.Provider value={{ pageId, groupId }}>
           {hasGroups ? (
-            showGroup ? (
-              <>
-                <div
-                  className={cn(
-                    'flex h-full justify-between bg-slate-1',
-                    workbenchSidebarApart ? 'rounded-lg' : 'rounded-l-lg',
-                  )}
-                >
-                  <VirtuaWorkbenchViewGroupList
-                    data={lists}
-                    groupId={groupId}
-                    setGroupId={setGroupId}
-                    onReorder={onPageGroupReorder}
-                  />
-                </div>
-              </>
-            ) : null
+            <div className="flex h-full justify-between rounded-lg bg-slate-1">
+              <VirtuaWorkbenchViewGroupList
+                data={lists}
+                groupId={groupId}
+                setGroupId={setGroupId}
+                onReorder={onPageGroupReorder}
+              />
+            </div>
           ) : (
             <div className="vines-center absolute flex-col gap-global">
               <CircleSlash size={64} />
@@ -423,10 +346,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             className={cn(
               'h-full bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1',
               showFormEmbed ? 'flex' : 'grid grid-rows-[1fr_auto]',
-              workbenchSidebarApart ? 'rounded-lg' : 'rounded-r-lg',
+              'rounded-lg',
             )}
           >
-            {/* Second nav */}
             <VirtuaWorkbenchViewList
               height={height}
               data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
@@ -435,6 +357,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               onChildClick={onPageClick}
               onReorder={onPageGroupPageReorder}
             />
+
             {showFormEmbed ? (
               <>
                 <Separator orientation="vertical" />
@@ -474,51 +397,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                   </DesignBoardProvider>
                 )}
               </>
-            ) : (
-              <div
-                className={cn(
-                  'flex items-center justify-center gap-global pb-global pt-2',
-                  density === 'compact' && 'px-global-1/2',
-                  density === 'default' && 'px-global',
-                )}
-              >
-                {globalViewSize !== 'sm' && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        onClick={() => toggleOnlyShowWorkbenchIcon()}
-                        icon={onlyShowWorkbenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
-                        size={'icon'}
-                        className={cn('shrink-0', onlyShowWorkbenchIcon && '')}
-                        variant="outline"
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-            )}
+            ) : null}
           </div>
         </WorkbenchViewItemCurrentData.Provider>
       )}
-      <AlertDialog open={visionProAlertVisible} onOpenChange={setVisionProAlertVisible}>
-        <AlertDialogContent
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-        >
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('common.utils.tips')}</AlertDialogTitle>
-            <AlertDialogDescription>请在 Vision Pro 中打开使用</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setVisionProAlertVisible(false)}>
-              {t('common.utils.confirm')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

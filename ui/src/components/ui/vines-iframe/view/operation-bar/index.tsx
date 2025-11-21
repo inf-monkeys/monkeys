@@ -1,36 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
-import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
 import { get } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
 import { useWorkflowAssociationList } from '@/apis/workflow/association';
 import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
 import useUrlState from '@/hooks/use-url-state';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn } from '@/utils';
 
+import { CommonOperationBar } from '../common-operation-bar';
 import { OperationItem } from './item';
-import { OperationBarTipButton } from './tip-button';
 
 interface IWorkbenchOperationBarProps extends React.ComponentPropsWithoutRef<'div'> {
   onDataChange?: (data: IWorkflowAssociation[]) => void;
@@ -49,91 +29,20 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
 
   const { data: initialData } = useWorkflowAssociationList(workflowId);
 
-  // 添加本地状态
-  const [localData, setLocalData] = useState<IWorkflowAssociation[]>(initialData?.filter((it) => it.enabled) ?? []);
+  const enabledData = useMemo(() => initialData?.filter((it) => it.enabled) ?? [], [initialData]);
 
-  // 当外部数据变化时更新本地状态
   useEffect(() => {
-    setLocalData(initialData?.filter((it) => it.enabled) ?? []);
-    onDataChange?.(initialData?.filter((it) => it.enabled) ?? []);
-  }, [initialData]);
+    onDataChange?.(enabledData);
+  }, [enabledData, onDataChange]);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // 添加传感器
-  const sensors = useSensors(
-    useSensor(MouseSensor, {
-      activationConstraint: {
-        distance: 10,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 250,
-        tolerance: 5,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
-  // 修改拖拽结束事件处理
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = localData.findIndex((item) => item.id === active.id);
-    const newIndex = localData.findIndex((item) => item.id === over.id);
-
-    const newData = arrayMove(localData, oldIndex, newIndex);
-
-    // 更新本地状态
-    setLocalData(newData);
-
-    // 调用外部回调
-    // onReorder?.(newData);
-  };
-  return localData.length > 0 ? (
-    <div
-      className={cn(
-        'flex flex-col bg-slate-1',
-        mode === 'mini' ? '' : 'rounded-lg',
-        themeMode === 'border' && 'border border-input',
-        themeMode === 'shadow' && 'shadow-around',
-      )}
-    >
-      <OperationBarTipButton mode={mode} type="form-view" density={density} />
-      <div className="flex min-h-0 flex-1 items-center justify-center">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis]}
-          onDragEnd={handleDragEnd}
-        >
-          <ScrollArea
-            className={cn(
-              'h-full',
-              mode === 'mini'
-                ? 'px-global-1/2'
-                : density === 'compact'
-                  ? 'w-[calc(var(--operation-bar-width)+var(--global-spacing))] px-global-1/2'
-                  : 'w-[calc(var(--operation-bar-width)+var(--global-spacing)*2)] px-global',
-            )}
-            ref={scrollRef}
-            disabledOverflowMask
-          >
-            <SortableContext items={localData.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-              {localData.map((it) => (
-                <OperationItem key={it.id} data={it}></OperationItem>
-              ))}
-            </SortableContext>
-          </ScrollArea>
-          {mode === 'mini' && <Separator orientation="vertical" />}
-        </DndContext>
-      </div>
-    </div>
-  ) : (
-    <></>
+  return (
+    <CommonOperationBar
+      data={enabledData}
+      mode={mode}
+      density={density}
+      themeMode={themeMode}
+      tipButtonProps={{ mode, density, type: 'form-view' }}
+      renderItem={(item, { expanded }) => <OperationItem data={item} expanded={expanded} />}
+    />
   );
 };

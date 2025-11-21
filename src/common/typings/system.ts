@@ -62,6 +62,7 @@ export interface ISystemConfig {
     workbenchSidebarToggleGroupDetail: boolean;
     workbenchSidebarViewType: boolean;
     workbenchSidebarFormViewEmbed: boolean;
+    workbenchSidebarModernMode: boolean;
     ugc: CustomizationUgc;
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';

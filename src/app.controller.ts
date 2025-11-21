@@ -147,6 +147,7 @@ export class AppController {
         workbenchSidebarToggleGroupDetail: config.server.customization.workbenchSidebarToggleGroupDetail,
         workbenchSidebarViewType: config.server.customization.workbenchSidebarViewType,
         workbenchSidebarFormViewEmbed: config.server.customization.workbenchSidebarFormViewEmbed,
+        workbenchSidebarModernMode: config.server.customization.workbenchSidebarModernMode,
         ugc: config.server.customization.ugc,
         uniImagePreview: config.server.customization.uniImagePreview,
         imagePreviewStyle: config.server.customization.imagePreviewStyle,

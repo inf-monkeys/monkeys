@@ -50,7 +50,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
 
   // 根据主题模式应用不同样式
   const isShadowMode = themeMode === 'shadow';
-  const backgroundClass = background ? '' : isShadowMode ? 'bg-[#f2f3f4]' : 'bg-neocard';
+  const backgroundClass = background ? '' : isShadowMode ? 'bg-[#f2f3f4] dark:bg-[#000000]' : 'bg-neocard';
 
   const showTeamSelector =
     oem &&

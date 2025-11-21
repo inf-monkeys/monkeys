@@ -28,6 +28,19 @@ export class MediaFileCrudController {
     private readonly toolsForwardService: ToolsForwardService,
   ) {}
 
+  @Get('/folder-view')
+  @ApiOperation({
+    summary: '获取文件夹视图数据',
+    description: '返回每个分组的4张预览图，用于文件夹视图展示',
+  })
+  public async listRichMediasForFolderView(@Req() request: IRequest, @Query('search') search?: string) {
+    const { teamId } = request;
+    const folders = await this.service.listRichMediasForFolderView(teamId, search);
+    return new SuccessResponse({
+      data: folders,
+    });
+  }
+
   @Get('')
   public async listRichMedias(@Req() request: IRequest, @Query() dto: ListDto, @Query('filterNeuralModel') filterNeuralModel?: 'only' | 'exclude' | 'all') {
     const { teamId } = request;

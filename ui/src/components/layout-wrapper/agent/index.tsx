@@ -21,7 +21,7 @@ export const AgentLayout: React.FC = () => {
 
   // 针对LF客户的主题定制
   const isLFTheme = themeMode === 'shadow';
-  const backgroundClass = isLFTheme ? 'bg-[#f2f3f4]' : 'bg-slate-3';
+  const backgroundClass = isLFTheme ? 'bg-[#f2f3f4] dark:bg-[#000000]' : 'bg-slate-3';
 
   return (
     <main className={cn('size-full p-global', backgroundClass)}>

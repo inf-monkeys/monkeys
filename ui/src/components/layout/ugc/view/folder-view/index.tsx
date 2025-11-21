@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import { IFolderViewData } from '@/apis/ugc';
 import { IAssetItem, IListUgcDto } from '@/apis/ugc/typings.ts';
 import { UgcViewFolderCard } from '@/components/layout/ugc/view/folder';
 
@@ -20,6 +21,7 @@ interface IFolderViewProps<E extends object> {
   currentRuleId?: string; // 添加当前规则ID
   assetFilterRules?: any[]; // 添加筛选规则列表
   onFolderClick?: (folderId: string, folderFilter: Partial<IListUgcDto['filter']>) => void;
+  folderViewData?: IFolderViewData[]; // 后端返回的文件夹视图数据
 }
 
 export const UgcViewFolderView = <E extends object>({
@@ -28,10 +30,32 @@ export const UgcViewFolderView = <E extends object>({
   currentRuleId,
   assetFilterRules = [],
   onFolderClick,
+  folderViewData,
 }: IFolderViewProps<E>) => {
   // 生成文件夹数据
   const generateFolderData = useMemo((): IFolderData[] => {
-    const folders: IFolderData[] = [];
+    // 如果提供了后端返回的文件夹视图数据，直接使用
+    if (folderViewData && folderViewData.length > 0) {
+      let folders = folderViewData.map((folder) => ({
+        id: folder.id,
+        name: folder.name,
+        assetCount: folder.assetCount,
+        lastUpdated: folder.lastUpdated,
+        previewImages: folder.previewImages,
+        previewAssets: folder.previewAssets,
+        filterRules: folder.filterRules,
+      }));
+
+      // 如果选中了某个分组，只显示该分组的文件夹
+      if (currentRuleId && currentRuleId !== 'all') {
+        folders = folders.filter((folder) => folder.id === currentRuleId);
+      }
+
+      return folders;
+    }
+
+    // 否则使用原来的逻辑（前端计算）
+    let folders: IFolderData[] = [];
 
     const hasSpecificFilter =
       filter &&
@@ -221,10 +245,15 @@ export const UgcViewFolderView = <E extends object>({
           filterRules: r, // 保存对应的筛选规则
         });
       });
+
+      // 如果选中了某个分组，只显示该分组的文件夹
+      if (currentRuleId && currentRuleId !== 'all') {
+        folders = folders.filter((folder) => folder.id === currentRuleId);
+      }
     }
 
     return folders;
-  }, [allData, filter, currentRuleId, assetFilterRules]);
+  }, [allData, filter, currentRuleId, assetFilterRules, folderViewData]);
 
   return (
     <div className="grid w-full grid-cols-1 gap-6 overflow-y-auto lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
