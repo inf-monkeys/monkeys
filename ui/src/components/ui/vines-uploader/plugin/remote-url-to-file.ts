@@ -113,7 +113,7 @@ export default class RemoteUrlToFile<M extends Meta, B extends Body> extends Bas
 
         const latestFile = this.uppy.getFile(file.id);
 
-        // 检测是否已经上传
+        // 检测是否已经上传（秒传场景）
         const rapidUploadResult = await (this.uppy.getPlugin('RapidUpload') as RapidUpload<M, B>)?.getRemoteUrlWithMd5(
           md5,
         );
@@ -126,6 +126,11 @@ export default class RemoteUrlToFile<M extends Meta, B extends Body> extends Bas
           set(latestFile, 'uploadURL', rapidUploadResult.url);
         }
 
+        // 只要有 remoteUrl 或 uploadURL，就认为预处理完成
+        const hasRemoteUrl =
+          Boolean((latestFile as any)?.uploadURL) ||
+          Boolean(((latestFile as any)?.meta && (latestFile as any).meta.remoteUrl));
+
         this.uppy.setFileState(file.id, {
           ...latestFile,
           data: blob,
@@ -134,7 +139,7 @@ export default class RemoteUrlToFile<M extends Meta, B extends Body> extends Bas
             md5,
           },
           isRemote: true,
-          progress: { ...file.progress, uploadComplete: !!serverRemoteUrl },
+          progress: { ...file.progress, uploadComplete: hasRemoteUrl },
         });
 
         processedFiles.push(file);
