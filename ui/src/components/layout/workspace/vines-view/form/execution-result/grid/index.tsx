@@ -61,7 +61,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const retryRef = useRef(0);
   const formContainerWidth = usePageStore((s) => s.containerWidth);
   const { isUseWorkSpace, isUseWorkbench } = useVinesRoute();
-  const { isSelectionMode, setSelectionMode, selectedOutputs, toggleOutputSelection } = useOutputSelectionStore();
+  const { isSelectionMode, setSelectionMode, selectedOutputs, toggleOutputSelection, clearSelection } = useOutputSelectionStore();
   const { data: associations } = useWorkflowAssociationList(workflowId);
   const { data: oem } = useSystemConfig();
   const pageFrom = useViewStore((s) => s.from);
@@ -162,6 +162,10 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
         // 使用 file-saver 下载 zip 文件
         saveAs(zipBlob, zipFileName);
+        
+        // 下载完成后清空选中状态并退出选择模式
+        clearSelection();
+        setSelectionMode(false);
         
         // 如果有部分图片下载失败,在控制台输出警告
         const failedCount = results.filter((r) => r && !r.success).length;
