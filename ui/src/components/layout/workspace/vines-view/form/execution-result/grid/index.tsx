@@ -2,11 +2,15 @@ import React, { Dispatch, SetStateAction, startTransition, useCallback, useEffec
 
 import { SWRInfiniteResponse } from 'swr/infinite';
 
+import { useMemoizedFn } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import { saveAs } from 'file-saver';
 import { t } from 'i18next';
+import JSZip from 'jszip';
 import { get } from 'lodash';
-import { Square, SquareCheck } from 'lucide-react';
+import { Download, Square, SquareCheck } from 'lucide-react';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
+import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
 import { useWorkflowAssociationList } from '@/apis/workflow/association';
@@ -80,6 +84,98 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       onSelectionChange(selectedItemsList);
     }
   }, [selectedOutputs, data, onSelectionChange]);
+
+  // 批量下载选中的图片
+  const handleBatchDownload = useMemoizedFn(async () => {
+    // 从当前数据中筛选出选中的图片项
+    const imageItems = data.filter(
+      (item) =>
+        selectedOutputs.has(item.render.key) &&
+        item.render.type === 'image' &&
+        item.render.status === 'COMPLETED' &&
+        item.render.data,
+    );
+
+    if (imageItems.length === 0) {
+      toast.error(t('workspace.form-view.execution-result.batch-download.no-images'));
+      return;
+    }
+
+    const count = imageItems.length;
+
+    toast.promise(
+      async () => {
+        // 创建 JSZip 实例
+        const zip = new JSZip();
+
+        // 并行下载所有图片并添加到 zip
+        const downloadPromises = imageItems.map(async (item, index) => {
+          const imageUrl = item.render.data as string;
+          if (!imageUrl) return null;
+
+          try {
+            // 使用 fetch 获取图片数据
+            const response = await fetch(imageUrl);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+            const blob = await response.blob();
+
+            // 从URL提取文件名,如果没有则使用默认名称
+            const urlParts = imageUrl.split('/');
+            let fileName = urlParts[urlParts.length - 1] || `image-${item.render.key}`;
+            
+            // 清理文件名中的查询参数
+            fileName = fileName.split('?')[0];
+            
+            // 确保文件名有扩展名
+            if (!fileName.includes('.')) {
+              // 根据 blob type 确定扩展名
+              const extension = blob.type.split('/')[1]?.split(';')[0] || 'png';
+              fileName = `${fileName}.${extension}`;
+            }
+
+            // 添加到 zip 文件,使用索引前缀避免文件名冲突
+            zip.file(`${String(index + 1).padStart(3, '0')}-${fileName}`, blob);
+            return { success: true, index };
+          } catch (error) {
+            console.error(`下载图片失败: ${imageUrl}`, error);
+            return { success: false, index, error };
+          }
+        });
+
+        // 等待所有图片下载完成
+        const results = await Promise.all(downloadPromises);
+        
+        // 检查是否有成功的下载
+        const successCount = results.filter((r) => r?.success).length;
+        if (successCount === 0) {
+          throw new Error('所有图片下载失败');
+        }
+
+        // 生成 zip 文件
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+        // 生成文件名(包含时间戳)
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        const zipFileName = `images-${timestamp}.zip`;
+
+        // 使用 file-saver 下载 zip 文件
+        saveAs(zipBlob, zipFileName);
+        
+        // 如果有部分图片下载失败,在控制台输出警告
+        const failedCount = results.filter((r) => r && !r.success).length;
+        if (failedCount > 0) {
+          console.warn(`${failedCount} 张图片下载失败,已成功打包 ${successCount} 张图片`);
+        }
+      },
+      {
+        success: t('workspace.form-view.execution-result.batch-download.success', { count }),
+        error: t('workspace.form-view.execution-result.batch-download.error'),
+        loading: t('workspace.form-view.execution-result.batch-download.loading', { count }),
+      },
+    );
+  });
 
   const loadMore = useInfiniteLoader(
     async () => {
@@ -291,16 +387,28 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     <div className="flex flex-col gap-2 p-2">
       <div className="flex items-center justify-between gap-2">
         {showErrorFilter && <ErrorFilter />}
-        {selectionModeDisplayType === 'dropdown-menu' && (
-          <Button
-            variant="borderless"
-            className="hover:bg-slate-1 active:bg-slate-1"
-            icon={isSelectionMode ? <SquareCheck /> : <Square />}
-            onClick={() => setSelectionMode(!isSelectionMode)}
-          >
-            {t('workspace.form-view.execution-result.select-mode.title')}
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {isSelectionMode && selectedOutputs.size > 0 && (
+            <Button
+              variant="borderless"
+              className="hover:bg-slate-1 active:bg-slate-1"
+              icon={<Download />}
+              onClick={handleBatchDownload}
+            >
+              {t('workspace.form-view.execution-result.batch-download.button', '批量下载')} ({selectedOutputs.size})
+            </Button>
+          )}
+          {selectionModeDisplayType === 'dropdown-menu' && (
+            <Button
+              variant="borderless"
+              className="hover:bg-slate-1 active:bg-slate-1"
+              icon={isSelectionMode ? <SquareCheck /> : <Square />}
+              onClick={() => setSelectionMode(!isSelectionMode)}
+            >
+              {t('workspace.form-view.execution-result.select-mode.title')}
+            </Button>
+          )}
+        </div>
       </div>
       <ScrollArea
         className={cn(

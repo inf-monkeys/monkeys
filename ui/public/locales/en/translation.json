@@ -3999,6 +3999,13 @@
       "execution-result": {
         "select-mode": {
           "title": "Select Mode"
+        },
+        "batch-download": {
+          "button": "Batch Download",
+          "loading": "Packaging {{count}} images into zip file...",
+          "success": "Successfully packaged {{count}} images into zip file",
+          "error": "Batch download failed",
+          "no-images": "No images available to download"
         }
       }
     },

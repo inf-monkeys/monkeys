@@ -4023,6 +4023,13 @@
       "execution-result": {
         "select-mode": {
           "title": "选择模式"
+        },
+        "batch-download": {
+          "button": "批量下载",
+          "loading": "正在打包 {{count}} 张图片到压缩包...",
+          "success": "成功打包 {{count}} 张图片到压缩包",
+          "error": "批量下载失败",
+          "no-images": "没有可下载的图片"
         }
       }
     },
