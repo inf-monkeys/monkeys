@@ -28,18 +28,6 @@ export class MediaFileCrudController {
     private readonly toolsForwardService: ToolsForwardService,
   ) {}
 
-  @Get('')
-  public async listRichMedias(@Req() request: IRequest, @Query() dto: ListDto, @Query('filterNeuralModel') filterNeuralModel?: 'only' | 'exclude' | 'all') {
-    const { teamId } = request;
-    const { list, totalCount } = await this.service.listRichMedias(teamId, dto, undefined, filterNeuralModel);
-    return new SuccessListResponse({
-      data: list,
-      total: totalCount,
-      page: dto.page,
-      limit: dto.limit,
-    });
-  }
-
   @Get('/folder-view')
   @ApiOperation({
     summary: '获取文件夹视图数据',
@@ -50,6 +38,18 @@ export class MediaFileCrudController {
     const folders = await this.service.listRichMediasForFolderView(teamId, search);
     return new SuccessResponse({
       data: folders,
+    });
+  }
+
+  @Get('')
+  public async listRichMedias(@Req() request: IRequest, @Query() dto: ListDto, @Query('filterNeuralModel') filterNeuralModel?: 'only' | 'exclude' | 'all') {
+    const { teamId } = request;
+    const { list, totalCount } = await this.service.listRichMedias(teamId, dto, undefined, filterNeuralModel);
+    return new SuccessListResponse({
+      data: list,
+      total: totalCount,
+      page: dto.page,
+      limit: dto.limit,
     });
   }
 

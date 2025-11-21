@@ -42,11 +42,11 @@ export const UgcViewFolderCard: React.FC<IFolderCardProps> = ({
 
   return (
     <Card
-      className={cn('h-80 cursor-pointer transition-colors hover:bg-neocard active:bg-neocard', {
+      className={cn('cursor-pointer transition-colors hover:bg-neocard active:bg-neocard', {
         'cursor-pointer': !!onClick,
         'cursor-default': !onClick,
       })}
-      style={{ height: '24rem' }}
+      style={{ height: '18rem' }}
       onClick={onClick}
     >
       <CardHeader className="p-global">

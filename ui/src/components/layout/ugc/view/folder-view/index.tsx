@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
-import { IAssetItem, IListUgcDto } from '@/apis/ugc/typings.ts';
 import { IFolderViewData } from '@/apis/ugc';
+import { IAssetItem, IListUgcDto } from '@/apis/ugc/typings.ts';
 import { UgcViewFolderCard } from '@/components/layout/ugc/view/folder';
 
 interface IFolderData {
@@ -36,7 +36,7 @@ export const UgcViewFolderView = <E extends object>({
   const generateFolderData = useMemo((): IFolderData[] => {
     // 如果提供了后端返回的文件夹视图数据，直接使用
     if (folderViewData && folderViewData.length > 0) {
-      return folderViewData.map((folder) => ({
+      let folders = folderViewData.map((folder) => ({
         id: folder.id,
         name: folder.name,
         assetCount: folder.assetCount,
@@ -45,10 +45,17 @@ export const UgcViewFolderView = <E extends object>({
         previewAssets: folder.previewAssets,
         filterRules: folder.filterRules,
       }));
+
+      // 如果选中了某个分组，只显示该分组的文件夹
+      if (currentRuleId && currentRuleId !== 'all') {
+        folders = folders.filter((folder) => folder.id === currentRuleId);
+      }
+
+      return folders;
     }
 
     // 否则使用原来的逻辑（前端计算）
-    const folders: IFolderData[] = [];
+    let folders: IFolderData[] = [];
 
     const hasSpecificFilter =
       filter &&
@@ -238,6 +245,11 @@ export const UgcViewFolderView = <E extends object>({
           filterRules: r, // 保存对应的筛选规则
         });
       });
+
+      // 如果选中了某个分组，只显示该分组的文件夹
+      if (currentRuleId && currentRuleId !== 'all') {
+        folders = folders.filter((folder) => folder.id === currentRuleId);
+      }
     }
 
     return folders;

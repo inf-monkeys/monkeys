@@ -346,21 +346,26 @@ export class MediaFileRepository {
       filterRules: any;
     }> = [];
 
-    const usedIds = new Set<string>();
-
     // 遍历每个筛选规则
     for (const rule of filters) {
       const filterRules = rule.rules || {};
 
-      // 查询匹配的资产（只获取前100个用于预览图选择）
+      // 确保 tagIdsAnd 字段正确传递（如果存在）
+      // 因为 AssetFilterRule 接口可能没有这个字段，但实际存储的 JSON 中可能有
+      const finalFilterRules = { ...filterRules };
+      if ((rule.rules as any)?.tagIdsAnd !== undefined) {
+        (finalFilterRules as any).tagIdsAnd = (rule.rules as any).tagIdsAnd;
+      }
+
+      // 查询匹配的资产（获取足够数量用于预览图选择，每个分组独立选择预览图）
       const { list: items } = await this.mediaFileAssetRepositroy.listAssets(
         'media-file',
         teamId,
         {
           page: 1,
-          limit: 100, // 只获取前100个用于选择预览图
+          limit: 100, // 获取前100个用于选择预览图
           search: search || undefined,
-          filter: filterRules,
+          filter: finalFilterRules,
           orderBy: 'DESC',
           orderColumn: 'createdTimestamp',
         },
@@ -371,18 +376,7 @@ export class MediaFileRepository {
         },
       );
 
-      // 过滤掉已被其他规则使用的文件
-      const filteredItems = items.filter((item) => {
-        if (usedIds.has(item.id)) {
-          return false;
-        }
-        usedIds.add(item.id);
-        return true;
-      });
-
       // 获取总数（用于显示资产数量）
-      // 注意：这里获取的是原始总数，不考虑去重，因为去重需要查询所有数据，性能较差
-      // 实际显示的数量可能会因为去重而略少，但这是可接受的性能权衡
       const { totalCount: rawTotalCount } = await this.mediaFileAssetRepositroy.listAssets(
         'media-file',
         teamId,
@@ -390,7 +384,7 @@ export class MediaFileRepository {
           page: 1,
           limit: 1,
           search: search || undefined,
-          filter: filterRules,
+          filter: finalFilterRules,
           orderBy: 'DESC',
           orderColumn: 'createdTimestamp',
         },
@@ -401,15 +395,15 @@ export class MediaFileRepository {
         },
       );
 
-      // 预处理数据
-      await this.preprocess(filteredItems);
+      // 预处理数据（使用原始查询结果，每个分组独立选择预览图）
+      await this.preprocess(items);
 
-      // 选择预览图
-      const previewImages = pickPreviewImages(filteredItems);
-      const previewAssets = pickPreviewAssets(filteredItems);
+      // 选择预览图（使用原始查询结果，确保每个分组都能显示足够的预览图）
+      const previewImages = pickPreviewImages(items);
+      const previewAssets = pickPreviewAssets(items);
 
       // 计算最后更新时间
-      const lastUpdatedTime = filteredItems.length > 0 ? Math.max(...filteredItems.map((item) => item.updatedTimestamp || 0)) : 0;
+      const lastUpdatedTime = items.length > 0 ? Math.max(...items.map((item) => item.updatedTimestamp || 0)) : 0;
       const lastUpdatedText = lastUpdatedTime > 0 ? new Date(lastUpdatedTime).toLocaleDateString('zh-CN') : '无';
 
       folders.push({
@@ -419,7 +413,7 @@ export class MediaFileRepository {
         lastUpdated: lastUpdatedText,
         previewImages,
         previewAssets,
-        filterRules,
+        filterRules: finalFilterRules,
       });
     }
 
