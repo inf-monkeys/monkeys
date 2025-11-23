@@ -213,6 +213,14 @@ export class AssetsCommonRepository {
   }
 
   public async updateAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[], merge: boolean = true) {
+    // 验证参数
+    if (!teamId || typeof teamId !== 'string') {
+      throw new Error(`updateAssetTags: teamId 必须是非空字符串，当前值: ${teamId}, 类型: ${typeof teamId}`);
+    }
+    if (!tagIds || !Array.isArray(tagIds) || tagIds.length === 0) {
+      throw new Error(`updateAssetTags: tagIds 必须是非空数组，当前值: ${JSON.stringify(tagIds)}`);
+    }
+
     const originalTags = await this.assetsTagRelationsRepo.find({
       where: {
         isDeleted: false,
@@ -239,15 +247,22 @@ export class AssetsCommonRepository {
       );
     }
     for (const tagId of toAdd) {
+      // 确保 tagId 是字符串
+      const tagIdStr = String(tagId);
+      if (!tagIdStr) {
+        console.error(`updateAssetTags: 跳过空的 tagId, teamId: ${teamId}, assetId: ${assetId}`);
+        continue;
+      }
+
       await this.assetsTagRelationsRepo.save({
         id: generateDbId(),
         isDeleted: false,
         createdTimestamp: Date.now(),
         updatedTimestamp: Date.now(),
-        teamId,
+        teamId: String(teamId), // 确保是字符串
         assetType,
         assetId,
-        tagId,
+        tagId: tagIdStr,
       });
     }
   }

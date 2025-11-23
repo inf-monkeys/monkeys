@@ -488,6 +488,9 @@
               "model-training": {
                 "label": "Model Training"
               },
+              "model-training-v2": {
+                "label": "Model Training 2.0"
+              },
               "neural-models": {
                 "label": "Neural Models"
               }

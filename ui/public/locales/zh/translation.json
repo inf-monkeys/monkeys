@@ -482,6 +482,9 @@
               "model-training": {
                 "label": "模型训练"
               },
+              "model-training-v2": {
+                "label": "模型训练2.0"
+              },
               "neural-models": {
                 "label": "神经模型"
               }

@@ -28,6 +28,7 @@ export type VinesSpaceSidebarModule =
   | 'table-data'
   | 'chat-v2'
   | 'model-training'
+  | 'model-training-v2'
   | 'neural-models';
 export type VinesSpaceSidebarModules = '*' | VinesSpaceSidebarModule[];
 

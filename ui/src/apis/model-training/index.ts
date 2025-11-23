@@ -31,3 +31,15 @@ export const updateModelTraining = (modelTrainingId: string, modelTraining: Part
     `/api/model-training/${modelTrainingId}`,
     modelTraining,
   );
+
+export const useGetPretrainedModels = (modelType: string = '2') =>
+  useSWR<string[] | undefined>(
+    `/api/model-training/pretrained-models?model_type=${modelType}`,
+    vinesFetcher({ wrapper: (data: any) => (Array.isArray(data) ? data : []) }),
+  );
+
+export const useGetLoraModels = (modelTrainingId?: string) =>
+  useSWR<string[] | undefined>(
+    modelTrainingId ? `/api/model-training/pretrained-models?model_type=1&model_training_id=${modelTrainingId}` : null,
+    vinesFetcher({ wrapper: (data: any) => (Array.isArray(data) ? data : []) }),
+  );

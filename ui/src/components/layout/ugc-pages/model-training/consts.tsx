@@ -23,14 +23,23 @@ interface ICreateModelTrainingColumnsProps extends IUgcCreateColumnsProps {
 export const createModelTrainingColumns = ({ hooks }: ICreateModelTrainingColumnsProps) => [
   columnHelper.accessor('displayName', {
     id: 'title',
-    cell: ({ getValue, row }) => (
-      <Link
-        className="hover:text-primary-500 cursor-pointer transition-colors"
-        to={`/$teamId/model-training/${row.original.id}` as any}
-      >
-        {getI18nContent(getValue() as string | I18nValue)}
-      </Link>
-    ),
+    cell: ({ getValue, row }) => {
+      const versionType = (row.original as any).versionType ?? 1;
+      const detailPath =
+        versionType === 2 ? '/$teamId/model-training-v2/$modelTrainingId' : '/$teamId/model-training/$modelTrainingId';
+      return (
+        <Link
+          className="hover:text-primary-500 cursor-pointer transition-colors"
+          to={detailPath as any}
+          params={(prev: any) => ({
+            ...prev,
+            modelTrainingId: row.original.id,
+          })}
+        >
+          {getI18nContent(getValue() as string | I18nValue)}
+        </Link>
+      );
+    },
   }),
   columnHelper.accessor('description', {
     id: 'description',

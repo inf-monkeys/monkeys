@@ -70,6 +70,10 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
         name: 'model-training',
       },
       {
+        path: '/$teamId/model-training-v2',
+        name: 'model-training-v2',
+      },
+      {
         path: '/$teamId/neural-models',
         name: 'neural-models',
       },

@@ -26,12 +26,14 @@ interface ICreateModelTrainingDialogProps {
   visible?: boolean;
   setVisible?: (visible: boolean) => void;
   afterCreate?: () => void;
+  versionType?: number;
 }
 
 export const CreateModelTrainingDialog: React.FC<ICreateModelTrainingDialogProps> = ({
   visible,
   setVisible,
   afterCreate,
+  versionType,
 }) => {
   const { t } = useTranslation();
 
@@ -47,6 +49,7 @@ export const CreateModelTrainingDialog: React.FC<ICreateModelTrainingDialogProps
     resolver: zodResolver(createModelTrainingSchema),
     defaultValues: {
       displayName: t('common.utils.untitled') + t('common.type.model-training'),
+      versionType,
     },
   });
 
@@ -70,9 +73,16 @@ export const CreateModelTrainingDialog: React.FC<ICreateModelTrainingDialogProps
       },
       {
         success: (ModelTraining) => {
-          // navigate({
-          //   to: '/$teamId/model-training',
-          // });
+          // 根据 versionType 跳转到对应的详情页
+          if (versionType === 2 && ModelTraining?.id && teamId) {
+            navigate({
+              to: '/$teamId/model-training-v2/$modelTrainingId',
+              params: {
+                teamId,
+                modelTrainingId: ModelTraining.id,
+              },
+            });
+          }
           setIsOpen(false);
           afterCreate?.(); // 调用回调函数
           return t('common.create.success');
