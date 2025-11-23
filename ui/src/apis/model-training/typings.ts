@@ -15,4 +15,5 @@ export interface IModelTraining {
   createdTimestamp: number;
   updatedTimestamp: number;
   status: ModelTrainingStatus;
+  versionType?: number;
 }

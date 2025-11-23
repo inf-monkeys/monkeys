@@ -1,7 +1,7 @@
 import { BaseAssetEntityDto } from '@/common/dto/base-asset-entity-dto';
 import { ModelTrainingStatus } from '@/database/entities/model-training/model-training';
 import { I18nValue } from '@inf-monkeys/monkeys';
-import { IsEnum, IsJSON, IsOptional } from 'class-validator';
+import { IsEnum, IsInt, IsJSON, IsOptional, Min } from 'class-validator';
 
 export class CreateModelTrainingDto extends BaseAssetEntityDto {
   @IsJSON()
@@ -15,4 +15,9 @@ export class CreateModelTrainingDto extends BaseAssetEntityDto {
   @IsEnum(ModelTrainingStatus)
   @IsOptional()
   status?: ModelTrainingStatus;
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  versionType?: number;
 }

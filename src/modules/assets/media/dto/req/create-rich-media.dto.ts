@@ -2,8 +2,8 @@ import { MediaSource, MediaType } from '@/database/entities/assets/media/media-f
 import * as Joiful from 'joiful';
 
 export class CreateRichMediaDto {
-  @Joiful.string().required().allow('image', 'text', 'dataset')
-  type: MediaType;
+  @Joiful.string().required()
+  type: MediaType | string; // 支持完整的 mimetype（如 image/jpeg）或简化类型（如 image）
 
   @Joiful.string()
   displayName: string;

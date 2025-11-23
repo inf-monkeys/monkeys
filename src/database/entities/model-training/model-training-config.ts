@@ -49,4 +49,7 @@ export class ModelTrainingConfigEntity extends BaseEntity {
 
   @Column({ name: 'model_path_prefix', type: 'varchar' })
   modelPathPrefix: string;
+
+  @Column({ name: 'version_type', type: 'int', default: 1 })
+  versionType: number;
 }

@@ -9,7 +9,7 @@ export enum MediaSource {
   OUTPUT = 4,
 }
 
-export type MediaType = 'image' | 'text' | 'video' | 'audio';
+export type MediaType = 'image' | 'text' | 'video' | 'audio' | string; // 支持完整的 mimetype（如 image/jpeg）
 
 export type MediaImageParams = {
   width: number;

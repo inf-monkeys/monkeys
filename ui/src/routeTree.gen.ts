@@ -14,9 +14,11 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './pages/__root'
 import { Route as TeamIdModelTrainingIndexImport } from './pages/$teamId/model-training/index'
+import { Route as TeamIdModelTrainingV2IndexImport } from './pages/$teamId/model-training-v2/index'
 import { Route as TeamIdEvaluationsIndexImport } from './pages/$teamId/evaluations/index'
 import { Route as TeamIdEvaluationsDetailImport } from './pages/$teamId/evaluations/detail'
 import { Route as TeamIdModelTrainingModelTrainingIdIndexImport } from './pages/$teamId/model-training/$modelTrainingId/index'
+import { Route as TeamIdModelTrainingV2ModelTrainingIdIndexImport } from './pages/$teamId/model-training-v2/$modelTrainingId/index'
 
 // Create Virtual Routes
 
@@ -394,6 +396,13 @@ const TeamIdModelTrainingIndexRoute = TeamIdModelTrainingIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const TeamIdModelTrainingV2IndexRoute = TeamIdModelTrainingV2IndexImport.update(
+  {
+    path: '/$teamId/model-training-v2/',
+    getParentRoute: () => rootRoute,
+  } as any,
+)
+
 const TeamIdEvaluationsIndexRoute = TeamIdEvaluationsIndexImport.update({
   path: '/$teamId/evaluations/',
   getParentRoute: () => rootRoute,
@@ -523,6 +532,12 @@ const TeamIdModelTrainingModelTrainingIdIndexRoute =
     getParentRoute: () => rootRoute,
   } as any)
 
+const TeamIdModelTrainingV2ModelTrainingIdIndexRoute =
+  TeamIdModelTrainingV2ModelTrainingIdIndexImport.update({
+    path: '/$teamId/model-training-v2/$modelTrainingId/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute =
   TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport.update({
     path: '/$teamId/workspace/$workflowId/image-detail/',
@@ -627,6 +642,10 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/evaluations/': {
       preLoaderRoute: typeof TeamIdEvaluationsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/model-training-v2/': {
+      preLoaderRoute: typeof TeamIdModelTrainingV2IndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/model-training/': {
@@ -749,6 +768,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/model-training-v2/$modelTrainingId/': {
+      preLoaderRoute: typeof TeamIdModelTrainingV2ModelTrainingIdIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/model-training/$modelTrainingId/': {
       preLoaderRoute: typeof TeamIdModelTrainingModelTrainingIdIndexImport
       parentRoute: typeof rootRoute
@@ -843,6 +866,7 @@ export const routeTree = rootRoute.addChildren([
   LoginIndexLazyRoute,
   TeamIdEvaluationsDetailRoute,
   TeamIdEvaluationsIndexRoute,
+  TeamIdModelTrainingV2IndexRoute,
   TeamIdModelTrainingIndexRoute,
   TeamIdActionToolsIndexLazyRoute,
   TeamIdAgentIndexLazyRoute,
@@ -873,6 +897,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkbenchIndexLazyRoute,
   TeamIdWorkflowsIndexLazyRoute,
   TeamIdWorkspaceIndexLazyRoute,
+  TeamIdModelTrainingV2ModelTrainingIdIndexRoute,
   TeamIdModelTrainingModelTrainingIdIndexRoute,
   TeamIdActionToolsActionToolNameIndexLazyRoute,
   TeamIdAgentAgentIdIndexLazyRoute,

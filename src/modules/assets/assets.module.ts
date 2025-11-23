@@ -38,6 +38,6 @@ import { SqlKnowledgeBaseModule } from './sql-knowledge-base/sql-knowledge-base.
     forwardRef(() => WorkflowModule),
     forwardRef(() => ComfyUIModule),
   ],
-  exports: [AssetsMarketplaceService, AssetsPublishService, MediaModule, AssetsMapperService],
+  exports: [AssetsMarketplaceService, AssetsPublishService, MediaModule, AssetsMapperService, AssetsTagService],
 })
 export class AssetsModule {}
