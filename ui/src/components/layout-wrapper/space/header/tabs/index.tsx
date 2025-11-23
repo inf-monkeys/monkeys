@@ -71,17 +71,24 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
     isUseCustomNav,
     routeCustomNavId,
     isUseDesign,
+    routeAppId,
     routeDesignProjectId,
   } = useVinesRoute();
 
   // 获取当前设计项目信息，用于判断是否为模板
   const { data: currentDesignProject } = useGetDesignProject(routeDesignProjectId);
 
+  const tabsList: VinesSpaceHeadbarModules = unionBy(oemVinesSpaceHeadbarModules, TAB_LIST, 'id');
+  const workbenchHeadbarModule = tabsList.find((item) => item.id === 'workbench');
+  const showWorkbenchQuickSwitcher = workbenchHeadbarModule?.showQuickSwitcher === true;
+
   const [value, setValue] = useState(defaultValue || 'workbench');
 
   useEffect(() => {
     if (isUseCustomNav && routeCustomNavId) {
       setValue(routeCustomNavId);
+    } else if (routeAppId && tabsList.some((item) => item.id === routeAppId)) {
+      setValue(routeAppId);
     } else if (isUseWorkbench) {
       setValue('workbench');
     } else if (isUseAppStore) {
@@ -103,12 +110,10 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
     isUseCustomNav,
     routeCustomNavId,
     isUseDesign,
+    routeAppId,
+    tabsList,
     currentDesignProject?.isTemplate,
   ]);
-
-  const tabsList: VinesSpaceHeadbarModules = unionBy(oemVinesSpaceHeadbarModules, TAB_LIST, 'id');
-  const workbenchHeadbarModule = tabsList.find((item) => item.id === 'workbench');
-  const showWorkbenchQuickSwitcher = workbenchHeadbarModule?.showQuickSwitcher === true;
 
   return (
     <Tabs

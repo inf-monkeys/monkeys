@@ -43,6 +43,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
     },
   });
   const isSettingRoute = pathName.split('/').at(-1) === 'settings';
+  const isModelTrainingV2Route = pathName.includes('/model-training-v2/');
 
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'border') as ISystemConfig['theme']['themeMode'];
@@ -80,6 +81,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
           isWorkspaceRoute &&
           !hideSidebar &&
           !isDesignRoute &&
+          !isModelTrainingV2Route &&
           layoutId != 'vines-outlet-main-$teamId-nav-$navId' && <VinesPanelSidebar />
         }
       >
