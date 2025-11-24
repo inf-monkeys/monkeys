@@ -16,6 +16,9 @@ export const useVinesRoute = () => {
 
   const params = routeMatch?.params;
 
+  // 检查是否是邀请页面
+  const isInvitePage = routeAppId === 'invite';
+
   // 检查是否是图片详情页面
   const isImageDetailPage = routeIds?.[3] === 'image-detail';
 
@@ -39,9 +42,12 @@ export const useVinesRoute = () => {
   const routeDesignProjectId = isUseDesign ? routeMatch?.params?.['designProjectId'] : undefined;
 
   // 对于图片详情页面，确保路由信息中包含workbench，以便高亮工作台选项
+  // 对于邀请页面，设置为 'invite' 以绕过认证检查
   window['vinesRoute'] = isImageDetailPage
     ? ['workbench', params?.['teamId'], params?.['workflowId']]
-    : [routeAppId || 'main', params?.['teamId'], params?.['workflowId']];
+    : isInvitePage
+      ? ['invite', params?.['teamId'], params?.['inviteId']]
+      : [routeAppId || 'main', params?.['teamId'], params?.['workflowId']];
 
   return {
     matches,
@@ -64,5 +70,6 @@ export const useVinesRoute = () => {
     isUseAppStore,
     isUseEvaluation,
     isUseCustomNav,
+    isInvitePage,
   };
 };

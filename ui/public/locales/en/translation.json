@@ -790,7 +790,8 @@
     "re-login": "Re-login",
     "login-required": "Api authentication exception! Please login again. ({{ count }})",
     "api-403": "Api authentication exception! Please login again.",
-    "api-invalid": "Data anomaly! Suggest to log in again."
+    "api-invalid": "Data anomaly! Suggest to log in again.",
+    "login-to-continue": "Login to Continue"
   },
   "settings": {
     "title": "Settings",
@@ -4474,6 +4475,30 @@
       "neuralModelGenerated": "Neural model generated successfully",
       "neuralModelGeneratedFailed": "Failed to generate neural model",
       "3dThumbnailGenerated": "3D model thumbnail generated successfully"
+    }
+  },
+  "pages": {
+    "invite": {
+      "title": "「{{teamName}}」invites you to join the team",
+      "default-description": "Join the team to start collaborating",
+      "join-button": "Join Team Now",
+      "back-to-home": "Back to Home",
+      "already-member": "You are already a member of「{{teamName}}」, redirecting to team page...",
+      "already-joined": "You are already a member of this team, redirecting to team page...",
+      "joining": "Joining team...",
+      "join-success": "Successfully joined the team",
+      "join-failed": "Failed to join team",
+      "loading": {
+        "title": "Loading...",
+        "description": "Fetching invitation information"
+      },
+      "error": {
+        "title": "Invalid Invitation Link",
+        "default": "Invitation link does not exist or has expired",
+        "link-not-found": "Invitation link does not exist or has expired",
+        "cannot-get-team-info": "Unable to get team information, returning...",
+        "fetch-failed": "Failed to fetch team invitation information: {{message}}"
+      }
     }
   }
 }

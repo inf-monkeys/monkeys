@@ -28,6 +28,7 @@ const HomeIndexLazyImport = createFileRoute('/home/')()
 const TeamIdIndexLazyImport = createFileRoute('/$teamId/')()
 const LoginOauthLazyImport = createFileRoute('/login/oauth')()
 const LoginCallbackLazyImport = createFileRoute('/login/callback')()
+const InviteInviteIdIndexLazyImport = createFileRoute('/invite/$inviteId/')()
 const TeamIdWorkspaceIndexLazyImport = createFileRoute('/$teamId/workspace/')()
 const TeamIdWorkflowsIndexLazyImport = createFileRoute('/$teamId/workflows/')()
 const TeamIdWorkbenchIndexLazyImport = createFileRoute('/$teamId/workbench/')()
@@ -170,6 +171,13 @@ const LoginCallbackLazyRoute = LoginCallbackLazyImport.update({
   path: '/login/callback',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./pages/login/callback.lazy').then((d) => d.Route))
+
+const InviteInviteIdIndexLazyRoute = InviteInviteIdIndexLazyImport.update({
+  path: '/invite/$inviteId/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./pages/invite/$inviteId/index.lazy').then((d) => d.Route),
+)
 
 const TeamIdWorkspaceIndexLazyRoute = TeamIdWorkspaceIndexLazyImport.update({
   path: '/$teamId/workspace/',
@@ -768,6 +776,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/invite/$inviteId/': {
+      preLoaderRoute: typeof InviteInviteIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/model-training-v2/$modelTrainingId/': {
       preLoaderRoute: typeof TeamIdModelTrainingV2ModelTrainingIdIndexImport
       parentRoute: typeof rootRoute
@@ -897,6 +909,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkbenchIndexLazyRoute,
   TeamIdWorkflowsIndexLazyRoute,
   TeamIdWorkspaceIndexLazyRoute,
+  InviteInviteIdIndexLazyRoute,
   TeamIdModelTrainingV2ModelTrainingIdIndexRoute,
   TeamIdModelTrainingModelTrainingIdIndexRoute,
   TeamIdActionToolsActionToolNameIndexLazyRoute,

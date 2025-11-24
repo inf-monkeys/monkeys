@@ -38,7 +38,11 @@ export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }
         }).then((link) => {
           void mutateInviteLinkList();
           if (!link) throw new Error("Link doesn't exists.");
-          copy(link);
+          // 使用独立的 /invite/$inviteId 路由
+          const newLink = new URL(link);
+          const inviteId = newLink.pathname.split('/').filter(Boolean)[0];
+          newLink.pathname = `/invite/i-${inviteId}/`;
+          copy(newLink.href);
         }),
         {
           success: t('common.toast.copy-success'),

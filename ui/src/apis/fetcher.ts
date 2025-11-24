@@ -82,12 +82,17 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         const errorMessage = raw?.message || null;
 
         if (code === 403) {
+          const routeType = window['vinesRoute']?.[0];
+          const isInviteRoute = routeType === 'invite';
+          
           clearTimeout(window['vinesRoute403_TIMEOUT']);
           window['vinesRoute403_TIMEOUT'] = window.setTimeout(() => {
             window['vinesRoute403_COUNT'] = 0;
             window['vinesRoute403_TOAST_ID'] = void 0;
           }, 3000);
-          if (window['sideBarMode'] != 'mini' && window['hideAuthToast'] !== true) {
+          
+          // 邀请页面不显示登录过期提示，直接抛出错误让页面处理
+          if (!isInviteRoute && window['sideBarMode'] != 'mini' && window['hideAuthToast'] !== true) {
             if (window['vinesRoute403_COUNT']) {
               window['vinesRoute403_COUNT']++;
               const toastData = {
