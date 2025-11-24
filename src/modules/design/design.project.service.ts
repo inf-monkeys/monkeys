@@ -153,6 +153,239 @@ export class DesignProjectService {
   }
 
   /**
+   * 从 snapshot 中提取画板内部结构
+   */
+  private extractBoardStructure(snapshot: any): {
+    images: string[];
+    frames: string[];
+    outputs: string[];
+    instructions: string[];
+  } {
+    const imagesSet = new Set<string>();
+    const framesSet = new Set<string>();
+    const outputsSet = new Set<string>();
+    const instructionsSet = new Set<string>();
+
+    if (!snapshot || !snapshot.document || !snapshot.document.store) {
+      return {
+        images: [],
+        frames: [],
+        outputs: [],
+        instructions: [],
+      };
+    }
+
+    const store = snapshot.document.store;
+
+    // 遍历所有 shapes
+    for (const key in store) {
+      if (!store.hasOwnProperty(key)) continue;
+      
+      const item = store[key];
+      if (!item || typeof item !== 'object') continue;
+
+      // 提取 image 节点（只处理 shape 类型的 image，避免与 asset 重复）
+      if (item.type === 'image' && item.typeName === 'shape' && item.props?.src) {
+        const src = item.props.src;
+        // 从 URL 中提取文件名
+        try {
+          const url = new URL(src);
+          const fileName = url.pathname.split('/').pop() || src;
+          imagesSet.add(`image: ${fileName}`);
+        } catch {
+          // 如果不是有效 URL，直接使用
+          imagesSet.add(`image: ${src}`);
+        }
+      }
+
+      // 提取 asset 中的图片
+      if (item.typeName === 'asset' && item.type === 'image' && item.props?.src) {
+        const src = item.props.src;
+        try {
+          const url = new URL(src);
+          const fileName = url.pathname.split('/').pop() || item.props.name || src;
+          imagesSet.add(`image: ${fileName}`);
+        } catch {
+          imagesSet.add(`image: ${item.props.name || src}`);
+        }
+      }
+
+      // 提取 frame 节点
+      if (item.type === 'frame' && item.props?.name) {
+        framesSet.add(`frame: ${item.props.name}`);
+      }
+
+      // 提取 output 节点
+      if (item.type === 'output' && item.props) {
+        const content = item.props.content || '';
+        if (content.trim()) {
+          // 截断过长的内容
+          const truncated = content.length > 100 
+            ? content.substring(0, 100) + '...' 
+            : content;
+          outputsSet.add(`output: ${truncated}`);
+        } else if (item.props.imageUrl) {
+          outputsSet.add(`output: [image]`);
+        }
+      }
+
+      // 提取 instruction 节点
+      if (item.type === 'instruction' && item.props) {
+        const content = item.props.content || '';
+        if (content.trim()) {
+          instructionsSet.add(`instruction: ${content}`);
+        } else if (item.props.imageUrl) {
+          instructionsSet.add(`instruction: [image]`);
+        } else {
+          instructionsSet.add(`instruction:`);
+        }
+      }
+    }
+
+    return {
+      images: Array.from(imagesSet),
+      frames: Array.from(framesSet),
+      outputs: Array.from(outputsSet),
+      instructions: Array.from(instructionsSet),
+    };
+  }
+
+  /**
+   * 生成 UML 文件内容
+   */
+  private generateUmlFile(project: DesignProjectEntity, boards: any[], exportData: any): string {
+    const projectName = typeof project.displayName === 'string' 
+      ? project.displayName 
+      : JSON.stringify(project.displayName);
+    
+    let uml = '@startuml\n';
+    uml += `title 设计项目: ${projectName}\n\n`;
+    
+    // 设置布局样式
+    uml += 'skinparam packageStyle rectangle\n';
+    uml += 'skinparam objectStyle uml2\n';
+    uml += 'skinparam linetype ortho\n';
+    uml += 'skinparam maxMessageSize 60\n\n';
+    
+    // 项目信息部分（左侧）
+    uml += 'package "项目信息" {\n';
+    uml += `  object "项目名称: ${projectName}" as ProjectName\n`;
+    
+    const desc = project.description 
+      ? (typeof project.description === 'string' 
+          ? project.description 
+          : JSON.stringify(project.description))
+      : '无描述';
+    uml += `  object "描述: ${desc}" as ProjectDesc\n`;
+    uml += `  object "模板: ${project.isTemplate ? '是' : '否'}" as ProjectTemplate\n`;
+    uml += '  ProjectName --> ProjectDesc\n';
+    uml += '  ProjectName --> ProjectTemplate\n';
+    uml += '}\n\n';
+    
+    // 画板列表部分（右侧），包含画板内部结构
+    uml += 'package "画板列表" {\n';
+    
+    if (boards.length === 0) {
+      uml += '  note right: 无画板\n';
+    } else {
+      // 画板内部结构嵌套在画板列表中
+      uml += '  package "图板内部结构" {\n';
+      
+      // 合并所有画板的结构
+      const allImages = new Set<string>();
+      const allFrames = new Set<string>();
+      const allOutputs = new Set<string>();
+      const allInstructions = new Set<string>();
+      
+      boards.forEach((board) => {
+        const structure = this.extractBoardStructure(board.snapshot);
+        structure.images.forEach(img => allImages.add(img));
+        structure.frames.forEach(frame => allFrames.add(frame));
+        structure.outputs.forEach(output => allOutputs.add(output));
+        structure.instructions.forEach(instruction => allInstructions.add(instruction));
+      });
+      
+      // image 节点 - 使用 together 关键字强制纵向排列
+      if (allImages.size > 0) {
+        uml += '    package "image 节点" {\n';
+        const imageArray = Array.from(allImages);
+        uml += '      together {\n';
+        imageArray.forEach((img, imgIndex) => {
+          uml += `        object "${img}" as Image_${imgIndex}\n`;
+        });
+        uml += '      }\n';
+        // 添加纵向连接线
+        for (let i = 0; i < imageArray.length - 1; i++) {
+          uml += `      Image_${i} -[hidden]down- Image_${i + 1}\n`;
+        }
+        uml += '    }\n';
+      }
+      
+      // frame 节点 - 纵向排列
+      if (allFrames.size > 0) {
+        uml += '    package "frame 节点" {\n';
+        const frameArray = Array.from(allFrames);
+        uml += '      together {\n';
+        frameArray.forEach((frame, frameIndex) => {
+          uml += `        object "${frame}" as Frame_${frameIndex}\n`;
+        });
+        uml += '      }\n';
+        for (let i = 0; i < frameArray.length - 1; i++) {
+          uml += `      Frame_${i} -[hidden]down- Frame_${i + 1}\n`;
+        }
+        uml += '    }\n';
+      }
+      
+      // output 节点 - 纵向排列
+      if (allOutputs.size > 0) {
+        uml += '    package "output 节点" {\n';
+        const outputArray = Array.from(allOutputs);
+        uml += '      together {\n';
+        outputArray.forEach((output, outputIndex) => {
+          uml += `        object "${output}" as Output_${outputIndex}\n`;
+        });
+        uml += '      }\n';
+        for (let i = 0; i < outputArray.length - 1; i++) {
+          uml += `      Output_${i} -[hidden]down- Output_${i + 1}\n`;
+        }
+        uml += '    }\n';
+      }
+      
+      // instruction 节点 - 纵向排列
+      if (allInstructions.size > 0) {
+        uml += '    package "instruction 节点" {\n';
+        const instructionArray = Array.from(allInstructions);
+        uml += '      together {\n';
+        instructionArray.forEach((instruction, instructionIndex) => {
+          uml += `        object "${instruction}" as Instruction_${instructionIndex}\n`;
+        });
+        uml += '      }\n';
+        for (let i = 0; i < instructionArray.length - 1; i++) {
+          uml += `      Instruction_${i} -[hidden]down- Instruction_${i + 1}\n`;
+        }
+        uml += '    }\n';
+      }
+      
+      uml += '  }\n';
+    }
+    
+    uml += '}\n\n';
+    
+    // 项目名称连接到画板列表
+    uml += 'ProjectName --> "画板列表"\n\n';
+    
+    // 添加 JSON 导出数据作为注释（可选，用于导入时恢复）
+    uml += "' JSON_EXPORT_BEGIN\n";
+    uml += `' ${JSON.stringify(exportData).replace(/\n/g, '\\n')}\n`;
+    uml += "' JSON_EXPORT_END\n";
+    uml += '\n';
+    
+    uml += '@enduml\n';
+    
+    return uml;
+  }
+
+  /**
    * 从 snapshot 中提取所有资源文件 URL
    */
   private extractAssetUrls(snapshot: any): string[] {
@@ -320,6 +553,10 @@ export class DesignProjectService {
 
     // 添加 JSON 文件
     zip.file('project.json', JSON.stringify(exportData, null, 2));
+
+    // 生成 UML 文件
+    const umlContent = this.generateUmlFile(project, boards, exportData);
+    zip.file('project.uml', umlContent);
 
     // 收集所有资源文件 URL
     const assetUrls = new Set<string>();
