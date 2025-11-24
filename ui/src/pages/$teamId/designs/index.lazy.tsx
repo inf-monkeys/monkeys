@@ -23,33 +23,33 @@ import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuGroup,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
@@ -73,8 +73,8 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ v
     const file = e.target.files?.[0];
     if (file) {
       const fileName = file.name.toLowerCase();
-      if (!fileName.endsWith('.json')) {
-        toast.error('请选择有效的 JSON 文件');
+      if (!fileName.endsWith('.json') && !fileName.endsWith('.uml')) {
+        toast.error('请选择有效的 JSON 或 UML 文件');
         return;
       }
       setSelectedFile(file);
@@ -117,7 +117,7 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ v
                   <input
                     type="file"
                     className="hidden"
-                    accept=".json"
+                    accept=".json,.uml"
                     onChange={handleFileChange}
                     disabled={importing}
                   />
@@ -125,7 +125,7 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ v
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              {t('common.import.file.hint', { defaultValue: '支持 .json 格式' })}
+              {t('common.import.file.hint', { defaultValue: '支持 .json 或 .uml 格式' })}
             </p>
           </div>
         </div>
@@ -269,16 +269,58 @@ export const Designs: React.FC = () => {
     }
   };
 
+  // 从 UML 文件中提取 JSON 数据
+  const extractJsonFromUml = (umlContent: string): any | null => {
+    try {
+      // 查找 JSON_EXPORT_BEGIN 和 JSON_EXPORT_END 之间的内容
+      const beginMarker = "' JSON_EXPORT_BEGIN";
+      const endMarker = "' JSON_EXPORT_END";
+      
+      const beginIndex = umlContent.indexOf(beginMarker);
+      const endIndex = umlContent.indexOf(endMarker);
+      
+      if (beginIndex === -1 || endIndex === -1 || beginIndex >= endIndex) {
+        return null;
+      }
+      
+      // 提取 JSON 数据（去掉注释标记）
+      const jsonStart = beginIndex + beginMarker.length;
+      const jsonEnd = endIndex;
+      let jsonContent = umlContent.substring(jsonStart, jsonEnd).trim();
+      
+      // 移除行首的注释标记（' 或 '）
+      jsonContent = jsonContent.replace(/^'+\s*/gm, '').trim();
+      
+      // 解析 JSON
+      return JSON.parse(jsonContent);
+    } catch (error) {
+      console.error('Failed to extract JSON from UML:', error);
+      return null;
+    }
+  };
+
   // 处理导入设计项目
   const handleImportProject = async (file: File) => {
     try {
       const fileContent = await file.text();
+      const fileName = file.name.toLowerCase();
       let importData: any;
-      try {
-        importData = JSON.parse(fileContent);
-      } catch (error) {
-        toast.error('JSON 文件格式错误，请检查文件内容');
-        return;
+      
+      if (fileName.endsWith('.uml')) {
+        // 处理 UML 文件：从注释中提取 JSON 数据
+        importData = extractJsonFromUml(fileContent);
+        if (!importData) {
+          toast.error('UML 文件中未找到有效的 JSON 导出数据');
+          return;
+        }
+      } else {
+        // 处理 JSON 文件：直接解析
+        try {
+          importData = JSON.parse(fileContent);
+        } catch (error) {
+          toast.error('JSON 文件格式错误，请检查文件内容');
+          return;
+        }
       }
 
       // 验证导入数据格式
