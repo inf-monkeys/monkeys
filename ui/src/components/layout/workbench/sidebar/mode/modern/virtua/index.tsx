@@ -169,7 +169,6 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
             ref={collapsedViewportRef}
             style={{ height }}
             scrollBarDisabled
-            disabledOverflowMask
             onScroll={handleScroll}
             onScrollPositionChange={syncScroll('collapsed')}
           >
@@ -211,7 +210,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
               <ScrollArea
                 ref={expandedViewportRef}
                 className="flex-1"
-                scrollBarDisabled={false}
+                scrollBarDisabled
                 onScrollPositionChange={syncScroll('expanded')}
               >
                 <div className={`flex flex-col`}>

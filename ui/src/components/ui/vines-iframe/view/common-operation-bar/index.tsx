@@ -171,7 +171,7 @@ export const CommonOperationBar = <T extends CommonOperationBarItemShape>({
             <ScrollArea
               className={cn(scrollAreaCls, scrollAreaWidthClass, 'flex-1', 'min-h-0')}
               ref={collapsedViewportRef}
-              disabledOverflowMask
+              scrollBarDisabled
               onScrollPositionChange={syncScroll('collapsed')}
             >
               <SortableContext items={localData.map((item) => item.id)} strategy={verticalListSortingStrategy}>
@@ -201,8 +201,8 @@ export const CommonOperationBar = <T extends CommonOperationBarItemShape>({
                 <ScrollArea
                   ref={expandedViewportRef}
                   className={cn(scrollAreaCls, 'flex-1', 'min-h-0')}
-                  scrollBarDisabled={false}
                   onScrollPositionChange={syncScroll('expanded')}
+                  scrollBarDisabled
                 >
                   <div className="items-between flex flex-col">
                     {localData.map((item, i) => (
