@@ -77,7 +77,11 @@ export const ModelTrainingV2Detail: React.FC<IModelTrainingV2DetailProps> = () =
             </TabsContent>
 
             <TabsContent value="model-training" className="h-full">
-              <ModelTrainingModule modelTrainingId={modelTrainingId} displayName={String(modelTraining.displayName)} />
+              <ModelTrainingModule
+                modelTrainingId={modelTrainingId}
+                displayName={String(modelTraining.displayName)}
+                onNavigateToTest={() => setActiveTab('model-test')}
+              />
             </TabsContent>
 
             <TabsContent value="model-test" className="h-full">

@@ -71,6 +71,16 @@ export class ModelTrainingController {
     return new SuccessResponse({ data: result });
   }
 
+  @Get('downloadable-model/:modelTrainingId')
+  @ApiOperation({
+    summary: '获取可下载的模型文件',
+    description: '获取指定模型训练的可下载模型文件信息',
+  })
+  async getDownloadableModel(@Param('modelTrainingId') modelTrainingId: string) {
+    const result = await this.modelTrainingService.getDownloadableModel(modelTrainingId);
+    return new SuccessResponse({ data: result });
+  }
+
   @Get(':modelTrainingId')
   @ApiOperation({
     summary: '获取模型训练',

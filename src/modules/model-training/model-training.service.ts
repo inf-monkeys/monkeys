@@ -27,8 +27,8 @@ import { GetTestTableConfigDto, GetTestTableConfigResponseDto } from './dto/get-
 import { GetTrainingConfigDto } from './dto/get-training-config.dto';
 import { SaveTrainingConfigDto, SaveTrainingConfigResponseDto } from './dto/save-training-config.dto';
 import { StartDataUploadDto } from './dto/start-data-upload.dto';
-import { StartModelTestDto, StartModelTestResponseDto } from './dto/start-model-test.dto';
 import { StartModelTestV2Dto, StartModelTestV2ResponseDto } from './dto/start-model-test-v2.dto';
+import { StartModelTestDto, StartModelTestResponseDto } from './dto/start-model-test.dto';
 import { SubmitDataUploadTaskDto, SubmitDataUploadTaskResponseDto } from './dto/submit-data-upload-task.dto';
 import { UploadDataToTestTableDto, UploadDataToTestTableResponseDto } from './dto/upload-data-to-test-table.dto';
 
@@ -1711,6 +1711,39 @@ export class ModelTrainingService {
       }
     } catch (error) {
       throw new Error(`获取底模列表失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * 获取可下载的模型文件
+   * @param modelTrainingId 模型训练ID
+   * @returns 可下载的模型信息数组，每个元素包含 model_name 和 model_url
+   */
+  async getDownloadableModel(
+    modelTrainingId: string,
+  ): Promise<Array<{ model_name: string; model_url: string }>> {
+    try {
+      // 获取endpoint配置
+      const modelTrainingEndpoint = config.modelTraining?.endpoint || 'http://sh-07.d.run:30064';
+      const apiUrl = `${modelTrainingEndpoint}/api/v1/model/upload/status/${modelTrainingId}`;
+
+      // 调用外部API获取可下载模型
+      const response = await firstValueFrom(
+        this.httpService.get(apiUrl, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }),
+      );
+
+      if (response.data.code === 200) {
+        // 返回 data 字段，如果是数组则返回，否则返回空数组
+        return Array.isArray(response.data.data) ? response.data.data : [];
+      } else {
+        throw new Error(`API返回错误: ${response.data.msg || response.data.message || '未知错误'}`);
+      }
+    } catch (error) {
+      throw new Error(`获取可下载模型失败: ${error.message}`);
     }
   }
 

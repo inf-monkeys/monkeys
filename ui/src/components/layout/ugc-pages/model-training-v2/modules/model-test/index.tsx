@@ -2,8 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import useSWR from 'swr';
 
-import { CheckCircle, Play, Plus, RefreshCw, RotateCcw, X } from 'lucide-react';
-import { Eye, FileText } from 'lucide-react';
+import { CheckCircle, Download, Eye, FileText, Play, Plus, RefreshCw, RotateCcw, X } from 'lucide-react';
 import qs from 'qs';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +10,7 @@ import { toast } from 'sonner';
 
 import { vinesFetcher } from '@/apis/fetcher';
 import { IMediaData } from '@/apis/media-data/typings';
-import { useGetLoraModels, useGetModelTraining, useGetPretrainedModels } from '@/apis/model-training';
+import { useGetDownloadableModel, useGetLoraModels, useGetModelTraining, useGetPretrainedModels } from '@/apis/model-training';
 import { IPaginationListData } from '@/apis/typings';
 import { createTag, useAssetTagList } from '@/apis/ugc';
 import { IAssetItem, IAssetTag, IListUgcDto } from '@/apis/ugc/typings';
@@ -25,7 +24,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useVinesImageManage } from '@/components/ui/image/use-vines-image-manage';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { usePagination } from '@/hooks/use-pagination';
 import { getI18nContent } from '@/utils';
@@ -39,7 +37,7 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
   const { icons, closeIcon } = useVinesImageManage();
   const [selectedLoraModels, setSelectedLoraModels] = useState<string[]>([]);
   const [pretrainedModel, setPretrainedModel] = useState<string>('');
-  const [testMode, setTestMode] = useState<'default' | 'custom'>('default');
+  const [testMode, setTestMode] = useState<'default' | 'custom' | 'download'>('default');
   const [customInputs, setCustomInputs] = useState<string[]>(['']);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(24);
@@ -53,6 +51,10 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
 
   // 获取Lora模型列表（model_type=1，需要model_training_id）
   const { data: loraModels = [], isLoading: isLoadingLoraModels } = useGetLoraModels(modelTrainingId);
+  
+  // 获取可下载模型信息
+  const { data: downloadableModel, isLoading: isLoadingDownloadableModel } = useGetDownloadableModel(modelTrainingId);
+  const [selectedDownloadModel, setSelectedDownloadModel] = useState<string>('');
   const { data: allTags, mutate: mutateTags } = useAssetTagList();
   const [defaultTags, setDefaultTags] = useState<IAssetTag[]>([]);
   const [filterTags, setFilterTags] = useState<IAssetTag[]>([]);
@@ -203,6 +205,13 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
       setLoraModelTags([]);
     }
   }, [loraModels, allTags, mutateTags]);
+
+  // 当可下载模型数据加载完成时，自动选择第一个模型
+  useEffect(() => {
+    if (downloadableModel && downloadableModel.length > 0 && !selectedDownloadModel) {
+      setSelectedDownloadModel(downloadableModel[0].model_name);
+    }
+  }, [downloadableModel, selectedDownloadModel]);
 
   // 初始化标签
   useEffect(() => {
@@ -469,102 +478,161 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
         <div className="space-y-4">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle>模型测试配置</CardTitle>
+              <CardTitle>{testMode === 'download' ? '模型下载配置' : '模型测试配置'}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* 测试模式部分 - 移到最上面 */}
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">测试模式</span>
+                  <span className="text-sm font-medium">{testMode === 'download' ? '下载模式' : '测试模式'}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">默认测试</span>
-                    <Switch
-                      checked={testMode === 'custom'}
-                      onCheckedChange={(checked) => setTestMode(checked ? 'custom' : 'default')}
-                    />
-                    <span className="text-sm">自定义测试</span>
+                    <Select value={testMode} onValueChange={(value) => setTestMode(value as 'default' | 'custom' | 'download')}>
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">默认测试</SelectItem>
+                        <SelectItem value="custom">自定义测试</SelectItem>
+                        <SelectItem value="download">模型下载</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
 
               {/* 模型配置部分 */}
-              <div className="space-y-4">
-                {/* Lora 模型选择和底模选择放在一行 */}
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Lora 模型选择（多选） */}
+              {testMode === 'download' ? (
+                /* 模型下载配置 */
+                <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">Lora 模型（可多选）</label>
+                    <label className="text-sm font-medium">Lora 模型</label>
                     <Select
-                      value={selectedLoraModels[0] || ''}
-                      onValueChange={(value) => {
-                        if (value && !selectedLoraModels.includes(value)) {
-                          setSelectedLoraModels([...selectedLoraModels, value]);
-                        }
-                      }}
-                      disabled={isLoadingLoraModels}
+                      value={selectedDownloadModel}
+                      onValueChange={setSelectedDownloadModel}
+                      disabled={isLoadingDownloadableModel}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={isLoadingLoraModels ? '加载中...' : '选择 Lora 模型'} />
+                        <SelectValue placeholder={isLoadingDownloadableModel ? '加载中...' : '选择 Lora 模型'} />
                       </SelectTrigger>
                       <SelectContent>
-                        {loraModels.length > 0 ? (
-                          loraModels.map((model) => (
-                            <SelectItem key={model} value={model}>
-                              {model}
+                        {downloadableModel && downloadableModel.length > 0 ? (
+                          downloadableModel.map((model) => (
+                            <SelectItem key={model.model_name} value={model.model_name}>
+                              {model.model_name}
                             </SelectItem>
                           ))
                         ) : (
                           <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            {isLoadingLoraModels ? '加载中...' : '暂无可用 Lora 模型'}
+                            {isLoadingDownloadableModel
+                              ? '加载中...'
+                              : downloadableModel && downloadableModel.length === 0
+                                ? '模型正在上传中，请稍后再试'
+                                : '暂无可用模型'}
                           </div>
                         )}
                       </SelectContent>
                     </Select>
-                    {selectedLoraModels.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {selectedLoraModels.map((modelId) => (
-                          <Badge key={modelId} variant="secondary" className="flex items-center gap-1">
-                            {modelId}
-                            <X
-                              className="h-3 w-3 cursor-pointer"
-                              onClick={() => {
-                                setSelectedLoraModels(selectedLoraModels.filter((id) => id !== modelId));
-                              }}
-                            />
-                          </Badge>
-                        ))}
+                    {selectedDownloadModel && (
+                      <div className="mt-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            const selectedModel = downloadableModel?.find(
+                              (model) => model.model_name === selectedDownloadModel,
+                            );
+                            if (selectedModel?.model_url) {
+                              window.open(selectedModel.model_url, '_blank');
+                            }
+                          }}
+                          disabled={!downloadableModel?.find((model) => model.model_name === selectedDownloadModel)?.model_url}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          下载模型
+                        </Button>
                       </div>
                     )}
                   </div>
+                </div>
+              ) : (
+                /* 模型测试配置 */
+                <div className="space-y-4">
+                  {/* Lora 模型选择和底模选择放在一行 */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Lora 模型选择（多选） */}
+                    <div>
+                      <label className="text-sm font-medium">Lora 模型（可多选）</label>
+                      <Select
+                        value={selectedLoraModels[0] || ''}
+                        onValueChange={(value) => {
+                          if (value && !selectedLoraModels.includes(value)) {
+                            setSelectedLoraModels([...selectedLoraModels, value]);
+                          }
+                        }}
+                        disabled={isLoadingLoraModels}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={isLoadingLoraModels ? '加载中...' : '选择 Lora 模型'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {loraModels.length > 0 ? (
+                            loraModels.map((model) => (
+                              <SelectItem key={model} value={model}>
+                                {model}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                              {isLoadingLoraModels ? '加载中...' : '暂无可用 Lora 模型'}
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {selectedLoraModels.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {selectedLoraModels.map((modelId) => (
+                            <Badge key={modelId} variant="secondary" className="flex items-center gap-1">
+                              {modelId}
+                              <X
+                                className="h-3 w-3 cursor-pointer"
+                                onClick={() => {
+                                  setSelectedLoraModels(selectedLoraModels.filter((id) => id !== modelId));
+                                }}
+                              />
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
-                  {/* 底模选择 */}
-                  <div>
-                    <label className="text-sm font-medium">底模选择</label>
-                    <Select
-                      value={pretrainedModel}
-                      onValueChange={setPretrainedModel}
-                      disabled={isLoadingPretrainedModels}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={isLoadingPretrainedModels ? '加载中...' : '选择底模'} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {pretrainedModels.length > 0 ? (
-                          pretrainedModels.map((model) => (
-                            <SelectItem key={model} value={model}>
-                              {model}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            {isLoadingPretrainedModels ? '加载中...' : '暂无可用底模'}
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    {/* 底模选择 */}
+                    <div>
+                      <label className="text-sm font-medium">底模选择</label>
+                      <Select
+                        value={pretrainedModel}
+                        onValueChange={setPretrainedModel}
+                        disabled={isLoadingPretrainedModels}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={isLoadingPretrainedModels ? '加载中...' : '选择底模'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {pretrainedModels.length > 0 ? (
+                            pretrainedModels.map((model) => (
+                              <SelectItem key={model} value={model}>
+                                {model}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                              {isLoadingPretrainedModels ? '加载中...' : '暂无可用底模'}
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* 自定义输入部分 */}
               <div className="space-y-4">
@@ -608,16 +676,18 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
           </Card>
 
           {/* 开始测试按钮 */}
-          <div className="flex gap-2">
-            <Button onClick={() => handleStartTest(false)} disabled={testMode === 'custom'} className="flex-1">
-              <Play className="mr-2 h-4 w-4" />
-              开始默认测试
-            </Button>
-            <Button onClick={() => handleStartTest(true)} disabled={testMode === 'default'} className="flex-1">
-              <Play className="mr-2 h-4 w-4" />
-              开始自定义测试
-            </Button>
-          </div>
+          {testMode !== 'download' && (
+            <div className="flex gap-2">
+              <Button onClick={() => handleStartTest(false)} disabled={testMode === 'custom'} className="flex-1">
+                <Play className="mr-2 h-4 w-4" />
+                开始默认测试
+              </Button>
+              <Button onClick={() => handleStartTest(true)} disabled={testMode === 'default'} className="flex-1">
+                <Play className="mr-2 h-4 w-4" />
+                开始自定义测试
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* 下方：标签筛选和文件显示（上下结构） */}
@@ -678,7 +748,7 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
                       type="text"
                       placeholder="搜索或创建标签..."
                       value={tagSearchValue}
-                      onChange={(e) => setTagSearchValue(e.target.value)}
+                      onChange={(value) => setTagSearchValue(value)}
                       className="mb-3"
                     />
 

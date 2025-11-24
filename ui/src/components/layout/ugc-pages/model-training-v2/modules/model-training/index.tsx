@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import ReactECharts from 'echarts-for-react';
-import { Brain, Download, Maximize2, Play, RefreshCw, Settings, Square } from 'lucide-react';
+import { Brain, Download, Maximize2, Play, RefreshCw, Settings, Square, TestTube } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -168,9 +168,10 @@ type TrainingConfigForm = z.infer<typeof trainingConfigSchema>;
 interface IModelTrainingModuleProps {
   modelTrainingId: string;
   displayName?: string; // 页面显示名称，用于作为默认模型名称
+  onNavigateToTest?: () => void; // 跳转到模型测试页面的回调
 }
 
-export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ modelTrainingId, displayName }) => {
+export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ modelTrainingId, displayName, onNavigateToTest }) => {
   // 获取底模列表
   const { data: pretrainedModels = [], isLoading: isLoadingPretrainedModels } = useGetPretrainedModels('2');
 
@@ -739,9 +740,13 @@ export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ model
     }
   };
 
-  // 下载模型
-  const downloadModel = () => {
-    toast.success('开始下载模型文件...');
+  // 跳转到模型测试
+  const navigateToTest = () => {
+    if (onNavigateToTest) {
+      onNavigateToTest();
+    } else {
+      toast.info('请从模型训练详情页面进入模型测试');
+    }
   };
 
   // 生成图表配置
@@ -1416,9 +1421,9 @@ export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ model
                 </Button>
               )}
               {trainingStatus === 'COMPLETED' && (
-                <Button onClick={downloadModel}>
-                  <Download className="mr-2 h-4 w-4" />
-                  下载模型
+                <Button onClick={navigateToTest}>
+                  <TestTube className="mr-2 h-4 w-4" />
+                  模型测试
                 </Button>
               )}
               {trainingStatus === 'STOPPED' && (
