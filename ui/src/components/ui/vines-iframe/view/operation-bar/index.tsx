@@ -29,7 +29,23 @@ export const WorkbenchOperationBar: React.FC<IWorkbenchOperationBarProps> = ({ o
 
   const { data: initialData } = useWorkflowAssociationList(workflowId);
 
-  const enabledData = useMemo(() => initialData?.filter((it) => it.enabled) ?? [], [initialData]);
+  const enabledData = useMemo(
+    () =>
+      initialData
+        ?.filter((it) => it.enabled)
+        .sort((a, b) => {
+          if (a.type === 'new-design' && b.type !== 'new-design') {
+            return -1;
+          }
+          if (a.type !== 'new-design' && b.type === 'new-design') {
+            return 1;
+          }
+          const aSortIndex = a.sortIndex ?? 0;
+          const bSortIndex = b.sortIndex ?? 0;
+          return aSortIndex - bSortIndex;
+        }) ?? [],
+    [initialData],
+  );
 
   useEffect(() => {
     onDataChange?.(enabledData);
