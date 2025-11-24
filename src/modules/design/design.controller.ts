@@ -4,8 +4,9 @@ import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { DesignAssociationEntity } from '@/database/entities/design/design-association';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
-import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { DesignAssociationService } from './design.association.service';
 import { DesignMetadataService } from './design.metadata.service';
 import { DesignProjectService } from './design.project.service';
@@ -287,12 +288,36 @@ export class DesignController {
   @Get('project/:projectId/export')
   @ApiOperation({
     summary: '导出设计项目',
-    description: '导出设计项目及其所有画板的完整数据',
+    description: '导出设计项目及其所有画板的完整数据（JSON格式）',
   })
   async exportProject(@Req() req: IRequest, @Param('projectId') projectId: string) {
     const { userId } = req;
     const exportData = await this.designProjectService.exportProject(projectId, userId);
     return new SuccessResponse({ data: exportData });
+  }
+
+  @Get('project/:projectId/export-zip')
+  @ApiOperation({
+    summary: '导出设计项目压缩包',
+    description: '导出设计项目及其所有画板的完整数据，包含所有资源文件（图像、视频等）的压缩包',
+  })
+  async exportProjectAsZip(@Req() req: IRequest, @Param('projectId') projectId: string, @Res() res: Response) {
+    const { userId } = req;
+    const zipBuffer = await this.designProjectService.exportProjectAsZip(projectId, userId);
+    
+    // 获取项目名称用于文件名
+    const project = await this.designProjectService.findById(projectId);
+    const projectName = project?.displayName 
+      ? (typeof project.displayName === 'string' ? project.displayName : JSON.stringify(project.displayName))
+      : 'design-project';
+    
+    // 设置响应头
+    res.set({
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(projectName)}-${Date.now()}.zip"`,
+    });
+    
+    res.send(zipBuffer);
   }
 
   @Post('project/import')

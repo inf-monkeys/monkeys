@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { get } from 'lodash';
 import { Download, GitBranch, Link, Pencil, Trash, Upload } from 'lucide-react';
@@ -9,18 +9,18 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
-import { deleteDesignProject, exportDesignProject, importDesignProject } from '@/apis/designs';
+import { deleteDesignProject, exportDesignProjectAsZip, importDesignProject } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor.tsx';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createDesignProjectsColumns } from '@/components/layout/ugc-pages/design-project/consts.tsx';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { DesignAssociationEditorDialog } from '@/components/layout/ugc-pages/design-project/design-association-editor';
 import { DesignProjectCardWrapper } from '@/components/layout/ugc-pages/design-project/design-project-card-wrapper';
 import { DesignProjectVersionManager } from '@/components/layout/ugc-pages/design-project/version-manager';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -238,17 +238,21 @@ export const Designs: React.FC = () => {
     });
   };
 
-  // 处理导出设计项目
-  const handleExportProject = async (project: IAssetItem<IDesignProject>) => {
+  // 处理导出设计项目压缩包（包含资源文件）
+  const handleExportProjectAsZip = async (project: IAssetItem<IDesignProject>) => {
     if (!project.id) {
       toast.warning(t('common.toast.loading'));
       return;
     }
 
     try {
-      const exportData = await exportDesignProject(project.id);
-      const fileName = `${getI18nContent(project.displayName) || 'design-project'}-${Date.now()}.json`;
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const loadingToast = toast.loading(t('common.export.loading', { defaultValue: '正在导出压缩包...' }));
+      const blob = await exportDesignProjectAsZip(project.id);
+      if (!blob) {
+        toast.error(t('common.export.error', { defaultValue: '导出失败' }));
+        return;
+      }
+      const fileName = `${getI18nContent(project.displayName) || 'design-project'}-${Date.now()}.zip`;
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -257,10 +261,11 @@ export const Designs: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      toast.dismiss(loadingToast);
       toast.success(t('common.export.success', { defaultValue: '导出成功' }));
     } catch (error) {
       toast.error(t('common.export.error', { defaultValue: '导出失败' }));
-      console.error('Export project failed:', error);
+      console.error('Export project as zip failed:', error);
     }
   };
 
@@ -364,7 +369,7 @@ export const Designs: React.FC = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onSelect={() => {
-                          void handleExportProject(item);
+                          void handleExportProjectAsZip(item);
                         }}
                       >
                         <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
@@ -444,7 +449,7 @@ export const Designs: React.FC = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
-                    void handleExportProject(item);
+                    void handleExportProjectAsZip(item);
                   }}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
