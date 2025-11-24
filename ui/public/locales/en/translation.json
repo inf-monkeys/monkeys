@@ -772,6 +772,10 @@
         "label": "Feishu",
         "get-info-failed": "Failed to obtain Feishu login information"
       },
+      "dingtalk": {
+        "label": "DingTalk",
+        "get-info-failed": "Failed to obtain DingTalk login information"
+      },
       "button": "Bind {{name}}",
       "loading": "Bind...",
       "success": "Bind successfully",
