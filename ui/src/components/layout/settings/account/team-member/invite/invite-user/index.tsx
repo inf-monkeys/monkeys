@@ -78,10 +78,9 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
             void mutateInviteLinkList();
             if (!link) throw new Error("Link doesn't exists.");
             const newLink = new URL(link);
-            newLink.pathname = newLink.pathname
-              .split('/')
-              .map((it, i) => (i === 1 ? `i-${it}` : it))
-              .join('/');
+            // 使用独立的 /invite/$inviteId 路由
+            const inviteId = newLink.pathname.split('/').filter(Boolean)[0];
+            newLink.pathname = `/invite/i-${inviteId}/`;
             copy(newLink.href);
 
             return t('common.operate.success');

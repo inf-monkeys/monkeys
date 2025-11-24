@@ -10,6 +10,19 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 
+/**
+ * @deprecated 此路由已废弃，请使用新的 /invite/$inviteId 路由
+ * 
+ * 旧路由：/$teamId/join-team/
+ * 新路由：/invite/$inviteId/
+ * 
+ * 新路由的优势：
+ * 1. 未登录用户会看到登录对话框而不是跳转到登录页面
+ * 2. 更好的用户体验，保持上下文
+ * 3. 登录对话框可复用
+ * 
+ * 此页面保留用于向后兼容，但不应再生成使用此路由的新邀请链接
+ */
 const JoinTeamPage: React.FC = () => {
   const { mutate } = useSWRConfig();
   const navigate = useNavigate();

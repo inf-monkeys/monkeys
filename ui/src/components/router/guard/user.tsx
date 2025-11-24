@@ -14,6 +14,8 @@ import VinesEvent from '@/utils/events.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
 export const UserGuard: React.FC = () => {
+  // 邀请页面不需要调用 useUser
+  const isInvitePage = window['vinesRoute']?.[0] === 'invite';
   const { data: user, mutate, error } = useUser();
 
   const [localUser, setUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
@@ -53,7 +55,9 @@ export const UserGuard: React.FC = () => {
   }, [localUser.id]);
 
   useEffect(() => {
-    if (error instanceof Error && window['vinesRoute']?.[0] !== 'workspace') {
+    const routeType = window['vinesRoute']?.[0];
+    // 邀请页面和 workspace 页面不显示登录错误提示
+    if (error instanceof Error && routeType !== 'workspace' && routeType !== 'invite') {
       const errorMessage = error?.message;
 
       if (errorMessage !== 'Login Required') {
@@ -61,6 +65,11 @@ export const UserGuard: React.FC = () => {
       }
     }
   }, [error]);
+
+  // 邀请页面不需要处理用户信息
+  if (isInvitePage) {
+    return null;
+  }
 
   return null;
 };

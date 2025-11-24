@@ -93,8 +93,8 @@ export const exportTeam = async (teamId: string, teamName: string, options: IExp
   })(`/api/export-tenant-assets/${teamId}`, options);
 };
 
-export const useInviteTeam = (inviteId: string) =>
-  useSWR<IInviteTeamData | undefined>(`/api/teams/invites/${inviteId}`, vinesFetcher());
+export const useInviteTeam = (inviteId?: string) =>
+  useSWR<IInviteTeamData | undefined>(inviteId ? `/api/teams/invites/${inviteId}` : null, vinesFetcher());
 
 export const acceptTeamInvite = (inviteId: string) =>
   vinesFetcher<boolean>({ method: 'POST', simple: true })(`/api/teams/invites/${inviteId}/accept`, {});

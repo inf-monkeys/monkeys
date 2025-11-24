@@ -20,7 +20,8 @@ export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) =
 
   if (!token) {
     const [vinesRoute, routeTeamId, workflowId] = window['vinesRoute'];
-    if (vinesRoute !== 'workspace') {
+    // workspace 和 invite 页面允许未登录访问
+    if (vinesRoute !== 'workspace' && vinesRoute !== 'invite') {
       if (useToast) {
         toast.warning(t('auth.login-expired'));
       }
