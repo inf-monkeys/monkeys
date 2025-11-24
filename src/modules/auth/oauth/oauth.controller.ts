@@ -146,9 +146,14 @@ export class OAuthController {
     description: '使用钉钉登录',
     summary: '使用钉钉登录',
   })
-  public async loginByDingtalkOauth(@Query('code') code: string, @Query('state') state: string, @Res() res: Response) {
+  public async loginByDingtalkOauth(
+    @Query('code') code: string,
+    @Query('authCode') authCode: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ) {
     const redirect_to = state?.replace('redirect_to=', '') || `${config.server.appUrl}/login/callback`;
-    const accessToken = await this.oauthService.handleDingtalkCallback(code, state);
+    const accessToken = await this.oauthService.handleDingtalkCallback(code || authCode, state);
     res.redirect(`${redirect_to}?access_token=${accessToken}`);
   }
 }

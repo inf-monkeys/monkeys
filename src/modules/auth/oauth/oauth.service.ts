@@ -207,12 +207,13 @@ export class OAuthService {
     if (!config.auth.dingtalk?.appId || !config.auth.dingtalk?.appSecret) {
       throw new Error('未配置钉钉应用信息');
     }
+    const authCode = code || state; // 钉钉可能回传 authCode 或 code，二者值相同
     const apiBaseUrl = config.auth.dingtalk.apiBaseUrl || 'https://api.dingtalk.com';
     const tokenApi = `${apiBaseUrl}/v1.0/oauth2/userAccessToken`;
     const { data: tokenData } = await axios.post(tokenApi, {
       clientId: config.auth.dingtalk.appId,
       clientSecret: config.auth.dingtalk.appSecret,
-      code,
+      code: authCode,
       grantType: 'authorization_code',
     });
 
@@ -225,6 +226,7 @@ export class OAuthService {
     const { data: userInfoData } = await axios.get(userInfoApi, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        'x-acs-dingtalk-access-token': accessToken,
       },
     });
 
