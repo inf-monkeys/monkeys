@@ -111,15 +111,26 @@ export const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
   // 表单提交：与表单视图一致，创建执行
   const handleSubmit = async (values: any) => {
     try {
-      const instanceId = await vines.start({ inputData: values, onlyStart: true });
-      if (instanceId) {
-        if (
-          !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
-          oem?.theme?.views?.form?.toast?.afterCreate !== false
-        ) {
-          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+      // 提取并行任务数量参数（默认为1）
+      const parallelTaskCount = values.__parallelTaskCount ?? 1;
+
+      const runTask = async () => {
+        const instanceId = await vines.start({ inputData: values, onlyStart: true });
+        if (instanceId) {
+          if (
+            !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
+            oem?.theme?.views?.form?.toast?.afterCreate !== false
+          ) {
+            toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+          }
         }
-      }
+      };
+
+      // 创建并行任务数组
+      const tasks = Array.from({ length: parallelTaskCount }, () => runTask());
+
+      // 并行执行所有任务
+      await Promise.allSettled(tasks);
     } catch (error) {
       toast.error(t('workspace.pre-view.actuator.execution.error'));
     }
