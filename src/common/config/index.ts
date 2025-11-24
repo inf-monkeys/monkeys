@@ -346,6 +346,13 @@ export interface FeishuConfig {
   appSecret: string;
 }
 
+export interface DingtalkConfig {
+  appId: string;
+  appSecret: string;
+  apiBaseUrl?: string;
+  loginBaseUrl?: string;
+}
+
 export interface AuthConfig {
   enabled: AuthMethod[];
   sessionSecret?: string;
@@ -360,6 +367,7 @@ export interface AuthConfig {
   privilegedToken?: string;
   wework?: WeWorkConfig;
   feishu?: FeishuConfig;
+  dingtalk?: DingtalkConfig;
   hideAuthToast?: boolean;
   autoReload?: boolean;
   defaultOtherTeam?: boolean;
@@ -870,6 +878,12 @@ export const config: Config = {
       feishuApiUrl: readConfig('auth.feishu.feishuApiUrl', 'https://open.feishu.cn'),
       appId: readConfig('auth.feishu.appId'),
       appSecret: readConfig('auth.feishu.appSecret'),
+    },
+    dingtalk: {
+      appId: readConfig('auth.dingtalk.appId'),
+      appSecret: readConfig('auth.dingtalk.appSecret'),
+      apiBaseUrl: readConfig('auth.dingtalk.apiBaseUrl', readConfig('auth.dingtalk.apiUrl', 'https://api.dingtalk.com')),
+      loginBaseUrl: readConfig('auth.dingtalk.loginBaseUrl', 'https://login.dingtalk.com'),
     },
     saltTotp: readConfig('auth.saltTotp'),
     totpDigits: readConfig('auth.totpDigits', 8),

@@ -17,3 +17,8 @@ export const getFeishuOAuthInfo = () =>
   vinesFetcher<{ appId: string; feishuApiUrl: string; redirectUri: string }>({ method: 'GET', auth: false })(
     '/api/auth/oauth/feishu/info',
   );
+
+export const getDingtalkOAuthInfo = () =>
+  vinesFetcher<{ appId: string; loginBaseUrl?: string; redirectUri: string }>({ method: 'GET', auth: false })(
+    '/api/auth/oauth/dingtalk/info',
+  );

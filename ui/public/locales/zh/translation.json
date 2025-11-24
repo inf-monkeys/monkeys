@@ -762,6 +762,14 @@
         "label": "企业微信",
         "get-info-failed": "获取企业微信登录信息失败"
       },
+      "feishu": {
+        "label": "飞书",
+        "get-info-failed": "获取飞书登录信息失败"
+      },
+      "dingtalk": {
+        "label": "钉钉",
+        "get-info-failed": "获取钉钉登录信息失败"
+      },
       "button": "绑定{{name}}快捷登录",
       "loading": "绑定中...",
       "success": "绑定成功",
