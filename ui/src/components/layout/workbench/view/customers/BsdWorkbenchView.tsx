@@ -18,8 +18,11 @@ type CustomOptions = {
 const getCustomOptions = (page: Partial<IPinPage>): CustomOptions =>
   (page.customOptions as CustomOptions) ?? {};
 
+const getPageInfo = (page?: Partial<IPinPage>) => page?.workflow ?? page?.agent ?? page?.designProject ?? page?.info;
+
 export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => {
-  const displayName = getI18nContent(page.displayName) ?? '波司登工作台';
+  const displayName =
+    getI18nContent(getPageInfo(page)?.displayName) ?? getI18nContent(page.displayName) ?? '波司登工作台';
   const { inspiration } = getCustomOptions(page);
 
   return (
@@ -28,3 +31,4 @@ export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => 
     </div>
   );
 };
+

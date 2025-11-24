@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
 import { useWorkspacePages } from '@/apis/pages';
+import { IPinPage } from '@/apis/pages/typings';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -30,6 +31,11 @@ import { BsdWorkbenchView } from './customers/BsdWorkbenchView';
 interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
   mode?: 'normal' | 'fast' | 'mini';
 }
+
+const getPageInfo = (page?: Partial<IPinPage>) => page?.workflow ?? page?.agent ?? page?.designProject ?? page?.info;
+
+const getPageDisplayName = (page?: Partial<IPinPage>) =>
+  getI18nContent(getPageInfo(page)?.displayName) ?? getI18nContent(page?.displayName) ?? '';
 
 export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const { t } = useTranslation();
@@ -56,8 +62,12 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const hasPages = (pages?.length ?? 0) > 0;
 
   const teamPage = page?.[teamId] ?? {};
+  const cachedPage = pages?.find((item) => item.id === teamPage?.id);
+  const resolvedDisplayName = getPageDisplayName(teamPage) || getPageDisplayName(cachedPage);
   const hasPage = !!(teamPage?.id && teamPage?.type);
   const isBsdTheme = systemConfig?.theme?.id === 'bsd';
+  const isInspirationPage =
+    (resolvedDisplayName ?? '').trim() === '灵感生成' || (resolvedDisplayName ?? '').trim() === 'Inspiration Generation';
 
   // 检查是否是 Vision Pro 工作流
   const pageName = getI18nContent(teamPage?.displayName) ?? '';
@@ -116,7 +126,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
                 <h2 className="font-bold">请在 Vision Pro 中打开使用</h2>
               </div>
             </motion.div>
-          ) : isBsdTheme ? (
+          ) : isBsdTheme && isInspirationPage ? (
             <motion.div
               key="vines-workbench-view-bsd"
               className="absolute top-0 size-full overflow-hidden"
