@@ -9,10 +9,10 @@ import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';

@@ -25,6 +25,8 @@ import { useCurrentPage } from '@/store/useCurrentPageStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn, getI18nContent } from '@/utils';
 
+import { BsdWorkbenchView } from './customers/BsdWorkbenchView';
+
 interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
   mode?: 'normal' | 'fast' | 'mini';
 }
@@ -55,6 +57,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
 
   const teamPage = page?.[teamId] ?? {};
   const hasPage = !!(teamPage?.id && teamPage?.type);
+  const isBsdTheme = systemConfig?.theme?.id === 'bsd';
 
   // 检查是否是 Vision Pro 工作流
   const pageName = getI18nContent(teamPage?.displayName) ?? '';
@@ -112,6 +115,17 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
               <div className="flex flex-col text-center">
                 <h2 className="font-bold">请在 Vision Pro 中打开使用</h2>
               </div>
+            </motion.div>
+          ) : isBsdTheme ? (
+            <motion.div
+              key="vines-workbench-view-bsd"
+              className="absolute top-0 size-full overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <BsdWorkbenchView page={teamPage} />
             </motion.div>
           ) : (
             <motion.div
