@@ -186,7 +186,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                     onChange={onChange}
                     form={form}
                     value={value}
-                    field={field}
+                    // field={field}
                     setLinkage={setLinkage}
                     filter={(m) => (enableFilter ? filterList?.includes(m.value) === filterReserve : true)}
                   />

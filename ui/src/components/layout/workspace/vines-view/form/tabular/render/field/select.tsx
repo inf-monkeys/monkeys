@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import { ControllerRenderProps, FieldValues, UseFormReturn } from 'react-hook-form';
+import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ interface IFieldSelectProps extends React.ComponentPropsWithoutRef<'div'> {
   onChange: (value: any) => void;
 
   form: UseFormReturn<IWorkflowInputForm>;
-  field: Omit<ControllerRenderProps<FieldValues, string>, 'value' | 'onChange'>;
+  // field: Omit<ControllerRenderProps<FieldValues, string>, 'value' | 'onChange'>;
 
   filter?: (it: TSelect) => boolean;
 
@@ -33,6 +33,7 @@ interface IFieldSelectProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const FieldSelect: React.FC<IFieldSelectProps> = ({
   input: { type, name, displayName, typeOptions },
+  // field,
   form,
   value,
   onChange,
@@ -144,8 +145,8 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
         />
       </SelectTrigger>
       <SelectContent>
-        {selectList.map((it, i) => (
-          <SelectItem value={it.value?.toString()} key={i}>
+        {selectList.map((it) => (
+          <SelectItem value={it.value?.toString()} key={it.value?.toString()}>
             {getI18nContent(it.label)}
           </SelectItem>
         ))}
