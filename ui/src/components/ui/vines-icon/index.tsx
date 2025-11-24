@@ -60,7 +60,16 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
     if (src.startsWith('custom-icon:')) return 'custom-icon';
     if (src.startsWith('lucide:')) return 'lucide';
     if (iconNames.includes(src)) return 'lucide';
-    if (isURL(src, { require_tld: false, allow_underscores: true })) return 'img';
+    if (
+      isURL(src, {
+        require_protocol: true,
+        protocols: ['http', 'https'],
+        require_tld: false,
+        allow_underscores: true,
+        allow_protocol_relative_urls: false,
+      })
+    )
+      return 'img';
     return 'emoji';
   }, [src, iconNames]);
 
@@ -102,7 +111,14 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
       ) : (
         <div
           className={cn('flex h-full w-full items-center justify-center', backgroundClass)}
-          style={showBackground ? { backgroundColor: propBackgroundColor || backgroundColor } : {}}
+          style={
+            showBackground
+              ? {
+                  backgroundColor:
+                    active && activeBackgroundColor ? activeBackgroundColor : propBackgroundColor || backgroundColor,
+                }
+              : {}
+          }
         >
           {iconType === 'img' && <VinesImage src={src} alt={alt} disabled={disabledPreview} />}
           {iconType === 'emoji' && emojiRenderer(text, { protocol: 'https', ext: '.png' })}
