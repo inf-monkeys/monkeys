@@ -58,11 +58,26 @@ export const saveAuthToken = async (token: string): Promise<Partial<IVinesUser> 
 export const logout = () => {
   const user = readLocalStorageValue<Partial<IVinesUser>>('vines-account', {});
   const userName = user?.name;
+  const userId = user?.id;
 
   if (userName) {
     toast.success(i18n.t('auth.users.logout-user', { name: userName }));
   } else {
     toast.error(i18n.t('auth.users.logout-success'));
+  }
+
+  // 保存当前用户的 teamId，以便该用户再次登录时能恢复
+  if (userId) {
+    const currentTeamId = readLocalStorageValue('vines-team-id', '', false);
+    if (currentTeamId) {
+      try {
+        const userTeamMap = readLocalStorageValue<Record<string, string>>('vines-user-team-map', {});
+        userTeamMap[userId] = currentTeamId;
+        setLocalStorage('vines-user-team-map', userTeamMap);
+      } catch (error) {
+        console.error('Failed to save user team mapping:', error);
+      }
+    }
   }
 
   deleteLocalStorage('vines-token', false);
