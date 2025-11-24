@@ -225,7 +225,6 @@ export class OAuthService {
     const userInfoApi = `${apiBaseUrl}/v1.0/contact/users/me`;
     const { data: userInfoData } = await axios.get(userInfoApi, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
         'x-acs-dingtalk-access-token': accessToken,
       },
     });
