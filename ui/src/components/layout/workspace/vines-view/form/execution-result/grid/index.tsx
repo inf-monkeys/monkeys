@@ -18,6 +18,7 @@ import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execut
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import useUrlState from '@/hooks/use-url-state';
 import { useOutputSelectionStore } from '@/store/useOutputSelectionStore';
 import { usePageStore } from '@/store/usePageStore';
@@ -26,6 +27,7 @@ import { useShouldFilterError } from '@/store/useShouldErrorFilterStore.ts';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
+import { mergeRefs } from '@/utils/merge-refs.ts';
 
 import { ErrorFilter } from './error-filter';
 import { ExecutionResultItem } from './item';
@@ -58,10 +60,16 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { ref: scrollViewportRef, width: scrollViewportWidth } = useElementSize<HTMLDivElement>();
+  const mergedScrollRef = React.useMemo(
+    () => mergeRefs([scrollRef, scrollViewportRef]),
+    [scrollRef, scrollViewportRef],
+  );
   const retryRef = useRef(0);
   const formContainerWidth = usePageStore((s) => s.containerWidth);
   const { isUseWorkSpace, isUseWorkbench } = useVinesRoute();
-  const { isSelectionMode, setSelectionMode, selectedOutputs, toggleOutputSelection, clearSelection } = useOutputSelectionStore();
+  const { isSelectionMode, setSelectionMode, selectedOutputs, toggleOutputSelection, clearSelection } =
+    useOutputSelectionStore();
   const { data: associations } = useWorkflowAssociationList(workflowId);
   const { data: oem } = useSystemConfig();
   const pageFrom = useViewStore((s) => s.from);
@@ -124,10 +132,10 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
             // 从URL提取文件名,如果没有则使用默认名称
             const urlParts = imageUrl.split('/');
             let fileName = urlParts[urlParts.length - 1] || `image-${item.render.key}`;
-            
+
             // 清理文件名中的查询参数
             fileName = fileName.split('?')[0];
-            
+
             // 确保文件名有扩展名
             if (!fileName.includes('.')) {
               // 根据 blob type 确定扩展名
@@ -146,7 +154,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
         // 等待所有图片下载完成
         const results = await Promise.all(downloadPromises);
-        
+
         // 检查是否有成功的下载
         const successCount = results.filter((r) => r?.success).length;
         if (successCount === 0) {
@@ -162,11 +170,11 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
         // 使用 file-saver 下载 zip 文件
         saveAs(zipBlob, zipFileName);
-        
+
         // 下载完成后清空选中状态并退出选择模式
         clearSelection();
         setSelectionMode(false);
-        
+
         // 如果有部分图片下载失败,在控制台输出警告
         const failedCount = results.filter((r) => r && !r.success).length;
         if (failedCount > 0) {
@@ -195,9 +203,15 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const [deletedInstanceIdList, setDeletedInstanceIdList] = useState<string[]>([]);
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
   const isMiniFrame = mode === 'mini';
-  const containerWidth = onlyResult
+  const rawContainerWidth = onlyResult
     ? formContainerWidth - 64
     : formContainerWidth * (isMiniFrame ? 1 : 0.6) - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0) - (isMiniFrame ? 12 : 0);
+  const enabledAssociationCount = associations?.filter((it) => it.enabled).length ?? 0;
+  const hasAssociationSidebar = isUseWorkbench && enabledAssociationCount > 0;
+  const normalizedContainerWidth = Number.isFinite(rawContainerWidth) ? rawContainerWidth : 0;
+  const fallbackContainerWidth = Math.max(normalizedContainerWidth, 0);
+  const viewportWidth = scrollViewportWidth || fallbackContainerWidth;
+  const containerWidth = Math.max(0, viewportWidth - (hasAssociationSidebar ? 80 : 0));
   const shouldFilterError = useShouldFilterError();
   const positioner = usePositioner(
     {
@@ -205,10 +219,9 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         isUseWorkbench && (associations?.filter((it) => it.enabled).length ?? 0) > 0
           ? containerWidth - 80
           : containerWidth,
-      // 适当增大列间距，避免相邻卡片边框在视觉上“重叠”
-      columnGutter: 12,
-      columnWidth: 200,
-      rowGutter: 12,
+      columnGutter: 10,
+      columnWidth: 160,
+      rowGutter: 10,
       columnCount: isMiniFrame ? 2 : void 0,
     },
     [data.length, workflowId, shouldFilterError, displayType],
@@ -337,23 +350,29 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         ? containerWidth - 80
         : containerWidth;
 
-    const itemSize = 200;
-    // 网格布局下也同步增大间距
-    const gap = 12;
+    const itemSize = 160;
+    const gap = 10;
     const columnsCount = Math.floor((containerWidthValue + gap) / (itemSize + gap));
 
     const isPomItem = (item: IVinesExecutionResultItem) => {
       const d: any = item?.render?.data as any;
       const payload = d && typeof d === 'object' ? (d.data ? d.data : d) : null;
-      const hasMeasurementsTable =
-        !!(payload && Array.isArray(payload.measurements_table) && payload.measurements_table.length > 0);
+      const hasMeasurementsTable = !!(
+        payload &&
+        Array.isArray(payload.measurements_table) &&
+        payload.measurements_table.length > 0
+      );
 
       // 已经有测量表格输出的结果，直接按 POM 结果处理
       if (hasMeasurementsTable) return true;
 
       // 对于已识别为 POM 的工作流，为运行中 / 暂停中的 JSON 结果预留同样的布局空间，
       // 确保「运行中」卡片组与最终结果卡片组宽高保持一致
-      if (isPomWorkflow && item.render.type === 'json' && ['SCHEDULED', 'RUNNING', 'PAUSED'].includes(item.render.status))
+      if (
+        isPomWorkflow &&
+        item.render.type === 'json' &&
+        ['SCHEDULED', 'RUNNING', 'PAUSED'].includes(item.render.status)
+      )
         return true;
 
       return false;
@@ -421,7 +440,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
             ? '[&>[data-radix-scroll-area-viewport]]:p-0'
             : '[&>[data-radix-scroll-area-viewport]]:p-2',
         )}
-        ref={scrollRef}
+        ref={mergedScrollRef}
         style={{
           height: height === Infinity ? 800 - executionResultFilterHeight : height - executionResultFilterHeight,
         }}
