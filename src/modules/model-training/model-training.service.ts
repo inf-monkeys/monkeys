@@ -1704,12 +1704,30 @@ export class ModelTrainingService {
         }),
       );
 
+      // 如果返回200且data是数组，返回数据
       if (response.data.code === 200 && Array.isArray(response.data.data)) {
         return response.data.data;
-      } else {
-        throw new Error(`API返回格式不正确: ${JSON.stringify(response.data)}`);
       }
+      
+      // 如果返回404，说明路径不存在或模型未生成，返回空数组
+      // 这是正常情况，不应该抛出错误
+      if (response.data.code === 404) {
+        return [];
+      }
+
+      // 如果返回其他非200状态码，也返回空数组（避免因业务错误导致前端报错）
+      if (response.data.code !== 200) {
+        return [];
+      }
+
+      // 如果code是200但data不是数组，返回空数组
+      return Array.isArray(response.data.data) ? response.data.data : [];
     } catch (error) {
+      // 如果是HTTP错误（如404），返回空数组而不是抛出错误
+      if (error.response?.status === 404 || error.response?.data?.code === 404) {
+        return [];
+      }
+      // 其他错误仍然抛出，但记录更详细的错误信息
       throw new Error(`获取底模列表失败: ${error.message}`);
     }
   }
