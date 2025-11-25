@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { useGetDefaultLoginTeam } from '@/hooks/use-get-default-login-team.ts';
-import { setLocalStorage } from '@/hooks/use-local-storage';
+import { readLocalStorageValue, setLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
 import VinesEvent from '@/utils/events.ts';
 
@@ -106,6 +106,8 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({
           mutate('/api/teams').then((it: IVinesTeam[] | undefined) => {
             setLoading(false);
             setLocalStorage('vines-teams', it);
+            
+            // 优先使用 redirect 参数中的 teamId
             if (
               redirect_id &&
               redirect_params &&
@@ -114,7 +116,29 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({
             ) {
               VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
             } else {
-              const currentTeamId = getDefaultTeam(it);
+              // 尝试恢复该用户上次访问的团队
+              let currentTeamId: string | undefined;
+              const userId = result?.id;
+              
+              if (userId) {
+                try {
+                  const userTeamMap = readLocalStorageValue<Record<string, string>>('vines-user-team-map', {});
+                  const savedTeamId = userTeamMap[userId];
+                  const isValidSavedTeam = savedTeamId && it?.some((item: { id: string }) => item.id === savedTeamId);
+                  
+                  if (isValidSavedTeam) {
+                    currentTeamId = savedTeamId;
+                  }
+                } catch (error) {
+                  console.error('Failed to restore user team mapping:', error);
+                }
+              }
+              
+              // 如果没有保存的 teamId 或无效，使用默认团队
+              if (!currentTeamId) {
+                currentTeamId = getDefaultTeam(it);
+              }
+              
               if (currentTeamId) {
                 localStorage.setItem('vines-team-id', currentTeamId);
                 window['vinesTeamId'] = currentTeamId;

@@ -482,6 +482,9 @@
               "model-training": {
                 "label": "模型训练"
               },
+              "model-training-v2": {
+                "label": "模型训练2.0"
+              },
               "neural-models": {
                 "label": "神经模型"
               }
@@ -759,6 +762,14 @@
         "label": "企业微信",
         "get-info-failed": "获取企业微信登录信息失败"
       },
+      "feishu": {
+        "label": "飞书",
+        "get-info-failed": "获取飞书登录信息失败"
+      },
+      "dingtalk": {
+        "label": "钉钉",
+        "get-info-failed": "获取钉钉登录信息失败"
+      },
       "button": "绑定{{name}}快捷登录",
       "loading": "绑定中...",
       "success": "绑定成功",
@@ -777,7 +788,8 @@
     "re-login": "重新登录",
     "login-required": "接口鉴权异常！建议重新登录（{{ count }}）",
     "api-403": "接口鉴权异常！建议重新登录",
-    "api-invalid": "接口数据异常！建议重新登录"
+    "api-invalid": "接口数据异常！建议重新登录",
+    "login-to-continue": "登录以继续"
   },
   "settings": {
     "title": "配置中心",
@@ -4023,6 +4035,13 @@
       "execution-result": {
         "select-mode": {
           "title": "选择模式"
+        },
+        "batch-download": {
+          "button": "批量下载",
+          "loading": "正在打包 {{count}} 张图片到压缩包...",
+          "success": "成功打包 {{count}} 张图片到压缩包",
+          "error": "批量下载失败",
+          "no-images": "没有可下载的图片"
         }
       }
     },
@@ -4442,6 +4461,30 @@
       "neuralModelGenerated": "神经模型生成成功",
       "neuralModelGeneratedFailed": "生成神经模型失败",
       "3dThumbnailGenerated": "3D模型缩略图生成成功"
+    }
+  },
+  "pages": {
+    "invite": {
+      "title": "「{{teamName}}」邀请您加入团队",
+      "default-description": "加入团队以开始协作",
+      "join-button": "立即加入团队",
+      "back-to-home": "返回首页",
+      "already-member": "您已是「{{teamName}}」团队成员，正在跳转到团队页面...",
+      "already-joined": "您已是该团队成员，正在跳转到团队页面...",
+      "joining": "正在加入团队...",
+      "join-success": "成功加入团队",
+      "join-failed": "加入团队失败",
+      "loading": {
+        "title": "加载中...",
+        "description": "正在获取邀请信息"
+      },
+      "error": {
+        "title": "邀请链接无效",
+        "default": "邀请链接不存在或已过期",
+        "link-not-found": "邀请链接不存在或已过期",
+        "cannot-get-team-info": "无法获取团队信息，正在返回",
+        "fetch-failed": "获取团队邀请信息失败: {{message}}"
+      }
     }
   }
 }

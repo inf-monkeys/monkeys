@@ -1,39 +1,43 @@
-import { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
+import { createLazyFileRoute } from '@tanstack/react-router';
 
-import {
-  useSetMediaDataFilter,
-  useSetMediaDataPagination,
-  useSetMediaDataSearch,
-  useSetMediaDataSelectedRuleId,
-} from '@/store/useMediaDataStore';
+import { VinesLoading } from '@/components/ui/loading';
 
-const TARGET_KEYWORD = '测试自定义参数化建模';
+const WORKFLOW_ID = '68db488c1f1339a3eeb377a9';
+const PAGE_ID = '68db488d14d998637f3c4938';
+const WORKSPACE_PATH = `/workspace/${WORKFLOW_ID}/${PAGE_ID}`;
 
 export const DesignSoftwareEvaluations: React.FC = () => {
-  const navigate = useNavigate();
   const { teamId } = Route.useParams();
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
-  const setSearch = useSetMediaDataSearch();
-  const setPagination = useSetMediaDataPagination();
-  const setFilter = useSetMediaDataFilter();
-  const setSelectedRuleId = useSetMediaDataSelectedRuleId();
+  const iframeSrc = useMemo(() => {
+    return `/${teamId}${WORKSPACE_PATH}?hideSpaceHeader=1`;
+  }, [teamId]);
 
   useEffect(() => {
-    setSearch(TARGET_KEYWORD);
-    setPagination({ pageIndex: 0 });
-    setFilter({});
-    setSelectedRuleId(undefined);
+    setIframeLoaded(false);
+  }, [iframeSrc]);
 
-    navigate({
-      to: '/$teamId/nav/concept-design:design-templates-and-innovation-approaches/design-project',
-      params: { teamId },
-      replace: true,
-    });
-  }, [navigate, setFilter, setPagination, setSearch, setSelectedRuleId, teamId]);
-
-  return null;
+  return (
+    <main className="size-full">
+      <div className="relative flex size-full flex-col overflow-hidden rounded-lg border border-input bg-slate-1">
+        {!iframeLoaded && (
+          <div className="vines-center absolute inset-0 z-10 bg-slate-1">
+            <VinesLoading />
+          </div>
+        )}
+        <iframe
+          key={iframeSrc}
+          src={iframeSrc}
+          title="设计软件测评工作台"
+          className="h-full w-full flex-1 border-0"
+          onLoad={() => setIframeLoaded(true)}
+        />
+      </div>
+    </main>
+  );
 };
 
 export const Route = createLazyFileRoute('/$teamId/design-software-evaluations/')({

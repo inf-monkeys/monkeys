@@ -34,26 +34,35 @@ export default class RapidUpload<M extends Meta, B extends Body> extends BasePlu
     this.prepareUpload = this.prepareUpload.bind(this);
   }
 
-  async getRemoteUrlWithMd5(md5: string): Promise<string | null> {
-    return (await getResourceByMd5(md5))?.data?.url || null;
+  async getRemoteUrlWithMd5(md5: string): Promise<{ url: string; assetId: string } | null> {
+    const result = await getResourceByMd5(md5);
+    if (result?.data?.url && result?.data?.id) {
+      return {
+        url: result.data.url,
+        assetId: result.data.id,
+      };
+    }
+    return null;
   }
 
   async prepareUpload(fileIDs: string[]): Promise<void> {
     const calculatedFiles: UppyFile<M, B>[] = [];
     const calculateAndApplyResult = this.#RateLimitedQueue.wrapPromiseFunction(async (file: UppyFile<M, B>) => {
       try {
-        const remoteUrl = await this.getRemoteUrlWithMd5(file.meta.md5 as string);
+        const rapidUploadResult = await this.getRemoteUrlWithMd5(file.meta.md5 as string);
 
-        if (remoteUrl) {
-          this.uppy.log(`[RapidUpload] Found remote file for ${file.id}: ${remoteUrl}`, 'debug');
+        if (rapidUploadResult) {
+          this.uppy.log(`[RapidUpload] Found remote file for ${file.id}: ${rapidUploadResult.url}`, 'debug');
           this.uppy.setFileState(file.id, {
             ...file,
             isRemote: true,
-            uploadURL: remoteUrl,
+            uploadURL: rapidUploadResult.url,
             meta: {
               ...file.meta,
-              remoteUrl,
+              remoteUrl: rapidUploadResult.url,
               isRapidUploaded: true,
+              assetId: rapidUploadResult.assetId, // 设置 assetId，供后续使用
+              mediaFileId: rapidUploadResult.assetId, // 兼容性：也设置 mediaFileId
             },
             progress: { ...file.progress, uploadComplete: true, percentage: 100 },
           });

@@ -212,7 +212,15 @@ export class AssetsCommonRepository {
     );
   }
 
-  public async updateAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
+  public async updateAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[], merge: boolean = true) {
+    // 验证参数
+    if (!teamId || typeof teamId !== 'string') {
+      throw new Error(`updateAssetTags: teamId 必须是非空字符串，当前值: ${teamId}, 类型: ${typeof teamId}`);
+    }
+    if (!tagIds || !Array.isArray(tagIds) || tagIds.length === 0) {
+      throw new Error(`updateAssetTags: tagIds 必须是非空数组，当前值: ${JSON.stringify(tagIds)}`);
+    }
+
     const originalTags = await this.assetsTagRelationsRepo.find({
       where: {
         isDeleted: false,
@@ -221,8 +229,13 @@ export class AssetsCommonRepository {
       },
     });
     const originalTagIds = originalTags.map((x) => x.tagId);
-    const toDelete = originalTags.filter((x) => !tagIds.includes(x.tagId));
-    const toAdd = tagIds.filter((x) => !originalTagIds.includes(x));
+
+    // 如果是合并模式，将新标签合并到现有标签中（去重）
+    const finalTagIds = merge ? [...new Set([...originalTagIds, ...tagIds])] : tagIds;
+
+    const toDelete = originalTags.filter((x) => !finalTagIds.includes(x.tagId));
+    const toAdd = finalTagIds.filter((x) => !originalTagIds.includes(x));
+
     for (const tag of toDelete) {
       await this.assetsTagRelationsRepo.update(
         {
@@ -234,15 +247,22 @@ export class AssetsCommonRepository {
       );
     }
     for (const tagId of toAdd) {
+      // 确保 tagId 是字符串
+      const tagIdStr = String(tagId);
+      if (!tagIdStr) {
+        console.error(`updateAssetTags: 跳过空的 tagId, teamId: ${teamId}, assetId: ${assetId}`);
+        continue;
+      }
+
       await this.assetsTagRelationsRepo.save({
         id: generateDbId(),
         isDeleted: false,
         createdTimestamp: Date.now(),
         updatedTimestamp: Date.now(),
-        teamId,
+        teamId: String(teamId), // 确保是字符串
         assetType,
         assetId,
-        tagId,
+        tagId: tagIdStr,
       });
     }
   }

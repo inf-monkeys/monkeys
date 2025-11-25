@@ -1069,7 +1069,7 @@ export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ model
         {/* 标题和描述 */}
         <div>
           <h2 className="text-2xl font-bold">模型训练</h2>
-          <p className="mt-2 text-muted-foreground">配置训练参数并开始模型训练过程</p>
+          <p className="mt-2 text-muted-foreground">配置训练参数并开始模型训练</p>
         </div>
 
         {/* 训练状态 */}

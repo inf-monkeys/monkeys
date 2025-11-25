@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useSystemConfig } from '@/apis/common';
 import { CustomizationUgc } from '@/apis/common/typings';
 import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
-import { useAssetFilterRuleList } from '@/apis/ugc';
+import { useAssetFilterRuleList, useUgcMediaDataForFolderView } from '@/apis/ugc';
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import {
@@ -93,10 +93,23 @@ export const UgcView = <E extends object>({
     `vines-ui-asset-display-mode`,
     {},
   );
-  const displayMode = useMemo(
-    () => (!team || !assetKey ? null : _.get(displayModeStorage, [team.teamId, assetKey], 'card')),
-    [displayModeStorage, team.teamId, assetKey],
-  );
+  // 添加本地状态以确保立即更新显示模式
+  const [localDisplayMode, setLocalDisplayMode] = useState<string | null>(null);
+  const displayMode = useMemo(() => {
+    if (localDisplayMode !== null) {
+      return localDisplayMode;
+    }
+    return !team || !assetKey ? null : _.get(displayModeStorage, [team.teamId, assetKey], 'card');
+  }, [displayModeStorage, team.teamId, assetKey, localDisplayMode]);
+
+  // 当 displayModeStorage 从外部更新时（比如用户手动切换视图），重置本地状态
+  useEffect(() => {
+    const storageMode = !team || !assetKey ? null : _.get(displayModeStorage, [team.teamId, assetKey], 'card');
+    if (localDisplayMode !== null && localDisplayMode !== storageMode) {
+      // 如果 localStorage 的值与本地状态不同，说明用户手动切换了视图，重置本地状态
+      setLocalDisplayMode(null);
+    }
+  }, [displayModeStorage, team?.teamId, assetKey, localDisplayMode]);
 
   const [defaultPageSizeStorage, setDefaultPageSizeStorage] = useLocalStorage<IDefaultPageSizeStorage>(
     `vines-ui-asset-default-page-size`,
@@ -192,6 +205,12 @@ export const UgcView = <E extends object>({
     setSearchInput(search);
   }, [search]);
 
+  // Clear search when assetKey changes to prevent search state leaking between pages
+  useEffect(() => {
+    setStoredSearch('');
+    setSearchInput('');
+  }, [assetKey, setStoredSearch]);
+
   // 处理文件夹点击
   const handleFolderClick = (folderId: string, folderFilter: Partial<IListUgcDto['filter']>) => {
     // 设置左侧分组选中状态
@@ -206,7 +225,10 @@ export const UgcView = <E extends object>({
       pageIndex: 0,
     }));
 
-    // 切换到画廊视图
+    // 立即切换到画廊视图（使用本地状态确保立即生效）
+    setLocalDisplayMode('gallery');
+
+    // 同时更新 localStorage（用于持久化）
     setDisplayModeStorage((prev) => {
       const newStorage = {
         ...prev,
@@ -234,11 +256,16 @@ export const UgcView = <E extends object>({
   });
 
   // 获取所有数据用于文件夹视图
+  // 注意：文件夹视图需要所有数据，不应受筛选条件影响，只保留搜索条件
+  // 对于媒体文件，使用新的API接口直接获取分组数据
+  const isMediaFile = assetKey === 'media-data' || assetType === 'media-file';
+  const { data: folderViewData } = useUgcMediaDataForFolderView(isMediaFile ? search : undefined);
+
   const { data: allDataRaw } = useUgcFetcher({
     page: 1,
     limit: 100000, // 获取大量数据
     search: search || undefined,
-    filter,
+    filter: {}, // 文件夹视图不使用筛选条件，以获取所有数据
     orderBy: sortCondition.orderBy,
     orderColumn: sortCondition.orderColumn,
   });
@@ -449,8 +476,10 @@ export const UgcView = <E extends object>({
                 <UgcViewFolderView
                   allData={allDataRaw?.data || []}
                   filter={filter}
+                  currentRuleId={selectedRuleId}
                   assetFilterRules={assetFilterRules || []}
                   onFolderClick={handleFolderClick}
+                  folderViewData={isMediaFile ? folderViewData : undefined}
                 />
               ) : rows.length === 0 ? (
                 !isLoading && (

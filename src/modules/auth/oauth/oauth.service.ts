@@ -201,4 +201,49 @@ export class OAuthService {
     const jwtToken = JwtHelper.signToken(user);
     return jwtToken;
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async handleDingtalkCallback(code: string, state: string) {
+    if (!config.auth.dingtalk?.appId || !config.auth.dingtalk?.appSecret) {
+      throw new Error('未配置钉钉应用信息');
+    }
+    const authCode = code || state; // 钉钉可能回传 authCode 或 code，二者值相同
+    const apiBaseUrl = config.auth.dingtalk.apiBaseUrl || 'https://api.dingtalk.com';
+    const tokenApi = `${apiBaseUrl}/v1.0/oauth2/userAccessToken`;
+    const { data: tokenData } = await axios.post(tokenApi, {
+      clientId: config.auth.dingtalk.appId,
+      clientSecret: config.auth.dingtalk.appSecret,
+      code: authCode,
+      grantType: 'authorization_code',
+    });
+
+    const accessToken = tokenData?.accessToken;
+    if (!accessToken) {
+      throw new Error(tokenData?.message || '获取钉钉访问凭证失败');
+    }
+
+    const userInfoApi = `${apiBaseUrl}/v1.0/contact/users/me`;
+    const { data: userInfoData } = await axios.get(userInfoApi, {
+      headers: {
+        'x-acs-dingtalk-access-token': accessToken,
+      },
+    });
+
+    const externalId = userInfoData?.unionId || userInfoData?.openId;
+    if (!externalId) {
+      throw new Error('未能获取钉钉用户标识');
+    }
+    const normalizedMobile = userInfoData?.mobile ? userInfoData.mobile.replace(/^(\+?86)/, '') : undefined;
+
+    const user = await this.userRepository.registryOrGetUser({
+      email: userInfoData?.email,
+      phone: normalizedMobile,
+      photo: userInfoData?.avatarUrl,
+      name: userInfoData?.nick || userInfoData?.openId || 'dingtalk-user',
+      externalId: `dingtalk:${externalId}`,
+    });
+    await this.userRepository.updateUserLastLogin(user.id, AuthMethod.oauth);
+    const jwtToken = JwtHelper.signToken(user);
+    return jwtToken;
+  }
 }

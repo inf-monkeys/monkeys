@@ -113,6 +113,21 @@ export class OAuthController {
     });
   }
 
+  @Get('dingtalk/info')
+  @ApiOperation({
+    description: '获取钉钉 OAuth 信息',
+    summary: '获取钉钉 OAuth 信息',
+  })
+  public async getDingtalkInfo() {
+    return new SuccessResponse({
+      data: {
+        appId: config.auth.dingtalk?.appId,
+        loginBaseUrl: config.auth.dingtalk?.loginBaseUrl || 'https://login.dingtalk.com',
+        redirectUri: `${config.server.appUrl}/api/auth/oauth/dingtalk/callback`,
+      },
+    });
+  }
+
   // 飞书回调
   @Get('feishu/callback')
   @ApiOperation({
@@ -122,6 +137,23 @@ export class OAuthController {
   public async loginByFeishuOauth(@Query('code') code: string, @Query('state') state: string, @Res() res: Response) {
     const redirect_to = state.replace('redirect_to=', '');
     const accessToken = await this.oauthService.handleFeishuCallback(code, state);
+    res.redirect(`${redirect_to}?access_token=${accessToken}`);
+  }
+
+  // 钉钉回调
+  @Get('dingtalk/callback')
+  @ApiOperation({
+    description: '使用钉钉登录',
+    summary: '使用钉钉登录',
+  })
+  public async loginByDingtalkOauth(
+    @Query('code') code: string,
+    @Query('authCode') authCode: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ) {
+    const redirect_to = state?.replace('redirect_to=', '') || `${config.server.appUrl}/login/callback`;
+    const accessToken = await this.oauthService.handleDingtalkCallback(code || authCode, state);
     res.redirect(`${redirect_to}?access_token=${accessToken}`);
   }
 }

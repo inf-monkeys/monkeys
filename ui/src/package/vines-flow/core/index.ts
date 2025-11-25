@@ -33,6 +33,7 @@ import {
   IVinesFlowRenderOptions,
   IVinesFlowRenderType,
   IVinesFlowRunParams,
+  VinesTelemetryContext,
   VinesWorkflowExecution,
   VinesWorkflowExecutionType,
 } from '@/package/vines-flow/core/typings.ts';
@@ -77,6 +78,8 @@ export class VinesCore extends VinesTools(VinesBase) {
   public workflowLoaded = false;
 
   public executionWorkflowDisableRestore = false;
+  private nextTelemetry?: VinesTelemetryContext;
+  private defaultTelemetry?: VinesTelemetryContext;
 
   // 当前执行的工作流实例
   public executionInstanceId = '';
@@ -487,6 +490,60 @@ export class VinesCore extends VinesTools(VinesBase) {
   // endregion
 
   // region RUNNER
+  private buildInputPreview(inputData: Record<string, unknown>) {
+    try {
+      const raw = JSON.stringify(inputData ?? {});
+      const limit = 500;
+      if (!raw) return undefined;
+      return raw.length > limit ? `${raw.slice(0, limit)}...` : raw;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private buildTelemetryHeaders(
+    inputData: Record<string, unknown>,
+    telemetry?: {
+      workspaceName?: string;
+    },
+  ): HeadersInit | undefined {
+    try {
+      const payload = {
+        function_group: 'workflow',
+        function_name: this.workflowName || this.workflowId || 'workflow',
+        workflow_id: this.workflowId,
+        workflow_version: this.version,
+        input_preview: this.buildInputPreview(inputData),
+        ...(telemetry?.workspaceName ? { workspace_name: telemetry.workspaceName } : {}),
+      };
+      const headerValue = this.encodeTelemetryPayload(payload);
+      if (!headerValue) return undefined;
+      return {
+        'x-monkeys-telemetry': headerValue,
+      };
+    } catch {
+      return undefined;
+    }
+  }
+
+  private encodeTelemetryPayload(payload: Record<string, unknown>) {
+    try {
+      const json = JSON.stringify(payload);
+      // btoa only accepts Latin1, so encodeURIComponent first to ensure ASCII
+      return btoa(encodeURIComponent(json));
+    } catch {
+      return undefined;
+    }
+  }
+
+  public setNextTelemetryContext(telemetry?: VinesTelemetryContext) {
+    this.nextTelemetry = telemetry;
+  }
+
+  public setDefaultTelemetryContext(telemetry?: VinesTelemetryContext) {
+    this.defaultTelemetry = telemetry;
+  }
+
   public executionStatus(instanceId = this.executionInstanceId): VinesWorkflowExecutionType {
     return this.executions.get(instanceId)?.status ?? 'SCHEDULED';
   }
@@ -513,6 +570,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     onlyStart = false,
     tasks,
     extraMetadata = this.extraMetadata,
+    telemetry,
   }: IVinesFlowRunParams = {}): Promise<boolean | string> {
     if (this.enableOpenAIInterface) {
       toast.warning('启动运行失败！请先关闭 OpenAI 接口');
@@ -544,11 +602,30 @@ export class VinesCore extends VinesTools(VinesBase) {
 
     nodes.forEach((it) => it.clearExecutionTask(instanceId ?? this.executionInstanceId));
 
+    const telemetryContext = telemetry || this.nextTelemetry || this.defaultTelemetry;
+    const telemetryHeaders = telemetryContext?.enabled
+      ? this.buildTelemetryHeaders(inputData, telemetryContext)
+      : undefined;
+    // reset one-time telemetry context
+    this.nextTelemetry = undefined;
+
     if (!instanceId) {
       if (tasks) {
-        instanceId = await executionWorkflowWithDebug(this.workflowId, inputData, tasks.length ? tasks : this.getRaw());
+        instanceId = await executionWorkflowWithDebug(
+          this.workflowId,
+          inputData,
+          tasks.length ? tasks : this.getRaw(),
+          telemetryHeaders,
+        );
       } else {
-        instanceId = await executionWorkflow(this.workflowId, inputData, version, chatSessionId, extraMetadata);
+        instanceId = await executionWorkflow(
+          this.workflowId,
+          inputData,
+          version,
+          chatSessionId,
+          extraMetadata,
+          telemetryHeaders,
+        );
       }
     }
 

@@ -143,8 +143,8 @@ export const Workflows: React.FC = () => {
 
             <DropdownMenuContent
               onClick={(e) => {
+                // Prevent event bubbling to parent row's onItemClick
                 e.stopPropagation();
-                e.preventDefault();
               }}
             >
               <DropdownMenuLabel>{t('ugc-page.workflow.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
@@ -252,7 +252,10 @@ export const Workflows: React.FC = () => {
                   className="text-red-10"
                   onSelect={() => {
                     setCurrentWorkflow(item);
-                    setDeleteAlertDialogVisible(true);
+                    // Delay opening dialog to ensure menu closes completely first
+                    requestAnimationFrame(() => {
+                      setDeleteAlertDialogVisible(true);
+                    });
                   }}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">

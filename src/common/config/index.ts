@@ -82,6 +82,7 @@ export type WorkflowPreviewExecutionGrid = {
   clickBehavior?: ClickBehavior;
   showErrorFilter?: boolean;
   displayType?: ExectuionResultGridDisplayType;
+  showDetailButton?: boolean;
 };
 
 export type CustomizationHistoryResult = {
@@ -210,6 +211,7 @@ export interface ServerConfig {
     workbenchSidebarToggleGroupDetail: boolean;
     workbenchSidebarViewType: boolean;
     workbenchSidebarFormViewEmbed: boolean;
+    workbenchSidebarModernMode: boolean;
     ugc: CustomizationUgc;
     uniImagePreview: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';
@@ -345,6 +347,13 @@ export interface FeishuConfig {
   appSecret: string;
 }
 
+export interface DingtalkConfig {
+  appId: string;
+  appSecret: string;
+  apiBaseUrl?: string;
+  loginBaseUrl?: string;
+}
+
 export interface AuthConfig {
   enabled: AuthMethod[];
   sessionSecret?: string;
@@ -359,6 +368,7 @@ export interface AuthConfig {
   privilegedToken?: string;
   wework?: WeWorkConfig;
   feishu?: FeishuConfig;
+  dingtalk?: DingtalkConfig;
   hideAuthToast?: boolean;
   autoReload?: boolean;
   defaultOtherTeam?: boolean;
@@ -554,6 +564,17 @@ export interface EvaluationConfig {
   defaultLlmEvaluatorModel: string;
 }
 
+export type TelemetryConfig = {
+  enabled: boolean;
+  appDeployment?: string;
+  appGroup?: string;
+  appName?: string;
+  appOwnerTeam?: string;
+  functionGroup?: string;
+  loggingServiceUrl?: string;
+  loggingApiKey?: string;
+};
+
 export interface AgentV2Config {
   // OpenAI Compatible API configuration
   openaiCompatible: {
@@ -626,6 +647,7 @@ export interface Config {
   agentv2: AgentV2Config;
   agentv3: AgentV3Config;
   modelTraining: ModelTrainingConfig;
+  telemetry: TelemetryConfig;
 }
 
 const rawS3ThumbnailBuckets = readConfig('s3-thumb-buckets', []);
@@ -708,6 +730,7 @@ export const config: Config = {
         clickBehavior: readConfig('server.customization.workflowPreviewExecutionGrid.clickBehavior', 'preview'),
         showErrorFilter: readConfig('server.customization.workflowPreviewExecutionGrid.showErrorFilter', true),
         displayType: readConfig('server.customization.workflowPreviewExecutionGrid.displayType', 'masonry'),
+        showDetailButton: readConfig('server.customization.workflowPreviewExecutionGrid.showDetailButton', true),
       },
       workbenchSidebarDefaultOpen: readConfig('server.customization.workbenchSidebarDefaultOpen', true),
       workbenchSidebarMoreAction: readConfig('server.customization.workbenchSidebarMoreAction', true),
@@ -715,6 +738,7 @@ export const config: Config = {
       workbenchSidebarToggleGroupDetail: readConfig('server.customization.workbenchSidebarToggleGroupDetail', true),
       workbenchSidebarViewType: readConfig('server.customization.workbenchSidebarViewType', true),
       workbenchSidebarFormViewEmbed: readConfig('server.customization.workbenchSidebarFormViewEmbed', false),
+      workbenchSidebarModernMode: readConfig('server.customization.workbenchSidebarModernMode', false),
       ugc: {
         onItemClick: readConfig('server.customization.ugc.onItemClick', true),
         subtitle: readConfig('server.customization.ugc.subtitle', true),
@@ -857,6 +881,12 @@ export const config: Config = {
       appId: readConfig('auth.feishu.appId'),
       appSecret: readConfig('auth.feishu.appSecret'),
     },
+    dingtalk: {
+      appId: readConfig('auth.dingtalk.appId'),
+      appSecret: readConfig('auth.dingtalk.appSecret'),
+      apiBaseUrl: readConfig('auth.dingtalk.apiBaseUrl', readConfig('auth.dingtalk.apiUrl', 'https://api.dingtalk.com')),
+      loginBaseUrl: readConfig('auth.dingtalk.loginBaseUrl', 'https://login.dingtalk.com'),
+    },
     saltTotp: readConfig('auth.saltTotp'),
     totpDigits: readConfig('auth.totpDigits', 8),
     totpAlgorithm: readConfig('auth.totpAlgorithm', 'SHA-512'),
@@ -990,6 +1020,16 @@ When answer to user:
   },
   modelTraining: {
     endpoint: readConfig('models-training.endpoint', 'http://localhost:30025'),
+  },
+  telemetry: {
+    enabled: readConfig('telemetry.enabled', false),
+    appDeployment: readConfig('telemetry.appDeployment', ''),
+    appGroup: readConfig('telemetry.appGroup', ''),
+    appName: readConfig('telemetry.appName', ''),
+    appOwnerTeam: readConfig('telemetry.appOwnerTeam', ''),
+    functionGroup: readConfig('telemetry.functionGroup', 'workflow'),
+    loggingServiceUrl: readConfig('telemetry.loggingServiceUrl', ''),
+    loggingApiKey: readConfig('telemetry.loggingApiKey', ''),
   },
 };
 

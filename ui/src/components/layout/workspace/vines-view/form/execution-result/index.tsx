@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -7,13 +7,18 @@ import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
-import { useWorkflowExecutionList, useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
+import {
+  getWorkflowExecutionSimple,
+  useWorkflowExecutionList,
+  useWorkflowExecutionListInfinite,
+} from '@/apis/workflow/execution';
 import { ExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 import { ImagesResult, useSetExecutionImages } from '@/store/useExecutionImageResultStore';
 import { useSetThumbImages } from '@/store/useExecutionImageTumbStore';
@@ -61,6 +66,14 @@ const getItemTimestamp = (item: VinesWorkflowExecutionOutputListItem) =>
   getUpdateTimestamp(item.updateTime ?? item.endTime ?? item.startTime);
 
 const FINAL_STATUSES = new Set(['COMPLETED', 'FAILED', 'TERMINATED', 'CANCELED', 'CANCELLED']);
+const RUNNING_INSTANCES_STORAGE_KEY = 'vines-workflow-running-instances';
+type RunningInstanceStorage = Record<string, Record<string, RunningInstanceMeta>>;
+interface RunningInstanceMeta {
+  instanceId: string;
+  workflowId: string;
+  updatedAt: number;
+}
+
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   className,
   event$,
@@ -82,13 +95,62 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const storeWorkflowId = useFlowStore((s) => s.workflowId);
   const workflowId = storeWorkflowId && visible ? storeWorkflowId : null;
 
+  const [runningInstanceStorage, setRunningInstanceStorage] = useLocalStorage<RunningInstanceStorage>(
+    RUNNING_INSTANCES_STORAGE_KEY,
+    {},
+  );
+
   const [executionResultList, setExecutionResultList] = useState<IVinesExecutionResultItem[]>([]);
   const [updateExecutionResultList, setUpdateExecutionResultList] = useState<VinesWorkflowExecutionOutputListItem[]>(
     [],
   );
   const [iframeOutputs, setIframeOutputs] = useState<VinesWorkflowExecutionOutputListItem[]>([]);
+  const [localRunningOutputs, setLocalRunningOutputs] = useState<VinesWorkflowExecutionOutputListItem[]>([]);
   const latestInstanceMetaRef = useRef<Map<string, { status: string; timestamp: number }>>(new Map());
   const pendingInstanceIdsRef = useRef<Set<string>>(new Set());
+  const pollingTimerRef = useRef<number>();
+  const addRunningInstanceToStorage = useCallback(
+    (targetWorkflowId: string | null, instance: VinesWorkflowExecutionOutputListItem) => {
+      if (!targetWorkflowId) return;
+      setRunningInstanceStorage((prev) => {
+        const next = { ...prev };
+        const workflowInstances = { ...(next[targetWorkflowId] ?? {}) };
+        if (workflowInstances[instance.instanceId]) {
+          return prev;
+        }
+        workflowInstances[instance.instanceId] = {
+          workflowId: targetWorkflowId,
+          instanceId: instance.instanceId,
+          updatedAt: Date.now(),
+        };
+        next[targetWorkflowId] = workflowInstances;
+        return next;
+      });
+    },
+    [setRunningInstanceStorage],
+  );
+
+  const removeRunningInstanceFromStorage = useCallback(
+    (targetWorkflowId: string | null, instanceId: string) => {
+      if (!targetWorkflowId) return;
+      setRunningInstanceStorage((prev) => {
+        const workflowInstances = prev?.[targetWorkflowId];
+        if (!workflowInstances || !workflowInstances[instanceId]) {
+          return prev;
+        }
+        const nextWorkflowInstances = { ...workflowInstances };
+        delete nextWorkflowInstances[instanceId];
+        const next = { ...prev };
+        if (Object.keys(nextWorkflowInstances).length > 0) {
+          next[targetWorkflowId] = nextWorkflowInstances;
+        } else {
+          delete next[targetWorkflowId];
+        }
+        return next;
+      });
+    },
+    [setRunningInstanceStorage],
+  );
 
   const {
     data: executionListData,
@@ -111,15 +173,20 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   // 统一的数据更新和转换逻辑
   useEffect(() => {
-    // 如果无限滚动数据为空，直接返回
-    if (!executionListData || executionListData.length === 0 || firstPageExecutionListData?.total === 0) {
+    const hasLocalFallback = localRunningOutputs.length > 0;
+    const remoteTotal = firstPageExecutionListData?.total ?? 0;
+    const hasRemoteData = executionListData && executionListData.length > 0 && remoteTotal !== 0;
+    if (!hasRemoteData && !hasLocalFallback) {
       setExecutionResultList([]);
       return;
     }
 
     // 获取所有现有的原始数据
     const allExistingItems: VinesWorkflowExecutionOutputListItem[] = [];
-    for (const execution of executionListData) {
+    if (localRunningOutputs.length > 0) {
+      allExistingItems.push(...localRunningOutputs);
+    }
+    for (const execution of executionListData ?? []) {
       if (execution && execution.data) {
         allExistingItems.push(...execution.data);
       }
@@ -168,9 +235,13 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
           if (isRunning && !isPending) {
             pendingInstanceIdsRef.current.add(item.instanceId);
             pushEventItem(item);
-          } else if (isFinal && isPending && hasStatusChanged) {
-            pendingInstanceIdsRef.current.delete(item.instanceId);
-            pushEventItem(item);
+            addRunningInstanceToStorage(workflowId, item);
+          } else if (isFinal) {
+            if (isPending && hasStatusChanged) {
+              pendingInstanceIdsRef.current.delete(item.instanceId);
+              pushEventItem(item);
+            }
+            removeRunningInstanceFromStorage(workflowId, item.instanceId);
           }
 
           latestInstanceMetaRef.current.set(item.instanceId, { status: item.status, timestamp: incomingTimestamp });
@@ -215,14 +286,81 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
     // 去重并设置最终结果
     setExecutionResultList(removeRepeatKey(renderList));
-  }, [executionListData, firstPageExecutionList]);
+  }, [
+    executionListData,
+    firstPageExecutionList,
+    workflowId,
+    localRunningOutputs,
+    addRunningInstanceToStorage,
+    removeRunningInstanceFromStorage,
+  ]);
 
   useEffect(() => {
     latestInstanceMetaRef.current.clear();
     pendingInstanceIdsRef.current.clear();
     setUpdateExecutionResultList([]);
     setIframeOutputs([]);
+    setLocalRunningOutputs([]);
   }, [workflowId]);
+
+  useEffect(() => {
+    const clearPolling = () => {
+      if (pollingTimerRef.current) {
+        window.clearInterval(pollingTimerRef.current);
+        pollingTimerRef.current = undefined;
+      }
+    };
+
+    if (!workflowId) {
+      clearPolling();
+      setLocalRunningOutputs([]);
+      return;
+    }
+
+    const workflowInstances = runningInstanceStorage?.[workflowId];
+    const storedInstanceIds = workflowInstances ? Object.keys(workflowInstances) : [];
+    if (storedInstanceIds.length === 0) {
+      clearPolling();
+      setLocalRunningOutputs([]);
+      return;
+    }
+
+    let disposed = false;
+    const fetchStoredInstances = async () => {
+      const latestIds = Object.keys(runningInstanceStorage?.[workflowId] ?? {});
+      if (disposed) return;
+      if (!latestIds.length) {
+        setLocalRunningOutputs([]);
+        return;
+      }
+      const responses = await Promise.all(
+        latestIds.map((instanceId) =>
+          getWorkflowExecutionSimple(instanceId)
+            .then((res) => res)
+            .catch(() => null),
+        ),
+      );
+      if (disposed) return;
+
+      const validItems = responses.filter((it): it is VinesWorkflowExecutionOutputListItem => Boolean(it));
+      setLocalRunningOutputs(validItems);
+
+      const finalItems = validItems.filter((item) => FINAL_STATUSES.has(item.status));
+      if (finalItems.length) {
+        finalItems.forEach((item) => removeRunningInstanceFromStorage(workflowId, item.instanceId));
+        setIframeOutputs((prev) => (isSameIframeOutputs(prev, finalItems) ? prev : finalItems));
+      }
+    };
+
+    void fetchStoredInstances();
+    clearPolling();
+    pollingTimerRef.current = window.setInterval(fetchStoredInstances, 10 * 1000);
+
+    return () => {
+      disposed = true;
+      clearPolling();
+    };
+  }, [workflowId, runningInstanceStorage, removeRunningInstanceFromStorage]);
 
   const setImages = useSetExecutionImages();
   const setThumbImages = useSetThumbImages();

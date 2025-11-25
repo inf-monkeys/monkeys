@@ -127,9 +127,7 @@ export class AppController {
         gradient: config.server.customization.gradient,
         roundedSize: config.server.customization.roundedSize,
         form: config.server.customization.form,
-        toast: {
-          position: config.server.customization.toast.position,
-        },
+        toast: config.server.customization.toast,
         icons: config.server.customization.icons,
         views: config.server.customization.views,
         extraLanguageURL: config.server.customization.extraLanguageURL,
@@ -147,6 +145,7 @@ export class AppController {
         workbenchSidebarToggleGroupDetail: config.server.customization.workbenchSidebarToggleGroupDetail,
         workbenchSidebarViewType: config.server.customization.workbenchSidebarViewType,
         workbenchSidebarFormViewEmbed: config.server.customization.workbenchSidebarFormViewEmbed,
+        workbenchSidebarModernMode: config.server.customization.workbenchSidebarModernMode,
         ugc: config.server.customization.ugc,
         uniImagePreview: config.server.customization.uniImagePreview,
         imagePreviewStyle: config.server.customization.imagePreviewStyle,

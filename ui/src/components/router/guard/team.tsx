@@ -9,8 +9,9 @@ import { isArray } from 'lodash';
 
 import { useTeams } from '@/apis/authz/team';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { useSystemConfig } from '@/apis/common';
-import { useLocalStorage } from '@/hooks/use-local-storage';
+import { readLocalStorageValue, setLocalStorage, useLocalStorage } from '@/hooks/use-local-storage';
 
 export const TeamsGuard: React.FC = () => {
   const { mutate } = useSWRConfig();
@@ -110,6 +111,19 @@ export const useVinesTeam = () => {
   const setTeamId = useMemoizedFn((id: string) => {
     setLocalTeamId(id);
     window['vinesTeamId'] = id;
+    
+    // 保存用户和团队的映射关系，以便用户下次登录时能恢复
+    try {
+      const user = readLocalStorageValue<Partial<IVinesUser>>('vines-account', {});
+      const userId = user?.id;
+      if (userId) {
+        const userTeamMap = readLocalStorageValue<Record<string, string>>('vines-user-team-map', {});
+        userTeamMap[userId] = id;
+        setLocalStorage('vines-user-team-map', userTeamMap);
+      }
+    } catch (error) {
+      console.error('Failed to save user team mapping:', error);
+    }
   });
 
   return {

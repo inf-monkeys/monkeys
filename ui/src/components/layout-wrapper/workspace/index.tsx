@@ -39,7 +39,7 @@ export const WorkspaceLayout: React.FC = () => {
 
   // 针对LF客户的主题定制
   const isLFTheme = themeMode === 'shadow';
-  const backgroundClass = isLFTheme ? 'bg-[#f2f3f4]' : 'bg-neocard';
+  const backgroundClass = isLFTheme ? 'bg-[#f2f3f4] dark:bg-[#000000]' : 'bg-neocard';
 
   const showTeamSelector =
     oem &&

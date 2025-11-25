@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { get } from 'lodash';
 import { Download, GitBranch, Link, Pencil, Trash, Upload } from 'lucide-react';
@@ -9,18 +9,18 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
-import { deleteDesignProject, exportDesignProject, importDesignProject } from '@/apis/designs';
+import { deleteDesignProject, exportDesignProjectAsZip, importDesignProject } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor.tsx';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createDesignProjectsColumns } from '@/components/layout/ugc-pages/design-project/consts.tsx';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { DesignAssociationEditorDialog } from '@/components/layout/ugc-pages/design-project/design-association-editor';
 import { DesignProjectCardWrapper } from '@/components/layout/ugc-pages/design-project/design-project-card-wrapper';
 import { DesignProjectVersionManager } from '@/components/layout/ugc-pages/design-project/version-manager';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -73,8 +73,8 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ v
     const file = e.target.files?.[0];
     if (file) {
       const fileName = file.name.toLowerCase();
-      if (!fileName.endsWith('.json')) {
-        toast.error('请选择有效的 JSON 文件');
+      if (!fileName.endsWith('.json') && !fileName.endsWith('.uml')) {
+        toast.error('请选择有效的 JSON 或 UML 文件');
         return;
       }
       setSelectedFile(file);
@@ -117,7 +117,7 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ v
                   <input
                     type="file"
                     className="hidden"
-                    accept=".json"
+                    accept=".json,.uml"
                     onChange={handleFileChange}
                     disabled={importing}
                   />
@@ -125,7 +125,7 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ v
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              {t('common.import.file.hint', { defaultValue: '支持 .json 格式' })}
+              {t('common.import.file.hint', { defaultValue: '支持 .json 或 .uml 格式' })}
             </p>
           </div>
         </div>
@@ -238,17 +238,21 @@ export const Designs: React.FC = () => {
     });
   };
 
-  // 处理导出设计项目
-  const handleExportProject = async (project: IAssetItem<IDesignProject>) => {
+  // 处理导出设计项目压缩包（包含资源文件）
+  const handleExportProjectAsZip = async (project: IAssetItem<IDesignProject>) => {
     if (!project.id) {
       toast.warning(t('common.toast.loading'));
       return;
     }
 
     try {
-      const exportData = await exportDesignProject(project.id);
-      const fileName = `${getI18nContent(project.displayName) || 'design-project'}-${Date.now()}.json`;
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const loadingToast = toast.loading(t('common.export.loading', { defaultValue: '正在导出压缩包...' }));
+      const blob = await exportDesignProjectAsZip(project.id);
+      if (!blob) {
+        toast.error(t('common.export.error', { defaultValue: '导出失败' }));
+        return;
+      }
+      const fileName = `${getI18nContent(project.displayName) || 'design-project'}-${Date.now()}.zip`;
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -257,10 +261,41 @@ export const Designs: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      toast.dismiss(loadingToast);
       toast.success(t('common.export.success', { defaultValue: '导出成功' }));
     } catch (error) {
       toast.error(t('common.export.error', { defaultValue: '导出失败' }));
-      console.error('Export project failed:', error);
+      console.error('Export project as zip failed:', error);
+    }
+  };
+
+  // 从 UML 文件中提取 JSON 数据
+  const extractJsonFromUml = (umlContent: string): any | null => {
+    try {
+      // 查找 JSON_EXPORT_BEGIN 和 JSON_EXPORT_END 之间的内容
+      const beginMarker = "' JSON_EXPORT_BEGIN";
+      const endMarker = "' JSON_EXPORT_END";
+      
+      const beginIndex = umlContent.indexOf(beginMarker);
+      const endIndex = umlContent.indexOf(endMarker);
+      
+      if (beginIndex === -1 || endIndex === -1 || beginIndex >= endIndex) {
+        return null;
+      }
+      
+      // 提取 JSON 数据（去掉注释标记）
+      const jsonStart = beginIndex + beginMarker.length;
+      const jsonEnd = endIndex;
+      let jsonContent = umlContent.substring(jsonStart, jsonEnd).trim();
+      
+      // 移除行首的注释标记（' 或 '）
+      jsonContent = jsonContent.replace(/^'+\s*/gm, '').trim();
+      
+      // 解析 JSON
+      return JSON.parse(jsonContent);
+    } catch (error) {
+      console.error('Failed to extract JSON from UML:', error);
+      return null;
     }
   };
 
@@ -268,12 +303,24 @@ export const Designs: React.FC = () => {
   const handleImportProject = async (file: File) => {
     try {
       const fileContent = await file.text();
+      const fileName = file.name.toLowerCase();
       let importData: any;
-      try {
-        importData = JSON.parse(fileContent);
-      } catch (error) {
-        toast.error('JSON 文件格式错误，请检查文件内容');
-        return;
+      
+      if (fileName.endsWith('.uml')) {
+        // 处理 UML 文件：从注释中提取 JSON 数据
+        importData = extractJsonFromUml(fileContent);
+        if (!importData) {
+          toast.error('UML 文件中未找到有效的 JSON 导出数据');
+          return;
+        }
+      } else {
+        // 处理 JSON 文件：直接解析
+        try {
+          importData = JSON.parse(fileContent);
+        } catch (error) {
+          toast.error('JSON 文件格式错误，请检查文件内容');
+          return;
+        }
       }
 
       // 验证导入数据格式
@@ -364,7 +411,7 @@ export const Designs: React.FC = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onSelect={() => {
-                          void handleExportProject(item);
+                          void handleExportProjectAsZip(item);
                         }}
                       >
                         <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
@@ -444,7 +491,7 @@ export const Designs: React.FC = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
-                    void handleExportProject(item);
+                    void handleExportProjectAsZip(item);
                   }}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">

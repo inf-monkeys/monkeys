@@ -1,5 +1,8 @@
 import { ModelTrainingEntity } from '@/database/entities/model-training/model-training';
 import { ModelTrainingConfigEntity } from '@/database/entities/model-training/model-training-config';
+import { ModelTrainingConfigV2Entity } from '@/database/entities/model-training/model-training-config-v2';
+import { AssetsModule } from '@/modules/assets/assets.module';
+import { MediaModule } from '@/modules/assets/media/media.module';
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,7 +12,7 @@ import { ModelTrainingService } from './model-training.service';
 export { ModelTrainingService } from './model-training.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ModelTrainingEntity, ModelTrainingConfigEntity]), HttpModule],
+  imports: [TypeOrmModule.forFeature([ModelTrainingEntity, ModelTrainingConfigEntity, ModelTrainingConfigV2Entity]), HttpModule, MediaModule, AssetsModule],
   controllers: [ModelTrainingController],
   providers: [ModelTrainingService],
 })

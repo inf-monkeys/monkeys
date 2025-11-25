@@ -1,10 +1,7 @@
-import React, { forwardRef, startTransition } from 'react';
+import { forwardRef, startTransition } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Folder } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -16,21 +13,22 @@ import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { GLOBAL_DESIGN_BOARD_PAGE } from '@/components/layout/workbench/sidebar/mode/normal/consts';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { useVinesRoute } from '@/components/router/use-vines-route';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import useUrlState from '@/hooks/use-url-state';
 import { useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { useSetTemp } from '@/store/useGlobalTempStore';
 import { useOutputSelectionStore } from '@/store/useOutputSelectionStore';
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
-import { cn, getI18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 import { getTargetInput } from '@/utils/association';
+
+import { CommonOperationBarItem } from '../common-operation-bar/item';
 
 export interface IWorkbenchOperationItemProps {
   data: IWorkflowAssociation;
+  expanded: boolean;
 }
 
-export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemProps>(({ data }) => {
+export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemProps>(({ data, expanded }, ref) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { teamId } = useVinesTeam();
@@ -43,14 +41,7 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
 
   const { selectedOutputItems } = useOutputSelectionStore();
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: data.id });
-
   const setWorkbenchCacheVal = useSetWorkbenchCacheVal();
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
 
   const onItemClick = async () => {
     if (selectedOutputItems.length == 0) {
@@ -118,6 +109,7 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
             startTransition(() => {
               setCurrentPage({ [teamId]: { ...GLOBAL_DESIGN_BOARD_PAGE, groupId: 'global-design-board' } });
             });
+
             navigate({
               to: '/$teamId',
               params: {
@@ -132,7 +124,6 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
                 operation: 'insert-images',
                 tid,
                 designProjectId: designProject.id,
-                // activePageFromType: 'global-design-board',
               },
             });
             return t('common.create.success');
@@ -145,37 +136,16 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger>
-        <div
-          ref={setNodeRef}
-          style={style}
-          {...attributes}
-          {...listeners}
-          key={data.id}
-          className={cn(
-            'z-10 flex cursor-pointer items-center justify-center gap-global-1/2 rounded-md p-global-1/2 transition-colors hover:bg-accent hover:text-accent-foreground',
-            mode === 'mini' ? 'size-[calc(var(--global-icon-size)+8px)]' : 'size-[var(--operation-bar-width)]',
-            isDragging && 'opacity-50',
-          )}
-          onClick={onItemClick}
-        >
-          {typeof data.iconUrl === 'string' ? (
-            <VinesLucideIcon
-              className={cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon')}
-              size={20}
-              src={data.iconUrl}
-            />
-          ) : (
-            React.createElement(Folder, {
-              className: cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon'),
-              size: 20,
-            })
-          )}
-        </div>
-      </TooltipTrigger>
-      <TooltipContent>{getI18nContent(data.displayName)}</TooltipContent>
-    </Tooltip>
+    <CommonOperationBarItem
+      ref={ref}
+      id={data.id}
+      mode={mode}
+      iconUrl={data.iconUrl}
+      tooltipContent={getI18nContent(data.displayName)}
+      tooltipSide="left"
+      onClick={onItemClick}
+      expanded={expanded}
+    />
   );
 });
 OperationItem.displayName = 'VirtuaWorkbenchOperationItem';

@@ -6,6 +6,8 @@ import { WorkbenchMiniModeSidebar } from '@/components/layout/workbench/sidebar/
 import { WorkbenchNormalModeSidebar } from '@/components/layout/workbench/sidebar/mode/normal';
 import { cn } from '@/utils';
 
+import { WorkbenchModernModeSidebar } from './mode/modern';
+
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   mode?: 'normal' | 'fast' | 'mini';
   showGroup?: boolean;
@@ -21,6 +23,8 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({
 
   const showSidebarTeamSelector = oem?.theme.showSidebarTeamSelector ?? false;
 
+  const modern = oem?.theme.workbenchSidebarModernMode ?? false;
+
   if (mode === 'mini') {
     return <WorkbenchMiniModeSidebar />;
   }
@@ -33,7 +37,11 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({
         </div>
       )}
       <div className={cn('h-full', collapsed && 'hidden')}>
-        <WorkbenchNormalModeSidebar showGroup={showGroup} collapsed={collapsed} />
+        {modern ? (
+          <WorkbenchModernModeSidebar collapsed={collapsed} />
+        ) : (
+          <WorkbenchNormalModeSidebar showGroup={showGroup} collapsed={collapsed} />
+        )}
       </div>
     </div>
   );

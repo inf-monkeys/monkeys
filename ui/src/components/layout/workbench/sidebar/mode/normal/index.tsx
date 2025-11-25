@@ -41,7 +41,7 @@ import {
   useToggleOnlyShowWorkbenchIcon,
 } from '@/store/showWorkbenchIcon';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
-import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
+import { useCurrentPage, useSetCurrentGroupId, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { DesignBoardProvider } from '@/store/useDesignBoardStore';
 import { getGlobalDesignBoardStore } from '@/store/useDesignBoardStore/shared';
 import { createExecutionStore, ExecutionStoreProvider } from '@/store/useExecutionStore';
@@ -152,6 +152,13 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   // const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
   const currentPage = useCurrentPage();
   const setCurrentPage = useSetCurrentPage();
+  const setCurrentGroupId = useSetCurrentGroupId();
+
+  // Sync groupId to global store
+  useEffect(() => {
+    setCurrentGroupId(groupId);
+  }, [groupId, setCurrentGroupId]);
+
   const latestOriginalPages = useLatest(originalPages);
   const latestOriginalGroups = useLatest(originalGroups);
   useEffect(() => {

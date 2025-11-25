@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WorkflowMetadataEntity } from '../entities/workflow/workflow-metadata';
@@ -10,6 +10,7 @@ export class WorkflowAssetRepositroy extends AbstractAssetRepository<WorkflowMet
   constructor(
     @InjectRepository(WorkflowMetadataEntity)
     public readonly assetRepository: Repository<WorkflowMetadataEntity>,
+    @Inject(forwardRef(() => AssetsCommonRepository))
     public readonly assetCommonRepository: AssetsCommonRepository,
   ) {
     super(assetRepository, assetCommonRepository);

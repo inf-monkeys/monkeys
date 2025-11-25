@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { IVinesEmojiSelectorProps } from '@/components/ui/emoji-selector/index.tsx';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { FloatingPopover, FloatingPopoverContent, FloatingPopoverTrigger } from '@/components/ui/floating-popover';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
 
@@ -43,11 +43,11 @@ const VinesEmojiSelector: React.FC<IVinesEmojiSelectorProps> = memo(
     }, [emojiLink]);
 
     return (
-      <Popover open={visible} onOpenChange={setVisible}>
-        <PopoverTrigger asChild>{children}</PopoverTrigger>
-        <PopoverContent
+      <FloatingPopover open={visible} onOpenChange={setVisible} placement="bottom-start" offset={-12}>
+        <FloatingPopoverTrigger asChild>{children}</FloatingPopoverTrigger>
+        <FloatingPopoverContent
           className="h-[512px] w-[352px] scale-75 overflow-hidden rounded-xl bg-slate-2 p-0"
-          sideOffset={-55}
+          portal={false}
         >
           <Picker
             i18n={i18n}
@@ -90,8 +90,8 @@ const VinesEmojiSelector: React.FC<IVinesEmojiSelectorProps> = memo(
               OK
             </Button>
           </div>
-        </PopoverContent>
-      </Popover>
+        </FloatingPopoverContent>
+      </FloatingPopover>
     );
   },
 );

@@ -23,4 +23,7 @@ export class ModelTrainingEntity extends BaseEntity {
 
   @Column({ name: 'status', type: 'enum', enum: ModelTrainingStatus })
   status: ModelTrainingStatus;
+
+  @Column({ name: 'version_type', type: 'int', default: 1 })
+  versionType: number;
 }

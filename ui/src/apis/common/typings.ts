@@ -28,6 +28,7 @@ export type VinesSpaceSidebarModule =
   | 'table-data'
   | 'chat-v2'
   | 'model-training'
+  | 'model-training-v2'
   | 'neural-models';
 export type VinesSpaceSidebarModules = '*' | VinesSpaceSidebarModule[];
 
@@ -57,7 +58,7 @@ export type CustomizationModules =
 export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile';
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
-export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy' | 'ghost';
+export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy' | 'ghost' | 'bsd-blue';
 export type CustomizationHeadbarNavPosition = 'left' | 'center' | 'right';
 
 export type CustomizationHeadbar =
@@ -81,6 +82,7 @@ export type WorkflowPreviewExecutionGrid = {
   clickBehavior?: ClickBehavior;
   showErrorFilter?: boolean;
   displayType?: ExectuionResultGridDisplayType;
+  showDetailButton?: boolean;
 };
 
 export type CustomizationHistoryResult = {
@@ -197,6 +199,7 @@ export interface ISystemConfig {
     workbenchSidebarToggleGroupDetail?: boolean;
     workbenchSidebarViewType?: boolean;
     workbenchSidebarFormViewEmbed?: boolean;
+    workbenchSidebarModernMode?: boolean;
     ugc: CustomizationUgc;
     uniImagePreview?: boolean;
     imagePreviewStyle: 'simple' | 'normal' | 'uni';

@@ -1,11 +1,5 @@
-import { config } from '@/common/config'
-import { Body, Controller, HttpCode, HttpStatus, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
+import { Body, Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common'
 import { Response } from 'express'
-import * as fs from 'fs'
-import OpenAI from 'openai'
-import * as os from 'os'
-import * as path from 'path'
 import { TldrawAgentRequestPayload, TldrawAgentService } from './tldraw-agent.service'
 
 type StreamRequestBody = TldrawAgentRequestPayload & { sessionId?: string }
@@ -106,41 +100,4 @@ export class TldrawAgentController {
     }
     return { success: true }
   }
-
-  // 简单的语音转写代理接口：接收前端上传的音频并调用 OpenAI 兼容 API 进行转写
-  @Post('transcribe')
-  @UseInterceptors(FileInterceptor('file'))
-  @HttpCode(HttpStatus.OK)
-  async transcribe(@UploadedFile() file: any) {
-    if (!file?.buffer?.length) {
-      return { text: '' }
-    }
-
-    // 根据上传文件名动态选择后缀，避免写死为 .webm 导致部分上游服务按扩展名解析失败
-    // 前端目前在 FormData 里用的是 'audio.webm'，如果以后改成 mp3 / wav 等，这里会自动跟随
-    const extFromName = file.originalname ? path.extname(file.originalname) : ''
-    const safeExt = extFromName && typeof extFromName === 'string' ? extFromName : '.webm'
-
-    // 将内存中的音频写入临时文件供 SDK 读取
-    const tmpFile = path.join(os.tmpdir(), `tldraw-audio-${Date.now()}${safeExt}`)
-    await fs.promises.writeFile(tmpFile, file.buffer)
-
-    try {
-      const openai = new OpenAI({
-        apiKey: config.agentv2.openaiCompatible.apiKey || process.env.OPENAI_API_KEY,
-        baseURL: config.agentv2.openaiCompatible.url || process.env.OPENAI_BASE_URL,
-      })
-
-      const result = await openai.audio.transcriptions.create({
-        file: fs.createReadStream(tmpFile) as any,
-        model: 'gpt-4o-transcribe',
-      })
-      return { text: (result as any)?.text || '' }
-    } finally {
-      // 清理临时文件
-      fs.promises.unlink(tmpFile).catch(() => undefined)
-    }
-  }
 }
-
-

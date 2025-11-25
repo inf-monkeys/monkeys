@@ -10,9 +10,13 @@ const createExecutionStore = () =>
   create<IExecutionStore>()((set) => ({
     status: 'idle',
     setStatus: (status) =>
-      set((state) => ({
-        status,
-      })),
+      set((state) =>
+        state.status === status
+          ? state
+          : {
+              status,
+            },
+      ),
   }));
 
 const { Provider: ExecutionStoreProvider, useStore: useExecutionStore } = createContext<StoreApi<IExecutionStore>>();

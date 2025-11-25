@@ -3,7 +3,8 @@ import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { ModelTrainingEntity } from '@/database/entities/model-training/model-training';
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AnalyzeTensorboardDto } from './dto/analyze-tensorboard.dto';
 import { AnalyzeTrainingLogDto } from './dto/analyze-training-log.dto';
@@ -15,6 +16,8 @@ import { GetModelTestConfigDto } from './dto/get-model-test-config.dto';
 import { GetTestTableConfigDto } from './dto/get-test-table-config.dto';
 import { GetTrainingConfigDto } from './dto/get-training-config.dto';
 import { SaveTrainingConfigDto } from './dto/save-training-config.dto';
+import { StartDataUploadDto } from './dto/start-data-upload.dto';
+import { StartModelTestV2Dto } from './dto/start-model-test-v2.dto';
 import { StartModelTestDto } from './dto/start-model-test.dto';
 import { SubmitDataUploadTaskDto } from './dto/submit-data-upload-task.dto';
 import { UpdateModelTrainingDto } from './dto/update-model-training.dto';
@@ -56,6 +59,26 @@ export class ModelTrainingController {
       page: +page,
       limit: +limit,
     });
+  }
+
+  @Get('pretrained-models')
+  @ApiOperation({
+    summary: '获取底模列表',
+    description: '查询底模列表，支持model_type和可选的model_training_id参数',
+  })
+  async getPretrainedModels(@Query('model_type') modelType: string = '2', @Query('model_training_id') modelTrainingId?: string) {
+    const result = await this.modelTrainingService.getPretrainedModels(modelType, modelTrainingId);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Get('downloadable-model/:modelTrainingId')
+  @ApiOperation({
+    summary: '获取可下载的模型文件',
+    description: '获取指定模型训练的可下载模型文件信息',
+  })
+  async getDownloadableModel(@Param('modelTrainingId') modelTrainingId: string) {
+    const result = await this.modelTrainingService.getDownloadableModel(modelTrainingId);
+    return new SuccessResponse({ data: result });
   }
 
   @Get(':modelTrainingId')
@@ -244,6 +267,16 @@ export class ModelTrainingController {
     return new SuccessResponse({ data: result });
   }
 
+  @Post('start-model-test-v2')
+  @ApiOperation({
+    summary: '开始模型测试2.0',
+    description: '提交模型测试2.0任务到外部服务',
+  })
+  async startModelTestV2(@Body() startModelTestV2Dto: StartModelTestV2Dto) {
+    const result = await this.modelTrainingService.startModelTestV2(startModelTestV2Dto);
+    return new SuccessResponse({ data: result });
+  }
+
   @Post('analyze-training-log')
   @ApiOperation({
     summary: '分析训练日志',
@@ -262,5 +295,59 @@ export class ModelTrainingController {
   async analyzeTensorboard(@Body() analyzeTensorboardDto: AnalyzeTensorboardDto) {
     const result = await this.modelTrainingService.analyzeTensorboard(analyzeTensorboardDto);
     return new SuccessResponse({ data: result });
+  }
+
+  @Post('start-data-upload')
+  @ApiOperation({
+    summary: '开始数据上传',
+    description: '根据标签查询所有文件并上传到模型训练服务',
+  })
+  async startDataUpload(@Req() req: IRequest, @Body() startDataUploadDto: StartDataUploadDto) {
+    const { teamId } = req;
+    const result = await this.modelTrainingService.startDataUpload(startDataUploadDto, teamId);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Post('upload-file-with-tags')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: '上传文件并添加标签',
+    description: '上传文件并自动添加标签，异步处理，收到请求即返回200',
+  })
+  async uploadFileWithTags(@Req() req: IRequest, @UploadedFile() file: any, @Body() body: any) {
+    const { teamId, userId } = req;
+
+    if (!file) {
+      throw new NotFoundException('文件不能为空');
+    }
+
+    // 处理 tagIds：可能是数组或 JSON 字符串
+    let tagIds: string[] = [];
+    if (body.tagIds) {
+      if (Array.isArray(body.tagIds)) {
+        tagIds = body.tagIds;
+      } else if (typeof body.tagIds === 'string') {
+        try {
+          tagIds = JSON.parse(body.tagIds);
+        } catch (e) {
+          // 如果不是 JSON，尝试按逗号分割
+          tagIds = body.tagIds
+            .split(',')
+            .map((id: string) => id.trim())
+            .filter((id: string) => id);
+        }
+      }
+    }
+
+    // 验证 tagIds
+    if (!Array.isArray(tagIds) || tagIds.length === 0) {
+      throw new NotFoundException('tagIds 必须是非空数组');
+    }
+
+    // 异步处理，不等待完成
+    await this.modelTrainingService.uploadFileWithTags(file, body.fileName, tagIds, teamId, userId);
+
+    // 立即返回200
+    return new SuccessResponse({ data: { message: '文件上传任务已提交，正在处理中' } });
   }
 }

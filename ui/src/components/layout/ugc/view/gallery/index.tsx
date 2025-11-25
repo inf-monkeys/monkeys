@@ -47,18 +47,6 @@ export const UgcViewGalleryItem = <E extends object>({
     const currentNavId = navMatch?.[1] ?? 'concept-design:design-assets';
     const targetUrl = `/${teamId}/nav/${currentNavId}/asset/${row.original.id}`;
 
-    // 调试日志
-    console.log('[Gallery Info Click Debug]', {
-      path,
-      teamId,
-      navMatch: navMatch?.[1],
-      currentNavId,
-      targetUrl,
-      assetId: row.original.id,
-      assetKey,
-      assetType,
-    });
-
     navigate({ to: targetUrl as any });
   };
 
@@ -84,16 +72,6 @@ export const UgcViewGalleryItem = <E extends object>({
       const navId = match?.[1] ?? '';
       currentAssetType = navId.includes(':') ? navId.split(':')[1] : navId;
     }
-
-    // 调试日志
-    console.log('[Gallery Info Button Debug]', {
-      assetKey,
-      assetType,
-      currentAssetType,
-      whitelist: DETAIL_PAGE_WHITELIST,
-      isInWhitelist: currentAssetType ? DETAIL_PAGE_WHITELIST.includes(currentAssetType) : false,
-      url: typeof window !== 'undefined' ? window.location.pathname : '',
-    });
 
     // 检查 assetType 是否在白名单中
     return currentAssetType ? DETAIL_PAGE_WHITELIST.includes(currentAssetType) : false;

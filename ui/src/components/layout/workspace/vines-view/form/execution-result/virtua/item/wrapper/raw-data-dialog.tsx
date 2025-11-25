@@ -30,6 +30,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useCopy } from '@/hooks/use-copy';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
+export const processInputsToCopyValue = (processedInputs: any[], values: Record<string, any>) => {
+  return processedInputs.map((input) => ({
+    id: input.name,
+    displayName: input.displayName,
+    description: input.description,
+    data: values[input.name],
+  }));
+};
+
 interface IVirtuaExecutionResultRawDataDialogProps {
   children: React.ReactNode;
 

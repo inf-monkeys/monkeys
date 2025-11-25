@@ -17,7 +17,7 @@ export const WorkbenchMiniModeLayout: React.FC<IWorkbenchMiniModeWrapperProps> =
 
   // 根据主题模式应用不同样式
   const isShadowMode = themeMode === 'shadow';
-  const backgroundClass = isShadowMode ? 'bg-[#f2f3f4]' : 'bg-slate-1';
+  const backgroundClass = isShadowMode ? 'bg-[#f2f3f4] dark:bg-[#000000]' : 'bg-slate-1';
 
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
 

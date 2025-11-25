@@ -1,7 +1,7 @@
 import { config } from '@/common/config';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { logger } from '@/common/logger';
-import { flattenObjectToSearchableText } from '@/common/utils';
+import { flattenObjectToSearchableText, generateDbId } from '@/common/utils';
 import { convertOutputFromRawOutput } from '@/common/utils/output';
 import { ToolsExecutionEntity } from '@/database/entities/tools/tools-execution';
 import { WorkflowArtifactEntity } from '@/database/entities/workflow/workflow-artifact.entity';
@@ -39,6 +39,7 @@ export class WorkflowExecutionPersistenceService {
       await Promise.all(
         detailedExecution.tasks.map(async (task) => {
           const toolsExecution = new ToolsExecutionEntity();
+          toolsExecution.id = generateDbId();
           toolsExecution.name = task.taskDefName;
           toolsExecution.namespace = task.taskDefName.split(':')[0] ?? 'unknown';
           toolsExecution.referenceName = task.referenceTaskName;

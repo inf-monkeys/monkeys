@@ -1,9 +1,11 @@
 import React from 'react';
 
 import { FeishuIcon } from '@/assets/icons/feishu';
-import { WeWorkIcon } from '@/assets/icons/wework.tsx';
+import { DingtalkIcon } from '@/assets/icons/dingtalk';
+import { WeWorkIcon } from '@/assets/icons/wework';
 import { OAuthWeWorkProvider } from '@/components/layout/login/auth/oauth/wework.tsx';
 
+import { OAuthDingtalkProvider } from './dingtalk';
 import { OAuthFeishuProvider } from './feishu';
 
 export const OAuthProvider: {
@@ -22,5 +24,10 @@ export const OAuthProvider: {
     icon: FeishuIcon as any,
     name: 'auth.oauth.feishu.label',
     Provider: OAuthFeishuProvider,
+  },
+  dingtalk: {
+    icon: DingtalkIcon as any,
+    name: 'auth.oauth.dingtalk.label',
+    Provider: OAuthDingtalkProvider,
   },
 };

@@ -99,17 +99,28 @@ export const WorkbenchQuickSwitcher: React.FC<IWorkbenchQuickSwitcherProps> = ({
             'ml-2 inline-flex items-center gap-1 rounded-sm border border-transparent px-1.5 py-0.5 text-xs font-medium transition-colors flex-none focus:outline-none focus-visible:outline-none focus-visible:ring-0',
             headbarTheme === 'glassy'
               ? 'text-white/80 hover:bg-white/20'
-              : 'text-muted-foreground hover:border-border hover:bg-muted',
+              : headbarTheme === 'bsd-blue'
+                ? 'hover:bg-white/10'
+                : 'text-muted-foreground hover:border-border hover:bg-muted',
           )}
+          style={headbarTheme === 'bsd-blue' ? { color: 'rgba(255, 255, 255, 0.85)' } : undefined}
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
           }}
         >
-          <span className="truncate" title={selectedWorkbenchPageName}>
+          <span
+            className="truncate"
+            title={selectedWorkbenchPageName}
+            style={headbarTheme === 'bsd-blue' ? { color: 'rgba(255, 255, 255, 0.85)' } : undefined}
+          >
             {selectedWorkbenchPageName}
           </span>
-          <ChevronDown className="size-3" strokeWidth={2} />
+          <ChevronDown
+            className="size-3"
+            strokeWidth={2}
+            style={headbarTheme === 'bsd-blue' ? { stroke: 'rgba(255, 255, 255, 0.85)' } : undefined}
+          />
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="center" className="min-w-0" sideOffset={6}>

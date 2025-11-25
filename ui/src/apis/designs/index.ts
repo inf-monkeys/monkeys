@@ -103,6 +103,14 @@ export const exportDesignProject = (projectId: string) =>
     simple: true,
   })(`/api/design/project/${projectId}/export`);
 
+export const exportDesignProjectAsZip = (projectId: string) =>
+  vinesFetcher<Blob>({
+    method: 'GET',
+    responseResolver: async (response) => {
+      return await response.blob();
+    },
+  })(`/api/design/project/${projectId}/export-zip`);
+
 export const importDesignProject = (importData: any) =>
   vinesFetcher<IAssetItem<IDesignProject>>({
     method: 'POST',

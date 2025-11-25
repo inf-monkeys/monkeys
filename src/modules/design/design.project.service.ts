@@ -1,7 +1,9 @@
 import { ListDto } from '@/common/dto/list.dto';
+import { downloadFileAsBuffer } from '@/common/utils/image';
 import { DesignMetadataRepository } from '@/database/repositories/design-metadata.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import JSZip from 'jszip';
 import { DesignProjectEntity } from '../../database/entities/design/design-project';
 import { DesignProjectRepository } from '../../database/repositories/design-project.repository';
 import { CreateDesignProjectDto } from './dto/create-design-project.dto';
@@ -151,6 +153,329 @@ export class DesignProjectService {
   }
 
   /**
+   * 从 snapshot 中提取画板内部结构
+   */
+  private extractBoardStructure(snapshot: any): {
+    images: string[];
+    frames: string[];
+    outputs: string[];
+    instructions: string[];
+  } {
+    const imagesSet = new Set<string>();
+    const framesSet = new Set<string>();
+    const outputsSet = new Set<string>();
+    const instructionsSet = new Set<string>();
+
+    if (!snapshot || !snapshot.document || !snapshot.document.store) {
+      return {
+        images: [],
+        frames: [],
+        outputs: [],
+        instructions: [],
+      };
+    }
+
+    const store = snapshot.document.store;
+
+    // 遍历所有 shapes
+    for (const key in store) {
+      if (!store.hasOwnProperty(key)) continue;
+      
+      const item = store[key];
+      if (!item || typeof item !== 'object') continue;
+
+      // 提取 image 节点（只处理 shape 类型的 image，避免与 asset 重复）
+      if (item.type === 'image' && item.typeName === 'shape' && item.props?.src) {
+        const src = item.props.src;
+        // 从 URL 中提取文件名
+        try {
+          const url = new URL(src);
+          const fileName = url.pathname.split('/').pop() || src;
+          imagesSet.add(`image: ${fileName}`);
+        } catch {
+          // 如果不是有效 URL，直接使用
+          imagesSet.add(`image: ${src}`);
+        }
+      }
+
+      // 提取 asset 中的图片
+      if (item.typeName === 'asset' && item.type === 'image' && item.props?.src) {
+        const src = item.props.src;
+        try {
+          const url = new URL(src);
+          const fileName = url.pathname.split('/').pop() || item.props.name || src;
+          imagesSet.add(`image: ${fileName}`);
+        } catch {
+          imagesSet.add(`image: ${item.props.name || src}`);
+        }
+      }
+
+      // 提取 frame 节点
+      if (item.type === 'frame' && item.props?.name) {
+        framesSet.add(`frame: ${item.props.name}`);
+      }
+
+      // 提取 output 节点
+      if (item.type === 'output' && item.props) {
+        const content = item.props.content || '';
+        if (content.trim()) {
+          // 截断过长的内容
+          const truncated = content.length > 100 
+            ? content.substring(0, 100) + '...' 
+            : content;
+          outputsSet.add(`output: ${truncated}`);
+        } else if (item.props.imageUrl) {
+          outputsSet.add(`output: [image]`);
+        }
+      }
+
+      // 提取 instruction 节点
+      if (item.type === 'instruction' && item.props) {
+        const content = item.props.content || '';
+        if (content.trim()) {
+          instructionsSet.add(`instruction: ${content}`);
+        } else if (item.props.imageUrl) {
+          instructionsSet.add(`instruction: [image]`);
+        } else {
+          instructionsSet.add(`instruction:`);
+        }
+      }
+    }
+
+    return {
+      images: Array.from(imagesSet),
+      frames: Array.from(framesSet),
+      outputs: Array.from(outputsSet),
+      instructions: Array.from(instructionsSet),
+    };
+  }
+
+  /**
+   * 生成 UML 文件内容
+   */
+  private generateUmlFile(project: DesignProjectEntity, boards: any[], exportData: any): string {
+    const projectName = typeof project.displayName === 'string' 
+      ? project.displayName 
+      : JSON.stringify(project.displayName);
+    
+    let uml = '@startuml\n';
+    uml += `title 设计项目: ${projectName}\n\n`;
+    
+    // 设置布局样式
+    uml += 'skinparam packageStyle rectangle\n';
+    uml += 'skinparam objectStyle uml2\n';
+    uml += 'skinparam linetype ortho\n';
+    uml += 'skinparam maxMessageSize 60\n\n';
+    
+    // 项目信息部分（左侧）
+    uml += 'package "项目信息" {\n';
+    uml += `  object "项目名称: ${projectName}" as ProjectName\n`;
+    
+    const desc = project.description 
+      ? (typeof project.description === 'string' 
+          ? project.description 
+          : JSON.stringify(project.description))
+      : '无描述';
+    uml += `  object "描述: ${desc}" as ProjectDesc\n`;
+    uml += `  object "模板: ${project.isTemplate ? '是' : '否'}" as ProjectTemplate\n`;
+    uml += '  ProjectName --> ProjectDesc\n';
+    uml += '  ProjectName --> ProjectTemplate\n';
+    uml += '}\n\n';
+    
+    // 画板列表部分（右侧），包含画板内部结构
+    uml += 'package "画板列表" {\n';
+    
+    if (boards.length === 0) {
+      uml += '  note right: 无画板\n';
+    } else {
+      // 画板内部结构嵌套在画板列表中
+      uml += '  package "图板内部结构" {\n';
+      
+      // 合并所有画板的结构
+      const allImages = new Set<string>();
+      const allFrames = new Set<string>();
+      const allOutputs = new Set<string>();
+      const allInstructions = new Set<string>();
+      
+      boards.forEach((board) => {
+        const structure = this.extractBoardStructure(board.snapshot);
+        structure.images.forEach(img => allImages.add(img));
+        structure.frames.forEach(frame => allFrames.add(frame));
+        structure.outputs.forEach(output => allOutputs.add(output));
+        structure.instructions.forEach(instruction => allInstructions.add(instruction));
+      });
+      
+      // image 节点 - 使用 together 关键字强制纵向排列
+      if (allImages.size > 0) {
+        uml += '    package "image 节点" {\n';
+        const imageArray = Array.from(allImages);
+        uml += '      together {\n';
+        imageArray.forEach((img, imgIndex) => {
+          uml += `        object "${img}" as Image_${imgIndex}\n`;
+        });
+        uml += '      }\n';
+        // 添加纵向连接线
+        for (let i = 0; i < imageArray.length - 1; i++) {
+          uml += `      Image_${i} -[hidden]down- Image_${i + 1}\n`;
+        }
+        uml += '    }\n';
+      }
+      
+      // frame 节点 - 纵向排列
+      if (allFrames.size > 0) {
+        uml += '    package "frame 节点" {\n';
+        const frameArray = Array.from(allFrames);
+        uml += '      together {\n';
+        frameArray.forEach((frame, frameIndex) => {
+          uml += `        object "${frame}" as Frame_${frameIndex}\n`;
+        });
+        uml += '      }\n';
+        for (let i = 0; i < frameArray.length - 1; i++) {
+          uml += `      Frame_${i} -[hidden]down- Frame_${i + 1}\n`;
+        }
+        uml += '    }\n';
+      }
+      
+      // output 节点 - 纵向排列
+      if (allOutputs.size > 0) {
+        uml += '    package "output 节点" {\n';
+        const outputArray = Array.from(allOutputs);
+        uml += '      together {\n';
+        outputArray.forEach((output, outputIndex) => {
+          uml += `        object "${output}" as Output_${outputIndex}\n`;
+        });
+        uml += '      }\n';
+        for (let i = 0; i < outputArray.length - 1; i++) {
+          uml += `      Output_${i} -[hidden]down- Output_${i + 1}\n`;
+        }
+        uml += '    }\n';
+      }
+      
+      // instruction 节点 - 纵向排列
+      if (allInstructions.size > 0) {
+        uml += '    package "instruction 节点" {\n';
+        const instructionArray = Array.from(allInstructions);
+        uml += '      together {\n';
+        instructionArray.forEach((instruction, instructionIndex) => {
+          uml += `        object "${instruction}" as Instruction_${instructionIndex}\n`;
+        });
+        uml += '      }\n';
+        for (let i = 0; i < instructionArray.length - 1; i++) {
+          uml += `      Instruction_${i} -[hidden]down- Instruction_${i + 1}\n`;
+        }
+        uml += '    }\n';
+      }
+      
+      uml += '  }\n';
+    }
+    
+    uml += '}\n\n';
+    
+    // 项目名称连接到画板列表
+    uml += 'ProjectName --> "画板列表"\n\n';
+    
+    // 添加 JSON 导出数据作为注释（可选，用于导入时恢复）
+    uml += "' JSON_EXPORT_BEGIN\n";
+    uml += `' ${JSON.stringify(exportData).replace(/\n/g, '\\n')}\n`;
+    uml += "' JSON_EXPORT_END\n";
+    uml += '\n';
+    
+    uml += '@enduml\n';
+    
+    return uml;
+  }
+
+  /**
+   * 从 snapshot 中提取所有资源文件 URL
+   */
+  private extractAssetUrls(snapshot: any): string[] {
+    const urls = new Set<string>();
+    if (!snapshot || typeof snapshot !== 'object') {
+      return [];
+    }
+
+    // 递归遍历对象，查找所有可能的资源 URL
+    const traverse = (obj: any) => {
+      if (!obj || typeof obj !== 'object') {
+        return;
+      }
+
+      // 检查是否是 asset 对象，包含 src 属性
+      if (obj.props?.src && typeof obj.props.src === 'string') {
+        const url = obj.props.src;
+        // 只添加有效的 HTTP/HTTPS URL
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          urls.add(url);
+        }
+      }
+
+      // 检查 output 节点的 imageUrl 和 images 字段
+      if (obj.type === 'output' && obj.props) {
+        // 检查 imageUrl 字段
+        if (obj.props.imageUrl && typeof obj.props.imageUrl === 'string') {
+          const url = obj.props.imageUrl;
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            urls.add(url);
+          }
+        }
+        // 检查 images 数组
+        if (Array.isArray(obj.props.images)) {
+          obj.props.images.forEach((img: any) => {
+            if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) {
+              urls.add(img);
+            }
+          });
+        }
+      }
+
+      // 检查其他可能的 URL 字段
+      if (obj.src && typeof obj.src === 'string') {
+        const url = obj.src;
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          urls.add(url);
+        }
+      }
+
+      if (obj.url && typeof obj.url === 'string') {
+        const url = obj.url;
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          urls.add(url);
+        }
+      }
+
+      // 检查 imageUrl, image_url, image, imageURL 等字段
+      const imageUrlFields = ['imageUrl', 'image_url', 'image', 'imageURL'];
+      for (const field of imageUrlFields) {
+        if (obj[field] && typeof obj[field] === 'string') {
+          const url = obj[field];
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            urls.add(url);
+          }
+        }
+      }
+
+      // 检查 images 数组字段
+      if (Array.isArray(obj.images)) {
+        obj.images.forEach((img: any) => {
+          if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) {
+            urls.add(img);
+          }
+        });
+      }
+
+      // 递归遍历所有属性
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          traverse(obj[key]);
+        }
+      }
+    };
+
+    traverse(snapshot);
+    return Array.from(urls);
+  }
+
+  /**
    * 导出设计项目：获取项目及其所有画板的完整数据
    */
   async exportProject(projectId: string, userId: string) {
@@ -185,6 +510,112 @@ export class DesignProjectService {
         thumbnailUrl: board.thumbnailUrl,
       })),
     };
+  }
+
+  /**
+   * 导出设计项目为压缩包：包含 JSON 数据和所有资源文件
+   */
+  async exportProjectAsZip(projectId: string, userId: string): Promise<Buffer> {
+    const project = await this.findById(projectId);
+    if (!project) {
+      throw new NotFoundException('设计项目不存在');
+    }
+
+    // 如果是模板，检查权限：只有团队所有者才能导出模板
+    if (project.isTemplate) {
+      await this.checkTemplatePermission(project, userId);
+    }
+    // 普通设计项目允许所有人导出
+
+    // 获取所有画板（包括snapshot）
+    const boards = await this.designMetadataRepository.findAllByProjectId(projectId);
+
+    // 构建导出数据
+    const exportData = {
+      version: '1.0',
+      exportTime: Date.now(),
+      project: {
+        displayName: project.displayName,
+        description: project.description,
+        iconUrl: project.iconUrl,
+        isTemplate: project.isTemplate,
+      },
+      boards: boards.map((board) => ({
+        displayName: board.displayName,
+        snapshot: board.snapshot,
+        pinned: board.pinned,
+        thumbnailUrl: board.thumbnailUrl,
+      })),
+    };
+
+    // 创建 ZIP 文件
+    const zip = new JSZip();
+
+    // 添加 JSON 文件
+    zip.file('project.json', JSON.stringify(exportData, null, 2));
+
+    // 生成 UML 文件
+    const umlContent = this.generateUmlFile(project, boards, exportData);
+    zip.file('project.uml', umlContent);
+
+    // 收集所有资源文件 URL
+    const assetUrls = new Set<string>();
+    
+    // 从项目图标 URL 中提取
+    if (project.iconUrl && (project.iconUrl.startsWith('http://') || project.iconUrl.startsWith('https://'))) {
+      assetUrls.add(project.iconUrl);
+    }
+
+    // 从画板的 snapshot 和缩略图中提取
+    for (const board of boards) {
+      // 提取 snapshot 中的资源 URL
+      const snapshotUrls = this.extractAssetUrls(board.snapshot);
+      snapshotUrls.forEach((url) => assetUrls.add(url));
+
+      // 添加缩略图 URL
+      if (board.thumbnailUrl && (board.thumbnailUrl.startsWith('http://') || board.thumbnailUrl.startsWith('https://'))) {
+        assetUrls.add(board.thumbnailUrl);
+      }
+    }
+
+    // 下载所有资源文件并添加到压缩包
+    if (assetUrls.size > 0) {
+      const assetsFolder = zip.folder('assets');
+      const downloadPromises = Array.from(assetUrls).map(async (url, index) => {
+        try {
+          // 下载文件
+          const buffer = await downloadFileAsBuffer(url);
+          
+          // 从 URL 中提取文件名
+          const urlPath = new URL(url).pathname;
+          const fileName = urlPath.split('/').pop() || `asset-${index}`;
+          
+          // 如果文件名没有扩展名，尝试从 Content-Type 推断
+          let finalFileName = fileName;
+          if (!fileName.includes('.')) {
+            // 尝试从 URL 或响应头推断文件类型
+            const contentType = url.match(/\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|ogg|pdf|zip)/i);
+            if (contentType) {
+              finalFileName = `${fileName}.${contentType[1]}`;
+            } else {
+              finalFileName = `${fileName}.bin`;
+            }
+          }
+          
+          // 添加到压缩包
+          assetsFolder.file(finalFileName, buffer);
+        } catch (error) {
+          // 如果下载失败，记录错误但继续处理其他文件
+          console.error(`Failed to download asset from ${url}:`, error);
+        }
+      });
+
+      // 等待所有文件下载完成
+      await Promise.all(downloadPromises);
+    }
+
+    // 生成 ZIP 文件
+    return await zip.generateAsync({ type: 'nodebuffer' });
   }
 
   /**

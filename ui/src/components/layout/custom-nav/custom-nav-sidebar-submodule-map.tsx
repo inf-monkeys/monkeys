@@ -6,6 +6,7 @@ import { EvaluationModules } from '@/pages/$teamId/evaluations';
 import { ImageModels } from '@/pages/$teamId/image-models/index.lazy';
 import { MediaData } from '@/pages/$teamId/media-data/index.lazy';
 import { ModelTraining } from '@/pages/$teamId/model-training';
+import { ModelTrainingV2 } from '@/pages/$teamId/model-training-v2';
 import { NeuralModels } from '@/pages/$teamId/neural-models/index.lazy';
 import { TextModels } from '@/pages/$teamId/text-models/index.lazy';
 import { Tools } from '@/pages/$teamId/tools/index.lazy';
@@ -32,7 +33,8 @@ export const CUSTOM_NAV_SUB_MODULE_MAP: INavListSubModuleMap = {
     'vr-evaluation': VREvaluations,
     'design-software-evaluation': DesignSoftwareEvaluations,
   },
-  designs: Designs,
+  'model-training-v2': ModelTrainingV2,
+  'designs': Designs,
   'designs-templates': DesignTemplates,
   'artist:asset-library': MediaData,
   'ai-sessions': ConversationApps,

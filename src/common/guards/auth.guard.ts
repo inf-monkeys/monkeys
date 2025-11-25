@@ -3,6 +3,7 @@ import { TeamRepository } from '@/database/repositories/team.repository';
 import { JwtHelper } from '@/modules/auth/jwt-utils';
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { config } from '../config';
+import { TelemetryService } from '../services/telemetry.service';
 import { IRequest } from '../typings/request';
 import { isValidObjectId } from '../utils';
 
@@ -11,12 +12,26 @@ export class CompatibleAuthGuard implements CanActivate {
   constructor(
     public teamRepository: TeamRepository,
     public apiKeyRepository: ApikeyRepository,
+    private readonly telemetryService: TelemetryService,
   ) {}
+
+  private shouldRecordTelemetry(request: IRequest) {
+    const path = request.path || request.url || '';
+    const method = (request.method || '').toUpperCase();
+    if (method !== 'POST') return false;
+    return /\/workflow\/executions\/[^/]+\/(start|debug)/.test(path);
+  }
+
+  private recordTelemetry(request: IRequest) {
+    if (!this.shouldRecordTelemetry(request)) return;
+    this.telemetryService.recordWorkflowRun(request, request.headers['x-monkeys-telemetry'] as string | string[]);
+  }
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<IRequest>();
 
     if (request.skipUnauthorized) {
+      this.recordTelemetry(request);
       return true;
     }
 
@@ -90,6 +105,7 @@ export class CompatibleAuthGuard implements CanActivate {
         request.userId = userId;
         request.teamId = teamId;
         request.apikey = apiKey;
+        this.recordTelemetry(request);
         return true;
       } else {
         return false;
@@ -97,6 +113,7 @@ export class CompatibleAuthGuard implements CanActivate {
     } else {
       request.userId = 'default';
       request.teamId = 'default';
+      this.recordTelemetry(request);
       return true;
     }
   }

@@ -1,10 +1,7 @@
-import React, { forwardRef, startTransition } from 'react';
+import { forwardRef, startTransition } from 'react';
 
 import { useNavigate, useRouter } from '@tanstack/react-router';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Folder } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { createShapeId } from 'tldraw';
@@ -13,25 +10,26 @@ import { IDesignAssociation } from '@/apis/designs/typings';
 import { useWorkspacePages } from '@/apis/pages';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { useVinesRoute } from '@/components/router/use-vines-route';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { uploadSingleFile } from '@/components/ui/vines-uploader/standalone';
 import useUrlState from '@/hooks/use-url-state';
 import { useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { useSetTemp } from '@/store/useGlobalTempStore';
 import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
-import { cn, getI18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 import { getTargetInput } from '@/utils/association';
 
 export interface IGlobalDesignBoardAssociationBarItemProps {
   data: IDesignAssociation;
+  expanded: boolean;
 }
+
+import { CommonOperationBarItem } from '../common-operation-bar/item';
 
 export const GlobalDesignBoardAssociationBarItem = forwardRef<
   HTMLDivElement,
   IGlobalDesignBoardAssociationBarItemProps
->(({ data }) => {
+>(({ data, expanded }, ref) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const router = useRouter();
@@ -49,14 +47,7 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
 
   const { editor } = useDesignBoardStore();
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: data.id });
-
   const setWorkbenchCacheVal = useSetWorkbenchCacheVal();
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
 
   // useEffect(() => {
   //   if (activePageFromType === 'global-design-board' && designProjectId) {
@@ -146,37 +137,15 @@ export const GlobalDesignBoardAssociationBarItem = forwardRef<
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger>
-        <div
-          ref={setNodeRef}
-          style={style}
-          {...attributes}
-          {...listeners}
-          key={data.id}
-          className={cn(
-            'z-10 flex cursor-pointer items-center justify-center gap-global-1/2 rounded-md p-global-1/2 transition-colors hover:bg-accent hover:text-accent-foreground',
-            mode === 'mini' ? 'size-[calc(var(--global-icon-size)+8px)]' : 'size-[var(--operation-bar-width)]',
-            isDragging && 'opacity-50',
-          )}
-          onClick={onItemClick}
-        >
-          {typeof data.iconUrl === 'string' ? (
-            <VinesLucideIcon
-              className={cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon')}
-              size={20}
-              src={data.iconUrl}
-            />
-          ) : (
-            React.createElement(Folder, {
-              className: cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon'),
-              size: 20,
-            })
-          )}
-        </div>
-      </TooltipTrigger>
-      <TooltipContent>{getI18nContent(data.displayName)}</TooltipContent>
-    </Tooltip>
+    <CommonOperationBarItem
+      ref={ref}
+      id={data.id}
+      mode={mode}
+      iconUrl={data.iconUrl}
+      tooltipContent={getI18nContent(data.displayName)}
+      onClick={onItemClick}
+      expanded={expanded}
+    />
   );
 });
 GlobalDesignBoardAssociationBarItem.displayName = 'GlobalDesignBoardAssociationBarItem';

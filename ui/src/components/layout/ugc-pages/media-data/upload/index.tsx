@@ -59,7 +59,7 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
 
   const handleUploadChange = async (urls: string[], files: UppyFile<Meta, Record<string, never>>[]) => {
     // 等待一段时间，确保 upload-success 事件已经触发
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // 优先使用从 upload-success 事件收集的文件 ID
     let uploadedFileIds = [...uploadedFileIdsRef.current];
@@ -73,7 +73,9 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
             (file.response as any)?.body?.data?.id ||
             file.meta?.mediaFileId ||
             (file.response as any)?.body?.data?.mediaFileId ||
-            (file.response as any)?.data?.id;
+            (file.response as any)?.data?.id ||
+            // 秒上传时，从 meta 中获取（rapid-upload 插件可能设置在这里）
+            (file.meta as any)?.assetId;
           return mediaFileId;
         })
         .filter((id): id is string => !!id);
@@ -87,7 +89,9 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
             (file.response as any)?.body?.data?.id ||
             file.meta?.mediaFileId ||
             (file.response as any)?.body?.data?.mediaFileId ||
-            (file.response as any)?.data?.id;
+            (file.response as any)?.data?.id ||
+            // 秒上传时，从 meta 中获取
+            (file.meta as any)?.assetId;
           return mediaFileId;
         })
         .filter((id): id is string => !!id);
@@ -95,14 +99,18 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
 
     // 如果有选中的标签，关联到上传的文件
     if (selectedTags.length > 0 && uploadedFileIds.length > 0) {
-      const tagIds = selectedTags.map((tag) => tag.id);
+      const newTagIds = selectedTags.map((tag) => tag.id);
       try {
-        await Promise.all(uploadedFileIds.map((mediaFileId) => updateAssetTag('media-file', mediaFileId, { tagIds })));
+        // 对于每个上传的文件，使用合并模式更新标签（后端会自动合并现有标签和新标签）
+        await Promise.all(
+          uploadedFileIds.map((mediaFileId) =>
+            updateAssetTag('media-file', mediaFileId, { tagIds: newTagIds, merge: true }),
+          ),
+        );
         toast.success(t('common.update.success'));
         // 上传成功后清空选中的标签，方便下次上传
         setSelectedTags([]);
       } catch (error) {
-        console.error('[UploadMedia] 标签更新失败:', error);
         toast.error(t('common.update.error'));
       }
     }

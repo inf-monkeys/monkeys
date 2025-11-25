@@ -21,6 +21,7 @@ const HEADBAR_THEME_MAP: Record<CustomizationHeadbarTheme, TabsVariant> = {
   fixed: 'ghost',
   glassy: 'rounded',
   ghost: 'ghost',
+  'bsd-blue': 'ghost',
 };
 
 const TAB_LIST: VinesSpaceHeadbarModules = [
@@ -70,17 +71,24 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
     isUseCustomNav,
     routeCustomNavId,
     isUseDesign,
+    routeAppId,
     routeDesignProjectId,
   } = useVinesRoute();
 
   // 获取当前设计项目信息，用于判断是否为模板
   const { data: currentDesignProject } = useGetDesignProject(routeDesignProjectId);
 
+  const tabsList: VinesSpaceHeadbarModules = unionBy(oemVinesSpaceHeadbarModules, TAB_LIST, 'id');
+  const workbenchHeadbarModule = tabsList.find((item) => item.id === 'workbench');
+  const showWorkbenchQuickSwitcher = workbenchHeadbarModule?.showQuickSwitcher === true;
+
   const [value, setValue] = useState(defaultValue || 'workbench');
 
   useEffect(() => {
     if (isUseCustomNav && routeCustomNavId) {
       setValue(routeCustomNavId);
+    } else if (routeAppId && tabsList.some((item) => item.id === routeAppId)) {
+      setValue(routeAppId);
     } else if (isUseWorkbench) {
       setValue('workbench');
     } else if (isUseAppStore) {
@@ -102,12 +110,10 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
     isUseCustomNav,
     routeCustomNavId,
     isUseDesign,
+    routeAppId,
+    tabsList,
     currentDesignProject?.isTemplate,
   ]);
-
-  const tabsList: VinesSpaceHeadbarModules = unionBy(oemVinesSpaceHeadbarModules, TAB_LIST, 'id');
-  const workbenchHeadbarModule = tabsList.find((item) => item.id === 'workbench');
-  const showWorkbenchQuickSwitcher = workbenchHeadbarModule?.showQuickSwitcher === true;
 
   return (
     <Tabs
@@ -139,7 +145,12 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
             return (
               <TabsTrigger
                 key={item.id}
-                className={cn('gap-1 py-1', headbarTheme === 'glassy' && 'gap-2')}
+                className={cn(
+                  'gap-1 py-1',
+                  headbarTheme === 'glassy' && 'gap-2',
+                  headbarTheme === 'bsd-blue' &&
+                    'relative z-10 text-white/85 transition-colors data-[state=active]:text-white data-[state=active]:bg-transparent',
+                )}
                 value={item.id}
                 onClick={() => {
                   if (item.id === 'designs') {
@@ -156,6 +167,7 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
                     className={cn(
                       'size-[14px]',
                       headbarTheme === 'glassy' && (item.id === value ? 'stroke-white' : 'stroke-vines-500'),
+                      headbarTheme === 'bsd-blue' && 'stroke-white',
                     )}
                   />
                 )}
@@ -164,6 +176,20 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
                   <WorkbenchQuickSwitcher headbarTheme={headbarTheme} onEnsureWorkbench={() => setValue('workbench')} />
                 )}
                 {ExtraInfo && <ExtraInfo tabId={item.id} />}
+                {headbarTheme === 'bsd-blue' && item.id === value && (
+                  <div
+                    className="pointer-events-none absolute inset-0 -z-10 rounded-full"
+                    style={{
+                      background: '#2C5EF5',
+                      boxShadow: 'inset 4px 4px 4px 0px rgba(150, 150, 150, 0.25)',
+                      border: '1.5px solid transparent',
+                      backgroundOrigin: 'border-box',
+                      backgroundClip: 'content-box, border-box',
+                      backgroundImage:
+                        'linear-gradient(#2C5EF5, #2C5EF5), linear-gradient(106deg, rgba(255, 255, 255, 0.5) -4%, rgba(255, 255, 255, 0) 81%)',
+                    }}
+                  />
+                )}
               </TabsTrigger>
             );
           })}

@@ -7,6 +7,7 @@ import Image, { ImagePreviewType } from 'rc-image';
 import { useWorkflowInstanceByArtifactUrl } from '@/apis/workflow/artifact';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useCopy } from '@/hooks/use-copy';
 import { cn, getI18nContent } from '@/utils';
 
 import { useUniImagePreview } from './context';
@@ -17,6 +18,8 @@ export const UniImagePreviewDialog: React.FC = () => {
   const navigate = useNavigate();
 
   const { teamId } = useParams({ from: '/$teamId/' });
+
+  const { copy } = useCopy();
 
   const { data: instance, isLoading } = useWorkflowInstanceByArtifactUrl(imageUrl);
 
@@ -56,10 +59,10 @@ export const UniImagePreviewDialog: React.FC = () => {
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && closePreview()}>
       <DialogContent
         className={cn(
-          'overflow-hidden transition-all',
-          imageUrl && !isLoading && instance
-            ? 'max-h-[600px] max-w-[1000px]'
-            : 'max-h-[calc(500px+(var(--global-spacing)*3))] max-w-[calc(275px+(var(--global-spacing)*3))]',
+          'max-h-[600px] max-w-[1000px] overflow-hidden transition-all',
+          // imageUrl && !isLoading && instance
+          //   ? 'max-h-[600px] max-w-[1000px]'
+          //   : 'max-h-[calc(500px+(var(--global-spacing)*3))] max-w-[calc(275px+(var(--global-spacing)*3))]',
         )}
       >
         <div className="flex flex-col gap-global">
@@ -146,23 +149,38 @@ export const UniImagePreviewDialog: React.FC = () => {
             >
               Cancel
             </Button>
-            <Button
-              variant="solid"
-              onClick={async () => {
-                closePreview();
-                navigate({
-                  to: '/$teamId',
-                  params: {
-                    teamId,
-                  },
-                  search: {
-                    activePageFromWorkflowInstanceId: instance.instanceId,
-                  },
-                });
-              }}
-            >
-              Remix in Studio
-            </Button>
+            <div className="flex items-center gap-global-1/2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  copy(
+                    JSON.stringify({
+                      type: 'input-parameters',
+                      data: instance.input ?? [],
+                    }),
+                  );
+                }}
+              >
+                Copy Prompts
+              </Button>
+              <Button
+                variant="solid"
+                onClick={async () => {
+                  closePreview();
+                  navigate({
+                    to: '/$teamId',
+                    params: {
+                      teamId,
+                    },
+                    search: {
+                      activePageFromWorkflowInstanceId: instance.instanceId,
+                    },
+                  });
+                }}
+              >
+                Remix in Studio
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>

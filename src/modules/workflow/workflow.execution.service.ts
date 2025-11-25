@@ -1057,15 +1057,6 @@ export class WorkflowExecutionService {
     }
     await this.workflowRepository.updateWorkflowExecutionStatus(workflowInstanceId, status, takes);
 
-    // 修改：为所有完成状态（包括失败状态）触发事件
-    if (status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT' || status === 'CANCELED' || status === 'PAUSED') {
-      this.eventEmitter.emit(`${config.server.appId}.workflow.completed.${workflowInstanceId}`, {
-        workflowInstanceId,
-        result: workflowExecutionDetails,
-        timestamp: Date.now(),
-      });
-    }
-
     return output;
   }
 

@@ -9,9 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { useSystemConfig } from '@/apis/common';
 import { CustomizationHeadbarNavPosition, CustomizationHeadbarTheme } from '@/apis/common/typings';
 import { getVinesToken } from '@/apis/utils.ts';
-import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { HeaderInvite } from '@/components/layout-wrapper/space/header/expand/header-invite';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
+import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -69,7 +69,8 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
           `flex h-[72px] w-full items-center justify-between gap-4 rounded-lg bg-slate-1 p-global`,
           theme === 'fixed' &&
             'shadow-b-lg fixed left-0 top-0 border-b-[1px] border-t-[3px] border-t-[rgb(var(--vines-500))]',
-          !['fixed', 'glassy'].includes(theme) && `border border-input`,
+          !['fixed', 'glassy', 'bsd-blue'].includes(theme) && `border border-input`,
+          theme === 'bsd-blue' && 'relative',
         )}
         style={
           theme === 'glassy'
@@ -81,9 +82,30 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
                 backdropFilter: 'blur(45px)',
                 boxShadow: 'inset 0px 0px 0px 0px rgba(0, 0, 0, 0.1)',
               }
-            : {}
+            : theme === 'bsd-blue'
+              ? {
+                  background: 'rgba(43, 93, 241,0.3)',
+                  boxSizing: 'border-box',
+                  backdropFilter: 'blur(32px)',
+                  borderRadius: '20px',
+                }
+              : {}
         }
       >
+        {theme === 'bsd-blue' && (
+          <div
+            className="pointer-events-none absolute inset-0 rounded-[20px]"
+            style={{
+              padding: '1px',
+              background:
+                'conic-gradient(from 158deg at 74% 49%, #12DCFF -5deg, #3159D1 51deg, #8099E3 159deg, #3159D1 259deg, #258AE2 295deg, #12DCFF 355deg, #3159D1 411deg)',
+              mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+              maskComposite: 'exclude',
+              WebkitMaskComposite: 'xor',
+            }}
+          />
+        )}
         <Link
           to="/$teamId"
           params={{ teamId }}

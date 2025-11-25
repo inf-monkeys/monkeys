@@ -502,6 +502,16 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       if (!data) return;
       setTemp(tid, null);
 
+      // 以当前画板的实际位置和尺寸为准，确保新建图片落在画板内部
+      const frameShape = editor.getShape(frameShapeId as TLShapeId);
+      const frameX = (frameShape as any)?.x ?? 0;
+      const frameY = (frameShape as any)?.y ?? 0;
+      const frameWidth = (frameShape as any)?.props?.w ?? canvasWidth;
+      const frameHeight = (frameShape as any)?.props?.h ?? canvasHeight;
+      const padding = 20;
+      const availableWidth = frameWidth - padding * 2;
+      const availableHeight = frameHeight - padding * 2;
+
       const processedData = await Promise.all(
         data.map(async (item) => {
           const imageUrl = item.render.data as string;
@@ -534,13 +544,38 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         }),
       );
 
-      for (const item of processedData) {
+      for (let index = 0; index < processedData.length; index++) {
+        const item = processedData[index];
+
+        // 计算图片在画板内的位置
+        // 画板大小为 1280x720，从左上角 (0, 0) 开始
+
+        // 计算图片的实际显示大小（可能需要缩放以适应画板）
+        let displayWidth = item.width;
+        let displayHeight = item.height;
+
+        // 如果图片超过可用空间，则按比例缩放
+        if (displayWidth > availableWidth || displayHeight > availableHeight) {
+          const widthRatio = availableWidth / displayWidth;
+          const heightRatio = availableHeight / displayHeight;
+          const scale = Math.min(widthRatio, heightRatio);
+          displayWidth = displayWidth * scale;
+          displayHeight = displayHeight * scale;
+        }
+
+        // 计算居中位置
+        const x = frameX + padding + (availableWidth - displayWidth) / 2;
+        const y = frameY + padding + (availableHeight - displayHeight) / 2;
+
         editor.createShape({
           type: 'image',
+          x,
+          y,
+          parentId: frameShapeId,
           props: {
             assetId: item.id,
-            w: item.width,
-            h: item.height,
+            w: displayWidth,
+            h: displayHeight,
           },
         });
       }
@@ -554,10 +589,14 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
   };
 
   useEffect(() => {
-    if (operation === 'insert-images' && tid && editor) {
-      void handleInsertImages(operation, tid);
+    if (operation === 'insert-images' && tid && editor && designBoardId) {
+      // 验证当前画板是否属于目标设计项目
+      const isBoardMatchProject = metadata?.designProjectId === designProjectId;
+      if (isBoardMatchProject) {
+        void handleInsertImages(operation, tid);
+      }
     }
-  }, [operation, tid, editor]);
+  }, [operation, tid, editor, designBoardId, designProjectId, metadata]);
 
   const handleEventExport = useMemoizedFn((boardId?: string) => {
     if (boardId !== designBoardId) return;
