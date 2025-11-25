@@ -122,3 +122,31 @@ export const setWorkflowAsBuiltinApp = (workflowId: string) =>
         : {},
     },
   })(`/api/tenant/manage/builtin/workflows/${workflowId}`);
+
+export const getWorkflowBuiltinStatus = (workflowId: string) =>
+  vinesFetcher<{ appId?: string; builtin: boolean }>({
+    method: 'GET',
+    simple: true,
+    auth: false,
+    fetchOptions: {
+      headers: TENANT_BEARER_TOKEN
+        ? {
+            authorization: `Bearer ${TENANT_BEARER_TOKEN}`,
+          }
+        : {},
+    },
+  })(`/api/tenant/manage/builtin/workflows/${workflowId}`);
+
+export const unsetWorkflowBuiltinApp = (workflowId: string) =>
+  vinesFetcher<{ appId?: string }>({
+    method: 'DELETE',
+    simple: true,
+    auth: false,
+    fetchOptions: {
+      headers: TENANT_BEARER_TOKEN
+        ? {
+            authorization: `Bearer ${TENANT_BEARER_TOKEN}`,
+          }
+        : {},
+    },
+  })(`/api/tenant/manage/builtin/workflows/${workflowId}`);

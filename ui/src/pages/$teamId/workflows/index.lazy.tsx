@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { useSystemConfig } from '@/apis/common';
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { cloneWorkflow, deleteWorkflow, setWorkflowAsBuiltinApp } from '@/apis/workflow';
+import { cloneWorkflow, deleteWorkflow, setWorkflowAsBuiltinApp, unsetWorkflowBuiltinApp } from '@/apis/workflow';
 import { GlobalWorkflowAssociationEditorDialog } from '@/components/layout/ugc-pages/apps/association';
 import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
 import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
@@ -78,6 +78,7 @@ export const Workflows: React.FC = () => {
   const [rollbackWorkflowVisible, setRollbackWorkflowVisible] = useState(false);
   const [rollbackWorkflowContext, setRollbackWorkflowContext] = useState<IRollbackWorkflowContext | undefined>();
   const [visionProAlertVisible, setVisionProAlertVisible] = useState(false);
+  const [builtinStatus, setBuiltinStatus] = useState<Record<string, boolean>>({});
 
   const handleAfterUpdateWorkflow = () => {
     void mutateWorkflows();
@@ -112,19 +113,43 @@ export const Workflows: React.FC = () => {
     });
   };
 
-  const handleSetBuiltinApp = async (workflowId?: string) => {
-    if (!workflowId) {
+  const handleToggleBuiltinApp = async (workflow?: IAssetItem<MonkeyWorkflow>) => {
+    if (!workflow) {
       toast.warning(t('common.toast.loading'));
       return;
     }
-    toast.promise(setWorkflowAsBuiltinApp(workflowId), {
-      loading: t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.loading', '正在设置为内置应用...'),
-      success: () => {
-        void mutateWorkflows();
-        return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.success', '已设置为内置应用');
-      },
-      error: t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.error', '设置内置应用失败'),
-    });
+
+    const workflowId = workflow.workflowId;
+    const initialBuiltin = (workflow as any).builtin as boolean | undefined;
+    let isBuiltin = typeof builtinStatus[workflowId] === 'boolean' ? builtinStatus[workflowId] : !!initialBuiltin;
+
+    if (isBuiltin) {
+      // 取消内置
+      toast.promise(unsetWorkflowBuiltinApp(workflowId), {
+        loading: t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.loading', '正在取消内置应用...'),
+        success: () => {
+          setBuiltinStatus((prev) => ({ ...prev, [workflowId]: false }));
+          void mutateWorkflows();
+          return t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.success', '已取消内置应用');
+        },
+        error: t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.error', '取消内置应用失败'),
+      });
+    } else {
+      // 设置为内置
+      toast.promise(setWorkflowAsBuiltinApp(workflowId), {
+        loading: t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.loading', '正在设置为内置应用...'),
+        success: (res) => {
+          setBuiltinStatus((prev) => ({ ...prev, [workflowId]: true }));
+          void mutateWorkflows();
+          // 若已是内置（后端返回 alreadyBuiltin），文案上仍视为成功
+          if ((res as any)?.alreadyBuiltin) {
+            return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.already', '该工作流已是内置应用');
+          }
+          return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.success', '已设置为内置应用');
+        },
+        error: t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.error', '设置内置应用失败'),
+      });
+    }
   };
   const iconOnlyMode = useGetUgcViewIconOnlyMode();
   return (
@@ -251,13 +276,17 @@ export const Workflows: React.FC = () => {
                   <>
                     <DropdownMenuItem
                       onSelect={() => {
-                        void handleSetBuiltinApp(item.workflowId);
+                        void handleToggleBuiltinApp(item);
                       }}
                     >
                       <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                         <ShieldCheck size={15} />
                       </DropdownMenuShortcut>
-                      {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.label', '设为内置应用')}
+                      {(typeof builtinStatus[item.workflowId] === 'boolean'
+                        ? builtinStatus[item.workflowId]
+                        : (item as any).builtin) 
+                        ? t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.label', '取消内置应用')
+                        : t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.label', '设为内置应用')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>

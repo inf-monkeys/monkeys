@@ -206,10 +206,21 @@ export class TenantManageService {
 
     if (existsAppVersion?.app) {
       const appId = existsAppVersion.app.id;
+      // 如果已经是预置应用，则直接返回，不重复安装
+      if (existsAppVersion.app.isPreset) {
+        return {
+          appId,
+          builtin: true,
+          created: false,
+          alreadyBuiltin: true,
+        };
+      }
+
       const result = await this.marketplaceService.setPreset(appId, true);
       return {
         appId,
         ...result,
+        builtin: true,
         created: false,
       };
     }
@@ -258,7 +269,41 @@ export class TenantManageService {
     return {
       appId,
       ...result,
+      builtin: true,
       created: true,
+    };
+  }
+
+  /**
+   * 查询 workflow 是否已经被设置为内置应用
+   */
+  async getWorkflowBuiltinStatus(workflowId: string) {
+    const appVersion = await this.marketplaceService.getAppVersionByAssetId(workflowId, 'workflow');
+    return {
+      appId: appVersion?.app?.id,
+      builtin: !!appVersion?.app?.isPreset,
+    };
+  }
+
+  /**
+   * 取消 workflow 对应应用的预置（内置）状态
+   */
+  async unsetWorkflowBuiltinApp(workflowId: string) {
+    const appVersion = await this.marketplaceService.getAppVersionByAssetId(workflowId, 'workflow');
+    if (!appVersion?.app) {
+      return {
+        appId: null,
+        builtin: false,
+        changed: false,
+      };
+    }
+    const appId = appVersion.app.id;
+    const result = await this.marketplaceService.setPreset(appId, false);
+    return {
+      appId,
+      ...result,
+      builtin: false,
+      changed: true,
     };
   }
 

@@ -13,6 +13,7 @@ import { sleep } from '@/common/utils/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
+import { TeamRepository } from '@/database/repositories/team.repository';
 import { FindWorkflowCondition, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Task, Workflow } from '@inf-monkeys/conductor-javascript';
 import { ForbiddenException, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
@@ -78,6 +79,7 @@ export class WorkflowExecutionService {
     private readonly workflowObservabilityService: WorkflowObservabilityService,
     @InjectRepository(WorkflowExecutionEntity)
     private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
+    private readonly teamRepository: TeamRepository,
   ) {}
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
@@ -108,6 +110,7 @@ export class WorkflowExecutionService {
   public async searchWorkflowExecutions(
     teamId: string,
     condition: SearchWorkflowExecutionsDto,
+    userId?: string,
   ): Promise<{ page: number; limit: number; total: number; definitions: WorkflowMetadataEntity[]; data: WorkflowWithMetadata[] }> {
     const {
       pagination = {},
@@ -118,13 +121,13 @@ export class WorkflowExecutionService {
       startTimeFrom,
       startTimeTo,
       freeText = '*',
-      startBy = [],
       chatSessionIds = [],
       versions = [],
       triggerTypes = [],
       workflowInstanceId,
     } = condition;
     let groups = condition.groups || [];
+    let startBy = condition.startBy || [];
 
     const { page: p = 1, limit: l = 10 } = pagination as PaginationDto;
     const [page, limitNum] = [+p, +l];
@@ -142,6 +145,32 @@ export class WorkflowExecutionService {
     }
 
     const workflowsToSearch = await this.workflowRepository.findWorkflowByCondition(workflowCondition);
+
+    // 内置应用执行记录可见性控制：
+    // - 若当前 workflow 是从预置应用克隆出来的（forkFromId 指向 isPreset 资产）
+    // - 且当前用户不是团队拥有者
+    // - 则默认只返回该用户自己触发的执行记录（startBy = [userId]），除非前端已显式传入 startBy
+    if (userId && workflowId && workflowsToSearch.length) {
+      const team = await this.teamRepository.getTeamById(teamId);
+      const isTeamOwner = team?.ownerUserId === userId;
+
+      if (!isTeamOwner && !startBy.length) {
+        let isBuiltinWorkflow = false;
+        for (const wf of workflowsToSearch) {
+          if (wf.forkFromId) {
+            const origin = await this.workflowRepository.getWorkflowByRecordId(wf.forkFromId, false);
+            if (origin?.isPreset) {
+              isBuiltinWorkflow = true;
+              break;
+            }
+          }
+        }
+
+        if (isBuiltinWorkflow) {
+          startBy = [userId];
+        }
+      }
+    }
 
     const shortcutIds = workflowsToSearch.map((it) => (it.shortcutsFlow ? `shortcut-${it.workflowId}` : null)).filter(Boolean);
     if (shortcutIds.length) {

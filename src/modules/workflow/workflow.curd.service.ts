@@ -292,13 +292,37 @@ export class WorkflowCrudService implements IAssetHandler {
 
   public async listWorkflows(teamId: string, dto: ListDto) {
     const { list, totalCount } = await this.workflowRepository.listWorkflows(teamId, dto);
+
+    // 先补充 user / team / tags 信息
+    const filledList = await this.assetsCommonRepository.fillAdditionalInfoList(list, {
+      withUser: true,
+      withTeam: true,
+      withTags: true,
+    });
+
+    // 为每个 workflow 计算是否为内置应用（对应应用 isPreset = true）
+    const builtinMap: Record<string, boolean> = {};
+    await Promise.all(
+      list.map(async (wf) => {
+        try {
+          const appVersion = await this.marketplaceService.getAppVersionByAssetId(wf.workflowId, 'workflow');
+          if (appVersion?.app) {
+            builtinMap[wf.workflowId] = !!appVersion.app.isPreset;
+          }
+        } catch {
+          // 忽略单个 workflow 的查询错误，避免影响整体列表
+        }
+      }),
+    );
+
+    const listWithBuiltin = filledList.map((item) => ({
+      ...item,
+      builtin: !!builtinMap[item.workflowId],
+    }));
+
     return {
       totalCount,
-      list: await this.assetsCommonRepository.fillAdditionalInfoList(list, {
-        withUser: true,
-        withTeam: true,
-        withTags: true,
-      }),
+      list: listWithBuiltin,
     };
   }
 

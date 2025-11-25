@@ -646,7 +646,11 @@ export class MarketplaceService {
   }
 
   public async getAppLatestVersion(appId: string) {
-    const appVersion = await this.versionRepo.findOne({ where: { appId }, order: { createdTimestamp: 'DESC' } });
+    const appVersion = await this.versionRepo.findOne({
+      where: { appId },
+      order: { createdTimestamp: 'DESC' },
+      relations: { app: true },
+    });
     return appVersion;
   }
 
@@ -672,6 +676,8 @@ export class MarketplaceService {
           return 'team.id NOT IN ' + subQuery;
         })
         .andWhere('team.isDeleted = :isDeleted', { isDeleted: false })
+        // 不再对应用作者团队重复安装，避免在作者团队里多出一份克隆的工作流资产
+        .andWhere('team.id != :authorTeamId', { authorTeamId: latestVersion.app.authorTeamId })
         .getMany();
 
       this.logger.debug(`Found ${teamsWithoutApp.length} teams without the app installed`);

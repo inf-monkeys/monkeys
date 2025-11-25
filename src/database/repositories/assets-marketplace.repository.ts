@@ -1,5 +1,5 @@
 import { LlmModelEndpointType } from '@/common/config';
-import { generateDbId, getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
+import { generateDbId, getComfyuiWorkflowDataListFromWorkflow, removeCredentials } from '@/common/utils';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { BUILT_IN_WORKFLOW_MARKETPLACE_LIST, PAGE_GROUP_SORT_LIST } from '@/modules/assets/assets.marketplace.data';
 import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_GENERATE_TEXT_TOOL, LLM_NAMESPACE } from '@/modules/tools/llm/llm.controller';
@@ -57,6 +57,8 @@ export class AssetsMarketPlaceRepository {
         _.set(tasks, `${path}.workflow`, comfyuiWorkflowIdMapper[comfyuiWorkflowId]);
         _.set(tasks, `${path}.server`, 'system');
       }
+      // 确保从内置市场克隆出来的工作流在定义层面不携带任何 credential，运行时统一走全局 config key
+      removeCredentials(tasks);
       return {
         workflowId: generateDbId(),
       };
