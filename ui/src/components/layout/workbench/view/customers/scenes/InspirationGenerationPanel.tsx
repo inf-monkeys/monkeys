@@ -2,6 +2,10 @@ import React, { useMemo, useState } from 'react';
 
 import { Check, Sparkles, Wand2 } from 'lucide-react';
 
+import { BsdAssistantIcon } from '@/components/icons/BsdAssistantIcon';
+import { BsdImageIcon } from '@/components/icons/BsdImageIcon';
+import { BsdLightIcon } from '@/components/icons/BsdLightIcon';
+
 import {
   Select,
   SelectContent,
@@ -54,10 +58,15 @@ const SelectField: React.FC<{
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-2">
-      <p className="text-xs text-white/60">{label}</p>
+      <p
+        className="text-white"
+        style={{ fontFamily: 'Noto Sans SC', fontSize: 14, fontWeight: 400, lineHeight: '140%', color: 'rgba(255,255,255,0.6)' }}
+      >
+        {label}
+      </p>
       <Select value={resolvedValue} onValueChange={onChange}>
         <SelectTrigger
-          className="flex h-11 w-full items-center rounded-2xl border border-white/20 px-4 text-left text-sm text-white focus:border-white/40 focus:ring-0 [&>span]:flex [&>span]:h-full [&>span]:w-full [&>span]:items-center [&>span]:font-['Noto_Sans_SC'] [&>span]:text-[14px] [&>span]:font-normal [&>span]:leading-[140%] [&>span]:tracking-[0em] [&>span]:text-white [&>span[data-placeholder]]:text-white/50"
+          className="flex h-11 w-full items-center rounded-2xl border border-white/20 px-4 text-left text-sm text-white transition hover:border-white/30 focus:border-white/40 focus:ring-0 [&>span]:flex [&>span]:h-full [&>span]:w-full [&>span]:items-center [&>span]:font-['Noto_Sans_SC'] [&>span]:text-[14px] [&>span]:font-normal [&>span]:leading-[140%] [&>span]:tracking-[0em] [&>span]:text-white [&>span[data-placeholder]]:text-white/50"
           style={{ background: 'rgba(44, 94, 245, 0.15)' }}
         >
           <SelectValue placeholder={`请选择${label}`} />
@@ -130,21 +139,38 @@ export const InspirationGenerationPanel: React.FC<InspirationGenerationPanelProp
 
   return (
     <div className="flex w-full max-w-xl flex-col gap-4 overflow-y-auto pr-1">
-      <section className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#1d2b5c] to-[#121a34] p-6 shadow-[0_20px_60px_rgba(15,23,42,0.65)]">
+      <section
+        className="flex flex-col gap-3 rounded-[15px] bg-white/10 border border-[rgba(255,255,255,0.1)] transition-colors duration-400 hover:border-white/40"
+        style={{ padding: 12 }}
+      >
         <header className="flex items-center justify-between">
           <div>
-            <p className="flex items-center gap-2 text-sm font-semibold text-white/90">
-              <Sparkles className="size-4 text-[#94aaff]" /> {resolvedOptions.title}
+            <p
+              className="flex items-center gap-2 text-white"
+              style={{ fontFamily: 'Noto Sans SC', fontSize: 16, fontWeight: 500, lineHeight: '140%' }}
+            >
+              <BsdLightIcon className="size-5" />
+              {resolvedOptions.title}
             </p>
-            <p className="mt-1 text-xs text-white/70">{resolvedOptions.description}</p>
-          </div>
+            <p
+              className="mt-1 text-white"
+              style={{ fontFamily: 'Noto Sans SC', fontSize: 12, fontWeight: 400, lineHeight: '140%', color: 'rgba(255,255,255,0.4)' }}
+            >
+              {resolvedOptions.description}
+            </p>
+            </div>
         </header>
 
-        <div className="mt-6 flex gap-4">
+        <div className="mt-3 flex gap-4">
           <SelectField label="场景" options={resolvedOptions.scenarios} value={scenario} onChange={setScenario} />
           <SelectField label="品类" options={resolvedOptions.categories} value={category} onChange={setCategory} />
           <div className="flex min-w-0 flex-1 flex-col gap-3">
-            <p className="text-xs text-white/60">更多</p>
+            <p
+              className="text-white"
+              style={{ fontFamily: 'Noto Sans SC', fontSize: 14, fontWeight: 400, lineHeight: '140%', color: 'rgba(255,255,255,0.6)' }}
+            >
+              更多
+            </p>
             <button
               type="button"
               onClick={() => setShowDictionary((prev) => !prev)}
@@ -158,7 +184,10 @@ export const InspirationGenerationPanel: React.FC<InspirationGenerationPanelProp
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-4">
+        <div
+          className="rounded-2xl border border-white/15 p-4 transition-colors duration-400 hover:border-white/40"
+          style={{ background: 'rgba(255, 255, 255, 0.1)' }}
+        >
           <textarea
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
@@ -166,22 +195,35 @@ export const InspirationGenerationPanel: React.FC<InspirationGenerationPanelProp
             className="h-40 w-full resize-none bg-transparent text-sm leading-relaxed text-white placeholder:text-white/40 focus:outline-none"
             placeholder="请输入创意描述"
           />
-          <div className="mt-2 flex items-center justify-between text-xs text-white/60">
-            <button className="inline-flex items-center gap-1 text-white/70">
-              <Sparkles className="size-3" /> 提示词助手
+          <div className="mt-2 flex items-center justify-start text-xs text-white/60">
+            <button className="inline-flex items-center gap-2 text-white/70">
+              <BsdAssistantIcon className="h-6 w-6" />
+              提示词助手
             </button>
-            <span>{prompt.length} / 500</span>
           </div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-white/10 bg-gradient-to-b from-[#19203f] to-[#121933] p-6 shadow-[0_15px_45px_rgba(15,23,42,0.55)]">
+      <section
+        className="flex flex-col gap-4 rounded-[15px] bg-white/10 border border-[rgba(255,255,255,0.1)] transition-colors duration-400 hover:border-white/40"
+        style={{ padding: 12 }}
+      >
         <header className="flex items-center gap-3">
-          <span className="rounded-2xl bg-white/10 px-3 py-1 text-xs text-white/80">可选</span>
-          <div>
-            <p className="text-base font-semibold text-white">个性化模型（可选）</p>
-            <p className="text-xs text-white/60">包含“风格/品牌”，点击后在下方弹出选择（最多三个）</p>
+          <div className="flex items-center gap-2">
+            <BsdImageIcon className="size-5" />
+            <p
+              className="text-white"
+              style={{ fontFamily: 'Noto Sans SC', fontSize: 16, fontWeight: 500, lineHeight: '140%' }}
+            >
+              个性化模型（可选）
+            </p>
           </div>
+          <p
+            className="text-white"
+            style={{ fontFamily: 'Noto Sans SC', fontSize: 12, fontWeight: 400, lineHeight: '140%', color: 'rgba(255,255,255,0.4)' }}
+          >
+            包含“风格/品牌”，点击后在下方弹出选择（最多三个）
+            </p>
         </header>
 
         <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -196,6 +238,36 @@ export const InspirationGenerationPanel: React.FC<InspirationGenerationPanelProp
           ))}
         </div>
       </section>
+
+      <div className="mt-2 flex w-full justify-center">
+        <button
+          type="button"
+          className="relative flex h-[42px] w-full items-center justify-center gap-2 overflow-hidden rounded-[10px] px-5 text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+          style={{
+            background:
+              'linear-gradient(0deg, rgba(40, 82, 173, 0.08), rgba(40, 82, 173, 0.08)), #2C5EF5',
+            
+          }}
+        >
+          <span className="pointer-events-none absolute bottom-0 left-1/2 h-2 w-2/3 -translate-x-1/2 translate-y-[6px] rounded-full bg-white/60 blur-[12px]" />
+          <Sparkles className="size-5" stroke="none" fill="#FFFFFF" />
+          <span
+            style={{
+              fontFamily: 'Microsoft YaHei UI, Microsoft YaHei, Alibaba PuHuiTi 3.0, sans-serif',
+              fontSize: 16,
+              fontWeight: 700,
+              lineHeight: '20px',
+              letterSpacing: '0em',
+              color: '#FFFFFF',
+              fontVariationSettings: '"opsz" auto',
+              fontFeatureSettings: '"kern" on',
+              textShadow: '0 1px 6px rgba(0, 0, 0, 0.25)',
+            }}
+          >
+            开始生图
+          </span>
+        </button>
+      </div>
     </div>
   );
 };

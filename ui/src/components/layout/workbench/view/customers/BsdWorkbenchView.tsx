@@ -26,9 +26,19 @@ export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => 
   const { inspiration } = getCustomOptions(page);
 
   return (
-    <div className="flex h-full w-full justify-center overflow-hidden bg-[#0f1729]/40 p-4 text-white lg:p-6">
+    <div
+      className="flex h-full w-full justify-center overflow-hidden p-4 text-white lg:p-6"
+      style={{
+        background:
+          'linear-gradient(0deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), linear-gradient(157deg, rgba(23, 23, 23, 0) 65%, rgba(39, 77, 189, 0.715) 88%, #2D62FF 97%)',
+        borderRadius: 20,
+        border: '1px solid transparent',
+        borderImage:
+          'conic-gradient(from 158deg at 74% 49%, #12DCFF -5deg, #3159D1 51deg, #8099E3 159deg, #3159D1 259deg, #258AE2 295deg, #12DCFF 355deg, #3159D1 411deg) 1',
+        backdropFilter: 'blur(32px)',
+      }}
+    >
       <InspirationGenerationPanel options={inspiration ?? { title: displayName }} />
     </div>
   );
 };
-
