@@ -749,7 +749,13 @@
       },
       "nav-to-home": "直接进入",
       "has-token-tips": "检查到已有登录凭证，可直接进入",
-      "fetch-teams": "正在拉取团队数据"
+      "fetch-teams": "正在拉取团队数据",
+      "validation": {
+        "invalid-email": "请输入正确的邮箱",
+        "invalid-password": "密码须包含大小写字母与数字，长度不少于 8 位",
+        "invalid-phone": "请输入正确的手机号码",
+        "invalid-verify-code": "请输入正确的验证码"
+      }
     },
     "users": {
       "logout": "退出登录",

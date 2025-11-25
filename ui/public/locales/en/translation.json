@@ -755,7 +755,13 @@
       },
       "nav-to-home": "Enter",
       "has-token-tips": "You already have login credentials.",
-      "fetch-teams": "Pulling team data"
+      "fetch-teams": "Pulling team data",
+      "validation": {
+        "invalid-email": "Please enter a valid email",
+        "invalid-password": "Password must contain uppercase and lowercase letters and numbers, at least 8 characters",
+        "invalid-phone": "Please enter a valid phone number",
+        "invalid-verify-code": "Please enter a valid verification code"
+      }
     },
     "users": {
       "logout": "Logout",

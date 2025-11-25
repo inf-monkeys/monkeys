@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCountDown, useEventEmitter } from 'ahooks';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +15,25 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { PHONE_REGEX } from '@/consts/authz';
 import { ILoginViaSms, loginViaSmsSchema } from '@/schema/authz';
 
+const customResolver = async (data: ILoginViaSms) => {
+  try {
+    const validated = await loginViaSmsSchema.parseAsync(data);
+    return { values: validated, errors: {} };
+  } catch (error) {
+    const errors: Record<string, { message: string }> = {};
+    if (error instanceof Error && 'issues' in error) {
+      const issues = (error as any).issues as Array<{ path: (string | number)[]; message: string }>;
+      issues.forEach((issue) => {
+        const path = String(issue.path[0]);
+        if (path) {
+          errors[path] = { message: issue.message };
+        }
+      });
+    }
+    return { values: {}, errors };
+  }
+};
+
 export const PhoneAuth: React.FC<IAuthWrapperOptions> = ({
   onFinished,
   buttonContent,
@@ -25,7 +43,8 @@ export const PhoneAuth: React.FC<IAuthWrapperOptions> = ({
   const { t } = useTranslation();
 
   const form = useForm<ILoginViaSms>({
-    resolver: zodResolver(loginViaSmsSchema),
+    resolver: customResolver,
+    mode: 'onChange',
     defaultValues: {
       phoneNumber: '',
       verifyCode: '',

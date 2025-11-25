@@ -172,7 +172,14 @@ const FormMessage = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<
   ({ className, children, ...props }, ref) => {
     const { t } = useTranslation();
     const { error, formMessageId } = useFormField();
-    const body = error && !children ? t(String(error?.message)) : children;
+    
+    let body: React.ReactNode;
+    if (children) {
+      body = children;
+    } else if (error) {
+      const errorMessage = String(error?.message);
+      body = t(errorMessage, { defaultValue: errorMessage });
+    }
 
     return (
       <SmoothTransition>

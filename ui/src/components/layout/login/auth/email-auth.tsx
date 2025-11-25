@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +8,25 @@ import { AuthWrapper, IAuthWrapperOptions } from '@/components/layout/login/auth
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { ILoginViaMail, loginViaMailSchema } from '@/schema/authz';
+
+const customResolver = async (data: ILoginViaMail) => {
+  try {
+    const validated = await loginViaMailSchema.parseAsync(data);
+    return { values: validated, errors: {} };
+  } catch (error) {
+    const errors: Record<string, { message: string }> = {};
+    if (error instanceof Error && 'issues' in error) {
+      const issues = (error as any).issues as Array<{ path: (string | number)[]; message: string }>;
+      issues.forEach((issue) => {
+        const path = String(issue.path[0]);
+        if (path) {
+          errors[path] = { message: issue.message };
+        }
+      });
+    }
+    return { values: {}, errors };
+  }
+};
 
 export const EmailAuth: React.FC<IAuthWrapperOptions> = ({
   onFinished,
@@ -19,12 +37,15 @@ export const EmailAuth: React.FC<IAuthWrapperOptions> = ({
   const { t } = useTranslation();
 
   const form = useForm<ILoginViaMail>({
-    resolver: zodResolver(loginViaMailSchema),
+    resolver: customResolver,
+    mode: 'onChange',
     defaultValues: {
       email: '',
       password: '',
     },
   });
+
+
 
   return (
     <AuthWrapper
