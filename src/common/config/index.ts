@@ -82,6 +82,7 @@ export type WorkflowPreviewExecutionGrid = {
   clickBehavior?: ClickBehavior;
   showErrorFilter?: boolean;
   displayType?: ExectuionResultGridDisplayType;
+  showDetailButton?: boolean;
 };
 
 export type CustomizationHistoryResult = {
@@ -729,6 +730,7 @@ export const config: Config = {
         clickBehavior: readConfig('server.customization.workflowPreviewExecutionGrid.clickBehavior', 'preview'),
         showErrorFilter: readConfig('server.customization.workflowPreviewExecutionGrid.showErrorFilter', true),
         displayType: readConfig('server.customization.workflowPreviewExecutionGrid.displayType', 'masonry'),
+        showDetailButton: readConfig('server.customization.workflowPreviewExecutionGrid.showDetailButton', true),
       },
       workbenchSidebarDefaultOpen: readConfig('server.customization.workbenchSidebarDefaultOpen', true),
       workbenchSidebarMoreAction: readConfig('server.customization.workbenchSidebarMoreAction', true),

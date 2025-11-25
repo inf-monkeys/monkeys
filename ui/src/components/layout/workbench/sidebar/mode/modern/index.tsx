@@ -106,6 +106,8 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
   const pagesMap = keyBy(originalPages, 'id');
   const lists = pageGroupProcess(originalGroups, pagesMap);
 
+  const event$ = useEventEmitter<any>();
+
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
   const toggleToActivePageRef = useRef(activePage || workflowExecution ? false : null);
 
@@ -136,16 +138,25 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
     if (workflowExecution) {
       const targetPage = latestOriginalPages.current.find((it) => it.workflowId === workflowExecution.workflowId);
       if (targetPage) {
+        const workflowInputs = Array.isArray(workflowExecution.input) ? workflowExecution.input : [];
         const targetInput = {};
 
-        for (const { data, id } of workflowExecution.input) {
+        for (const { data, id } of workflowInputs) {
           targetInput[id] = data;
         }
 
         setWorkbenchCacheVal(workflowExecution.workflowId, targetInput);
 
+        const isActivePage = currentPage?.[teamId]?.id === targetPage.id;
+        console.log(targetPage, targetInput, isActivePage);
+
         setPageId(targetPage.id);
-        setCurrentPage({ [teamId]: targetPage });
+
+        if (isActivePage && workflowInputs.length) {
+          event$.emit({ type: 'paste-param', data: workflowInputs });
+        } else {
+          setCurrentPage({ [teamId]: targetPage });
+        }
 
         return;
       }
@@ -242,6 +253,7 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
     activePageFromType,
     workflowExecution,
     activePageFromWorkflowInstanceId,
+    event$,
   ]);
 
   const { ref: wrapperRef, height: wrapperHeight } = useElementSize();
@@ -295,8 +307,6 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
       void mutate();
     });
   };
-
-  const event$ = useEventEmitter();
 
   const showFormEmbed =
     EMBED_TYPE_LIST.includes(currentPage?.[teamId]?.type ?? '') && currentPage?.[teamId]?.workflowId;

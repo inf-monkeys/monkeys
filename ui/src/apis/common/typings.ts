@@ -82,6 +82,7 @@ export type WorkflowPreviewExecutionGrid = {
   clickBehavior?: ClickBehavior;
   showErrorFilter?: boolean;
   displayType?: ExectuionResultGridDisplayType;
+  showDetailButton?: boolean;
 };
 
 export type CustomizationHistoryResult = {

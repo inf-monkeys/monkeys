@@ -3,8 +3,7 @@ import { useMemo, useRef } from 'react';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import { useMemoizedFn, useUpdate } from 'ahooks';
-import { BooleanOptional, IParseOptions } from 'qs';
-import qs from 'qs';
+import qs, { BooleanOptional, IParseOptions } from 'qs';
 import type * as React from 'react';
 
 export interface Options {

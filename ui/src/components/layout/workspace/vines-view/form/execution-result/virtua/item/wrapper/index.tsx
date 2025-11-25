@@ -212,15 +212,17 @@ const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResult
           <TooltipContent>{t('common.utils.delete')}</TooltipContent>
         </Tooltip>
 
-        <VirtuaExecutionResultRawDataDialog data={data}>
-          <Button
-            className={OPERATION_ICON_BUTTON_CLASSNAME}
-            icon={<Ellipsis />}
-            variant="outline"
-            size="small"
-            onClick={(e) => e.stopPropagation()} // 阻止事件冒泡
-          />
-        </VirtuaExecutionResultRawDataDialog>
+        {(oem?.theme?.workflowPreviewExecutionGrid?.showDetailButton ?? true) && (
+          <VirtuaExecutionResultRawDataDialog data={data}>
+            <Button
+              className={OPERATION_ICON_BUTTON_CLASSNAME}
+              icon={<Ellipsis />}
+              variant="outline"
+              size="small"
+              onClick={(e) => e.stopPropagation()} // 阻止事件冒泡
+            />
+          </VirtuaExecutionResultRawDataDialog>
+        )}
 
         {selectionModeDisplayType === 'operation-button' && (
           <Tooltip>
