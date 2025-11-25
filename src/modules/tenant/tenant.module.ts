@@ -1,8 +1,9 @@
 import { TemporaryWorkflowEntity } from '@/database/entities/workflow/temporary-workflow.entity';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TeamsModule } from '../auth/teams/teams.module';
+import { MarketplaceModule } from '../marketplace/marketplace.module';
 import { TemporaryWorkflowModule } from '../temporary-workflow/temporary-workflow.module';
 import { ConductorService } from '../workflow/conductor/conductor.service';
 import { WorkflowArtifactService } from '../workflow/workflow.artifact.service';
@@ -15,7 +16,13 @@ import { TenantService } from './tenant.service';
 @Module({
   controllers: [TenantController, TenantManageController],
   providers: [TenantService, ConductorService, TenantManageService, WorkflowArtifactService],
-  imports: [TypeOrmModule.forFeature([WorkflowExecutionEntity, TemporaryWorkflowEntity]), WorkflowModule, TemporaryWorkflowModule, TeamsModule],
+  imports: [
+    TypeOrmModule.forFeature([WorkflowExecutionEntity, TemporaryWorkflowEntity]),
+    WorkflowModule,
+    TemporaryWorkflowModule,
+    TeamsModule,
+    forwardRef(() => MarketplaceModule),
+  ],
   exports: [TenantService],
 })
 export class TenantModule {}

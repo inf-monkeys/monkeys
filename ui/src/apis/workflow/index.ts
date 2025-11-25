@@ -106,3 +106,19 @@ export const workflowPermission = (workflowId: string) =>
   }>({ method: 'GET', simple: true })(`/api/workflow/metadata/${workflowId}/permissions`);
 
 export const useAllWorkflowList = () => useWorkflowList({ page: 1, limit: 9999 });
+
+const TENANT_BEARER_TOKEN = import.meta.env.VITE_TENANT_BEARER_TOKEN as string | undefined;
+
+export const setWorkflowAsBuiltinApp = (workflowId: string) =>
+  vinesFetcher<{ appId: string; created?: boolean }>({
+    method: 'POST',
+    simple: true,
+    auth: false,
+    fetchOptions: {
+      headers: TENANT_BEARER_TOKEN
+        ? {
+            authorization: `Bearer ${TENANT_BEARER_TOKEN}`,
+          }
+        : {},
+    },
+  })(`/api/tenant/manage/builtin/workflows/${workflowId}`);

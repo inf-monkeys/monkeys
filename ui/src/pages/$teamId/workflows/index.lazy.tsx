@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, Trash, Undo2 } from 'lucide-react';
+import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, ShieldCheck, Trash, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { cloneWorkflow, deleteWorkflow } from '@/apis/workflow';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { cloneWorkflow, deleteWorkflow, setWorkflowAsBuiltinApp } from '@/apis/workflow';
 import { GlobalWorkflowAssociationEditorDialog } from '@/components/layout/ugc-pages/apps/association';
 import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
 import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
@@ -25,6 +23,8 @@ import { PublishToMarket } from '@/components/layout/ugc-pages/workflows/publish
 import { IPublishToMarketWithAssetsContext } from '@/components/layout/ugc-pages/workflows/publish-to-market/typings.ts';
 import { RollbackWorkflow } from '@/components/layout/ugc-pages/workflows/rollback-workflow';
 import { IRollbackWorkflowContext } from '@/components/layout/ugc-pages/workflows/rollback-workflow/typings';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow-info-editor.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
@@ -65,6 +65,7 @@ export const Workflows: React.FC = () => {
   const { teamId } = useVinesTeam();
   const { data: systemConfig } = useSystemConfig();
   const mutateWorkflows = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/workflow/metadata'));
+  const hasTenantBuiltinToken = !!import.meta.env.VITE_TENANT_BEARER_TOKEN;
 
   const [currentWorkflow, setCurrentWorkflow] = useState<IAssetItem<MonkeyWorkflow>>();
   const [workflowEditorVisible, setWorkflowEditorVisible] = useState(false);
@@ -108,6 +109,21 @@ export const Workflows: React.FC = () => {
         return t('common.delete.success');
       },
       error: t('common.delete.error'),
+    });
+  };
+
+  const handleSetBuiltinApp = async (workflowId?: string) => {
+    if (!workflowId) {
+      toast.warning(t('common.toast.loading'));
+      return;
+    }
+    toast.promise(setWorkflowAsBuiltinApp(workflowId), {
+      loading: t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.loading', '正在设置为内置应用...'),
+      success: () => {
+        void mutateWorkflows();
+        return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.success', '已设置为内置应用');
+      },
+      error: t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.error', '设置内置应用失败'),
     });
   };
   const iconOnlyMode = useGetUgcViewIconOnlyMode();
@@ -231,23 +247,21 @@ export const Workflows: React.FC = () => {
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
                 <DropdownMenuSeparator />
-                {/* <DropdownMenuItem
-                  onSelect={() => {
-                    setPublishToMarketContext({
-                      id: item.workflowId,
-                      displayName: getI18nContent(item.displayName),
-                      description: getI18nContent(item.description),
-                      iconUrl: item.iconUrl,
-                    });
-                    setPublishToMarketVisible(true);
-                  }}
-                >
-                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <Share size={15} />
-                  </DropdownMenuShortcut>
-                  {t('components.layout.ugc.publish-dialog.title')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator /> */}
+                {hasTenantBuiltinToken && (
+                  <>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        void handleSetBuiltinApp(item.workflowId);
+                      }}
+                    >
+                      <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                        <ShieldCheck size={15} />
+                      </DropdownMenuShortcut>
+                      {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.label', '设为内置应用')}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem
                   className="text-red-10"
                   onSelect={() => {

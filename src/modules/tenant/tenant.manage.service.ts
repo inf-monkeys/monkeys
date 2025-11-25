@@ -10,7 +10,9 @@ import { MarketplaceAppEntity } from '@/database/entities/marketplace/marketplac
 import { WorkflowObservabilityEntity } from '@/database/entities/observability/workflow-observability';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { TeamRepository } from '@/database/repositories/team.repository';
-import { Injectable, Logger } from '@nestjs/common';
+import { WorkflowRepository } from '@/database/repositories/workflow.repository';
+import { MarketplaceService } from '@/modules/marketplace/services/marketplace.service';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EntityManager, EntityTarget, FindOptionsWhere, In } from 'typeorm';
 import { TeamsService } from '../auth/teams/teams.service';
 
@@ -26,6 +28,8 @@ export class TenantManageService {
   constructor(
     private readonly teamRepository: TeamRepository,
     private readonly teamsService: TeamsService,
+    private readonly workflowRepository: WorkflowRepository,
+    private readonly marketplaceService: MarketplaceService,
     private readonly entityManager: EntityManager,
   ) {}
 
@@ -184,6 +188,78 @@ export class TenantManageService {
     }
 
     this.logger.log('All teams initialized');
+  }
+
+  /**
+   * 将指定 workflow 对应的应用市场应用设置为预置应用（内置应用），并自动安装到所有团队。
+   *
+   * 要求：
+   * - 调用方通过 TenantStatisticsAuthGuard 使用租户级 Bearer Token 鉴权
+   * - 该 workflow 需要已经通过应用市场提交流程创建过应用（存在 sourceAssetReferences 记录）
+   *   如果尚未创建，会自动为该 workflow 创建一个应用、审批并设置为预置应用。
+   *
+   * @param workflowId 工作流 ID（workflowId，而非数据库主键）
+   */
+  async setWorkflowAsBuiltinApp(workflowId: string) {
+    // 1. 尝试根据 workflowId 在应用市场中查找对应的 App 版本
+    const existsAppVersion = await this.marketplaceService.getAppVersionByAssetId(workflowId, 'workflow');
+
+    if (existsAppVersion?.app) {
+      const appId = existsAppVersion.app.id;
+      const result = await this.marketplaceService.setPreset(appId, true);
+      return {
+        appId,
+        ...result,
+        created: false,
+      };
+    }
+
+    // 2. 如果不存在应用，则自动为该 workflow 创建一个应用并提交审核
+    const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId);
+    if (!workflow) {
+      throw new NotFoundException(`工作流 ${workflowId} 不存在`);
+    }
+
+    const teamId = workflow.teamId;
+    const userId = workflow.creatorUserId || 'system';
+    const version = workflow.version;
+
+    const appId = workflowId; // 使用 workflowId 作为 appId/name，保证一一对应
+
+    const dto = {
+      app: {
+        name: appId,
+        description: typeof workflow.description === 'string' ? workflow.description : undefined,
+        iconUrl: workflow.iconUrl,
+        assetType: 'workflow' as const,
+        categories: [] as string[],
+      },
+      version: {
+        version: '1.0.0',
+        releaseNotes: 'Created as builtin app via tenant manage API',
+        assets: [
+          {
+            assetType: 'workflow' as const,
+            assetId: workflowId,
+            version,
+          },
+        ],
+      },
+    };
+
+    await this.marketplaceService.createAppWithVersion(teamId, userId, dto as any);
+
+    // 3. 审批并标记为预置应用
+    await this.marketplaceService.approveSubmission(appId, true);
+
+    // 4. 将应用标记为预置应用（isPreset = true），并为所有团队安装最新版本
+    const result = await this.marketplaceService.setPreset(appId, true);
+
+    return {
+      appId,
+      ...result,
+      created: true,
+    };
   }
 
   // 进度订阅管理方法
