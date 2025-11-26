@@ -688,6 +688,24 @@ export class MarketplaceService {
         throw new NotFoundException(`No version found for app ${appId}`);
       }
 
+      /**
+       * 对于 workflow 类型的应用，我们希望「内置应用」在资产层面是共享的：
+       * - 不再为每个团队克隆一份 workflow 资产
+       * - 其他团队通过统一的 workflowId + teamId 上下文来使用同一条工作流
+       *
+       * 因此这里对 workflow 资产类型直接跳过实际安装逻辑，仅返回一个统计结果。
+       * 其他资产类型（如 comfyui-workflow、design-association 等）仍保持原有的克隆安装行为。
+       */
+      if (latestVersion.app.assetType === 'workflow') {
+        this.logger.debug(
+          `Skip cloning workflow assets for preset app ${appId}, workflows will be shared across teams by workflowId.`,
+        );
+        return {
+          totalTeams: 0,
+          failedInstallations: [],
+        };
+      }
+
       // 2. 获取所有团队，排除已安装此应用的团队
       const teamsWithoutApp = await transactionalEntityManager
         .createQueryBuilder(TeamEntity, 'team')
@@ -727,6 +745,35 @@ export class MarketplaceService {
         failedInstallations,
       };
     });
+  }
+
+  /**
+   * 获取当前租户中所有被标记为预置（内置应用）的 workflow 对应的 workflowId 列表。
+   *
+   * 设计说明：
+   * - 以 MarketplaceAppEntity 为中心，筛选 isPreset = true 且 assetType = 'workflow' 的应用
+   * - 对每个应用，取最新版本（versions[0] 已按 createdTimestamp DESC 排序）
+   * - 从 sourceAssetReferences 中提取 assetType = 'workflow' 的 assetId 作为 workflowId
+   * - 返回去重后的 workflowId 列表
+   */
+  public async getBuiltinWorkflowIds(): Promise<string[]> {
+    const presetApps = await this.getPresetApps();
+    const builtinWorkflowIds = new Set<string>();
+
+    for (const app of presetApps) {
+      if (app.assetType !== 'workflow') continue;
+      const latestVersion = app.versions?.[0];
+      if (!latestVersion) continue;
+
+      const refs = latestVersion.sourceAssetReferences || [];
+      for (const ref of refs) {
+        if (ref.assetType === 'workflow' && ref.assetId) {
+          builtinWorkflowIds.add(ref.assetId);
+        }
+      }
+    }
+
+    return Array.from(builtinWorkflowIds);
   }
 
   public async initPresetAppMarketplace() {

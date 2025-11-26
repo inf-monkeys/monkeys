@@ -288,7 +288,14 @@ export const Workflows: React.FC = () => {
                   {t('ugc-page.workflow.ugc-view.operate-area.options.edit-info')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onSelect={() => copy(location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`))}
+                  onSelect={() => {
+                    const isBuiltin =
+                      typeof builtinStatus[item.workflowId] === 'boolean'
+                        ? builtinStatus[item.workflowId]
+                        : (item as any).builtin;
+                    const targetTeamId = isBuiltin && teamId ? teamId : item.teamId;
+                    copy(location.origin.concat(`/${targetTeamId}/workspace/${item.workflowId}`));
+                  }}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Link size={15} />
@@ -404,7 +411,12 @@ export const Workflows: React.FC = () => {
           }
 
           // 默认行为：在新标签页打开工作流
-          open(`/${item.teamId}/workspace/${item.workflowId}`, '_blank');
+          const isBuiltin =
+            typeof builtinStatus[item.workflowId] === 'boolean'
+              ? builtinStatus[item.workflowId]
+              : (item as any).builtin;
+          const targetTeamId = isBuiltin && teamId ? teamId : item.teamId;
+          open(`/${targetTeamId}/workspace/${item.workflowId}`, '_blank');
         }}
         subtitle={
           <>

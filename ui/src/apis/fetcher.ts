@@ -69,7 +69,45 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         return responseResolver(r) as U;
       }
 
-      const raw = (await r.json()) as IOriginData<U>;
+      let raw: IOriginData<U>;
+      try {
+        raw = (await r.json()) as IOriginData<U>;
+      } catch (e) {
+        // 后端返回的不是 JSON（例如 HTML 错误页），降级使用 HTTP 状态码
+        const status = r.status || 0;
+
+        if (status === 403) {
+          const isTeamInitStatus =
+            typeof url === 'string' && /\/api\/teams\/[^/]+\/init-status$/.test(url);
+          const isUserProfile = url === '/api/users/profile';
+          const isTeamsRoot =
+            typeof url === 'string' && /^\/api\/teams($|\?)/.test(url);
+
+          // 这些接口的 403 视为普通权限不足，不触发登录过期提示
+          if (isTeamInitStatus || isUserProfile || isTeamsRoot) {
+            if (simple) {
+              return void 0 as U;
+            } else {
+              throw new Error('Forbidden');
+            }
+          }
+
+          // 其他 403（非 JSON 响应），统一视为普通权限错误
+          if (simple) {
+            return void 0 as U;
+          }
+          throw new Error('Forbidden');
+        }
+
+        if (status === 404) {
+          throw new Error('404 NOT FOUND');
+        }
+
+        if (simple) {
+          return void 0 as U;
+        }
+        throw new Error('Network Error');
+      }
 
       const code = raw?.code || raw?.status;
       const data = raw?.data || void 0;
@@ -82,6 +120,31 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         const errorMessage = raw?.message || null;
 
         if (code === 403) {
+          const isTeamInitStatus =
+            typeof url === 'string' && /\/api\/teams\/[^/]+\/init-status$/.test(url);
+          const isUserProfile = url === '/api/users/profile';
+          const isTeamsRoot =
+            typeof url === 'string' && /^\/api\/teams($|\?)/.test(url);
+
+          // 对团队初始化状态、用户资料和团队列表接口的 403 不弹「建议重新登录」提示，直接静默处理 / 抛出普通错误
+          if (isTeamInitStatus || isUserProfile || isTeamsRoot) {
+            if (simple) {
+              return void 0;
+            } else {
+              throw new Error(errorMessage || 'Forbidden');
+            }
+          }
+
+          // 只有当后端明确返回“请先登录”时，才触发登录过期逻辑
+          const isLoginRequired = errorMessage === '请先登录';
+          if (!isLoginRequired) {
+            if (simple) {
+              return void 0;
+            } else {
+              throw new Error(errorMessage || 'Forbidden');
+            }
+          }
+
           const routeType = window['vinesRoute']?.[0];
           const isInviteRoute = routeType === 'invite';
           

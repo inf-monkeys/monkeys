@@ -150,10 +150,28 @@ export class WorkflowExecutionService {
     let workflowsToSearch = await this.workflowRepository.findWorkflowByCondition(workflowCondition);
 
     /**
+     * 若当前团队下没有对应 workflow 定义（例如：其他团队的内置应用 workflow），
+     * 则尝试跨团队按 workflowId 获取一次定义，用于执行记录查询。
+     * 这样可以支持「不克隆工作流，仅按 teamId 进行执行隔离」的场景。
+     */
+    if ((!workflowsToSearch || workflowsToSearch.length === 0) && workflowId) {
+      try {
+        const globalWorkflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId, false);
+        if (globalWorkflow) {
+          workflowsToSearch = [globalWorkflow];
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    let isBuiltinOwnerView = false;
+
+    /**
      * 作者团队视角的「内置应用跨团队汇总」：
      * - 若当前 workflowId 对应的是预置应用（app.isPreset = true）
      * - 且当前 teamId 是应用的 authorTeamId
-     * - 则将 workflowTypes 扩展为：作者团队的源 workflowId + 所有安装到其他团队的 workflowId
+     * - 则作者团队应看到所有团队的执行记录
      */
     if (workflowId && workflowsToSearch.length) {
       try {
@@ -163,43 +181,10 @@ export class WorkflowExecutionService {
         const app = appVersion?.app;
 
         if (app?.isPreset && app.authorTeamId === teamId) {
-          // 作者团队：聚合所有安装出来的 workflowId
-          const installedWorkflowIds = await this.marketplaceService.getInstalledWorkflowIdsByAppId(app.id);
-          const allWorkflowIds = _.uniq([baseWorkflow.workflowId, ...installedWorkflowIds]);
-
-          // 重新拉取所有相关 workflow 定义（跨团队）
-          if (allWorkflowIds.length) {
-            workflowsToSearch = await this.workflowRepository.findWorkflowByIds(allWorkflowIds);
-          }
+          isBuiltinOwnerView = true;
         }
       } catch {
         // 聚合失败不影响正常查询，降级为原来的 team 内查询
-      }
-    }
-
-    // 内置应用执行记录可见性控制：
-    // - 若当前 workflow 是从预置应用克隆出来的（forkFromId 指向 isPreset 资产）
-    // - 且当前用户不是团队拥有者
-    // - 则默认只返回该用户自己触发的执行记录（startBy = [userId]），除非前端已显式传入 startBy
-    if (userId && workflowId && workflowsToSearch.length) {
-      const team = await this.teamRepository.getTeamById(teamId);
-      const isTeamOwner = team?.ownerUserId === userId;
-
-      if (!isTeamOwner && !startBy.length) {
-        let isBuiltinWorkflow = false;
-        for (const wf of workflowsToSearch) {
-          if (wf.forkFromId) {
-            const origin = await this.workflowRepository.getWorkflowByRecordId(wf.forkFromId, false);
-            if (origin?.isPreset) {
-              isBuiltinWorkflow = true;
-              break;
-            }
-          }
-        }
-
-        if (isBuiltinWorkflow) {
-          startBy = [userId];
-        }
       }
     }
 
@@ -351,8 +336,21 @@ export class WorkflowExecutionService {
       return true;
     });
 
+    // 非作者团队视角：仅返回当前 teamId 的执行记录
+    let teamFilteredCount = 0;
+    const dataAfterTeamFilter = isBuiltinOwnerView
+      ? finalData
+      : finalData.filter((it) => {
+          const ctxTeamId = it.input?.['__context']?.['teamId'] as string | undefined;
+          const keep = !ctxTeamId || ctxTeamId === teamId;
+          if (!keep) {
+            teamFilteredCount++;
+          }
+          return keep;
+    });
+
     // 分页处理
-    const pagedData = finalData.slice(0, limitNum);
+    const pagedData = dataAfterTeamFilter.slice(0, limitNum);
 
     return {
       definitions: resultDefinitions.map((it) => {
@@ -386,7 +384,7 @@ export class WorkflowExecutionService {
       page,
       limit: limitNum,
       data: pagedData,
-      total: (totalHits ?? 0) - filterCount,
+      total: (totalHits ?? 0) - filterCount - teamFilteredCount,
     };
   }
 

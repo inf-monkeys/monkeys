@@ -297,34 +297,77 @@ export class WorkflowCrudService implements IAssetHandler {
   public async listWorkflows(teamId: string, dto: ListDto) {
     const { list, totalCount } = await this.workflowRepository.listWorkflows(teamId, dto);
 
+    // 当前查询条件中的搜索关键字（仅用于简单匹配内置工作流的名称/描述）
+    const searchText = typeof dto.search === 'string' ? dto.search.trim().toLowerCase() : '';
+
+    // 追加来自「内置应用」的跨团队 workflow（不克隆），仅以只读方式展示
+    const builtinWorkflowIds = await this.marketplaceService.getBuiltinWorkflowIds();
+    const builtinIdSet = new Set(builtinWorkflowIds);
+
+    const existingWorkflowIdSet = new Set(list.map((wf) => wf.workflowId));
+
+    const extraBuiltinWorkflows: WorkflowMetadataEntity[] = [];
+
+    for (const workflowId of builtinWorkflowIds) {
+      // 已经在当前团队中存在（作者团队场景），直接跳过
+      if (existingWorkflowIdSet.has(workflowId)) {
+        continue;
+      }
+
+      // 加载该 workflow 的最新版本定义（跨团队）
+      let workflow: WorkflowMetadataEntity | null = null;
+      try {
+        workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId, false);
+      } catch {
+        workflow = null;
+      }
+      if (!workflow) {
+        continue;
+      }
+
+      // 作者团队才允许在本团队下维护工作流；其他团队只读使用
+      // 这里仅展示「作者团队的 workflow」，因此过滤掉 teamId 相同的情况（已在 list 中）
+      if (workflow.teamId === teamId) {
+        continue;
+      }
+
+      // 按搜索关键字做一次简单过滤，避免污染搜索结果
+      if (searchText) {
+        const nameStr =
+          typeof workflow.displayName === 'string'
+            ? workflow.displayName.toLowerCase()
+            : JSON.stringify(workflow.displayName || {}).toLowerCase();
+        const descStr =
+          typeof workflow.description === 'string'
+            ? workflow.description.toLowerCase()
+            : JSON.stringify(workflow.description || {}).toLowerCase();
+        if (!nameStr.includes(searchText) && !descStr.includes(searchText)) {
+          continue;
+        }
+      }
+
+      extraBuiltinWorkflows.push(workflow);
+    }
+
+    const combinedList = [...list, ...extraBuiltinWorkflows];
+
     // 先补充 user / team / tags 信息
-    const filledList = await this.assetsCommonRepository.fillAdditionalInfoList(list, {
+    const filledList = await this.assetsCommonRepository.fillAdditionalInfoList(combinedList, {
       withUser: true,
       withTeam: true,
       withTags: true,
     });
 
-    // 为每个 workflow 计算是否为内置应用（对应应用 isPreset = true）
-    const builtinMap: Record<string, boolean> = {};
-    await Promise.all(
-      list.map(async (wf) => {
-        try {
-          const appVersion = await this.marketplaceService.getAppVersionByAssetId(wf.workflowId, 'workflow');
-          if (appVersion?.app) {
-            builtinMap[wf.workflowId] = !!appVersion.app.isPreset;
-          }
-        } catch {
-          // 忽略单个 workflow 的查询错误，避免影响整体列表
-        }
-      }),
-    );
+    // 使用 MarketplaceService 维护的内置 workflowId 集合来标记 builtin 状态
+    const builtinWorkflowIdSet = new Set(await this.marketplaceService.getBuiltinWorkflowIds());
 
     const listWithBuiltin = filledList.map((item) => ({
       ...item,
-      builtin: !!builtinMap[item.workflowId],
+      builtin: builtinWorkflowIdSet.has(item.workflowId),
     }));
 
     return {
+      // totalCount 只统计当前团队真正拥有的工作流数量，额外的内置只读 workflow 不计入总数
       totalCount,
       list: listWithBuiltin,
     };
