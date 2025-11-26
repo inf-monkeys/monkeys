@@ -240,6 +240,35 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
             </PopoverContent>
           </Popover>
         </div>
+        {/* Workflow 特有筛选：是否仅看本团队 / 是否仅看内置应用 */}
+        {assetType === 'workflow' && (
+          <>
+            <div className="flex items-center justify-between">
+              <Label>{t('ugc-page.workflow.ugc-view.filter.button.only-self', '仅本团队工作流')}</Label>
+              <Switch
+                checked={!!filter?.isSelf}
+                onCheckedChange={(checked) =>
+                  onFilterChange({
+                    ...filter,
+                    isSelf: checked || undefined,
+                  })
+                }
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>{t('ugc-page.workflow.ugc-view.filter.button.only-builtin', '仅内置应用')}</Label>
+              <Switch
+                checked={!!filter?.isBuiltin}
+                onCheckedChange={(checked) =>
+                  onFilterChange({
+                    ...filter,
+                    isBuiltin: checked || undefined,
+                  })
+                }
+              />
+            </div>
+          </>
+        )}
         {addToFavourite && (
           <div className="flex flex-col gap-3">
             <Label>{t('components.layout.ugc.view.filter.button.filter-group-name.label')}</Label>

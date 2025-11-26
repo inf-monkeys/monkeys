@@ -295,7 +295,26 @@ export class WorkflowCrudService implements IAssetHandler {
   }
 
   public async listWorkflows(teamId: string, dto: ListDto) {
-    const { list, totalCount } = await this.workflowRepository.listWorkflows(teamId, dto);
+    const { page = 1, limit = 24 } = dto;
+
+    // 解析工作流特有的过滤条件（是否仅看本团队 / 是否仅看内置应用），并从通用 filter 中剥离，避免影响通用资产过滤逻辑
+    const rawFilter = ((dto.filter || {}) as any) || {};
+    const onlySelf: boolean = !!rawFilter.isSelf;
+    const onlyBuiltin: boolean = !!rawFilter.isBuiltin;
+    const { isSelf, isBuiltin, ...restFilter } = rawFilter;
+
+    const repoDto: ListDto = {
+      ...dto,
+      filter: restFilter,
+    };
+
+    // 先获取当前团队下（满足搜索/筛选条件的）全部 workflow，后续在内存中叠加内置映射并统一做分页
+    const { list } = await this.workflowRepository.listWorkflows(teamId, {
+      ...repoDto,
+      page: 1,
+      // 这里给一个足够大的值，保证能拿到本团队所有符合条件的工作流，再在内存中进行分页
+      limit: 100000,
+    });
 
     // 当前查询条件中的搜索关键字（仅用于简单匹配内置工作流的名称/描述）
     const searchText = typeof dto.search === 'string' ? dto.search.trim().toLowerCase() : '';
@@ -366,10 +385,23 @@ export class WorkflowCrudService implements IAssetHandler {
       builtin: builtinWorkflowIdSet.has(item.workflowId),
     }));
 
+    // 内存中做一次筛选，用于“是否本团队 / 是否内置应用”切换（通过 filter.isSelf / filter.isBuiltin）
+    let scopedList = listWithBuiltin;
+    if (onlySelf) {
+      scopedList = scopedList.filter((item) => item.teamId === teamId);
+    }
+    if (onlyBuiltin) {
+      scopedList = scopedList.filter((item) => builtinWorkflowIdSet.has(item.workflowId));
+    }
+
+    const totalCount = scopedList.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const pagedList = scopedList.slice(startIndex, endIndex);
+
     return {
-      // totalCount 只统计当前团队真正拥有的工作流数量，额外的内置只读 workflow 不计入总数
       totalCount,
-      list: listWithBuiltin,
+      list: pagedList,
     };
   }
 
