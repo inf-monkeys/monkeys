@@ -606,6 +606,31 @@ export class MarketplaceService {
     return appVersionId;
   }
 
+  /**
+   * 获取某个应用在所有团队中安装出来的 workflowId 列表
+   * 仅针对 workflow 类型资产，用于作者团队在执行记录中汇总所有映射实例
+   */
+  public async getInstalledWorkflowIdsByAppId(appId: string): Promise<string[]> {
+    const latestVersion = await this.getAppLatestVersion(appId);
+    if (!latestVersion) {
+      return [];
+    }
+
+    const installations = await this.installedAppRepo.find({
+      where: {
+        marketplaceAppVersionId: latestVersion.id,
+      },
+    });
+
+    const workflowIds: string[] = [];
+    for (const inst of installations) {
+      const wfIds = inst.installedAssetIds?.workflow || [];
+      workflowIds.push(...wfIds);
+    }
+
+    return workflowIds;
+  }
+
   public async getAppVersionByAssetId(assetId: string, assetType: AssetType) {
     const appVersion = await this.versionRepo
       .createQueryBuilder('version')

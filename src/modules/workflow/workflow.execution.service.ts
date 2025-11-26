@@ -22,6 +22,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
 import { FindManyOptions, In, IsNull, Not, Repository } from 'typeorm';
+import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
@@ -80,6 +81,8 @@ export class WorkflowExecutionService {
     @InjectRepository(WorkflowExecutionEntity)
     private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
     private readonly teamRepository: TeamRepository,
+    @Inject(forwardRef(() => MarketplaceService))
+    private readonly marketplaceService: MarketplaceService,
   ) {}
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
@@ -144,7 +147,35 @@ export class WorkflowExecutionService {
       workflowCondition.creatorUserId = creatorUserId;
     }
 
-    const workflowsToSearch = await this.workflowRepository.findWorkflowByCondition(workflowCondition);
+    let workflowsToSearch = await this.workflowRepository.findWorkflowByCondition(workflowCondition);
+
+    /**
+     * 作者团队视角的「内置应用跨团队汇总」：
+     * - 若当前 workflowId 对应的是预置应用（app.isPreset = true）
+     * - 且当前 teamId 是应用的 authorTeamId
+     * - 则将 workflowTypes 扩展为：作者团队的源 workflowId + 所有安装到其他团队的 workflowId
+     */
+    if (workflowId && workflowsToSearch.length) {
+      try {
+        const baseWorkflow = workflowsToSearch[0];
+        // 通过 workflowId 反查对应的应用版本
+        const appVersion = await this.marketplaceService.getAppVersionByAssetId(baseWorkflow.workflowId, 'workflow');
+        const app = appVersion?.app;
+
+        if (app?.isPreset && app.authorTeamId === teamId) {
+          // 作者团队：聚合所有安装出来的 workflowId
+          const installedWorkflowIds = await this.marketplaceService.getInstalledWorkflowIdsByAppId(app.id);
+          const allWorkflowIds = _.uniq([baseWorkflow.workflowId, ...installedWorkflowIds]);
+
+          // 重新拉取所有相关 workflow 定义（跨团队）
+          if (allWorkflowIds.length) {
+            workflowsToSearch = await this.workflowRepository.findWorkflowByIds(allWorkflowIds);
+          }
+        }
+      } catch {
+        // 聚合失败不影响正常查询，降级为原来的 team 内查询
+      }
+    }
 
     // 内置应用执行记录可见性控制：
     // - 若当前 workflow 是从预置应用克隆出来的（forkFromId 指向 isPreset 资产）
