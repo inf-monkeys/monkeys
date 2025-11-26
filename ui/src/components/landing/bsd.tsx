@@ -3,14 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { motion } from 'framer-motion';
-import { LogIn, Sparkles, User } from 'lucide-react';
+import { Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useUser } from '@/apis/authz/user';
 import { isAuthed } from '@/components/router/guard/auth';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
-import VinesEvent from '@/utils/events.ts';
 
 // 轮播卡片数据
 const carouselData = [
@@ -119,11 +118,6 @@ export const BSDLandingPage: React.FC = () => {
     setCurrentIndex((prev) => (prev + 1) % carouselData.length);
   };
 
-  // 处理登录
-  const handleLogin = () => {
-    VinesEvent.emit('vines-nav', '/login');
-  };
-
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black">
       {/* 顶部导航栏 - 独立背景 */}
@@ -208,154 +202,113 @@ export const BSDLandingPage: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="flex flex-col gap-[80px] px-4 sm:flex-row sm:px-0"
           >
-            {isAuthenticated ? (
-              <>
-                <Button
-                  size="large"
-                  onClick={handleToWorkbench}
-                  className="group relative h-[80px] w-[293px] overflow-hidden rounded-[15px] border-[1.5px] border-white/10 px-5 py-0 text-[24px] font-medium backdrop-blur-[30px] transition-all hover:scale-105 hover:border-white/20"
+            <>
+              <Button
+                size="large"
+                onClick={handleToWorkbench}
+                className="group relative h-[80px] w-[293px] overflow-hidden rounded-[15px] border-[1.5px] border-white/10 px-5 py-0 text-[24px] font-medium backdrop-blur-[30px] transition-all hover:scale-105 hover:border-white/20"
+                style={{
+                  background: 'linear-gradient(0deg, rgba(40, 82,173, 0.08), rgba(40, 82, 173,0.08)), #171717',
+                  boxShadow: 'inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#03072D';
+                  e.currentTarget.style.border = '1.5px solid rgba(144, 166, 231, 0.8)';
+                  e.currentTarget.style.boxShadow =
+                    'inset 11px -12px 13.7px 0px rgba(144, 166, 231,0.5), 0 0 20px rgba(144, 166, 231, 0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background =
+                    'linear-gradient(0deg, rgba(40, 82,173, 0.08), rgba(40, 82, 173,0.08)), #171717';
+                  e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.boxShadow = 'inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25)';
+                }}
+              >
+                <span
+                  className="relative z-10 flex w-full items-center justify-between"
                   style={{
-                    background: 'linear-gradient(0deg, rgba(40, 82,173, 0.08), rgba(40, 82, 173,0.08)), #171717',
-                    boxShadow: 'inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#03072D';
-                    e.currentTarget.style.border = '1.5px solid rgba(144, 166, 231, 0.8)';
-                    e.currentTarget.style.boxShadow =
-                      'inset 11px -12px 13.7px 0px rgba(144, 166, 231,0.5), 0 0 20px rgba(144, 166, 231, 0.6)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      'linear-gradient(0deg, rgba(40, 82,173, 0.08), rgba(40, 82, 173,0.08)), #171717';
-                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.boxShadow = 'inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25)';
+                    background: 'linear-gradient(270deg, #9AB3FF 0%, rgba(180, 169, 245, 0) 100%), #FFFFFF',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
                   }}
                 >
-                  <span
-                    className="relative z-10 flex w-full items-center justify-between"
-                    style={{
-                      background: 'linear-gradient(270deg, #9AB3FF 0%, rgba(180, 169, 245, 0) 100%), #FFFFFF',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <img
-                        src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E5%89%8D%E6%B2%BF%E8%B5%84%E8%AE%AF.svg"
-                        alt="出款"
-                        className="h-4 w-4 sm:h-5 sm:w-5"
-                      />
-                      {t('auth.enter-workspace', { defaultValue: '前沿资讯' })}
-                    </div>
-                    <div className="relative">
-                      <img
-                        src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E7%AE%AD%E5%A4%B42.svg"
-                        alt="箭头"
-                        className="h-4 w-4 transition-opacity duration-200 group-hover:opacity-0 sm:h-5 sm:w-5"
-                      />
-                      <img
-                        src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E7%AE%AD%E5%A4%B41.svg"
-                        alt="箭头"
-                        className="absolute inset-0 h-4 w-4 opacity-0 transition-all duration-200 group-hover:scale-150 group-hover:opacity-100 sm:h-5 sm:w-5"
-                      />
-                    </div>
-                  </span>
-                </Button>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E5%89%8D%E6%B2%BF%E8%B5%84%E8%AE%AF.svg"
+                      alt="出款"
+                      className="h-4 w-4 sm:h-5 sm:w-5"
+                    />
+                    {t('auth.enter-workspace', { defaultValue: '前沿资讯' })}
+                  </div>
+                  <div className="relative">
+                    <img
+                      src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E7%AE%AD%E5%A4%B42.svg"
+                      alt="箭头"
+                      className="h-4 w-4 transition-opacity duration-200 group-hover:opacity-0 sm:h-5 sm:w-5"
+                    />
+                    <img
+                      src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E7%AE%AD%E5%A4%B41.svg"
+                      alt="箭头"
+                      className="absolute inset-0 h-4 w-4 opacity-0 transition-all duration-200 group-hover:scale-150 group-hover:opacity-100 sm:h-5 sm:w-5"
+                    />
+                  </div>
+                </span>
+              </Button>
 
-                <Button
-                  size="large"
-                  variant="outline"
-                  className="h-[80px] w-[293px] rounded-[15px] border-[1.5px] border-white/10 px-5 py-0 text-[24px] font-medium backdrop-blur-[30px] transition-all hover:scale-105 hover:border-white/20"
+              <Button
+                size="large"
+                variant="outline"
+                className="h-[80px] w-[293px] rounded-[15px] border-[1.5px] border-white/10 px-5 py-0 text-[24px] font-medium backdrop-blur-[30px] transition-all hover:scale-105 hover:border-white/20"
+                style={{
+                  background: 'linear-gradient(0deg, rgba(40, 82,173, 0.08), rgba(40, 82, 173,0.08)), #171717',
+                  boxShadow: 'inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#03072D';
+                  e.currentTarget.style.border = '1.5px solid rgba(144, 166, 231, 0.8)';
+                  e.currentTarget.style.boxShadow =
+                    'inset 11px -12px 13.7px 0px rgba(144, 166, 231,0.5), 0 0 20px rgba(144, 166, 231, 0.6)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background =
+                    'linear-gradient(0deg, rgba(40, 82,173, 0.08), rgba(40, 82, 173,0.08)), #171717';
+                  e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.boxShadow = 'inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25)';
+                }}
+              >
+                <span
+                  className="group flex w-full items-center justify-between"
                   style={{
-                    background: 'linear-gradient(0deg, rgba(40, 82,173, 0.08), rgba(40, 82, 173,0.08)), #171717',
-                    boxShadow: 'inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#03072D';
-                    e.currentTarget.style.border = '1.5px solid rgba(144, 166, 231, 0.8)';
-                    e.currentTarget.style.boxShadow =
-                      'inset 11px -12px 13.7px 0px rgba(144, 166, 231,0.5), 0 0 20px rgba(144, 166, 231, 0.6)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      'linear-gradient(0deg, rgba(40, 82,173, 0.08), rgba(40, 82, 173,0.08)), #171717';
-                    e.currentTarget.style.border = '1.5px solid rgba(255, 255, 255, 0.1)';
-                    e.currentTarget.style.boxShadow = 'inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25)';
+                    background: 'linear-gradient(270deg, #9AB3FF 0%, rgba(180, 169, 245, 0) 100%), #FFFFFF',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
                   }}
                 >
-                  <span
-                    className="group flex w-full items-center justify-between"
-                    style={{
-                      background: 'linear-gradient(270deg, #9AB3FF 0%, rgba(180, 169, 245, 0) 100%), #FFFFFF',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <img
-                        src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E8%AE%BE%E8%AE%A1%E6%99%BA%E8%83%BD%E4%BD%93.png"
-                        alt="设计智能体"
-                        className="h-4 w-4 sm:h-5 sm:w-5"
-                      />
-                      <span>设计智能体</span>
-                    </div>
-                    <div className="relative">
-                      <img
-                        src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E7%AE%AD%E5%A4%B42.svg"
-                        alt="箭头"
-                        className="h-4 w-4 transition-opacity duration-200 group-hover:opacity-0 sm:h-5 sm:w-5"
-                      />
-                      <img
-                        src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E7%AE%AD%E5%A4%B41.svg"
-                        alt="箭头"
-                        className="absolute inset-0 h-4 w-4 opacity-0 transition-all duration-200 group-hover:scale-150 group-hover:opacity-100 sm:h-5 sm:w-5"
-                      />
-                    </div>
-                  </span>
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  size="large"
-                  onClick={handleLogin}
-                  className="group relative h-[77px] w-[260px] overflow-hidden rounded-[15px] border-[1.5px] border-white/10 bg-gradient-to-b from-[rgba(69,69,69,0.35)] to-[rgba(40,40,40,0.25)] px-5 py-0 text-[24px] font-medium shadow-[4px_0px_10px_0px_rgba(23,23,23,0.3)] backdrop-blur-[30px] transition-all hover:scale-105 hover:border-white/20 hover:bg-gradient-to-b hover:from-[rgba(69,69,69,0.5)] hover:to-[rgba(40,40,40,0.4)]"
-                >
-                  <span
-                    className="relative z-10 flex items-center justify-start gap-2"
-                    style={{
-                      background: 'linear-gradient(270deg, #9AB3FF 0%, rgba(180, 169, 245, 0) 100%), #FFFFFF',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    <LogIn className="h-4 w-4 sm:h-5 sm:w-5" />
-                    {t('auth.login', { defaultValue: '立即登录' })}
-                  </span>
-                </Button>
-
-                <Button
-                  size="large"
-                  variant="outline"
-                  className="h-[77px] w-[260px] rounded-[15px] border-[1.5px] border-white/10 bg-gradient-to-b from-[rgba(69,69,69,0.35)] to-[rgba(40,40,40,0.25)] px-5 py-0 text-[24px] font-medium shadow-[4px_0px_10px_0px_rgba(23,23,23,0.3)] backdrop-blur-[30px] transition-all hover:scale-105 hover:border-white/20 hover:bg-gradient-to-b hover:from-[rgba(69,69,69,0.5)] hover:to-[rgba(40,40,40,0.4)]"
-                >
-                  <span
-                    className="group flex w-full justify-start"
-                    style={{
-                      background: 'linear-gradient(270deg, #9AB3FF 0%, rgba(180, 169, 245, 0) 100%), #FFFFFF',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    了解更多
-                  </span>
-                </Button>
-              </>
-            )}
+                  <div className="flex items-center gap-2">
+                    <img
+                      src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E8%AE%BE%E8%AE%A1%E6%99%BA%E8%83%BD%E4%BD%93.png"
+                      alt="设计智能体"
+                      className="h-4 w-4 sm:h-5 sm:w-5"
+                    />
+                    <span>设计智能体</span>
+                  </div>
+                  <div className="relative">
+                    <img
+                      src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E7%AE%AD%E5%A4%B42.svg"
+                      alt="箭头"
+                      className="h-4 w-4 transition-opacity duration-200 group-hover:opacity-0 sm:h-5 sm:w-5"
+                    />
+                    <img
+                      src="https://inf-monkeys.oss-cn-beijing.aliyuncs.com/monkeys-assets/bsd/%E7%AE%AD%E5%A4%B41.svg"
+                      alt="箭头"
+                      className="absolute inset-0 h-4 w-4 opacity-0 transition-all duration-200 group-hover:scale-150 group-hover:opacity-100 sm:h-5 sm:w-5"
+                    />
+                  </div>
+                </span>
+              </Button>
+            </>
           </motion.div>
 
           {/* 新增卡片区域 */}
