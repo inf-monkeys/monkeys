@@ -109,44 +109,46 @@ export const useAllWorkflowList = () => useWorkflowList({ page: 1, limit: 9999 }
 
 const TENANT_BEARER_TOKEN = import.meta.env.VITE_TENANT_BEARER_TOKEN as string | undefined;
 
-export const setWorkflowAsBuiltinApp = (workflowId: string) =>
+export const setWorkflowAsBuiltinApp = (workflowId: string, tenantToken: string) =>
   vinesFetcher<{ appId: string; created?: boolean }>({
     method: 'POST',
-    simple: true,
+    simple: false, // 改为 false 以便捕获详细错误信息
     auth: false,
     fetchOptions: {
-      headers: TENANT_BEARER_TOKEN
-        ? {
-            authorization: `Bearer ${TENANT_BEARER_TOKEN}`,
-          }
-        : {},
+      headers: {
+        authorization: `Bearer ${tenantToken}`,
+      },
     },
-  })(`/api/tenant/manage/builtin/workflows/${workflowId}`);
+  })(`/api/tenant/manage/builtin/workflows/${workflowId}`)
+    .catch((error) => {
+      // 重新抛出错误，包含原始错误信息
+      throw error;
+    });
 
-export const getWorkflowBuiltinStatus = (workflowId: string) =>
+export const getWorkflowBuiltinStatus = (workflowId: string, tenantToken: string) =>
   vinesFetcher<{ appId?: string; builtin: boolean }>({
     method: 'GET',
     simple: true,
     auth: false,
     fetchOptions: {
-      headers: TENANT_BEARER_TOKEN
-        ? {
-            authorization: `Bearer ${TENANT_BEARER_TOKEN}`,
-          }
-        : {},
+      headers: {
+        authorization: `Bearer ${tenantToken}`,
+      },
     },
   })(`/api/tenant/manage/builtin/workflows/${workflowId}`);
 
-export const unsetWorkflowBuiltinApp = (workflowId: string) =>
+export const unsetWorkflowBuiltinApp = (workflowId: string, tenantToken: string) =>
   vinesFetcher<{ appId?: string }>({
     method: 'DELETE',
-    simple: true,
+    simple: false, // 改为 false 以便捕获详细错误信息
     auth: false,
     fetchOptions: {
-      headers: TENANT_BEARER_TOKEN
-        ? {
-            authorization: `Bearer ${TENANT_BEARER_TOKEN}`,
-          }
-        : {},
+      headers: {
+        authorization: `Bearer ${tenantToken}`,
+      },
     },
-  })(`/api/tenant/manage/builtin/workflows/${workflowId}`);
+  })(`/api/tenant/manage/builtin/workflows/${workflowId}`)
+    .catch((error) => {
+      // 重新抛出错误，包含原始错误信息
+      throw error;
+    });
