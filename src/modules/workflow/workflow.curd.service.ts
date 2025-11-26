@@ -15,10 +15,11 @@ import { WorkflowRepository } from '@/database/repositories/workflow.repository'
 import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { AssetType, I18nValue, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monkeys/monkeys';
-import { ForbiddenException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
 import _, { isEmpty } from 'lodash';
 import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
+import { AssetsPermissionService } from '../assets/assets.permission.service';
 import { AssetsPublishService } from '../assets/assets.publish.service';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { AssetCloneResult, AssetUpdateResult, IAssetHandler } from '../marketplace/types';
@@ -47,49 +48,10 @@ export class WorkflowCrudService implements IAssetHandler {
 
     @Inject(forwardRef(() => MarketplaceService))
     private readonly marketplaceService: MarketplaceService,
+
+    @Inject(forwardRef(() => AssetsPermissionService))
+    private readonly assetsPermissionService: AssetsPermissionService,
   ) {}
-
-  /**
-   * 内置应用相关工作流的写权限校验：
-   * - 若工作流绑定到预置应用（app.isPreset = true）
-   * - 只有 marketplace 应用的 authorTeamId 才能修改 / 删除 / 克隆 / 回滚
-   * - 其他团队拿到的都是「映射实例」，一律只读
-   */
-  private async assertBuiltinWorkflowWritable(teamId: string, workflowId: string) {
-    // 先拿到 workflow，确定归属团队
-    const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId, false);
-    if (!workflow) {
-      throw new NotFoundException(`工作流 (${workflowId}) 不存在！`);
-    }
-
-    // 基本团队越权校验：不允许操作其他团队的工作流
-    if (workflow.teamId !== teamId) {
-      throw new ForbiddenException('无权限操作其他团队的工作流');
-    }
-
-    // 1. 尝试通过 sourceAssetReferences 反查这个 workflow 对应的应用版本（作者团队中的「源工作流」）
-    let appVersion = await this.marketplaceService.getAppVersionByAssetId(workflow.workflowId, 'workflow');
-
-    // 2. 如果查不到，说明当前 workflow 可能是安装到其他团队的「映射实例」
-    //    通过 InstalledAppEntity.installedAssetIds 反查其所属的预置应用版本
-    if (!appVersion) {
-      const installed = await this.marketplaceService.getInstalledAppVersionIdByAssetId(workflow.workflowId, 'workflow');
-      if (installed?.marketplaceAppVersionId) {
-        appVersion = await this.marketplaceService.getAppVersionById(installed.marketplaceAppVersionId);
-      }
-    }
-
-    const app = appVersion?.app;
-    if (!app || !app.isPreset) {
-      // 非预置应用对应的工作流，不做额外限制
-      return;
-    }
-
-    // 预置应用：只有作者团队可以写，其余团队（映射实例）一律只读
-    if (app.authorTeamId !== teamId) {
-      throw new ForbiddenException('内置应用映射仅可读，只有设置为内置应用的团队可以修改工作流');
-    }
-  }
 
   public async getSnapshot(workflowIdOrRecordId: string, version: number): Promise<any> {
     let workflow: WorkflowExportJson | undefined;
@@ -701,14 +663,18 @@ export class WorkflowCrudService implements IAssetHandler {
    */
   public async deleteWorkflowDef(teamId: string, workflowId: string) {
     // 内置应用只读控制：仅作者团队可删除
-    await this.assertBuiltinWorkflowWritable(teamId, workflowId);
+    const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId, false);
+    if (!workflow) {
+      throw new NotFoundException(`工作流 (${workflowId}) 不存在！`);
+    }
+    await this.assetsPermissionService.assertCanWriteAsset(teamId, workflow);
     return await this.workflowRepository.deleteWorkflow(teamId, workflowId);
   }
 
   public async cloneWorkflowOfVersion(teamId: string, userId: string, originalWorkflowId: string, originalWorkflowVersion: number) {
-    // 内置应用只读控制：仅作者团队可以基于内置应用克隆版本
-    await this.assertBuiltinWorkflowWritable(teamId, originalWorkflowId);
     const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, originalWorkflowVersion);
+    // 内置应用只读控制：仅作者团队可以基于内置应用克隆版本
+    await this.assetsPermissionService.assertCanWriteAsset(teamId, originalWorkflow);
     return await this.createWorkflowDef(teamId, userId, {
       displayName: {
         'zh-CN': getI18NValue(originalWorkflow.displayName, 'zh-CN') + ' - 副本',
@@ -720,12 +686,12 @@ export class WorkflowCrudService implements IAssetHandler {
   }
 
   public async cloneWorkflow(teamId: string, userId: string, originalWorkflowId: string, autoPinPage?: WorkflowAutoPinPage) {
-    // 内置应用只读控制：仅作者团队可以基于内置应用克隆工作流
-    await this.assertBuiltinWorkflowWritable(teamId, originalWorkflowId);
     const versions = await this.workflowRepository.getWorkflowVersions(originalWorkflowId);
     const newWorkflowId = generateDbId();
     for (const { version } of versions) {
       const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, version);
+      // 内置应用只读控制：仅作者团队可以基于内置应用克隆工作流
+      await this.assetsPermissionService.assertCanWriteAsset(teamId, originalWorkflow);
       const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(originalWorkflow.tasks);
       const comfyuiWorkflowIds = Array.from(new Set(comfyuiDataList.map((c) => c.comfyuiWorkflowId)));
       const comfyuiWorkflowIdMapper = comfyuiWorkflowIds.reduce((mapper, comfyuiWorkflowId) => {
@@ -880,8 +846,8 @@ export class WorkflowCrudService implements IAssetHandler {
       throw new NotFoundException(`工作流 (${workflowId}) 不存在！`);
     }
 
-    // 内置应用只读控制：仅作者团队可修改
-    await this.assertBuiltinWorkflowWritable(teamId, workflowId);
+    // 内置应用只读控制：仅作者团队可修改（通过统一的 AssetsPermissionService）
+    await this.assetsPermissionService.assertCanWriteAsset(teamId, workflow);
 
     // 当为快捷方式时，只允许更新 shortcutsFlow 字段
     if (!isEmpty(workflow?.shortcutsFlow ?? null)) {
@@ -991,8 +957,12 @@ export class WorkflowCrudService implements IAssetHandler {
   }
 
   public async rollbackWorkflow(teamId: string, workflowId: string, version: number) {
+    const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
+    if (!workflow) {
+      throw new NotFoundException(`工作流 (${workflowId}) 不存在！无法回滚`);
+    }
     // 内置应用只读控制：仅作者团队可回滚
-    await this.assertBuiltinWorkflowWritable(teamId, workflowId);
+    await this.assetsPermissionService.assertCanWriteAsset(teamId, workflow);
     return await this.workflowRepository.rollbackWorkflow(teamId, workflowId, version);
   }
 }

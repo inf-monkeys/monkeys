@@ -1,5 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { DesignModule } from '../design/design.module';
+import { MarketplaceModule } from '../marketplace/marketplace.module';
 import { ComfyUIModule } from '../tools/comfyui/comfyui.module';
 import { WorkflowModule } from '../workflow/workflow.module';
 import { AssetsMapperService } from './assets.common.service';
@@ -7,6 +8,7 @@ import { AssetsFiltersController } from './assets.filter.controller';
 import { AssetsFilterService } from './assets.filter.service';
 import { AssetsMarketplaceController } from './assets.marketplace.controller';
 import { AssetsMarketplaceService } from './assets.marketplace.service';
+import { AssetsPermissionService } from './assets.permission.service';
 import { AssetsPublishController } from './assets.publish.controller';
 import { AssetsPublishService } from './assets.publish.service';
 import { AssetsReferenceController } from './assets.reference.controller';
@@ -24,7 +26,7 @@ import { SqlKnowledgeBaseModule } from './sql-knowledge-base/sql-knowledge-base.
 
 @Module({
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController, AssetsReferenceController, AssetsMarketplaceController],
-  providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsMapperService, AssetsReferenceService, AssetsMarketplaceService],
+  providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsMapperService, AssetsReferenceService, AssetsMarketplaceService, AssetsPermissionService],
   imports: [
     CanvasModule,
     MediaModule,
@@ -37,7 +39,8 @@ import { SqlKnowledgeBaseModule } from './sql-knowledge-base/sql-knowledge-base.
     forwardRef(() => DesignModule),
     forwardRef(() => WorkflowModule),
     forwardRef(() => ComfyUIModule),
+    forwardRef(() => MarketplaceModule),
   ],
-  exports: [AssetsMarketplaceService, AssetsPublishService, MediaModule, AssetsMapperService, AssetsTagService],
+  exports: [AssetsMarketplaceService, AssetsPublishService, MediaModule, AssetsMapperService, AssetsTagService, AssetsPermissionService],
 })
 export class AssetsModule {}
