@@ -10,7 +10,12 @@ import { toast } from 'sonner';
 
 import { vinesFetcher } from '@/apis/fetcher';
 import { IMediaData } from '@/apis/media-data/typings';
-import { useGetDownloadableModel, useGetLoraModels, useGetModelTraining, useGetPretrainedModels } from '@/apis/model-training';
+import {
+  useGetDownloadableModel,
+  useGetLoraModels,
+  useGetModelTraining,
+  useGetPretrainedModels,
+} from '@/apis/model-training';
 import { IPaginationListData } from '@/apis/typings';
 import { createTag, useAssetTagList } from '@/apis/ugc';
 import { IAssetItem, IAssetTag, IListUgcDto } from '@/apis/ugc/typings';
@@ -51,7 +56,7 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
 
   // 获取Lora模型列表（model_type=1，需要model_training_id）
   const { data: loraModels = [], isLoading: isLoadingLoraModels } = useGetLoraModels(modelTrainingId);
-  
+
   // 获取可下载模型信息
   const { data: downloadableModel, isLoading: isLoadingDownloadableModel } = useGetDownloadableModel(modelTrainingId);
   const [selectedDownloadModel, setSelectedDownloadModel] = useState<string>('');
@@ -486,7 +491,10 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">{testMode === 'download' ? '下载模式' : '测试模式'}</span>
                   <div className="flex items-center gap-2">
-                    <Select value={testMode} onValueChange={(value) => setTestMode(value as 'default' | 'custom' | 'download')}>
+                    <Select
+                      value={testMode}
+                      onValueChange={(value) => setTestMode(value as 'default' | 'custom' | 'download')}
+                    >
                       <SelectTrigger className="w-[140px]">
                         <SelectValue />
                       </SelectTrigger>
@@ -544,7 +552,9 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
                               window.open(selectedModel.model_url, '_blank');
                             }
                           }}
-                          disabled={!downloadableModel?.find((model) => model.model_name === selectedDownloadModel)?.model_url}
+                          disabled={
+                            !downloadableModel?.find((model) => model.model_name === selectedDownloadModel)?.model_url
+                          }
                         >
                           <Download className="mr-2 h-4 w-4" />
                           下载模型

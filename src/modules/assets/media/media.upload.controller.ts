@@ -6,6 +6,7 @@ import { Body, Controller, Get, Head, NotFoundException, Post, Query, Res, Strea
 import { FileInterceptor } from '@nestjs/platform-express';
 import { generateId } from 'ai';
 import { Response } from 'express';
+import _ from 'lodash';
 import { Readable } from 'stream';
 import { MediaFileService } from './media.service';
 
@@ -88,6 +89,24 @@ export class MediaUploadController {
     const data = await s3Helpers.getSignedUrlForUpload(key);
     return new SuccessResponse({
       data,
+    });
+  }
+
+  @Head('/s3/presign-v2')
+  async getPreSignedUrlV2Head(@Query('url') url: string, @Res({ passthrough: true }) res: Response) {
+    res.status(200).end();
+  }
+
+  @Get('/s3/presign-v2')
+  async getPreSignedUrlV2(@Query('url') url: string, @Query('redirect') redirect: string = 'true', @Res({ passthrough: true }) res: Response) {
+    const redirectBoolean = parseBoolean(redirect);
+    const data = await this.mediaFileService.getPresignedUrl(url);
+    if (redirectBoolean && res) {
+      res.redirect(301, data.signedUrl);
+      return;
+    }
+    return new SuccessResponse({
+      data: _.pick(data, ['signedUrl', 'expiresIn', 'originalUrl']),
     });
   }
 

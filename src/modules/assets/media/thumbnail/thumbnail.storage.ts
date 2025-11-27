@@ -1,4 +1,4 @@
-import { Operator, type WriteOptions } from 'opendal';
+import { Operator, type PresignedRequest, type WriteOptions } from 'opendal';
 import { BucketConfig } from './thumbnail.types';
 
 class StorageClientCache {
@@ -86,5 +86,14 @@ export class StorageOperations {
       console.error(`Error listing files in ${prefix}:`, error);
     }
     return files;
+  }
+
+  static async presignRead(bucket: BucketConfig, path: string, expiresInSeconds: number): Promise<PresignedRequest> {
+    const operator = await storageClientCache.getOperator(bucket);
+    const capability = operator.capability();
+    if (!capability.presign || !capability.presignRead) {
+      throw new Error(`Bucket ${bucket.id} 不支持 presign 操作`);
+    }
+    return operator.presignRead(path, expiresInSeconds);
   }
 }
