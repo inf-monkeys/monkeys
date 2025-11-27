@@ -1,8 +1,10 @@
 import { ListDto } from '@/common/dto/list.dto';
+import { S3Helpers } from '@/common/s3';
 import { downloadFileAsBuffer } from '@/common/utils/image';
 import { DesignMetadataRepository } from '@/database/repositories/design-metadata.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { generateId } from 'ai';
 import JSZip from 'jszip';
 import { DesignProjectEntity } from '../../database/entities/design/design-project';
 import { DesignProjectRepository } from '../../database/repositories/design-project.repository';
@@ -581,6 +583,8 @@ export class DesignProjectService {
     // 下载所有资源文件并添加到压缩包
     if (assetUrls.size > 0) {
       const assetsFolder = zip.folder('assets');
+      const urlToFileName = new Map<string, string>(); // URL -> 文件名的映射
+      
       const downloadPromises = Array.from(assetUrls).map(async (url, index) => {
         try {
           // 下载文件
@@ -588,19 +592,32 @@ export class DesignProjectService {
           
           // 从 URL 中提取文件名
           const urlPath = new URL(url).pathname;
-          const fileName = urlPath.split('/').pop() || `asset-${index}`;
+          let fileName = urlPath.split('/').pop() || `asset-${index}`;
           
-          // 如果文件名没有扩展名，尝试从 Content-Type 推断
-          let finalFileName = fileName;
+          // 如果文件名没有扩展名，尝试从 URL 推断
           if (!fileName.includes('.')) {
-            // 尝试从 URL 或响应头推断文件类型
+            // 尝试从 URL 路径推断文件类型
             const contentType = url.match(/\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|ogg|pdf|zip)/i);
             if (contentType) {
-              finalFileName = `${fileName}.${contentType[1]}`;
+              fileName = `${fileName}.${contentType[1]}`;
             } else {
-              finalFileName = `${fileName}.bin`;
+              // 如果无法推断，使用 URL 的 hash 作为文件名的一部分
+              const urlHash = Buffer.from(url).toString('base64').substring(0, 8).replace(/[^a-zA-Z0-9]/g, '');
+              fileName = `asset-${urlHash}.bin`;
             }
           }
+          
+          // 确保文件名唯一（如果重复，添加索引）
+          let finalFileName = fileName;
+          let counter = 1;
+          while (Array.from(urlToFileName.values()).includes(finalFileName)) {
+            const ext = fileName.includes('.') ? fileName.split('.').pop() : '';
+            const baseName = fileName.includes('.') ? fileName.substring(0, fileName.lastIndexOf('.')) : fileName;
+            finalFileName = ext ? `${baseName}-${counter}.${ext}` : `${baseName}-${counter}`;
+            counter++;
+          }
+          
+          urlToFileName.set(url, finalFileName);
           
           // 添加到压缩包
           assetsFolder.file(finalFileName, buffer);
@@ -612,6 +629,12 @@ export class DesignProjectService {
 
       // 等待所有文件下载完成
       await Promise.all(downloadPromises);
+      
+      // 将 URL 映射保存到压缩包中，方便导入时使用
+      if (urlToFileName.size > 0) {
+        const urlMapping = Object.fromEntries(urlToFileName);
+        zip.file('url-mapping.json', JSON.stringify(urlMapping, null, 2));
+      }
     }
 
     // 生成 ZIP 文件
@@ -700,6 +723,218 @@ export class DesignProjectService {
     }
 
     return newProject;
+  }
+
+  /**
+   * 从 ZIP 文件导入设计项目：解压 ZIP、上传资源文件、更新 URL 映射
+   */
+  async importProjectFromZip(zipBuffer: Buffer, teamId: string, creatorUserId: string): Promise<DesignProjectEntity> {
+    const zip = new JSZip();
+    const unzipped = await zip.loadAsync(zipBuffer);
+
+    // 1. 读取 project.json
+    const projectJsonFile = unzipped.file('project.json');
+    if (!projectJsonFile) {
+      throw new NotFoundException('ZIP 文件中未找到 project.json');
+    }
+
+    const projectJsonContent = await projectJsonFile.async('string');
+    let importData: any;
+    try {
+      importData = JSON.parse(projectJsonContent);
+    } catch (error) {
+      throw new Error('project.json 格式错误');
+    }
+
+    // 验证导入数据格式
+    if (!importData.project || !importData.boards) {
+      throw new Error('导入文件格式不正确，缺少必要的数据');
+    }
+
+    // 2. 读取 URL 映射文件（如果存在）
+    let urlToFileName: Record<string, string> = {};
+    const urlMappingFile = unzipped.file('url-mapping.json');
+    if (urlMappingFile) {
+      try {
+        const urlMappingContent = await urlMappingFile.async('string');
+        urlToFileName = JSON.parse(urlMappingContent);
+      } catch (error) {
+        console.error('Failed to parse url-mapping.json:', error);
+      }
+    }
+
+    // 3. 上传 assets 文件夹中的文件并创建 URL 映射
+    const urlMapping = new Map<string, string>(); // 旧 URL -> 新 URL 的映射
+    const assetsFolder = unzipped.folder('assets');
+    
+    if (assetsFolder) {
+      const s3Helpers = new S3Helpers();
+      const assetFiles = Object.keys(assetsFolder.files).filter((name) => !assetsFolder.files[name].dir);
+
+      // 上传所有资源文件到 S3
+      for (const assetFileName of assetFiles) {
+        const assetFile = assetsFolder.files[assetFileName];
+        if (!assetFile) continue;
+
+        try {
+          const assetBuffer = await assetFile.async('nodebuffer');
+          
+          // 生成新的文件路径
+          const fileId = generateId();
+          const fileExtension = assetFileName.split('.').pop() || '';
+          const s3Key = `user-files/designs/${fileId}${fileExtension ? '.'.concat(fileExtension) : ''}`;
+          
+          // 上传到 S3
+          const newUrl = await s3Helpers.uploadFile(assetBuffer, s3Key);
+          
+          // 通过 url-mapping.json 找到对应的原始 URL
+          for (const [originalUrl, fileName] of Object.entries(urlToFileName)) {
+            if (fileName === assetFileName) {
+              urlMapping.set(originalUrl, newUrl);
+              break;
+            }
+          }
+          
+          // 如果没有找到映射，尝试通过文件名匹配（兼容旧版本）
+          if (urlMapping.size === 0 || !Array.from(urlMapping.values()).includes(newUrl)) {
+            // 收集所有需要替换的 URL
+            const allUrls = new Set<string>();
+            if (importData.project.iconUrl) {
+              allUrls.add(importData.project.iconUrl);
+            }
+            for (const board of importData.boards) {
+              if (board.thumbnailUrl) {
+                allUrls.add(board.thumbnailUrl);
+              }
+              if (board.snapshot) {
+                const snapshotUrls = this.extractAssetUrls(board.snapshot);
+                snapshotUrls.forEach((url) => allUrls.add(url));
+              }
+            }
+            
+            // 尝试通过 URL 路径匹配文件名
+            for (const url of allUrls) {
+              try {
+                const urlPath = new URL(url).pathname;
+                const urlFileName = urlPath.split('/').pop();
+                if (urlFileName === assetFileName || assetFileName.includes(urlFileName?.split('.')[0] || '')) {
+                  urlMapping.set(url, newUrl);
+                }
+              } catch (error) {
+                // URL 解析失败，跳过
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to upload asset ${assetFileName}:`, error);
+          // 继续处理其他文件
+        }
+      }
+    }
+
+    // 4. 更新 importData 中的 URL
+    // 3.1 更新项目图标 URL
+    if (importData.project.iconUrl && urlMapping.has(importData.project.iconUrl)) {
+      importData.project.iconUrl = urlMapping.get(importData.project.iconUrl)!;
+    }
+
+    // 3.2 更新画板中的 URL（snapshot 和 thumbnailUrl）
+    for (const board of importData.boards) {
+      // 更新缩略图 URL
+      if (board.thumbnailUrl && urlMapping.has(board.thumbnailUrl)) {
+        board.thumbnailUrl = urlMapping.get(board.thumbnailUrl)!;
+      }
+
+      // 更新 snapshot 中的 URL
+      if (board.snapshot) {
+        board.snapshot = this.replaceUrlsInSnapshot(board.snapshot, urlMapping);
+      }
+    }
+
+    // 5. 导入时强制设置为非模板（普通设计项目）
+    importData.project.isTemplate = false;
+
+    // 6. 调用现有的 importProject 方法
+    return await this.importProject(importData, teamId, creatorUserId);
+  }
+
+  /**
+   * 替换数据中的 URL：从 URL 映射中查找并返回新 URL
+   */
+  private replaceUrlInData(oldUrl: string, urlMapping: Map<string, string>, unzipped: JSZip): string | null {
+    if (!oldUrl || typeof oldUrl !== 'string') {
+      return null;
+    }
+
+    // 直接从映射中查找
+    if (urlMapping.has(oldUrl)) {
+      return urlMapping.get(oldUrl)!;
+    }
+
+    return null;
+  }
+
+  /**
+   * 递归替换 snapshot 中的所有 URL
+   */
+  private replaceUrlsInSnapshot(snapshot: any, urlMapping: Map<string, string>): any {
+    if (!snapshot || typeof snapshot !== 'object') {
+      return snapshot;
+    }
+
+    // 如果是数组，递归处理每个元素
+    if (Array.isArray(snapshot)) {
+      return snapshot.map((item) => this.replaceUrlsInSnapshot(item, urlMapping));
+    }
+
+    // 创建副本
+    const result = JSON.parse(JSON.stringify(snapshot));
+
+    // 替换可能的 URL 字段
+    const urlFields = ['src', 'url', 'imageUrl', 'image_url', 'image', 'imageURL', 'thumbnailUrl'];
+    for (const field of urlFields) {
+      if (result[field] && typeof result[field] === 'string' && urlMapping.has(result[field])) {
+        result[field] = urlMapping.get(result[field])!;
+      }
+    }
+
+    // 处理 props 对象
+    if (result.props) {
+      for (const field of urlFields) {
+        if (result.props[field] && typeof result.props[field] === 'string' && urlMapping.has(result.props[field])) {
+          result.props[field] = urlMapping.get(result.props[field])!;
+        }
+      }
+
+      // 处理 images 数组
+      if (Array.isArray(result.props.images)) {
+        result.props.images = result.props.images.map((img: any) => {
+          if (typeof img === 'string' && urlMapping.has(img)) {
+            return urlMapping.get(img)!;
+          }
+          return img;
+        });
+      }
+    }
+
+    // 处理 images 数组字段
+    if (Array.isArray(result.images)) {
+      result.images = result.images.map((img: any) => {
+        if (typeof img === 'string' && urlMapping.has(img)) {
+          return urlMapping.get(img)!;
+        }
+        return img;
+      });
+    }
+
+    // 递归处理所有属性
+    for (const key in result) {
+      if (result.hasOwnProperty(key) && typeof result[key] === 'object' && result[key] !== null) {
+        result[key] = this.replaceUrlsInSnapshot(result[key], urlMapping);
+      }
+    }
+
+    return result;
   }
 
   /**
