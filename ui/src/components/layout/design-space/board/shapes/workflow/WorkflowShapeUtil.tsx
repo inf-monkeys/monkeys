@@ -190,6 +190,7 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
       connections: [],
       inputParams: [],
       inputConnections: [],
+      generatedTime: 0,
     };
   }
 
@@ -671,8 +672,75 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         return;
       }
 
+      // 通过 API 获取 workflow 的最新执行记录来计算耗时
+      let generatedTime = 0;
+      
+      try {
+        // 调用 API 获取最新的执行记录
+        const historyResp = await fetch(
+          `/api/workflow/executions/${shape.props.workflowId}/outputs?page=1&limit=1`,
+          {
+            method: 'GET',
+            headers: {
+              ...vinesHeader({ useToast: false }),
+            },
+          },
+        );
+        
+        if (historyResp.ok) {
+          const historyData = await historyResp.json();
+          console.log('[Workflow] 获取到历史执行记录:', historyData);
+          
+          // 解析最新的执行记录
+          const latestExecution = historyData?.data?.[0] || historyData?.[0];
+          
+          if (latestExecution) {
+            let startTime = latestExecution.startTime || 0;
+            let endTime = latestExecution.endTime || 0;
+            
+            // 如果是秒级时间戳（10位），转换为毫秒
+            if (startTime > 0 && String(startTime).length === 10) {
+              startTime *= 1000;
+            }
+            if (endTime > 0 && String(endTime).length === 10) {
+              endTime *= 1000;
+            }
+            
+            // 计算耗时（毫秒）- 只有当两个时间都有效时才计算
+            if (endTime && startTime && endTime > startTime) {
+              generatedTime = endTime - startTime;
+              
+              console.log('[Workflow] 从历史记录计算生成耗时:', {
+                instanceId: latestExecution.instanceId,
+                startTime: new Date(startTime).toISOString(),
+                endTime: new Date(endTime).toISOString(),
+                duration: generatedTime,
+                durationFormatted:
+                  generatedTime < 1000 ? `${generatedTime}ms` : `${(generatedTime / 1000).toFixed(2)}s`,
+              });
+            } else {
+              console.warn('[Workflow] 时间数据不完整，无法计算耗时:', { startTime, endTime });
+            }
+          } else {
+            console.warn('[Workflow] 未找到历史执行记录');
+          }
+        } else {
+          console.warn('[Workflow] 获取历史执行记录失败:', historyResp.status);
+        }
+      } catch (error) {
+        console.error('[Workflow] 获取历史执行记录异常:', error);
+      }
+
       // 提取可展示的数据（优先使用 output）
-      const rawData = executionDetail?.output ?? executionDetail;
+      // executionDetail.output 可能是 {data: ..., requestId: ...} 的格式，需要提取 data
+      let rawData = executionDetail?.output ?? executionDetail;
+      
+      // 如果 output 是对象且包含 data 字段，使用 data
+      if (rawData && typeof rawData === 'object' && 'data' in rawData && !Array.isArray(rawData)) {
+        console.log('[Workflow] 检测到 output 包含 data 字段，提取 data');
+        rawData = (rawData as any).data;
+      }
+      
       let result: string = '';
       let imageUrl: string = '';
       let imageUrls: string[] = [];
@@ -680,6 +748,12 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       let multiSegments: Array<{ text?: string; imageUrl?: string; images?: string[] }> = [];
 
       console.log('[Workflow] 执行完成，准备提取展示结果');
+      console.log('[Workflow] 最终 rawData:', {
+        type: typeof rawData,
+        isArray: Array.isArray(rawData),
+        value: rawData,
+        keys: rawData && typeof rawData === 'object' ? Object.keys(rawData) : null,
+      });
 
       // 辅助函数：在任意嵌套结构中查找 output 数组（或其字符串形式）
       const extractOutputArray = (obj: any): any[] | null => {
@@ -787,7 +861,13 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         return found;
       };
 
-      // 从 Markdown/HTML 文本中尝试提取图片链接（用于多图拆分到多个 Output）
+      // 辅助函数：检查 URL 是否是图片或视频
+      const isMediaUrl = (url: string): boolean => {
+        if (!url || typeof url !== 'string') return false;
+        return /\.(png|jpe?g|webp|gif|bmp|svg|mp4|webm|mov|avi)(\?.*)?$/i.test(url);
+      };
+
+      // 从 Markdown/HTML 文本中尝试提取图片/视频链接（用于多图拆分到多个 Output）
       const extractImageUrlsFromContent = (content: string): string[] => {
         if (!content) return [];
         const urls = new Set<string>();
@@ -796,19 +876,23 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         for (const m of content.matchAll(/!\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi)) {
           urls.add(m[1]);
         }
-        // 2) Markdown 链接（当链接目标是图片时）: [text](url)
+        // 2) Markdown 链接（当链接目标是图片/视频时）: [text](url)
         for (const m of content.matchAll(/\[[^\]]*]\((https?:\/\/[^\s)]+)\)/gi)) {
           const u = m[1];
-          if (/\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(u)) urls.add(u);
+          if (isMediaUrl(u)) urls.add(u);
         }
         // 3) HTML 图片: <img src="url" ...>
         for (const m of content.matchAll(/<img[^>]+src=["'](https?:\/\/[^"']+)["'][^>]*>/gi)) {
           urls.add(m[1]);
         }
-        // 4) 文本中的裸链接（以图片扩展名结尾）
+        // 4) HTML 视频: <video src="url" ...>
+        for (const m of content.matchAll(/<video[^>]+src=["'](https?:\/\/[^"']+)["'][^>]*>/gi)) {
+          urls.add(m[1]);
+        }
+        // 5) 文本中的裸链接（以图片/视频扩展名结尾）
         for (const m of content.matchAll(/https?:\/\/[^\s"'')]+/gi)) {
           const u = m[0];
-          if (/\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(u)) urls.add(u);
+          if (isMediaUrl(u)) urls.add(u);
         }
 
         return Array.from(urls);
@@ -832,6 +916,13 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
       // 提取结果 - 优先处理 output 数组（格式化后的输出）
       if (data && typeof data === 'object') {
+        console.log('[Workflow] 开始解析数据:', {
+          hasOutput: 'output' in data,
+          outputType: Array.isArray(data.output) ? 'array' : typeof data.output,
+          outputValue: data.output,
+          dataKeys: Object.keys(data),
+        });
+
         // 0. 首先尝试递归查找嵌套结构中的 images 和 text（处理复杂的嵌套响应）
         const nestedResult = findImagesAndText(data);
         if (nestedResult.images.length > 0) {
@@ -849,6 +940,24 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         }
         if (data.text && typeof data.text === 'string' && data.text.trim() && !result) {
           result = data.text;
+        }
+
+        // 1.5. 处理 output 数组直接包含图片/视频 URL 的情况
+        // 例如: {"output": ["https://...mp4"]} 或 {"output": ["url1", "url2"]}
+        if (Array.isArray(data.output) && data.output.length > 0) {
+          console.log('[Workflow] 检测到 output 数组:', data.output);
+          const mediaUrls = data.output.filter((item: any) => {
+            const isMedia = typeof item === 'string' && isMediaUrl(item);
+            console.log('[Workflow] 检查项:', { item, isString: typeof item === 'string', isMedia });
+            return isMedia;
+          });
+          if (mediaUrls.length > 0) {
+            imageUrls.push(...mediaUrls);
+            if (!imageUrl) imageUrl = mediaUrls[0];
+            console.log('[Workflow] 从 output 数组中提取到媒体文件:', mediaUrls);
+          } else {
+            console.warn('[Workflow] output 数组中没有找到媒体文件');
+          }
         }
 
         // 2. 如果能够解析到 output 数组（格式化后的输出）
@@ -1006,6 +1115,14 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         console.log('[Workflow] 图片 URL:', imageUrl);
       }
 
+      // 更新 Workflow Shape 的生成时间
+      console.log('[Workflow] 即将更新 Workflow shape，generatedTime =', generatedTime);
+      editor.updateShape<WorkflowShape>({
+        id: shape.id,
+        type: 'workflow',
+        props: { ...shape.props, generatedTime },
+      });
+
       // 更新连接的 Output 框
       console.log('[Workflow] 更新连接的 Output 框:', currentConnectedOutputs);
 
@@ -1034,6 +1151,16 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                 : imageUrls) || [];
           const segImageUrl = segment.imageUrl || segImages[0] || imageUrl || '';
 
+          // 只有当有图片或视频时才设置生成时间
+          const hasMedia = segImages && segImages.length > 0;
+          const finalGeneratedTime = hasMedia && generatedTime > 0 ? generatedTime : 0;
+          
+          console.log('[Workflow] 更新 Output 框(多段)', {
+            generatedTime,
+            hasMedia,
+            finalGeneratedTime,
+          });
+          
           editor.updateShape({
             id: outputId as any,
             type: 'output',
@@ -1042,6 +1169,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
               content: segText,
               imageUrl: segImageUrl,
               images: segImages,
+              generatedTime: finalGeneratedTime,
             },
           });
           console.log('[Workflow] Output 框已更新(多段):', outputId, {
@@ -1055,6 +1183,16 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           console.log('[Workflow] 找到 Output 框:', outputId, outputShape?.type);
 
           if (outputShape && outputShape.type === 'output') {
+            // 只有当有图片或视频时才设置生成时间
+            const hasMedia = imageUrls && imageUrls.length > 0;
+            const finalGeneratedTime = hasMedia && generatedTime > 0 ? generatedTime : 0;
+            
+            console.log('[Workflow] 更新 Output 框', {
+              generatedTime,
+              hasMedia,
+              finalGeneratedTime,
+            });
+            
             editor.updateShape({
               id: outputId as any,
               type: 'output',
@@ -1063,6 +1201,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                 content: result,
                 imageUrl: imageUrl,
                 images: imageUrls,
+                generatedTime: finalGeneratedTime,
               },
             });
             console.log('[Workflow] Output 框已更新:', outputId, { images: imageUrls.length, hasImage: !!imageUrl });
@@ -1402,6 +1541,8 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           ID: {shape.props.workflowId}
         </div>
       </div>
+
+
 
       {/* 输入参数端口 - 在顶层渲染 */}
       {shape.props.inputParams &&
