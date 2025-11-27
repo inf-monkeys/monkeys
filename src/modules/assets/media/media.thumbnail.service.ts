@@ -1,9 +1,8 @@
 import { config } from '@/common/config';
-import { BadRequestException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
-import { BucketManager } from './thumbnail/thumbnail.bucket-manager';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { MediaBucketRegistryService } from './media.bucket-registry.service';
 import { ThumbnailCoreService } from './thumbnail/thumbnail.core';
-import { resolveProviderCapabilities } from './thumbnail/thumbnail.provider-capabilities';
-import { BucketConfig, ThumbnailAppConfig, ThumbnailRequest, ThumbnailResult } from './thumbnail/thumbnail.types';
+import { ThumbnailAppConfig, ThumbnailRequest, ThumbnailResult } from './thumbnail/thumbnail.types';
 
 export interface GetThumbnailOptions {
   url: string;
@@ -21,21 +20,16 @@ export interface ThumbnailWithMeta extends ThumbnailResult {
 }
 
 @Injectable()
-export class MediaThumbnailService implements OnModuleInit {
+export class MediaThumbnailService {
   private readonly logger = new Logger(MediaThumbnailService.name);
-  private readonly bucketManager = new BucketManager();
   private readonly thumbnailCore: ThumbnailCoreService;
 
-  constructor() {
+  constructor(private readonly bucketRegistry: MediaBucketRegistryService) {
     const quality = Number(config.s3Thumbnail?.quality ?? 80);
     const thumbnailConfig: ThumbnailAppConfig = {
       quality: Number.isFinite(quality) ? quality : 80,
     };
     this.thumbnailCore = new ThumbnailCoreService(thumbnailConfig);
-  }
-
-  onModuleInit() {
-    this.initializeBuckets();
   }
 
   async getThumbnailByUrl(options: GetThumbnailOptions): Promise<ThumbnailWithMeta> {
@@ -51,7 +45,7 @@ export class MediaThumbnailService implements OnModuleInit {
       throw new BadRequestException('url 参数格式不正确');
     }
 
-    const resolved = this.bucketManager.resolveBucketFromUrl(urlObject);
+    const resolved = this.bucketRegistry.resolveBucketFromUrl(urlObject);
     if (!resolved) {
       throw new NotFoundException(`未找到可用的缩略图存储桶: ${url}`);
     }
@@ -69,29 +63,6 @@ export class MediaThumbnailService implements OnModuleInit {
       shouldRedirect: resolved.bucket.capabilities.supportsUrlResize ?? false,
       matchedPatternId: resolved.matchedPatternId,
     };
-  }
-
-  private initializeBuckets() {
-    this.bucketManager.clear();
-    if (!config.s3ThumbnailBuckets?.length) {
-      this.logger.warn('未在配置中发现 s3-thumb-buckets，缩略图服务将不可用');
-      return;
-    }
-    for (const rawBucket of config.s3ThumbnailBuckets) {
-      const bucket = this.buildBucketConfig(rawBucket);
-      this.bucketManager.registerBucket(bucket);
-    }
-  }
-
-  private buildBucketConfig(rawBucket: (typeof config.s3ThumbnailBuckets)[number]): BucketConfig {
-    const bucket: BucketConfig = {
-      ...rawBucket,
-      capabilities: {
-        supportsUrlResize: false,
-      },
-    };
-    bucket.capabilities = resolveProviderCapabilities(rawBucket.provider, bucket);
-    return bucket;
   }
 
   private buildThumbnailRequest(imagePath: string, options: Omit<GetThumbnailOptions, 'url'>): ThumbnailRequest {

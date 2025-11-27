@@ -26,5 +26,6 @@ export type OutputShape = TLBaseShape<
     images?: string[]; // 支持多图显示（向下兼容 imageUrl）
     color: TLDefaultColorStyle;
     sourceId: string; // 来源的 instruction shape id
+    generatedTime: number; // 生成耗时（毫秒），0 表示未生成
   }
 >;

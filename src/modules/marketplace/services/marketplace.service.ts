@@ -40,6 +40,20 @@ export class MarketplaceService {
     private readonly assetsMapperService: AssetsMapperService,
   ) {}
 
+  /**
+   * 预置应用缓存（仅用于 workflow 内置应用相关的筛选逻辑），
+   * 用来减少频繁调用 getPresetApps 带来的数据库压力。
+   * 在 setPreset / initPresetAppMarketplace 等修改预置应用的操作后会被清空。
+   */
+  private presetAppsCache: MarketplaceAppEntity[] | null = null;
+
+  private async getPresetAppsCached(): Promise<MarketplaceAppEntity[]> {
+    if (!this.presetAppsCache) {
+      this.presetAppsCache = await this.getPresetApps();
+    }
+    return this.presetAppsCache;
+  }
+
   private async createTasksSnapshot(tasks: MonkeyTaskDefTypes[]): Promise<MonkeyTaskDefTypes[]> {
     return JSON.parse(JSON.stringify(tasks));
   }
@@ -606,6 +620,31 @@ export class MarketplaceService {
     return appVersionId;
   }
 
+  /**
+   * 获取某个应用在所有团队中安装出来的 workflowId 列表
+   * 仅针对 workflow 类型资产，用于作者团队在执行记录中汇总所有映射实例
+   */
+  public async getInstalledWorkflowIdsByAppId(appId: string): Promise<string[]> {
+    const latestVersion = await this.getAppLatestVersion(appId);
+    if (!latestVersion) {
+      return [];
+    }
+
+    const installations = await this.installedAppRepo.find({
+      where: {
+        marketplaceAppVersionId: latestVersion.id,
+      },
+    });
+
+    const workflowIds: string[] = [];
+    for (const inst of installations) {
+      const wfIds = inst.installedAssetIds?.workflow || [];
+      workflowIds.push(...wfIds);
+    }
+
+    return workflowIds;
+  }
+
   public async getAppVersionByAssetId(assetId: string, assetType: AssetType) {
     const appVersion = await this.versionRepo
       .createQueryBuilder('version')
@@ -638,6 +677,8 @@ export class MarketplaceService {
     if (!app) throw new NotFoundException('Application not found.');
     app.isPreset = isPreset;
     const updatedApp = await this.appRepo.save(app);
+    // 预置应用状态发生变化时清空缓存
+    this.presetAppsCache = null;
     if (isPreset) {
       const installResult = await this.installAppLatestVersionToAllTeams(appId);
       return { ...updatedApp, installResult };
@@ -646,7 +687,11 @@ export class MarketplaceService {
   }
 
   public async getAppLatestVersion(appId: string) {
-    const appVersion = await this.versionRepo.findOne({ where: { appId }, order: { createdTimestamp: 'DESC' } });
+    const appVersion = await this.versionRepo.findOne({
+      where: { appId },
+      order: { createdTimestamp: 'DESC' },
+      relations: { app: true },
+    });
     return appVersion;
   }
 
@@ -657,6 +702,24 @@ export class MarketplaceService {
       const latestVersion = await this.getAppLatestVersion(appId);
       if (!latestVersion) {
         throw new NotFoundException(`No version found for app ${appId}`);
+      }
+
+      /**
+       * 对于 workflow 类型的应用，我们希望「内置应用」在资产层面是共享的：
+       * - 不再为每个团队克隆一份 workflow 资产
+       * - 其他团队通过统一的 workflowId + teamId 上下文来使用同一条工作流
+       *
+       * 因此这里对 workflow 资产类型直接跳过实际安装逻辑，仅返回一个统计结果。
+       * 其他资产类型（如 comfyui-workflow、design-association 等）仍保持原有的克隆安装行为。
+       */
+      if (latestVersion.app.assetType === 'workflow') {
+        this.logger.debug(
+          `Skip cloning workflow assets for preset app ${appId}, workflows will be shared across teams by workflowId.`,
+        );
+        return {
+          totalTeams: 0,
+          failedInstallations: [],
+        };
       }
 
       // 2. 获取所有团队，排除已安装此应用的团队
@@ -672,6 +735,8 @@ export class MarketplaceService {
           return 'team.id NOT IN ' + subQuery;
         })
         .andWhere('team.isDeleted = :isDeleted', { isDeleted: false })
+        // 不再对应用作者团队重复安装，避免在作者团队里多出一份克隆的工作流资产
+        .andWhere('team.id != :authorTeamId', { authorTeamId: latestVersion.app.authorTeamId })
         .getMany();
 
       this.logger.debug(`Found ${teamsWithoutApp.length} teams without the app installed`);
@@ -698,6 +763,61 @@ export class MarketplaceService {
     });
   }
 
+  /**
+   * 获取当前租户中所有被标记为预置（内置应用）的 workflow 对应的 workflowId 列表。
+   *
+   * 设计说明：
+   * - 以 MarketplaceAppEntity 为中心，筛选 isPreset = true 且 assetType = 'workflow' 的应用
+   * - 对每个应用，取最新版本（versions[0] 已按 createdTimestamp DESC 排序）
+   * - 从 sourceAssetReferences 中提取 assetType = 'workflow' 的 assetId 作为 workflowId
+   * - 返回去重后的 workflowId 列表
+   */
+  public async getBuiltinWorkflowIds(): Promise<string[]> {
+    const presetApps = await this.getPresetAppsCached();
+    const builtinWorkflowIds = new Set<string>();
+
+    for (const app of presetApps) {
+      if (app.assetType !== 'workflow') continue;
+      const latestVersion = app.versions?.[0];
+      if (!latestVersion) continue;
+
+      const refs = latestVersion.sourceAssetReferences || [];
+      for (const ref of refs) {
+        if (ref.assetType === 'workflow' && ref.assetId) {
+          builtinWorkflowIds.add(ref.assetId);
+        }
+      }
+    }
+
+    return Array.from(builtinWorkflowIds);
+  }
+
+  /**
+   * 获取由指定团队作为作者（authorTeamId）的所有预置 workflow 的 workflowId 列表。
+   *
+   * 主要用于作者团队快速筛选「本团队被设置为内置应用」的工作流。
+   */
+  public async getBuiltinWorkflowIdsByAuthorTeam(teamId: string): Promise<string[]> {
+    const presetApps = await this.getPresetAppsCached();
+    const builtinWorkflowIds = new Set<string>();
+
+    for (const app of presetApps) {
+      if (app.assetType !== 'workflow') continue;
+      if (app.authorTeamId !== teamId) continue;
+      const latestVersion = app.versions?.[0];
+      if (!latestVersion) continue;
+
+      const refs = latestVersion.sourceAssetReferences || [];
+      for (const ref of refs) {
+        if (ref.assetType === 'workflow' && ref.assetId) {
+          builtinWorkflowIds.add(ref.assetId);
+        }
+      }
+    }
+
+    return Array.from(builtinWorkflowIds);
+  }
+
   public async initPresetAppMarketplace() {
     if (marketplaceDataManager.presetAppLocalDataList.length === 0) {
       this.logger.log('No internal preset apps need to be initialized.');
@@ -720,6 +840,9 @@ export class MarketplaceService {
         await this.createAppWithSnapshot('system', 'system', presetAppLocalData, transactionalEntityManager);
         await this.approveSubmission(presetAppLocalData.appId, true, transactionalEntityManager);
       }
+
+      // 预置应用整体刷新后，清空缓存
+      this.presetAppsCache = null;
     });
   }
 

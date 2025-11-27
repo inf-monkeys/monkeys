@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tag } from '@/components/ui/tag';
-import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
 export interface IUgcTagSelectorProps {
@@ -49,6 +49,17 @@ export const UgcTagSelector = ({
   const searchedLocalTags = localTags.filter((t) =>
     searchValue && searchValue != '' ? t.name.includes(searchValue) || t._pinyin?.includes(searchValue) : true,
   );
+
+  // 计算tag名称的最大显示长度（根据容器宽度自适应）
+  // PopoverContent宽度是w-64 (256px)，减去padding和CheckCircle图标，tag名称可用宽度约为180px
+  // 中文字符宽度约为12px，英文字符宽度约为7px，取平均值约10px
+  // 考虑到tag的padding和图标，实际可用字符数约为15-18个字符
+  const getTruncatedTagName = (tagName: string, maxLength: number = 20) => {
+    if (tagName.length <= maxLength) {
+      return { text: tagName, isTruncated: false };
+    }
+    return { text: tagName.slice(0, maxLength) + '...', isTruncated: true };
+  };
 
   const handleTagClick = (tagId: string) => {
     const index = selectedTags.findIndex((t) => t.id === tagId);
@@ -183,6 +194,7 @@ export const UgcTagSelector = ({
             {searchedLocalTags.length > 0 ? (
               searchedLocalTags.map((tag, index) => {
                 const selected = selectedTags && selectedTags.find((t) => t.id === tag.id);
+                const { text: truncatedName, isTruncated } = getTruncatedTagName(tag.name);
                 return (
                   <div
                     key={index}
@@ -192,9 +204,24 @@ export const UgcTagSelector = ({
                     )}
                     onClick={() => handleTagClick(tag.id)}
                   >
-                    <Tag color="primary" size="xs" className="cursor-pointer">
-                      {tag.name}
-                    </Tag>
+                    {isTruncated ? (
+                      <Tooltip delayDuration={200}>
+                        <TooltipTrigger asChild>
+                          <span className="inline-block">
+                            <Tag color="primary" size="xs" className="cursor-pointer">
+                              {truncatedName}
+                            </Tag>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" sideOffset={4} className="z-[100] max-w-xs break-words">
+                          {tag.name}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <Tag color="primary" size="xs" className="cursor-pointer">
+                        {tag.name}
+                      </Tag>
+                    )}
                     {selected && <CheckCircle size={15} />}
                   </div>
                 );

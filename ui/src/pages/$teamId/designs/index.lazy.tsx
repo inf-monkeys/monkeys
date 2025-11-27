@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
-import { deleteDesignProject, exportDesignProjectAsZip, importDesignProject } from '@/apis/designs';
+import { deleteDesignProject, exportDesignProjectAsZip, importDesignProject, importDesignProjectFromZip } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings.ts';
 import { preloadUgcDesignProjects, useUgcDesignProjects } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -73,8 +73,8 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ v
     const file = e.target.files?.[0];
     if (file) {
       const fileName = file.name.toLowerCase();
-      if (!fileName.endsWith('.json') && !fileName.endsWith('.uml')) {
-        toast.error('请选择有效的 JSON 或 UML 文件');
+      if (!fileName.endsWith('.json') && !fileName.endsWith('.uml') && !fileName.endsWith('.zip')) {
+        toast.error('请选择有效的 JSON、UML 或 ZIP 文件');
         return;
       }
       setSelectedFile(file);
@@ -117,7 +117,7 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ v
                   <input
                     type="file"
                     className="hidden"
-                    accept=".json,.uml"
+                    accept=".json,.uml,.zip"
                     onChange={handleFileChange}
                     disabled={importing}
                   />
@@ -125,7 +125,7 @@ const ImportDesignProjectDialog: React.FC<ImportDesignProjectDialogProps> = ({ v
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              {t('common.import.file.hint', { defaultValue: '支持 .json 或 .uml 格式' })}
+              {t('common.import.file.hint', { defaultValue: '支持 .json、.uml 或 .zip 格式' })}
             </p>
           </div>
         </div>
@@ -302,8 +302,29 @@ export const Designs: React.FC = () => {
   // 处理导入设计项目
   const handleImportProject = async (file: File) => {
     try {
-      const fileContent = await file.text();
       const fileName = file.name.toLowerCase();
+      
+      // 处理 ZIP 文件
+      if (fileName.endsWith('.zip')) {
+        const loadingToast = toast.loading(t('common.import.loading', { defaultValue: '导入中...' }));
+        try {
+          const newProject = await importDesignProjectFromZip(file);
+          if (newProject) {
+            toast.dismiss(loadingToast);
+            toast.success(t('common.import.success', { defaultValue: '导入成功' }));
+            void mutateDesignProjects();
+            setImportDialogVisible(false);
+          }
+        } catch (error: any) {
+          toast.dismiss(loadingToast);
+          toast.error(error?.message || t('common.import.error', { defaultValue: '导入失败' }));
+          console.error('Import project from zip failed:', error);
+        }
+        return;
+      }
+
+      // 处理 JSON 或 UML 文件
+      const fileContent = await file.text();
       let importData: any;
       
       if (fileName.endsWith('.uml')) {

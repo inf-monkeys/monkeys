@@ -2,6 +2,7 @@ import useSWR from 'swr';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { vinesHeader } from '@/apis/utils.ts';
 import { ICreateDesignProject } from '@/schema/workspace/create-design-project.ts';
 import { IDesignAssociationForEditor } from '@/schema/workspace/design-association';
 
@@ -116,6 +117,32 @@ export const importDesignProject = (importData: any) =>
     method: 'POST',
     simple: true,
   })('/api/design/project/import', importData);
+
+export const importDesignProjectFromZip = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  // 使用 fetch 直接上传，因为 vinesFetcher 默认会设置 JSON Content-Type
+  const response = await fetch('/api/design/project/import-zip', {
+    method: 'POST',
+    headers: {
+      ...vinesHeader({ useToast: true }),
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: '导入失败' }));
+    throw new Error(error.message || '导入失败');
+  }
+
+  const result = await response.json();
+  if (result.code && result.code !== 200) {
+    throw new Error(result.message || '导入失败');
+  }
+
+  return result.data as IAssetItem<IDesignProject>;
+};
 
 // 版本管理相关 API
 export const useDesignProjectVersions = (projectId?: string | null) =>

@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, Trash, Undo2 } from 'lucide-react';
+import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, ShieldCheck, Trash, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { cloneWorkflow, deleteWorkflow } from '@/apis/workflow';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { cloneWorkflow, deleteWorkflow, setWorkflowAsBuiltinApp, unsetWorkflowBuiltinApp } from '@/apis/workflow';
 import { GlobalWorkflowAssociationEditorDialog } from '@/components/layout/ugc-pages/apps/association';
 import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
 import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
@@ -25,6 +23,8 @@ import { PublishToMarket } from '@/components/layout/ugc-pages/workflows/publish
 import { IPublishToMarketWithAssetsContext } from '@/components/layout/ugc-pages/workflows/publish-to-market/typings.ts';
 import { RollbackWorkflow } from '@/components/layout/ugc-pages/workflows/rollback-workflow';
 import { IRollbackWorkflowContext } from '@/components/layout/ugc-pages/workflows/rollback-workflow/typings';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow-info-editor.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
@@ -38,6 +38,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +53,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { getI18nContent } from '@/utils';
@@ -77,6 +79,57 @@ export const Workflows: React.FC = () => {
   const [rollbackWorkflowVisible, setRollbackWorkflowVisible] = useState(false);
   const [rollbackWorkflowContext, setRollbackWorkflowContext] = useState<IRollbackWorkflowContext | undefined>();
   const [visionProAlertVisible, setVisionProAlertVisible] = useState(false);
+  const [builtinStatus, setBuiltinStatus] = useState<Record<string, boolean>>({});
+  // 使用 sessionStorage 存储 tenant token，刷新页面会自动清除，比内存更安全
+  const [tenantToken, setTenantToken] = useState(() => {
+    try {
+      return sessionStorage.getItem('vines-tenant-token') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [tenantTokenDialogVisible, setTenantTokenDialogVisible] = useState(false);
+  const [pendingBuiltinWorkflow, setPendingBuiltinWorkflow] = useState<IAssetItem<MonkeyWorkflow> | undefined>();
+
+  // 安全地保存 token 到 sessionStorage
+  const saveTenantToken = (token: string) => {
+    setTenantToken(token);
+    try {
+      if (token) {
+        sessionStorage.setItem('vines-tenant-token', token);
+      } else {
+        sessionStorage.removeItem('vines-tenant-token');
+      }
+    } catch {
+      // sessionStorage 可能被禁用，忽略错误
+    }
+  };
+
+  // 清除 token
+  const clearTenantToken = () => {
+    setTenantToken('');
+    try {
+      sessionStorage.removeItem('vines-tenant-token');
+    } catch {
+      // sessionStorage 可能被禁用，忽略错误
+    }
+  };
+
+  // 强制清理对话框遮罩层，防止页面卡死
+  const forceCleanupDialog = () => {
+    requestAnimationFrame(() => {
+      // 清理所有设置了 pointer-events 的元素（核心修复：这些元素会阻止页面交互）
+      document.querySelectorAll('[style*="pointer-events"]').forEach((element: any) => {
+        if (element.getAttribute('data-vines-overlay') !== 'true') {
+          element.style.pointerEvents = '';
+        }
+      });
+
+      // 恢复 body 的样式
+      document.body.style.pointerEvents = '';
+      document.body.style.overflow = '';
+    });
+  };
 
   const handleAfterUpdateWorkflow = () => {
     void mutateWorkflows();
@@ -109,6 +162,79 @@ export const Workflows: React.FC = () => {
       },
       error: t('common.delete.error'),
     });
+  };
+
+  const toggleBuiltinWithToken = async (workflow: IAssetItem<MonkeyWorkflow>, token: string) => {
+    const workflowId = workflow.workflowId;
+    const initialBuiltin = (workflow as any).builtin as boolean | undefined;
+    let isBuiltin = typeof builtinStatus[workflowId] === 'boolean' ? builtinStatus[workflowId] : !!initialBuiltin;
+
+    const handleAuthError = (error: any) => {
+      // 检测是否是认证错误（401/403）
+      const isAuthError =
+        error?.message?.includes('Login Required') ||
+        error?.message?.includes('403') ||
+        error?.message?.includes('401') ||
+        error?.response?.status === 401 ||
+        error?.response?.status === 403;
+
+      if (isAuthError) {
+        // 清除错误的 token
+        clearTenantToken();
+        // 重新打开对话框让用户输入正确的 token
+        setPendingBuiltinWorkflow(workflow);
+        setTenantTokenDialogVisible(true);
+        return t(
+          'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-invalid',
+          'Token 无效或已过期，请重新输入',
+        );
+      }
+      return isBuiltin
+        ? t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.error', '取消内置应用失败')
+        : t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.error', '设置内置应用失败');
+    };
+
+    if (isBuiltin) {
+      // 取消内置
+      toast.promise(unsetWorkflowBuiltinApp(workflowId, token), {
+        loading: t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.loading', '正在取消内置应用...'),
+        success: () => {
+          setBuiltinStatus((prev) => ({ ...prev, [workflowId]: false }));
+          void mutateWorkflows();
+          return t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.success', '已取消内置应用');
+        },
+        error: handleAuthError,
+      });
+    } else {
+      // 设置为内置
+      toast.promise(setWorkflowAsBuiltinApp(workflowId, token), {
+        loading: t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.loading', '正在设置为内置应用...'),
+        success: (res) => {
+          setBuiltinStatus((prev) => ({ ...prev, [workflowId]: true }));
+          void mutateWorkflows();
+          if ((res as any)?.alreadyBuiltin) {
+            return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.already', '该工作流已是内置应用');
+          }
+          return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.success', '已设置为内置应用');
+        },
+        error: handleAuthError,
+      });
+    }
+  };
+
+  const handleToggleBuiltinApp = async (workflow?: IAssetItem<MonkeyWorkflow>) => {
+    if (!workflow) {
+      toast.warning(t('common.toast.loading'));
+      return;
+    }
+
+    if (!tenantToken) {
+      setPendingBuiltinWorkflow(workflow);
+      setTenantTokenDialogVisible(true);
+      return;
+    }
+
+    void toggleBuiltinWithToken(workflow, tenantToken);
   };
   const iconOnlyMode = useGetUgcViewIconOnlyMode();
   return (
@@ -162,7 +288,14 @@ export const Workflows: React.FC = () => {
                   {t('ugc-page.workflow.ugc-view.operate-area.options.edit-info')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onSelect={() => copy(location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`))}
+                  onSelect={() => {
+                    const isBuiltin =
+                      typeof builtinStatus[item.workflowId] === 'boolean'
+                        ? builtinStatus[item.workflowId]
+                        : (item as any).builtin;
+                    const targetTeamId = isBuiltin && teamId ? teamId : item.teamId;
+                    copy(location.origin.concat(`/${targetTeamId}/workspace/${item.workflowId}`));
+                  }}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Link size={15} />
@@ -231,23 +364,23 @@ export const Workflows: React.FC = () => {
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
                 <DropdownMenuSeparator />
-                {/* <DropdownMenuItem
-                  onSelect={() => {
-                    setPublishToMarketContext({
-                      id: item.workflowId,
-                      displayName: getI18nContent(item.displayName),
-                      description: getI18nContent(item.description),
-                      iconUrl: item.iconUrl,
-                    });
-                    setPublishToMarketVisible(true);
-                  }}
-                >
-                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <Share size={15} />
-                  </DropdownMenuShortcut>
-                  {t('components.layout.ugc.publish-dialog.title')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator /> */}
+                <>
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      void handleToggleBuiltinApp(item);
+                    }}
+                  >
+                    <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                      <ShieldCheck size={15} />
+                    </DropdownMenuShortcut>
+                    {(typeof builtinStatus[item.workflowId] === 'boolean'
+                      ? builtinStatus[item.workflowId]
+                      : (item as any).builtin)
+                      ? t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.label', '取消内置应用')
+                      : t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.label', '设为内置应用')}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
                 <DropdownMenuItem
                   className="text-red-10"
                   onSelect={() => {
@@ -278,7 +411,12 @@ export const Workflows: React.FC = () => {
           }
 
           // 默认行为：在新标签页打开工作流
-          open(`/${item.teamId}/workspace/${item.workflowId}`, '_blank');
+          const isBuiltin =
+            typeof builtinStatus[item.workflowId] === 'boolean'
+              ? builtinStatus[item.workflowId]
+              : (item as any).builtin;
+          const targetTeamId = isBuiltin && teamId ? teamId : item.teamId;
+          open(`/${targetTeamId}/workspace/${item.workflowId}`, '_blank');
         }}
         subtitle={
           <>
@@ -379,6 +517,107 @@ export const Workflows: React.FC = () => {
         setVisible={setRollbackWorkflowVisible}
         context={rollbackWorkflowContext}
       />
+      <Dialog
+        open={tenantTokenDialogVisible}
+        onOpenChange={(open) => {
+          setTenantTokenDialogVisible(open);
+          if (!open) {
+            // 对话框关闭时清理状态
+            setPendingBuiltinWorkflow(undefined);
+            // 强制清理遮罩层，防止页面卡死
+            forceCleanupDialog();
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-title', '设置内置应用需要 Tenant Token')}
+            </DialogTitle>
+            <DialogDescription>
+              {t(
+                'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-desc',
+                '请输入后端配置的 Tenant Bearer Token。Token 仅存储在浏览器会话中，关闭标签页或刷新页面后会自动清除。',
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 space-y-2">
+            <Input
+              type="password"
+              placeholder={t(
+                'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-placeholder',
+                '请输入 Tenant Token',
+              )}
+              value={tenantToken}
+              autoComplete="new-password"
+              onChange={(v) => saveTenantToken(v)}
+            />
+            {tenantToken && (
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {t(
+                    'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-saved-hint',
+                    'Token 已保存（仅本次会话有效）',
+                  )}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="small"
+                  className="h-6 px-2 text-xs"
+                  onClick={() => {
+                    clearTenantToken();
+                    toast.success(
+                      t(
+                        'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-cleared',
+                        'Token 已清除',
+                      ),
+                    );
+                  }}
+                >
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.clear-token', '清除')}
+                </Button>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setTenantTokenDialogVisible(false);
+                forceCleanupDialog();
+              }}
+            >
+              {t('common.utils.cancel')}
+            </Button>
+            <Button
+              variant="solid"
+              onClick={() => {
+                if (!tenantToken) {
+                  toast.warning(
+                    t(
+                      'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-required',
+                      '请先输入 Tenant Token',
+                    ),
+                  );
+                  return;
+                }
+                const workflow = pendingBuiltinWorkflow;
+                const token = tenantToken;
+                setTenantTokenDialogVisible(false);
+                forceCleanupDialog();
+                // 使用 setTimeout 确保对话框关闭后再执行操作
+                setTimeout(() => {
+                  if (workflow) {
+                    void toggleBuiltinWithToken(workflow, token);
+                  }
+                }, 0);
+              }}
+            >
+              {t('common.utils.confirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <AlertDialog open={visionProAlertVisible} onOpenChange={setVisionProAlertVisible}>
         <AlertDialogContent
           onClick={(e) => {

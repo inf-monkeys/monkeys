@@ -19,6 +19,7 @@ import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/commo
 import fs from 'fs';
 import _, { isEmpty } from 'lodash';
 import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
+import { AssetsPermissionService } from '../assets/assets.permission.service';
 import { AssetsPublishService } from '../assets/assets.publish.service';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { AssetCloneResult, AssetUpdateResult, IAssetHandler } from '../marketplace/types';
@@ -47,6 +48,9 @@ export class WorkflowCrudService implements IAssetHandler {
 
     @Inject(forwardRef(() => MarketplaceService))
     private readonly marketplaceService: MarketplaceService,
+
+    @Inject(forwardRef(() => AssetsPermissionService))
+    private readonly assetsPermissionService: AssetsPermissionService,
   ) {}
 
   public async getSnapshot(workflowIdOrRecordId: string, version: number): Promise<any> {
@@ -291,14 +295,113 @@ export class WorkflowCrudService implements IAssetHandler {
   }
 
   public async listWorkflows(teamId: string, dto: ListDto) {
-    const { list, totalCount } = await this.workflowRepository.listWorkflows(teamId, dto);
+    const { page = 1, limit = 24 } = dto;
+
+    // 解析工作流特有的过滤条件（是否仅看本团队 / 是否仅看内置应用），并从通用 filter 中剥离，避免影响通用资产过滤逻辑
+    const rawFilter = ((dto.filter || {}) as any) || {};
+    const onlySelf: boolean = !!rawFilter.isSelf;
+    const onlyBuiltin: boolean = !!rawFilter.isBuiltin;
+    const { isSelf, isBuiltin, ...restFilter } = rawFilter;
+
+    const repoDto: ListDto = {
+      ...dto,
+      filter: restFilter,
+    };
+
+    // 先获取当前团队下（满足搜索/筛选条件的）全部 workflow，后续在内存中叠加内置映射并统一做分页
+    const { list } = await this.workflowRepository.listWorkflows(teamId, {
+      ...repoDto,
+      page: 1,
+      // 这里给一个足够大的值，保证能拿到本团队所有符合条件的工作流，再在内存中进行分页
+      limit: 100000,
+    });
+
+    // 当前查询条件中的搜索关键字（仅用于简单匹配内置工作流的名称/描述）
+    const searchText = typeof dto.search === 'string' ? dto.search.trim().toLowerCase() : '';
+
+    // 追加来自「内置应用」的跨团队 workflow（不克隆），仅以只读方式展示
+    const builtinWorkflowIds = await this.marketplaceService.getBuiltinWorkflowIds();
+    const builtinIdSet = new Set(builtinWorkflowIds);
+
+    const existingWorkflowIdSet = new Set(list.map((wf) => wf.workflowId));
+
+    const extraBuiltinWorkflows: WorkflowMetadataEntity[] = [];
+
+    for (const workflowId of builtinWorkflowIds) {
+      // 已经在当前团队中存在（作者团队场景），直接跳过
+      if (existingWorkflowIdSet.has(workflowId)) {
+        continue;
+      }
+
+      // 加载该 workflow 的最新版本定义（跨团队）
+      let workflow: WorkflowMetadataEntity | null = null;
+      try {
+        workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId, false);
+      } catch {
+        workflow = null;
+      }
+      if (!workflow) {
+        continue;
+      }
+
+      // 作者团队才允许在本团队下维护工作流；其他团队只读使用
+      // 这里仅展示「作者团队的 workflow」，因此过滤掉 teamId 相同的情况（已在 list 中）
+      if (workflow.teamId === teamId) {
+        continue;
+      }
+
+      // 按搜索关键字做一次简单过滤，避免污染搜索结果
+      if (searchText) {
+        const nameStr =
+          typeof workflow.displayName === 'string'
+            ? workflow.displayName.toLowerCase()
+            : JSON.stringify(workflow.displayName || {}).toLowerCase();
+        const descStr =
+          typeof workflow.description === 'string'
+            ? workflow.description.toLowerCase()
+            : JSON.stringify(workflow.description || {}).toLowerCase();
+        if (!nameStr.includes(searchText) && !descStr.includes(searchText)) {
+          continue;
+        }
+      }
+
+      extraBuiltinWorkflows.push(workflow);
+    }
+
+    const combinedList = [...list, ...extraBuiltinWorkflows];
+
+    // 先补充 user / team / tags 信息
+    const filledList = await this.assetsCommonRepository.fillAdditionalInfoList(combinedList, {
+      withUser: true,
+      withTeam: true,
+      withTags: true,
+    });
+
+    // 使用 MarketplaceService 维护的内置 workflowId 集合来标记 builtin 状态
+    const builtinWorkflowIdSet = new Set(await this.marketplaceService.getBuiltinWorkflowIds());
+
+    const listWithBuiltin = filledList.map((item) => ({
+      ...item,
+      builtin: builtinWorkflowIdSet.has(item.workflowId),
+    }));
+
+    // 内存中做一次筛选，用于“是否本团队 / 是否内置应用”切换（通过 filter.isSelf / filter.isBuiltin）
+    let scopedList = listWithBuiltin;
+    if (onlySelf) {
+      scopedList = scopedList.filter((item) => item.teamId === teamId);
+    }
+    if (onlyBuiltin) {
+      scopedList = scopedList.filter((item) => builtinWorkflowIdSet.has(item.workflowId));
+    }
+
+    const totalCount = scopedList.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const pagedList = scopedList.slice(startIndex, endIndex);
+
     return {
       totalCount,
-      list: await this.assetsCommonRepository.fillAdditionalInfoList(list, {
-        withUser: true,
-        withTeam: true,
-        withTags: true,
-      }),
+      list: pagedList,
     };
   }
 
@@ -634,11 +737,19 @@ export class WorkflowCrudService implements IAssetHandler {
    * 删除 workflow（conductor 里面的 workflow 定义不要删，保留一下备份，不然日志那些都查不到了）
    */
   public async deleteWorkflowDef(teamId: string, workflowId: string) {
+    // 内置应用只读控制：仅作者团队可删除
+    const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId, false);
+    if (!workflow) {
+      throw new NotFoundException(`工作流 (${workflowId}) 不存在！`);
+    }
+    await this.assetsPermissionService.assertCanWriteAsset(teamId, workflow);
     return await this.workflowRepository.deleteWorkflow(teamId, workflowId);
   }
 
   public async cloneWorkflowOfVersion(teamId: string, userId: string, originalWorkflowId: string, originalWorkflowVersion: number) {
     const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, originalWorkflowVersion);
+    // 内置应用只读控制：仅作者团队可以基于内置应用克隆版本
+    await this.assetsPermissionService.assertCanWriteAsset(teamId, originalWorkflow);
     return await this.createWorkflowDef(teamId, userId, {
       displayName: {
         'zh-CN': getI18NValue(originalWorkflow.displayName, 'zh-CN') + ' - 副本',
@@ -654,6 +765,8 @@ export class WorkflowCrudService implements IAssetHandler {
     const newWorkflowId = generateDbId();
     for (const { version } of versions) {
       const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, version);
+      // 内置应用只读控制：仅作者团队可以基于内置应用克隆工作流
+      await this.assetsPermissionService.assertCanWriteAsset(teamId, originalWorkflow);
       const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(originalWorkflow.tasks);
       const comfyuiWorkflowIds = Array.from(new Set(comfyuiDataList.map((c) => c.comfyuiWorkflowId)));
       const comfyuiWorkflowIdMapper = comfyuiWorkflowIds.reduce((mapper, comfyuiWorkflowId) => {
@@ -808,6 +921,9 @@ export class WorkflowCrudService implements IAssetHandler {
       throw new NotFoundException(`工作流 (${workflowId}) 不存在！`);
     }
 
+    // 内置应用只读控制：仅作者团队可修改（通过统一的 AssetsPermissionService）
+    await this.assetsPermissionService.assertCanWriteAsset(teamId, workflow);
+
     // 当为快捷方式时，只允许更新 shortcutsFlow 字段
     if (!isEmpty(workflow?.shortcutsFlow ?? null)) {
       updates = {
@@ -916,6 +1032,12 @@ export class WorkflowCrudService implements IAssetHandler {
   }
 
   public async rollbackWorkflow(teamId: string, workflowId: string, version: number) {
+    const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
+    if (!workflow) {
+      throw new NotFoundException(`工作流 (${workflowId}) 不存在！无法回滚`);
+    }
+    // 内置应用只读控制：仅作者团队可回滚
+    await this.assetsPermissionService.assertCanWriteAsset(teamId, workflow);
     return await this.workflowRepository.rollbackWorkflow(teamId, workflowId, version);
   }
 }

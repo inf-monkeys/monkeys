@@ -36,5 +36,6 @@ export type WorkflowShape = TLBaseShape<
     connections: string[]; // 连接到的 output shape ids
     inputParams: WorkflowInputParam[]; // 输入参数列表
     inputConnections: WorkflowInputConnection[]; // 输入连接列表
+    generatedTime: number; // 生成耗时（毫秒），0 表示未生成
   }
 >;

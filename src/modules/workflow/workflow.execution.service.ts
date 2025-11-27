@@ -13,6 +13,7 @@ import { sleep } from '@/common/utils/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
+import { TeamRepository } from '@/database/repositories/team.repository';
 import { FindWorkflowCondition, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Task, Workflow } from '@inf-monkeys/conductor-javascript';
 import { ForbiddenException, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
@@ -21,6 +22,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
 import { FindManyOptions, In, IsNull, Not, Repository } from 'typeorm';
+import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
@@ -78,6 +80,9 @@ export class WorkflowExecutionService {
     private readonly workflowObservabilityService: WorkflowObservabilityService,
     @InjectRepository(WorkflowExecutionEntity)
     private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
+    private readonly teamRepository: TeamRepository,
+    @Inject(forwardRef(() => MarketplaceService))
+    private readonly marketplaceService: MarketplaceService,
   ) {}
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
@@ -108,6 +113,7 @@ export class WorkflowExecutionService {
   public async searchWorkflowExecutions(
     teamId: string,
     condition: SearchWorkflowExecutionsDto,
+    userId?: string,
   ): Promise<{ page: number; limit: number; total: number; definitions: WorkflowMetadataEntity[]; data: WorkflowWithMetadata[] }> {
     const {
       pagination = {},
@@ -118,13 +124,13 @@ export class WorkflowExecutionService {
       startTimeFrom,
       startTimeTo,
       freeText = '*',
-      startBy = [],
       chatSessionIds = [],
       versions = [],
       triggerTypes = [],
       workflowInstanceId,
     } = condition;
     let groups = condition.groups || [];
+    let startBy = condition.startBy || [];
 
     const { page: p = 1, limit: l = 10 } = pagination as PaginationDto;
     const [page, limitNum] = [+p, +l];
@@ -141,7 +147,46 @@ export class WorkflowExecutionService {
       workflowCondition.creatorUserId = creatorUserId;
     }
 
-    const workflowsToSearch = await this.workflowRepository.findWorkflowByCondition(workflowCondition);
+    let workflowsToSearch = await this.workflowRepository.findWorkflowByCondition(workflowCondition);
+
+    /**
+     * 若当前团队下没有对应 workflow 定义（例如：其他团队的内置应用 workflow），
+     * 则尝试跨团队按 workflowId 获取一次定义，用于执行记录查询。
+     * 这样可以支持「不克隆工作流，仅按 teamId 进行执行隔离」的场景。
+     */
+    if ((!workflowsToSearch || workflowsToSearch.length === 0) && workflowId) {
+      try {
+        const globalWorkflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId, false);
+        if (globalWorkflow) {
+          workflowsToSearch = [globalWorkflow];
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    let isBuiltinOwnerView = false;
+
+    /**
+     * 作者团队视角的「内置应用跨团队汇总」：
+     * - 若当前 workflowId 对应的是预置应用（app.isPreset = true）
+     * - 且当前 teamId 是应用的 authorTeamId
+     * - 则作者团队应看到所有团队的执行记录
+     */
+    if (workflowId && workflowsToSearch.length) {
+      try {
+        const baseWorkflow = workflowsToSearch[0];
+        // 通过 workflowId 反查对应的应用版本
+        const appVersion = await this.marketplaceService.getAppVersionByAssetId(baseWorkflow.workflowId, 'workflow');
+        const app = appVersion?.app;
+
+        if (app?.isPreset && app.authorTeamId === teamId) {
+          isBuiltinOwnerView = true;
+        }
+      } catch {
+        // 聚合失败不影响正常查询，降级为原来的 team 内查询
+      }
+    }
 
     const shortcutIds = workflowsToSearch.map((it) => (it.shortcutsFlow ? `shortcut-${it.workflowId}` : null)).filter(Boolean);
     if (shortcutIds.length) {
@@ -291,8 +336,21 @@ export class WorkflowExecutionService {
       return true;
     });
 
+    // 非作者团队视角：仅返回当前 teamId 的执行记录
+    let teamFilteredCount = 0;
+    const dataAfterTeamFilter = isBuiltinOwnerView
+      ? finalData
+      : finalData.filter((it) => {
+          const ctxTeamId = it.input?.['__context']?.['teamId'] as string | undefined;
+          const keep = !ctxTeamId || ctxTeamId === teamId;
+          if (!keep) {
+            teamFilteredCount++;
+          }
+          return keep;
+    });
+
     // 分页处理
-    const pagedData = finalData.slice(0, limitNum);
+    const pagedData = dataAfterTeamFilter.slice(0, limitNum);
 
     return {
       definitions: resultDefinitions.map((it) => {
@@ -326,7 +384,7 @@ export class WorkflowExecutionService {
       page,
       limit: limitNum,
       data: pagedData,
-      total: (totalHits ?? 0) - filterCount,
+      total: (totalHits ?? 0) - filterCount - teamFilteredCount,
     };
   }
 

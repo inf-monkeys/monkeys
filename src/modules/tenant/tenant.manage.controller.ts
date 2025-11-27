@@ -1,6 +1,6 @@
 import { TenantStatisticsAuthGuard } from '@/common/guards/tenant-statistics.guard';
 import { SuccessResponse } from '@/common/response';
-import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
@@ -145,6 +145,42 @@ export class TenantManageController {
     const result = await this.eventEmitter.emitAsync('marketplace.initPreset');
     return new SuccessResponse({
       data: result,
+    });
+  }
+
+  @Post('/builtin/workflows/:workflowId')
+  @ApiOperation({
+    summary: '将工作流设置为内置应用（预置应用）',
+    description: '根据 workflowId 查找对应的应用市场应用，设置为预置应用并自动安装到所有团队（租户级鉴权）。',
+  })
+  async setWorkflowAsBuiltinApp(@Param('workflowId') workflowId: string) {
+    const data = await this.tenantManageService.setWorkflowAsBuiltinApp(workflowId);
+    return new SuccessResponse({
+      data,
+    });
+  }
+
+  @Get('/builtin/workflows/:workflowId')
+  @ApiOperation({
+    summary: '查询工作流是否为内置应用',
+    description: '根据 workflowId 查询其对应的应用是否被标记为预置应用（isPreset）。',
+  })
+  async getWorkflowBuiltinStatus(@Param('workflowId') workflowId: string) {
+    const data = await this.tenantManageService.getWorkflowBuiltinStatus(workflowId);
+    return new SuccessResponse({
+      data,
+    });
+  }
+
+  @Delete('/builtin/workflows/:workflowId')
+  @ApiOperation({
+    summary: '取消工作流的内置应用状态',
+    description: '根据 workflowId 取消其对应应用的预置状态（不再自动安装到所有团队）。',
+  })
+  async unsetWorkflowAsBuiltinApp(@Param('workflowId') workflowId: string) {
+    const data = await this.tenantManageService.unsetWorkflowBuiltinApp(workflowId);
+    return new SuccessResponse({
+      data,
     });
   }
 }

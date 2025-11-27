@@ -36,8 +36,8 @@ export class WorkflowExecutionController {
     description: '搜索 workflow 的执行记录',
   })
   public async searchWorkflowExecutions(@Req() req: IRequest, @Body() body: SearchWorkflowExecutionsDto) {
-    const { teamId } = req;
-    const result = await this.service.searchWorkflowExecutions(teamId, body);
+    const { teamId, userId } = req;
+    const result = await this.service.searchWorkflowExecutions(teamId, body, userId);
     return new SuccessResponse({
       data: result,
     });

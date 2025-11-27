@@ -4,7 +4,8 @@ import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { DesignAssociationEntity } from '@/database/entities/design/design-association';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
-import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, NotFoundException, Param, Post, Put, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { DesignAssociationService } from './design.association.service';
@@ -328,6 +329,27 @@ export class DesignController {
   async importProject(@Req() req: IRequest, @Body() importData: any) {
     const { teamId, userId } = req;
     const result = await this.designProjectService.importProject(importData, teamId, userId);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Post('project/import-zip')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: '从 ZIP 文件导入设计项目',
+    description: '从 ZIP 压缩包导入设计项目，包含 JSON 数据、UML 文件和所有资源文件',
+  })
+  async importProjectFromZip(@Req() req: IRequest, @UploadedFile() file: any) {
+    const { teamId, userId } = req;
+
+    if (!file) {
+      throw new NotFoundException('ZIP 文件不能为空');
+    }
+
+    if (!file.buffer) {
+      throw new NotFoundException('文件数据无效');
+    }
+
+    const result = await this.designProjectService.importProjectFromZip(file.buffer, teamId, userId);
     return new SuccessResponse({ data: result });
   }
 
