@@ -402,7 +402,7 @@ export class DesignProjectService {
         return;
       }
 
-      // 检查是否是 asset 对象，包含 src 属性
+      // 检查是否是 asset 对象，包含 src 属性（支持 image、video、3D 模型等所有类型）
       if (obj.props?.src && typeof obj.props.src === 'string') {
         const url = obj.props.src;
         // 只添加有效的 HTTP/HTTPS URL
@@ -411,7 +411,32 @@ export class DesignProjectService {
         }
       }
 
-      // 检查 output 节点的 imageUrl 和 images 字段
+      // 检查 video asset
+      if (obj.typeName === 'asset' && obj.type === 'video' && obj.props?.src) {
+        const url = obj.props.src;
+        if (typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))) {
+          urls.add(url);
+        }
+      }
+
+      // 检查 3D 模型 asset（可能存储为 model、model3d、glb 等类型）
+      if (obj.typeName === 'asset' && (obj.type === 'model' || obj.type === 'model3d' || obj.type === 'glb')) {
+        if (obj.props?.src && typeof obj.props.src === 'string') {
+          const url = obj.props.src;
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            urls.add(url);
+          }
+        }
+        // 3D 模型可能也存储在 url 字段
+        if (obj.props?.url && typeof obj.props.url === 'string') {
+          const url = obj.props.url;
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            urls.add(url);
+          }
+        }
+      }
+
+      // 检查 output 节点的 imageUrl、images、3D 模型 URL 等字段
       if (obj.type === 'output' && obj.props) {
         // 检查 imageUrl 字段
         if (obj.props.imageUrl && typeof obj.props.imageUrl === 'string') {
@@ -427,6 +452,58 @@ export class DesignProjectService {
               urls.add(img);
             }
           });
+        }
+        // 检查 3D 模型相关字段
+        const modelFields = ['modelUrl', 'model_url', 'model', 'glbUrl', 'glb_url', 'glb', 'model3d', 'model3D', 'threeDUrl', 'threeD_url'];
+        for (const field of modelFields) {
+          if (obj.props[field] && typeof obj.props[field] === 'string') {
+            const url = obj.props[field];
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+              urls.add(url);
+            }
+          }
+        }
+        // 检查 content 字段（output shape 使用 content 存储文本内容）
+        if (obj.props.content && typeof obj.props.content === 'string') {
+          // 使用正则表达式提取文本中的所有 URL
+          const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+          const matches = obj.props.content.match(urlRegex);
+          if (matches) {
+            matches.forEach((url) => urls.add(url));
+          }
+        }
+        // 检查文本内容中的 URL（output 节点可能将 URL 存储在文本中）
+        if (obj.props.text && typeof obj.props.text === 'string') {
+          // 使用正则表达式提取文本中的所有 URL
+          const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+          const matches = obj.props.text.match(urlRegex);
+          if (matches) {
+            matches.forEach((url) => urls.add(url));
+          }
+        }
+        // 检查 richText 中的 URL（如果使用富文本格式）
+        if (obj.props.richText && typeof obj.props.richText === 'string') {
+          const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+          const matches = obj.props.richText.match(urlRegex);
+          if (matches) {
+            matches.forEach((url) => urls.add(url));
+          }
+        }
+        // 检查所有 props 中的字符串值，看是否包含 URL
+        if (obj.props && typeof obj.props === 'object') {
+          for (const key in obj.props) {
+            if (obj.props.hasOwnProperty(key)) {
+              const value = obj.props[key];
+              // 如果是字符串，检查是否包含 URL
+              if (typeof value === 'string' && value.length > 0) {
+                const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+                const matches = value.match(urlRegex);
+                if (matches) {
+                  matches.forEach((url) => urls.add(url));
+                }
+              }
+            }
+          }
         }
       }
 
@@ -456,11 +533,52 @@ export class DesignProjectService {
         }
       }
 
+      // 检查 videoUrl, video_url, video, modelUrl, model_url, model, glbUrl, glb_url 等字段
+      const mediaUrlFields = ['videoUrl', 'video_url', 'video', 'modelUrl', 'model_url', 'model', 'glbUrl', 'glb_url', 'glb', 'model3d', 'model3D', 'threeDUrl', 'threeD_url'];
+      for (const field of mediaUrlFields) {
+        if (obj[field] && typeof obj[field] === 'string') {
+          const url = obj[field];
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            urls.add(url);
+          }
+        }
+      }
+
+      // 检查 props 中的 media URL 字段
+      if (obj.props) {
+        for (const field of mediaUrlFields) {
+          if (obj.props[field] && typeof obj.props[field] === 'string') {
+            const url = obj.props[field];
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+              urls.add(url);
+            }
+          }
+        }
+      }
+
       // 检查 images 数组字段
       if (Array.isArray(obj.images)) {
         obj.images.forEach((img: any) => {
           if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) {
             urls.add(img);
+          }
+        });
+      }
+
+      // 检查 videos 数组字段
+      if (Array.isArray(obj.videos)) {
+        obj.videos.forEach((video: any) => {
+          if (typeof video === 'string' && (video.startsWith('http://') || video.startsWith('https://'))) {
+            urls.add(video);
+          }
+        });
+      }
+
+      // 检查 models 数组字段
+      if (Array.isArray(obj.models)) {
+        obj.models.forEach((model: any) => {
+          if (typeof model === 'string' && (model.startsWith('http://') || model.startsWith('https://'))) {
+            urls.add(model);
           }
         });
       }
@@ -596,8 +714,8 @@ export class DesignProjectService {
           
           // 如果文件名没有扩展名，尝试从 URL 推断
           if (!fileName.includes('.')) {
-            // 尝试从 URL 路径推断文件类型
-            const contentType = url.match(/\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|ogg|pdf|zip)/i);
+            // 尝试从 URL 路径推断文件类型（包括图片、视频、3D 模型等）
+            const contentType = url.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico|tiff|tif|mp4|webm|ogg|ogv|avi|mov|wmv|flv|mkv|m4v|3gp|pdf|zip|glb|obj|fbx|stl|step|stp|dae|ply|3ds|max|blend|usd|usdz|usda|gltf)/i);
             if (contentType) {
               fileName = `${fileName}.${contentType[1]}`;
             } else {
@@ -730,7 +848,8 @@ export class DesignProjectService {
    */
   async importProjectFromZip(zipBuffer: Buffer, teamId: string, creatorUserId: string): Promise<DesignProjectEntity> {
     const zip = new JSZip();
-    const unzipped = await zip.loadAsync(zipBuffer);
+    // 将 Buffer 转换为 Uint8Array，因为 JSZip.loadAsync 需要 Uint8Array 类型
+    const unzipped = await zip.loadAsync(Uint8Array.from(zipBuffer));
 
     // 1. 读取 project.json
     const projectJsonFile = unzipped.file('project.json');
