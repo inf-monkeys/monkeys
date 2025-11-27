@@ -795,8 +795,24 @@ export class WorkflowExecutionService {
     };
   }
 
-  public async getWorkflowExecutionOutputs(inputWorkflowId: string, page = 1, limit = 10) {
+  public async getWorkflowExecutionOutputs(teamId: string, inputWorkflowId: string, page = 1, limit = 10) {
     let workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(inputWorkflowId);
+
+    // 判断当前视角是否为「内置应用作者团队」
+    // - 作者团队：查看该内置应用在所有团队下的执行记录
+    // - 其他团队：仅查看本团队（__context.teamId === teamId）的执行记录
+    let isBuiltinOwnerView = false;
+    if (workflow) {
+      try {
+        const appVersion = await this.marketplaceService.getAppVersionByAssetId(workflow.workflowId, 'workflow');
+        const app = appVersion?.app;
+        if (app?.isPreset && app.authorTeamId === teamId) {
+          isBuiltinOwnerView = true;
+        }
+      } catch {
+        // 查询应用失败时，降级为普通团队视角，仅按 teamId 过滤
+      }
+    }
 
     let shortcutsFlowInstanceIds: string[] = [];
     const isShortcutFlow = workflow?.shortcutsFlow !== null && workflow?.shortcutsFlow !== undefined;
@@ -819,8 +835,15 @@ export class WorkflowExecutionService {
     return {
       total: data?.totalHits ?? 0,
       data: (data?.results ?? [])
+        // 1. 过滤掉快捷方式和临时工作流
         .filter((it) => (!isShortcutFlow ? !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('shortcut') : true))
         .filter((it) => !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('temporary-'))
+        // 2. 非作者团队视角：仅保留本团队的执行记录
+        .filter((it) => {
+          if (isBuiltinOwnerView) return true;
+          const ctxTeamId = it.input?.['__context']?.['teamId'] as string | undefined;
+          return !ctxTeamId || ctxTeamId === teamId;
+        })
         .map((it) => {
           const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
 
