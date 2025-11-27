@@ -1,9 +1,10 @@
-import { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import { Edit3, Eye, ImagePlus, Loader2 } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d, resizeBox } from 'tldraw';
 
+import { useSystemConfig } from '@/apis/common';
 import { createMediaFile } from '@/apis/resources';
 import { VinesResourceSource, VinesResourceType } from '@/apis/resources/typting.ts';
 import { VinesMarkdown } from '@/components/ui/markdown';
@@ -14,7 +15,7 @@ import { getOutputPorts } from '../ports/shapePorts';
 
 const PORT_RADIUS_PX = 8;
 
-// 图片替换组件 - 支持点击上传替换
+// 媒体替换组件 - 支持点击上传替换（图片或视频）
 function ImageReplaceZone({
   imageUrl,
   index,
@@ -27,6 +28,9 @@ function ImageReplaceZone({
   const [isHover, setIsHover] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // 检测是否是视频
+  const isVideo = /\.(mp4|webm|mov|avi)(\?.*)?$/i.test(imageUrl);
 
   // 上传文件到服务器
   const uploadFile = async (file: File): Promise<string> => {
@@ -79,7 +83,8 @@ function ImageReplaceZone({
       const files = e.currentTarget.files;
       if (files && files.length > 0) {
         const file = files[0];
-        if (file.type.startsWith('image/')) {
+        // 支持图片和视频
+        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
           setIsUploading(true);
           try {
             const url = await uploadFile(file);
@@ -108,18 +113,33 @@ function ImageReplaceZone({
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
     >
-      <img
-        src={imageUrl}
-        alt={`Output_${index + 1}`}
-        style={{
-          width: '100%',
-          maxHeight: '150px',
-          objectFit: 'contain',
-          borderRadius: '4px',
-          backgroundColor: '#F3F4F6',
-          opacity: isUploading ? 0.5 : 1,
-        }}
-      />
+      {isVideo ? (
+        <video
+          src={imageUrl}
+          controls
+          style={{
+            width: '100%',
+            maxHeight: '150px',
+            objectFit: 'contain',
+            borderRadius: '4px',
+            backgroundColor: '#F3F4F6',
+            opacity: isUploading ? 0.5 : 1,
+          }}
+        />
+      ) : (
+        <img
+          src={imageUrl}
+          alt={`Output_${index + 1}`}
+          style={{
+            width: '100%',
+            maxHeight: '150px',
+            objectFit: 'contain',
+            borderRadius: '4px',
+            backgroundColor: '#F3F4F6',
+            opacity: isUploading ? 0.5 : 1,
+          }}
+        />
+      )}
 
       {/* 悬浮遮罩 - 点击替换 */}
       {(isHover || isUploading) && (
@@ -158,7 +178,7 @@ function ImageReplaceZone({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         onChange={handleFileSelect}
         style={{ display: 'none' }}
       />
@@ -185,6 +205,7 @@ export class OutputShapeUtil extends BaseBoxShapeUtil<OutputShape> {
       sourceId: '',
       imageUrl: '',
       images: [],
+      generatedTime: 0,
     };
   }
 
@@ -247,6 +268,10 @@ function OutputShapeComponent({
   editor: Editor;
   isEditing: boolean;
 }) {
+  // 获取 OEM 配置
+  const { data: oemConfig } = useSystemConfig();
+  const showGeneratedTime = oemConfig?.theme?.id === 'concept-design'; // 只在国重环境显示
+
   // 获取图片列表
   const getImages = useCallback(() => {
     const imgs = (Array.isArray(shape.props.images) ? shape.props.images : []).filter(
@@ -496,19 +521,40 @@ function OutputShapeComponent({
                   gap: '8px',
                 }}
               >
-                {imagesToShow.map((url, idx) => (
-                  <img
-                    key={`view_${idx}`}
-                    src={url}
-                    alt={`Output_${idx + 1}`}
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: hasContent ? '200px' : '100%',
-                      objectFit: 'contain',
-                      borderRadius: '4px',
-                    }}
-                  />
-                ))}
+                {imagesToShow.map((url, idx) => {
+                  // 检测是否是视频
+                  const isVideo = /\.(mp4|webm|mov|avi)(\?.*)?$/i.test(url);
+                  
+                  if (isVideo) {
+                    return (
+                      <video
+                        key={`view_${idx}`}
+                        src={url}
+                        controls
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: hasContent ? '200px' : '100%',
+                          objectFit: 'contain',
+                          borderRadius: '4px',
+                        }}
+                      />
+                    );
+                  }
+                  
+                  return (
+                    <img
+                      key={`view_${idx}`}
+                      src={url}
+                      alt={`Output_${idx + 1}`}
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: hasContent ? '200px' : '100%',
+                        objectFit: 'contain',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  );
+                })}
               </div>
             )}
 
@@ -524,6 +570,51 @@ function OutputShapeComponent({
           </>
         )}
       </div>
+
+      {/* 生成时间标签 - 右下角（只在有图片/视频且有有效耗时时显示） */}
+      {showGeneratedTime &&
+        shape.props.generatedTime > 0 &&
+        ((shape.props.images && shape.props.images.length > 0) || shape.props.imageUrl) && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '8px',
+            right: '8px',
+            fontSize: '10px',
+            color: '#6B7280',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            border: '1px solid #E5E7EB',
+            fontFamily: 'monospace',
+            pointerEvents: 'none',
+            zIndex: 10,
+          }}
+        >
+          {(() => {
+            const ms = shape.props.generatedTime;
+            // 小于 1 秒，显示毫秒
+            if (ms < 1000) {
+              return `${ms}ms`;
+            }
+            // 小于 1 分钟，显示秒（保留 2 位小数）
+            if (ms < 60000) {
+              return `${(ms / 1000).toFixed(2)}s`;
+            }
+            // 小于 1 小时，显示 分:秒
+            if (ms < 3600000) {
+              const minutes = Math.floor(ms / 60000);
+              const seconds = ((ms % 60000) / 1000).toFixed(0);
+              return `${minutes}m ${seconds}s`;
+            }
+            // 大于 1 小时，显示 时:分:秒
+            const hours = Math.floor(ms / 3600000);
+            const minutes = Math.floor((ms % 3600000) / 60000);
+            const seconds = ((ms % 60000) / 1000).toFixed(0);
+            return `${hours}h ${minutes}m ${seconds}s`;
+          })()}
+        </div>
+      )}
 
       <GenericPort shapeId={shape.id} portId="input" />
       <GenericPort shapeId={shape.id} portId="output" />

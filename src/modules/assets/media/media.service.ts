@@ -10,6 +10,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import { createHash } from 'crypto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
+import { MediaPresignResult, MediaPresignService } from './media.presign.service';
 import { GetThumbnailOptions, MediaThumbnailService, ThumbnailWithMeta } from './media.thumbnail.service';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class MediaFileService {
     private readonly mediaRepository: MediaFileRepository,
     private readonly toolsForwardService: ToolsForwardService,
     private readonly mediaThumbnailService: MediaThumbnailService,
+    private readonly mediaPresignService: MediaPresignService,
   ) {}
 
   public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[], filterNeuralModel?: 'only' | 'exclude' | 'all') {
@@ -701,5 +703,9 @@ export class MediaFileService {
 
   public async getThumbnailByUrl(options: GetThumbnailOptions): Promise<ThumbnailWithMeta> {
     return this.mediaThumbnailService.getThumbnailByUrl(options);
+  }
+
+  public async getPresignedUrl(targetUrl: string, expiresInSeconds?: number): Promise<MediaPresignResult> {
+    return this.mediaPresignService.getPresignedUrl(targetUrl, expiresInSeconds);
   }
 }
