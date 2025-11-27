@@ -92,7 +92,7 @@ export class WorkflowExecutionController {
     const result =
       workflowId === 'all'
         ? await this.service.getAllWorkflowsExecutionOutputs(req.teamId, { page: Number(page) || 1, limit: Number(limit) || 10, orderBy, orderKey })
-        : await this.service.getWorkflowExecutionOutputs(workflowId, Number(page) || 1, Number(limit) || 10);
+        : await this.service.getWorkflowExecutionOutputs(req.teamId, workflowId, Number(page) || 1, Number(limit) || 10);
     return {
       code: 200,
       message: 'ok',

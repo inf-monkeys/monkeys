@@ -10,6 +10,7 @@ import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
+import { WorkflowBuiltinPinnedPageEntity } from '@/database/entities/workflow/workflow-builtin-pinned-page';
 import { WorkflowTemplateEntity } from '@/database/entities/workflow/workflow-template';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { TimestampSubscriber } from '@/timestamp.subscriber';
@@ -99,6 +100,7 @@ export const entities: EntityClassOrSchema[] = [
   ApiKeyEntity,
   WorkflowPageEntity,
   WorkflowPageGroupEntity,
+  WorkflowBuiltinPinnedPageEntity,
   LlmModelEntity,
   LlmChannelEntity,
   SdModelEntity,
