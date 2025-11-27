@@ -249,7 +249,7 @@ export class WorkflowPageService {
       return { pages: [], groups: [] };
     }
 
-    const groups = await this.pageGroupRepository.find({
+    let groups = await this.pageGroupRepository.find({
       where: {
         teamId,
       },
@@ -257,6 +257,13 @@ export class WorkflowPageService {
         sortIndex: 1,
       },
     });
+
+    // 确保每个团队至少有一个内置（默认）分组，便于挂载全局内置 pinned 视图
+    // 对于新注册的团队，如果还没有任何 page group，这里会自动创建一个 isBuiltIn = true 的默认分组
+    if (!groups.some((g) => g.isBuiltIn)) {
+      const defaultGroup = await this.workflowRepository.getDefaultPageGroupAndCreateIfNotExists(teamId);
+      groups = groups.concat(defaultGroup);
+    }
 
     const pageIds = uniq(groups.map((it) => it.pageIds).flat(1)) as string[];
 
