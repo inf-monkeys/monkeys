@@ -323,13 +323,17 @@ export const ModelTrainingModule: React.FC<IModelTrainingModuleProps> = ({ model
       // 如果错误消息包含"未找到"和"对应的lora或unet文件夹"，不显示弹窗
       // 这是正常情况（模型训练尚未生成TensorBoard数据），不应该显示错误提示
       const errorMessage = error instanceof Error ? error.message : '未知错误';
-      if (errorMessage.includes('未找到') && errorMessage.includes('对应的lora或unet文件夹')) {
+      if (
+        (errorMessage.includes('未找到') && errorMessage.includes('对应的lora或unet文件夹')) ||
+        (errorMessage.includes('未找到') && errorMessage.includes('lora或unet文件夹'))
+      ) {
         // 静默处理，不显示错误弹窗
         setTensorboardAnalysis(null);
         return;
       }
 
-      toast.error(`获取TensorBoard分析失败: ${errorMessage}`);
+      // 不显示错误弹窗，只在控制台记录
+      console.warn('获取TensorBoard分析失败:', errorMessage);
     } finally {
       setIsLoadingTensorboard(false);
     }

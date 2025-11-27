@@ -60,6 +60,7 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
   // 获取可下载模型信息
   const { data: downloadableModel, isLoading: isLoadingDownloadableModel } = useGetDownloadableModel(modelTrainingId);
   const [selectedDownloadModel, setSelectedDownloadModel] = useState<string>('');
+  const [isDownloading, setIsDownloading] = useState(false);
   const { data: allTags, mutate: mutateTags } = useAssetTagList();
   const [defaultTags, setDefaultTags] = useState<IAssetTag[]>([]);
   const [filterTags, setFilterTags] = useState<IAssetTag[]>([]);
@@ -544,20 +545,55 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
                       <div className="mt-2">
                         <Button
                           variant="outline"
-                          onClick={() => {
+                          onClick={async () => {
                             const selectedModel = downloadableModel?.find(
                               (model) => model.model_name === selectedDownloadModel,
                             );
-                            if (selectedModel?.model_url) {
-                              window.open(selectedModel.model_url, '_blank');
+                            if (!selectedModel?.model_url) {
+                              toast.error('模型URL不存在');
+                              return;
+                            }
+
+                            setIsDownloading(true);
+                            try {
+                              // 先调用 presign-v2 获取预签名URL，设置 redirect=false 避免重定向导致的CORS问题
+                              const presignUrl = `/api/medias/s3/presign-v2?url=${encodeURIComponent(selectedModel.model_url)}&redirect=false`;
+                              const response = await fetch(presignUrl, {
+                                method: 'GET',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  ...vinesHeader({ useToast: false }),
+                                },
+                              });
+
+                              if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.message || '获取预签名URL失败');
+                              }
+
+                              const result = await response.json();
+                              if (result.code === 200 && result.data?.signedUrl) {
+                                // 直接使用 window.location.href 导航到预签名URL，避免CORS问题
+                                // 浏览器会直接下载文件，不会触发CORS检查
+                                window.location.href = result.data.signedUrl;
+                                toast.success('开始下载模型');
+                              } else {
+                                throw new Error(result.message || '获取预签名URL失败');
+                              }
+                            } catch (error) {
+                              console.error('下载模型失败:', error);
+                              toast.error(`下载模型失败: ${error instanceof Error ? error.message : '未知错误'}`);
+                            } finally {
+                              setIsDownloading(false);
                             }
                           }}
                           disabled={
+                            isDownloading ||
                             !downloadableModel?.find((model) => model.model_name === selectedDownloadModel)?.model_url
                           }
                         >
                           <Download className="mr-2 h-4 w-4" />
-                          下载模型
+                          {isDownloading ? '下载中...' : '下载模型'}
                         </Button>
                       </div>
                     )}
