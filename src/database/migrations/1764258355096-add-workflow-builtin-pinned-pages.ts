@@ -4,7 +4,7 @@ import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 const appId = config.server.appId;
 
-export class AddWorkflowBuiltinPinnedPages1766500000000 implements MigrationInterface {
+export class AddWorkflowBuiltinPinnedPages1764258355096 implements MigrationInterface {
   TABLE_NAME = `${appId}_workflow_builtin_pinned_pages`;
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -43,5 +43,3 @@ export class AddWorkflowBuiltinPinnedPages1766500000000 implements MigrationInte
     await queryRunner.dropTable(this.TABLE_NAME);
   }
 }
-
-
