@@ -1,6 +1,8 @@
 import { InstalledAppEntity } from '@/database/entities/marketplace/installed-app.entity';
 import { MarketplaceAppVersionEntity } from '@/database/entities/marketplace/marketplace-app-version.entity';
 import { MarketplaceAppEntity } from '@/database/entities/marketplace/marketplace-app.entity';
+import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssetsModule } from '../assets/assets.module';
@@ -15,7 +17,13 @@ import { MarketplaceService } from './services/marketplace.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([MarketplaceAppEntity, MarketplaceAppVersionEntity, InstalledAppEntity]),
+    TypeOrmModule.forFeature([
+      MarketplaceAppEntity,
+      MarketplaceAppVersionEntity,
+      InstalledAppEntity,
+      WorkflowPageEntity,
+      WorkflowPageGroupEntity,
+    ]),
     forwardRef(() => WorkflowModule),
     forwardRef(() => AssetsModule),
     forwardRef(() => DesignModule),
