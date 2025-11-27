@@ -26,7 +26,7 @@ import { useCurrentGroupId, useCurrentPage } from '@/store/useCurrentPageStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn, getI18nContent } from '@/utils';
 
-import { BsdWorkbenchView, BSD_CONTAINER_BORDER_RADIUS } from './customers/BsdWorkbenchView';
+// import { BsdWorkbenchView, BSD_CONTAINER_BORDER_RADIUS } from './customers/BsdWorkbenchView';
 
 interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
   mode?: 'normal' | 'fast' | 'mini';
@@ -66,10 +66,10 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const cachedPage = pages?.find((item) => item.id === teamPage?.id);
   const resolvedDisplayName = getPageDisplayName(teamPage) || getPageDisplayName(cachedPage);
   const hasPage = !!(teamPage?.id && teamPage?.type);
-  const isBsdTheme = systemConfig?.theme?.id === 'bsd';
-  const isInspirationPage =
-    (resolvedDisplayName ?? '').trim() === '灵感生成' || (resolvedDisplayName ?? '').trim() === 'Inspiration Generation';
-  const isBsdInspirationPage = isBsdTheme && isInspirationPage;
+  // const isBsdTheme = systemConfig?.theme?.id === 'bsd';
+  // const isInspirationPage =
+  //   (resolvedDisplayName ?? '').trim() === '灵感生成' || (resolvedDisplayName ?? '').trim() === 'Inspiration Generation';
+  // const isBsdInspirationPage = isBsdTheme && isInspirationPage;
 
   // 检查是否是 Vision Pro 工作流
   const pageName = getI18nContent(teamPage?.displayName) ?? '';
@@ -128,12 +128,14 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
       ref={ref}
       className={cn(
         'relative w-full flex-1 overflow-hidden p-0',
-        mode === 'mini' ? 'rounded-none' : isBsdInspirationPage ? '' : 'rounded-lg',
+        mode === 'mini' ? 'rounded-none' : 'rounded-lg',
+        // mode === 'mini' ? 'rounded-none' : isBsdInspirationPage ? '' : 'rounded-lg',
       )}
       style={
-        isBsdInspirationPage && mode !== 'mini'
-          ? { borderRadius: BSD_CONTAINER_BORDER_RADIUS, overflow: 'hidden' }
-          : undefined
+        // isBsdInspirationPage && mode !== 'mini'
+        //   ? { borderRadius: BSD_CONTAINER_BORDER_RADIUS, overflow: 'hidden' }
+        //   : undefined
+        undefined
       }
     >
       <AnimatePresence>
@@ -153,18 +155,18 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
                 <h2 className="font-bold">请在 Vision Pro 中打开使用</h2>
               </div>
             </motion.div>
-          ) : isBsdTheme && isInspirationPage ? (
-            <motion.div
-              key="vines-workbench-view-bsd"
-              className="absolute top-0 size-full overflow-hidden"
-              style={{ borderRadius: BSD_CONTAINER_BORDER_RADIUS }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <BsdWorkbenchView page={teamPage} />
-            </motion.div>
+          // ) : isBsdTheme && isInspirationPage ? (
+          //   <motion.div
+          //     key="vines-workbench-view-bsd"
+          //     className="absolute top-0 size-full overflow-hidden"
+          //     style={{ borderRadius: BSD_CONTAINER_BORDER_RADIUS }}
+          //     initial={{ opacity: 0 }}
+          //     animate={{ opacity: 1 }}
+          //     exit={{ opacity: 0 }}
+          //     transition={{ duration: 0.25 }}
+          //   >
+          //     <BsdWorkbenchView page={teamPage} />
+          //   </motion.div>
           ) : (
             <motion.div
               key="vines-workbench-view"
