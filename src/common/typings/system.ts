@@ -48,6 +48,7 @@ export interface ISystemConfig {
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader: boolean;
     showSidebarTeamSelector: boolean;
+    showWorkbenchSidebar?: boolean;
     defaults: {
       showFormInImageDetail?: boolean;
     };

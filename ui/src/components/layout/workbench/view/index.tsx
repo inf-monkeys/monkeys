@@ -66,6 +66,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const cachedPage = pages?.find((item) => item.id === teamPage?.id);
   const resolvedDisplayName = getPageDisplayName(teamPage) || getPageDisplayName(cachedPage);
   const hasPage = !!(teamPage?.id && teamPage?.type);
+  // 服务上线生产暂时隐藏
   // const isBsdTheme = systemConfig?.theme?.id === 'bsd';
   // const isInspirationPage =
   //   (resolvedDisplayName ?? '').trim() === '灵感生成' || (resolvedDisplayName ?? '').trim() === 'Inspiration Generation';

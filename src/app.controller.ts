@@ -133,6 +133,7 @@ export class AppController {
         extraLanguageURL: config.server.customization.extraLanguageURL,
         hideSpaceHeader: config.server.customization.hideSpaceHeader,
         showSidebarTeamSelector: config.server.customization.showSidebarTeamSelector,
+        showWorkbenchSidebar: config.server.customization.showWorkbenchSidebar,
         defaults: config.server.customization.defaults,
         modules: config.server.customization.modules,
         headbar: config.server.customization.headbar,

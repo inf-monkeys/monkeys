@@ -197,6 +197,7 @@ export interface ServerConfig {
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
+    showWorkbenchSidebar?: boolean;
     defaults?: {
       showFormInImageDetail?: boolean;
     };
@@ -709,6 +710,7 @@ export const config: Config = {
       extraLanguageURL: readConfig('server.customization.extraLanguageURL', {}),
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
       showSidebarTeamSelector: readConfig('server.customization.showSidebarTeamSelector', false),
+      showWorkbenchSidebar: readConfig('server.customization.showWorkbenchSidebar', true),
       defaults: {
         showFormInImageDetail: readConfig('server.customization.defaults.showFormInImageDetail', true),
       },
