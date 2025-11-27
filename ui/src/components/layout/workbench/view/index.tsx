@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useThrottleEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GitBranchPlus } from 'lucide-react';
+import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
+import { CustomizationWorkbenchViewTheme } from '@/apis/common/typings';
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -43,6 +45,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const { data, isLoading } = useWorkspacePages();
   const [pages, setPages] = useState(data?.pages);
   const { data: systemConfig } = useSystemConfig();
+  const workbenchViewTheme = get(systemConfig, 'theme.workbenchViewTheme', 'default') as CustomizationWorkbenchViewTheme;
   const [visionProAlertVisible, setVisionProAlertVisible] = useState(false);
 
   // const [fullFrameMode, setFullFrameMode] = useState(true);
@@ -133,10 +136,13 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
         // mode === 'mini' ? 'rounded-none' : isBsdInspirationPage ? '' : 'rounded-lg',
       )}
       style={
-        // isBsdInspirationPage && mode !== 'mini'
-        //   ? { borderRadius: BSD_CONTAINER_BORDER_RADIUS, overflow: 'hidden' }
-        //   : undefined
-        undefined
+        workbenchViewTheme === 'bsd-blue'
+          ? {
+              background: 'rgba(43, 93, 241, 0.08)',
+              boxSizing: 'border-box',
+              backdropFilter: 'blur(16px)',
+            }
+          : undefined
       }
     >
       <AnimatePresence>

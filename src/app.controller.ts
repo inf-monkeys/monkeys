@@ -134,6 +134,7 @@ export class AppController {
         hideSpaceHeader: config.server.customization.hideSpaceHeader,
         showSidebarTeamSelector: config.server.customization.showSidebarTeamSelector,
         showWorkbenchSidebar: config.server.customization.showWorkbenchSidebar,
+        workbenchViewTheme: config.server.customization.workbenchViewTheme,
         defaults: config.server.customization.defaults,
         modules: config.server.customization.modules,
         headbar: config.server.customization.headbar,

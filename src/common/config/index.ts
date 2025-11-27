@@ -64,7 +64,8 @@ export type CustomizationModules = {
 export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile';
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
-export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy' | 'ghost';
+export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy' | 'ghost' | 'bsd-blue';
+export type CustomizationWorkbenchViewTheme = 'default' | 'bsd-blue';
 export type CustomizationHeadbar = {
   theme?: CustomizationHeadbarTheme;
   navPosition?: 'left' | 'center' | 'right';
@@ -198,6 +199,7 @@ export interface ServerConfig {
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
     showWorkbenchSidebar?: boolean;
+    workbenchViewTheme?: CustomizationWorkbenchViewTheme;
     defaults?: {
       showFormInImageDetail?: boolean;
     };
@@ -711,6 +713,7 @@ export const config: Config = {
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
       showSidebarTeamSelector: readConfig('server.customization.showSidebarTeamSelector', false),
       showWorkbenchSidebar: readConfig('server.customization.showWorkbenchSidebar', true),
+      workbenchViewTheme: readConfig('server.customization.workbenchViewTheme', 'default'),
       defaults: {
         showFormInImageDetail: readConfig('server.customization.defaults.showFormInImageDetail', true),
       },
