@@ -7,11 +7,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
+import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { VinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { IframeHeader } from '@/components/layout/workspace/vines-view/form/tabular/iframe-header.tsx';
 import { ViewTitle } from '@/components/layout/workspace/vines-view/form/tabular/view-title';
-import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
@@ -25,7 +25,8 @@ const VinesForm: React.FC = () => {
 
   const showPreviewViewExecutionResultGrid = get(oem, 'theme.miniMode.showPreviewViewExecutionResultGrid', true);
 
-  const oemOnlyResult = get(oem, 'theme.views.form.onlyResult', false);
+  // 默认始终展示完整的表单视图（左侧表单 + 右侧结果），不再在 workbench 中显示「只看结果」模式
+  const oemOnlyResult = false;
 
   const themeGradient = get(oem, 'theme.gradient', undefined) as ISystemConfig['theme']['gradient'];
 
