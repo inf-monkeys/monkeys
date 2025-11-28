@@ -59,6 +59,7 @@ export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile'
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
 export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy' | 'ghost' | 'bsd-blue';
+export type CustomizationWorkbenchViewTheme = 'default' | 'bsd-blue';
 export type CustomizationHeadbarNavPosition = 'left' | 'center' | 'right';
 
 export type CustomizationHeadbar =
@@ -185,6 +186,8 @@ export interface ISystemConfig {
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader: boolean;
     showSidebarTeamSelector: boolean;
+    showWorkbenchSidebar?: boolean;
+    workbenchViewTheme?: CustomizationWorkbenchViewTheme;
     defaults: {
       showFormInImageDetail: boolean;
     };

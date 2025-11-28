@@ -8,6 +8,14 @@ import { readConfig } from './readYaml';
 
 export type DatabaseConfig = DataSourceOptions;
 
+// Agent V3 模型配置类型：支持字符串或对象格式
+export type AgentV3ModelConfig =
+  | string
+  | {
+      name: string;
+      apiType?: 'chat'; // 可选：强制使用 chat API，不指定则自动判断
+    };
+
 export interface ConductorConfig {
   baseUrl: string;
   auth?: {
@@ -64,7 +72,8 @@ export type CustomizationModules = {
 export type VinesSpaceHeadbar = 'team-invite' | 'team-selector' | 'user-profile';
 export type VinesSpaceHeadbarProfile = 'dark-mode' | 'language' | 'settings' | 'logout';
 
-export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy' | 'ghost';
+export type CustomizationHeadbarTheme = 'fixed' | 'card' | 'glassy' | 'ghost' | 'bsd-blue';
+export type CustomizationWorkbenchViewTheme = 'default' | 'bsd-blue';
 export type CustomizationHeadbar = {
   theme?: CustomizationHeadbarTheme;
   navPosition?: 'left' | 'center' | 'right';
@@ -197,6 +206,8 @@ export interface ServerConfig {
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
+    showWorkbenchSidebar?: boolean;
+    workbenchViewTheme?: CustomizationWorkbenchViewTheme;
     defaults?: {
       showFormInImageDetail?: boolean;
     };
@@ -709,6 +720,8 @@ export const config: Config = {
       extraLanguageURL: readConfig('server.customization.extraLanguageURL', {}),
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
       showSidebarTeamSelector: readConfig('server.customization.showSidebarTeamSelector', false),
+      showWorkbenchSidebar: readConfig('server.customization.showWorkbenchSidebar', true),
+      workbenchViewTheme: readConfig('server.customization.workbenchViewTheme', 'default'),
       defaults: {
         showFormInImageDetail: readConfig('server.customization.defaults.showFormInImageDetail', true),
       },
@@ -964,6 +977,7 @@ When answer to user:
     defaultModelId: readConfig('agentv3.defaultModelId', undefined),
     openai: {
       apiKey: readConfig('agentv3.openai.apiKey', process.env.OPENAI_API_KEY),
+      baseUrl: readConfig('agentv3.openai.baseUrl'),
       models: readConfig('agentv3.openai.models', []),
     },
     openaiCompatible: {
@@ -973,10 +987,12 @@ When answer to user:
     },
     anthropic: {
       apiKey: readConfig('agentv3.anthropic.apiKey', process.env.ANTHROPIC_API_KEY),
+      baseUrl: readConfig('agentv3.anthropic.baseUrl'),
       models: readConfig('agentv3.anthropic.models', []),
     },
     google: {
       apiKey: readConfig('agentv3.google.apiKey', process.env.GOOGLE_API_KEY),
+      baseUrl: readConfig('agentv3.google.baseUrl'),
       models: readConfig('agentv3.google.models', []),
     },
   },

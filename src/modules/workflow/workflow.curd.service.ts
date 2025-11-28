@@ -305,8 +305,38 @@ export class WorkflowCrudService implements IAssetHandler {
 
     const repoDto: ListDto = {
       ...dto,
-      filter: restFilter,
+      // 注意：空对象 {} 不应视为「有筛选条件」，否则会触发后端通用资产筛选逻辑，导致一次全表扫描
+      filter: Object.keys(restFilter || {}).length ? restFilter : undefined,
     };
+
+    /**
+     * 性能优化：
+     * - 当仅查看「本团队」工作流，且未勾选「仅内置应用」时，不需要做跨团队内置应用合并
+     * - 可以直接使用仓库层的分页结果与 totalCount，避免一次性拉取大量数据再在内存中分页
+     */
+    if (onlySelf && !onlyBuiltin) {
+      const { totalCount, list } = await this.workflowRepository.listWorkflows(teamId, repoDto);
+
+      // 先补充 user / team / tags 信息
+      const filledList = await this.assetsCommonRepository.fillAdditionalInfoList(list, {
+        withUser: true,
+        withTeam: true,
+        withTags: true,
+      });
+
+      // 使用 MarketplaceService 维护的内置 workflowId 集合来标记 builtin 状态
+      const builtinWorkflowIdSet = new Set(await this.marketplaceService.getBuiltinWorkflowIds());
+
+      const listWithBuiltin = filledList.map((item) => ({
+        ...item,
+        builtin: builtinWorkflowIdSet.has(item.workflowId),
+      }));
+
+      return {
+        totalCount,
+        list: listWithBuiltin,
+      };
+    }
 
     // 先获取当前团队下（满足搜索/筛选条件的）全部 workflow，后续在内存中叠加内置映射并统一做分页
     const { list } = await this.workflowRepository.listWorkflows(teamId, {
@@ -324,48 +354,58 @@ export class WorkflowCrudService implements IAssetHandler {
     const builtinIdSet = new Set(builtinWorkflowIds);
 
     const existingWorkflowIdSet = new Set(list.map((wf) => wf.workflowId));
-
     const extraBuiltinWorkflows: WorkflowMetadataEntity[] = [];
 
-    for (const workflowId of builtinWorkflowIds) {
-      // 已经在当前团队中存在（作者团队场景），直接跳过
-      if (existingWorkflowIdSet.has(workflowId)) {
-        continue;
-      }
+    /**
+     * 性能优化：
+     * - 通过一次批量查询拿到所有内置 workflow 的各个版本
+     * - 在内存中选出每个 workflowId 的最新版本，避免对每个 workflowId 分别调用 getWorkflowByIdWithoutVersion（会产生 2N 次 DB 查询）
+     */
+    if (builtinWorkflowIds.length > 0) {
+      const builtinWorkflowsAll = await this.workflowRepository.findWorkflowByIds(builtinWorkflowIds);
 
-      // 加载该 workflow 的最新版本定义（跨团队）
-      let workflow: WorkflowMetadataEntity | null = null;
-      try {
-        workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId, false);
-      } catch {
-        workflow = null;
-      }
-      if (!workflow) {
-        continue;
-      }
+      const latestBuiltinMap = builtinWorkflowsAll.reduce<Record<string, WorkflowMetadataEntity>>((acc, item) => {
+        const exists = acc[item.workflowId];
+        if (!exists || item.version > exists.version) {
+          acc[item.workflowId] = item;
+        }
+        return acc;
+      }, {});
 
-      // 作者团队才允许在本团队下维护工作流；其他团队只读使用
-      // 这里仅展示「作者团队的 workflow」，因此过滤掉 teamId 相同的情况（已在 list 中）
-      if (workflow.teamId === teamId) {
-        continue;
-      }
-
-      // 按搜索关键字做一次简单过滤，避免污染搜索结果
-      if (searchText) {
-        const nameStr =
-          typeof workflow.displayName === 'string'
-            ? workflow.displayName.toLowerCase()
-            : JSON.stringify(workflow.displayName || {}).toLowerCase();
-        const descStr =
-          typeof workflow.description === 'string'
-            ? workflow.description.toLowerCase()
-            : JSON.stringify(workflow.description || {}).toLowerCase();
-        if (!nameStr.includes(searchText) && !descStr.includes(searchText)) {
+      for (const workflowId of builtinWorkflowIds) {
+        const workflow = latestBuiltinMap[workflowId];
+        if (!workflow) {
           continue;
         }
-      }
 
-      extraBuiltinWorkflows.push(workflow);
+        // 已经在当前团队中存在（作者团队场景），直接跳过
+        if (existingWorkflowIdSet.has(workflowId)) {
+          continue;
+        }
+
+        // 作者团队才允许在本团队下维护工作流；其他团队只读使用
+        // 这里仅展示「作者团队的 workflow」，因此过滤掉 teamId 相同的情况（已在 list 中）
+        if (workflow.teamId === teamId) {
+          continue;
+        }
+
+        // 按搜索关键字做一次简单过滤，避免污染搜索结果
+        if (searchText) {
+          const nameStr =
+            typeof workflow.displayName === 'string'
+              ? workflow.displayName.toLowerCase()
+              : JSON.stringify(workflow.displayName || {}).toLowerCase();
+          const descStr =
+            typeof workflow.description === 'string'
+              ? workflow.description.toLowerCase()
+              : JSON.stringify(workflow.description || {}).toLowerCase();
+          if (!nameStr.includes(searchText) && !descStr.includes(searchText)) {
+            continue;
+          }
+        }
+
+        extraBuiltinWorkflows.push(workflow);
+      }
     }
 
     const combinedList = [...list, ...extraBuiltinWorkflows];

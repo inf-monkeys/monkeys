@@ -3,6 +3,7 @@ import { AgentV2Entity } from '@/database/entities/agent-v2/agent-v2.entity';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
+import { WorkflowBuiltinPinnedPageEntity } from '@/database/entities/workflow/workflow-builtin-pinned-page';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
@@ -22,6 +23,8 @@ export class WorkflowPageService {
     private readonly pageRepository: Repository<WorkflowPageEntity>,
     @InjectRepository(WorkflowPageGroupEntity)
     private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
+    @InjectRepository(WorkflowBuiltinPinnedPageEntity)
+    private readonly builtinPinnedPageRepository: Repository<WorkflowBuiltinPinnedPageEntity>,
     @InjectRepository(ConversationAppEntity)
     private readonly conversationAppRepository: Repository<ConversationAppEntity>,
     @InjectRepository(AgentV2Entity)
@@ -167,6 +170,42 @@ export class WorkflowPageService {
     return this.listWorkflowPages(workflowId);
   }
 
+  /**
+   * 为指定 workflow 添加一个全局内置 pinned 视图配置
+   * - 不绑定具体的 pageId / groupId
+   * - 仅在 getPinnedPages 时按需解析为虚拟 pinned 视图
+   */
+  public async addBuiltinPinnedPage(workflowId: string, pageType: 'process' | 'log' | 'preview' | 'chat' = 'preview') {
+    const exists = await this.builtinPinnedPageRepository.findOne({
+      where: {
+        workflowId,
+        pageType,
+        isDeleted: false,
+      },
+    });
+    if (exists) return exists;
+
+    const entity = this.builtinPinnedPageRepository.create({
+      id: generateDbId(),
+      workflowId,
+      pageType,
+    });
+    return await this.builtinPinnedPageRepository.save(entity);
+  }
+
+  public async removeBuiltinPinnedPagesForWorkflow(workflowId: string) {
+    await this.builtinPinnedPageRepository.update(
+      {
+        workflowId,
+        isDeleted: false,
+      },
+      {
+        isDeleted: true,
+        updatedTimestamp: Date.now(),
+      },
+    );
+  }
+
   async removeWorkflowPage(workflowId: string, teamId: string, userId: string, pageId: string) {
     await this.pageRepository.update(
       {
@@ -210,7 +249,7 @@ export class WorkflowPageService {
       return { pages: [], groups: [] };
     }
 
-    const groups = await this.pageGroupRepository.find({
+    let groups = await this.pageGroupRepository.find({
       where: {
         teamId,
       },
@@ -218,6 +257,13 @@ export class WorkflowPageService {
         sortIndex: 1,
       },
     });
+
+    // 确保每个团队至少有一个内置（默认）分组，便于挂载全局内置 pinned 视图
+    // 对于新注册的团队，如果还没有任何 page group，这里会自动创建一个 isBuiltIn = true 的默认分组
+    if (!groups.some((g) => g.isBuiltIn)) {
+      const defaultGroup = await this.workflowRepository.getDefaultPageGroupAndCreateIfNotExists(teamId);
+      groups = groups.concat(defaultGroup);
+    }
 
     const pageIds = uniq(groups.map((it) => it.pageIds).flat(1)) as string[];
 
@@ -241,7 +287,7 @@ export class WorkflowPageService {
     });
 
     const workflowIds = uniq(filteredPages.map((page) => page.workflowId));
-    const workflows = await this.workflowRepository.findWorkflowByIds(workflowIds);
+    let workflows = await this.workflowRepository.findWorkflowByIds(workflowIds);
     const workflowMap = keyBy(workflows, 'workflowId');
     const pageInstanceTypeMapper = keyBy(BUILT_IN_PAGE_INSTANCES, 'type');
 
@@ -375,8 +421,8 @@ export class WorkflowPageService {
       };
     });
 
-    // 合并所有页面
-    const allPages = [
+    // 合并所有页面（团队本地 pinned + agent + design board 等）
+    const allPagesBase = [
       ...filteredPages.map((p) => ({
         ...p,
         workflow: workflowMap[p.workflowId],
@@ -387,8 +433,71 @@ export class WorkflowPageService {
       ...designBoardPages,
     ];
 
+    // 追加「内置应用」全局固定视图（不与具体 pageId 绑定）
+    const builtinPinnedConfigs = await this.builtinPinnedPageRepository.find({
+      where: {
+        isDeleted: false,
+      },
+      order: {
+        sortIndex: 1,
+      },
+    });
+
+    let allPages = allPagesBase;
+    let groupsWithBuiltin = groups;
+
+    if (builtinPinnedConfigs.length > 0) {
+      const builtinWorkflowIds = uniq(builtinPinnedConfigs.map((pin) => pin.workflowId));
+
+      // 补充当前 teams 已经没有加载到的 workflow 元数据
+      const missingWorkflowIds = builtinWorkflowIds.filter((id) => !workflowMap[id]);
+      if (missingWorkflowIds.length > 0) {
+        const extraWorkflows = await this.workflowRepository.findWorkflowByIds(missingWorkflowIds);
+        workflows = [...workflows, ...extraWorkflows];
+        const extraWorkflowMap = keyBy(extraWorkflows, 'workflowId');
+        Object.assign(workflowMap, extraWorkflowMap);
+      }
+
+      const builtinPages = builtinPinnedConfigs
+        .map((pin) => {
+          const workflow = workflowMap[pin.workflowId];
+          if (!workflow) return null;
+
+          const pageType = pin.pageType;
+          const instance = pageInstanceTypeMapper[pageType];
+          if (!instance) return null;
+
+          const id = `builtin-${pin.workflowId}-${pageType}`;
+
+          return {
+            id,
+            type: pageType,
+            // 关键：显式带上 workflowId，让前端识别为 workflow 视图分组
+            workflowId: pin.workflowId,
+            displayName: workflow.displayName as any,
+            workflow,
+            instance,
+            // 标记为全局内置 pinned，前端如有需要可以据此区分只读/不可删除等
+            isBuiltinPinned: true,
+          } as any;
+        })
+        .filter(Boolean);
+
+      if (builtinPages.length > 0) {
+        allPages = [...allPagesBase, ...builtinPages];
+
+        // 虚拟注入到当前团队的默认分组（isBuiltIn = true 的 group）
+        groupsWithBuiltin = groups.map((g) => ({ ...g }));
+        const defaultGroup = groupsWithBuiltin.find((g) => g.isBuiltIn);
+        if (defaultGroup) {
+          const builtinIds = builtinPages.map((p) => p.id);
+          defaultGroup.pageIds = uniq([...(defaultGroup.pageIds || []), ...builtinIds]);
+        }
+      }
+    }
+
     // 按照 groups 中的 pageIds 顺序排序
-    const pageIdsForSort = Array.from(new Set(groups.flatMap((it) => it.pageIds)));
+    const pageIdsForSort = Array.from(new Set(groupsWithBuiltin.flatMap((it) => it.pageIds)));
     const sortedPages = allPages.sort((a, b) => {
       const aIndex = pageIdsForSort.indexOf(a.id);
       const bIndex = pageIdsForSort.indexOf(b.id);
@@ -400,7 +509,7 @@ export class WorkflowPageService {
 
     return {
       pages: sortedPages,
-      groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn', 'iconUrl', 'sortIndex'])),
+      groups: groupsWithBuiltin.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn', 'iconUrl', 'sortIndex'])),
     };
   }
 

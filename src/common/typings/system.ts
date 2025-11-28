@@ -10,6 +10,7 @@ import {
   CustomizationModules,
   CustomizationUgc,
   CustomizationUploader,
+  CustomizationWorkbenchViewTheme,
   CustomizationWorkbench,
   ExtraLanguageURL,
   SystemConfigBehavior,
@@ -48,6 +49,8 @@ export interface ISystemConfig {
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader: boolean;
     showSidebarTeamSelector: boolean;
+    showWorkbenchSidebar?: boolean;
+    workbenchViewTheme?: CustomizationWorkbenchViewTheme;
     defaults: {
       showFormInImageDetail?: boolean;
     };

@@ -4,6 +4,7 @@ import { ConversationAppEntity } from '@/database/entities/conversation-app/conv
 import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { WorkflowArtifactEntity } from '@/database/entities/workflow/workflow-artifact.entity';
+import { WorkflowBuiltinPinnedPageEntity } from '@/database/entities/workflow/workflow-builtin-pinned-page';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
@@ -90,6 +91,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     TypeOrmModule.forFeature([
       WorkflowPageEntity,
       WorkflowPageGroupEntity,
+      WorkflowBuiltinPinnedPageEntity,
       ConversationAppEntity,
       AgentV2Entity,
       DesignMetadataEntity,

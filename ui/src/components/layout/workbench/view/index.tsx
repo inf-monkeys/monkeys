@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 
 import { useThrottleEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
+import { get } from 'lodash';
 import { GitBranchPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
+import { CustomizationWorkbenchViewTheme } from '@/apis/common/typings';
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -26,7 +28,7 @@ import { useCurrentGroupId, useCurrentPage } from '@/store/useCurrentPageStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn, getI18nContent } from '@/utils';
 
-import { BsdWorkbenchView, BSD_CONTAINER_BORDER_RADIUS } from './customers/BsdWorkbenchView';
+import { BSD_CONTAINER_BORDER_RADIUS, BsdWorkbenchView } from './customers/BsdWorkbenchView';
 
 interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
   mode?: 'normal' | 'fast' | 'mini';
@@ -43,6 +45,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const { data, isLoading } = useWorkspacePages();
   const [pages, setPages] = useState(data?.pages);
   const { data: systemConfig } = useSystemConfig();
+  const workbenchViewTheme = get(systemConfig, 'theme.workbenchViewTheme', 'default') as CustomizationWorkbenchViewTheme;
   const [visionProAlertVisible, setVisionProAlertVisible] = useState(false);
 
   // const [fullFrameMode, setFullFrameMode] = useState(true);
@@ -131,8 +134,12 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
         mode === 'mini' ? 'rounded-none' : isBsdInspirationPage ? '' : 'rounded-lg',
       )}
       style={
-        isBsdInspirationPage && mode !== 'mini'
-          ? { borderRadius: BSD_CONTAINER_BORDER_RADIUS, overflow: 'hidden' }
+        workbenchViewTheme === 'bsd-blue'
+          ? {
+              background: 'rgba(43, 93, 241, 0.08)',
+              boxSizing: 'border-box',
+              backdropFilter: 'blur(16px)',
+            }
           : undefined
       }
     >
@@ -153,7 +160,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
                 <h2 className="font-bold">请在 Vision Pro 中打开使用</h2>
               </div>
             </motion.div>
-          ) : isBsdTheme && isInspirationPage ? (
+          ) : isBsdInspirationPage ? (
             <motion.div
               key="vines-workbench-view-bsd"
               className="absolute top-0 size-full overflow-hidden"

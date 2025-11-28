@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { createDesignProject } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -38,6 +39,9 @@ export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps
 }) => {
   const { t } = useTranslation();
 
+  const { data: oem } = useSystemConfig();
+  const oemId = oem?.theme.id;
+
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // 使用外部传入的visible状态，如果没有则使用内部状态
@@ -47,7 +51,7 @@ export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps
   const form = useForm<ICreateDesignProject>({
     resolver: zodResolver(createDesignProjectSchema),
     defaultValues: {
-      displayName: t('common.utils.untitled') + t('common.type.design-project'),
+      displayName: oemId != 'lf' ? t('common.utils.untitled') + t('common.type.design-project') : 'Untitled Board',
       description: '',
       iconUrl: DEFAULT_DESIGN_PROJECT_ICON_URL,
       isTemplate,
@@ -77,7 +81,9 @@ export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps
       },
       {
         success: (designProject) => {
-          open(`/${teamId}/design/${designProject.id}`, '_blank');
+          if (oemId != 'lf') {
+            open(`/${teamId}/design/${designProject.id}`, '_blank');
+          }
           setIsOpen(false);
           afterCreate?.(); // 调用回调函数
           return t('common.create.success');
@@ -104,13 +110,15 @@ export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps
       )}
       <DialogContent className="overflow-hidden">
         <DialogHeader>
-          <DialogTitle>{t('ugc-page.design-project.create.dialog.title')}</DialogTitle>
+          <DialogTitle>{oemId != 'lf' ? t('ugc-page.design-project.create.dialog.title') : 'Create Board'}</DialogTitle>
         </DialogHeader>
         <div className="m-1">
           <Form {...form}>
             <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-global">
               <div className="flex flex-col gap-2">
-                <FormLabel>{t('ugc-page.design-project.create.dialog.info.label')}</FormLabel>
+                <FormLabel>
+                  {oemId != 'lf' ? t('ugc-page.design-project.create.dialog.info.label') : 'Board Name'}
+                </FormLabel>
 
                 <div className="flex w-full items-center gap-3">
                   <FormField
@@ -136,7 +144,11 @@ export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps
                       <FormItem className="flex-1">
                         <FormControl>
                           <Input
-                            placeholder={t('ugc-page.design-project.create.dialog.info.placeholder')}
+                            placeholder={
+                              oemId != 'lf'
+                                ? t('ugc-page.design-project.create.dialog.info.placeholder')
+                                : 'Enter Board Name'
+                            }
                             {...field}
                             className=""
                             autoFocus
@@ -154,10 +166,18 @@ export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('ugc-page.design-project.create.dialog.description.label')}</FormLabel>
+                    <FormLabel>
+                      {oemId != 'lf'
+                        ? t('ugc-page.design-project.create.dialog.description.label')
+                        : 'Board Description'}
+                    </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder={t('ugc-page.design-project.create.dialog.description.placeholder')}
+                        placeholder={
+                          oemId != 'lf'
+                            ? t('ugc-page.design-project.create.dialog.description.placeholder')
+                            : 'Enter Board Description'
+                        }
                         className="h-28 resize-none"
                         {...field}
                       />

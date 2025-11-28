@@ -5,6 +5,7 @@ import { createLazyFileRoute } from '@tanstack/react-router';
 import { get } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
+import { CustomizationWorkbenchViewTheme } from '@/apis/common/typings';
 import { HistoryResult } from '@/components/layout/workbench/history';
 import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
 import { TemporaryWorkflowOverlay } from '@/components/layout/workbench/temporary-workflow-overlay';
@@ -19,6 +20,8 @@ export const Workbench: React.FC = () => {
   const sidebarCollapsed = useSidebarCollapsed();
   const { data: oem } = useSystemConfig();
 
+  const showWorkbenchSidebar = get(oem, 'theme.showWorkbenchSidebar', true) as boolean;
+  const workbenchViewTheme = get(oem, 'theme.workbenchViewTheme', 'default') as CustomizationWorkbenchViewTheme;
   const showHistoryResult = get(oem, 'theme.historyResult.display', false) as boolean;
 
   const [{ mode, temporaryWorkflowId }] = useUrlState<{
@@ -53,9 +56,24 @@ export const Workbench: React.FC = () => {
   }, [temporaryWorkflowId]);
 
   return (
-    <main className={cn('relative flex size-full', mode != 'mini' && 'gap-global')}>
-      <WorkbenchSidebar mode={mode} showGroup={showGroup} collapsed={sidebarCollapsed} />
-      <div className={`flex size-full flex-col gap-global ${sidebarCollapsed ? 'flex-1' : ''}`}>
+    <main className={cn('relative flex size-full', mode != 'mini' && showWorkbenchSidebar && 'gap-global')}>
+      {showWorkbenchSidebar && <WorkbenchSidebar mode={mode} showGroup={showGroup} collapsed={sidebarCollapsed} />}
+      <div
+        className={cn(
+          'flex size-full flex-col gap-global',
+          (sidebarCollapsed || !showWorkbenchSidebar) && 'flex-1',
+          workbenchViewTheme === 'bsd-blue' && 'rounded-lg',
+        )}
+        style={
+          workbenchViewTheme === 'bsd-blue'
+            ? {
+                background: 'rgba(43, 93, 241, 0.08)',
+                boxSizing: 'border-box',
+                backdropFilter: 'blur(16px)',
+              }
+            : undefined
+        }
+      >
         <WorkbenchView mode={mode} />
         {mode !== 'mini' && globalViewSize !== 'sm' && showHistoryResult && <HistoryResult />}
       </div>

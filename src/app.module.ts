@@ -28,6 +28,7 @@ import { TemporaryWorkflowModule } from './modules/temporary-workflow/temporary-
 import { TenantModule } from './modules/tenant/tenant.module';
 import { TldrawAgentV2Module } from './modules/tldraw-agent-v2/tldraw-agent-v2.module';
 import { TldrawAgentModule } from './modules/tldraw-agent/tldraw-agent.module';
+import { TldrawAgentV3Module } from './modules/tldraw-agent-v3/tldraw-agent-v3.module';
 import { LLMToolsModule } from './modules/tools/llm/llm.module';
 import { MediaToolsModule } from './modules/tools/media/media.module';
 import { ToolsModule } from './modules/tools/tools.module';
@@ -73,6 +74,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     ModelTrainingModule,
     TldrawAgentModule,
     TldrawAgentV2Module,
+    TldrawAgentV3Module,
     FalModule,
     SttModule,
   ],

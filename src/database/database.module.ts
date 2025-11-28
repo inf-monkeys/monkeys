@@ -10,6 +10,7 @@ import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
+import { WorkflowBuiltinPinnedPageEntity } from '@/database/entities/workflow/workflow-builtin-pinned-page';
 import { WorkflowTemplateEntity } from '@/database/entities/workflow/workflow-template';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { TimestampSubscriber } from '@/timestamp.subscriber';
@@ -21,6 +22,7 @@ import { AgentV2MessageQueueEntity, AgentV2TaskStateEntity } from './entities/ag
 import { AgentV2Entity } from './entities/agent-v2/agent-v2.entity';
 import { AgentV3SessionEntity } from './entities/agent-v3/agent-v3-session.entity';
 import { AgentV3MessageEntity } from './entities/agent-v3/agent-v3-message.entity';
+import { TldrawAgentV3BindingEntity } from './entities/agent-v3/tldraw-agent-v3-binding.entity';
 import { ApiKeyEntity } from './entities/apikey/apikey';
 import { AssetsAuthorizationEntity } from './entities/assets/asset-authorization';
 import { AssetFilterEntity } from './entities/assets/asset-filter';
@@ -99,6 +101,7 @@ export const entities: EntityClassOrSchema[] = [
   ApiKeyEntity,
   WorkflowPageEntity,
   WorkflowPageGroupEntity,
+  WorkflowBuiltinPinnedPageEntity,
   LlmModelEntity,
   LlmChannelEntity,
   SdModelEntity,
@@ -146,6 +149,7 @@ export const entities: EntityClassOrSchema[] = [
   AgentV2MessageQueueEntity,
   AgentV3SessionEntity,
   AgentV3MessageEntity,
+  TldrawAgentV3BindingEntity,
   ModelTrainingEntity,
   ModelTrainingConfigEntity,
   ModelTrainingConfigV2Entity,

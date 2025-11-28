@@ -4,8 +4,10 @@ import { TeamEntity } from '@/database/entities/identity/team';
 import { InstalledAppEntity } from '@/database/entities/marketplace/installed-app.entity';
 import { MarketplaceAppVersionEntity, MarketplaceAppVersionStatus } from '@/database/entities/marketplace/marketplace-app-version.entity';
 import { MarketplaceAppEntity, MarketplaceAppStatus } from '@/database/entities/marketplace/marketplace-app.entity';
-import { PageInstanceType } from '@/database/entities/workflow/workflow-page';
+import { PageInstanceType, WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
+import { BUILT_IN_PAGE_INSTANCES } from '@/database/repositories/workflow.repository';
 import { AssetsMapperService } from '@/modules/assets/assets.common.service';
 import { WorkflowCrudService } from '@/modules/workflow/workflow.curd.service';
 import { WorkflowPageService } from '@/modules/workflow/workflow.page.service';
@@ -31,6 +33,10 @@ export class MarketplaceService {
     private readonly versionRepo: Repository<MarketplaceAppVersionEntity>,
     @InjectRepository(InstalledAppEntity)
     private readonly installedAppRepo: Repository<InstalledAppEntity>,
+    @InjectRepository(WorkflowPageEntity)
+    private readonly workflowPageRepository: Repository<WorkflowPageEntity>,
+    @InjectRepository(WorkflowPageGroupEntity)
+    private readonly workflowPageGroupRepository: Repository<WorkflowPageGroupEntity>,
     private readonly workflowCrudService: WorkflowCrudService,
     private readonly workflowPageService: WorkflowPageService,
     private readonly toolsRepository: ToolsRepository,
@@ -681,7 +687,27 @@ export class MarketplaceService {
     this.presetAppsCache = null;
     if (isPreset) {
       const installResult = await this.installAppLatestVersionToAllTeams(appId);
+      // 为 workflow 类型的预置应用添加全局 pinned 视图配置（默认表单视图）
+      if (updatedApp.assetType === 'workflow') {
+        const latestVersion = await this.getAppLatestVersion(appId);
+        const refs = latestVersion?.sourceAssetReferences || [];
+        for (const ref of refs) {
+          if (ref.assetType === 'workflow' && ref.assetId) {
+            await this.workflowPageService.addBuiltinPinnedPage(ref.assetId, 'preview');
+          }
+        }
+      }
       return { ...updatedApp, installResult };
+    }
+    // 取消预置应用时，清理对应的全局 pinned 配置
+    if (updatedApp.assetType === 'workflow') {
+      const latestVersion = await this.getAppLatestVersion(appId);
+      const refs = latestVersion?.sourceAssetReferences || [];
+      for (const ref of refs) {
+        if (ref.assetType === 'workflow' && ref.assetId) {
+          await this.workflowPageService.removeBuiltinPinnedPagesForWorkflow(ref.assetId);
+        }
+      }
     }
     return updatedApp;
   }
@@ -709,7 +735,8 @@ export class MarketplaceService {
        * - 不再为每个团队克隆一份 workflow 资产
        * - 其他团队通过统一的 workflowId + teamId 上下文来使用同一条工作流
        *
-       * 因此这里对 workflow 资产类型直接跳过实际安装逻辑，仅返回一个统计结果。
+       * 页面视图仍然使用原有的 4 个默认视图（流程/日志/表单/对话），
+       * 不在这里额外为所有团队批量创建和固定表单视图，以避免工作台左侧出现大量重复视图。
        * 其他资产类型（如 comfyui-workflow、design-association 等）仍保持原有的克隆安装行为。
        */
       if (latestVersion.app.assetType === 'workflow') {
@@ -921,6 +948,135 @@ export class MarketplaceService {
     } catch (error) {
       this.logger.error(`Failed to upgrade installations for app ${appId}`, error.stack);
       throw error;
+    }
+  }
+
+  /**
+   * 为指定团队固定所有内置应用的表单视图页面到默认文件夹
+   * @param teamId 团队 ID
+   */
+  public async pinAllBuiltinFormViewsForTeam(teamId: string): Promise<void> {
+    try {
+      const builtinWorkflowIds = await this.getBuiltinWorkflowIds();
+      this.logger.debug(`Pinning form views for ${builtinWorkflowIds.length} builtin workflows in team ${teamId}`);
+
+      for (const workflowId of builtinWorkflowIds) {
+        try {
+          await this.pinFormViewForTeam(workflowId, teamId);
+        } catch (error) {
+          this.logger.error(`Failed to pin form view for workflow ${workflowId} in team ${teamId}:`, error);
+          // 继续处理其他 workflow，不中断整个过程
+          continue;
+        }
+      }
+
+      this.logger.debug(`Successfully pinned form views for all builtin workflows in team ${teamId}`);
+    } catch (error) {
+      this.logger.error(`Failed to pin all builtin form views for team ${teamId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 为指定团队创建并固定表单视图页面到默认文件夹
+   * @param workflowId 工作流 ID
+   * @param teamId 团队 ID
+   * @param transactionalEntityManager 事务管理器（可选）
+   */
+  private async pinFormViewForTeam(
+    workflowId: string,
+    teamId: string,
+    transactionalEntityManager?: EntityManager,
+  ): Promise<void> {
+    const entityManager = transactionalEntityManager || this.entityManager;
+
+    // 0. 获取工作流信息，用于命名视图（避免工作台侧边栏全部显示为「表单视图」）
+    // 如果获取失败，则退回到内置的「表单视图」名称
+    let workflowDisplayName: string | Record<string, string> | undefined;
+    try {
+      const workflow = await this.workflowCrudService.getWorkflowDef(workflowId);
+      workflowDisplayName = workflow?.displayName;
+    } catch {
+      workflowDisplayName = undefined;
+    }
+
+    // 1. 查找或创建表单视图页面（type='preview'）
+    const previewPageInstance = BUILT_IN_PAGE_INSTANCES.find((item) => item.type === 'preview');
+    if (!previewPageInstance) {
+      throw new NotFoundException('Preview page instance not found');
+    }
+
+    // 检查是否已存在该团队下的表单视图页面
+    let formPage = await entityManager.findOne(WorkflowPageEntity, {
+      where: {
+        workflowId,
+        teamId,
+        type: 'preview',
+        isDeleted: false,
+      },
+    });
+
+    if (!formPage) {
+      // 创建表单视图页面
+      const pageId = generateDbId();
+      formPage = entityManager.create(WorkflowPageEntity, {
+        id: pageId,
+        type: 'preview',
+        // 这里使用「工作流名称」作为视图标题，避免侧边栏出现一长串相同的「表单视图」
+        // 如果是多语言对象，优先取 zh-CN，其次任意一个值，避免直接把 JSON 串存进数据库
+        displayName:
+          typeof workflowDisplayName === 'string'
+            ? workflowDisplayName
+            : workflowDisplayName && typeof workflowDisplayName === 'object'
+              ? (workflowDisplayName['zh-CN'] as string) ||
+                (workflowDisplayName['en-US'] as string) ||
+                (Object.values(workflowDisplayName)[0] as string) ||
+                previewPageInstance.name
+              : previewPageInstance.name,
+        workflowId,
+        isBuiltIn: true,
+        teamId,
+        permissions: previewPageInstance.allowedPermissions,
+        sortIndex: 0,
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
+        isDeleted: false,
+      });
+      await entityManager.save(formPage);
+      this.logger.debug(`Created form view page ${pageId} for workflow ${workflowId} in team ${teamId}`);
+    }
+
+    // 2. 获取或创建默认文件夹
+    let defaultGroup = await entityManager.findOne(WorkflowPageGroupEntity, {
+      where: {
+        teamId,
+        isBuiltIn: true,
+      },
+    });
+
+    if (!defaultGroup) {
+      const groupId = generateDbId();
+      defaultGroup = entityManager.create(WorkflowPageGroupEntity, {
+        id: groupId,
+        displayName: JSON.stringify({
+          'zh-CN': '默认',
+          'en-US': 'Default',
+        }),
+        isBuiltIn: true,
+        teamId,
+        pageIds: [],
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
+      });
+      await entityManager.save(defaultGroup);
+      this.logger.debug(`Created default group ${groupId} for team ${teamId}`);
+    }
+
+    // 3. 将表单视图页面固定到默认文件夹（如果尚未固定）
+    if (!defaultGroup.pageIds.includes(formPage.id)) {
+      defaultGroup.pageIds.push(formPage.id);
+      await entityManager.save(defaultGroup);
+      this.logger.debug(`Pinned form view page ${formPage.id} to default group for team ${teamId}`);
     }
   }
 
