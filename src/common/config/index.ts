@@ -8,6 +8,14 @@ import { readConfig } from './readYaml';
 
 export type DatabaseConfig = DataSourceOptions;
 
+// Agent V3 模型配置类型：支持字符串或对象格式
+export type AgentV3ModelConfig =
+  | string
+  | {
+      name: string;
+      apiType?: 'chat'; // 可选：强制使用 chat API，不指定则自动判断
+    };
+
 export interface ConductorConfig {
   baseUrl: string;
   auth?: {
@@ -969,6 +977,7 @@ When answer to user:
     defaultModelId: readConfig('agentv3.defaultModelId', undefined),
     openai: {
       apiKey: readConfig('agentv3.openai.apiKey', process.env.OPENAI_API_KEY),
+      baseUrl: readConfig('agentv3.openai.baseUrl'),
       models: readConfig('agentv3.openai.models', []),
     },
     openaiCompatible: {
@@ -978,10 +987,12 @@ When answer to user:
     },
     anthropic: {
       apiKey: readConfig('agentv3.anthropic.apiKey', process.env.ANTHROPIC_API_KEY),
+      baseUrl: readConfig('agentv3.anthropic.baseUrl'),
       models: readConfig('agentv3.anthropic.models', []),
     },
     google: {
       apiKey: readConfig('agentv3.google.apiKey', process.env.GOOGLE_API_KEY),
+      baseUrl: readConfig('agentv3.google.baseUrl'),
       models: readConfig('agentv3.google.models', []),
     },
   },

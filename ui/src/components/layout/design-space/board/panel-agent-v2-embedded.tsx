@@ -2,15 +2,16 @@ import React, { useRef, useState } from 'react';
 
 import type { Editor } from 'tldraw';
 
-import { useTldrawAgentV2 } from '@/agent/useTldrawAgentV2';
+import { useTldrawAgentV3 } from '@/agent/useTldrawAgentV3';
 
 interface TldrawAgentV2EmbeddedPanelProps {
   editor: Editor | null;
+  boardId?: string;
   onClose?: () => void;
 }
 
-export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProps> = ({ editor, onClose }) => {
-  const agentApi = useTldrawAgentV2(editor);
+export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProps> = ({ editor, boardId }) => {
+  const agentApi = useTldrawAgentV3(editor, boardId);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -85,9 +86,10 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
     if (isRecording) {
       try {
         mediaRecorderRef.current?.stop();
-      } catch {}
+      } catch (error) {
+        console.warn('stop recording failed', error);
+      }
       setIsRecording(false);
-      recordStartRef.current = recordStartRef.current;
       return;
     }
     try {
@@ -144,7 +146,7 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
       <div className="flex h-full flex-col gap-0">
         <div ref={scrollRef} className="flex flex-1 flex-col gap-2.5 overflow-auto p-3">
           {(agentApi?.history ?? []).length === 0 && (
-            <div className="text-xs text-gray-400">开始与 Agent V2 对话，它会理解画布并执行操作。</div>
+            <div className="text-xs text-gray-400">开始与 Agent V3 对话，它会理解画布并执行操作。</div>
           )}
           {(agentApi?.history ?? []).map((m, idx) => {
             const matchedVoice =
@@ -210,9 +212,7 @@ export const TldrawAgentV2EmbeddedPanel: React.FC<TldrawAgentV2EmbeddedPanelProp
             <button
               title="更多"
               className="absolute bottom-2.5 left-2.5 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500"
-              onClick={() => {
-                /* 预留：打开更多操作 */
-              }}
+              onClick={() => undefined}
             >
               <span className="text-base leading-none">+</span>
             </button>

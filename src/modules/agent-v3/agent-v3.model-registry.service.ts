@@ -1,5 +1,5 @@
-import { config } from '@/common/config';
-import { Injectable } from '@nestjs/common';
+import { config, AgentV3ModelConfig as ConfigModelDef } from '@/common/config';
+import { Injectable, Logger } from '@nestjs/common';
 import { LanguageModel } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
@@ -14,10 +14,84 @@ export interface AgentV3ModelConfig {
   displayName?: string;
   supportsImages?: boolean;
   supportsReasoning?: boolean;
+  apiType?: 'chat'; // 可选：强制使用 chat API，不指定则自动判断
 }
 
 @Injectable()
 export class AgentV3ModelRegistryService {
+  private readonly logger = new Logger(AgentV3ModelRegistryService.name);
+
+  /**
+   * 自定义 fetch 函数，仅在错误时记录响应信息
+   */
+  private createLoggingFetch() {
+    return async (url: string, init?: RequestInit) => {
+      try {
+        const response = await fetch(url, init);
+
+        // 如果是错误响应，记录响应内容
+        if (!response.ok) {
+          const responseText = await response.text();
+          this.logger.error(`[HTTP Response] Status: ${response.status}, URL: ${url}`);
+          this.logger.error(`[HTTP Response] Body: ${responseText}`);
+          // 创建新的响应对象（因为 body 已被读取）
+          return new Response(responseText, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers,
+          });
+        }
+
+        return response;
+      } catch (error) {
+        this.logger.error(`[HTTP Request] Error: ${error.message}, URL: ${url}`);
+        throw error;
+      }
+    };
+  }
+
+  /**
+   * 规范化模型配置：将字符串或对象格式统一转换为对象
+   */
+  private normalizeModelConfig(model: ConfigModelDef): { name: string; apiType?: 'chat' } {
+    if (typeof model === 'string') {
+      return { name: model }; // 不指定 apiType，使用自动判断
+    }
+    return { name: model.name, apiType: model.apiType };
+  }
+
+  /**
+   * 根据 provider 和模型名称查找模型配置
+   */
+  private findModelConfig(provider: string, modelName: string): { name: string; apiType?: 'chat' } {
+    let models: ConfigModelDef[] = [];
+
+    switch (provider) {
+      case 'openai':
+        models = (config.agentv3?.openai?.models as ConfigModelDef[]) || [];
+        break;
+      case 'openai-compatible':
+        models = (config.agentv3?.openaiCompatible?.models as ConfigModelDef[]) || [];
+        break;
+      case 'anthropic':
+        models = (config.agentv3?.anthropic?.models as ConfigModelDef[]) || [];
+        break;
+      case 'google':
+        models = (config.agentv3?.google?.models as ConfigModelDef[]) || [];
+        break;
+    }
+
+    for (const model of models) {
+      const normalized = this.normalizeModelConfig(model);
+      if (normalized.name === modelName) {
+        return normalized;
+      }
+    }
+
+    // 未找到配置，返回默认值（自动判断）
+    return { name: modelName };
+  }
+
   /**
    * 根据 teamId 和 modelId 解析为 AI SDK 的 LanguageModel
    */
@@ -38,30 +112,49 @@ export class AgentV3ModelRegistryService {
       case 'openai': {
         const apiKey = config.agentv3?.openai?.apiKey || process.env.OPENAI_API_KEY;
         const baseUrl = config.agentv3?.openai?.baseUrl;
+        const modelConfig = this.findModelConfig('openai', name);
+
         const client = createOpenAI({
+          apiKey,
+          baseURL: baseUrl,
+        });
+
+        // 根据配置选择 API 类型
+        if (modelConfig.apiType === 'chat') {
+          return client.chat(name) as unknown as LanguageModel;
+        }
+        return client(name) as unknown as LanguageModel; // 默认：自动判断
+      }
+      case 'openai-compatible': {
+        const modelConfig = this.findModelConfig('openai-compatible', name);
+
+        const client = createOpenAI({
+          apiKey: config.agentv3?.openaiCompatible?.apiKey || process.env.OPENAI_COMPATIBLE_API_KEY,
+          baseURL: config.agentv3?.openaiCompatible?.baseUrl || process.env.OPENAI_COMPATIBLE_BASE_URL,
+          fetch: this.createLoggingFetch(),
+        });
+
+        // 根据配置选择 API 类型
+        if (modelConfig.apiType === 'chat') {
+          return client.chat(name) as unknown as LanguageModel;
+        }
+        return client(name) as unknown as LanguageModel; // 默认：自动判断
+      }
+      case 'anthropic': {
+        const apiKey = config.agentv3?.anthropic?.apiKey || process.env.ANTHROPIC_API_KEY;
+        const baseUrl = config.agentv3?.anthropic?.baseUrl;
+        const client = createAnthropic({
           apiKey,
           baseURL: baseUrl,
         });
         return client(name) as unknown as LanguageModel;
       }
-      case 'openai-compatible': {
-        const client = createOpenAI({
-          apiKey: config.agentv3?.openaiCompatible?.apiKey || process.env.OPENAI_COMPATIBLE_API_KEY,
-          baseURL: config.agentv3?.openaiCompatible?.baseUrl || process.env.OPENAI_COMPATIBLE_BASE_URL,
-        });
-        return client(name) as unknown as LanguageModel;
-      }
-      case 'anthropic': {
-        const client = createAnthropic({
-          apiKey: config.agentv3?.anthropic?.apiKey || process.env.ANTHROPIC_API_KEY,
-          baseURL: config.agentv3?.anthropic?.baseUrl,
-        });
-        return client(name) as unknown as LanguageModel;
-      }
       case 'google': {
+        const apiKey = config.agentv3?.google?.apiKey || process.env.GOOGLE_API_KEY;
+        const baseUrl = config.agentv3?.google?.baseUrl;
         const client = createGoogleGenerativeAI({
-          apiKey: config.agentv3?.google?.apiKey || process.env.GOOGLE_API_KEY,
-          baseURL: config.agentv3?.google?.baseUrl,
+          apiKey,
+          baseURL: baseUrl,
         });
         return client(name) as unknown as LanguageModel;
       }
@@ -79,44 +172,50 @@ export class AgentV3ModelRegistryService {
     const models: AgentV3ModelConfig[] = [];
 
     if (config.agentv3?.openai?.models) {
-      for (const name of config.agentv3.openai.models) {
+      for (const model of config.agentv3.openai.models as ConfigModelDef[]) {
+        const normalized = this.normalizeModelConfig(model);
         models.push({
-          id: `openai:${name}`,
+          id: `openai:${normalized.name}`,
           providerId: 'openai',
-          modelName: name,
+          modelName: normalized.name,
           supportsImages: true,
+          apiType: normalized.apiType,
         });
       }
     }
 
     if (config.agentv3?.openaiCompatible?.models) {
-      for (const name of config.agentv3.openaiCompatible.models) {
+      for (const model of config.agentv3.openaiCompatible.models as ConfigModelDef[]) {
+        const normalized = this.normalizeModelConfig(model);
         models.push({
-          id: `openai-compatible:${name}`,
+          id: `openai-compatible:${normalized.name}`,
           providerId: 'openai-compatible',
-          modelName: name,
+          modelName: normalized.name,
           supportsImages: true,
+          apiType: normalized.apiType,
         });
       }
     }
 
     if (config.agentv3?.anthropic?.models) {
-      for (const name of config.agentv3.anthropic.models) {
+      for (const model of config.agentv3.anthropic.models as ConfigModelDef[]) {
+        const normalized = this.normalizeModelConfig(model);
         models.push({
-          id: `anthropic:${name}`,
+          id: `anthropic:${normalized.name}`,
           providerId: 'anthropic',
-          modelName: name,
+          modelName: normalized.name,
           supportsImages: true,
         });
       }
     }
 
     if (config.agentv3?.google?.models) {
-      for (const name of config.agentv3.google.models) {
+      for (const model of config.agentv3.google.models as ConfigModelDef[]) {
+        const normalized = this.normalizeModelConfig(model);
         models.push({
-          id: `google:${name}`,
+          id: `google:${normalized.name}`,
           providerId: 'google',
-          modelName: name,
+          modelName: normalized.name,
           supportsImages: true,
         });
       }

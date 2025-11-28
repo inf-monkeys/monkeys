@@ -1,0 +1,39 @@
+diff --git a/node_modules/@ai-sdk/openai/dist/index.js b/node_modules/@ai-sdk/openai/dist/index.js
+index 244b108..951d5dc 100644
+--- a/node_modules/@ai-sdk/openai/dist/index.js
++++ b/node_modules/@ai-sdk/openai/dist/index.js
+@@ -216,6 +216,7 @@ function convertToOpenAIChatMessages({
+           messages.push({
+             role: "tool",
+             tool_call_id: toolResponse.toolCallId,
++            name: toolResponse.toolName,
+             content: contentValue
+           });
+         }
+@@ -1063,7 +1064,7 @@ var OpenAIChatLanguageModel = class {
+   }
+ };
+ function isReasoningModel(modelId) {
+-  return (modelId.startsWith("o") || modelId.startsWith("gpt-5")) && !modelId.startsWith("gpt-5-chat");
++  return (modelId.startsWith("o") || modelId.startsWith("gpt-5")) && !modelId.startsWith("gpt-5-chat") && !modelId.startsWith("gpt-5.1");
+ }
+ function supportsFlexProcessing(modelId) {
+   return modelId.startsWith("o3") || modelId.startsWith("o4-mini") || modelId.startsWith("gpt-5") && !modelId.startsWith("gpt-5-chat");
+diff --git a/node_modules/@ai-sdk/openai/patches/@ai-sdk+openai+2.0.68.patch b/node_modules/@ai-sdk/openai/patches/@ai-sdk+openai+2.0.68.patch
+new file mode 100644
+index 0000000..93592a5
+--- /dev/null
++++ b/node_modules/@ai-sdk/openai/patches/@ai-sdk+openai+2.0.68.patch
+@@ -0,0 +1,12 @@
++diff --git a/node_modules/@ai-sdk/openai/dist/index.js b/node_modules/@ai-sdk/openai/dist/index.js
++index 1234567..abcdefg 100644
++--- a/node_modules/@ai-sdk/openai/dist/index.js
+++++ b/node_modules/@ai-sdk/openai/dist/index.js
++@@ -216,6 +216,7 @@
++           messages.push({
++             role: "tool",
++             tool_call_id: toolResponse.toolCallId,
+++            name: toolResponse.toolName,
++             content: contentValue
++           });
++         }

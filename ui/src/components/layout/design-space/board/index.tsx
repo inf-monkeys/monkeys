@@ -399,12 +399,15 @@ export const Board: React.FC<BoardProps> = ({
   // 获取设计项目信息，用于判断是否为模板以及用户权限
   // 使用可选链和默认值来安全获取路由参数
   let designProjectId: string | undefined;
+  let designBoardId: string | undefined;
   try {
     const params = useParams({ from: '/$teamId/design/$designProjectId/$designBoardId/' });
     designProjectId = params?.designProjectId;
+    designBoardId = params?.designBoardId;
   } catch {
     // 如果不在设计画板路由中，designProjectId 为 undefined
     designProjectId = undefined;
+    designBoardId = undefined;
   }
   const { data: designProject } = useGetDesignProject(designProjectId);
   const { data: user } = useUser();
@@ -987,7 +990,7 @@ export const Board: React.FC<BoardProps> = ({
             ...(leftCollapsed ? {} : {}),
           }}
         >
-          {editor && <ExternalLayerPanel editor={editor} />}
+          {editor && <ExternalLayerPanel editor={editor} boardId={designBoardId} />}
           {/* 右侧拖拽调宽手柄 */}
           {!leftCollapsed && (
             <div

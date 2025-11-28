@@ -1,5 +1,5 @@
 import { AgentV3MessageRepository } from '@/database/repositories/agent-v3-message.repository';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ModelMessage } from 'ai';
 import { MediaFileRepository } from '@/database/repositories/media.repository';
 import { MediaFileEntity } from '@/database/entities/assets/media/media-file';
@@ -7,6 +7,8 @@ import { MediaFileService } from '@/modules/assets/media/media.service';
 
 @Injectable()
 export class AgentV3HistoryService {
+  private readonly logger = new Logger(AgentV3HistoryService.name);
+
   constructor(
     private readonly messageRepo: AgentV3MessageRepository,
     private readonly mediaRepo: MediaFileRepository,
@@ -69,9 +71,10 @@ export class AgentV3HistoryService {
           contentParts.push({ type: 'image', image: url });
         }
 
+        // 只在有图片时使用数组格式，纯文本时使用字符串格式（兼容代理服务器）
         messages.push({
           role: 'user',
-          content: contentParts.length ? contentParts : mergedText || '',
+          content: imageUrls.length > 0 ? contentParts : mergedText || '',
         });
         continue;
       }
@@ -83,16 +86,32 @@ export class AgentV3HistoryService {
           argsForModel = '';
         }
 
+        // 解析 toolInput（数据库中存储为 JSON 字符串）
+        let input: any;
+        if (typeof argsForModel === 'string') {
+          if (argsForModel === '') {
+            input = {}; // 空字符串转为空对象
+          } else {
+            try {
+              input = JSON.parse(argsForModel);
+            } catch {
+              // 如果解析失败，保持为字符串
+              input = argsForModel;
+            }
+          }
+        } else {
+          input = argsForModel;
+        }
+
+        // AI SDK v5 标准格式：content 是包含 tool-call part 的数组
         messages.push({
           role: 'assistant',
-          toolCalls: [
+          content: [
             {
-              id: toolCallId,
-              type: 'function',
-              function: {
-                name: toolName,
-                arguments: argsForModel || '',
-              },
+              type: 'tool-call',
+              toolCallId: toolCallId,
+              toolName: toolName,
+              input: input,
             },
           ],
         } as any);
@@ -109,12 +128,21 @@ export class AgentV3HistoryService {
           }
         }
 
-        const contentForModel = typeof payload === 'string' ? payload : payload == null ? '' : JSON.stringify(payload);
+        // AI SDK v5 标准格式：使用 LanguageModelV2ToolResultOutput
+        // 参考：createToolModelOutput 函数的实现
+        const output = typeof payload === 'string' ? { type: 'text' as const, value: payload } : { type: 'json' as const, value: payload === undefined ? null : payload };
 
+        // AI SDK v5 标准：tool 消息的 content 是 ToolResultPart 数组
         messages.push({
           role: 'tool',
-          toolCallId,
-          content: contentForModel,
+          content: [
+            {
+              type: 'tool-result',
+              toolCallId,
+              toolName,
+              output,
+            },
+          ],
         } as any);
         continue;
       }
