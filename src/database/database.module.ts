@@ -22,6 +22,7 @@ import { AgentV2MessageQueueEntity, AgentV2TaskStateEntity } from './entities/ag
 import { AgentV2Entity } from './entities/agent-v2/agent-v2.entity';
 import { AgentV3SessionEntity } from './entities/agent-v3/agent-v3-session.entity';
 import { AgentV3MessageEntity } from './entities/agent-v3/agent-v3-message.entity';
+import { TldrawAgentV3BindingEntity } from './entities/agent-v3/tldraw-agent-v3-binding.entity';
 import { ApiKeyEntity } from './entities/apikey/apikey';
 import { AssetsAuthorizationEntity } from './entities/assets/asset-authorization';
 import { AssetFilterEntity } from './entities/assets/asset-filter';
@@ -148,6 +149,7 @@ export const entities: EntityClassOrSchema[] = [
   AgentV2MessageQueueEntity,
   AgentV3SessionEntity,
   AgentV3MessageEntity,
+  TldrawAgentV3BindingEntity,
   ModelTrainingEntity,
   ModelTrainingConfigEntity,
   ModelTrainingConfigV2Entity,

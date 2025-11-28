@@ -3,7 +3,7 @@ import { AgentV3ModelRegistryService } from './agent-v3.model-registry.service';
 import { AgentV3HistoryService } from './agent-v3.history.service';
 import { AgentV3MessageRepository } from '@/database/repositories/agent-v3-message.repository';
 import { sseEvent, nowTs } from './agent-v3.sse';
-import { streamText, tool } from 'ai';
+import { streamText, tool, stepCountIs } from 'ai';
 import { z } from 'zod';
 
 export interface AgentV3RunLoopOptions {
@@ -13,6 +13,14 @@ export interface AgentV3RunLoopOptions {
   modelId?: string;
   userMessage: string;
   imageMediaIds?: string[];
+  /**
+   * 追加到默认系统提示词之后（用于特定场景，如 tldraw）
+   */
+  systemPrompt?: string;
+  /**
+   * 追加工具（会与内置 reasoning 工具合并）
+   */
+  tools?: Record<string, unknown>;
 }
 
 type ReasoningInput = {
@@ -118,103 +126,142 @@ Tool usage:
         timestamp: nowTs(),
       });
 
-      const systemPrompt = this.buildSystemPrompt(new Date());
+      const baseSystemPrompt = this.buildSystemPrompt(new Date());
+      const systemPrompt = opts.systemPrompt ? `${baseSystemPrompt}\n\n${opts.systemPrompt}` : baseSystemPrompt;
       const model = this.modelRegistry.resolveModel(teamId, modelId);
       const history = await this.historyService.buildMessagesForModel(sessionId, teamId, systemPrompt);
 
       let pendingText = '';
       let lastReasoningReady: boolean | null = null;
 
-      const tools = { reasoning: reasoningTool };
+      const tools = { reasoning: reasoningTool, ...(opts.tools || {}) };
 
-      const stream = streamText({
-        model,
-        messages: history,
-        tools,
-        toolChoice: 'auto',
-      });
+      let stream;
+      try {
+        stream = streamText({
+          model,
+          messages: history,
+          tools,
+          toolChoice: 'auto',
+          stopWhen: stepCountIs(20), // 允许最多20步推理，支持多轮工具调用
+        });
+      } catch (error) {
+        this.logger.error(`[AgentV3] Failed to create stream: ${error.message}`, error.stack);
+        throw error;
+      }
 
       // streaming: 文本 + 工具调用
-      for await (const event of stream.fullStream) {
-        // NOTE: AI SDK v5 事件模型参考文档，这里只用到 text/tool-calls 的基本能力
-        if (event.type === 'text-delta') {
-          const delta = event.text ?? '';
-          if (!delta) continue;
-          pendingText += delta;
-          // 这里可以按需拆分为 content_start/content_delta 事件，目前简化为最终一次性下发
-        }
+      try {
+        for await (const event of stream.fullStream) {
+          // NOTE: AI SDK v5 事件模型参考文档，这里只用到 text/tool-calls 的基本能力
+          if (event.type === 'text-delta') {
+            const delta = event.text ?? '';
+            if (!delta) continue;
+            pendingText += delta;
+            // 这里可以按需拆分为 content_start/content_delta 事件，目前简化为最终一次性下发
+          }
 
-        if (event.type === 'tool-call') {
-          const toolName = event.toolName;
-          const toolCallId = event.toolCallId;
-          const args = 'args' in event ? event.args : (event as any).input;
-
-          yield sseEvent({
-            type: 'tool_call',
-            tool_call_id: toolCallId,
-            tool_name: toolName,
-            tool_input: args,
-            timestamp: nowTs(),
-          });
-
-          yield sseEvent({
-            type: 'tool_executing',
-            tool_call_id: toolCallId,
-            tool_name: toolName,
-            message: `Executing tool ${toolName}...`,
-            timestamp: nowTs(),
-          });
-
-          if (toolName === 'reasoning') {
-            try {
-              const seq = await this.messageRepo.getNextSequence(sessionId, teamId);
-              await this.messageRepo.insertMessage({
-                sessionId,
-                teamId,
-                role: 'assistant',
-                content: '',
-                toolCallId,
-                toolName,
-                toolInput: JSON.stringify(args),
-                toolOutput: undefined,
-                modelId,
-                sequence: seq,
-              });
-              await this.messageRepo.insertMessage({
-                sessionId,
-                teamId,
-                role: 'tool',
-                content: args?.summary || '',
-                toolCallId,
-                toolName,
-                toolInput: undefined,
-                toolOutput: JSON.stringify(args),
-                modelId: undefined,
-                sequence: seq + 1,
-              });
-            } catch (e) {
-              this.logger.warn(`AgentV3 reasoning persistence error: ${(e as Error).message}`);
-            }
-
-            lastReasoningReady = !!args?.ready_to_reply;
+          if (event.type === 'tool-call') {
+            const toolName = event.toolName;
+            const toolCallId = event.toolCallId;
+            const args = 'args' in event ? event.args : (event as any).input;
 
             yield sseEvent({
-              type: 'tool_result',
+              type: 'tool_call',
               tool_call_id: toolCallId,
               tool_name: toolName,
-              tool_output: args,
-              success: true,
+              tool_input: args,
               timestamp: nowTs(),
             });
+
+            yield sseEvent({
+              type: 'tool_executing',
+              tool_call_id: toolCallId,
+              tool_name: toolName,
+              message: `Executing tool ${toolName}...`,
+              timestamp: nowTs(),
+            });
+
+            if (toolName === 'reasoning') {
+              try {
+                const seq = await this.messageRepo.getNextSequence(sessionId, teamId);
+                await this.messageRepo.insertMessage({
+                  sessionId,
+                  teamId,
+                  role: 'assistant',
+                  content: '',
+                  toolCallId,
+                  toolName,
+                  toolInput: JSON.stringify(args),
+                  toolOutput: undefined,
+                  modelId,
+                  sequence: seq,
+                });
+                await this.messageRepo.insertMessage({
+                  sessionId,
+                  teamId,
+                  role: 'tool',
+                  content: args?.summary || '',
+                  toolCallId,
+                  toolName,
+                  toolInput: undefined,
+                  toolOutput: JSON.stringify(args),
+                  modelId: undefined,
+                  sequence: seq + 1,
+                });
+              } catch (e) {
+                this.logger.warn(`AgentV3 reasoning persistence error: ${(e as Error).message}`);
+              }
+
+              lastReasoningReady = !!args?.ready_to_reply;
+
+              yield sseEvent({
+                type: 'tool_result',
+                tool_call_id: toolCallId,
+                tool_name: toolName,
+                tool_output: args,
+                success: true,
+                timestamp: nowTs(),
+              });
+            }
+          }
+
+          if (event.type === 'tool-result') {
+            const toolCallId = event.toolCallId;
+            const toolName = event.toolName;
+            const result = 'result' in event ? event.result : (event as any).output;
+
+            // reasoning 工具已在 tool-call 事件中处理，跳过避免重复
+            if (toolName !== 'reasoning') {
+              yield sseEvent({
+                type: 'tool_result',
+                tool_call_id: toolCallId,
+                tool_name: toolName,
+                tool_output: result,
+                success: true,
+                timestamp: nowTs(),
+              });
+            }
+          }
+
+          if (event.type === 'finish') {
+            break;
           }
         }
 
-        if (event.type === 'finish') {
-          break;
-        }
-      }
+        readyToReply = lastReasoningReady ?? true;
+      } catch (streamError) {
+        this.logger.error(`[AgentV3] Stream error: ${streamError.message}`, streamError.stack);
 
-      readyToReply = lastReasoningReady ?? true;
+        yield sseEvent({
+          type: 'error',
+          error_code: 'STREAM_ERROR',
+          error_message: streamError.message,
+          timestamp: nowTs(),
+        });
+
+        return;
+      }
 
       if (readyToReply) {
         const finalText = pendingText.trim();
