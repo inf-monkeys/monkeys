@@ -84,6 +84,7 @@ const getShapeTypeInChinese = (type: string, geoKind?: string): string => {
 
 interface ExternalLayerPanelProps {
   editor: Editor;
+  boardId?: string;
 }
 
 // 递归的形状项组件
@@ -573,7 +574,7 @@ const MiniTabularButtons: React.FC<{ tabular$: any; useAbsolutePosition?: boolea
   );
 };
 
-export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }) => {
+export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, boardId }) => {
   const SUBMENU_WIDTH = 220;
   const [currentPageShapeIds, setCurrentPageShapeIds] = useState<TLShapeId[]>([]);
   const [pages, setPages] = useState<{ id: string; name: string }[]>([]);
@@ -2784,7 +2785,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor }
       {/* 当 agentVisible 时，显示 Agent 嵌入；其次是 mini 应用；否则显示页面+图层面板 */}
       {agentVisible && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
-          <TldrawAgentV2EmbeddedPanel editor={editor} onClose={() => setAgentVisible(false)} />
+          <TldrawAgentV2EmbeddedPanel editor={editor} boardId={boardId} onClose={() => setAgentVisible(false)} />
         </div>
       ) : miniPage && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', position: 'relative' }}>
