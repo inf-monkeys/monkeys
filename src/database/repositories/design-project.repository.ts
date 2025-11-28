@@ -153,7 +153,12 @@ export class DesignProjectRepository {
   }
 
   public async update(id: string, designProject: DesignProjectEntity) {
-    return this.designProjectRepository.update(id, designProject);
+    // TypeORM 的 update 只能接受实体上已注册为 Column 的字段
+    // 像 assetType 这类仅在代码中使用、未映射为列的属性如果直接传入，会报
+    // "Property \"assetType\" was not found in \"DesignProjectEntity\"" 错误
+    const { assetType, ...payload } = designProject as any;
+
+    return this.designProjectRepository.update(id, payload);
   }
 
   public async delete(id: string) {
