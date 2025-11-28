@@ -75,6 +75,8 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
   const { data: designProjectList, isLoading, mutate: mutateDesignProjectList } = useGetDesignProjectList();
   const { data: oem } = useSystemConfig();
 
+  const oemId = oem?.theme.id;
+
   const [currentDesignProjectId, setCurrentDesignProjectId] = useState<string | null>(
     designProjectIdFromSearch ?? null,
   );
@@ -201,14 +203,22 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
       <div className="flex w-full flex-col gap-global">
         <div className="flex w-full flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold">{t('common.type.design-project')}</span>
-            {currentDesignProjectId && (
+            <span className="text-xs font-semibold">
+              {currentDesignProjectId
+                ? getI18nContent(selectedDesignProject?.displayName ?? 'Unselected Design Board')
+                : isLoading
+                  ? t('common.load.loading')
+                  : 'Unselected Design Board'}
+            </span>
+            {currentDesignProjectId && oemId != 'lf' && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Pencil className="size-3 cursor-pointer" onClick={() => setDesignProjectEditorVisible(true)} />
                 </TooltipTrigger>
                 <TooltipContent>
-                  {t('workspace.global-design-board.operation-bar.design-project.edit-tooltip')}
+                  {oemId != 'lf'
+                    ? t('workspace.global-design-board.operation-bar.design-project.edit-tooltip')
+                    : 'Edit Board Name'}
                 </TooltipContent>
               </Tooltip>
             )}
@@ -231,10 +241,16 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
             <PopoverContent className="p-0">
               <Command>
                 <CommandInput
-                  placeholder={t('workspace.global-design-board.operation-bar.design-project.search-placeholder')}
+                  placeholder={
+                    oemId != 'lf'
+                      ? t('workspace.global-design-board.operation-bar.design-project.search-placeholder')
+                      : 'Search Board'
+                  }
                 />
                 <CommandEmpty>
-                  {t('workspace.global-design-board.operation-bar.design-project.search-empty')}
+                  {oemId != 'lf'
+                    ? t('workspace.global-design-board.operation-bar.design-project.search-empty')
+                    : 'No Board Found'}
                 </CommandEmpty>
                 <ScrollArea className="h-64">
                   <CommandGroup>
@@ -274,16 +290,18 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
                   <CommandGroup>
                     <CommandItem onSelect={handleCreateDesignProject}>
                       <Plus className="mr-2 h-4 w-4" />
-                      <span>{t('ugc-page.design-project.dropdown.create')}</span>
+                      <span>{oemId != 'lf' ? t('ugc-page.design-project.dropdown.create') : 'Create Board'}</span>
                     </CommandItem>
                     {/* 多画板模式下显示“新建画板” */}
                     {get(oem, 'theme.designProjects.oneOnOne', false) === false && selectedDesignProject && (
                       <CommandItem onSelect={handleCreateDesignBoard}>
                         <Plus className="mr-2 h-4 w-4" />
                         <span>
-                          {t('workspace.global-design-board.operation-bar.design-board.create', {
-                            defaultValue: '新建画板',
-                          })}
+                          {oemId != 'lf'
+                            ? t('workspace.global-design-board.operation-bar.design-board.create', {
+                                defaultValue: '新建画板',
+                              })
+                            : 'Create Board'}
                         </span>
                       </CommandItem>
                     )}
@@ -291,14 +309,16 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
                     {selectedDesignProject && (
                       <CommandItem onSelect={handleShowDeleteConfirm} className="text-red-600">
                         <Trash className="mr-2 h-4 w-4" />
-                        <span>{t('ugc-page.design-project.dropdown.delete')}</span>
+                        <span>{oemId != 'lf' ? t('ugc-page.design-project.dropdown.delete') : 'Delete Board'}</span>
                       </CommandItem>
                     )}
 
-                    <CommandItem onSelect={handleGoToWorkspace}>
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      <span>{t('ugc-page.design-project.dropdown.manage-workspace')}</span>
-                    </CommandItem>
+                    {oemId != 'lf' && (
+                      <CommandItem onSelect={handleGoToWorkspace}>
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        <span>{t('ugc-page.design-project.dropdown.manage-workspace')}</span>
+                      </CommandItem>
+                    )}
                   </CommandGroup>
                 </ScrollArea>
               </Command>
@@ -324,15 +344,19 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t('common.dialog.delete-confirm.title', { type: t('common.type.design-project') })}
+              {oemId != 'lf'
+                ? t('common.dialog.delete-confirm.title', { type: t('common.type.design-project') })
+                : 'Delete Board Confirm'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t('common.dialog.delete-confirm.content', {
-                type: t('common.type.design-project'),
-                name: selectedDesignProject
-                  ? getI18nContent(selectedDesignProject.displayName)
-                  : t('common.utils.unknown'),
-              })}
+              {oemId != 'lf'
+                ? t('common.dialog.delete-confirm.content', {
+                    type: t('common.type.design-project'),
+                    name: selectedDesignProject
+                      ? getI18nContent(selectedDesignProject.displayName)
+                      : t('common.utils.unknown'),
+                  })
+                : 'Are you sure you want to delete this board?'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
