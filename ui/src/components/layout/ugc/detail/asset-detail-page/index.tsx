@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import {
   imageGenerate3DModel,
   imageGenerateJson,
@@ -51,6 +52,19 @@ export const AssetDetailPage = <E extends object>({
   const [isGenerating, setIsGenerating] = useState(false);
   const stepViewerRef = useRef<StepViewerRef | null>(null);
   const [pending3DThumb, setPending3DThumb] = useState<{ id: string; url: string; name: string } | null>(null);
+
+  // 获取 OEM 配置，用于判断是否显示转换时间
+  const { data: oemConfig } = useSystemConfig();
+  const showConversionTime = oemConfig?.theme?.id === 'concept-design';
+
+  // 格式化耗时显示
+  const formatDuration = (ms: number): string => {
+    if (ms < 1000) return `${ms}ms`;
+    if (ms < 60000) return `${(ms / 1000).toFixed(2)}s`;
+    const minutes = Math.floor(ms / 60000);
+    const seconds = ((ms % 60000) / 1000).toFixed(0);
+    return `${minutes}m ${seconds}s`;
+  };
 
   // 获取资产的基本信息
   const assetInfo = {
@@ -422,9 +436,12 @@ export const AssetDetailPage = <E extends object>({
                         // 当图片转换为文字时，调用 AI 生成描述
                         if (isImageFile() && conversionType === 'text' && mutate) {
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             await imageGenerateTxt(asset.id);
-                            toast.success(t('asset.detail.descriptionGenerated'));
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success(t('asset.detail.descriptionGenerated') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
@@ -434,9 +451,12 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isImageFile() && conversionType === '3d-model' && mutate) {
                           // 当图片转换为3D模型时，调用 AI 生成3D模型，并生成缩略图
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             const created3D = await imageGenerate3DModel(asset.id);
-                            toast.success(t('asset.detail.3dModelGenerated') || '3D模型已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.3dModelGenerated') || '3D模型已生成') + timeInfo);
                             if ((created3D as any)?.url && (created3D as any)?.id) {
                               setPending3DThumb({
                                 id: (created3D as any).id,
@@ -453,9 +473,12 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isImageFile() && conversionType === 'symbol-summary' && mutate) {
                           // 当图片转换为 Markdown 时，调用 AI 生成 Markdown 描述
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             await imageGenerateMarkdown(asset.id);
-                            toast.success(t('asset.detail.markdownGenerated') || 'Markdown描述已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.markdownGenerated') || 'Markdown描述已生成') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
@@ -465,11 +488,14 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isImageFile() && conversionType === 'neural-model' && mutate) {
                           // 当图片转换为神经模型时，调用 AI 生成 JSON
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             // 获取文件名（不含扩展名）
                             const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
                             await imageGenerateJson(asset.id, jsonFileName);
-                            toast.success(t('asset.detail.neuralModelGenerated') || '神经模型已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.neuralModelGenerated') || '神经模型已生成') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
@@ -479,6 +505,7 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isTextFile() && conversionType === 'image' && mutate) {
                           // 当文本转换为图片时，读取文本内容并生成图片
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             const response = await fetch((asset as any).url);
                             const text = await response.text();
@@ -488,7 +515,9 @@ export const AssetDetailPage = <E extends object>({
                             const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
 
                             await txtGenerateImage(asset.id, textPreview, jsonFileName);
-                            toast.success(t('asset.detail.imageGenerated') || '图片已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.imageGenerated') || '图片已生成') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
@@ -498,6 +527,7 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isTextFile() && conversionType === 'symbol-summary' && mutate) {
                           // 当文本转换为 Markdown 时，读取文本内容并生成 Markdown
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             const response = await fetch((asset as any).url);
                             const text = await response.text();
@@ -507,7 +537,9 @@ export const AssetDetailPage = <E extends object>({
                             const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
 
                             await txtGenerateMarkdown(asset.id, textPreview, jsonFileName);
-                            toast.success(t('asset.detail.markdownGenerated') || 'Markdown描述已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.markdownGenerated') || 'Markdown描述已生成') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
@@ -517,6 +549,7 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isTextFile() && conversionType === '3d-model' && mutate) {
                           // 当文本转换为3D模型时，读取文本内容并生成3D模型
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             const response = await fetch((asset as any).url);
                             const text = await response.text();
@@ -526,7 +559,9 @@ export const AssetDetailPage = <E extends object>({
                             const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
 
                             const created3D = await txtGenerate3DModel(asset.id, textPreview, jsonFileName);
-                            toast.success(t('asset.detail.3dModelGenerated') || '3D模型已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.3dModelGenerated') || '3D模型已生成') + timeInfo);
                             if ((created3D as any)?.url && (created3D as any)?.id) {
                               setPending3DThumb({
                                 id: (created3D as any).id,
@@ -543,13 +578,16 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isTextFile() && conversionType === 'neural-model' && mutate) {
                           // 当文本转换为 JSON 时，读取文本内容并生成 JSON
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             const response = await fetch((asset as any).url);
                             const text = await response.text();
                             const textPreview = text.substring(0, 100);
                             const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
                             await txtGenerateJson(asset.id, textPreview, jsonFileName);
-                            toast.success(t('asset.detail.neuralModelGenerated') || 'JSON已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.neuralModelGenerated') || 'JSON已生成') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(
@@ -561,10 +599,13 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isStepFile() && conversionType === 'image' && mutate) {
                           // 3D 文件：生成图片（通过截图）
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             const { url: imageUrl } = await captureStepScreenshotAndCreateAsset();
                             await threeDImageUploadImage(asset.id, imageUrl);
-                            toast.success(t('asset.detail.imageGenerated') || '图片已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.imageGenerated') || '图片已生成') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
@@ -574,10 +615,13 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isStepFile() && conversionType === 'text' && mutate) {
                           // 3D 文件：先截图生成图片，再按图片转文本
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             const { url: imageUrl } = await captureStepScreenshotAndCreateAsset();
                             await threeDImageGenerateTxt(asset.id, imageUrl);
-                            toast.success(t('asset.detail.descriptionGenerated'));
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success(t('asset.detail.descriptionGenerated') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
@@ -587,10 +631,13 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isStepFile() && conversionType === 'symbol-summary' && mutate) {
                           // 3D 文件：先截图，再按图片转 Markdown
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             const { url: imageUrl } = await captureStepScreenshotAndCreateAsset();
                             await threeDImageGenerateMarkdown(asset.id, imageUrl);
-                            toast.success(t('asset.detail.markdownGenerated') || 'Markdown描述已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.markdownGenerated') || 'Markdown描述已生成') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
@@ -600,11 +647,14 @@ export const AssetDetailPage = <E extends object>({
                         } else if (isStepFile() && conversionType === 'neural-model' && mutate) {
                           // 3D 文件：先截图，再按图片转 JSON 神经模型
                           setIsGenerating(true);
+                          const startTime = Date.now();
                           try {
                             const { url: imageUrl } = await captureStepScreenshotAndCreateAsset();
                             const jsonFileName = assetInfo.name.replace(/\.[^.]+$/, '');
                             await threeDImageGenerateJson(asset.id, imageUrl, jsonFileName);
-                            toast.success(t('asset.detail.neuralModelGenerated') || '神经模型已生成');
+                            const duration = Date.now() - startTime;
+                            const timeInfo = showConversionTime ? ` (${formatDuration(duration)})` : '';
+                            toast.success((t('asset.detail.neuralModelGenerated') || '神经模型已生成') + timeInfo);
                             await mutate();
                           } catch (error: any) {
                             toast.error(t('asset.detail.generateFailed') + ': ' + (error?.message || 'Unknown error'));
