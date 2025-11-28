@@ -7,6 +7,9 @@ WORKDIR /usr/src/app
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY ["package.json", "yarn.lock", "./"]
 
+# Copy patches directory for patch-package
+COPY patches ./patches
+
 # Install app dependencies
 RUN yarn
 
