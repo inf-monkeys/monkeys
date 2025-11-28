@@ -306,23 +306,15 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     };
 
     try {
-      console.info('[InspirationPanel] start generate', {
-        workflowId,
-        scenario: finalScenario,
-        category: finalCategory,
-        styleModel,
-        brandModel,
-      });
       setStarting(true);
       // 立即刷新一次历史列表，避免等待下一次定时轮询
       void mutateExecutionList?.();
       await executionWorkflow(workflowId, inputData, 1);
-      console.info('[InspirationPanel] start generate success');
     } catch (err) {
-      console.error('[InspirationPanel] start execution failed', err);
+      //console.error('[InspirationPanel] start execution failed', err);
     } finally {
       setStarting(false);
-      console.info('[InspirationPanel] start generate done');
+      void mutateExecutionList?.();
     }
   };
 
@@ -374,15 +366,6 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     return deduped;
   }, [executionListData]);
 
-  // 调试：查看数据流
-  useEffect(() => {
-    console.info('[InspirationPanel] execution data', {
-      workflowId,
-      pages: executionListData?.length,
-      items: executionItems.length,
-      rawPagesLengths: executionListData?.map((p) => p?.data?.length),
-    });
-  }, [executionItems, executionListData, workflowId]);
   const executionImages = useMemo(
     () => {
       const mapped = executionItems.map((item, idx) => {
@@ -420,13 +403,6 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     setDisplayImages([]);
   }, [workflowId]);
 
-  useEffect(() => {
-    console.info('[InspirationPanel] display images', {
-      length: displayImages.length,
-      executionLength: executionImages.length,
-      loading: isLoading,
-    });
-  }, [displayImages.length, executionImages.length, isLoading]);
   const hasMoreExec =
     executionListData && executionListData.length > 0 && (executionListData[size - 1]?.data?.length ?? 0) === LOAD_LIMIT;
   const loadMoreExec = () => {
@@ -434,6 +410,19 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
       setSize((prev) => prev + 1);
     }
   };
+
+  // 如果存在运行中的任务，定期刷新，确保占位状态能回填为完成图片
+  useEffect(() => {
+    if (!workflowId) return;
+    const hasPending = executionItems.some((item) =>
+      ['SCHEDULED', 'RUNNING', 'PAUSED'].includes(item.render?.status),
+    );
+    if (!hasPending) return;
+    const timer = window.setInterval(() => {
+      void mutateExecutionList?.();
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, [executionItems, workflowId, mutateExecutionList]);
 
   return (
     <div className="flex w-full gap-4 pr-1">

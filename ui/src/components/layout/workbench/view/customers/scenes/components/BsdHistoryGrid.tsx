@@ -46,6 +46,7 @@ export const BsdHistoryGrid: React.FC<{
   const [cursor, setCursor] = useState(0);
   const [showBackTop, setShowBackTop] = useState(false);
   const cursorRef = useRef(0);
+  const prevSignatureRef = useRef<string>('');
   const prevWorkflowRef = useRef<string | null | undefined>(workflowId);
   const isLoadingMoreRef = useRef(false);
   const prevEffectiveLenRef = useRef(0);
@@ -63,6 +64,10 @@ export const BsdHistoryGrid: React.FC<{
   const effectiveImages = useMemo(
     () => keyedImages.filter((img) => !removedKeys.has(img._key)),
     [keyedImages, removedKeys],
+  );
+  const effectiveSignature = useMemo(
+    () => effectiveImages.map((img) => `${img._key}:${img.status ?? ''}:${img.url ?? ''}`).join('|'),
+    [effectiveImages],
   );
 
   const appendChunkFrom = React.useCallback(
@@ -90,8 +95,9 @@ export const BsdHistoryGrid: React.FC<{
   useEffect(() => {
     const workflowChanged = workflowId !== undefined && workflowId !== prevWorkflowRef.current;
     const len = effectiveImages.length;
+    const signatureChanged = effectiveSignature !== prevSignatureRef.current;
 
-    if (workflowChanged || len < prevEffectiveLenRef.current) {
+    if (workflowChanged || len < prevEffectiveLenRef.current || signatureChanged) {
       prevWorkflowRef.current = workflowId;
       cursorRef.current = 0;
       setCursor(0);
@@ -99,6 +105,7 @@ export const BsdHistoryGrid: React.FC<{
       setColumns([[], [], []]);
       appendChunkFrom(0);
       prevEffectiveLenRef.current = len;
+      prevSignatureRef.current = effectiveSignature;
       return;
     }
 
@@ -109,7 +116,8 @@ export const BsdHistoryGrid: React.FC<{
     }
 
     prevEffectiveLenRef.current = len;
-  }, [effectiveImages, workflowId, appendChunkFrom, columns]);
+    prevSignatureRef.current = effectiveSignature;
+  }, [effectiveImages, effectiveSignature, workflowId, appendChunkFrom, columns]);
 
   useEffect(() => {
     setRemovedKeys(new Set());
