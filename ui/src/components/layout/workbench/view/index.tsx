@@ -70,9 +70,10 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const resolvedDisplayName = getPageDisplayName(teamPage) || getPageDisplayName(cachedPage);
   const hasPage = !!(teamPage?.id && teamPage?.type);
   const isBsdTheme = systemConfig?.theme?.id === 'bsd';
-  const isInspirationPage =
-    (resolvedDisplayName ?? '').trim() === '灵感生成' || (resolvedDisplayName ?? '').trim() === 'Inspiration Generation';
-  const isBsdInspirationPage = isBsdTheme && isInspirationPage;
+  const trimmedName = (resolvedDisplayName ?? '').trim();
+  const isInspirationPage = trimmedName === '灵感生成' || trimmedName === 'Inspiration Generation';
+  const isStyleFusionPage = trimmedName === '风格融合' || trimmedName === 'Style Fusion';
+  const isBsdCustomPage = isBsdTheme && (isInspirationPage || isStyleFusionPage);
 
   // 检查是否是 Vision Pro 工作流
   const pageName = getI18nContent(teamPage?.displayName) ?? '';
@@ -131,7 +132,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
       ref={ref}
       className={cn(
         'relative w-full flex-1 overflow-hidden p-0',
-        mode === 'mini' ? 'rounded-none' : isBsdInspirationPage ? '' : 'rounded-lg',
+        mode === 'mini' ? 'rounded-none' : isBsdCustomPage ? '' : 'rounded-lg',
       )}
       style={
         workbenchViewTheme === 'bsd-blue'
@@ -160,7 +161,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
                 <h2 className="font-bold">请在 Vision Pro 中打开使用</h2>
               </div>
             </motion.div>
-          ) : isBsdInspirationPage ? (
+          ) : isBsdCustomPage ? (
+            // BSD 定制页面（灵感生成 / 风格融合等）
             <motion.div
               key="vines-workbench-view-bsd"
               className="absolute top-0 size-full overflow-hidden"

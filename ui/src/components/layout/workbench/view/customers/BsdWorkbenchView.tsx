@@ -11,6 +11,7 @@ import {
   InspirationGenerationOptions,
   InspirationGenerationPanel,
 } from './scenes/InspirationGenerationPanel';
+import { StyleFusionPanel, type StyleFusionOptions } from './scenes/StyleFusionPanel';
 
 export const BSD_CONTAINER_BORDER_RADIUS = 20;
 
@@ -20,6 +21,7 @@ interface IBsdWorkbenchViewProps {
 
 type CustomOptions = {
   inspiration?: InspirationGenerationOptions;
+  styleFusion?: StyleFusionOptions;
 };
 
 const getCustomOptions = (page: Partial<IPinPage>): CustomOptions =>
@@ -40,8 +42,13 @@ const FlowInitializer: React.FC<{ workflowId?: string }> = ({ workflowId }) => {
 export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => {
   const displayName =
     getI18nContent(getPageInfo(page)?.displayName) ?? getI18nContent(page.displayName) ?? '波司登工作台';
-  const { inspiration } = getCustomOptions(page);
+  const { inspiration, styleFusion } = getCustomOptions(page);
   const workflowId = page?.workflowId ?? page?.workflow?.id ?? '';
+
+  const trimmedName = (displayName ?? '').trim();
+  const isStyleFusion = trimmedName === '风格融合' || trimmedName === 'Style Fusion';
+  const PanelComponent = isStyleFusion ? StyleFusionPanel : InspirationGenerationPanel;
+  const panelOptions = isStyleFusion ? styleFusion : inspiration;
 
   return (
     <div
@@ -72,7 +79,7 @@ export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => 
             <OutputSelectionStoreProvider createStore={createOutputSelectionStore}>
               <ViewStoreProvider createStore={createViewStore}>
                 <FlowInitializer workflowId={workflowId} />
-                <InspirationGenerationPanel options={{ workflowId, title: displayName, ...inspiration }} />
+                <PanelComponent options={{ workflowId, title: displayName, ...panelOptions }} />
               </ViewStoreProvider>
             </OutputSelectionStoreProvider>
           </ExecutionStoreProvider>
