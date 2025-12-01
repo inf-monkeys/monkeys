@@ -80,6 +80,8 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
     };
   }, [setVisible]);
 
+  const randomSeed15 = () => Math.floor(1e14 + Math.random() * 9e14);
+
   const handleStart = async () => {
     if (!workflowId) return;
     const baseSlot = referenceSlots.find((s) => s.id === 'base');
@@ -103,7 +105,7 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
         image_1: uploadMap['base'] ?? '',
         image_2: uploadMap['reference'] ?? '',
         qwkrp6: '趋势模型',
-        seed: -1,
+        seed: randomSeed15(),
         step: 25,
       };
       void mutateExecutionList?.();

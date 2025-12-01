@@ -101,6 +101,8 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
     };
   }, [setVisible, maskPreviewUrl]);
 
+  const randomSeed15 = () => Math.floor(1e14 + Math.random() * 9e14);
+
   const handleStart = async () => {
     if (!workflowId) return;
     const baseSlot = referenceSlots.find((s) => s.id === 'base');
@@ -136,7 +138,7 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
         cloth_image: clothImage,
         cloth_mask: clothMask,
         reference_image: referenceImage,
-        seed: -1,
+        seed: randomSeed15(),
       };
       void mutateExecutionList?.();
       await executionWorkflow(workflowId, inputData as any, 1);

@@ -75,6 +75,8 @@ export const FreeFissionPanel: React.FC<{ options?: FreeFissionOptions }> = ({ o
     };
   }, [setVisible]);
 
+  const randomSeed15 = () => Math.floor(1e14 + Math.random() * 9e14);
+
   const handleStart = async () => {
     if (!workflowId) return;
     const baseSlot = referenceSlots.find((s) => s.id === 'base');
@@ -96,7 +98,7 @@ export const FreeFissionPanel: React.FC<{ options?: FreeFissionOptions }> = ({ o
         model: ['趋势模型'],
         prompt: prompt,
         reference: uploadMap['base'] ?? '',
-        seed: -1,
+        seed: randomSeed15(),
         steps: 24,
         strength: 0.1,
       };

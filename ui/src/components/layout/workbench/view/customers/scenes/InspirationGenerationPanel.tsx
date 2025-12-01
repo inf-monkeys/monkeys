@@ -269,6 +269,8 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     setVisible?.(true);
   }, [setVisible]);
 
+  const randomSeed15 = () => Math.floor(1e14 + Math.random() * 9e14);
+
   // 当首选模型变化时，随机填充对应提示词
   useEffect(() => {
     const primary = selectionOrder[0];
@@ -299,7 +301,7 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
       jftj9f: brandModel,
       rhpqgw: resolvedOptions.flavors?.[0] ?? '',
       scene: finalScenario ?? '',
-      seed: -1,
+      seed: randomSeed15(),
       steps: 25,
       styleModel,
       width: 768,
