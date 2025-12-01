@@ -1,6 +1,6 @@
 import { useEventEmitter } from 'ahooks';
 import { Plus, X } from 'lucide-react';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import { cn } from '@/utils';
@@ -27,9 +27,24 @@ export const ReferenceImageCard: React.FC<{
   const containerRef = useRef<HTMLDivElement | null>(null);
   const uppy$ = useEventEmitter<any>();
   const uppyRef = useRef<any>(null);
+  const lastUploadedFileRef = useRef<File | null>(null);
   uppy$?.useSubscription?.((uppy: any) => {
     uppyRef.current = uppy;
   });
+
+  // 监听 slot.file 变化，当有新文件时触发上传
+  useEffect(() => {
+    if (slot.file && uppyRef.current?.addFile && slot.file !== lastUploadedFileRef.current) {
+      lastUploadedFileRef.current = slot.file;
+      // 清除之前的文件
+      uppyRef.current.getFiles?.().forEach((f: any) => uppyRef.current.removeFile?.(f.id));
+      try {
+        uppyRef.current.addFile({ data: slot.file, name: slot.file.name, type: slot.file.type });
+      } catch {
+        // fallback
+      }
+    }
+  }, [slot.file]);
 
   const handleFiles = (files: FileList | File[] | null) => {
     if (!files || files.length === 0) return;
@@ -38,15 +53,8 @@ export const ReferenceImageCard: React.FC<{
       toast.info('仅支持图片格式');
       return;
     }
-    onUploadingChange(slot.id, true);
-    if (uppyRef.current?.addFile) {
-      try {
-        uppyRef.current.addFile({ data: file, name: file.name, type: file.type });
-        return;
-      } catch {
-        // fallback
-      }
-    }
+    // 只调用 onSelect 更新状态和打开裁剪弹窗，不立即上传
+    // 上传会在裁剪完成后或关闭弹窗时通过 slot.file 变化触发
     onSelect?.(slot.id, file);
   };
 

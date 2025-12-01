@@ -15,6 +15,7 @@ import { useElementSize } from '@/hooks/use-resize-observer';
 import { useViewStoreOptional } from '@/store/useViewStore';
 
 import { BsdHistoryGrid, type HistoryImage } from './components/BsdHistoryGrid';
+import { CropEditModal } from './components/CropEditModal';
 import { ReferenceImageCard, type ReferenceSlot } from './components/ReferenceImageCard';
 import type { InspirationGenerationOptions } from './InspirationGenerationPanel';
 
@@ -41,12 +42,19 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
   maskUppy$?.useSubscription?.((uppy: any) => {
     maskUppyRef.current = uppy;
   });
+  const [cropEditOpen, setCropEditOpen] = useState(false);
   const [referenceSlots, setReferenceSlots] = useState<ReferenceSlot[]>([
     { id: 'base', label: '局部修改底图' },
     { id: 'reference', label: '参考图', optional: true },
   ]);
 
+  // 用于标记是否是裁剪后的文件，避免重复打开裁剪弹窗
+  const isCroppedFileRef = useRef(false);
+
   const updateSlotFile = (slotId: string, file: File | null) => {
+    const isCropped = isCroppedFileRef.current;
+    isCroppedFileRef.current = false; // 重置标记
+
     setReferenceSlots((prev) =>
       prev.map((slot) => {
         if (slot.id !== slotId) return slot;
@@ -63,24 +71,35 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
           setMaskEditorImage(file);
           setMaskEditorOpen(true);
         }
+        // 只有非裁剪后的文件才打开裁剪弹窗
+        if (slotId === 'reference' && !isCropped) {
+          setCropEditOpen(true);
+        }
         return { ...slot, previewUrl, uploading: true, file };
       }),
     );
   };
 
+  // 用于存储裁剪弹窗打开时收到的缓存 URL
+  const pendingReferenceUrlRef = useRef<string | null>(null);
+
   const handleUploaded = (slotId: string, url: string) => {
+    // 如果裁剪弹窗打开且是 reference，先缓存 URL，等弹窗关闭后再处理
+    if (slotId === 'reference' && cropEditOpen) {
+      pendingReferenceUrlRef.current = url;
+      return;
+    }
+
     setReferenceSlots((prev) =>
-      prev.map((slot) =>
-        slot.id === slotId
-          ? {
-              ...slot,
-              uploadedUrl: url || undefined,
-              uploading: false,
-              previewUrl: url || slot.previewUrl,
-              file: undefined,
-            }
-          : slot,
-      ),
+      prev.map((slot) => {
+        if (slot.id !== slotId) return slot;
+        return {
+          ...slot,
+          uploadedUrl: url || undefined,
+          uploading: false,
+          previewUrl: url || slot.previewUrl,
+        };
+      }),
     );
     if (slotId === 'base' && url) {
       setMaskEditorImage(url);
@@ -91,6 +110,7 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
   const handleUploadingChange = (slotId: string, uploading: boolean) => {
     setReferenceSlots((prev) => prev.map((slot) => (slot.id === slotId ? { ...slot, uploading } : slot)));
   };
+
 
   useEffect(() => {
     setVisible?.(true);
@@ -115,14 +135,19 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
       return;
     }
 
+    // 检查是否有正在上传的图片
+    const uploadingSlots = referenceSlots.filter((s) => s.uploading);
+    if (uploadingSlots.length > 0) {
+      toast.error('请等待图片上传完成');
+      return;
+    }
+
     try {
       setStarting(true);
-      setUploading(true);
       const uploadMap = referenceSlots.reduce<Record<string, string>>((acc, slot) => {
         acc[slot.id] = slot.uploadedUrl ?? '';
         return acc;
       }, {});
-      setUploading(false);
 
       const clothImage = uploadMap['base'] ?? '';
       const referenceImage = uploadMap['reference'] ?? '';
@@ -146,7 +171,6 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
       toast.error(`启动任务失败: ${err instanceof Error ? err.message : '未知错误'}`);
     } finally {
       setStarting(false);
-      setUploading(false);
       void mutateExecutionList?.();
     }
   };
@@ -207,7 +231,7 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
             item.render.status === 'COMPLETED' && item.render.type === 'image' && item.render.data
               ? String(item.render.data)
               : undefined,
-          title: item.raw?.input?.prompt as string | undefined,
+          title: (item as any).raw?.input?.prompt as string | undefined,
           status: item.render.status,
           instanceId: item.instanceId,
         };
@@ -251,6 +275,7 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
     }, 2000);
     return () => window.clearInterval(timer);
   }, [executionItems, workflowId, mutateExecutionList]);
+
 
   return (
     <>
@@ -374,7 +399,9 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
           setMaskFile(file);
           setMaskUploadedUrl(null);
           setMaskUploading(true);
-          if (maskUppyRef.current?.addFile) {
+          if (maskUppyRef.current) {
+            // 先清除之前的文件，避免 "You can only upload 1 file" 错误
+            maskUppyRef.current.getFiles?.().forEach((f: any) => maskUppyRef.current.removeFile?.(f.id));
             try {
               maskUppyRef.current.addFile({ data: file, name: file.name, type: file.type });
             } catch (err) {
@@ -398,6 +425,39 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
           const url = urls?.[0] ?? '';
           setMaskUploadedUrl(url || null);
           setMaskUploading(false);
+        }}
+      />
+      <CropEditModal
+        open={cropEditOpen}
+        onOpenChange={(open) => {
+          setCropEditOpen(open);
+          // 弹窗关闭时，如果有缓存的 URL（用户没裁剪直接关闭），使用缓存的 URL
+          if (!open && pendingReferenceUrlRef.current) {
+            const url = pendingReferenceUrlRef.current;
+            pendingReferenceUrlRef.current = null;
+            setReferenceSlots((prev) =>
+              prev.map((slot) => {
+                if (slot.id !== 'reference') return slot;
+                return {
+                  ...slot,
+                  uploadedUrl: url,
+                  uploading: false,
+                  previewUrl: url,
+                };
+              }),
+            );
+          }
+        }}
+        image={referenceSlots.find((s) => s.id === 'reference')?.previewUrl}
+        onCropComplete={(blob) => {
+          // 清除缓存的 URL，因为用户选择了裁剪
+          pendingReferenceUrlRef.current = null;
+          // 将裁剪后的 Blob 转换为 File
+          const file = new File([blob], `cropped-reference-${Date.now()}.png`, { type: 'image/png' });
+          // 标记为裁剪后的文件，避免重复打开裁剪弹窗
+          isCroppedFileRef.current = true;
+          // 通过 updateSlotFile 触发上传流程
+          updateSlotFile('reference', file);
         }}
       />
     </>
