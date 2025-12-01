@@ -35,6 +35,7 @@ interface IVinesIframeMessage {
 export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVinesIframeMessage) => {
   // console.log('outputs', outputs);
   const [lastOutputsLength, setLastOutputsLength] = useState(0);
+  const executionRecord = useRef<Map<string, VinesWorkflowExecutionOutputListItemForIframe>>(new Map());
 
   const sendExecutionStart = useMemoizedFn((workflows: MonkeyWorkflowExecution[]) => {
     const message = stringify({
@@ -94,9 +95,9 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
         setLastOutputsLength(outputs.length);
       }
 
-      const data: VinesWorkflowExecutionOutputListItemForIframe[] = outputs
+      const normalizedExecutions: VinesWorkflowExecutionOutputListItemForIframe[] = outputs
         // .filter((it) => it.status === 'COMPLETED')
-        .slice(0, 4)
+        // .slice(0, 4)
         .map(
           ({
             instanceId,
@@ -112,18 +113,30 @@ export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVine
             ...it,
           }),
         );
-      if (data.length === 0) return;
+      if (normalizedExecutions.length === 0) return;
+
+      normalizedExecutions.forEach((execution) => {
+        executionRecord.current.set(execution.workflowInstanceId, execution);
+      });
+
+      const mergedExecutions = Array.from(executionRecord.current.values());
+      if (mergedExecutions.length === 0) return;
 
       window.parent.postMessage(
         stringify({
           'v-event': 'vines-execution-image-outputs',
-          // 'v-data': msg.slice(0, 4),
-          'v-data': data.slice(0, 16),
+          'v-data': mergedExecutions,
         }),
         '*',
       );
     }
   }, [enable, outputs]);
+
+  useEffect(() => {
+    return () => {
+      executionRecord.current.clear();
+    };
+  }, []);
 
   const messageListened = useRef(false);
   const messageEvent = useMemoizedFn((event: MessageEvent<any>) => {
