@@ -1,3 +1,4 @@
+import { useEventEmitter } from 'ahooks';
 import { Sparkles } from 'lucide-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -7,14 +8,15 @@ import { BsdImageIcon } from '@/components/icons/BsdImageIcon';
 import { BsdLightIcon } from '@/components/icons/BsdLightIcon';
 import { HistoryIcon, PanelCard, PanelHeader } from '@/components/layout/workbench/view/customers/scenes/components/PanelSection';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result';
+import { MaskEditorDialog } from '@/components/mask-editor';
 import { WorkbenchOperationBar } from '@/components/ui/vines-iframe/view/operation-bar';
+import { VinesUploader } from '@/components/ui/vines-uploader';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import { useViewStoreOptional } from '@/store/useViewStore';
-import { MaskEditorDialog } from '@/components/mask-editor';
 
 import { BsdHistoryGrid, type HistoryImage } from './components/BsdHistoryGrid';
-import type { InspirationGenerationOptions } from './InspirationGenerationPanel';
 import { ReferenceImageCard, type ReferenceSlot } from './components/ReferenceImageCard';
+import type { InspirationGenerationOptions } from './InspirationGenerationPanel';
 
 export type LocalEditOptions = InspirationGenerationOptions;
 
@@ -31,6 +33,14 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
   const [maskEditorOpen, setMaskEditorOpen] = useState(false);
   const [maskEditorImage, setMaskEditorImage] = useState<File | string | null>(null);
   const [maskFile, setMaskFile] = useState<File | null>(null);
+  const [maskPreviewUrl, setMaskPreviewUrl] = useState<string | null>(null);
+  const [maskUploadedUrl, setMaskUploadedUrl] = useState<string | null>(null);
+  const [maskUploading, setMaskUploading] = useState(false);
+  const maskUppy$ = useEventEmitter<any>();
+  const maskUppyRef = useRef<any>(null);
+  maskUppy$?.useSubscription?.((uppy: any) => {
+    maskUppyRef.current = uppy;
+  });
   const [referenceSlots, setReferenceSlots] = useState<ReferenceSlot[]>([
     { id: 'base', label: '局部修改底图' },
     { id: 'reference', label: '参考图', optional: true },
@@ -87,14 +97,19 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
     return () => {
       previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
       previewUrlsRef.current.clear();
+      if (maskPreviewUrl) URL.revokeObjectURL(maskPreviewUrl);
     };
-  }, [setVisible]);
+  }, [setVisible, maskPreviewUrl]);
 
   const handleStart = async () => {
     if (!workflowId) return;
     const baseSlot = referenceSlots.find((s) => s.id === 'base');
     if (!baseSlot?.file && !baseSlot?.uploadedUrl) {
       toast.error('请先上传局部修改底图');
+      return;
+    }
+    if (!maskUploadedUrl && !maskPreviewUrl && !maskFile) {
+      toast.error('请先生成并上传遮罩');
       return;
     }
 
@@ -107,19 +122,26 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
       }, {});
       setUploading(false);
 
+      const clothImage = uploadMap['base'] ?? '';
+      const referenceImage = uploadMap['reference'] ?? '';
+      const clothMask = maskUploadedUrl || maskPreviewUrl || '';
+      if (!clothMask) {
+        toast.error('遮罩未就绪，请重新生成遮罩');
+        setStarting(false);
+        setUploading(false);
+        return;
+      }
+
       const inputData: Record<string, unknown> = {
-        batch_size: 3,
-        prompt_input: prompt,
-        image_1: uploadMap['base'] ?? '',
-        image_2: uploadMap['reference'] ?? '',
-        qwkrp6: '趋势模型',
-        seed: Math.floor(Math.random() * 1_000_000),
-        step: 25,
+        cloth_image: clothImage,
+        cloth_mask: clothMask,
+        reference_image: referenceImage,
+        seed: -1,
       };
       void mutateExecutionList?.();
       await executionWorkflow(workflowId, inputData as any, 1);
     } catch (err) {
-      toast.error('启动任务失败');
+      toast.error(`启动任务失败: ${err instanceof Error ? err.message : '未知错误'}`);
     } finally {
       setStarting(false);
       setUploading(false);
@@ -247,6 +269,13 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
                     onSelect={updateSlotFile}
                     onUploaded={handleUploaded}
                     onUploadingChange={handleUploadingChange}
+                    maskPreviewUrl={slot.id === 'base' ? maskPreviewUrl ?? undefined : undefined}
+                    onOpenMask={(slotId, image) => {
+                      if (slotId === 'base') {
+                        setMaskEditorImage(image);
+                        setMaskEditorOpen(true);
+                      }
+                    }}
                   />
                 ))}
               </div>
@@ -284,8 +313,10 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
               disabled={
                 starting ||
                 uploading ||
+                maskUploading ||
                 !workflowId ||
-                !referenceSlots.find((s) => s.id === 'base' && s.uploadedUrl)
+                !referenceSlots.find((s) => s.id === 'base' && s.uploadedUrl) ||
+                (!maskUploadedUrl && !maskPreviewUrl && !maskFile)
               }
             >
               <span className="pointer-events-none absolute bottom-0 left-1/2 h-2 w-2/3 -translate-x-1/2 translate-y-[6px] rounded-full bg-white/60 blur-[12px]" />
@@ -334,8 +365,38 @@ export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ optio
         open={maskEditorOpen}
         onOpenChange={setMaskEditorOpen}
         image={maskEditorImage}
-        onMaskGenerated={(file) => setMaskFile(file)}
+        onMaskGenerated={(file) => {
+          if (maskPreviewUrl) URL.revokeObjectURL(maskPreviewUrl);
+          const url = URL.createObjectURL(file);
+          setMaskPreviewUrl(url);
+          setMaskFile(file);
+          setMaskUploadedUrl(null);
+          setMaskUploading(true);
+          if (maskUppyRef.current?.addFile) {
+            try {
+              maskUppyRef.current.addFile({ data: file, name: file.name, type: file.type });
+            } catch (err) {
+              console.error('mask upload failed to start', err);
+              setMaskUploading(false);
+            }
+          } else {
+            setMaskUploading(false);
+          }
+          setMaskEditorOpen(false);
+        }}
         title="编辑遮罩"
+      />
+      <VinesUploader
+        className="hidden"
+        basePath="user-files/workflow-input"
+        max={1}
+        files={maskUploadedUrl ? [maskUploadedUrl] : []}
+        uppy$={maskUppy$}
+        onChange={(urls) => {
+          const url = urls?.[0] ?? '';
+          setMaskUploadedUrl(url || null);
+          setMaskUploading(false);
+        }}
       />
     </>
   );

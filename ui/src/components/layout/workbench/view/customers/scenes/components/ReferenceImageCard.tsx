@@ -21,7 +21,9 @@ export const ReferenceImageCard: React.FC<{
   onSelect: (slotId: string, file: File | null) => void;
   onUploaded: (slotId: string, url: string) => void;
   onUploadingChange: (slotId: string, uploading: boolean) => void;
-}> = ({ slot, onSelect, onUploaded, onUploadingChange }) => {
+  maskPreviewUrl?: string;
+  onOpenMask?: (slotId: string, image: File | string) => void;
+}> = ({ slot, onSelect, onUploaded, onUploadingChange, maskPreviewUrl, onOpenMask }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const uppy$ = useEventEmitter<any>();
   const uppyRef = useRef<any>(null);
@@ -98,13 +100,30 @@ export const ReferenceImageCard: React.FC<{
           zIndex: 0,
         }}
         onClick={(e) => {
-          // 点击仅用于聚焦，便于粘贴
+          if (slot.id === 'base' && (slot.previewUrl || slot.uploadedUrl) && onOpenMask) {
+            const image = slot.uploadedUrl || slot.previewUrl;
+            if (image) {
+              onOpenMask(slot.id, image);
+              return;
+            }
+          }
+          // 默认点击用于聚焦，便于粘贴
           (e.currentTarget as HTMLDivElement).focus();
         }}
       >
         {slot.previewUrl ? (
           <>
             <img src={slot.previewUrl} alt={slot.label} className="h-full w-full object-cover" />
+            {maskPreviewUrl && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <img
+                  src={maskPreviewUrl}
+                  alt="mask-preview"
+                  className="h-full w-full object-cover mix-blend-screen"
+                  style={{ opacity: 0.6 }}
+                />
+              </div>
+            )}
             <button
               type="button"
               onClick={(e) => {

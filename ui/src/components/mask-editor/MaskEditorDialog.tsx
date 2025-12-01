@@ -8,7 +8,7 @@ import {
   RotateCcw,
   Square
 } from 'lucide-react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -43,8 +43,11 @@ const toDataUrl = (fileOrUrl?: File | string | null) =>
 const MaskCanvas: React.FC<{
   imageSrc?: string;
   initMaskSrc?: string;
+  open?: boolean;
   onExport?: (file: File) => void;
-}> = ({ imageSrc, initMaskSrc, onExport }) => {
+}> = ({ imageSrc, initMaskSrc, open, onExport }) => {
+  const EDITOR_HEIGHT = 'clamp(320px, calc(100vh - 240px), 480px)';
+  const TOOLBAR_MAX_HEIGHT = `calc(${EDITOR_HEIGHT} - 80px)`; // 预留上下间距
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const maskCanvasRef = useRef<HTMLCanvasElement | null>(null); // 原尺寸遮罩
   const [mode, setMode] = useState<Mode>('brush');
@@ -70,10 +73,10 @@ const MaskCanvas: React.FC<{
   const shapeBtnRef = useRef<HTMLButtonElement | null>(null);
   const [shapeMenuPos, setShapeMenuPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const toolbarRef = useRef<HTMLDivElement | null>(null);
-  const [editorHeight, setEditorHeight] = useState(480);
-  const [editorWidth, setEditorWidth] = useState(820);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [showShapeMenu, setShowShapeMenu] = useState(false);
   const [shapeType, setShapeType] = useState<'rect' | 'ellipse'>('rect');
+  const middlePanRef = useRef(false);
 
   const viewScale = useMemo(() => {
     if (!imageInfo || !canvasRef.current) return 1;
@@ -313,6 +316,14 @@ const MaskCanvas: React.FC<{
 
   const handlePointerDown: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     if (!imageInfo) return;
+    if (event.button === 1) {
+      // Middle button pans regardless of current mode
+      event.currentTarget.setPointerCapture(event.pointerId);
+      middlePanRef.current = true;
+      startPointRef.current = { x: event.clientX, y: event.clientY };
+      setIsDrawing(true);
+      return;
+    }
     const point = toImageCoords(event.clientX, event.clientY);
     if (!point) return;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -338,7 +349,19 @@ const MaskCanvas: React.FC<{
       }
       pushUndo();
       setPenPoints((prev) => [...prev, point]);
-      setPenHandles((prev) => [...prev, {}]);
+      setPenHandles((prev) => {
+        const next = [...prev];
+        const prevAnchor = penPoints[penPoints.length - 1];
+        const prevOut = prev.length ? prev[prev.length - 1]?.handleOut : undefined;
+        if (prevAnchor && prevOut) {
+          const mirrorDx = prevAnchor.x - prevOut.x;
+          const mirrorDy = prevAnchor.y - prevOut.y;
+          next.push({ handleIn: { x: point.x + mirrorDx, y: point.y + mirrorDy } });
+        } else {
+          next.push({});
+        }
+        return next;
+      });
       setPenDragTarget({ index: penPoints.length, type: 'out' });
       setIsDrawing(true);
       setRenderTick((t) => t + 1);
@@ -369,6 +392,15 @@ const MaskCanvas: React.FC<{
 
   const handlePointerMove: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     if (!isDrawing) return;
+    if (middlePanRef.current) {
+      if (!startPointRef.current) return;
+      const dx = event.clientX - startPointRef.current.x;
+      const dy = event.clientY - startPointRef.current.y;
+      setPan((p) => ({ x: p.x + dx, y: p.y + dy }));
+      startPointRef.current = { x: event.clientX, y: event.clientY };
+      setRenderTick((t) => t + 1);
+      return;
+    }
     if (mode === 'pan') {
       if (!startPointRef.current) return;
       const dx = event.clientX - startPointRef.current.x;
@@ -424,6 +456,11 @@ const MaskCanvas: React.FC<{
   const handlePointerUp: React.PointerEventHandler<HTMLCanvasElement> = (event) => {
     if (!isDrawing) return;
     event.currentTarget.releasePointerCapture(event.pointerId);
+    if (middlePanRef.current) {
+      middlePanRef.current = false;
+      setIsDrawing(false);
+      return;
+    }
     setIsDrawing(false);
     if (mode === 'pen' && penDragTarget) {
       setPenDragTarget(null);
@@ -449,6 +486,15 @@ const MaskCanvas: React.FC<{
       setPreviewLine(null);
       setRenderTick((t) => t + 1);
     }
+  };
+
+  const handleDoubleClick: React.MouseEventHandler<HTMLCanvasElement> = (event) => {
+    if (mode !== 'pen' || penPoints.length < 3) return;
+    event.preventDefault();
+    commitPenPath();
+    setIsDrawing(false);
+    setPenDragTarget(null);
+    startPointRef.current = null;
   };
 
   const handleWheel: React.WheelEventHandler<HTMLDivElement> = (event) => {
@@ -586,33 +632,69 @@ const MaskCanvas: React.FC<{
     render();
   }, [renderTick, imageInfo, previewShape, penPoints, centerOffset, viewScale]);
 
-  useEffect(() => {
-    const updateSize = () => {
-      const h = Math.min(640, Math.max(360, window.innerHeight - 240));
-      const w = Math.min(960, Math.max(640, window.innerWidth - 320));
-      setEditorHeight(h);
-      setEditorWidth(w);
-    };
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
+  const syncCanvasSize = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const width = Math.max(1, Math.floor(rect.width));
+    const height = Math.max(1, Math.floor(rect.height));
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+      setRenderTick((t) => t + 1);
+    }
   }, []);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const resize = () => {
-      const { clientWidth, clientHeight } = canvas;
-      if (clientWidth && clientHeight) {
-        canvas.width = clientWidth;
-        canvas.height = clientHeight;
-        setRenderTick((t) => t + 1);
+    syncCanvasSize();
+    window.addEventListener('resize', syncCanvasSize);
+    return () => window.removeEventListener('resize', syncCanvasSize);
+  }, [syncCanvasSize]);
+
+  useEffect(() => {
+    syncCanvasSize();
+  }, [imageInfo, open, syncCanvasSize]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    syncCanvasSize();
+    const raf = requestAnimationFrame(syncCanvasSize);
+    const timeout1 = window.setTimeout(syncCanvasSize, 60);
+    const timeout2 = window.setTimeout(syncCanvasSize, 150);
+    const timeout3 = window.setTimeout(syncCanvasSize, 300);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+      clearTimeout(timeout3);
+    };
+  }, [open, syncCanvasSize]);
+
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => syncCanvasSize());
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [syncCanvasSize]);
+
+  useEffect(() => {
+    if (!open) return;
+    let raf: number | null = null;
+    const tick = () => {
+      syncCanvasSize();
+      const canvas = canvasRef.current;
+      const w = canvas?.getBoundingClientRect().width ?? 0;
+      const h = canvas?.getBoundingClientRect().height ?? 0;
+      if (w < 2 || h < 2) {
+        raf = requestAnimationFrame(tick);
       }
     };
-    resize();
-    window.addEventListener('resize', resize);
-    return () => window.removeEventListener('resize', resize);
-  }, []);
+    tick();
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [open, syncCanvasSize]);
 
   const exportMask = async () => {
     const mask = maskCanvasRef.current;
@@ -664,21 +746,32 @@ const MaskCanvas: React.FC<{
   ];
 
   return (
-    <div className="flex flex-col gap-3 no-scrollbar overflow-y-auto">
+    <div className="flex flex-col gap-3 overflow-hidden">
       <div
         className="relative flex w-full items-center justify-center overflow-visible rounded-2xl border border-white/10"
         style={{
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           background: '#1A1B27',
-          height: editorHeight,
+          height: EDITOR_HEIGHT,
+          width: '100%',
         }}
         onWheel={handleWheel}
+        ref={containerRef}
       >
+        <canvas
+          ref={canvasRef}
+          className="block h-full w-full select-none"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onDoubleClick={handleDoubleClick}
+        />
+
         <div
           ref={toolbarRef}
-          className="absolute left-4 top-1/2 z-10 flex w-[96px] -translate-y-1/2 flex-col gap-2 rounded-2xl bg-[rgb(42,42,42)] p-1.5 text-white shadow-lg overflow-visible relative"
-          style={{ backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}
+          className="absolute top-1/2 z-10 flex w-[96px] -translate-y-1/2 flex-col gap-2 rounded-2xl bg-[rgb(42,42,42)] p-1.5 text-white shadow-lg overflow-visible"
+          style={{ left: 20, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}
           onWheel={(e) => {
             // 防止工具栏滚轮触发画布缩放
             e.stopPropagation();
@@ -686,17 +779,19 @@ const MaskCanvas: React.FC<{
         >
           <div
             className="flex flex-col gap-2 overflow-y-auto no-scrollbar"
-            style={{ maxHeight: editorHeight - 80 }}
+            style={{ maxHeight: TOOLBAR_MAX_HEIGHT }}
           >
             {toolButtons.map((item) => {
               if (item.key === 'divider') {
                 return <div key="divider" className="my-1 h-[2px] w-[70%] self-center rounded-full" style={{ background: '#676767' }} />;
               }
-            const isActive = item.mode ? mode === item.mode : item.key === 'rect' ? mode === 'rect' : false;
-            return (
-              <Button
-                key={item.key}
-                ref={item.key === 'brush-size' ? brushSizeBtnRef : item.key === 'rect' ? shapeBtnRef : undefined}
+              const isActive = item.mode ? mode === item.mode : item.key === 'rect' ? mode === 'rect' : false;
+              const targetRef =
+                item.key === 'brush-size' ? brushSizeBtnRef : item.key === 'rect' ? shapeBtnRef : undefined;
+              return (
+                <Button
+                  key={item.key}
+                  ref={targetRef}
                   variant={isActive ? 'secondary' : 'ghost'}
                   size="sm"
                   className={cn(
@@ -735,10 +830,7 @@ const MaskCanvas: React.FC<{
                     }
                   }}
                 >
-                  <item.icon
-                    className="h-4 w-4 text-white stroke-white"
-                    style={{ stroke: '#FFFFFF', color: '#FFFFFF' }}
-                  />
+                  <item.icon className="h-4 w-4 text-white stroke-white" style={{ stroke: '#FFFFFF', color: '#FFFFFF' }} />
                   <span>{item.label}</span>
                 </Button>
               );
@@ -809,22 +901,37 @@ const MaskCanvas: React.FC<{
             </div>
           )}
         </div>
-
-        <canvas
-            ref={canvasRef}
-            className="h-full w-full select-none"
-            style={{
-              maxHeight: editorHeight,
-              maxWidth: editorWidth,
-            }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-          />
       </div>
 
       <div className="flex justify-end">
-        <Button size="sm" onClick={exportMask}>
+        <Button
+          size="sm"
+          variant="borderless"
+          onClick={exportMask}
+          className={cn(
+            '!h-[42px] !w-[227px] !rounded-[10px] !px-0',
+            '!text-white !leading-[16px] !text-[16px] !font-semibold',
+            'transition duration-150 hover:!brightness-110 active:!brightness-95',
+            'hover:!bg-[linear-gradient(0deg,rgba(40,82,173,0.08),rgba(40,82,173,0.08)),#2C5EF5]',
+            'active:!bg-[linear-gradient(0deg,rgba(40,82,173,0.08),rgba(40,82,173,0.08)),#2C5EF5]',
+          )}
+          style={{
+            width: 227,
+            height: 42,
+            borderRadius: 10,
+            opacity: 1,
+            background: 'linear-gradient(0deg, rgba(40, 82, 173, 0.08), rgba(40, 82, 173, 0.08)), #2C5EF5',
+            boxShadow: 'inset 4px 4px 8.7px 0px rgba(255, 255, 255, 0.25)',
+            fontFamily: '"Alibaba PuHuiTi 3.0", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif',
+            fontSize: 16,
+            fontWeight: 600,
+            lineHeight: '16px',
+            letterSpacing: '0em',
+            fontVariationSettings: '"opsz" auto',
+            fontFeatureSettings: '"kern" on',
+            color: '#FFFFFF',
+          }}
+        >
           生成遮罩
         </Button>
       </div>
@@ -888,11 +995,11 @@ export const MaskEditorDialog: React.FC<MaskEditorDialogProps> = ({
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-white">{title}</DialogTitle>
         </DialogHeader>
-        <div className="max-h-[640px] overflow-y-auto no-scrollbar">
+        <div className="overflow-hidden">
           {!imageSrc ? (
             <div className="flex h-[480px] items-center justify-center text-sm text-white/60">请先提供一张图片以编辑遮罩</div>
           ) : (
-            <MaskCanvas imageSrc={imageSrc} initMaskSrc={initMaskSrc} onExport={onMaskGenerated} />
+            <MaskCanvas open={open} imageSrc={imageSrc} initMaskSrc={initMaskSrc} onExport={onMaskGenerated} />
           )}
         </div>
       </DialogContent>
