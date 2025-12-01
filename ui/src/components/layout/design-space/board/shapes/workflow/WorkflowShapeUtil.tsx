@@ -493,7 +493,24 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       });
     }
 
-    return Array.from(new Set(outputs));
+    // 去重后按画布中的位置排序（先按 Y 从上到下，再按 X 从左到右）
+    const uniqueOutputs = Array.from(new Set(outputs));
+
+    uniqueOutputs.sort((a, b) => {
+      const boundsA = editor.getShapePageBounds(a as any);
+      const boundsB = editor.getShapePageBounds(b as any);
+
+      if (!boundsA || !boundsB) return 0;
+
+      const dy = boundsA.y - boundsB.y;
+      if (Math.abs(dy) > 2) {
+        return dy;
+      }
+
+      return boundsA.x - boundsB.x;
+    });
+
+    return uniqueOutputs;
   };
 
   const handleRun = async () => {

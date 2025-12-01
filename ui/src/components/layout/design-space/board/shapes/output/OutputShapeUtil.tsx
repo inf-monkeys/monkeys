@@ -444,7 +444,13 @@ function OutputShapeComponent({
       </div>
 
       {/* 内容区域 */}
-      <div style={{ flex: 1, padding: '12px', overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <div
+        style={{ flex: 1, padding: '12px', overflow: 'auto', display: 'flex', flexDirection: 'column' }}
+        // 防止在内容区域滚动 / 拖动滚动条时触发画布上的拖拽（移动整个 Output 框）
+        onPointerDown={(e) => {
+          e.stopPropagation();
+        }}
+      >
         {/* 空状态 */}
         {isEmpty && !isEditing && (
           <div
