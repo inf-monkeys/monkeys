@@ -25,7 +25,7 @@ export const TabMenu: React.FC<ITabMenuProps> = memo(({ onOpenChange }) => {
   const forceUpdate = useForceUpdate();
 
   return (
-    <DropdownMenu onOpenChange={onOpenChange}>
+    <DropdownMenu modal={false} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button className="-m-1 scale-[.8] p-1 [&_svg]:stroke-gold-12" icon={<MoreVertical />} variant="borderless" />
       </DropdownMenuTrigger>
