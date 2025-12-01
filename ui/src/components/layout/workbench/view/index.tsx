@@ -71,9 +71,18 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const hasPage = !!(teamPage?.id && teamPage?.type);
   const isBsdTheme = systemConfig?.theme?.id === 'bsd';
   const trimmedName = (resolvedDisplayName ?? '').trim();
-  const isInspirationPage = trimmedName === '灵感生成' || trimmedName === 'Inspiration Generation';
-  const isStyleFusionPage = trimmedName === '风格融合' || trimmedName === 'Style Fusion';
-  const isBsdCustomPage = isBsdTheme && (isInspirationPage || isStyleFusionPage);
+  const normalizedName = trimmedName.toLowerCase();
+  const customNames = [
+    '灵感生成',
+    'inspiration generation',
+    '风格融合',
+    'style fusion',
+    '自由裂变',
+    'free fission',
+    '局部修改',
+    'local edit',
+  ].map((name) => name.toLowerCase());
+  const isBsdCustomPage = isBsdTheme && customNames.includes(normalizedName);
 
   // 检查是否是 Vision Pro 工作流
   const pageName = getI18nContent(teamPage?.displayName) ?? '';

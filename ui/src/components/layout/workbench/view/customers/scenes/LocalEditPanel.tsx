@@ -10,14 +10,15 @@ import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execut
 import { WorkbenchOperationBar } from '@/components/ui/vines-iframe/view/operation-bar';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import { useViewStoreOptional } from '@/store/useViewStore';
+import { MaskEditorDialog } from '@/components/mask-editor';
 
 import { BsdHistoryGrid, type HistoryImage } from './components/BsdHistoryGrid';
-import { ReferenceImageCard, type ReferenceSlot } from './components/ReferenceImageCard';
 import type { InspirationGenerationOptions } from './InspirationGenerationPanel';
+import { ReferenceImageCard, type ReferenceSlot } from './components/ReferenceImageCard';
 
-export type StyleFusionOptions = InspirationGenerationOptions;
+export type LocalEditOptions = InspirationGenerationOptions;
 
-export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ options }) => {
+export const LocalEditPanel: React.FC<{ options?: LocalEditOptions }> = ({ options }) => {
   const resolvedOptions = useMemo(() => options ?? {}, [options]);
   const { height: rightHeight, ref: rightRef } = useElementSize<HTMLDivElement>();
   const setVisible = useViewStoreOptional((s) => s?.setVisible);
@@ -27,8 +28,11 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
   const [prompt, setPrompt] = useState(resolvedOptions.prompt ?? '');
   const [starting, setStarting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [maskEditorOpen, setMaskEditorOpen] = useState(false);
+  const [maskEditorImage, setMaskEditorImage] = useState<File | string | null>(null);
+  const [maskFile, setMaskFile] = useState<File | null>(null);
   const [referenceSlots, setReferenceSlots] = useState<ReferenceSlot[]>([
-    { id: 'base', label: '廓形参考图' },
+    { id: 'base', label: '局部修改底图' },
     { id: 'reference', label: '参考图', optional: true },
   ]);
 
@@ -45,6 +49,10 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
         }
         const previewUrl = URL.createObjectURL(file);
         previewUrlsRef.current.add(previewUrl);
+        if (slotId === 'base') {
+          setMaskEditorImage(file);
+          setMaskEditorOpen(true);
+        }
         return { ...slot, previewUrl, uploading: true, file };
       }),
     );
@@ -64,12 +72,14 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
           : slot,
       ),
     );
+    if (slotId === 'base' && url) {
+      setMaskEditorImage(url);
+      setMaskEditorOpen(true);
+    }
   };
 
   const handleUploadingChange = (slotId: string, uploading: boolean) => {
-    setReferenceSlots((prev) =>
-      prev.map((slot) => (slot.id === slotId ? { ...slot, uploading } : slot)),
-    );
+    setReferenceSlots((prev) => prev.map((slot) => (slot.id === slotId ? { ...slot, uploading } : slot)));
   };
 
   useEffect(() => {
@@ -103,7 +113,7 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
         image_1: uploadMap['base'] ?? '',
         image_2: uploadMap['reference'] ?? '',
         qwkrp6: '趋势模型',
-        seed: -1,
+        seed: Math.floor(Math.random() * 1_000_000),
         step: 25,
       };
       void mutateExecutionList?.();
@@ -219,105 +229,114 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
   }, [executionItems, workflowId, mutateExecutionList]);
 
   return (
-    <div className="flex w-full gap-4 pr-1">
-      <div className="flex w-[400px] min-h-0 flex-col gap-3">
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <PanelCard className="gap-4" padding={12}>
-            <PanelHeader
-              icon={<BsdImageIcon className="size-5" />}
-              title={resolvedOptions.title ?? '图像参考'}
-              description="上传图像参考"
-            />
-            <div className="flex flex-row flex-wrap gap-3">
-              {referenceSlots.map((slot) => (
-                <ReferenceImageCard
-                  key={slot.id}
-                  slot={slot}
-                  onSelect={updateSlotFile}
-                  onUploaded={handleUploaded}
-                  onUploadingChange={handleUploadingChange}
-                />
-              ))}
-            </div>
-          </PanelCard>
-
-          <PanelCard className="gap-3" padding={12}>
-            <PanelHeader
-              icon={<BsdLightIcon className="size-5" />}
-              title="创意描述"
-              description="通过文字描述生成图片或使用提示词字典提升生成效果"
-            />
-            <div
-              className="rounded-2xl border border-white/15 p-4 transition-colors duration-400 hover:border-white/40"
-              style={{ background: 'rgba(255, 255, 255, 0.08)' }}
-            >
-              <textarea
-                value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
-                rows={5}
-                className="h-36 w-full resize-none bg-transparent text-sm leading-relaxed text-white placeholder:text-white/40 focus:outline-none"
-                placeholder="请输入创意描述"
+    <>
+      <div className="flex w-full gap-4 pr-1">
+        <div className="flex w-[400px] min-h-0 flex-col gap-3">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <PanelCard className="gap-4" padding={12}>
+              <PanelHeader
+                icon={<BsdImageIcon className="size-5" />}
+                title={resolvedOptions.title ?? '图像参考'}
+                description="上传图像参考"
               />
-            </div>
-          </PanelCard>
-        </div>
+              <div className="flex flex-row flex-wrap gap-3">
+                {referenceSlots.map((slot) => (
+                  <ReferenceImageCard
+                    key={slot.id}
+                    slot={slot}
+                    onSelect={updateSlotFile}
+                    onUploaded={handleUploaded}
+                    onUploadingChange={handleUploadingChange}
+                  />
+                ))}
+              </div>
+            </PanelCard>
 
-        <div className="flex w-full items-center justify-between gap-3 pb-1 pt-1">
-          <button
-            type="button"
-            onClick={handleStart}
-            className="relative flex h-[42px] w-full items-center justify-center gap-2 overflow-hidden rounded-[10px] px-5 text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-          style={{
-            background: 'linear-gradient(0deg, rgba(40, 82, 173, 0.08), rgba(40, 82, 173, 0.08)), #2C5EF5',
-          }}
-          disabled={
-            starting ||
-            uploading ||
-            !workflowId ||
-            !referenceSlots.find((s) => s.id === 'base' && s.uploadedUrl)
-          }
-        >
-            <span className="pointer-events-none absolute bottom-0 left-1/2 h-2 w-2/3 -translate-x-1/2 translate-y-[6px] rounded-full bg-white/60 blur-[12px]" />
-            <Sparkles className="size-5" stroke="none" fill="#FFFFFF" />
-            <span
+            <PanelCard className="gap-3" padding={12}>
+              <PanelHeader
+                icon={<BsdLightIcon className="size-5" />}
+                title="创意描述"
+                description="通过文字描述生成图片或使用提示词字典提升生成效果"
+              />
+              <div
+                className="rounded-2xl border border-white/15 p-4 transition-colors duration-400 hover:border-white/40"
+                style={{ background: 'rgba(255, 255, 255, 0.08)' }}
+              >
+                <textarea
+                  value={prompt}
+                  onChange={(event) => setPrompt(event.target.value)}
+                  rows={5}
+                  className="h-36 w-full resize-none bg-transparent text-sm leading-relaxed text-white placeholder:text-white/40 focus:outline-none"
+                  placeholder="请输入创意描述"
+                />
+              </div>
+            </PanelCard>
+          </div>
+
+          <div className="flex w-full items-center justify-between gap-3 pb-1 pt-1">
+            <button
+              type="button"
+              onClick={handleStart}
+              className="relative flex h-[42px] w-full items-center justify-center gap-2 overflow-hidden rounded-[10px] px-5 text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
               style={{
-                fontFamily: 'Microsoft YaHei UI, Microsoft YaHei, Alibaba PuHuiTi 3.0, sans-serif',
-                fontSize: 16,
-                fontWeight: 700,
-                lineHeight: '20px',
-                letterSpacing: '0em',
-                color: '#FFFFFF',
-                fontVariationSettings: '"opsz" auto',
-                fontFeatureSettings: '"kern" on',
-                textShadow: '0 1px 6px rgba(0, 0, 0, 0.25)',
+                background: 'linear-gradient(0deg, rgba(40, 82, 173, 0.08), rgba(40, 82, 173, 0.08)), #2C5EF5',
               }}
+              disabled={
+                starting ||
+                uploading ||
+                !workflowId ||
+                !referenceSlots.find((s) => s.id === 'base' && s.uploadedUrl)
+              }
             >
-              开始生成
-            </span>
-          </button>
-          <div className="flex h-full items-center">
-            <WorkbenchOperationBar />
+              <span className="pointer-events-none absolute bottom-0 left-1/2 h-2 w-2/3 -translate-x-1/2 translate-y-[6px] rounded-full bg-white/60 blur-[12px]" />
+              <Sparkles className="size-5" stroke="none" fill="#FFFFFF" />
+              <span
+                style={{
+                  fontFamily: 'Microsoft YaHei UI, Microsoft YaHei, Alibaba PuHuiTi 3.0, sans-serif',
+                  fontSize: 16,
+                  fontWeight: 700,
+                  lineHeight: '20px',
+                  letterSpacing: '0em',
+                  color: '#FFFFFF',
+                  fontVariationSettings: '"opsz" auto',
+                  fontFeatureSettings: '"kern" on',
+                  textShadow: '0 1px 6px rgba(0, 0, 0, 0.25)',
+                }}
+              >
+                开始生成
+              </span>
+            </button>
+            <div className="flex h-full items-center">
+              <WorkbenchOperationBar />
+            </div>
           </div>
         </div>
-      </div>
 
-      <PanelCard ref={rightRef} className="flex flex-1 min-h-0 gap-3 overflow-hidden" padding={12}>
-        <div className="mb-2">
-          <PanelHeader icon={<HistoryIcon />} title="历史生成" description="查看当前生成图片和历史生成图片" />
-        </div>
-        <div className="flex flex-1 min-h-0">
-          <BsdHistoryGrid
-            images={displayImages.length ? displayImages : executionImages}
-            workflowId={workflowId}
-            hasMore={hasMoreExec}
-            onLoadMore={loadMoreExec}
-            onDeleted={() => mutateExecutionList?.()}
-            loading={isLoading && (executionImages.length === 0 && displayImages.length === 0)}
-            loadingMore={isValidating && (executionImages.length > 0 || displayImages.length > 0)}
-            height={rightHeight || 800}
-          />
-        </div>
-      </PanelCard>
-    </div>
+        <PanelCard ref={rightRef} className="flex flex-1 min-h-0 gap-3 overflow-hidden" padding={12}>
+          <div className="mb-2">
+            <PanelHeader icon={<HistoryIcon />} title="历史生成" description="查看当前生成图片和历史生成图片" />
+          </div>
+          <div className="flex flex-1 min-h-0">
+            <BsdHistoryGrid
+              images={displayImages.length ? displayImages : executionImages}
+              workflowId={workflowId}
+              hasMore={hasMoreExec}
+              onLoadMore={loadMoreExec}
+              onDeleted={() => mutateExecutionList?.()}
+              loading={isLoading && (executionImages.length === 0 && displayImages.length === 0)}
+              loadingMore={isValidating && (executionImages.length > 0 || displayImages.length > 0)}
+              height={rightHeight || 800}
+            />
+          </div>
+        </PanelCard>
+      </div>
+      <MaskEditorDialog
+        open={maskEditorOpen}
+        onOpenChange={setMaskEditorOpen}
+        image={maskEditorImage}
+        onMaskGenerated={(file) => setMaskFile(file)}
+        title="编辑遮罩"
+      />
+    </>
   );
 };

@@ -13,6 +13,7 @@ import {
 } from './scenes/InspirationGenerationPanel';
 import { StyleFusionPanel, type StyleFusionOptions } from './scenes/StyleFusionPanel';
 import { FreeFissionPanel, type FreeFissionOptions } from './scenes/FreeFissionPanel';
+import { LocalEditPanel, type LocalEditOptions } from './scenes/LocalEditPanel';
 
 export const BSD_CONTAINER_BORDER_RADIUS = 20;
 
@@ -24,6 +25,7 @@ type CustomOptions = {
   inspiration?: InspirationGenerationOptions;
   styleFusion?: StyleFusionOptions;
   freeFission?: FreeFissionOptions;
+  localEdit?: LocalEditOptions;
 };
 
 const getCustomOptions = (page: Partial<IPinPage>): CustomOptions =>
@@ -44,14 +46,28 @@ const FlowInitializer: React.FC<{ workflowId?: string }> = ({ workflowId }) => {
 export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => {
   const displayName =
     getI18nContent(getPageInfo(page)?.displayName) ?? getI18nContent(page.displayName) ?? '波司登工作台';
-  const { inspiration, styleFusion, freeFission } = getCustomOptions(page);
+  const { inspiration, styleFusion, freeFission, localEdit } = getCustomOptions(page);
   const workflowId = page?.workflowId ?? page?.workflow?.id ?? '';
 
   const trimmedName = (displayName ?? '').trim();
-  const isFreeFission = trimmedName === '自由裂变' || trimmedName === 'Free Fission';
-  const isStyleFusion = trimmedName === '风格融合' || trimmedName === 'Style Fusion';
-  const PanelComponent = isFreeFission ? FreeFissionPanel : isStyleFusion ? StyleFusionPanel : InspirationGenerationPanel;
-  const panelOptions = isFreeFission ? freeFission : isStyleFusion ? styleFusion : inspiration;
+  const normalizedName = trimmedName.toLowerCase();
+
+  const panelRegistry: Array<{
+    names: string[];
+    component: React.FC<{ options?: InspirationGenerationOptions }>;
+    options: InspirationGenerationOptions | FreeFissionOptions | StyleFusionOptions | LocalEditOptions | undefined;
+  }> = [
+    { names: ['局部修改', 'local edit'], component: LocalEditPanel, options: localEdit },
+    { names: ['自由裂变', 'free fission'], component: FreeFissionPanel, options: freeFission },
+    { names: ['风格融合', 'style fusion'], component: StyleFusionPanel, options: styleFusion },
+  ];
+
+  const matchedPanel = panelRegistry.find((entry) =>
+    entry.names.some((name) => normalizedName === name.toLowerCase()),
+  );
+
+  const PanelComponent = matchedPanel?.component ?? InspirationGenerationPanel;
+  const panelOptions = matchedPanel?.options ?? inspiration;
 
   return (
     <div
