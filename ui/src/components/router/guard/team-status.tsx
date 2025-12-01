@@ -74,7 +74,7 @@ export const TeamStatusGuard: React.FC<TeamStatusGuardProps> = ({
             setShowOverlay(false);
             // 状态变为 success 时调用回调函数
             onSuccess?.();
-            mutate((key) => typeof key === 'string' && key.startsWith('/api/workflow'));
+            mutate((key) => typeof key === 'string' && key.startsWith('/api'));
           }, successDisplayDuration);
           break;
 
