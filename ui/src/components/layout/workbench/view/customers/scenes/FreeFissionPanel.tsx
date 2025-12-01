@@ -12,12 +12,12 @@ import { useElementSize } from '@/hooks/use-resize-observer';
 import { useViewStoreOptional } from '@/store/useViewStore';
 
 import { BsdHistoryGrid, type HistoryImage } from './components/BsdHistoryGrid';
-import { ReferenceImageCard, type ReferenceSlot } from './components/ReferenceImageCard';
 import type { InspirationGenerationOptions } from './InspirationGenerationPanel';
+import { ReferenceImageCard, type ReferenceSlot } from './components/ReferenceImageCard';
 
-export type StyleFusionOptions = InspirationGenerationOptions;
+export type FreeFissionOptions = InspirationGenerationOptions;
 
-export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ options }) => {
+export const FreeFissionPanel: React.FC<{ options?: FreeFissionOptions }> = ({ options }) => {
   const resolvedOptions = useMemo(() => options ?? {}, [options]);
   const { height: rightHeight, ref: rightRef } = useElementSize<HTMLDivElement>();
   const setVisible = useViewStoreOptional((s) => s?.setVisible);
@@ -27,10 +27,7 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
   const [prompt, setPrompt] = useState(resolvedOptions.prompt ?? '');
   const [starting, setStarting] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [referenceSlots, setReferenceSlots] = useState<ReferenceSlot[]>([
-    { id: 'base', label: '局部修改底图' },
-    { id: 'reference', label: '参考图', optional: true },
-  ]);
+  const [referenceSlots, setReferenceSlots] = useState<ReferenceSlot[]>([{ id: 'base', label: '参考图' }]);
 
   const updateSlotFile = (slotId: string, file: File | null) => {
     setReferenceSlots((prev) =>
@@ -67,9 +64,7 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
   };
 
   const handleUploadingChange = (slotId: string, uploading: boolean) => {
-    setReferenceSlots((prev) =>
-      prev.map((slot) => (slot.id === slotId ? { ...slot, uploading } : slot)),
-    );
+    setReferenceSlots((prev) => prev.map((slot) => (slot.id === slotId ? { ...slot, uploading } : slot)));
   };
 
   useEffect(() => {
@@ -84,7 +79,7 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
     if (!workflowId) return;
     const baseSlot = referenceSlots.find((s) => s.id === 'base');
     if (!baseSlot?.file && !baseSlot?.uploadedUrl) {
-      toast.error('请先上传局部修改底图');
+      toast.error('请先上传参考图');
       return;
     }
 
@@ -98,13 +93,12 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
       setUploading(false);
 
       const inputData: Record<string, unknown> = {
-        batch_size: 3,
-        prompt_input: prompt,
-        image_1: uploadMap['base'] ?? '',
-        image_2: uploadMap['reference'] ?? '',
-        qwkrp6: '趋势模型',
+        model: ['趋势模型'],
+        prompt: prompt,
+        reference: uploadMap['base'] ?? '',
         seed: -1,
-        step: 25,
+        steps: 24,
+        strength: 0.1,
       };
       void mutateExecutionList?.();
       await executionWorkflow(workflowId, inputData as any, 1);
@@ -225,8 +219,8 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
           <PanelCard className="gap-4" padding={12}>
             <PanelHeader
               icon={<BsdImageIcon className="size-5" />}
-              title={resolvedOptions.title ?? '图像参考'}
-              description="上传图像参考"
+              title={resolvedOptions.title ?? '参考图'}
+              description="上传参考图"
             />
             <div className="flex flex-row flex-wrap gap-3">
               {referenceSlots.map((slot) => (
@@ -267,16 +261,11 @@ export const StyleFusionPanel: React.FC<{ options?: StyleFusionOptions }> = ({ o
             type="button"
             onClick={handleStart}
             className="relative flex h-[42px] w-full items-center justify-center gap-2 overflow-hidden rounded-[10px] px-5 text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-          style={{
-            background: 'linear-gradient(0deg, rgba(40, 82, 173, 0.08), rgba(40, 82, 173, 0.08)), #2C5EF5',
-          }}
-          disabled={
-            starting ||
-            uploading ||
-            !workflowId ||
-            !referenceSlots.find((s) => s.id === 'base' && s.uploadedUrl)
-          }
-        >
+            style={{
+              background: 'linear-gradient(0deg, rgba(40, 82, 173, 0.08), rgba(40, 82, 173, 0.08)), #2C5EF5',
+            }}
+            disabled={starting || uploading || !workflowId || !referenceSlots.find((s) => s.id === 'base' && s.uploadedUrl)}
+          >
             <span className="pointer-events-none absolute bottom-0 left-1/2 h-2 w-2/3 -translate-x-1/2 translate-y-[6px] rounded-full bg-white/60 blur-[12px]" />
             <Sparkles className="size-5" stroke="none" fill="#FFFFFF" />
             <span
