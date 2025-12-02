@@ -85,6 +85,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
     'free fission',
     '局部修改',
     'local edit',
+    '光影大片',
+    'light effect',
   ].map((name) => name.toLowerCase());
   const isBsdCustomPage = isBsdTheme && customNames.includes(normalizedName);
 
