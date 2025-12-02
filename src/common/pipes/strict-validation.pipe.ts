@@ -10,7 +10,7 @@ export class StrictValidationPipe implements PipeTransform {
     }
 
     const object = plainToInstance(metadata.metatype as any, value);
-    const errors = validateSync(object as Record<string, unknown>, {
+    const errors = validateSync(object as any, {
       whitelist: true,
       forbidUnknownValues: true,
       forbidNonWhitelisted: false,
