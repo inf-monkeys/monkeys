@@ -9,10 +9,10 @@ import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
@@ -27,7 +27,7 @@ interface IWorkbenchQuickSwitcherProps {
 }
 
 const DEFAULT_LABEL = '选择视图';
-const MAX_GROUPS = 2; // 控制可展示的分组数量
+const MAX_GROUPS = 1; // 控制可展示的分组数量
 
 const getPageInfo = (page?: Partial<IPinPage>) => page?.workflow ?? page?.agent ?? page?.designProject ?? page?.info;
 

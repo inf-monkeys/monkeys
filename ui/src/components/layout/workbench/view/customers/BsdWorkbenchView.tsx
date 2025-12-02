@@ -1,21 +1,25 @@
 import React, { useEffect } from 'react';
 
 import { IPinPage } from '@/apis/pages/typings';
-import { getI18nContent } from '@/utils';
-import { createFlowStore, FlowStoreProvider, useFlowStore } from '@/store/useFlowStore';
+import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { createExecutionStore, ExecutionStoreProvider } from '@/store/useExecutionStore';
+import { createFlowStore, FlowStoreProvider, useFlowStore } from '@/store/useFlowStore';
 import { createOutputSelectionStore, OutputSelectionStoreProvider } from '@/store/useOutputSelectionStore';
 import { createViewStore, ViewStoreProvider } from '@/store/useViewStore';
-import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
+import { getI18nContent } from '@/utils';
+import { type AtmosphereOptions } from './scenes/AtmospherePanel';
+import { FreeFissionPanel, type FreeFissionOptions } from './scenes/FreeFissionPanel';
+import { GarmentOnModelPanel, type GarmentOnModelOptions } from './scenes/GarmentOnModelPanel';
 import {
   InspirationGenerationOptions,
   InspirationGenerationPanel,
 } from './scenes/InspirationGenerationPanel';
-import { StyleFusionPanel, type StyleFusionOptions } from './scenes/StyleFusionPanel';
-import { FreeFissionPanel, type FreeFissionOptions } from './scenes/FreeFissionPanel';
-import { LocalEditPanel, type LocalEditOptions } from './scenes/LocalEditPanel';
+import { type LightEffectOptions } from './scenes/LightEffectPanel';
 import { LineToGarmentPanel, type LineToGarmentOptions } from './scenes/LineToGarmentPanel';
-import { LightEffectPanel, type LightEffectOptions } from './scenes/LightEffectPanel';
+import { LocalEditPanel, type LocalEditOptions } from './scenes/LocalEditPanel';
+import { type RunwayOptions } from './scenes/RunwayPanel';
+import { type SmartOutfitOptions } from './scenes/SmartOutfitPanel';
+import { StyleFusionPanel, type StyleFusionOptions } from './scenes/StyleFusionPanel';
 
 export const BSD_CONTAINER_BORDER_RADIUS = 20;
 
@@ -29,7 +33,11 @@ type CustomOptions = {
   freeFission?: FreeFissionOptions;
   localEdit?: LocalEditOptions;
   lineToGarment?: LineToGarmentOptions;
+  garmentOnModel?: GarmentOnModelOptions;
   lightEffect?: LightEffectOptions;
+  atmosphere?: AtmosphereOptions;
+  smartOutfit?: SmartOutfitOptions;
+  runway?: RunwayOptions;
 };
 
 const getCustomOptions = (page: Partial<IPinPage>): CustomOptions =>
@@ -50,7 +58,8 @@ const FlowInitializer: React.FC<{ workflowId?: string }> = ({ workflowId }) => {
 export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => {
   const displayName =
     getI18nContent(getPageInfo(page)?.displayName) ?? getI18nContent(page.displayName) ?? '波司登工作台';
-  const { inspiration, styleFusion, freeFission, localEdit, lineToGarment, lightEffect } = getCustomOptions(page);
+  const { inspiration, styleFusion, freeFission, localEdit, lineToGarment,garmentOnModel, lightEffect, atmosphere, smartOutfit, runway } =
+    getCustomOptions(page);
   const workflowId = page?.workflowId ?? page?.workflow?.id ?? '';
 
   const trimmedName = (displayName ?? '').trim();
@@ -65,14 +74,22 @@ export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => 
       | StyleFusionOptions
       | LocalEditOptions
       | LineToGarmentOptions
+      | GarmentOnModelOptions
       | LightEffectOptions
+      | AtmosphereOptions
+      | SmartOutfitOptions
+      | RunwayOptions
       | undefined;
   }> = [
     { names: ['局部修改', 'local edit'], component: LocalEditPanel, options: localEdit },
     { names: ['自由裂变', 'free fission'], component: FreeFissionPanel, options: freeFission },
     { names: ['风格融合', 'style fusion'], component: StyleFusionPanel, options: styleFusion },
     { names: ['线稿成衣', 'line to garment'], component: LineToGarmentPanel, options: lineToGarment },
+    { names: ['成衣上身', 'garment on model'], component: GarmentOnModelPanel, options: garmentOnModel },
     { names: ['光影大片', 'light effect'], component: LightEffectPanel, options: lightEffect },
+    { names: ['灵感图生成', 'atmosphere', '氛围图'], component: AtmospherePanel, options: atmosphere },
+    { names: ['智能穿搭', 'smart outfit'], component: SmartOutfitPanel, options: smartOutfit },
+    { names: ['秀场款生成', 'runway'], component: RunwayPanel, options: runway },
   ];
 
   const matchedPanel = panelRegistry.find((entry) =>
