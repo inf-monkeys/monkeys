@@ -27,6 +27,7 @@ interface IWorkbenchQuickSwitcherProps {
 }
 
 const DEFAULT_LABEL = '选择视图';
+const MAX_GROUPS = 2; // 控制可展示的分组数量
 
 const getPageInfo = (page?: Partial<IPinPage>) => page?.workflow ?? page?.agent ?? page?.designProject ?? page?.info;
 
@@ -40,19 +41,18 @@ export const WorkbenchQuickSwitcher: React.FC<IWorkbenchQuickSwitcherProps> = ({
 
   const [selectedWorkbenchPageName, setSelectedWorkbenchPageName] = useState(DEFAULT_LABEL);
 
-  const firstGroupWithPages = useMemo(() => {
-    if (!workspaceData?.groups?.length) return null;
-    const firstGroup = workspaceData.groups[0];
-    if (!firstGroup?.pageIds?.length) return null;
+  const groupedPages = useMemo(() => {
+    if (!workspaceData?.groups?.length) return [];
     const pageMap = keyBy(workspaceData.pages ?? [], 'id');
-    const pages = firstGroup.pageIds
-      .map((pageId) => pageMap[pageId])
-      .filter(Boolean) as IPinPage[];
-    if (!pages.length) return null;
-    return { group: firstGroup, pages };
+    return workspaceData.groups.slice(0, MAX_GROUPS).map((group) => {
+      const pages = (group.pageIds ?? [])
+        .map((pageId) => pageMap[pageId])
+        .filter(Boolean) as IPinPage[];
+      return { group, pages };
+    });
   }, [workspaceData?.groups, workspaceData?.pages]);
 
-  const firstGroupPages = firstGroupWithPages?.pages;
+  const firstGroupPages = groupedPages[0]?.pages;
 
   const getPageDisplayName = (page?: Partial<IPinPage>) =>
     getI18nContent(getPageInfo(page)?.displayName) ??
@@ -124,33 +124,39 @@ export const WorkbenchQuickSwitcher: React.FC<IWorkbenchQuickSwitcherProps> = ({
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="center" className="min-w-0" sideOffset={6}>
-        {firstGroupWithPages ? (
-          firstGroupWithPages.pages.map((page) => (
-            <DropdownMenuItem
-              key={page.id}
-              className="flex items-center gap-2 py-1.5"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                const pageDisplayName = getPageDisplayName(page) ?? DEFAULT_LABEL;
-                setSelectedWorkbenchPageName(pageDisplayName);
-                onEnsureWorkbench?.();
-                setCurrentPage({
-                  [teamId]: { ...page, groupId: firstGroupWithPages.group.id },
-                });
-                VinesEvent.emit('vines-nav', '/$teamId/', { teamId });
-              }}
-            >
-              {getPageIconUrl(page) ? (
-                <VinesIcon className="size-4" size="sm" disabledPreview>
-                  {getPageIconUrl(page)}
-                </VinesIcon>
-              ) : (
-                <VinesLucideIcon className="size-4 text-muted-foreground" size={14} src={getPageInstanceIcon(page)} />
-              )}
-              <span className="text-sm font-medium leading-tight text-foreground">{getPageDisplayName(page)}</span>
-            </DropdownMenuItem>
-          ))
+        {groupedPages.length ? (
+          groupedPages.map(({ group, pages }, idx) =>
+            pages.length ? (
+              <div key={group.id} className={cn('last:border-b-0', idx < groupedPages.length - 1 && 'border-b border-border')}>
+                {pages.map((page) => (
+                  <DropdownMenuItem
+                    key={page.id}
+                    className="flex items-center gap-2 py-1.5"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      const pageDisplayName = getPageDisplayName(page) ?? DEFAULT_LABEL;
+                      setSelectedWorkbenchPageName(pageDisplayName);
+                      onEnsureWorkbench?.();
+                      setCurrentPage({
+                        [teamId]: { ...page, groupId: group.id },
+                      });
+                      VinesEvent.emit('vines-nav', '/$teamId/', { teamId });
+                    }}
+                  >
+                    {getPageIconUrl(page) ? (
+                      <VinesIcon className="size-4" size="sm" disabledPreview>
+                        {getPageIconUrl(page)}
+                      </VinesIcon>
+                    ) : (
+                      <VinesLucideIcon className="size-4 text-muted-foreground" size={14} src={getPageInstanceIcon(page)} />
+                    )}
+                    <span className="text-sm font-medium leading-tight text-foreground">{getPageDisplayName(page)}</span>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            ) : null,
+          )
         ) : (
           <DropdownMenuItem disabled className="text-xs text-muted-foreground">
             暂无工作台分组

@@ -79,6 +79,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
     'style fusion',
     '线稿成衣',
     'line to garment',
+    '成衣上身',
+    'garment on model',
     '自由裂变',
     'free fission',
     '局部修改',
