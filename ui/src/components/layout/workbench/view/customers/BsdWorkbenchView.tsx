@@ -7,18 +7,18 @@ import { createFlowStore, FlowStoreProvider, useFlowStore } from '@/store/useFlo
 import { createOutputSelectionStore, OutputSelectionStoreProvider } from '@/store/useOutputSelectionStore';
 import { createViewStore, ViewStoreProvider } from '@/store/useViewStore';
 import { getI18nContent } from '@/utils';
-import { type AtmosphereOptions } from './scenes/AtmospherePanel';
+import { AtmospherePanel, type AtmosphereOptions } from './scenes/AtmospherePanel';
 import { FreeFissionPanel, type FreeFissionOptions } from './scenes/FreeFissionPanel';
 import { GarmentOnModelPanel, type GarmentOnModelOptions } from './scenes/GarmentOnModelPanel';
 import {
   InspirationGenerationOptions,
   InspirationGenerationPanel,
 } from './scenes/InspirationGenerationPanel';
-import { type LightEffectOptions } from './scenes/LightEffectPanel';
+import { LightEffectPanel, type LightEffectOptions } from './scenes/LightEffectPanel';
 import { LineToGarmentPanel, type LineToGarmentOptions } from './scenes/LineToGarmentPanel';
 import { LocalEditPanel, type LocalEditOptions } from './scenes/LocalEditPanel';
-import { type RunwayOptions } from './scenes/RunwayPanel';
-import { type SmartOutfitOptions } from './scenes/SmartOutfitPanel';
+import { RunwayPanel, type RunwayOptions } from './scenes/RunwayPanel';
+import { SmartOutfitPanel, type SmartOutfitOptions } from './scenes/SmartOutfitPanel';
 import { StyleFusionPanel, type StyleFusionOptions } from './scenes/StyleFusionPanel';
 
 export const BSD_CONTAINER_BORDER_RADIUS = 20;
