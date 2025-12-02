@@ -1,8 +1,12 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { OrbitControls } from '@react-three/drei';
+import { Canvas, useThree } from '@react-three/fiber';
 import { Edit3, Eye, ImagePlus, Loader2 } from 'lucide-react';
 import { nanoid } from 'nanoid';
+import * as THREE from 'three';
 import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d, resizeBox } from 'tldraw';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { useSystemConfig } from '@/apis/common';
 import { createMediaFile } from '@/apis/resources';
@@ -14,6 +18,169 @@ import { GenericPort } from '../ports/GenericPort';
 import { getOutputPorts } from '../ports/shapePorts';
 
 const PORT_RADIUS_PX = 8;
+
+const MODEL_URL_REGEX = /(https?:\/\/[^\s)]+?\.(?:glb|gltf|usdz|fbx|obj)(?:\?[^\s)]+)?)/i;
+
+const extractModelUrl = (content: string): string | null => {
+  if (!content) return null;
+  const prefixed = content.match(/3d模型\s*url[:：]\s*(https?:\/\/\S+)/i);
+  if (prefixed?.[1]) {
+    return prefixed[1].trim();
+  }
+  const matched = content.match(MODEL_URL_REGEX);
+  return matched?.[1]?.trim() ?? null;
+};
+
+const stripModelUrlFromContent = (content: string): string => {
+  if (!content) return '';
+  // 去掉“3D模型url: xxx” 或单独的 glb/gltf 等链接，保留其他文本
+  const removed = content
+    .replace(/3d模型\s*url[:：]?\s*https?:\/\/\S+/gi, '')
+    .replace(MODEL_URL_REGEX, '')
+    .replace(/^\s*[\r\n]/gm, ''); // 去掉留下的空行
+  return removed.trim();
+};
+
+function GLBModel({
+  url,
+  onLoaded,
+  onError,
+}: {
+  url: string;
+  onLoaded: () => void;
+  onError: (message: string) => void;
+}) {
+  const [model, setModel] = useState<THREE.Group | null>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const { camera } = useThree();
+
+  useEffect(() => {
+    let cancelled = false;
+    setModel(null);
+    const loader = new GLTFLoader();
+
+    loader.load(
+      url,
+      (gltf) => {
+        if (cancelled) return;
+        const scene = (gltf as any).scene || (gltf as any).scenes?.[0];
+        if (!scene) {
+          onError('模型为空');
+          return;
+        }
+        setModel(scene.clone(true));
+        onLoaded();
+      },
+      undefined,
+      (error) => {
+        if (cancelled) return;
+        console.error('3D model load failed', error);
+        onError('模型加载失败');
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [url, onError, onLoaded]);
+
+  useEffect(() => {
+    if (!model || !groupRef.current) return;
+    const box = new THREE.Box3().setFromObject(groupRef.current);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    const distance = maxDim * 1.8;
+    const scale = 2 / maxDim;
+
+    groupRef.current.position.set(-center.x, -center.y, -center.z);
+    groupRef.current.scale.setScalar(scale);
+    camera.position.set(center.x + distance, center.y + distance, center.z + distance);
+    camera.lookAt(0, 0, 0);
+  }, [model, camera]);
+
+  if (!model) return null;
+
+  return (
+    // eslint-disable-next-line react/no-unknown-property
+    <primitive ref={groupRef} object={model} />
+  );
+}
+
+function ModelViewer3D({ url }: { url: string }) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const stopScroll = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    // 避免画布跟随滚动，同时允许 3D 视图缩放
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+  }, [url]);
+
+  const handleLoaded = useCallback(() => {
+    setLoading(false);
+  }, []);
+
+  const handleError = useCallback((message: string) => {
+    setError(message);
+    setLoading(false);
+  }, []);
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '240px',
+        border: '1px solid #E5E7EB',
+        borderRadius: '6px',
+        backgroundColor: '#F8FAFC',
+        overflow: 'hidden',
+        position: 'relative',
+        overscrollBehavior: 'contain',
+      }}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+      }}
+      onWheel={stopScroll}
+      onWheelCapture={stopScroll}
+    >
+      <Canvas camera={{ position: [0, 0, 3], fov: 50 }} style={{ width: '100%', height: '100%' }}>
+        {/* eslint-disable-next-line react/no-unknown-property */}
+        <color attach="background" args={['#F8FAFC']} />
+        {/* eslint-disable-next-line react/no-unknown-property */}
+        <ambientLight intensity={0.8} />
+        {/* eslint-disable-next-line react/no-unknown-property */}
+        <directionalLight position={[4, 4, 4]} intensity={0.9} />
+        {/* eslint-disable-next-line react/no-unknown-property */}
+        <directionalLight position={[-4, 2, -4]} intensity={0.5} />
+        <OrbitControls enableDamping dampingFactor={0.08} enablePan enableZoom />
+        <GLBModel url={url} onLoaded={handleLoaded} onError={handleError} />
+      </Canvas>
+
+      {(loading || error) && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(248, 250, 252, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '13px',
+            color: '#4B5563',
+            pointerEvents: 'none',
+          }}
+        >
+          {error ?? '模型加载中...'}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // 媒体替换组件 - 支持点击上传替换（图片或视频）
 function ImageReplaceZone({
@@ -285,17 +452,30 @@ function OutputShapeComponent({
 
   const images = getImages();
   const hasImages = images.length > 0;
-  const hasContent = shape.props.content && shape.props.content.length > 0;
-  const isEmpty = !hasImages && !hasContent;
+  const rawContent = shape.props.content || '';
+  const modelUrl = extractModelUrl(shape.props.content);
+  const is3DModel = Boolean(modelUrl);
+  const cleanedContent = is3DModel ? stripModelUrlFromContent(rawContent) : rawContent;
+  const hasContent = cleanedContent.length > 0;
+  const isEmpty = !hasImages && !hasContent && !is3DModel;
+  const canEdit = !is3DModel && !isEmpty;
+  const effectiveEditing = isEditing && canEdit;
+
+  useEffect(() => {
+    if (!canEdit && isEditing) {
+      editor.setEditingShape(null);
+    }
+  }, [canEdit, editor, isEditing]);
 
   // 切换编辑模式
   const toggleEditMode = useCallback(() => {
+    if (!canEdit) return;
     if (isEditing) {
       editor.setEditingShape(null);
     } else {
       editor.setEditingShape(shape.id);
     }
-  }, [editor, shape.id, isEditing]);
+  }, [canEdit, editor, shape.id, isEditing]);
 
   // 处理内容变化
   const handleContentChange = useCallback(
@@ -377,13 +557,13 @@ function OutputShapeComponent({
       style={{
         width: '100%',
         height: '100%',
-        border: isEditing ? '2px solid #3B82F6' : '2px solid #059669',
+        border: effectiveEditing ? '2px solid #3B82F6' : '2px solid #059669',
         borderRadius: '8px',
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        boxShadow: isEditing ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
+        boxShadow: effectiveEditing ? '0 0 0 2px rgba(59, 130, 246, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
       }}
     >
       {/* 标题栏 */}
@@ -394,7 +574,7 @@ function OutputShapeComponent({
           justifyContent: 'space-between',
           padding: '8px 12px',
           borderBottom: '1px solid #E5E7EB',
-          backgroundColor: isEditing ? '#EFF6FF' : '#F0FDF4',
+          backgroundColor: effectiveEditing ? '#EFF6FF' : '#F0FDF4',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -405,41 +585,49 @@ function OutputShapeComponent({
                 style={{
                   width: '4px',
                   height: '4px',
-                  backgroundColor: isEditing ? '#3B82F6' : '#059669',
+                  backgroundColor: effectiveEditing ? '#3B82F6' : '#059669',
                   borderRadius: '50%',
                 }}
               />
             ))}
           </div>
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>
-            Output {isEditing && '(编辑中)'}
+            Output {effectiveEditing && '(编辑中)'}
           </span>
         </div>
 
         {/* 编辑按钮 */}
         <button
-          disabled={isEmpty}
+          disabled={!canEdit}
           onPointerDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (!isEmpty) toggleEditMode();
+            if (canEdit) toggleEditMode();
           }}
           style={{
             width: '24px',
             height: '24px',
             border: 'none',
-            backgroundColor: isEmpty ? '#F3F4F6' : isEditing ? '#3B82F6' : '#E5E7EB',
-            color: isEmpty ? '#D1D5DB' : isEditing ? 'white' : '#6B7280',
+            backgroundColor: !canEdit ? '#F3F4F6' : effectiveEditing ? '#3B82F6' : '#E5E7EB',
+            color: !canEdit ? '#D1D5DB' : effectiveEditing ? 'white' : '#6B7280',
             borderRadius: '4px',
-            cursor: isEmpty ? 'not-allowed' : 'pointer',
+            cursor: !canEdit ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            opacity: isEmpty ? 0.6 : 1,
+            opacity: !canEdit ? 0.6 : 1,
           }}
-          title={isEmpty ? '无内容可编辑' : isEditing ? '完成' : '编辑'}
+          title={
+            !canEdit
+              ? is3DModel
+                ? '3D 模型展示暂不支持编辑'
+                : '无内容可编辑'
+              : effectiveEditing
+                ? '完成'
+                : '编辑'
+          }
         >
-          {isEditing ? <Eye size={14} /> : <Edit3 size={14} />}
+          {effectiveEditing ? <Eye size={14} /> : <Edit3 size={14} />}
         </button>
       </div>
 
@@ -452,7 +640,7 @@ function OutputShapeComponent({
         }}
       >
         {/* 空状态 */}
-        {isEmpty && !isEditing && (
+        {isEmpty && !effectiveEditing && (
           <div
             style={{
               flex: 1,
@@ -468,7 +656,7 @@ function OutputShapeComponent({
         )}
 
         {/* 编辑模式 */}
-        {isEditing ? (
+        {effectiveEditing ? (
           <>
             {/* 图片编辑区域 */}
             {showImages && (
@@ -518,6 +706,31 @@ function OutputShapeComponent({
         ) : (
           /* 预览模式 */
           <>
+            {is3DModel && modelUrl && (
+              <div
+                style={{
+                  marginBottom: showImages || hasContent ? '12px' : 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <ModelViewer3D url={modelUrl} />
+                <div style={{ fontSize: '13px', color: '#4B5563', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 600 }}>3D 模型</span>
+                  <a
+                    href={modelUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: '#2563EB', wordBreak: 'break-all' }}
+                  >
+                    {modelUrl}
+                  </a>
+                </div>
+              </div>
+            )}
+
             {showImages && (
               <div
                 style={{
@@ -567,9 +780,9 @@ function OutputShapeComponent({
             {hasContent && (
               <div style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5', wordBreak: 'break-word' }}>
                 {contentIsMarkdown ? (
-                  <VinesMarkdown className="prose prose-sm max-w-none">{shape.props.content}</VinesMarkdown>
+                  <VinesMarkdown className="prose prose-sm max-w-none">{cleanedContent}</VinesMarkdown>
                 ) : (
-                  <div style={{ whiteSpace: 'pre-wrap' }}>{shape.props.content}</div>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>{cleanedContent}</div>
                 )}
               </div>
             )}

@@ -1,3 +1,4 @@
+import { getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { ApiKeyEntity } from '@/database/entities/apikey/apikey';
 import { BaseEntity } from '@/database/entities/base/base';
 import { DesignAssociationEntity } from '@/database/entities/design/design-association';
@@ -191,6 +192,82 @@ export class TenantManageService {
   }
 
   /**
+   * 确保 workflow 中引用的 comfyui 工作流在应用市场中已经存在对应的应用。
+   * 如果不存在，则自动为这些 comfyui workflow 创建应用并审批通过（但不会标记为预置应用）。
+   *
+   * 这样在后续为 workflow 创建内置应用时，WorkflowCrudService.getSnapshot
+   * 中解析 comfyui 依赖就不会因为缺少对应的 comfyui-workflow 应用而报 404。
+   */
+  private async ensureComfyuiDependenciesPublished(workflow: WorkflowMetadataEntity) {
+    const tasks: any[] = (workflow as any)?.tasks || [];
+    if (!tasks.length) {
+      return;
+    }
+
+    const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(tasks);
+    if (!comfyuiDataList.length) {
+      return;
+    }
+
+    const comfyuiWorkflowIds = Array.from(
+      new Set(
+        comfyuiDataList
+          .map((item) => item.comfyuiWorkflowId)
+          .filter((id): id is string => typeof id === 'string' && !!id),
+      ),
+    );
+
+    if (!comfyuiWorkflowIds.length) {
+      return;
+    }
+
+    const teamId = workflow.teamId;
+    const userId = workflow.creatorUserId || 'system';
+
+    for (const comfyuiWorkflowId of comfyuiWorkflowIds) {
+      // 如果已经存在应用，则跳过
+      const existsAppVersion = await this.marketplaceService.getAppVersionByAssetId(comfyuiWorkflowId, 'comfyui-workflow');
+      if (existsAppVersion?.app) {
+        continue;
+      }
+
+      const appId = comfyuiWorkflowId; // 与 comfyui workflow 资产一一对应
+
+      this.logger.debug(
+        `Create marketplace app for comfyui workflow dependency ${comfyuiWorkflowId} in team ${teamId} (appId=${appId})`,
+      );
+
+      const dto = {
+        app: {
+          name: appId,
+          // comfyui workflow 本身的描述与图标在 snapshot 中处理；这里保持简单配置
+          description: undefined,
+          iconUrl: undefined,
+          assetType: 'comfyui-workflow' as const,
+          categories: [] as string[],
+        },
+        version: {
+          version: '1.0.0',
+          releaseNotes: 'Created automatically for builtin workflow comfyui dependency',
+          assets: [
+            {
+              assetType: 'comfyui-workflow' as const,
+              assetId: comfyuiWorkflowId,
+              // comfyui-workflow 当前未使用版本号，这里填入固定值即可
+              version: 1,
+            },
+          ],
+        },
+      };
+
+      await this.marketplaceService.createAppWithVersion(teamId, userId, dto as any);
+
+      // 审批通过，但不标记为预置应用；由引用它的 workflow 控制是否预置
+      await this.marketplaceService.approveSubmission(appId);
+    }
+  }
+
+  /**
    * 将指定 workflow 对应的应用市场应用设置为预置应用（内置应用），并自动安装到所有团队。
    *
    * 要求：
@@ -230,6 +307,10 @@ export class TenantManageService {
     if (!workflow) {
       throw new NotFoundException(`工作流 ${workflowId} 不存在`);
     }
+
+    // 2.1 先确保 workflow 中引用的 comfyui 工作流已经在应用市场中存在应用
+    //     避免在后续生成 snapshot 时，因为缺少 comfyui-workflow 应用而导致 404
+    await this.ensureComfyuiDependenciesPublished(workflow);
 
     const teamId = workflow.teamId;
     const userId = workflow.creatorUserId || 'system';
