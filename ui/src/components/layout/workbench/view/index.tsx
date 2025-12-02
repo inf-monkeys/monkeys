@@ -84,6 +84,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
     '灵感图生成',
     'atmosphere',
     '氛围图',
+    '智能穿搭',
+    'smart outfit',
     '自由裂变',
     'free fission',
     '局部修改',
