@@ -17,6 +17,8 @@ import { LocalEditPanel, type LocalEditOptions } from './scenes/LocalEditPanel';
 import { LineToGarmentPanel, type LineToGarmentOptions } from './scenes/LineToGarmentPanel';
 import { GarmentOnModelPanel, type GarmentOnModelOptions } from './scenes/GarmentOnModelPanel';
 import { AtmospherePanel, type AtmosphereOptions } from './scenes/AtmospherePanel';
+import { SmartOutfitPanel, type SmartOutfitOptions } from './scenes/SmartOutfitPanel';
+import { RunwayPanel, type RunwayOptions } from './scenes/RunwayPanel';
 
 export const BSD_CONTAINER_BORDER_RADIUS = 20;
 
@@ -32,6 +34,8 @@ type CustomOptions = {
   lineToGarment?: LineToGarmentOptions;
   garmentOnModel?: GarmentOnModelOptions;
   atmosphere?: AtmosphereOptions;
+  smartOutfit?: SmartOutfitOptions;
+  runway?: RunwayOptions;
 };
 
 const getCustomOptions = (page: Partial<IPinPage>): CustomOptions =>
@@ -52,7 +56,8 @@ const FlowInitializer: React.FC<{ workflowId?: string }> = ({ workflowId }) => {
 export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => {
   const displayName =
     getI18nContent(getPageInfo(page)?.displayName) ?? getI18nContent(page.displayName) ?? '波司登工作台';
-  const { inspiration, styleFusion, freeFission, localEdit, lineToGarment, garmentOnModel, atmosphere } = getCustomOptions(page);
+  const { inspiration, styleFusion, freeFission, localEdit, lineToGarment, garmentOnModel, atmosphere, smartOutfit, runway } =
+    getCustomOptions(page);
   const workflowId = page?.workflowId ?? page?.workflow?.id ?? '';
 
   const trimmedName = (displayName ?? '').trim();
@@ -69,6 +74,8 @@ export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => 
       | LineToGarmentOptions
       | GarmentOnModelOptions
       | AtmosphereOptions
+      | SmartOutfitOptions
+      | RunwayOptions
       | undefined;
   }> = [
     { names: ['局部修改', 'local edit'], component: LocalEditPanel, options: localEdit },
@@ -77,6 +84,8 @@ export const BsdWorkbenchView: React.FC<IBsdWorkbenchViewProps> = ({ page }) => 
     { names: ['线稿成衣', 'line to garment'], component: LineToGarmentPanel, options: lineToGarment },
     { names: ['成衣上身', 'garment on model'], component: GarmentOnModelPanel, options: garmentOnModel },
     { names: ['灵感图生成', 'atmosphere', '氛围图'], component: AtmospherePanel, options: atmosphere },
+    { names: ['智能穿搭', 'smart outfit'], component: SmartOutfitPanel, options: smartOutfit },
+    { names: ['秀场款生成', 'runway'], component: RunwayPanel, options: runway },
   ];
 
   const matchedPanel = panelRegistry.find((entry) =>
