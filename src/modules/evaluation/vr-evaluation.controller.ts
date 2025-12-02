@@ -1,12 +1,14 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { StrictValidationPipe } from '@/common/pipes/strict-validation.pipe';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards, UsePipes } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UpdateEvaluationDataRequestDto } from './dto/vr-evaluation.dto';
 import { CreateVRTaskDto, UpdateEvaluationDataDto, VREvaluationService } from './vr-evaluation.service';
 
 @Controller('vr-evaluation')
+@UsePipes(new StrictValidationPipe())
 @ApiTags('VR Evaluation')
 export class VREvaluationController {
   constructor(private readonly vrEvaluationService: VREvaluationService) {}
@@ -33,18 +35,18 @@ export class VREvaluationController {
   @UseGuards(CompatibleAuthGuard)
   async updateEvaluateData(@Body() dto: UpdateEvaluationDataRequestDto) {
     const payload: UpdateEvaluationDataDto = {
-      taskId: dto.task_id,
+      taskId: dto.taskId,
       evaluationResult: {
-        score_1: dto.evaluation_result.score_1,
-        score_2: dto.evaluation_result.score_2,
-        score_3: dto.evaluation_result.score_3,
-        score_4: dto.evaluation_result.score_4,
-        score_5: dto.evaluation_result.score_5,
-        score_6: dto.evaluation_result.score_6,
-        score_7: dto.evaluation_result.score_7,
-        score_8: dto.evaluation_result.score_8,
-        score_9: dto.evaluation_result.score_9,
-        score_10: dto.evaluation_result.score_10,
+        score_1: dto.evaluationResult.score_1,
+        score_2: dto.evaluationResult.score_2,
+        score_3: dto.evaluationResult.score_3,
+        score_4: dto.evaluationResult.score_4,
+        score_5: dto.evaluationResult.score_5,
+        score_6: dto.evaluationResult.score_6,
+        score_7: dto.evaluationResult.score_7,
+        score_8: dto.evaluationResult.score_8,
+        score_9: dto.evaluationResult.score_9,
+        score_10: dto.evaluationResult.score_10,
       },
     };
 

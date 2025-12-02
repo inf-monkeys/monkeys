@@ -54,12 +54,12 @@ class EvaluationResultRequestDto {
 }
 
 export class UpdateEvaluationDataRequestDto {
-  // Vision Pro 端传递为 task_id
+  // Vision Pro 端传递为 taskId（与接口文档一致）
   @IsString()
-  task_id: string;
+  taskId: string;
 
   @IsObject()
   @ValidateNested()
   @Type(() => EvaluationResultRequestDto)
-  evaluation_result: EvaluationResultRequestDto;
+  evaluationResult: EvaluationResultRequestDto;
 }
