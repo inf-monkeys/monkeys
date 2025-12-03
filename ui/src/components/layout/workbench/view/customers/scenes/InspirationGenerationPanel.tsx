@@ -156,6 +156,8 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
   const [selectionOrder, setSelectionOrder] = useState<string[]>([]);
   const [starting, setStarting] = useState(false);
   const prevPrimaryModelRef = React.useRef<string | undefined>(undefined);
+  const [userOverridden, setUserOverridden] = useState(false);
+  const hadSelectionRef = useRef(false);
 
   const scenarioOptions = useMemo(() => baseScenarios, [baseScenarios]);
 
@@ -194,8 +196,10 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
   const composePrompt = useMemoizedFn((base: string, dict: string[]) => {
     const cleanBase = base.trim();
     const dictSegment = dict.filter(Boolean).join(', ');
-    if (cleanBase && dictSegment) return `${cleanBase}, ${dictSegment}`;
-    return cleanBase || dictSegment || '';
+    const segments = [];
+    if (cleanBase) segments.push(cleanBase);
+    if (dictSegment) segments.push(dictSegment);
+    return segments.join(' ');
   });
 
   useEffect(() => {
@@ -205,6 +209,7 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     setPrompt(resolvedOptions.prompt ?? '');
     setSelectedDictionaryKeys(new Set());
     setActiveDictionaryCategory(dictionaryCategories[0] ?? '');
+    setUserOverridden(false);
   }, [resolvedOptions.prompt, stripDictionaryWords, dictionaryCategories]);
 
   useEffect(() => {
@@ -213,6 +218,7 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     const base = stripDictionaryWords(resolvedOptions.prompt ?? '');
     setManualPrompt(base);
     manualPromptRef.current = base;
+    setUserOverridden(false);
   }, [workflowId, stripDictionaryWords, resolvedOptions.prompt, dictionaryCategories]);
 
   // 保证下拉联动：场景/品类变更时自动对齐可选列表
@@ -323,12 +329,20 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     setVisible?.(true);
   }, [setVisible]);
 
-  const syncPromptFromInput = useMemoizedFn((value: string) => {
-    const base = stripDictionaryWords(value);
-    const nextPrompt = composePrompt(base, dictionaryWords);
-    setPrompt(nextPrompt);
+  const handleUserPromptChange = useMemoizedFn((value: string) => {
+    setUserOverridden(true);
+    setPrompt(value);
+    setManualPrompt(value);
+    manualPromptRef.current = value;
+  });
+
+  const applySystemPrompt = useMemoizedFn((value: string) => {
+    setUserOverridden(false);
+    const base = value.trim();
     setManualPrompt(base);
     manualPromptRef.current = base;
+    const nextPrompt = composePrompt(base, dictionaryWords);
+    setPrompt(nextPrompt);
   });
 
   const applyDictionarySelection = useMemoizedFn((nextKeys: Set<string>) => {
@@ -352,10 +366,22 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
   const toggleDictionaryItem = useMemoizedFn((key: string) => {
     setSelectedDictionaryKeys((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
+      const adding = !next.has(key);
+      if (adding) {
         next.add(key);
+      } else {
+        next.delete(key);
+      }
+      if (userOverridden) {
+        if (adding) {
+          const word = key.split('.')[1];
+          setPrompt((prevPrompt) => {
+            const trimmed = (prevPrompt ?? '').trim();
+            const prefix = trimmed ? `${trimmed} ` : '';
+            return (prefix + word).trimStart();
+          });
+        }
+        return next;
       }
       applyDictionarySelection(next);
       return next;
@@ -364,6 +390,7 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
 
   const clearDictionarySelection = useMemoizedFn(() => {
     setSelectedDictionaryKeys(new Set());
+    if (userOverridden) return;
     const nextPrompt = composePrompt(manualPromptRef.current ?? manualPrompt, []);
     setPrompt(nextPrompt);
   });
@@ -378,9 +405,29 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     prevPrimaryModelRef.current = primary;
     if (Array.isArray(prompts) && prompts.length > 0) {
       const idx = Math.floor(Math.random() * prompts.length);
-      syncPromptFromInput(prompts[idx]);
+      applySystemPrompt(prompts[idx]);
     }
-  }, [selectionOrder, syncPromptFromInput]);
+  }, [selectionOrder, applySystemPrompt]);
+
+  // 首次选择模型时，重置为系统接管并应用模型提示词
+  useEffect(() => {
+    const hasSelection = selectionOrder.length > 0;
+    if (!hadSelectionRef.current && hasSelection) {
+      hadSelectionRef.current = true;
+      const primary = selectionOrder[0];
+      const prompts = primary ? MODEL_PROMPT_MAP_LIST[primary] : undefined;
+      if (Array.isArray(prompts) && prompts.length > 0) {
+        const idx = Math.floor(Math.random() * prompts.length);
+        applySystemPrompt(prompts[idx]);
+      } else {
+        applySystemPrompt('');
+      }
+    }
+    if (!hasSelection) {
+      hadSelectionRef.current = false;
+      prevPrimaryModelRef.current = undefined;
+    }
+  }, [selectionOrder, applySystemPrompt]);
 
   const handleStart = async () => {
     if (!workflowId) return;
@@ -639,7 +686,7 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
             >
               <textarea
                 value={prompt}
-                onChange={(event) => syncPromptFromInput(event.target.value)}
+                onChange={(event) => handleUserPromptChange(event.target.value)}
                 rows={6}
                 className="h-40 w-full resize-none bg-transparent text-sm leading-relaxed text-white placeholder:text-white/40 focus:outline-none"
                 placeholder="请输入创意描述"
