@@ -1,5 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
-import { generateDbId } from '@/common/utils';
+import { generateDbId, removeCredentials } from '@/common/utils';
 import { TeamEntity } from '@/database/entities/identity/team';
 import { InstalledAppEntity } from '@/database/entities/marketplace/installed-app.entity';
 import { MarketplaceAppVersionEntity, MarketplaceAppVersionStatus } from '@/database/entities/marketplace/marketplace-app-version.entity';
@@ -678,6 +678,63 @@ export class MarketplaceService {
     return appVersion;
   }
 
+  /**
+   * 内部工具：当某个应用被标记为预置（内置应用）时，
+   * 对其绑定的 workflow 资产做一次「清理 credential」操作，避免在定义层面携带旧团队的密钥。
+   *
+   * 设计说明：
+   * - 仅对 workflow 类型的应用生效
+   * - 只处理最新版本中的 sourceAssetReferences 列出的 workflowId + version 组合
+   * - 在作者团队维度更新 workflow 定义（其他团队通过内置应用共享同一条 workflow）
+   */
+  private async cleanupPresetWorkflowCredentials(appId: string) {
+    const latestVersion = await this.getAppLatestVersion(appId);
+    if (!latestVersion || latestVersion.app.assetType !== 'workflow') {
+      return;
+    }
+
+    const refs = latestVersion.sourceAssetReferences || [];
+    const authorTeamId = latestVersion.app.authorTeamId;
+
+    for (const ref of refs) {
+      if (ref.assetType !== 'workflow' || !ref.assetId || !ref.version) {
+        continue;
+      }
+
+      try {
+        const workflow = await this.workflowCrudService.getWorkflowDef(ref.assetId, ref.version);
+        if (!workflow?.tasks) {
+          continue;
+        }
+
+        // 深拷贝一份 tasks，避免直接修改实体对象
+        const clonedTasks: MonkeyTaskDefTypes[] = JSON.parse(JSON.stringify(workflow.tasks));
+        // 移除所有 credential 字段，运行时统一走全局 config / 兼容逻辑
+        removeCredentials(clonedTasks);
+
+        await this.workflowCrudService.updateWorkflowDef(
+          authorTeamId,
+          ref.assetId,
+          ref.version,
+          {
+            tasks: clonedTasks,
+          },
+          // 作为系统级清理操作，不需要生成额外的备份版本
+          false,
+        );
+
+        this.logger.debug(
+          `Cleanup credentials for preset workflow asset appId=${appId}, workflowId=${ref.assetId}, version=${ref.version}`,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to cleanup credentials for preset workflow asset appId=${appId}, workflowId=${ref.assetId}, version=${ref.version}`,
+          error.stack || error.message,
+        );
+      }
+    }
+  }
+
   public async setPreset(appId: string, isPreset: boolean) {
     const app = await this.appRepo.findOne({ where: { id: appId } });
     if (!app) throw new NotFoundException('Application not found.');
@@ -696,6 +753,8 @@ export class MarketplaceService {
             await this.workflowPageService.addBuiltinPinnedPage(ref.assetId, 'preview');
           }
         }
+        // 同步清理预置 workflow 定义中的 credential，保证从此以后以「内置应用」方式使用时不再依赖旧团队的密钥
+        await this.cleanupPresetWorkflowCredentials(appId);
       }
       return { ...updatedApp, installResult };
     }

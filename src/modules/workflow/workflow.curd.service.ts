@@ -136,6 +136,10 @@ export class WorkflowCrudService implements IAssetHandler {
       }
     }
 
+    // 确保从应用市场安装的工作流不携带任何 credential，运行时统一走全局 config key
+    // 即使 snapshot 是旧版本生成的（可能包含 credential），也要在这里移除
+    removeCredentials(clonedSnapshot.tasks);
+
     return clonedSnapshot;
   }
 
