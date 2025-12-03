@@ -1,41 +1,64 @@
-# Build Server
-FROM node:22-alpine as builder
+# syntax=docker/dockerfile:1.6
+
+###########
+# Server build (NestJS)
+###########
+FROM node:22-alpine AS server-deps
 WORKDIR /usr/src/app
-COPY ["package.json", "yarn.lock", "./"]
-# Copy patches directory for patch-package
+
+# Install dependencies with cache (includes dev deps for runtime migrations)
+COPY package.json yarn.lock ./
 COPY patches ./patches
-RUN yarn
+RUN --mount=type=cache,target=/root/.cache/yarn \
+    yarn install --frozen-lockfile
+
+FROM node:22-alpine AS server-build
+WORKDIR /usr/src/app
+COPY --from=server-deps /usr/src/app/node_modules ./node_modules
 COPY . .
-RUN yarn build
+# Cache tsc incremental files between builds
+RUN --mount=type=cache,target=/root/.cache/yarn \
+    --mount=type=cache,target=/usr/src/app/.tsbuildcache \
+    yarn build
 
-# Build Proxy
-FROM node:22-alpine as proxy
-# Copy source code of server to /usr/src/server
-WORKDIR /usr/src/server
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY --from=builder /usr/src/app/package.json ./package.json
-COPY --from=builder /usr/src/app/ormconfig.js ./ormconfig.js
-
-# Copy source code of multi-tenancy to /usr/src/proxy
+###########
+# Multi-tenancy proxy deps
+###########
+FROM node:22-alpine AS proxy-deps
 WORKDIR /usr/src/proxy
-COPY ./multi-tenancy .
-RUN yarn
+COPY multi-tenancy/package.json multi-tenancy/yarn.lock ./
+RUN --mount=type=cache,target=/root/.cache/yarn \
+    yarn install --frozen-lockfile --production
 
-ENV MONKEYS_DIST_FOLDER=/usr/src/server/dist
-# 设置时区和字符集
+###########
+# Runtime image
+###########
+FROM node:22-alpine AS runner
 
-RUN apk add --no-cache tzdata \
-    && apk add --no-cache --virtual .build-deps \
-    curl \
-    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone \
-    && apk del .build-deps
+# Locale & timezone
+RUN apk add --no-cache tzdata curl \ 
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \ 
+    && echo "Asia/Shanghai" > /etc/timezone
 
-ENV TZ=Asia/Shanghai
-ENV LC_ALL=en_US.UTF-8
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US.UTF-8
+ENV NODE_ENV=production \
+    NODE_OPTIONS=--max_old_space_size=4096 \
+    MONKEYS_DIST_FOLDER=/usr/src/server/dist \
+    TZ=Asia/Shanghai \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8
+
+# Server runtime (keep full node_modules because migrations use dev tools like ts-node)
+WORKDIR /usr/src/server
+COPY --from=server-build /usr/src/app/dist ./dist
+COPY --from=server-deps /usr/src/app/node_modules ./node_modules
+COPY --from=server-build /usr/src/app/ormconfig.js ./ormconfig.js
+COPY --from=server-build /usr/src/app/package.json ./package.json
+
+# Proxy runtime
+WORKDIR /usr/src/proxy
+COPY multi-tenancy/. .
+COPY --from=proxy-deps /usr/src/proxy/node_modules ./node_modules
 
 EXPOSE 3000
 CMD ["node", "main.js"]
