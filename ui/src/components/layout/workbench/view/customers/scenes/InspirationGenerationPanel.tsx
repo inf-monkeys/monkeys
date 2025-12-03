@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useEventEmitter } from 'ahooks';
+import { useEventEmitter, useMemoizedFn } from 'ahooks';
 import { Sparkles, X } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { executionWorkflow, useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
 import { BsdAssistantIcon } from '@/components/icons/BsdAssistantIcon';
 import { BsdImageIcon } from '@/components/icons/BsdImageIcon';
 import { BsdLightIcon } from '@/components/icons/BsdLightIcon';
 import { BsdPromptDictionaryIcon } from '@/components/icons/BsdPromptDictionaryIcon';
-
-import { executionWorkflow, useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WorkbenchOperationBar } from '@/components/ui/vines-iframe/view/operation-bar';
 import { useElementSize } from '@/hooks/use-resize-observer';
@@ -20,6 +20,7 @@ import { cn } from '@/utils';
 import { BsdHistoryGrid, type HistoryImage } from './components/BsdHistoryGrid';
 import { HistoryIcon, PanelCard, PanelHeader } from './components/PanelSection';
 import { MODEL_LIBRARY, allowedModelIds, defaultOptions } from './constants';
+import { PROMPT_DICTIONARY } from './promptDictionaryOptions';
 import { MODEL_PROMPT_MAP_LIST } from './promptList';
 
 export type InspirationGenerationOptions = {
@@ -123,6 +124,7 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
   const { height: rightHeight, ref: rightRef } = useElementSize<HTMLDivElement>();
   const setVisible = useViewStoreOptional((s) => s?.setVisible);
   const workflowId = options?.workflowId as string | undefined;
+  const leftColumnRef = useRef<HTMLDivElement>(null);
 
   const enrichedModels = useMemo(
     () =>
@@ -144,6 +146,7 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
   const [scenario, setScenario] = useState<string | undefined>(undefined);
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [prompt, setPrompt] = useState(resolvedOptions.prompt ?? '');
+  const [manualPrompt, setManualPrompt] = useState('');
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [selectorType, setSelectorType] = useState<'style' | 'brand' | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -160,6 +163,57 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     const pool = visibleModels.filter((m) => !scenario || m.scenarios.includes(scenario));
     return Array.from(new Set(pool.flatMap((m) => m.categories)));
   }, [scenario, visibleModels]);
+
+  // 提示词字典
+  const dictionaryCategories = useMemo(() => Object.keys(PROMPT_DICTIONARY), []);
+  const [dictionaryOpen, setDictionaryOpen] = useState(false);
+  const [activeDictionaryCategory, setActiveDictionaryCategory] = useState<string>(dictionaryCategories[0] ?? '');
+  const [selectedDictionaryKeys, setSelectedDictionaryKeys] = useState<Set<string>>(new Set());
+  const dictionaryWords = useMemo(
+    () => Array.from(selectedDictionaryKeys).map((item) => item.split('.')[1]).filter(Boolean),
+    [selectedDictionaryKeys],
+  );
+  const activeDictionaryItems = useMemo(
+    () => Object.entries(PROMPT_DICTIONARY[activeDictionaryCategory] ?? {}),
+    [activeDictionaryCategory],
+  );
+  const allDictionaryWords = useMemo(
+    () =>
+      new Set<string>(
+        Object.values(PROMPT_DICTIONARY)
+          .flatMap((group) => Object.keys(group))
+          .filter(Boolean),
+      ),
+    [],
+  );
+  const stripDictionaryWords = useMemoizedFn((text: string) => {
+    const parts = text.split(',').map((p) => p.trim()).filter(Boolean);
+    return parts.filter((p) => !allDictionaryWords.has(p)).join(', ');
+  });
+  const manualPromptRef = useRef<string>('');
+  const composePrompt = useMemoizedFn((base: string, dict: string[]) => {
+    const cleanBase = base.trim();
+    const dictSegment = dict.filter(Boolean).join(', ');
+    if (cleanBase && dictSegment) return `${cleanBase}, ${dictSegment}`;
+    return cleanBase || dictSegment || '';
+  });
+
+  useEffect(() => {
+    const base = stripDictionaryWords(resolvedOptions.prompt ?? '');
+    setManualPrompt(base);
+    manualPromptRef.current = base;
+    setPrompt(resolvedOptions.prompt ?? '');
+    setSelectedDictionaryKeys(new Set());
+    setActiveDictionaryCategory(dictionaryCategories[0] ?? '');
+  }, [resolvedOptions.prompt, stripDictionaryWords, dictionaryCategories]);
+
+  useEffect(() => {
+    setSelectedDictionaryKeys(new Set());
+    setActiveDictionaryCategory(dictionaryCategories[0] ?? '');
+    const base = stripDictionaryWords(resolvedOptions.prompt ?? '');
+    setManualPrompt(base);
+    manualPromptRef.current = base;
+  }, [workflowId, stripDictionaryWords, resolvedOptions.prompt, dictionaryCategories]);
 
   // 保证下拉联动：场景/品类变更时自动对齐可选列表
   useEffect(() => {
@@ -269,6 +323,51 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     setVisible?.(true);
   }, [setVisible]);
 
+  const syncPromptFromInput = useMemoizedFn((value: string) => {
+    const base = stripDictionaryWords(value);
+    const nextPrompt = composePrompt(base, dictionaryWords);
+    setPrompt(nextPrompt);
+    setManualPrompt(base);
+    manualPromptRef.current = base;
+  });
+
+  const applyDictionarySelection = useMemoizedFn((nextKeys: Set<string>) => {
+    const dict = Array.from(nextKeys).map((item) => item.split('.')[1]).filter(Boolean);
+    const nextPrompt = composePrompt(manualPromptRef.current ?? manualPrompt, dict);
+    setPrompt(nextPrompt);
+  });
+
+  const removeDictionaryWord = useMemoizedFn((word: string) => {
+    setSelectedDictionaryKeys((prev) => {
+      const next = new Set(prev);
+      const target = Array.from(next).find((key) => key.endsWith(`.${word}`));
+      if (target) {
+        next.delete(target);
+        applyDictionarySelection(next);
+      }
+      return next;
+    });
+  });
+
+  const toggleDictionaryItem = useMemoizedFn((key: string) => {
+    setSelectedDictionaryKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      applyDictionarySelection(next);
+      return next;
+    });
+  });
+
+  const clearDictionarySelection = useMemoizedFn(() => {
+    setSelectedDictionaryKeys(new Set());
+    const nextPrompt = composePrompt(manualPromptRef.current ?? manualPrompt, []);
+    setPrompt(nextPrompt);
+  });
+
   const randomSeed15 = () => Math.floor(1e14 + Math.random() * 9e14);
 
   // 当首选模型变化时，随机填充对应提示词
@@ -279,9 +378,9 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
     prevPrimaryModelRef.current = primary;
     if (Array.isArray(prompts) && prompts.length > 0) {
       const idx = Math.floor(Math.random() * prompts.length);
-      setPrompt(prompts[idx]);
+      syncPromptFromInput(prompts[idx]);
     }
-  }, [selectionOrder]);
+  }, [selectionOrder, syncPromptFromInput]);
 
   const handleStart = async () => {
     if (!workflowId) return;
@@ -427,8 +526,8 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
   }, [executionItems, workflowId, mutateExecutionList]);
 
   return (
-    <div className="flex w-full gap-4 pr-1">
-      <div className="flex w-[400px] min-h-0 flex-col gap-3">
+    <div className="flex w-full gap-4 pr-1 overflow-hidden">
+      <div ref={leftColumnRef} className="relative flex w-[400px] min-h-0 flex-col gap-3 overflow-hidden">
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <PanelCard className="gap-3" padding={12}>
             <PanelHeader
@@ -447,9 +546,90 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
                 >
                   更多
                 </p>
-                <div className="flex h-9 items-center rounded-2xl transition hover:brightness-110 -translate-y-[2px]">
-                  <BsdPromptDictionaryIcon className="h-full w-auto" />
-                </div>
+                <Popover open={dictionaryOpen} onOpenChange={setDictionaryOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="flex h-9 w-full items-center rounded-2xl transition hover:brightness-110 -translate-y-[2px]"
+                      aria-label="提示词字典"
+                    >
+                      <BsdPromptDictionaryIcon className="h-full w-auto" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[420px] border-white/10 bg-slate-900/90 p-4 text-white shadow-xl backdrop-blur-md transition hover:border-white/30"
+                    side="right"
+                    align="start"
+                    sideOffset={8}
+                    container={leftColumnRef.current ?? undefined}
+                  >
+                    <div className="flex gap-3">
+                      <div className="w-24 space-y-2">
+                        {dictionaryCategories.map((cat) => (
+                          <button
+                            key={cat}
+                            type="button"
+                            className={cn(
+                              'w-full rounded-lg border px-2 py-1.5 text-left text-sm text-white transition',
+                              activeDictionaryCategory === cat
+                                ? 'border-white/60 bg-white/10'
+                                : 'border-white/10 bg-white/5 hover:border-white/25 hover:bg-white/10',
+                            )}
+                            onClick={() => setActiveDictionaryCategory(cat)}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex-1">
+              <div className="mb-2 flex items-center justify-between text-xs text-white">
+                <span className="text-white">已选 {selectedDictionaryKeys.size}</span>
+                          <button
+                            type="button"
+                            className={cn(
+                              'rounded-md px-2 py-1 transition text-white',
+                              selectedDictionaryKeys.size === 0
+                                ? 'cursor-not-allowed opacity-50'
+                                : 'bg-white/10 hover:bg-white/15',
+                            )}
+                            onClick={clearDictionarySelection}
+                            disabled={selectedDictionaryKeys.size === 0}
+                          >
+                            清空
+                          </button>
+                        </div>
+                        <div className="grid max-h-[320px] grid-cols-3 gap-2 overflow-y-auto pr-1">
+                          {activeDictionaryItems.map(([name, meta]) => {
+                            const key = `${activeDictionaryCategory}.${name}`;
+                            const selected = selectedDictionaryKeys.has(key);
+                            return (
+                              <button
+                                key={key}
+                                type="button"
+                                className={cn(
+                                  'group flex flex-col overflow-hidden rounded-lg border bg-white/5 text-left text-xs transition hover:border-white/30',
+                                  selected ? 'border-white/60 bg-white/10 shadow-[0_0_8px_rgba(255,255,255,0.25)]' : 'border-white/10',
+                                )}
+                                onClick={() => toggleDictionaryItem(key)}
+                                title={meta?.en ?? name}
+                              >
+                                {meta?.path ? (
+                                  <img src={meta.path} alt={name} className="h-20 w-full object-cover" />
+                                ) : (
+                                  <div className="flex h-20 w-full items-center justify_center bg-slate-800/60 text-white/60">无图</div>
+                                )}
+                                <div className="flex flex-col gap-0.5 px-2 py-2">
+                                  <span className="truncate text-white text-[13px]">{name}</span>
+                                  {meta?.en ? <span className="truncate text-white/60">{meta.en}</span> : null}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
@@ -459,7 +639,7 @@ export const InspirationGenerationPanel: React.FC<{ options?: InspirationGenerat
             >
               <textarea
                 value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
+                onChange={(event) => syncPromptFromInput(event.target.value)}
                 rows={6}
                 className="h-40 w-full resize-none bg-transparent text-sm leading-relaxed text-white placeholder:text-white/40 focus:outline-none"
                 placeholder="请输入创意描述"
