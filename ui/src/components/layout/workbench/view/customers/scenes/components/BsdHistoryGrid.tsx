@@ -51,6 +51,8 @@ export const BsdHistoryGrid: React.FC<{
   const isLoadingMoreRef = useRef(false);
   const prevEffectiveLenRef = useRef(0);
   const [removedKeys, setRemovedKeys] = useState<Set<string>>(new Set());
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
 
   const keyedImages = useMemo<HistoryCard[]>(
     () =>
@@ -121,6 +123,8 @@ export const BsdHistoryGrid: React.FC<{
 
   useEffect(() => {
     setRemovedKeys(new Set());
+    setSelectedKeys(new Set());
+    setSelectMode(false);
   }, [workflowId]);
 
   useEffect(() => {
@@ -170,6 +174,66 @@ export const BsdHistoryGrid: React.FC<{
     if (!el) return;
     el.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const toggleSelect = (key: string) => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    const allKeys = effectiveImages.filter((img) => img.instanceId).map((img) => img._key);
+    setSelectedKeys(new Set(allKeys));
+  };
+
+  const clearSelection = () => setSelectedKeys(new Set());
+
+  const handleBatchDelete = useMemoizedFn(async () => {
+    const targetKeys = effectiveImages.filter((img) => img.instanceId && selectedKeys.has(img._key));
+    if (!targetKeys.length) return;
+    const instanceIds = Array.from(new Set(targetKeys.map((img) => img.instanceId!)));
+    const prevScrollTop = containerRef.current?.scrollTop ?? 0;
+    try {
+      await toast.promise(Promise.all(instanceIds.map((id) => deleteWorkflowExecution(id))), {
+        success: t('common.delete.success'),
+        error: t('common.delete.error'),
+        loading: t('common.delete.loading'),
+      });
+      setRemovedKeys((prev) => {
+        const next = new Set(prev);
+        targetKeys.forEach((img) => next.add(img._key));
+        // 立即更新当前列
+        const nextEffective = keyedImages.filter((img) => !next.has(img._key));
+        const nextCursor = Math.min(cursorRef.current, nextEffective.length);
+        const rebuilt: Array<HistoryCard[]> = [[], [], []];
+        nextEffective.slice(0, nextCursor).forEach((item, idx) => {
+          rebuilt[idx % 3].push(item);
+        });
+        cursorRef.current = nextCursor;
+        setCursor(nextCursor);
+        setColumns(rebuilt);
+        prevEffectiveLenRef.current = nextEffective.length;
+
+        if (containerRef.current) {
+          const target = Math.min(prevScrollTop, containerRef.current.scrollHeight - containerRef.current.clientHeight);
+          window.requestAnimationFrame(() => {
+            containerRef.current?.scrollTo({ top: target, behavior: 'auto' });
+          });
+        }
+        return next;
+      });
+      setSelectedKeys(new Set());
+      onDeleted?.();
+    } catch (err) {
+      // toast.promise already handled
+    }
+  });
 
   const handleDelete = useMemoizedFn((instanceId?: string, key?: string) => {
     if (!instanceId) return;
@@ -252,33 +316,57 @@ export const BsdHistoryGrid: React.FC<{
             {item.title}
           </div>
         )}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-center justify-center gap-2 bg-black/35 px-2 py-1.5 opacity-0 backdrop-blur-md transition-opacity duration-150 group-hover:opacity-100">
-          <div
-            role="button"
-            tabIndex={canDelete ? 0 : -1}
-            aria-disabled={!canDelete}
-            onClick={(e) => {
-              if (!canDelete) return;
-              e.stopPropagation();
-              handleDelete(item.instanceId, key);
-            }}
-            onKeyDown={(e) => {
-              if (!canDelete) return;
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
+        {!selectMode && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-center justify-center gap-2 bg-black/35 px-2 py-1.5 opacity-0 backdrop-blur-md transition-opacity duration-150 group-hover:opacity-100">
+            <div
+              role="button"
+              tabIndex={canDelete ? 0 : -1}
+              aria-disabled={!canDelete}
+              onClick={(e) => {
+                if (!canDelete) return;
+                e.stopPropagation();
                 handleDelete(item.instanceId, key);
-              }
-            }}
-            className={cn(
-              'pointer-events-auto flex items-center justify-center rounded-md border border-white/30 bg-white/10 p-1.5 text-white transition hover:border-white/70 hover:bg-white/20',
-              !canDelete && 'cursor-not-allowed opacity-50',
-            )}
-            title={t('common.utils.delete')}
-            aria-label={t('common.utils.delete')}
-          >
-            <Trash className="size-4" stroke="white" />
+              }}
+              onKeyDown={(e) => {
+                if (!canDelete) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleDelete(item.instanceId, key);
+                }
+              }}
+              className={cn(
+                'pointer-events-auto flex items-center justify-center rounded-md border border-white/30 bg-white/10 p-1.5 text-white transition hover:border-white/70 hover:bg-white/20',
+                !canDelete && 'cursor-not-allowed opacity-50',
+              )}
+              title={t('common.utils.delete')}
+              aria-label={t('common.utils.delete')}
+            >
+              <Trash className="size-4" stroke="white" />
+            </div>
           </div>
-        </div>
+        )}
+
+        {canDelete && selectMode && (
+          <button
+            type="button"
+            className={cn(
+              'absolute left-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded-sm border border-white/50 bg-black/40 text-white transition',
+              selectedKeys.has(key) ? 'border-white bg-black/60 text-white' : 'hover:border-white/80 hover:bg-black/60',
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSelect(key);
+            }}
+            aria-pressed={selectedKeys.has(key)}
+            aria-label="选择"
+          >
+            {selectedKeys.has(key) ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8.5L6.5 12L13 5.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : null}
+          </button>
+        )}
       </div>
     );
   };
@@ -293,7 +381,17 @@ export const BsdHistoryGrid: React.FC<{
         <div className="grid flex-1 grid-cols-3 gap-4">
           {columns.map((col, colIndex) => (
             <div key={colIndex} className="flex flex-col gap-4">
-              {col.map((item) => renderCard(item))}
+              {col.map((item) => (
+                <div
+                  key={item._key}
+                  onClick={() => {
+                    if (selectMode && item.instanceId) toggleSelect(item._key);
+                  }}
+                  className={selectMode && item.instanceId ? 'cursor-pointer' : ''}
+                >
+                  {renderCard(item)}
+                </div>
+              ))}
             </div>
           ))}
           {effectiveImages.length === 0 && (
@@ -303,22 +401,89 @@ export const BsdHistoryGrid: React.FC<{
           )}
         </div>
       </div>
-      <button
-        type="button"
-        onClick={scrollToTop}
-        className={cn(
-          'pointer-events-auto absolute bottom-3 right-3 z-[4] flex items-center justify-center rounded-full bg-[#2C5EF5] text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
-          showBackTop ? 'opacity-100' : 'opacity-0 pointer-events-none',
+      <div className="pointer-events-none absolute right-3 z-[4] flex items-center gap-2" style={{ top: -50 }}>
+        {selectMode && (
+          <button
+            type="button"
+            className={cn(
+              'pointer-events-auto flex h-[30px] min-w-[124px] items-center justify-center gap-2 rounded-[44px] border-[1.5px] border-white/10 bg-white/10 px-4 py-[5px] text-xs text-white shadow-lg transition hover:bg-red-500 hover:border-white/20',
+              selectedKeys.size === 0 && 'opacity-60 cursor-not-allowed',
+            )}
+            disabled={selectedKeys.size === 0}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleBatchDelete();
+            }}
+          >
+            删除
+          </button>
         )}
-        aria-label="回到顶部"
-        style={{
-          width: 55,
-          height: 55,
-          boxShadow: '0px 4px 10px 0px #727AEB',
-        }}
-      >
-        <BackToTopIcon />
-      </button>
+        <button
+          type="button"
+          className={cn(
+            'pointer-events-auto flex h-[30px] min-w-[124px] items-center justify-center gap-2 rounded-[44px] border-[1.5px] border-white/10 bg-white/10 px-4 py-[5px] text-xs text-white shadow-lg transition hover:bg-white/20',
+            selectMode && 'border-white/30',
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (selectMode) {
+              clearSelection();
+              setSelectMode(false);
+            } else {
+              setSelectMode(true);
+              clearSelection();
+            }
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <rect
+              x="1.625"
+              y="4.625"
+              width="13.75"
+              height="13.75"
+              rx="2.375"
+              stroke="#FFFFFF"
+              strokeOpacity="0.85"
+              strokeWidth="1.25"
+              fill="none"
+            />
+            <path
+              d="M5 2L6.25 3.25H15.0433C15.7682 3.25 16.2591 3.7409 16.2591 4.46578V13.75L18 15V4.95667C18 3.29981 16.7002 2 15.0433 2H5Z"
+              fill="#FFFFFF"
+              fillOpacity="0.85"
+              fillRule="evenodd"
+            />
+            <path
+              d="M13.4419 8.44185C13.5297 8.35396 13.5773 8.23913 13.5773 8.11483C13.5773 8.05329 13.5653 7.99293 13.5423 7.93607C13.5187 7.87921 13.4846 7.82796 13.4419 7.78445C13.3983 7.74093 13.3472 7.70674 13.2959 7.67255C13.2448 7.63836 13.188 7.61481 13.1276 7.6028C13.0672 7.5908 13.0068 7.5908 12.9464 7.6028C12.886 7.61481 12.8292 7.63836 12.7781 7.67255L7 13.1161L4.44194 10.5581C4.35404 10.4703 4.23913 10.4227 4.11483 10.4227C4.05329 10.4227 3.99293 10.4347 3.93607 10.4577C3.87921 10.4813 3.82796 10.5154 3.78445 10.5581C3.74093 10.6017 3.70674 10.6528 3.67255 10.704C3.63836 10.7552 3.61481 10.812 3.6028 10.8724C3.5908 10.9328 3.5908 10.9932 3.6028 11.0536C3.61481 11.114 3.63836 11.1708 3.67255 11.2219L6.55806 14.1069C6.64597 14.1948 6.76082 14.2424 6.88512 14.2424C7.00941 14.2424 7.12432 14.1948 7.21222 14.1069L13.4419 8.44185Z"
+              fill="#FFFFFF"
+              fillOpacity="0.85"
+              fillRule="evenodd"
+            />
+          </svg>
+          {selectMode ? '退出多选' : '批量操作'}
+        </button>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-3 right-3 z-[4] flex flex-col items-end gap-2">
+        <div className="pointer-events-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={scrollToTop}
+            className={cn(
+              'flex items-center justify-center rounded-full bg-[#2C5EF5] text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+              showBackTop ? 'opacity-100' : 'opacity-0 pointer-events-none',
+            )}
+            aria-label="回到顶部"
+            style={{
+              width: 55,
+              height: 55,
+              boxShadow: '0px 4px 10px 0px #727AEB',
+            }}
+          >
+            <BackToTopIcon />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
