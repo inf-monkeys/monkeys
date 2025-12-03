@@ -248,13 +248,17 @@ export const LightEffectPanel: React.FC<{ options?: LightEffectOptions }> = ({ o
                 onClick={() => handleToggleSelector('background')}
                 className={cn('flex-1 rounded-lg px-4 py-2 text-sm text-white transition-colors', selectorType === 'background' ? 'bg-[#1668dc]' : 'bg-[#232734] hover:bg-[#2a2f3d]')}
               >
-                背景{selectedBackground ? `：${getAllBackgroundOptions().find(o => o.id === selectedBackground)?.label}` : ''}
+                {selectedBackground
+                  ? getAllBackgroundOptions().find((o) => o.id === selectedBackground)?.label
+                  : '请选择背景'}
               </button>
               <button
                 onClick={() => handleToggleSelector('lightStyle')}
                 className={cn('flex-1 rounded-lg px-4 py-2 text-sm text-white transition-colors', selectorType === 'lightStyle' ? 'bg-[#1668dc]' : 'bg-[#232734] hover:bg-[#2a2f3d]')}
               >
-                光照{selectedLightStyle ? `：${LIGHT_STYLE_OPTIONS.find(o => o.id === selectedLightStyle)?.label}` : ''}
+                {selectedLightStyle
+                  ? LIGHT_STYLE_OPTIONS.find((o) => o.id === selectedLightStyle)?.label
+                  : '请选择光照'}
               </button>
             </div>
 
