@@ -1,11 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
-
-import { Sparkles } from 'lucide-react';
-
-import { BsdAssistantIcon } from '@/components/icons/BsdAssistantIcon';
-import { BsdLightIcon } from '@/components/icons/BsdLightIcon';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { executionWorkflow, useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
+import { BsdAssistantIcon } from '@/components/icons/BsdAssistantIcon';
+import { BsdLightIcon } from '@/components/icons/BsdLightIcon';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { WorkbenchOperationBar } from '@/components/ui/vines-iframe/view/operation-bar';
 import { useElementSize } from '@/hooks/use-resize-observer';
@@ -14,6 +11,9 @@ import { cn } from '@/utils';
 
 import { BsdHistoryGrid, type HistoryImage } from './components/BsdHistoryGrid';
 import { HistoryIcon, PanelCard, PanelHeader } from './components/PanelSection';
+import { ReferenceImageCard, type ReferenceSlot } from './components/ReferenceImageCard';
+import { BACKGROUND_CATEGORIES, BACKGROUND_OPTIONS, LIGHT_STYLE_OPTIONS } from './lightEffectAssets';
+import { Sparkles } from 'lucide-react';
 
 export type LightEffectOptions = {
   title?: string;
@@ -21,60 +21,6 @@ export type LightEffectOptions = {
   workflowId?: string;
 };
 
-// 背景分类
-const BACKGROUND_CATEGORIES = [
-  { id: 'outdoor', label: '户外' },
-  { id: 'cold', label: '极寒' },
-  { id: 'puff', label: '泡芙' },
-];
-
-/**
- * 获取背景选项列表
- * TODO: 替换为后端 API 调用
- */
-const getBackgroundOptions = (): Record<string, Array<{ id: string; label: string; image: string }>> => {
-  // TODO: 替换下方 URL 为实际的图片地址或对接后端 API
-  return {
-    outdoor: [
-      { id: 'forest', label: '森林', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Forest.png' },
-      { id: 'camp', label: '露营', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Camp.png' },
-      { id: 'gorge', label: '峡谷', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Gorge.png' },
-      { id: 'snow', label: '雪山', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Snow-capped%20mountain.png' },
-      { id: 'runway', label: 'T台', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/T-T.png' },
-    ],
-    cold: [
-      { id: 'ice_cave', label: '冰洞', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Snow-capped%20mountain.png' },
-      { id: 'glacier', label: '冰川', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Snow-capped%20mountain.png' },
-      { id: 'snow_field', label: '雪原', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Snow-capped%20mountain.png' },
-      { id: 'polar', label: '极地', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Snow-capped%20mountain.png' },
-    ],
-    puff: [
-      { id: 'studio', label: '摄影棚', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/T-T.png' },
-      { id: 'fashion_show', label: '时装秀', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/T-T.png' },
-      { id: 'magazine', label: '杂志风', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/T-T.png' },
-      { id: 'street', label: '街拍', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Camp.png' },
-    ],
-  };
-};
-
-/**
- * 获取光照风格选项列表
- * TODO: 替换为后端 API 调用
- */
-const getLightStyleOptions = (): Array<{ id: string; label: string; image: string }> => {
-  // TODO: 替换下方 URL 为实际的图片地址或对接后端 API
-  return [
-    { id: 'natural', label: '自然光', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Forest.png' },
-    { id: 'golden_hour', label: '黄金时刻', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Camp.png' },
-    { id: 'studio_light', label: '影棚灯光', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/T-T.png' },
-    { id: 'dramatic', label: '戏剧光', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Gorge.png' },
-    { id: 'soft', label: '柔光', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Snow-capped%20mountain.png' },
-    { id: 'backlight', label: '逆光', image: 'https://bsd-ai-oss-prd.oss-cn-wulanchabu.aliyuncs.com/new-ai/%E5%85%89%E5%BD%B1%E5%A4%A7%E7%89%87%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%AD%97%E5%85%B8%E7%BC%A9%E7%95%A5%E5%9B%BE/Forest.png' },
-  ];
-};
-
-const BACKGROUND_OPTIONS = getBackgroundOptions();
-const LIGHT_STYLE_OPTIONS = getLightStyleOptions();
 
 const defaultLightEffectOptions: LightEffectOptions = {
   title: '创意描述',
@@ -89,9 +35,11 @@ export const LightEffectPanel: React.FC<{ options?: LightEffectOptions }> = ({ o
   const workflowId = options?.workflowId as string | undefined;
 
   // 状态
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [referenceSlots, setReferenceSlots] = useState<ReferenceSlot[]>([{ id: 'base', label: '参考图' }]);
   const [prompt, setPrompt] = useState('');
   const [starting, setStarting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const previewUrlsRef = useRef<Set<string>>(new Set());
 
   // 面板展开状态
   const [selectorType, setSelectorType] = useState<'background' | 'lightStyle' | null>(null);
@@ -104,15 +52,50 @@ export const LightEffectPanel: React.FC<{ options?: LightEffectOptions }> = ({ o
   // 光照风格选择
   const [selectedLightStyle, setSelectedLightStyle] = useState<string | null>(null);
 
-  useEffect(() => { setVisible?.(true); }, [setVisible]);
+  useEffect(() => {
+    setVisible?.(true);
+    return () => {
+      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      previewUrlsRef.current.clear();
+    };
+  }, [setVisible]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => setUploadedImage(event.target?.result as string);
-      reader.readAsDataURL(file);
-    }
+  const updateSlotFile = (slotId: string, file: File | null) => {
+    setReferenceSlots((prev) =>
+      prev.map((slot) => {
+        if (slot.id !== slotId) return slot;
+        if (slot.previewUrl) {
+          URL.revokeObjectURL(slot.previewUrl);
+          previewUrlsRef.current.delete(slot.previewUrl);
+        }
+        if (!file) {
+          return { ...slot, previewUrl: undefined, uploadedUrl: undefined, uploading: false, file: undefined };
+        }
+        const previewUrl = URL.createObjectURL(file);
+        previewUrlsRef.current.add(previewUrl);
+        return { ...slot, previewUrl, uploading: true, file };
+      }),
+    );
+  };
+
+  const handleUploaded = (slotId: string, url: string) => {
+    setReferenceSlots((prev) =>
+      prev.map((slot) =>
+        slot.id === slotId
+          ? {
+              ...slot,
+              uploadedUrl: url || undefined,
+              uploading: false,
+              previewUrl: url || slot.previewUrl,
+              file: undefined,
+            }
+          : slot,
+      ),
+    );
+  };
+
+  const handleUploadingChange = (slotId: string, nextUploading: boolean) => {
+    setReferenceSlots((prev) => prev.map((slot) => (slot.id === slotId ? { ...slot, uploading: nextUploading } : slot)));
   };
 
   const getAllBackgroundOptions = () => Object.values(BACKGROUND_OPTIONS).flat();
@@ -155,12 +138,34 @@ export const LightEffectPanel: React.FC<{ options?: LightEffectOptions }> = ({ o
 
   const handleStart = async () => {
     if (!workflowId) return;
+    const baseSlot = referenceSlots.find((s) => s.id === 'base');
+    if (!baseSlot?.file && !baseSlot?.uploadedUrl) {
+      toast?.error?.('请先上传参考图');
+      return;
+    }
     try {
       setStarting(true);
+      setUploading(true);
+      const uploadMap = referenceSlots.reduce<Record<string, string>>((acc, slot) => {
+        acc[slot.id] = slot.uploadedUrl ?? '';
+        return acc;
+      }, {});
+      setUploading(false);
       void mutateExecutionList?.();
-      await executionWorkflow(workflowId, { image: uploadedImage, background: selectedBackground, lightStyle: selectedLightStyle, prompt, seed: randomSeed15() }, 1);
+      await executionWorkflow(
+        workflowId,
+        {
+          reference: uploadMap['base'] ?? '',
+          background: selectedBackground,
+          lightStyle: selectedLightStyle,
+          prompt,
+          seed: randomSeed15(),
+        },
+        1,
+      );
     } finally {
       setStarting(false);
+      setUploading(false);
       void mutateExecutionList?.();
     }
   };
@@ -217,23 +222,21 @@ export const LightEffectPanel: React.FC<{ options?: LightEffectOptions }> = ({ o
       {/* 左侧：配置面板 */}
       <div className="flex w-[400px] min-h-0 flex-col gap-3">
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {/* 光影模版上传 */}
-          <PanelCard className="gap-3" padding={12}>
-            <PanelHeader icon={<BsdLightIcon className="size-5" />} title="光影模版" description="上传需要重打光和换背景的图片模版" />
-            <div className="flex flex-wrap items-start justify-start gap-2 p-2">
-              <label className={cn('flex cursor-pointer flex-col items-center justify-center rounded-xl border bg-gradient-to-b from-gray-700/50 to-gray-800/50 text-xs transition-all duration-300', 'border-blue-500/20 hover:border-blue-400/40 hover:bg-gray-700/30')} style={{ width: 100, height: 120 }}>
-                {uploadedImage ? (
-                  <img src={uploadedImage} alt="uploaded" className="h-full w-full rounded-xl object-cover" />
-                ) : (
-                  <>
-                    <div className="relative z-10 mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/10"><span className="text-xl text-blue-400">+</span></div>
-                    <div className="relative z-10 text-xs text-gray-400">上传图片</div>
-                  </>
-                )}
-                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              </label>
-            </div>
-          </PanelCard>
+      {/* 光影模版上传 */}
+      <PanelCard className="gap-3" padding={12}>
+        <PanelHeader icon={<BsdLightIcon className="size-5" />} title="光影模版" description="上传需要重打光和换背景的图片模版" />
+        <div className="flex flex-row flex-wrap gap-3">
+          {referenceSlots.map((slot) => (
+            <ReferenceImageCard
+              key={slot.id}
+              slot={slot}
+              onSelect={updateSlotFile}
+              onUploaded={handleUploaded}
+              onUploadingChange={handleUploadingChange}
+            />
+          ))}
+        </div>
+      </PanelCard>
 
           {/* 创意描述（融合背景和光照选择） */}
           <PanelCard className="gap-3" padding={12}>
@@ -318,7 +321,13 @@ export const LightEffectPanel: React.FC<{ options?: LightEffectOptions }> = ({ o
 
         {/* 底部按钮 */}
         <div className="flex w-full items-center justify-between gap-3 pb-1 pt-1">
-          <button type="button" onClick={handleStart} disabled={starting || !workflowId} className="relative flex h-[42px] w-full items-center justify-center gap-2 overflow-hidden rounded-[10px] px-5 text-white transition hover:brightness-110" style={{ background: 'linear-gradient(0deg, rgba(40, 82, 173, 0.08), rgba(40, 82, 173, 0.08)), #2C5EF5' }}>
+          <button
+            type="button"
+            onClick={handleStart}
+            disabled={starting || uploading || !workflowId || !referenceSlots.find((s) => s.id === 'base' && s.uploadedUrl)}
+            className="relative flex h-[42px] w-full items-center justify-center gap-2 overflow-hidden rounded-[10px] px-5 text-white transition hover:brightness-110"
+            style={{ background: 'linear-gradient(0deg, rgba(40, 82, 173, 0.08), rgba(40, 82, 173, 0.08)), #2C5EF5' }}
+          >
             <span className="pointer-events-none absolute bottom-0 left-1/2 h-2 w-2/3 -translate-x-1/2 translate-y-[6px] rounded-full bg-white/60 blur-[12px]" />
             <Sparkles className="size-5" stroke="none" fill="#FFFFFF" />
             <span style={{ fontFamily: 'Microsoft YaHei UI, sans-serif', fontSize: 16, fontWeight: 700, color: '#FFFFFF' }}>开始生图</span>
