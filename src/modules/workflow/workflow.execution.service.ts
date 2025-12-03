@@ -166,6 +166,7 @@ export class WorkflowExecutionService {
     }
 
     let isBuiltinOwnerView = false;
+    let isSharedPresetWorkflow = false;
 
     /**
      * 作者团队视角的「内置应用跨团队汇总」：
@@ -180,8 +181,15 @@ export class WorkflowExecutionService {
         const appVersion = await this.marketplaceService.getAppVersionByAssetId(baseWorkflow.workflowId, 'workflow');
         const app = appVersion?.app;
 
-        if (app?.isPreset && app.authorTeamId === teamId) {
-          isBuiltinOwnerView = true;
+        if (app?.isPreset) {
+          if (app.authorTeamId === teamId) {
+            // 作者团队视角：需要聚合所有团队执行记录
+            isBuiltinOwnerView = true;
+          } else {
+            // 其他团队视角下的预置（内置）应用工作流：
+            // 工作流定义是跨团队共享的，但执行记录仍应按 teamId 隔离
+            isSharedPresetWorkflow = true;
+          }
         }
       } catch {
         // 聚合失败不影响正常查询，降级为原来的 team 内查询
@@ -349,8 +357,21 @@ export class WorkflowExecutionService {
           return keep;
     });
 
-    // 分页处理
+    // 分页处理（在 team 过滤之后再做）
     const pagedData = dataAfterTeamFilter.slice(0, limitNum);
+
+    /**
+     * total 计算逻辑说明：
+     * - Conductor 返回的 totalHits 是「全局」命中数，不区分 teamId
+     * - 对于作者团队视角（isBuiltinOwnerView = true），我们保留聚合后的 total（仅扣掉本次批次中被过滤掉的数量）
+     * - 对于其他团队在使用预置应用（isSharedPresetWorkflow = true）时：
+     *   - 为了避免「历史上其他团队的执行记录」导致 total 远大于当前团队可见数量，
+     *   - 这里退化为按已加载数量估算 total，表现为无「剩余 N 项」的误导性提示
+     * - 对于普通工作流：依然沿用原有基于 totalHits 的 total
+     */
+    const baseTotal = (totalHits ?? 0) - filterCount - teamFilteredCount;
+    const isCrossTeamPresetView = isSharedPresetWorkflow && !isBuiltinOwnerView;
+    const effectiveTotal = isCrossTeamPresetView ? start + dataAfterTeamFilter.length : baseTotal;
 
     return {
       definitions: resultDefinitions.map((it) => {
@@ -384,7 +405,7 @@ export class WorkflowExecutionService {
       page,
       limit: limitNum,
       data: pagedData,
-      total: (totalHits ?? 0) - filterCount - teamFilteredCount,
+      total: effectiveTotal,
     };
   }
 
