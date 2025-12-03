@@ -371,7 +371,8 @@ export class WorkflowExecutionService {
      */
     const baseTotal = (totalHits ?? 0) - filterCount - teamFilteredCount;
     const isCrossTeamPresetView = isSharedPresetWorkflow && !isBuiltinOwnerView;
-    const effectiveTotal = isCrossTeamPresetView ? start + dataAfterTeamFilter.length : baseTotal;
+    // 非作者团队查看预置（内置）应用时，避免把其他团队的历史记录计入 total，直接使用当前可见数量
+    const effectiveTotal = isCrossTeamPresetView ? dataAfterTeamFilter.length : baseTotal;
 
     return {
       definitions: resultDefinitions.map((it) => {
