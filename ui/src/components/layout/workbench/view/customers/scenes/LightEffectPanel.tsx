@@ -155,9 +155,9 @@ export const LightEffectPanel: React.FC<{ options?: LightEffectOptions }> = ({ o
       await executionWorkflow(
         workflowId,
         {
-          reference: uploadMap['base'] ?? '',
-          background: selectedBackground,
-          lightStyle: selectedLightStyle,
+          image: uploadMap['base'] ?? '',
+          bfzhrq: selectedBackground ?? '',
+          rd7zfc: selectedLightStyle ?? '',
           prompt,
           seed: randomSeed15(),
         },
