@@ -95,15 +95,40 @@ export class CompatibleAuthGuard implements CanActivate {
       }
 
       if (isAuthenticated) {
-        // Validate team
+        /**
+         * teamId 兜底逻辑说明：
+         * - 正常情况下前端会在 header 中传入 x-monkeys-teamid 作为当前团队 ID
+         * - 当用户使用一个全新的账号登录，但浏览器还保留了旧账号的 teamId 时，会出现：
+         *   - JWT 属于新账号
+         *   - header.teamId 属于旧团队，新账号并不在该团队内 → isUserInTeam = false
+         *   - 旧逻辑直接抛 ForbiddenException，导致新账号无法访问任何资源
+         *
+         * 改进策略：
+         * - 当发现「用户已认证但 header.teamId 不属于该用户」时：
+         *   - 优先回退到「用户自己的第一个团队」作为当前 teamId
+         *   - 若用户一个团队都没有，则仍抛 ForbiddenException
+         * - 这样可以兼容新账号首次登录场景，同时仍保证不会越权访问其他团队数据
+         */
+        let finalTeamId = teamId;
         if (teamId) {
           const isUserInTeam = await this.teamRepository.isUserInTeam(userId, teamId);
           if (!isUserInTeam) {
+            const userTeams = await this.teamRepository.getUserTeams(userId);
+            if (!userTeams.length) {
+              throw new ForbiddenException();
+            }
+            finalTeamId = userTeams[0].id;
+          }
+        } else {
+          const userTeams = await this.teamRepository.getUserTeams(userId);
+          if (!userTeams.length) {
             throw new ForbiddenException();
           }
+          finalTeamId = userTeams[0].id;
         }
+
         request.userId = userId;
-        request.teamId = teamId;
+        request.teamId = finalTeamId;
         request.apikey = apiKey;
         this.recordTelemetry(request);
         return true;

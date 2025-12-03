@@ -350,12 +350,13 @@ export class WorkflowExecutionService {
       ? finalData
       : finalData.filter((it) => {
           const ctxTeamId = it.input?.['__context']?.['teamId'] as string | undefined;
-          const keep = !ctxTeamId || ctxTeamId === teamId;
+          // 对于预置（内置）应用的跨团队共享视图，严格按照 teamId 匹配，避免老数据（缺少 teamId）泄露到其他团队
+          const keep = isSharedPresetWorkflow ? ctxTeamId === teamId : !ctxTeamId || ctxTeamId === teamId;
           if (!keep) {
             teamFilteredCount++;
           }
           return keep;
-    });
+        });
 
     // 分页处理（在 team 过滤之后再做）
     const pagedData = dataAfterTeamFilter.slice(0, limitNum);
@@ -824,12 +825,17 @@ export class WorkflowExecutionService {
     // - 作者团队：查看该内置应用在所有团队下的执行记录
     // - 其他团队：仅查看本团队（__context.teamId === teamId）的执行记录
     let isBuiltinOwnerView = false;
+    let isSharedPresetWorkflow = false;
     if (workflow) {
       try {
         const appVersion = await this.marketplaceService.getAppVersionByAssetId(workflow.workflowId, 'workflow');
         const app = appVersion?.app;
-        if (app?.isPreset && app.authorTeamId === teamId) {
-          isBuiltinOwnerView = true;
+        if (app?.isPreset) {
+          if (app.authorTeamId === teamId) {
+            isBuiltinOwnerView = true;
+          } else {
+            isSharedPresetWorkflow = true;
+          }
         }
       } catch {
         // 查询应用失败时，降级为普通团队视角，仅按 teamId 过滤
@@ -864,7 +870,8 @@ export class WorkflowExecutionService {
         .filter((it) => {
           if (isBuiltinOwnerView) return true;
           const ctxTeamId = it.input?.['__context']?.['teamId'] as string | undefined;
-          return !ctxTeamId || ctxTeamId === teamId;
+          // 对于预置（内置）应用的跨团队共享视图，严格按照 teamId 匹配，避免老数据（缺少 teamId）泄露到其他团队
+          return isSharedPresetWorkflow ? ctxTeamId === teamId : !ctxTeamId || ctxTeamId === teamId;
         })
         .map((it) => {
           const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
