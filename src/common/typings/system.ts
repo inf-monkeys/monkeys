@@ -12,6 +12,7 @@ import {
   CustomizationUploader,
   CustomizationWorkbenchViewTheme,
   CustomizationWorkbench,
+  CustomizationDefaults,
   ExtraLanguageURL,
   SystemConfigBehavior,
   WorkflowPreviewExecutionGrid,
@@ -51,9 +52,7 @@ export interface ISystemConfig {
     showSidebarTeamSelector: boolean;
     showWorkbenchSidebar?: boolean;
     workbenchViewTheme?: CustomizationWorkbenchViewTheme;
-    defaults: {
-      showFormInImageDetail?: boolean;
-    };
+    defaults: CustomizationDefaults;
     modules: CustomizationModules;
     headbar: CustomizationHeadbar;
     paginationPosition?: 'left' | 'right';

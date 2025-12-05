@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { useFavicon, useTitle } from 'ahooks';
 import { get } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
@@ -15,9 +16,10 @@ import VinesEvent from '@/utils/events.ts';
 
 export const OEM: React.FC = () => {
   const { team } = useVinesTeam();
-  const [localDarkMode, setLocalDarkMode] = useLocalStorage<string>('vines-ui-dark-mode', '', false);
-
   const { data: oem } = useSystemConfig();
+  const { i18n } = useTranslation();
+
+  const [localDarkMode, setLocalDarkMode] = useLocalStorage<string>('vines-ui-dark-mode', '', false);
 
   const darkMode = useAppStore((s) => s.darkMode);
   const toggleDarkMode = useAppStore((s) => s.toggleDarkMode);
@@ -34,6 +36,47 @@ export const OEM: React.FC = () => {
   const teamNeocardColor = get(team, 'customTheme.neocardColor', '');
   const teamNeocardDarkColor = get(team, 'customTheme.neocardDarkColor', '');
   const themeGradient = get(oem, 'theme.gradient', undefined) as ISystemConfig['theme']['gradient'];
+
+  // Initialize defaults from OEM config
+  useLayoutEffect(() => {
+    if (!oem) return;
+
+    const defaultDarkMode = get(oem, 'theme.defaults.darkMode', 'light') as 'light' | 'dark' | 'auto';
+    const defaultLanguage = get(oem, 'theme.defaults.language', 'zh-CN');
+    const showDarkModeToggle = get(oem, 'theme.defaults.showDarkModeToggle', true);
+    const showLanguageToggle = get(oem, 'theme.defaults.showLanguageToggle', true);
+
+    // Handle language first (using layoutEffect to ensure it's set before render)
+    if (!showLanguageToggle) {
+      // Force OEM default when toggle is hidden (always enforce)
+      const currentLang = i18n.language.startsWith('zh') ? 'zh-CN' : i18n.language;
+      const targetLang = defaultLanguage === 'zh-CN' ? 'zh' : defaultLanguage === 'en-US' ? 'en' : defaultLanguage;
+      if (currentLang !== targetLang) {
+        void i18n.changeLanguage(targetLang);
+      }
+    } else {
+      // Only set default if user hasn't set it yet
+      const storedLanguage = localStorage.getItem('i18nextLng');
+      if (!storedLanguage) {
+        const targetLang = defaultLanguage === 'zh-CN' ? 'zh' : defaultLanguage === 'en-US' ? 'en' : defaultLanguage;
+        void i18n.changeLanguage(targetLang);
+      }
+    }
+
+    // Handle dark mode
+    if (!showDarkModeToggle) {
+      // Force OEM default when toggle is hidden (always enforce)
+      if (localDarkMode !== defaultDarkMode) {
+        setLocalDarkMode(defaultDarkMode);
+      }
+    } else {
+      // Only set default if user hasn't set it yet
+      const storedDarkMode = localStorage.getItem('vines-ui-dark-mode');
+      if (!storedDarkMode) {
+        setLocalDarkMode(defaultDarkMode);
+      }
+    }
+  }, [oem, localDarkMode, i18n, setLocalDarkMode]);
 
   useEffect(() => {
     setValue(teamThemeColor || siteThemeColor);

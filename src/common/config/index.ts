@@ -81,6 +81,14 @@ export type CustomizationHeadbar = {
   profile?: VinesSpaceHeadbarProfile[] | '*';
 };
 
+export type CustomizationDefaults = {
+  showFormInImageDetail?: boolean;
+  darkMode?: 'light' | 'dark' | 'auto';
+  language?: 'en-US' | 'zh-CN' | 'ja-JP';
+  showDarkModeToggle?: boolean;
+  showLanguageToggle?: boolean;
+};
+
 export type SelectionModeDisplayType = 'operation-button' | 'dropdown-menu';
 export type ClickBehavior = 'preview' | 'select' | 'fill-form';
 
@@ -208,9 +216,7 @@ export interface ServerConfig {
     showSidebarTeamSelector?: boolean;
     showWorkbenchSidebar?: boolean;
     workbenchViewTheme?: CustomizationWorkbenchViewTheme;
-    defaults?: {
-      showFormInImageDetail?: boolean;
-    };
+    defaults?: CustomizationDefaults;
     modules?: CustomizationModules;
     headbar?: CustomizationHeadbar;
     paginationPosition?: 'left' | 'right';
@@ -725,6 +731,10 @@ export const config: Config = {
       workbenchViewTheme: readConfig('server.customization.workbenchViewTheme', 'default'),
       defaults: {
         showFormInImageDetail: readConfig('server.customization.defaults.showFormInImageDetail', true),
+        darkMode: readConfig('server.customization.defaults.darkMode', 'light'),
+        language: readConfig('server.customization.defaults.language', 'zh-CN'),
+        showDarkModeToggle: readConfig('server.customization.defaults.showDarkModeToggle', true),
+        showLanguageToggle: readConfig('server.customization.defaults.showLanguageToggle', true),
       },
       modules: {
         vinesSpaceSidebar: readConfig('server.customization.modules.vinesSpaceSidebar', '*'),

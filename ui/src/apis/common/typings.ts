@@ -155,6 +155,14 @@ export type SystemConfigBehavior = {
   clearWorkflowFormStorageAfterUpdate: boolean;
 };
 
+export type CustomizationDefaults = {
+  showFormInImageDetail: boolean;
+  darkMode?: 'light' | 'dark' | 'auto';
+  language?: 'en-US' | 'zh-CN' | 'ja-JP';
+  showDarkModeToggle?: boolean;
+  showLanguageToggle?: boolean;
+};
+
 export interface ISystemConfig {
   theme: {
     id?: string;

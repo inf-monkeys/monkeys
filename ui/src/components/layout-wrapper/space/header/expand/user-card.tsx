@@ -37,12 +37,9 @@ export const UserCard: React.FC<IUserCardProps> = () => {
 
   const teamAsUser = oem?.theme.teamAsUser || false;
 
-  const showDarkMode =
-    oem &&
-    (!oem.theme.headbar || oem.theme.headbar.profile === '*' || oem.theme.headbar.profile?.includes('dark-mode'));
+  const showDarkMode = oem?.theme.defaults.showDarkModeToggle ?? true;
 
-  const showLanguage =
-    oem && (!oem.theme.headbar || oem.theme.headbar.profile === '*' || oem.theme.headbar.profile?.includes('language'));
+  const showLanguage = oem?.theme.defaults.showLanguageToggle ?? true;
 
   const showSettings =
     oem && (!oem.theme.headbar || oem.theme.headbar.profile === '*' || oem.theme.headbar.profile?.includes('settings'));
