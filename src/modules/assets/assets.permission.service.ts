@@ -1,6 +1,7 @@
 import { AssetType } from '@inf-monkeys/monkeys';
 import { ForbiddenException, Inject, Injectable, forwardRef } from '@nestjs/common';
 
+import { config } from '@/common/config';
 import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
 
@@ -59,8 +60,13 @@ export class AssetsPermissionService {
       return;
     }
 
-    // 预置应用：只有作者团队可以写，其余团队（映射实例）一律只读
-    if (app.authorTeamId !== teamId) {
+    // 预置应用：
+    // - 作者团队始终可写
+    // - 额外白名单中的团队（server.customization.marketplace.writablePresetTeamIds）也允许写
+    const extraWritableTeamIds = (config.server.customization.marketplace as any).writablePresetTeamIds || [];
+    const isExtraWritable = Array.isArray(extraWritableTeamIds) && extraWritableTeamIds.includes(teamId);
+
+    if (app.authorTeamId !== teamId && !isExtraWritable) {
       throw new ForbiddenException('内置应用映射仅可读，只有设置为内置应用的团队可以修改工作流');
     }
   }

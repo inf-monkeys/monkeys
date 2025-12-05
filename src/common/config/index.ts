@@ -242,6 +242,7 @@ export interface ServerConfig {
     marketplace: {
       presetAppSortFileUrl?: string;
       presetAppFileUrl?: string;
+      writablePresetTeamIds?: string[];
     };
     workbench: CustomizationWorkbench;
     visionProWorkflows?: string[];
@@ -796,6 +797,8 @@ export const config: Config = {
       marketplace: {
         presetAppSortFileUrl: readConfig('server.customization.marketplace.presetAppSortFileUrl', undefined),
         presetAppFileUrl: readConfig('server.customization.marketplace.presetAppFileUrl', undefined),
+        // 允许对预置（内置）应用绑定的 workflow 具有写权限的团队 ID 白名单（用于 OEM 特殊团队场景）
+        writablePresetTeamIds: readConfig('server.customization.marketplace.writablePresetTeamIds', []),
       },
       workbench: {
         pages: readConfig('server.customization.workbench.pages', []),
