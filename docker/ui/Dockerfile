@@ -1,30 +1,28 @@
-FROM node:22-alpine as builder
+# syntax=docker/dockerfile:1.6
 
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json yarn.lock ./
+RUN --mount=type=cache,target=/root/.cache/yarn \
+    yarn install --frozen-lockfile
+
+FROM node:22-alpine AS build
 ARG GIT_COMMIT_HASH=dev
 ARG GIT_TAG=
-
 WORKDIR /app
-
-COPY ["package.json", "yarn.lock", "./"]
-
 ENV NODE_OPTIONS=--max_old_space_size=8192 \
     GIT_COMMIT_HASH=${GIT_COMMIT_HASH} \
     GIT_TAG=${GIT_TAG}
-
-RUN yarn
-
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN --mount=type=cache,target=/root/.cache/yarn \
+    --mount=type=cache,target=/app/node_modules/.cache \
+    --mount=type=cache,target=/app/.tsbuildcache \
+    yarn build
 
-RUN yarn build
-
-FROM node:22-alpine as runner
-
+FROM node:22-alpine AS runner
 WORKDIR /app
-
-RUN npm i -g serve
-
-COPY --from=builder /app/dist ./dist
-
+RUN --mount=type=cache,target=/root/.npm npm i -g serve
+COPY --from=build /app/dist ./dist
 EXPOSE 3000
-
-CMD [ "serve", "-s", "dist", "-p", "3000" ]
+CMD ["serve", "-s", "dist", "-p", "3000"]
