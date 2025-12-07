@@ -185,7 +185,10 @@ export class EvaluationController {
     }
 
     // 并行执行获取已在排行榜中的资产和媒体文件列表
-    const [assetsInModule, mediaResult] = await Promise.all([this.openskillService.getAssetsInModule(teamId, moduleId), this.mediaFileService.listRichMedias(teamId, { page: +page, limit: +limit })]);
+    const [assetsInModule, mediaResult] = await Promise.all([
+      this.openskillService.getAssetsInModule(teamId, moduleId),
+      this.mediaFileService.listRichMedias(teamId, { page: +page, limit: +limit }),
+    ]);
 
     // 在内存中过滤，避免数据库二次查询
     const excludeSet = new Set(assetsInModule);

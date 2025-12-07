@@ -399,6 +399,8 @@ export interface AdminConfig {
 }
 
 export interface S3Config {
+  // 是否启用 opendal 上传（Azure Blob 等），默认关闭以兼容旧的 S3/OSS 路径
+  enableOpendalUpload: boolean;
   proxy: boolean;
   randomFilename: boolean;
   autoGenerateThumbnail: boolean;
@@ -924,6 +926,7 @@ export const config: Config = {
   },
   admin: readConfig('admin'),
   s3: {
+    enableOpendalUpload: readConfig('s3.enableOpendalUpload', false),
     proxy: readConfig('s3.proxy', true),
     randomFilename: readConfig('s3.randomFilename', false),
     autoGenerateThumbnail: readConfig('s3.autoGenerateThumbnail', false),

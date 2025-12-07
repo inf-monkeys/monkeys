@@ -25,6 +25,11 @@ export class MediaBucketRegistryService implements OnModuleInit {
     return this.bucketManager.getAllBuckets();
   }
 
+  getPrimaryBucket(): BucketConfig | undefined {
+    const buckets = this.bucketManager.getAllBuckets();
+    return buckets.length > 0 ? buckets[0] : undefined;
+  }
+
   private initializeBuckets() {
     this.bucketManager.clear();
     if (!config.s3ThumbnailBuckets?.length) {

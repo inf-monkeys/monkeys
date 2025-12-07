@@ -2,13 +2,15 @@ import { config } from '@/common/config';
 import { SuccessResponse } from '@/common/response';
 import { S3Helpers } from '@/common/s3';
 import { getMimeType } from '@/common/utils/file';
-import { Body, Controller, Get, Head, NotFoundException, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Head, NotFoundException, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { generateId } from 'ai';
 import { Response } from 'express';
 import _ from 'lodash';
 import { Readable } from 'stream';
+import { MediaBucketRegistryService } from './media.bucket-registry.service';
 import { MediaFileService } from './media.service';
+import { MediaStorageService } from './media.storage.service';
 
 const parseBoolean = (value?: string) => {
   if (value === undefined || value === null) {
@@ -26,7 +28,22 @@ const parseBoolean = (value?: string) => {
 
 @Controller('medias')
 export class MediaUploadController {
-  constructor(private readonly mediaFileService: MediaFileService) {}
+  constructor(
+    private readonly mediaFileService: MediaFileService,
+    private readonly mediaStorageService: MediaStorageService,
+    private readonly mediaBucketRegistryService: MediaBucketRegistryService,
+  ) {}
+
+  /**
+   * 检查是否应该使用 opendal（Azure Blob 等）
+   */
+  private shouldUseOpendal(): boolean {
+    if (!config.s3.enableOpendalUpload) {
+      return false;
+    }
+    const primaryBucket = this.mediaBucketRegistryService.getPrimaryBucket();
+    return !!primaryBucket && primaryBucket.provider === 'azblob';
+  }
 
   @Get('/s3/configs')
   async genStsToken() {
@@ -36,6 +53,7 @@ export class MediaUploadController {
         region: config.s3.region,
         baseUrl: config.s3.publicAccessUrl + '/',
         isPrivate: config.s3.isPrivate,
+        supportsPresignUpload: true, // 尝试支持预签名上传
       },
     });
   }
@@ -85,11 +103,39 @@ export class MediaUploadController {
 
   @Get('/s3/presign')
   async getPreSignedUrl(@Query('key') key: string) {
-    const s3Helpers = new S3Helpers();
-    const data = await s3Helpers.getSignedUrlForUpload(key);
-    return new SuccessResponse({
-      data,
-    });
+    // 智能选择存储方式
+    if (this.shouldUseOpendal()) {
+      // 尝试使用 opendal（支持 Azure Blob 等）
+      try {
+        const result = await this.mediaStorageService.getPresignedUploadUrl({ key });
+        // 返回完整的预签名信息，包括必需的 headers
+        return new SuccessResponse({
+          data: {
+            url: result.url,
+            method: result.method,
+            headers: result.headers,
+            key: result.key,
+            bucketId: result.bucketId,
+            expiresIn: result.expiresIn,
+          },
+        });
+      } catch (error) {
+        // 如果预签名失败，返回错误提示
+        throw new BadRequestException({
+          message: `预签名上传失败: ${error.message}`,
+          code: 'PRESIGN_FAILED',
+          alternativeEndpoint: '/medias/s3/file',
+          error: error.message,
+        });
+      }
+    } else {
+      // 使用传统 S3Helpers（支持 S3/OSS）
+      const s3Helpers = new S3Helpers();
+      const data = await s3Helpers.getSignedUrlForUpload(key);
+      return new SuccessResponse({
+        data,
+      });
+    }
   }
 
   @Head('/s3/presign-v2')
@@ -237,17 +283,37 @@ export class MediaUploadController {
   @Post('/s3/file')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFileStream(@UploadedFile() file: any, @Body('key') key: string) {
-    const s3Helpers = new S3Helpers();
-    // NOTE: 原有的缩略图生成逻辑已交由独立服务处理，这里禁用本地生成与上传缩略图。
-    const suffix = key.split('.').pop()?.toLowerCase();
-    if (config.s3.randomFilename) {
-      const id = generateId();
-      key = `r/${id}.${suffix}`;
+    // 智能选择存储方式
+    if (this.shouldUseOpendal()) {
+      // 使用 opendal（支持 Azure Blob 等）
+      const result = await this.mediaStorageService.uploadFile({
+        key,
+        buffer: file.buffer,
+        contentType: file.mimetype,
+        randomFilename: config.s3.randomFilename,
+      });
+      return new SuccessResponse({
+        data: {
+          url: result.url, // 立即可用（私有时为签名）
+          canonicalUrl: result.canonicalUrl ?? result.url,
+          key: result.key,
+          bucketId: result.bucketId,
+        },
+      });
+    } else {
+      // 使用传统 S3Helpers（支持 S3/OSS）
+      const s3Helpers = new S3Helpers();
+      // NOTE: 原有的缩略图生成逻辑已交由独立服务处理，这里禁用本地生成与上传缩略图。
+      const suffix = key.split('.').pop()?.toLowerCase();
+      if (config.s3.randomFilename) {
+        const id = generateId();
+        key = `r/${id}.${suffix}`;
+      }
+      const url = await s3Helpers.uploadFile(file.buffer, key);
+      const data = config.s3.isPrivate ? await s3Helpers.getSignedUrl(key) : url;
+      return new SuccessResponse({
+        data,
+      });
     }
-    const url = await s3Helpers.uploadFile(file.buffer, key);
-    const data = config.s3.isPrivate ? await s3Helpers.getSignedUrl(key) : url;
-    return new SuccessResponse({
-      data,
-    });
   }
 }

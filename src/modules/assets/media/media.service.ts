@@ -11,6 +11,7 @@ import axios from 'axios';
 import { createHash } from 'crypto';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
 import { MediaPresignResult, MediaPresignService } from './media.presign.service';
+import { MediaStorageService } from './media.storage.service';
 import { GetThumbnailOptions, MediaThumbnailService, ThumbnailWithMeta } from './media.thumbnail.service';
 
 @Injectable()
@@ -22,18 +23,42 @@ export class MediaFileService {
     private readonly toolsForwardService: ToolsForwardService,
     private readonly mediaThumbnailService: MediaThumbnailService,
     private readonly mediaPresignService: MediaPresignService,
+    private readonly mediaStorageService: MediaStorageService,
   ) {}
 
   public async listRichMedias(teamId: string, dto: ListDto, excludeIds?: string[], filterNeuralModel?: 'only' | 'exclude' | 'all') {
-    return await this.mediaRepository.listRichMedias(teamId, dto, excludeIds, filterNeuralModel);
+    const result = await this.mediaRepository.listRichMedias(teamId, dto, excludeIds, filterNeuralModel);
+    const signedList = await this.attachPublicUrlsIfNeeded(result.list);
+    return { ...result, list: signedList };
   }
 
   public async listRichMediasForFolderView(teamId: string, search?: string) {
-    return await this.mediaRepository.listRichMediasForFolderView(teamId, search);
+    const result = await this.mediaRepository.listRichMediasForFolderView(teamId, search);
+    // 此接口返回的不是标准 MediaFileEntity，保持原样以避免类型报错
+    return result;
   }
 
   public async deleteMedia(teamId: string, id: string) {
     return await this.mediaRepository.deleteMedia(teamId, id);
+  }
+
+  /**
+   * 如果是私有存储，则为列表中的媒体补上可访问的签名 URL
+   */
+  private async attachPublicUrlsIfNeeded<T extends MediaFileEntity>(items: T[]) {
+    if (!config.s3.isPrivate && !config.s3.enableOpendalUpload) {
+      return items;
+    }
+    return Promise.all(
+      items.map(async (item) => {
+        try {
+          const signed = await this.getPublicUrl(item);
+          return { ...item, url: signed };
+        } catch {
+          return item;
+        }
+      }),
+    );
   }
 
   public async getMediaById(id: string) {
@@ -75,12 +100,10 @@ export class MediaFileService {
   public async getPublicUrl(media: MediaFileEntity): Promise<string> {
     // 1. 如果 S3 桶本身就是公开的，直接返回存储的 URL
     if (!config.s3.isPrivate) {
-      this.logger.debug(`S3 bucket is public, returning original URL: ${media.url}`);
       return media.url;
     }
 
     // 2. 如果是私有桶，需要生成预签名 URL
-    this.logger.debug(`S3 bucket is private. Attempting to generate a signed URL for: ${media.url}`);
     let s3Key: string | null = null;
 
     try {
@@ -108,18 +131,25 @@ export class MediaFileService {
 
     // 清理 S3 Key，移除可能存在的前导斜杠
     s3Key = s3Key.startsWith('/') ? s3Key.substring(1) : s3Key;
-    this.logger.debug(`Extracted S3 key: ${s3Key}`);
-
     try {
+      // 如果启用了 opendal 上传（Azure Blob 等），使用 MediaStorageService 生成读签名
+      if (this.shouldUseOpendalUpload()) {
+        const signedUrl = await this.mediaStorageService.getFileUrl(s3Key);
+        return signedUrl;
+      }
+
+      // 兼容旧的 S3/OSS 路径
       const s3Helpers = new S3Helpers();
-      const signedUrl = await s3Helpers.getSignedUrl(s3Key);
-      this.logger.debug(`Successfully generated signed URL for key ${s3Key}: ${signedUrl.substring(0, 100)}...`);
-      return signedUrl;
+      return await s3Helpers.getSignedUrl(s3Key);
     } catch (error) {
       this.logger.error(`Failed to generate signed URL for S3 key "${s3Key}". Returning original URL.`, error);
       // 如果生成签名失败，返回原始URL并记录详细错误
       return media.url;
     }
+  }
+
+  private shouldUseOpendalUpload(): boolean {
+    return Boolean(config.s3.enableOpendalUpload);
   }
 
   public async getMediaByIdAndTeamId(id: string, teamId: string) {

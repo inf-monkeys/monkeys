@@ -90,10 +90,31 @@ export class StorageOperations {
 
   static async presignRead(bucket: BucketConfig, path: string, expiresInSeconds: number): Promise<PresignedRequest> {
     const operator = await storageClientCache.getOperator(bucket);
-    const capability = operator.capability();
-    if (!capability.presign || !capability.presignRead) {
-      throw new Error(`Bucket ${bucket.id} 不支持 presign 操作`);
+    try {
+      return await operator.presignRead(path, expiresInSeconds);
+    } catch (error: any) {
+      throw new Error(`Bucket ${bucket.id} presignRead 失败: ${error.message}`);
     }
-    return operator.presignRead(path, expiresInSeconds);
+  }
+
+  static async presignWrite(bucket: BucketConfig, path: string, expiresInSeconds: number): Promise<PresignedRequest> {
+    const operator = await storageClientCache.getOperator(bucket);
+    const capability = operator.capability();
+
+    // 记录 capability 信息用于调试
+    console.log(`Bucket ${bucket.id} (${bucket.provider}) capabilities:`, {
+      presign: capability.presign,
+      presignRead: capability.presignRead,
+      presignWrite: capability.presignWrite,
+      presignStat: capability.presignStat,
+    });
+
+    // 尝试直接调用 presignWrite，让 opendal 自己处理是否支持
+    try {
+      return await operator.presignWrite(path, expiresInSeconds);
+    } catch (error) {
+      // 如果真的不支持，会抛出错误
+      throw new Error(`Bucket ${bucket.id} presignWrite 失败: ${error.message}`);
+    }
   }
 }

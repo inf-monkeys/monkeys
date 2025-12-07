@@ -23,9 +23,17 @@ export class MediaPresignService {
   async getPresignedUrl(targetUrl: string, expiresInSeconds?: number): Promise<MediaPresignResult> {
     const normalizedExpires = this.normalizeExpires(expiresInSeconds);
     const resolved = this.resolveBucket(targetUrl);
-    const presigned = await StorageOperations.presignRead(resolved.bucket, resolved.imagePath, normalizedExpires);
+    let presigned;
+    try {
+      presigned = await StorageOperations.presignRead(resolved.bucket, resolved.imagePath, normalizedExpires);
+    } catch (error: any) {
+      const message = error?.message || 'presign failed';
+      this.logger.error(`Presign read failed for bucket ${resolved.bucket.id}, path ${resolved.imagePath}: ${message}`);
+      // 将底层错误包装为 BadRequest 便于前端展示具体原因
+      throw new BadRequestException(`获取预签名链接失败: ${message}`);
+    }
 
-    this.logger.debug('Generated presigned URL for %s', resolved.imagePath);
+    this.logger.debug(`Generated presigned URL for ${resolved.imagePath}: ${presigned.url}`);
 
     return {
       bucketId: resolved.bucket.id,

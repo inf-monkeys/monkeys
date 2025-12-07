@@ -74,7 +74,14 @@ export class MediaFileCrudController {
       throw new NotFoundException('Media file not found or access denied');
     }
 
-    return new SuccessResponse({ data });
+    // 为私有存储返回可访问 URL（S3/OSS 或 Azure）
+    try {
+      const signedUrl = await this.service.getPublicUrl(data);
+      return new SuccessResponse({ data: { ...data, url: signedUrl } });
+    } catch (error) {
+      // 如果签名失败，仍返回原始数据避免前端崩溃
+      return new SuccessResponse({ data });
+    }
   }
 
   @Put(':id')
