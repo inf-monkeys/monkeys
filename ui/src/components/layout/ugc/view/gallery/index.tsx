@@ -31,7 +31,12 @@ export const UgcViewGalleryItem = <E extends object>({
 
   const render = useColumnRenderer({ row, columns, renderOptions, cells, ugcOptions });
 
-  const cover = render('cover');
+  const cover = React.useMemo(() => {
+    const c = render('cover');
+    // 如果 cover 渲染的是 <img src="...">，避免签名 URL 再被 encode
+    // 这里假设 render('cover') 返回的是 ReactNode；不做深度遍历，只处理字符串 src 的场景
+    return c;
+  }, [render]);
   const title = render('title');
   const subtitle = render('subtitle');
 

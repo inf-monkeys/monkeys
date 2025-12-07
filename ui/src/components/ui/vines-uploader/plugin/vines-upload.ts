@@ -246,10 +246,34 @@ export default class VinesUpload<M extends Meta, B extends Body> extends BasePlu
 
     await this.handleUploadWithEvents(file, async () => {
       const { filename } = await this.#prepareUpload(file);
-      const presignedUrl = await this.fetchJSON<string>(`/api/medias/s3/presign?key=${filename}`);
+
+      // 获取预签名信息
+      const presignResponse = await this.fetchJSON<
+        string | { url: string; method?: string; headers?: Record<string, string> }
+      >(`/api/medias/s3/presign?key=${filename}`);
+
+      // 处理新旧两种格式
+      let presignedUrl: string;
+      let presignHeaders: Record<string, string> = {};
+      let presignMethod = 'PUT';
+
+      if (typeof presignResponse === 'string') {
+        // 旧格式：直接返回 URL 字符串（S3/OSS）
+        presignedUrl = presignResponse;
+      } else if (presignResponse && typeof presignResponse === 'object') {
+        // 新格式：返回 { url, method, headers }（Azure Blob 等）
+        presignedUrl = presignResponse.url;
+        presignHeaders = presignResponse.headers || {};
+        presignMethod = presignResponse.method || 'PUT';
+      } else {
+        throw new Error('Invalid presign response format');
+      }
 
       await new Promise<void>((resolve, reject) => {
-        const xhr = this.createXHR('PUT', presignedUrl);
+        const xhr = this.createXHR(presignMethod, presignedUrl, presignHeaders);
+        if (file.meta.type) {
+          xhr.setRequestHeader('Content-Type', file.meta.type as string);
+        }
         this.setupXHREvents(xhr, file, new AbortController(), resolve, reject);
         xhr.send(file.data);
       });

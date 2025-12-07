@@ -64,7 +64,9 @@ export const NeuralModels: React.FC = () => {
           );
         } else if (isImageFile && row.original.url) {
           // 图片文件显示图片预览
-          return RenderIcon({ iconUrl: encodeURI(row.original.url) });
+          const rawUrl = row.original.url;
+          const normalizedUrl = rawUrl.includes('%25') ? decodeURIComponent(rawUrl) : rawUrl;
+          return RenderIcon({ iconUrl: normalizedUrl });
         } else {
           // 其他文件显示默认图标
           return RenderIcon({ iconUrl: row.original.iconUrl || '' });
@@ -119,7 +121,8 @@ export const NeuralModels: React.FC = () => {
               );
             } else if (isImageFile && item.url) {
               // 图片文件显示图片预览
-              return RenderIcon({ iconUrl: item.url, size: 'gallery' });
+              const normalizedUrl = item.url.includes('%25') ? decodeURIComponent(item.url) : item.url;
+              return RenderIcon({ iconUrl: normalizedUrl, size: 'gallery' });
             } else {
               // 其他文件类型显示默认图标
               return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });

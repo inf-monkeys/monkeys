@@ -18,7 +18,13 @@ export const getMediaAsset = (assetId: string): Promise<MediaAsset> => {
   return vinesFetcher<MediaAsset>({
     method: 'GET',
     simple: true,
-  })(`/api/media-files/${assetId}`).then((result) => result as MediaAsset);
+  })(`/api/media-files/${assetId}`).then((result) => {
+    // 后端已返回 SAS；如果包含双重编码（%25），先解码一次，避免签名失效
+    if (result?.url && result.url.includes('%25')) {
+      return { ...(result as any), url: decodeURIComponent(result.url) } as MediaAsset;
+    }
+    return result as MediaAsset;
+  });
 };
 
 export const updateMediaIcon = (id: string, iconUrl: string) =>

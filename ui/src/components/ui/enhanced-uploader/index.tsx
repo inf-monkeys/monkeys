@@ -280,9 +280,25 @@ export const EnhancedUploader: React.FC<EnhancedUploaderProps> = ({
           headers: vinesHeader({}),
         });
         const presignData = await presignResponse.json();
-        const presignedUrl = presignData.data;
 
-        // 上传到S3
+        // 处理预签名响应（支持新旧两种格式）
+        let presignedUrl: string;
+        let presignHeaders: Record<string, string> = {};
+        let presignMethod = 'PUT';
+
+        if (typeof presignData.data === 'string') {
+          // 旧格式：直接返回 URL 字符串（S3/OSS）
+          presignedUrl = presignData.data;
+        } else if (presignData.data && typeof presignData.data === 'object') {
+          // 新格式：返回 { url, method, headers }（Azure Blob 等）
+          presignedUrl = presignData.data.url;
+          presignHeaders = presignData.data.headers || {};
+          presignMethod = presignData.data.method || 'PUT';
+        } else {
+          throw new Error('Invalid presign response format');
+        }
+
+        // 上传到S3/Azure Blob
         await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
 
@@ -303,8 +319,18 @@ export const EnhancedUploader: React.FC<EnhancedUploaderProps> = ({
 
           xhr.onerror = () => reject(new Error('Network error'));
 
-          xhr.open('PUT', presignedUrl);
-          xhr.setRequestHeader('Content-Type', file.type);
+          xhr.open(presignMethod, presignedUrl);
+
+          // 设置必需的 headers（Azure Blob 需要）
+          Object.entries(presignHeaders).forEach(([key, value]) => {
+            xhr.setRequestHeader(key, value);
+          });
+
+          // 设置 Content-Type
+          if (file.type) {
+            xhr.setRequestHeader('Content-Type', file.type);
+          }
+
           xhr.send(file);
         });
 

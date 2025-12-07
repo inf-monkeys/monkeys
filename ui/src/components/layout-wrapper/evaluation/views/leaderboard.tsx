@@ -16,6 +16,7 @@ import {
   getOpenSkillLeaderboard,
 } from '@/apis/evaluation';
 import { getMediaAsset } from '@/apis/media-data';
+import { vinesHeader } from '@/apis/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -47,6 +48,49 @@ const OpenSkillLeaderboardRow: React.FC<IOpenSkillLeaderboardRowProps> = ({ item
     isLoading: isMediaAssetLoading,
     error: mediaAssetError,
   } = useSWR(item.assetId ? ['media-asset', item.assetId] : null, () => getMediaAsset(item.assetId!));
+  const [resolvedUrl, setResolvedUrl] = useState<string | undefined>(undefined);
+
+  // 尝试为私有桶获取读签名，失败则回退原始 URL
+  useEffect(() => {
+    let cancelled = false;
+    const normalizeSignedUrl = (url: string) => (url && url.includes('%25') ? decodeURIComponent(url) : url);
+    const fetchSignedUrl = async () => {
+      if (!mediaAsset?.url) {
+        setResolvedUrl(undefined);
+        return;
+      }
+      // 已是 SAS/签名 URL，直接使用，避免二次编码导致签名失效
+      if (/[?&](sv|sig)=/.test(mediaAsset.url)) {
+        setResolvedUrl(normalizeSignedUrl(mediaAsset.url));
+        return;
+      }
+      try {
+        const res = await fetch(`/api/medias/s3/presign-v2?url=${encodeURIComponent(mediaAsset.url)}&redirect=false`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...vinesHeader({ useToast: false }),
+          },
+        });
+        if (!res.ok) {
+          throw new Error(`presign failed: ${res.status}`);
+        }
+        const json = await res.json();
+        const signed = json?.data?.signedUrl as string | undefined;
+        if (!cancelled) {
+          setResolvedUrl(normalizeSignedUrl(signed || mediaAsset.url));
+        }
+      } catch (err) {
+        console.warn('presign-v2 failed, fallback to original url', err);
+        if (!cancelled) {
+          setResolvedUrl(normalizeSignedUrl(mediaAsset.url));
+        }
+      }
+    };
+    fetchSignedUrl();
+    return () => {
+      cancelled = true;
+    };
+  }, [mediaAsset?.url]);
 
   const getSigmaColor = (sigma: number) => {
     if (sigma < 5.0) return 'text-green-600';
@@ -67,7 +111,7 @@ const OpenSkillLeaderboardRow: React.FC<IOpenSkillLeaderboardRowProps> = ({ item
             </div>
           ) : mediaAsset?.url ? (
             <img
-              src={mediaAsset.url}
+              src={resolvedUrl || mediaAsset.url}
               alt={item.assetId}
               className="h-10 w-10 rounded object-cover"
               onError={(e) => {

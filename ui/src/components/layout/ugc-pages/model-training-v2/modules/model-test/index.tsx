@@ -47,7 +47,7 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(24);
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [isSelectionMode] = useState(false);
 
   const { data: modelTraining } = useGetModelTraining(modelTrainingId);
 
@@ -556,6 +556,16 @@ export const ModelTestModule: React.FC<IModelTestModuleProps> = ({ modelTraining
 
                             setIsDownloading(true);
                             try {
+                              // 如果已经是 SAS/签名 URL，直接下载，避免二次编码导致签名失效
+                              if (/[?&](sv|sig)=/.test(selectedModel.model_url)) {
+                                const normalized = selectedModel.model_url.includes('%25')
+                                  ? decodeURIComponent(selectedModel.model_url)
+                                  : selectedModel.model_url;
+                                window.location.href = normalized;
+                                toast.success('开始下载模型');
+                                return;
+                              }
+
                               // 先调用 presign-v2 获取预签名URL，设置 redirect=false 避免重定向导致的CORS问题
                               const presignUrl = `/api/medias/s3/presign-v2?url=${encodeURIComponent(selectedModel.model_url)}&redirect=false`;
                               const response = await fetch(presignUrl, {
