@@ -19,6 +19,7 @@ import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import useUrlState from '@/hooks/use-url-state';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 import { ImagesResult, useSetExecutionImages } from '@/store/useExecutionImageResultStore';
 import { useSetThumbImages } from '@/store/useExecutionImageTumbStore';
@@ -81,6 +82,9 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   enablePostMessage,
 }) => {
   const { t } = useTranslation();
+
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  const isMiniMode = mode === 'mini';
 
   const { data: oem } = useSystemConfig();
 
@@ -304,6 +308,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   }, [workflowId]);
 
   useEffect(() => {
+    if (!isMiniMode) return;
     const clearPolling = () => {
       if (pollingTimerRef.current) {
         window.clearInterval(pollingTimerRef.current);
@@ -360,7 +365,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       disposed = true;
       clearPolling();
     };
-  }, [workflowId, runningInstanceStorage, removeRunningInstanceFromStorage]);
+  }, [workflowId, runningInstanceStorage, removeRunningInstanceFromStorage, isMiniMode]);
 
   const setImages = useSetExecutionImages();
   const setThumbImages = useSetThumbImages();
