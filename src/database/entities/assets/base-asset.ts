@@ -84,7 +84,6 @@ export class BaseAssetEntity extends BaseEntity {
     default: 0,
   })
   sort?: number;
-  
 
   @AfterLoad()
   afterLoad?() {

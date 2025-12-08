@@ -1708,7 +1708,7 @@ export class ModelTrainingService {
       if (response.data.code === 200 && Array.isArray(response.data.data)) {
         return response.data.data;
       }
-      
+
       // 如果返回404，说明路径不存在或模型未生成，返回空数组
       // 这是正常情况，不应该抛出错误
       if (response.data.code === 404) {
@@ -1737,9 +1737,7 @@ export class ModelTrainingService {
    * @param modelTrainingId 模型训练ID
    * @returns 可下载的模型信息数组，每个元素包含 model_name 和 model_url
    */
-  async getDownloadableModel(
-    modelTrainingId: string,
-  ): Promise<Array<{ model_name: string; model_url: string }>> {
+  async getDownloadableModel(modelTrainingId: string): Promise<Array<{ model_name: string; model_url: string }>> {
     try {
       // 获取endpoint配置
       const modelTrainingEndpoint = config.modelTraining?.endpoint || 'http://sh-07.d.run:30064';

@@ -723,14 +723,9 @@ export class MarketplaceService {
           false,
         );
 
-        this.logger.debug(
-          `Cleanup credentials for preset workflow asset appId=${appId}, workflowId=${ref.assetId}, version=${ref.version}`,
-        );
+        this.logger.debug(`Cleanup credentials for preset workflow asset appId=${appId}, workflowId=${ref.assetId}, version=${ref.version}`);
       } catch (error) {
-        this.logger.error(
-          `Failed to cleanup credentials for preset workflow asset appId=${appId}, workflowId=${ref.assetId}, version=${ref.version}`,
-          error.stack || error.message,
-        );
+        this.logger.error(`Failed to cleanup credentials for preset workflow asset appId=${appId}, workflowId=${ref.assetId}, version=${ref.version}`, error.stack || error.message);
       }
     }
   }
@@ -799,9 +794,7 @@ export class MarketplaceService {
        * 其他资产类型（如 comfyui-workflow、design-association 等）仍保持原有的克隆安装行为。
        */
       if (latestVersion.app.assetType === 'workflow') {
-        this.logger.debug(
-          `Skip cloning workflow assets for preset app ${appId}, workflows will be shared across teams by workflowId.`,
-        );
+        this.logger.debug(`Skip cloning workflow assets for preset app ${appId}, workflows will be shared across teams by workflowId.`);
         return {
           totalTeams: 0,
           failedInstallations: [],
@@ -1042,11 +1035,7 @@ export class MarketplaceService {
    * @param teamId 团队 ID
    * @param transactionalEntityManager 事务管理器（可选）
    */
-  private async pinFormViewForTeam(
-    workflowId: string,
-    teamId: string,
-    transactionalEntityManager?: EntityManager,
-  ): Promise<void> {
+  private async pinFormViewForTeam(workflowId: string, teamId: string, transactionalEntityManager?: EntityManager): Promise<void> {
     const entityManager = transactionalEntityManager || this.entityManager;
 
     // 0. 获取工作流信息，用于命名视图（避免工作台侧边栏全部显示为「表单视图」）
@@ -1087,10 +1076,7 @@ export class MarketplaceService {
           typeof workflowDisplayName === 'string'
             ? workflowDisplayName
             : workflowDisplayName && typeof workflowDisplayName === 'object'
-              ? (workflowDisplayName['zh-CN'] as string) ||
-                (workflowDisplayName['en-US'] as string) ||
-                (Object.values(workflowDisplayName)[0] as string) ||
-                previewPageInstance.name
+              ? (workflowDisplayName['zh-CN'] as string) || (workflowDisplayName['en-US'] as string) || (Object.values(workflowDisplayName)[0] as string) || previewPageInstance.name
               : previewPageInstance.name,
         workflowId,
         isBuiltIn: true,

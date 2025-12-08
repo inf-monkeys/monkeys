@@ -58,5 +58,3 @@ export class StartModelTestV2ResponseDto {
   })
   data?: any;
 }
-
-

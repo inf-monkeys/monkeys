@@ -61,4 +61,3 @@ export class AddModelTrainingConfigV21765000000000 implements MigrationInterface
     await queryRunner.query(`DROP TABLE "${appId}_model_training_config_v2"`);
   }
 }
-

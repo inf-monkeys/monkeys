@@ -16,13 +16,7 @@ import { TenantService } from './tenant.service';
 @Module({
   controllers: [TenantController, TenantManageController],
   providers: [TenantService, ConductorService, TenantManageService, WorkflowArtifactService],
-  imports: [
-    TypeOrmModule.forFeature([WorkflowExecutionEntity, TemporaryWorkflowEntity]),
-    WorkflowModule,
-    TemporaryWorkflowModule,
-    TeamsModule,
-    forwardRef(() => MarketplaceModule),
-  ],
+  imports: [TypeOrmModule.forFeature([WorkflowExecutionEntity, TemporaryWorkflowEntity]), WorkflowModule, TemporaryWorkflowModule, TeamsModule, forwardRef(() => MarketplaceModule)],
   exports: [TenantService],
 })
 export class TenantModule {}

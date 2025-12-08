@@ -14,4 +14,3 @@ export class ModelTrainingConfigV2Entity extends BaseEntity {
   @Column({ name: 'data', type: 'jsonb', nullable: true })
   data: Record<string, any> | null;
 }
-

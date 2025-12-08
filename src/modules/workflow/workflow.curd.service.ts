@@ -395,14 +395,8 @@ export class WorkflowCrudService implements IAssetHandler {
 
         // 按搜索关键字做一次简单过滤，避免污染搜索结果
         if (searchText) {
-          const nameStr =
-            typeof workflow.displayName === 'string'
-              ? workflow.displayName.toLowerCase()
-              : JSON.stringify(workflow.displayName || {}).toLowerCase();
-          const descStr =
-            typeof workflow.description === 'string'
-              ? workflow.description.toLowerCase()
-              : JSON.stringify(workflow.description || {}).toLowerCase();
+          const nameStr = typeof workflow.displayName === 'string' ? workflow.displayName.toLowerCase() : JSON.stringify(workflow.displayName || {}).toLowerCase();
+          const descStr = typeof workflow.description === 'string' ? workflow.description.toLowerCase() : JSON.stringify(workflow.description || {}).toLowerCase();
           if (!nameStr.includes(searchText) && !descStr.includes(searchText)) {
             continue;
           }

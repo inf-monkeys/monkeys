@@ -8,20 +8,9 @@ import { TldrawAgentV2Controller } from './tldraw-agent-v2.controller';
 import { TldrawAgentV2Service } from './tldraw-agent-v2.service';
 
 @Module({
-  imports: [
-    AgentV2Module,
-    ToolsModule,
-  ],
+  imports: [AgentV2Module, ToolsModule],
   controllers: [TldrawAgentV2Controller],
-  providers: [
-    TldrawAgentV2Service,
-    TldrawToolsRegistryService,
-    TldrawToolExecutorService,
-    TldrawAgentV2BridgeService,
-  ],
-  exports: [
-    TldrawAgentV2Service,
-    TldrawToolsRegistryService,
-  ],
+  providers: [TldrawAgentV2Service, TldrawToolsRegistryService, TldrawToolExecutorService, TldrawAgentV2BridgeService],
+  exports: [TldrawAgentV2Service, TldrawToolsRegistryService],
 })
 export class TldrawAgentV2Module {}

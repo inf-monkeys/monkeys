@@ -209,13 +209,7 @@ export class TenantManageService {
       return;
     }
 
-    const comfyuiWorkflowIds = Array.from(
-      new Set(
-        comfyuiDataList
-          .map((item) => item.comfyuiWorkflowId)
-          .filter((id): id is string => typeof id === 'string' && !!id),
-      ),
-    );
+    const comfyuiWorkflowIds = Array.from(new Set(comfyuiDataList.map((item) => item.comfyuiWorkflowId).filter((id): id is string => typeof id === 'string' && !!id)));
 
     if (!comfyuiWorkflowIds.length) {
       return;
@@ -233,9 +227,7 @@ export class TenantManageService {
 
       const appId = comfyuiWorkflowId; // 与 comfyui workflow 资产一一对应
 
-      this.logger.debug(
-        `Create marketplace app for comfyui workflow dependency ${comfyuiWorkflowId} in team ${teamId} (appId=${appId})`,
-      );
+      this.logger.debug(`Create marketplace app for comfyui workflow dependency ${comfyuiWorkflowId} in team ${teamId} (appId=${appId})`);
 
       const dto = {
         app: {

@@ -25,4 +25,3 @@ export class StartDataUploadDto {
   @IsString({ each: true })
   tagIds: string[];
 }
-

@@ -47,14 +47,9 @@ export class TldrawAgentV2BridgeService {
   /**
    * 启动tldraw agent-v2会话
    */
-  async startSession(
-    agentId: string,
-    userId: string,
-    teamId: string,
-    editor?: any,
-  ): Promise<string> {
+  async startSession(agentId: string, userId: string, teamId: string, editor?: any): Promise<string> {
     const sessionId = `tldraw-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    
+
     const session: TldrawAgentV2Session = {
       sessionId,
       agentId,
@@ -85,11 +80,7 @@ export class TldrawAgentV2BridgeService {
   /**
    * 处理tldraw agent请求
    */
-  async processRequest(
-    sessionId: string,
-    request: TldrawAgentV2Request,
-    callbacks: TldrawAgentV2Callbacks = {},
-  ): Promise<void> {
+  async processRequest(sessionId: string, request: TldrawAgentV2Request, callbacks: TldrawAgentV2Callbacks = {}): Promise<void> {
     const session = this.activeSessions.get(sessionId);
     if (!session || !session.isActive) {
       throw new Error(`Session ${sessionId} not found or inactive`);
@@ -101,10 +92,10 @@ export class TldrawAgentV2BridgeService {
 
       // 获取tldraw专用工具
       const tldrawTools = this.toolsRegistry.getAllTools();
-      
+
       // 为agent-v2注册tldraw工具
       await this.registerTldrawToolsForAgent(agentId, tldrawTools, session.teamId);
-      
+
       // 确保tldraw工具已注册到全局工具注册表
       await this.ensureTldrawToolsInGlobalRegistry(tldrawTools, session.teamId);
 
@@ -131,7 +122,6 @@ export class TldrawAgentV2BridgeService {
 
       // 设置自定义工具处理器
       this.setupTldrawToolHandler(agentContext, session);
-
     } catch (error) {
       this.logger.error(`Error processing tldraw agent request:`, error);
       callbacks.onError?.(error as Error);
@@ -141,11 +131,7 @@ export class TldrawAgentV2BridgeService {
   /**
    * 处理tldraw agent流式请求
    */
-  async processStreamRequest(
-    sessionId: string,
-    request: TldrawAgentV2Request,
-    callbacks: TldrawAgentV2Callbacks = {},
-  ): Promise<void> {
+  async processStreamRequest(sessionId: string, request: TldrawAgentV2Request, callbacks: TldrawAgentV2Callbacks = {}): Promise<void> {
     const session = this.activeSessions.get(sessionId);
     if (!session || !session.isActive) {
       throw new Error(`Session ${sessionId} not found or inactive`);
@@ -157,10 +143,10 @@ export class TldrawAgentV2BridgeService {
 
       // 获取tldraw专用工具
       const tldrawTools = this.toolsRegistry.getAllTools();
-      
+
       // 为agent-v2注册tldraw工具
       await this.registerTldrawToolsForAgent(agentId, tldrawTools, session.teamId);
-      
+
       // 确保tldraw工具已注册到全局工具注册表
       await this.ensureTldrawToolsInGlobalRegistry(tldrawTools, session.teamId);
 
@@ -196,7 +182,6 @@ export class TldrawAgentV2BridgeService {
 
       // 设置自定义工具处理器
       this.setupTldrawToolHandler(agentContext, session);
-
     } catch (error) {
       this.logger.error(`Error processing tldraw agent stream request:`, error);
       callbacks.onError?.(error as Error);
@@ -208,7 +193,7 @@ export class TldrawAgentV2BridgeService {
    */
   private async ensureAgentExists(agentId: string, teamId: string, userId: string): Promise<string> {
     this.logger.log(`ensureAgentExists called with agentId: ${agentId}, teamId: ${teamId}, userId: ${userId}`);
-    
+
     try {
       // 尝试查找现有的Agent
       const existingAgent = await this.agentRepository.findAgentById(agentId);
@@ -224,10 +209,8 @@ export class TldrawAgentV2BridgeService {
     // 先尝试查找团队中是否已有tldraw Agent
     try {
       const teamAgents = await this.agentRepository.findAgentsByTeam(teamId, { limit: 100 });
-      const existingTldrawAgent = teamAgents.agents.find(agent => 
-        agent.name.includes('Tldraw Assistant') || agent.name.includes('tldraw')
-      );
-      
+      const existingTldrawAgent = teamAgents.agents.find((agent) => agent.name.includes('Tldraw Assistant') || agent.name.includes('tldraw'));
+
       if (existingTldrawAgent) {
         this.logger.log(`Found existing tldraw agent: ${existingTldrawAgent.id}`);
         return existingTldrawAgent.id;
@@ -262,7 +245,7 @@ export class TldrawAgentV2BridgeService {
         teamId,
         createdBy: userId,
       });
-      
+
       this.logger.log(`Created default tldraw agent: ${createdAgent.id} for team ${teamId} and user ${userId}`);
       return createdAgent.id;
     } catch (error) {
@@ -271,23 +254,22 @@ export class TldrawAgentV2BridgeService {
     }
   }
 
-
   /**
    * 为agent注册tldraw工具
    */
   private async registerTldrawToolsForAgent(agentId: string, tools: any[], teamId?: string): Promise<void> {
     this.logger.log(`Registering ${tools.length} tldraw tools for agent ${agentId}`);
-    
+
     try {
       // 获取工具名称列表
-      const toolNames = tools.map(tool => tool.name);
-      
+      const toolNames = tools.map((tool) => tool.name);
+
       // 使用agent-v2的工具更新API来注册工具
       const result = await this.agentV2Service.updateAgentTools(agentId, teamId || 'system', {
         enabled: true,
         toolNames: toolNames,
       });
-      
+
       if (result.success) {
         this.logger.log(`Successfully registered ${toolNames.length} tldraw tools for agent ${agentId}`);
       } else {
@@ -303,9 +285,7 @@ export class TldrawAgentV2BridgeService {
    * 构建tldraw系统提示词
    */
   private buildTldrawSystemPrompt(tools: any[]): string {
-    const toolDescriptions = tools.map(tool => 
-      `- ${tool.name}: ${tool.description}`
-    ).join('\n');
+    const toolDescriptions = tools.map((tool) => `- ${tool.name}: ${tool.description}`).join('\n');
 
     return `You are a specialized tldraw canvas assistant with advanced capabilities.
 
@@ -341,7 +321,6 @@ Remember: You are a powerful drawing assistant. Use your tools effectively to he
   private setupTldrawToolHandler(agentContext: any, session: TldrawAgentV2Session): void {
     // 这里需要设置agent-v2的工具调用处理器
     // 当agent-v2调用工具时，我们需要拦截tldraw工具并执行相应的操作
-    
     // TODO: 实现工具调用拦截和处理逻辑
     // 可能需要修改AgentV2PersistentExecutionContext来支持自定义工具处理
   }
@@ -349,11 +328,7 @@ Remember: You are a powerful drawing assistant. Use your tools effectively to he
   /**
    * 处理tldraw工具调用
    */
-  private async handleTldrawToolCall(
-    session: TldrawAgentV2Session,
-    tool: any,
-    result: any,
-  ): Promise<void> {
+  private async handleTldrawToolCall(session: TldrawAgentV2Session, tool: any, result: any): Promise<void> {
     const toolContext: TldrawToolContext = {
       editor: session.editor,
       sessionId: session.sessionId,
@@ -363,7 +338,7 @@ Remember: You are a powerful drawing assistant. Use your tools effectively to he
 
     try {
       const executionResult = await this.toolExecutor.executeTool(tool, toolContext);
-      
+
       if (!executionResult.success) {
         this.logger.warn(`Tool execution failed: ${executionResult.error}`);
       } else {
@@ -385,7 +360,7 @@ Remember: You are a powerful drawing assistant. Use your tools effectively to he
    * 获取所有活跃会话
    */
   getAllActiveSessions(): TldrawAgentV2Session[] {
-    return Array.from(this.activeSessions.values()).filter(session => session.isActive);
+    return Array.from(this.activeSessions.values()).filter((session) => session.isActive);
   }
 
   /**
@@ -406,11 +381,11 @@ Remember: You are a powerful drawing assistant. Use your tools effectively to he
     if (!tool || !tool._type) {
       return false;
     }
-    
+
     // 获取所有tldraw工具名称
     const tldrawTools = this.toolsRegistry.getAllTools();
-    const tldrawToolNames = tldrawTools.map(t => t.name);
-    
+    const tldrawToolNames = tldrawTools.map((t) => t.name);
+
     // 检查工具类型是否在tldraw工具列表中
     return tldrawToolNames.includes(tool._type);
   }
@@ -420,7 +395,7 @@ Remember: You are a powerful drawing assistant. Use your tools effectively to he
    */
   private async ensureTldrawToolsInGlobalRegistry(tools: any[], teamId: string): Promise<void> {
     this.logger.log(`Ensuring ${tools.length} tldraw tools are registered in global registry for team ${teamId}`);
-    
+
     for (const tool of tools) {
       try {
         await this.toolsRegistry.registerTool(tool, teamId);

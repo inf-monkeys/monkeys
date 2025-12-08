@@ -130,7 +130,7 @@ export class WorkflowExecutionService {
       workflowInstanceId,
     } = condition;
     let groups = condition.groups || [];
-    let startBy = condition.startBy || [];
+    const startBy = condition.startBy || [];
 
     const { page: p = 1, limit: l = 10 } = pagination as PaginationDto;
     const [page, limitNum] = [+p, +l];

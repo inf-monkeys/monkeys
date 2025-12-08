@@ -7,9 +7,7 @@ import sharp from 'sharp';
 
 @Injectable()
 export class DesignThumbnailService {
-  constructor(
-    private readonly designMetadataRepository: DesignMetadataRepository,
-  ) {}
+  constructor(private readonly designMetadataRepository: DesignMetadataRepository) {}
 
   /**
    * 从Base64图片数据更新画板缩略图
@@ -20,7 +18,7 @@ export class DesignThumbnailService {
       if (!imageData || imageData.length < 100) {
         throw new Error('Base64数据无效');
       }
-      
+
       // 将Base64数据转换为Buffer
       const imageBuffer = Buffer.from(imageData, 'base64');
 

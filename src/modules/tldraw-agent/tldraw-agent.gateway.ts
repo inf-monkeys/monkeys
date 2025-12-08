@@ -1,45 +1,37 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  ConnectedSocket,
-  MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { TldrawAgentService } from './tldraw-agent.service';
 
 type AgentClientToServer = {
-  prompt: (payload: { message: string; bounds?: { x: number; y: number; w: number; h: number }; modelName?: string }) => void
-  cancel: () => void
-  reset: () => void
+  prompt: (payload: { message: string; bounds?: { x: number; y: number; w: number; h: number }; modelName?: string }) => void;
+  cancel: () => void;
+  reset: () => void;
 };
 
 type AgentServerToClient = {
-  info: (payload: { message: string }) => void
-  delta: (payload: { content?: string; action?: any }) => void
-  done: (payload: { message: string }) => void
-  error: (payload: { message: string }) => void
+  info: (payload: { message: string }) => void;
+  delta: (payload: { content?: string; action?: any }) => void;
+  done: (payload: { message: string }) => void;
+  error: (payload: { message: string }) => void;
 };
 
 @Injectable()
-@WebSocketGateway({ 
+@WebSocketGateway({
   namespace: '/tldraw-agent',
   cors: {
     origin: true,
-    credentials: true
+    credentials: true,
   },
   transports: ['websocket', 'polling'],
-  allowEIO3: true
+  allowEIO3: true,
 })
 export class TldrawAgentGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly agentService: TldrawAgentService) {
     this.logger.log('[DEBUG] TldrawAgentGateway initialized');
   }
   private readonly logger = new Logger(TldrawAgentGateway.name);
-  
+
   @WebSocketServer()
   public server!: Server<AgentClientToServer, AgentServerToClient>;
 
@@ -66,7 +58,7 @@ export class TldrawAgentGateway implements OnGatewayConnection, OnGatewayDisconn
     body: { message: string; bounds?: { x: number; y: number; w: number; h: number }; modelName?: string; context?: any },
   ) {
     this.logger.log(`[DEBUG] Received prompt from client ${client.id}:`, body);
-    
+
     if (!body?.message) {
       this.logger.warn(`[DEBUG] Empty message from client ${client.id}`);
       client.emit('error', { message: 'message 不能为空' });
@@ -87,7 +79,7 @@ export class TldrawAgentGateway implements OnGatewayConnection, OnGatewayDisconn
         onDone: (message) => client.emit('done', { message }),
         onError: (message) => client.emit('error', { message }),
       },
-    )
+    );
   }
 
   @SubscribeMessage('cancel')
@@ -103,5 +95,3 @@ export class TldrawAgentGateway implements OnGatewayConnection, OnGatewayDisconn
     client.emit('info', { message: '会话已重置' });
   }
 }
-
-

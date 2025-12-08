@@ -10,8 +10,9 @@ import { UsersModule } from './modules/auth/users/users.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { AiWorkflowBuilderModule } from './modules/ai-workflow-builder/ai-workflow-builder.module';
 
-const imports: Array<any> = [TeamsModule, UsersModule, WorkflowModule, ToolsModule, AssetsModule, ChatModule];
+const imports: Array<any> = [TeamsModule, UsersModule, WorkflowModule, ToolsModule, AssetsModule, ChatModule, AiWorkflowBuilderModule];
 if (config.auth.enabled.includes(AuthMethod.oidc)) {
   imports.push(OidcModule);
 }

@@ -57,13 +57,12 @@ export async function generateThumbnail(
       } as sharp.ResizeOptions)
     : (() => {
         // 未指定尺寸时，按最长边 200 生成等比缩略图
-        return sharp(inputBuffer)
-          .resize({
-            width: 200,
-            height: 200,
+        return sharp(inputBuffer).resize({
+          width: 200,
+          height: 200,
           fit: 'inside',
-            withoutEnlargement: true,
-          } as sharp.ResizeOptions);
+          withoutEnlargement: true,
+        } as sharp.ResizeOptions);
       })();
 
   // 根据格式选择输出
