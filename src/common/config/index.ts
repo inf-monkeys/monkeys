@@ -153,6 +153,14 @@ export type CustomizationLoginPage = {
    */
   logoLocation?: CustomizationLoginPageLogoLocation;
   /**
+   * logo 的大小，支持 CSS 值，如 "48px", "60px", "3rem", "200%" 等
+   */
+  logoSize?: string;
+  /**
+   * logo 的左边距，支持 CSS 值，如 "30px", "50px", "5%" 等
+   */
+  logoLeft?: string;
+  /**
    * 登录表单卡片的圆角大小，例如 '25px'
    */
   formRadius?: string;
@@ -782,6 +790,8 @@ export const config: Config = {
         background: readLoginConfig('background', undefined),
         logo: readLoginConfig('logo', undefined),
         logoLocation: readLoginConfig('logo-location', undefined),
+        logoSize: readLoginConfig('logo-size', undefined),
+        logoLeft: readLoginConfig('logo-left', undefined),
         // 如果未单独配置圆角，则回退到主题全局 roundedSize
         formRadius: readLoginConfig('form-radius', readConfig('server.customization.roundedSize', undefined)),
         theme: {

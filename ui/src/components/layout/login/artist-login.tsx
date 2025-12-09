@@ -48,6 +48,8 @@ interface IArtistLoginProps {
     background?: string;
     logo?: string;
     logoLocation?: 'top' | 'middle' | 'bottom';
+    logoSize?: string;
+    logoLeft?: string;
     formRadius?: string;
     theme?: {
       cardBackground?: string;
@@ -71,6 +73,7 @@ interface IArtistLoginProps {
   };
   primaryColor?: string;
   darkMode?: boolean;
+  oemId?: string;
 }
 
 export const ArtistLogin: React.FC<IArtistLoginProps> = ({
@@ -78,6 +81,7 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({
   loginPageConfig,
   primaryColor,
   darkMode,
+  oemId,
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -219,15 +223,28 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({
     navigate({ to: '/home' });
   };
 
+  const isBsdTheme = oemId === 'bsd';
+
   return (
-    <div className={`artist-login-container ${darkMode ? 'dark-mode' : ''}`} style={containerStyle}>
+    <div className={`artist-login-container ${darkMode ? 'dark-mode' : ''} ${isBsdTheme ? 'bsd-theme' : ''}`} style={containerStyle}>
       {/* 背景：优先使用 OEM 配置的图片，否则回退原动态背景 */}
       {loginPageConfig?.background ? (
         <div
-          className="artist-login-bg absolute inset-x-0 bottom-0 top-[128px]"
+          className="artist-login-bg"
           style={{
             backgroundImage: `url(${loginPageConfig.background})`,
-            backgroundPosition: 'center top',
+            backgroundPosition: oemId === 'bsd' ? 'center top' : 'center',
+            ...(oemId === 'bsd'
+              ? {
+                  position: 'absolute',
+                  top: '128px',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  width: 'auto',
+                  height: 'auto',
+                }
+              : {}),
           }}
         />
       ) : (
@@ -235,9 +252,37 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({
       )}
 
       {/* 品牌标志：若有自定义 logo 则展示单图，否则保持原来的 icon+title */}
-      <div className={`artist-logo logo-location-${logoLocation}`}>
+      <div
+        className={`artist-logo logo-location-${logoLocation}`}
+        style={{
+          left: loginPageConfig?.logoLeft || undefined,
+        }}
+      >
         {loginPageConfig?.logo ? (
-          <img className="logo-single" src={loginPageConfig.logo} alt="logo" />
+          (() => {
+            const logoSize = loginPageConfig.logoSize;
+            // 如果值是百分比格式（如 "200%"），转换为 scale
+            const isPercentage = logoSize && /^\d+%$/.test(logoSize.trim());
+            const scale = isPercentage ? parseFloat(logoSize) / 100 : undefined;
+            
+            return (
+              <img
+                className="logo-single"
+                src={loginPageConfig.logo}
+                alt="logo"
+                style={{
+                  ...(isPercentage
+                    ? {
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'left center',
+                      }
+                    : {
+                        height: logoSize || undefined,
+                      }),
+                }}
+              />
+            );
+          })()
         ) : (
           <>
             <img className="logo-icon" src={ICON_URL} alt="logo" />

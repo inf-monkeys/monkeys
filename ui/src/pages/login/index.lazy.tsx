@@ -14,8 +14,13 @@ import { AppLogo } from '@/components/ui/logo';
 import { useAppStore } from '@/store/useAppStore';
 
 const Login: React.FC = () => {
-  const darkMode = useAppStore((s) => s.darkMode);
+  const storeDarkMode = useAppStore((s) => s.darkMode);
   const { data: oem, error } = useSystemConfig();
+
+  // bsd 默认使用深色模式，其他默认使用浅色模式
+  // 如果 oem 数据还没加载，默认使用浅色模式
+  const oemId = oem?.theme?.id;
+  const darkMode = oemId === 'bsd' ? true : false;
 
   const logoUrl = get(oem, `theme.logo.${darkMode ? 'dark' : 'light'}`, '');
   const appName = get(oem, 'theme.name', 'AI');
@@ -37,11 +42,14 @@ const Login: React.FC = () => {
             background: loginPageConfig?.background,
             logo: loginPageConfig?.logo,
             logoLocation: loginPageConfig?.logoLocation,
+            logoSize: loginPageConfig?.logoSize,
+            logoLeft: loginPageConfig?.logoLeft,
             formRadius: loginPageConfig?.formRadius,
             theme: loginPageConfig?.theme,
           }}
           primaryColor={themePrimaryColor}
           darkMode={darkMode}
+          oemId={oem?.theme.id}
         />
       ) : (
         <>

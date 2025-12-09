@@ -7,15 +7,23 @@
   align-items: center;
   justify-content: flex-end;
   padding-right: 5%;
-  background-color: #000000;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   border-radius: var(--login-form-radius, 20px);
+
+  &.bsd-theme {
+    background-color: #000000;
+  }
 }
 
 /* 背景层：动态背景或自定义图片 */
 .artist-login-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: 0;
   background-size: cover;
   background-position: center;

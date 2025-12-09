@@ -122,6 +122,8 @@ export type CustomizationLoginPage = {
   background?: string;
   logo?: string;
   logoLocation?: CustomizationLoginPageLogoLocation;
+  logoSize?: string; // Logo 大小，支持 CSS 值，如 "48px", "60px", "3rem" 等
+  logoLeft?: string; // Logo 左边距，支持 CSS 值，如 "30px", "50px", "5%" 等
   formRadius?: string;
   theme?: CustomizationLoginPageTheme;
 };
