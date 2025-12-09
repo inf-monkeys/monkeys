@@ -110,6 +110,52 @@ export type CustomizationForm = {
   variant: 'bento' | 'ghost';
 };
 
+export type CustomizationLoginPageStyle = 'classic' | 'modern';
+export type CustomizationLoginPageLogoLocation = 'top' | 'middle' | 'bottom';
+
+export type CustomizationLoginPageTheme = {
+  cardBackground?: string;
+  cardBorder?: string;
+  cardBorderImage?: string;
+  cardBlur?: string;
+  tabInactiveColor?: string;
+  inputBackground?: string;
+  inputBorder?: string;
+  inputPlaceholder?: string;
+  checkboxBackground?: string;
+  checkboxShadow?: string;
+  titleGradient?: string;
+};
+
+export type CustomizationLoginPage = {
+  /**
+   * 登录页样式：
+   * - classic：旧版登录页（当前默认行为）
+   * - modern：基于 Artist 登录/注册页的新版模板
+   */
+  style?: CustomizationLoginPageStyle;
+  /**
+   * 背景图片地址；如果未配置则沿用原有背景（如 Artist 的 DynamicBackground）
+   */
+  background?: string;
+  /**
+   * 登录页左侧/底部展示的 logo 图片
+   */
+  logo?: string;
+  /**
+   * logo 的垂直位置：上/中/下
+   */
+  logoLocation?: CustomizationLoginPageLogoLocation;
+  /**
+   * 登录表单卡片的圆角大小，例如 '25px'
+   */
+  formRadius?: string;
+  /**
+   * UI 主题色/渐变等额外样式
+   */
+  theme?: CustomizationLoginPageTheme;
+};
+
 export type CustomizationUploader = {
   orientation: 'vertical' | 'horizontal';
   pasteButton: boolean;
@@ -211,6 +257,13 @@ export interface ServerConfig {
     views: {
       form: CustomizationFormView;
     };
+    /**
+     * 登录页配置（classic / modern）
+     *
+     * 注意：真正的配置来自顶层 YAML 中的 `login-page` 节点，
+     * 这里仅是把解析结果挂载到 customization 里，方便前端统一从 theme 中读取。
+     */
+    loginPage?: CustomizationLoginPage;
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
@@ -708,6 +761,33 @@ export const config: Config = {
       roundedSize: readConfig('server.customization.roundedSize', undefined),
       form: {
         variant: readConfig('server.customization.form.variant', 'bento'),
+      },
+      loginPage: {
+        // 顶层 OEM 配置：login-page:
+        //   style: classic | modern
+        //   background: ...
+        //   logo: ...
+        //   logo-location: top | middle | bottom
+        //   form-radius: 25px
+        style: readConfig('login-page.style', undefined),
+        background: readConfig('login-page.background', undefined),
+        logo: readConfig('login-page.logo', undefined),
+        logoLocation: readConfig('login-page.logo-location', undefined),
+        // 如果未单独配置圆角，则回退到主题全局 roundedSize
+        formRadius: readConfig('login-page.form-radius', readConfig('server.customization.roundedSize', undefined)),
+        theme: {
+          cardBackground: readConfig('login-page.theme.card-background', undefined),
+          cardBorder: readConfig('login-page.theme.card-border', undefined),
+          cardBorderImage: readConfig('login-page.theme.card-border-image', undefined),
+          cardBlur: readConfig('login-page.theme.card-blur', undefined),
+          tabInactiveColor: readConfig('login-page.theme.tab-inactive-color', undefined),
+          inputBackground: readConfig('login-page.theme.input-background', undefined),
+          inputBorder: readConfig('login-page.theme.input-border', undefined),
+          inputPlaceholder: readConfig('login-page.theme.input-placeholder', undefined),
+          checkboxBackground: readConfig('login-page.theme.checkbox-background', undefined),
+          checkboxShadow: readConfig('login-page.theme.checkbox-shadow', undefined),
+          titleGradient: readConfig('login-page.theme.title-gradient', undefined),
+        },
       },
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),

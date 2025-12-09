@@ -1,21 +1,23 @@
 import {
-  AuthMethod,
-  CustomIcons,
-  CustomizationDensity,
-  CustomizationDesignProjects,
-  CustomizationForm,
-  CustomizationFormView,
-  CustomizationHeadbar,
-  CustomizationHistoryResult,
-  CustomizationModules,
-  CustomizationUgc,
-  CustomizationUploader,
-  CustomizationWorkbenchViewTheme,
-  CustomizationWorkbench,
-  CustomizationDefaults,
-  ExtraLanguageURL,
-  SystemConfigBehavior,
-  WorkflowPreviewExecutionGrid,
+    AuthMethod,
+    CustomIcons,
+    CustomizationDefaults,
+    CustomizationDensity,
+    CustomizationDesignProjects,
+    CustomizationForm,
+    CustomizationFormView,
+    CustomizationHeadbar,
+    CustomizationHistoryResult,
+    CustomizationLoginPage,
+    CustomizationLoginPageTheme,
+    CustomizationModules,
+    CustomizationUgc,
+    CustomizationUploader,
+    CustomizationWorkbench,
+    CustomizationWorkbenchViewTheme,
+    ExtraLanguageURL,
+    SystemConfigBehavior,
+    WorkflowPreviewExecutionGrid,
 } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
@@ -44,6 +46,7 @@ export interface ISystemConfig {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
     icons: CustomIcons;
+    loginPage?: CustomizationLoginPage & { theme?: CustomizationLoginPageTheme };
     views: {
       form: CustomizationFormView;
     };

@@ -5,6 +5,7 @@ import { createLazyFileRoute } from '@tanstack/react-router';
 import { get } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
+import { CustomizationLoginPage } from '@/apis/common/typings';
 import { VinesUserLogin } from '@/components/layout/login';
 import { ArtistLogin } from '@/components/layout/login/artist-login';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
@@ -23,11 +24,24 @@ const Login: React.FC = () => {
 
   const isServerError = error instanceof Error;
   const isArtistTheme = oem?.theme.id === 'artist';
+  const loginPageConfig = get(oem, 'theme.loginPage') as CustomizationLoginPage | undefined;
+  const loginPageStyle = loginPageConfig?.style ?? (isArtistTheme ? 'modern' : 'classic');
+  const themePrimaryColor = get(oem, 'theme.colors.primaryColor', '#4D8F9D');
+  const useModernLogin = loginPageStyle === 'modern';
 
   return (
     <>
-      {isArtistTheme ? (
-        <ArtistLogin />
+      {useModernLogin ? (
+        <ArtistLogin
+          loginPageConfig={{
+            background: loginPageConfig?.background,
+            logo: loginPageConfig?.logo,
+            logoLocation: loginPageConfig?.logoLocation,
+            formRadius: loginPageConfig?.formRadius,
+            theme: loginPageConfig?.theme,
+          }}
+          primaryColor={themePrimaryColor}
+        />
       ) : (
         <>
           <div className="flex flex-col items-center gap-8">

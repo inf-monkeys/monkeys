@@ -94,6 +94,32 @@ export type CustomizationForm = {
   variant: 'bento' | 'ghost';
 };
 
+export type CustomizationLoginPageStyle = 'classic' | 'modern';
+export type CustomizationLoginPageLogoLocation = 'top' | 'middle' | 'bottom';
+
+export type CustomizationLoginPageTheme = {
+  cardBackground?: string;
+  cardBorder?: string;
+  cardBorderImage?: string;
+  cardBlur?: string;
+  tabInactiveColor?: string;
+  inputBackground?: string;
+  inputBorder?: string;
+  inputPlaceholder?: string;
+  checkboxBackground?: string;
+  checkboxShadow?: string;
+  titleGradient?: string;
+};
+
+export type CustomizationLoginPage = {
+  style?: CustomizationLoginPageStyle;
+  background?: string;
+  logo?: string;
+  logoLocation?: CustomizationLoginPageLogoLocation;
+  formRadius?: string;
+  theme?: CustomizationLoginPageTheme;
+};
+
 export type CustomizationUploader = {
   orientation: 'vertical' | 'horizontal';
   pasteButton: boolean;
@@ -188,6 +214,7 @@ export interface ISystemConfig {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
     icons?: CustomIcons;
+    loginPage?: CustomizationLoginPage;
     views: {
       form: CustomizationFormView;
     };

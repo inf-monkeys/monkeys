@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 import { useSWRConfig } from 'swr';
@@ -44,9 +44,29 @@ const validatePassword = (password: string): { valid: boolean; message?: string 
 
 interface IArtistLoginProps {
   onLoginFinished?: () => void;
+  loginPageConfig?: {
+    background?: string;
+    logo?: string;
+    logoLocation?: 'top' | 'middle' | 'bottom';
+    formRadius?: string;
+    theme?: {
+      cardBackground?: string;
+      cardBorder?: string;
+      cardBorderImage?: string;
+      cardBlur?: string;
+      tabInactiveColor?: string;
+      inputBackground?: string;
+      inputBorder?: string;
+      inputPlaceholder?: string;
+      checkboxBackground?: string;
+      checkboxShadow?: string;
+      titleGradient?: string;
+    };
+  };
+  primaryColor?: string;
 }
 
-export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) => {
+export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished, loginPageConfig, primaryColor }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { mutate } = useSWRConfig();
@@ -58,6 +78,27 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
   const [repeatPassword, setRepeatPassword] = useState('');
   const [rememberPassword, setRememberPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const logoLocation = loginPageConfig?.logoLocation ?? 'bottom';
+
+  const containerStyle = useMemo<React.CSSProperties>(
+    () => ({
+      ['--login-form-radius' as string]: loginPageConfig?.formRadius,
+      ['--login-primary-color' as string]: primaryColor,
+      ['--login-card-bg' as string]: loginPageConfig?.theme?.cardBackground,
+      ['--login-card-border' as string]: loginPageConfig?.theme?.cardBorder,
+      ['--login-card-border-image' as string]: loginPageConfig?.theme?.cardBorderImage,
+      ['--login-card-blur' as string]: loginPageConfig?.theme?.cardBlur,
+      ['--login-tab-inactive-color' as string]: loginPageConfig?.theme?.tabInactiveColor,
+      ['--login-input-bg' as string]: loginPageConfig?.theme?.inputBackground,
+      ['--login-input-border' as string]: loginPageConfig?.theme?.inputBorder,
+      ['--login-input-placeholder' as string]: loginPageConfig?.theme?.inputPlaceholder,
+      ['--login-checkbox-bg' as string]: loginPageConfig?.theme?.checkboxBackground,
+      ['--login-checkbox-shadow' as string]: loginPageConfig?.theme?.checkboxShadow,
+      ['--login-title-gradient' as string]: loginPageConfig?.theme?.titleGradient,
+    }),
+    [loginPageConfig, primaryColor],
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,18 +163,28 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
   };
 
   return (
-    <div className="artist-login-container">
-      {/* 动态背景 */}
-      <DynamicBackground />
+    <div className="artist-login-container" style={containerStyle}>
+      {/* 背景：优先使用 OEM 配置的图片，否则回退原动态背景 */}
+      {loginPageConfig?.background ? (
+        <div className="artist-login-bg" style={{ backgroundImage: `url(${loginPageConfig.background})` }} />
+      ) : (
+        <DynamicBackground />
+      )}
 
-      {/* ARTIST品牌标志 */}
-      <div className="artist-logo">
-        <img className="logo-icon" src={ICON_URL} alt="logo" />
-        <img className="logo-title" src={ICON_TITLE_URL} alt="logo" />
+      {/* 品牌标志：若有自定义 logo 则展示单图，否则保持原来的 icon+title */}
+      <div className={`artist-logo logo-location-${logoLocation}`}>
+        {loginPageConfig?.logo ? (
+          <img className="logo-single" src={loginPageConfig.logo} alt="logo" />
+        ) : (
+          <>
+            <img className="logo-icon" src={ICON_URL} alt="logo" />
+            <img className="logo-title" src={ICON_TITLE_URL} alt="logo" />
+          </>
+        )}
       </div>
 
       {/* 登录表单容器 */}
-      <div className="login-form-container">
+      <div className="login-form-container" style={{ borderRadius: loginPageConfig?.formRadius }}>
         {/* 返回首页链接 */}
         <div className="back-to-home" onClick={handleBackToHome}>
           <ArrowLeft className="back-icon" />
@@ -198,6 +249,7 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished }) =>
                     id="remember"
                     checked={rememberPassword}
                     onCheckedChange={(checked) => setRememberPassword(checked === true)}
+                className="login-checkbox"
                   />
                   <Label htmlFor="remember">记住密码</Label>
                 </div>

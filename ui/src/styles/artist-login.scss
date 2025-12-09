@@ -7,18 +7,52 @@
   align-items: center;
   justify-content: flex-end;
   padding-right: 5%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-/* 动态背景由DynamicBackground组件处理 */
+/* 背景层：动态背景或自定义图片 */
+.artist-login-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(0.92);
+}
 
 .artist-logo {
   position: absolute;
-  bottom: 30px;
   left: 30px;
   display: flex;
   align-items: center;
   gap: 10px;
   z-index: 10;
+
+  &.logo-location-top {
+    top: 30px;
+  }
+
+  &.logo-location-middle {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  &.logo-location-bottom {
+    bottom: 30px;
+  }
+
+  .logo-single {
+    height: 48px;
+    width: auto;
+    max-width: 320px;
+    object-fit: contain;
+  }
 
   .logo-icon {
     width: 46px;
@@ -35,12 +69,17 @@
   position: relative;
   width: 400px;
   max-width: 90vw;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
+  background: var(--login-card-bg, rgba(255, 255, 255, 0.95));
+  border-radius: var(--login-form-radius, 20px);
   padding: 40px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  border: var(--login-card-border, none);
+  border-image: var(--login-card-border-image, none);
+  border-image-slice: 1;
+  backdrop-filter: var(--login-card-blur, blur(10px));
   z-index: 5;
+  box-sizing: border-box;
+  color: #fff;
 }
 
 .back-to-home {
@@ -68,7 +107,11 @@
 .form-title {
   font-size: 28px;
   font-weight: bold;
-  color: #333;
+  color: #fff;
+  background: var(--login-title-gradient, linear-gradient(#fff, #fff));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin-bottom: 30px;
   text-align: center;
 }
@@ -92,10 +135,10 @@
     cursor: pointer;
     transition: all 0.3s ease;
     background: #f5f5f5;
-    color: #666;
+    color: var(--login-tab-inactive-color, #666);
 
     &.active {
-      background: #4D8F9D;
+      background: var(--login-primary-color, #4D8F9D);
       color: white;
     }
 
@@ -120,20 +163,21 @@
   .form-input {
     width: 100%;
     padding: 15px 20px;
-    border: none;
+    border: var(--login-input-border, none);
     border-radius: 10px;
-    background: #f8f9fa;
+    background: var(--login-input-bg, #f8f9fa);
     font-size: 16px;
+    color: #fff;
     transition: all 0.3s ease;
 
     &:focus {
       outline: none;
-      background: #fff;
+      background: var(--login-input-bg, #fff);
       box-shadow: 0 0 0 2px rgba(77, 143, 157, 0.2);
     }
 
     &::placeholder {
-      color: #999;
+      color: var(--login-input-placeholder, #999);
     }
   }
 }
@@ -194,7 +238,7 @@
 .submit-button {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(135deg, #4D8F9D 0%, #416887 100%);
+  background: linear-gradient(135deg, var(--login-primary-color, #4D8F9D) 0%, var(--login-primary-color, #4D8F9D) 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -214,6 +258,17 @@
   }
 }
 
+.login-checkbox {
+  background: var(--login-checkbox-bg, #fff) !important;
+  box-shadow: var(--login-checkbox-shadow, none);
+  border: 1px solid transparent;
+
+  &[data-state='checked'] {
+    background: var(--login-checkbox-bg, var(--login-primary-color, #4D8F9D)) !important;
+    color: #fff;
+  }
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .artist-login-container {
@@ -228,8 +283,20 @@
   }
 
   .artist-logo {
-    bottom: 20px;
     left: 20px;
+
+    &.logo-location-top {
+      top: 20px;
+    }
+
+    &.logo-location-middle {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    &.logo-location-bottom {
+      bottom: 20px;
+    }
 
     .logo-text {
       font-size: 20px;
