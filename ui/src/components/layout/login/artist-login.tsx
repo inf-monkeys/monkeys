@@ -10,7 +10,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useLoginByPassword } from '@/apis/authz';
+import { useSystemConfig } from '@/apis/common';
 import { DynamicBackground } from '@/components/landing/artist/dynamic-background';
+import { OAuthDingtalkProvider } from '@/components/layout/login/auth/oauth/dingtalk';
 import { saveAuthToken } from '@/components/router/guard/auth';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -87,6 +89,14 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({
   const navigate = useNavigate();
   const { mutate } = useSWRConfig();
   const { trigger: triggerPassword } = useLoginByPassword();
+  const { data: oem } = useSystemConfig();
+
+  // 检查是否启用了钉钉登录
+  const loginMethods = (oem?.auth?.enabled || []) as string[];
+  const isDingtalkEnabled = loginMethods.some(
+    (method) => method === 'oauth-dingtalk' || (typeof method === 'string' && method.startsWith('oauth-') && method.includes('dingtalk')),
+  );
+  const isBsdAndDingtalkEnabled = oemId === 'bsd' && isDingtalkEnabled;
 
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -412,6 +422,55 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({
           <Button type="submit" className="submit-button" disabled={isLoading}>
             {isLoading ? '处理中...' : isLogin ? '登录' : '注册'}
           </Button>
+
+          {/* 钉钉登录按钮 - 仅在 BSD 且启用钉钉登录时显示 */}
+          {isBsdAndDingtalkEnabled && isLogin && (
+            <div className="mt-4 w-full flex flex-col items-center gap-2">
+              <div className="text-sm" style={{ color: resolvedTextColor || 'rgba(255,255,255,0.8)' }}>
+                {t('auth.login.other')}
+              </div>
+              <OAuthDingtalkProvider>
+                <Button
+                  type="button"
+                  className="dingtalk-button"
+                  style={{
+                    width: '50%',
+                    maxWidth: '200px',
+                    minWidth: '120px',
+                    background: 'linear-gradient(135deg, #1677FF 0%, #4096FF 100%)',
+                    color: 'white',
+                  }}
+                >
+                  <svg
+                    className="mr-2 h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                    fill="none"
+                    version="1.1"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                  >
+                    <defs>
+                      <clipPath id="master_svg0_1_022">
+                        <rect x="0" y="0" width="20" height="20" rx="0" />
+                      </clipPath>
+                    </defs>
+                    <g clipPath="url(#master_svg0_1_022)">
+                      <g>
+                        <path
+                          d="M14.0160097890625,13.32282440625L16.293009789062502,13.32282440625L12.1520099890625,19.11182440625L12.0520095890625,19.07682440625L12.9520101890625,15.27182340625L11.1720094890625,15.27182340625C11.3720092890625,14.34882340625,11.5640096890625,13.48182440625,11.7720098890625,12.53382440625C11.2660092890625,12.68582340625,10.8240098890625,12.77382340625,10.421008589062499,12.94982340625C9.548008889062501,13.32982340625,8.763008589062501,13.16782240625,8.0550093890625,12.60582240625C7.5784177890625,12.23938840625,7.1401800890625,11.82560940625,6.7470089890625005,11.37082340625C6.3470089890625,10.89282320625,6.4740085890625,10.61982250625,7.080009189062499,10.51782320625C8.363009489062499,10.30182270625,9.6500091890625,10.11182310625,10.9390091890625,9.87182330625L10.1300096890625,9.87182330625C9.0210094890625,9.86082360625,7.9110087890625,9.84282300625,6.8020093890624995,9.83882330625C6.1210090890625,9.83882330625,5.6410090890625,9.48382280625,5.2300090890625,8.98982330625C4.7107814890625,8.36002680625,4.3433150890625,7.61927750625,4.1560092890625,6.82482290625C4.0300094490625,6.31682300625,4.1690094890625,6.17682310625,4.6930092890625,6.29882290625C6.0180091890625,6.60682300625,7.3410091890625,6.92582270625,8.6660093890625,7.23582310625C9.343382789062499,7.40267560625,10.028974989062501,7.53418680625,10.7200088890625,7.62982320625C9.9200090890625,7.36382290625,9.1040095890625,7.11982340625,8.3110088890625,6.82982350625C7.1010090890625,6.38182350625,5.9110087890625,5.89382310625,4.7010089890625,5.42982340625C4.3556087890625,5.30491970625,4.0791622390625,5.03973530625,3.9400089390625,4.69982460625C3.4690090090625,3.62582470625,3.1170089719625,2.52082440625,3.1090087890625,1.33482438625C3.1090087890625,0.90282440185,3.2500087790625,0.79682435825,3.6210086990625,0.97682438025C7.4000086890625,2.79982460625,11.3070087890625,4.34182430625,15.2260087890625,5.84582470625C15.6039857890625,6.00003770625,15.9640977890625,6.19484660625,16.3000097890625,6.42682410625C16.9510087890625,6.85982470625,17.1630097890625,7.40582420625,16.8260087890625,8.09182450625C16.1340097890625,9.49982450625,15.3730087890625,10.87382410625,14.6340097890625,12.25882440625C14.4490077890625,12.59982440625,14.2430087890625,12.93082440625,14.0160097890625,13.32282440625Z"
+                          fill="#FFFFFF"
+                          fillOpacity="0.85"
+                        />
+                      </g>
+                    </g>
+                  </svg>
+                  {t('auth.oauth.dingtalk.label')}
+                </Button>
+              </OAuthDingtalkProvider>
+            </div>
+          )}
         </form>
       </div>
     </div>

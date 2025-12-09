@@ -316,6 +316,16 @@
   }
 }
 
+.dingtalk-button {
+  width: 100%;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(64, 150, 255, 0.3);
+  }
+}
+
 .login-checkbox {
   background: var(--login-checkbox-bg, #fff) !important;
   box-shadow: var(--login-checkbox-shadow, none);
