@@ -5,7 +5,7 @@ import { useSWRConfig } from 'swr';
 
 import '@/styles/artist-login.scss';
 
-import { ArrowLeft, Mail, UserPlus } from 'lucide-react';
+import { Mail, UserPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -58,15 +58,27 @@ interface IArtistLoginProps {
       inputBackground?: string;
       inputBorder?: string;
       inputPlaceholder?: string;
+      inputTextColor?: string;
       checkboxBackground?: string;
+      checkboxCheckedBackground?: string;
+      checkboxCheckColor?: string;
+      checkboxBorder?: string;
+      checkboxShape?: 'round' | 'square' | 'rounded';
       checkboxShadow?: string;
       titleGradient?: string;
+      textColor?: string;
     };
   };
   primaryColor?: string;
+  darkMode?: boolean;
 }
 
-export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished, loginPageConfig, primaryColor }) => {
+export const ArtistLogin: React.FC<IArtistLoginProps> = ({
+  onLoginFinished,
+  loginPageConfig,
+  primaryColor,
+  darkMode,
+}) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { mutate } = useSWRConfig();
@@ -80,6 +92,35 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished, logi
   const [isLoading, setIsLoading] = useState(false);
 
   const logoLocation = loginPageConfig?.logoLocation ?? 'bottom';
+  // 文本与输入颜色：优先 OEM 配置；否则按背景亮度选择
+  const resolvedTextColor = loginPageConfig?.theme?.textColor ?? (darkMode ? '#fff' : '#000');
+  const resolvedInputTextColor =
+    loginPageConfig?.theme?.inputTextColor ??
+    loginPageConfig?.theme?.textColor ??
+    (darkMode ? '#fff' : '#000');
+  const resolvedCheckboxBg =
+    loginPageConfig?.theme?.checkboxBackground ?? (darkMode ? '#fff' : '#fff');
+  const resolvedCheckboxCheckedBg =
+    loginPageConfig?.theme?.checkboxCheckedBackground ?? (darkMode ? '#000' : '#fff');
+  const resolvedCheckboxCheckColor =
+    loginPageConfig?.theme?.checkboxCheckColor ?? (darkMode ? '#fff' : '#000');
+  const resolvedCheckboxBorder =
+    loginPageConfig?.theme?.checkboxBorder ?? (darkMode ? '1px solid rgba(255,255,255,0.5)' : '1px solid rgba(0,0,0,0.5)');
+  const resolvedCheckboxRadius = (() => {
+    const shape = loginPageConfig?.theme?.checkboxShape ?? 'rounded';
+    if (shape === 'round') return '50%';
+    if (shape === 'square') return '2px';
+    return '6px';
+  })();
+
+  const defaultTitleGradient = useMemo(() => {
+    if (loginPageConfig?.theme?.titleGradient) {
+      return loginPageConfig.theme.titleGradient;
+    }
+    // 如果没有配置 titleGradient，使用 primaryColor 生成默认渐变
+    // 使用更明显的渐变：从 primaryColor 到更亮的灰色，增加中间停止点
+    return `linear-gradient(270deg, ${primaryColor} 0%, ${primaryColor} 30%, #B0B0B0 70%, #D0D0D0 100%), #FFFFFF`;
+  }, [loginPageConfig?.theme?.titleGradient, primaryColor]);
 
   const containerStyle = useMemo<React.CSSProperties>(
     () => ({
@@ -94,10 +135,26 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished, logi
       ['--login-input-border' as string]: loginPageConfig?.theme?.inputBorder,
       ['--login-input-placeholder' as string]: loginPageConfig?.theme?.inputPlaceholder,
       ['--login-checkbox-bg' as string]: loginPageConfig?.theme?.checkboxBackground,
+      ['--login-checkbox-bg-checked' as string]: resolvedCheckboxCheckedBg,
+      ['--login-checkbox-check-color' as string]: resolvedCheckboxCheckColor,
+      ['--login-checkbox-border' as string]: resolvedCheckboxBorder,
+      ['--login-checkbox-radius' as string]: resolvedCheckboxRadius,
       ['--login-checkbox-shadow' as string]: loginPageConfig?.theme?.checkboxShadow,
-      ['--login-title-gradient' as string]: loginPageConfig?.theme?.titleGradient,
+      ['--login-title-gradient' as string]: defaultTitleGradient,
+      ['--login-text-color' as string]: resolvedTextColor,
+      ['--login-input-text' as string]: resolvedInputTextColor,
     }),
-    [loginPageConfig, primaryColor],
+    [
+      loginPageConfig,
+      primaryColor,
+      resolvedTextColor,
+      resolvedInputTextColor,
+      resolvedCheckboxCheckedBg,
+      resolvedCheckboxCheckColor,
+      resolvedCheckboxBorder,
+      resolvedCheckboxRadius,
+      defaultTitleGradient,
+    ],
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -163,7 +220,7 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished, logi
   };
 
   return (
-    <div className="artist-login-container" style={containerStyle}>
+    <div className={`artist-login-container ${darkMode ? 'dark-mode' : ''}`} style={containerStyle}>
       {/* 背景：优先使用 OEM 配置的图片，否则回退原动态背景 */}
       {loginPageConfig?.background ? (
         <div className="artist-login-bg" style={{ backgroundImage: `url(${loginPageConfig.background})` }} />
@@ -187,8 +244,26 @@ export const ArtistLogin: React.FC<IArtistLoginProps> = ({ onLoginFinished, logi
       <div className="login-form-container" style={{ borderRadius: loginPageConfig?.formRadius }}>
         {/* 返回首页链接 */}
         <div className="back-to-home" onClick={handleBackToHome}>
-          <ArrowLeft className="back-icon" />
           <span>返回首页</span>
+          <svg
+            className="back-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+            fill="none"
+            version="1.1"
+            width="16.484106063842773"
+            height="17.4375"
+            viewBox="0 0 16.484106063842773 17.4375"
+          >
+            <g>
+              <path
+                d="M9.6216078,3.7109375L2.707545,3.7109375L5.0219984,1.3964844C5.3423109,1.0761719,5.3423109,0.55859375,5.0219984,0.24023438C4.7016859,-0.080078125,4.1841078,-0.080078125,3.8657484,0.24023438L0.23684214,3.8671875C0.061060902,4.0429688,-0.013157844,4.2773438,0.0024671552,4.5058594C-0.015110969,4.734375,0.061060902,4.96875,0.23684214,5.1445312L3.8637953,8.7714844C4.0239515,8.9316406,4.2329359,9.0117188,4.4419203,9.0117188C4.6509047,9.0117188,4.859889,8.9316406,5.0200453,8.7714844C5.3403578,8.4511719,5.3403578,7.9335938,5.0200453,7.6152344L2.7524669,5.3476562L9.5180922,5.3476562C12.375513,5.3476562,14.783716,7.5976562,14.848169,10.455078C14.914576,13.390625,12.545435,15.800781,9.6235609,15.800781L8.5766859,15.800781C8.5649672,15.800781,8.5512953,15.798828,8.5395765,15.798828L1.518092,15.798828C1.5044202,15.798828,1.4927014,15.800781,1.4809827,15.800781C1.0903577,15.818359,0.77395147,16.107422,0.71145147,16.484375L0.71145147,16.753906C0.77395147,17.128906,1.0903577,17.417969,1.4770764,17.4375L9.500514,17.4375C13.262232,17.4375,16.414576,14.460938,16.482935,10.701172C16.553247,6.859375,13.447779,3.7109375,9.6216078,3.7109375Z"
+                fill="#000000"
+                fillOpacity="0.85"
+              />
+            </g>
+          </svg>
+
         </div>
 
         {/* 表单标题 */}

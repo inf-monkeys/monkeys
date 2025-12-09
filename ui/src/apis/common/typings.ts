@@ -106,9 +106,15 @@ export type CustomizationLoginPageTheme = {
   inputBackground?: string;
   inputBorder?: string;
   inputPlaceholder?: string;
+  inputTextColor?: string;
   checkboxBackground?: string;
+  checkboxCheckedBackground?: string;
+  checkboxCheckColor?: string;
+  checkboxBorder?: string;
+  checkboxShape?: 'round' | 'square' | 'rounded';
   checkboxShadow?: string;
   titleGradient?: string;
+  textColor?: string;
 };
 
 export type CustomizationLoginPage = {

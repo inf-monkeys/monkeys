@@ -122,9 +122,15 @@ export type CustomizationLoginPageTheme = {
   inputBackground?: string;
   inputBorder?: string;
   inputPlaceholder?: string;
+  inputTextColor?: string;
   checkboxBackground?: string;
+  checkboxCheckedBackground?: string;
+  checkboxCheckColor?: string;
+  checkboxBorder?: string;
+  checkboxShape?: 'round' | 'square' | 'rounded';
   checkboxShadow?: string;
   titleGradient?: string;
+  textColor?: string;
 };
 
 export type CustomizationLoginPage = {
@@ -735,6 +741,9 @@ const logoConfig = readConfig('server.customization.logo', {
 });
 const faviconConfig = readConfig('server.customization.favicon', 'https://monkeyminio01.daocloud.cn/monkeys/logo/InfMonkeys-ICO.svg');
 
+const readLoginConfig = <T = any>(path: string, defaultValue?: T) =>
+  readConfig(`server.login-page.${path}`, readConfig(`login-page.${path}`, defaultValue));
+
 export const config: Config = {
   server: {
     port,
@@ -763,30 +772,36 @@ export const config: Config = {
         variant: readConfig('server.customization.form.variant', 'bento'),
       },
       loginPage: {
-        // 顶层 OEM 配置：login-page:
+        // OEM 配置：优先 server.login-page，兼容顶层 login-page
         //   style: classic | modern
         //   background: ...
         //   logo: ...
         //   logo-location: top | middle | bottom
         //   form-radius: 25px
-        style: readConfig('login-page.style', undefined),
-        background: readConfig('login-page.background', undefined),
-        logo: readConfig('login-page.logo', undefined),
-        logoLocation: readConfig('login-page.logo-location', undefined),
+        style: readLoginConfig('style', undefined),
+        background: readLoginConfig('background', undefined),
+        logo: readLoginConfig('logo', undefined),
+        logoLocation: readLoginConfig('logo-location', undefined),
         // 如果未单独配置圆角，则回退到主题全局 roundedSize
-        formRadius: readConfig('login-page.form-radius', readConfig('server.customization.roundedSize', undefined)),
+        formRadius: readLoginConfig('form-radius', readConfig('server.customization.roundedSize', undefined)),
         theme: {
-          cardBackground: readConfig('login-page.theme.card-background', undefined),
-          cardBorder: readConfig('login-page.theme.card-border', undefined),
-          cardBorderImage: readConfig('login-page.theme.card-border-image', undefined),
-          cardBlur: readConfig('login-page.theme.card-blur', undefined),
-          tabInactiveColor: readConfig('login-page.theme.tab-inactive-color', undefined),
-          inputBackground: readConfig('login-page.theme.input-background', undefined),
-          inputBorder: readConfig('login-page.theme.input-border', undefined),
-          inputPlaceholder: readConfig('login-page.theme.input-placeholder', undefined),
-          checkboxBackground: readConfig('login-page.theme.checkbox-background', undefined),
-          checkboxShadow: readConfig('login-page.theme.checkbox-shadow', undefined),
-          titleGradient: readConfig('login-page.theme.title-gradient', undefined),
+          cardBackground: readLoginConfig('theme.card-background', undefined),
+          cardBorder: readLoginConfig('theme.card-border', undefined),
+          cardBorderImage: readLoginConfig('theme.card-border-image', undefined),
+          cardBlur: readLoginConfig('theme.card-blur', undefined),
+          tabInactiveColor: readLoginConfig('theme.tab-inactive-color', undefined),
+          inputBackground: readLoginConfig('theme.input-background', undefined),
+          inputBorder: readLoginConfig('theme.input-border', undefined),
+          inputPlaceholder: readLoginConfig('theme.input-placeholder', undefined),
+          inputTextColor: readLoginConfig('theme.input-text-color', undefined),
+          checkboxBackground: readLoginConfig('theme.checkbox-background', undefined),
+          checkboxCheckedBackground: readLoginConfig('theme.checkbox-checked-background', undefined),
+          checkboxCheckColor: readLoginConfig('theme.checkbox-check-color', undefined),
+          checkboxBorder: readLoginConfig('theme.checkbox-border', undefined),
+          checkboxShape: readLoginConfig('theme.checkbox-shape', undefined),
+          checkboxShadow: readLoginConfig('theme.checkbox-shadow', undefined),
+          titleGradient: readLoginConfig('theme.title-gradient', undefined),
+          textColor: readLoginConfig('theme.text-color', undefined),
         },
       },
       toast: {

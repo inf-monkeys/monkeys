@@ -41,6 +41,7 @@ const Login: React.FC = () => {
             theme: loginPageConfig?.theme,
           }}
           primaryColor={themePrimaryColor}
+          darkMode={darkMode}
         />
       ) : (
         <>
