@@ -48,6 +48,7 @@ import { cn, getI18nContent } from '@/utils';
 const getDesignProjectDisplayName = (designProject?: IDesignProject) => {
   if (!designProject) return '';
   const displayName = getI18nContent(designProject.displayName ?? '');
+
   return (
     <div className="flex items-center gap-2">
       <VinesIcon src={designProject.iconUrl ?? DEFAULT_DESIGN_PROJECT_ICON_URL} size="xs" />
@@ -76,6 +77,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
   const { data: oem } = useSystemConfig();
 
   const oemId = oem?.theme.id;
+  const isLf = oemId === 'lf';
 
   const [currentDesignProjectId, setCurrentDesignProjectId] = useState<string | null>(
     designProjectIdFromSearch ?? null,
@@ -181,7 +183,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
         pinned: false,
         teamId,
       });
-      const newBoardId = res.data?.data?.id ?? (res as any)?.data?.id ?? (res as any)?.id; // 兼容不同 fetcher 返回结构
+      const newBoardId = (res as any)?.data?.data?.id ?? (res as any)?.data?.id ?? (res as any)?.id; // 兼容不同 fetcher 返回结构
       await mutateDesignProjectMetadataList();
       if (newBoardId) {
         setCurrentDesignBoardId(newBoardId);
@@ -234,7 +236,9 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
                   ? getDesignProjectDisplayName(selectedDesignProject!)
                   : isLoading
                     ? t('common.load.loading')
-                    : t('workspace.global-design-board.operation-bar.design-project.placeholder')}
+                    : isLf
+                      ? 'Select a design board'
+                      : t('workspace.global-design-board.operation-bar.design-project.placeholder')}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
