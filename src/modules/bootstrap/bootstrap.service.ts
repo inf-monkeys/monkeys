@@ -133,36 +133,37 @@ export class BootstrapService {
   //   }
   // }
 
-  private async upsertInitialAdmin() {
-    if (!config.admin || !config.admin.email) {
-      return;
-    }
-
-    const { password, email, username } = config.admin;
-    const finalUsername = username || email.split('@')[0];
-    let adminUser = await this.userRepo.findByEmail(email);
-
-    if (!adminUser) {
-      const encryptedPassword = this.passwordService.encryptPassword(password);
-      adminUser = await this.userRepo.registerUser({
-        email,
-        name: finalUsername,
-        password: encryptedPassword,
-      });
-      logger.info(`Initial admin user ${finalUsername} not found, creating a new one.`);
-    } else {
-      logger.info(`Initial admin user ${finalUsername} found, updating.`);
-    }
-
-    const userToUpdate: Partial<UserEntity> = {
-      isAdmin: true,
-    };
-    if (password) {
-      userToUpdate.password = this.passwordService.encryptPassword(password);
-    }
-    await this.userRepo.updateUser(adminUser.id, userToUpdate);
-    logger.info(`Initial admin user ${finalUsername} has been upserted.`);
-  }
+  // 旧的 admin 初始化逻辑已废弃，使用新的 Admin 系统（通过 /api/admin/auth/super-admin/init 接口初始化）
+  // private async upsertInitialAdmin() {
+  //   if (!config.admin || !config.admin.email) {
+  //     return;
+  //   }
+  //
+  //   const { password, email, username } = config.admin;
+  //   const finalUsername = username || email.split('@')[0];
+  //   let adminUser = await this.userRepo.findByEmail(email);
+  //
+  //   if (!adminUser) {
+  //     const encryptedPassword = this.passwordService.encryptPassword(password);
+  //     adminUser = await this.userRepo.registerUser({
+  //       email,
+  //       name: finalUsername,
+  //       password: encryptedPassword,
+  //     });
+  //     logger.info(`Initial admin user ${finalUsername} not found, creating a new one.`);
+  //   } else {
+  //     logger.info(`Initial admin user ${finalUsername} found, updating.`);
+  //   }
+  //
+  //   const userToUpdate: Partial<UserEntity> = {
+  //     isAdmin: true,
+  //   };
+  //   if (password) {
+  //     userToUpdate.password = this.passwordService.encryptPassword(password);
+  //   }
+  //   await this.userRepo.updateUser(adminUser.id, userToUpdate);
+  //   logger.info(`Initial admin user ${finalUsername} has been upserted.`);
+  // }
 
   public async bootstrap() {
     logger.info('Starting system bootstrap process...');
@@ -198,9 +199,10 @@ export class BootstrapService {
       // await this.syncPresetMarketplaceApps(marketData);
       // logger.info('Preset marketplace apps (independent) synced successfully.');
 
-      logger.info('Upserting initial admin user...');
-      await this.upsertInitialAdmin();
-      logger.info('Initial admin user upserted successfully.');
+      // 旧的 admin 初始化已废弃
+      // logger.info('Upserting initial admin user...');
+      // await this.upsertInitialAdmin();
+      // logger.info('Initial admin user upserted successfully.');
 
       logger.info('System bootstrap process completed successfully.');
     } catch (error) {

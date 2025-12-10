@@ -10,6 +10,7 @@ import { ToolsMiddleware } from './common/middlewares/tools.middleware';
 import { CronJobModule } from './cronjobs/cron.module';
 import { DatabaseModule } from './database/database.module';
 import { RepositoryMoule } from './database/repositories.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { AgentV2Module } from './modules/agent-v2/agent-v2.module';
 import { AgentV3Module } from './modules/agent-v3/agent-v3.module';
 import { AssetsModule } from './modules/assets/assets.module';
@@ -54,6 +55,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     ExportModule,
     BootstrapModule,
     AuthModule,
+    AdminModule,
     AssetsModule,
     LLMToolsModule,
     TranslateToolsModule,

@@ -179,6 +179,7 @@ export interface ServerConfig {
   port: number;
   appId: string;
   appUrl: string;
+  host: string;
   loadExample: boolean;
   rateLimit: {
     enabled: boolean;
@@ -393,9 +394,15 @@ export interface AuthConfig {
 }
 
 export interface AdminConfig {
-  username: string;
-  password?: string;
-  email: string;
+  initToken?: string; // 用于初始化 SuperAdmin 的固定 token（可选，不配置则禁用初始化接口）
+  jwt?: {
+    secret?: string; // Admin JWT 密钥（可选，默认使用 'monkeys-admin'）
+    expiresIn?: string; // JWT 过期时间（可选，默认 '7d'）
+  };
+  // 注意：SuperAdmin 的 username、name、email 是固定的，不可配置
+  // username: 'SuperAdmin'
+  // name: '超级管理员'
+  // email: 'superadmin@{host}'（host 从 server.host 或 server.hosts[0] 获取）
 }
 
 export interface S3Config {
@@ -676,6 +683,11 @@ const resolvedS3ThumbnailBuckets = Array.isArray(rawS3ThumbnailBuckets) ? rawS3T
 const port = readConfig('server.port', 3000);
 const appUrl = readConfig('server.appUrl', `http://127.0.0.1:${port}`);
 
+// 获取 host 或 hosts（取第一个）
+const rawHost = readConfig('server.host');
+const rawHosts = readConfig('server.hosts', []);
+const host = rawHost || (Array.isArray(rawHosts) && rawHosts.length > 0 ? rawHosts[0] : 'localhost');
+
 const logoConfig = readConfig('server.customization.logo', {
   light: 'https://monkeyminio01.daocloud.cn/monkeys/logo/InfMonkeys-logo-light.svg',
   dark: 'https://monkeyminio01.daocloud.cn/monkeys/logo/InfMonkeys-logo-dark.svg',
@@ -687,6 +699,7 @@ export const config: Config = {
     port,
     appId: readConfig('server.appId', 'monkeys'),
     appUrl: appUrl,
+    host,
     loadExample: readConfig('server.loadExample', true),
     rateLimit: {
       enabled: readConfig('server.rateLimit.enabled', false),
@@ -924,7 +937,13 @@ export const config: Config = {
     autoReload: readConfig('auth.autoReload', false),
     defaultOtherTeam: readConfig('auth.defaultOtherTeam', false),
   },
-  admin: readConfig('admin'),
+  admin: {
+    initToken: readConfig('admin.initToken'),
+    jwt: {
+      secret: readConfig('admin.jwt.secret', 'monkeys-admin'),
+      expiresIn: readConfig('admin.jwt.expiresIn', '7d'),
+    },
+  },
   s3: {
     enableOpendalUpload: readConfig('s3.enableOpendalUpload', false),
     proxy: readConfig('s3.proxy', true),

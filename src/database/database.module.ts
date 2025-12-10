@@ -16,6 +16,9 @@ import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-tr
 import { TimestampSubscriber } from '@/timestamp.subscriber';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+import { AdminUserEntity } from './entities/admin/admin-user.entity';
+import { AdminRoleEntity } from './entities/admin/admin-role.entity';
+import { AdminPermissionEntity } from './entities/admin/admin-permission.entity';
 import { AgentV2MessageEntity } from './entities/agent-v2/agent-v2-message.entity';
 import { AgentV2SessionEntity } from './entities/agent-v2/agent-v2-session.entity';
 import { AgentV2MessageQueueEntity, AgentV2TaskStateEntity } from './entities/agent-v2/agent-v2-task-state.entity';
@@ -78,6 +81,9 @@ import { WorkflowAssociationsEntity } from './entities/workflow/workflow-associa
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
 
 export const entities: EntityClassOrSchema[] = [
+  AdminUserEntity,
+  AdminRoleEntity,
+  AdminPermissionEntity,
   ThemeEntity,
   ToolsEntity,
   ToolsCredentialTypeEntity,
