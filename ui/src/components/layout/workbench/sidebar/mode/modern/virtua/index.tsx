@@ -64,6 +64,14 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   const ref = useRef<VListHandle>(null);
   const lastPageId = useRef<string>();
 
+  const handleChildClick = useCallback(
+    (page: IWorkbenchViewItemPage) => {
+      onChildClick?.(page);
+      setExpanded(false);
+    },
+    [onChildClick],
+  );
+
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -178,7 +186,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
                 <ViewItem
                   key={it.id ?? i}
                   page={it as IWorkbenchViewItemPage}
-                  onClick={onChildClick}
+                  onClick={handleChildClick}
                   onlyShowWorkbenchIcon={true}
                 />
               ))}
@@ -219,7 +227,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
                       <ViewItem
                         key={it.id ?? i}
                         page={it as IWorkbenchViewItemPage}
-                        onClick={onChildClick}
+                        onClick={handleChildClick}
                         onlyShowWorkbenchIcon={false}
                       />
                     </motion.div>
