@@ -164,7 +164,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                         </Tooltip>
                       </div>
                       {/* 文件名 - 底部居中（在按钮上方） */}
-                      <div className="pointer-events-none absolute bottom-16 z-10 flex w-full items-center justify-center px-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                      {/* <div className="pointer-events-none absolute bottom-16 z-10 flex w-full items-center justify-center px-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <p className="line-clamp-1 max-w-36 rounded border border-input bg-slate-1 p-1 text-sm leading-none shadow dark:bg-card-dark">
@@ -173,7 +173,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                           </TooltipTrigger>
                           <TooltipContent>{(meta as any)?.originalName || name}</TooltipContent>
                         </Tooltip>
-                      </div>
+                      </div> */}
                     </>
                   )}
                 </div>
