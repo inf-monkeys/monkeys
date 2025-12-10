@@ -15,6 +15,7 @@ import {
   useGetDesignProjectList,
 } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings';
+import { IAssetItem } from '@/apis/ugc/typings';
 import { DesignProjectInfoEditor } from '@/components/layout/design-space/design-project-info-editor';
 import { CreateDesignProjectDialog } from '@/components/layout/ugc-pages/design-project/create';
 import { useVinesTeam } from '@/components/router/guard/team';
@@ -141,9 +142,14 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
     setDesignProjectVisible(false);
   };
 
-  const handleAfterCreateDesignProject = () => {
+  const handleAfterCreateDesignProject = (project?: IAssetItem<IDesignProject>) => {
     setCreateDesignProjectVisible(false);
     mutateDesignProjectList();
+    if (project?.id) {
+      setCurrentDesignProjectId(project.id);
+      setCurrentDesignBoardId(undefined);
+      setDesignProjectVisible(false);
+    }
   };
 
   const handleDeleteDesignProject = async () => {
