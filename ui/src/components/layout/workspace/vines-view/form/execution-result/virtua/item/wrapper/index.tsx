@@ -142,8 +142,8 @@ const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResult
       {/* 图片内容区域，保持点击可以触发预览 */}
       <div className={`z-10 ${displayType === 'grid' ? 'h-full w-full' : 'flex-1'}`}>{children}</div>
 
-      {/* 操作按钮区域 - 提高z-index确保在最上层可点击 */}
-      <div className="absolute right-4 top-4 z-30 flex gap-1 opacity-0 transition-opacity group-hover/vgi:opacity-100">
+      {/* 操作按钮区域 - hover 显示 */}
+      <div className="absolute right-14 top-4 z-30 flex gap-1 opacity-0 transition-opacity group-hover/vgi:opacity-100">
         {data.status === 'FAILED' && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -224,7 +224,15 @@ const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResult
           </VirtuaExecutionResultRawDataDialog>
         )}
 
-        {selectionModeDisplayType === 'operation-button' && (
+      </div>
+
+      {/* 选择按钮 - 选中时常驻，未选中时悬浮显示 */}
+      {selectionModeDisplayType === 'operation-button' && (
+        <div
+          className={`absolute right-4 top-4 z-40 transition-opacity ${
+            isSelected ? 'opacity-100' : 'opacity-0 group-hover/vgi:opacity-100'
+          }`}
+        >
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -240,8 +248,8 @@ const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResult
             </TooltipTrigger>
             <TooltipContent>{isSelected ? t('common.utils.unselect') : t('common.utils.select')}</TooltipContent>
           </Tooltip>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* hover遮罩 - 半透明，只在hover时显示，z-index设置为20，低于按钮但高于其他元素 */}
       <div className="pointer-events-none absolute inset-0 z-20 rounded-lg bg-black/20 opacity-0 transition-opacity group-hover/vgi:opacity-100"></div>

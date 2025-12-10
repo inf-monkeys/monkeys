@@ -3,7 +3,7 @@ import React from 'react';
 import Uppy, { Meta, UppyFile } from '@uppy/core';
 import { useCreation } from 'ahooks';
 import { motion } from 'framer-motion';
-import { CircleCheck, CircleX, Eye, Loader2, RotateCw, Trash2, Zap } from 'lucide-react';
+import { CircleCheck, CircleX, Eye, Loader2, RotateCw, Trash2 } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 
@@ -12,7 +12,6 @@ import { UniImagePreviewWrapper } from '@/components/layout-wrapper/main/uni-ima
 import { Button } from '@/components/ui/button';
 import { useVinesImageManage } from '@/components/ui/image/use-vines-image-manage.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
@@ -117,20 +116,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                               : t('components.ui.updater.status.wait')}
                       </p>
                     )}
-                    {(meta.isRapidUploaded as boolean) && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex cursor-pointer items-center gap-1">
-                            <Separator className="mx-1 h-4" orientation="vertical" />
-                            <Zap size={13} className="fill-vines-500 stroke-vines-500" />
-                            <p className="text-xs leading-none text-vines-500">
-                              {t('components.ui.updater.rapid-upload')}
-                            </p>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent sideOffset={8}>{t('components.ui.updater.rapid-upload-tip')}</TooltipContent>
-                      </Tooltip>
-                    )}
+                    {/* 隐藏秒传提示标识 */}
                     {isError && (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -164,7 +150,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                         </Tooltip>
                       </div>
                       {/* 文件名 - 底部居中（在按钮上方） */}
-                      <div className="pointer-events-none absolute bottom-16 z-10 flex w-full items-center justify-center px-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                      {/* <div className="pointer-events-none absolute bottom-16 z-10 flex w-full items-center justify-center px-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <p className="line-clamp-1 max-w-36 rounded border border-input bg-slate-1 p-1 text-sm leading-none shadow dark:bg-card-dark">
@@ -173,7 +159,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                           </TooltipTrigger>
                           <TooltipContent>{(meta as any)?.originalName || name}</TooltipContent>
                         </Tooltip>
-                      </div>
+                      </div> */}
                     </>
                   )}
                 </div>

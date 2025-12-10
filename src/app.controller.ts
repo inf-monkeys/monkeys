@@ -130,6 +130,7 @@ export class AppController {
         toast: config.server.customization.toast,
         icons: config.server.customization.icons,
         views: config.server.customization.views,
+        loginPage: config.server.customization.loginPage,
         extraLanguageURL: config.server.customization.extraLanguageURL,
         hideSpaceHeader: config.server.customization.hideSpaceHeader,
         showSidebarTeamSelector: config.server.customization.showSidebarTeamSelector,

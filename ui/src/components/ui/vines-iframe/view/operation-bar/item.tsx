@@ -1,11 +1,11 @@
-import { forwardRef, startTransition } from 'react';
+import { forwardRef, startTransition, useEffect, useMemo, useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { createDesignProject } from '@/apis/designs';
+import { createDesignProject, useDesignProjectMetadataList, useGetDesignProjectList } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings';
 import { useWorkspacePages } from '@/apis/pages';
 import { IAssetItem } from '@/apis/ugc/typings';
@@ -13,6 +13,16 @@ import { IWorkflowAssociation } from '@/apis/workflow/association/typings';
 import { GLOBAL_DESIGN_BOARD_PAGE } from '@/components/layout/workbench/sidebar/mode/normal/consts';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { useVinesRoute } from '@/components/router/use-vines-route';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useUrlState from '@/hooks/use-url-state';
 import { useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { useSetTemp } from '@/store/useGlobalTempStore';
@@ -42,6 +52,31 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
   const { selectedOutputItems } = useOutputSelectionStore();
 
   const setWorkbenchCacheVal = useSetWorkbenchCacheVal();
+
+  // To Board 选择已有画板/新建画板
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [targetMode, setTargetMode] = useState<'new' | 'existing'>('new');
+  const { data: designProjects } = useGetDesignProjectList();
+  const [targetProjectId, setTargetProjectId] = useState<string | undefined>();
+  const { data: designBoards } = useDesignProjectMetadataList(targetProjectId);
+  const [targetBoardId, setTargetBoardId] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!targetProjectId && designProjects && designProjects.length > 0) {
+      setTargetProjectId(designProjects[0].id);
+    }
+  }, [designProjects, targetProjectId]);
+
+  useEffect(() => {
+    if (designBoards && designBoards.length > 0) {
+      setTargetBoardId((prev) => prev && designBoards.some((b) => b.id === prev) ? prev : designBoards[0].id);
+    } else {
+      setTargetBoardId(undefined);
+    }
+  }, [designBoards]);
+
+  const projectOptions = useMemo(() => designProjects ?? [], [designProjects]);
+  const boardOptions = useMemo(() => designBoards ?? [], [designBoards]);
 
   const onItemClick = async () => {
     if (selectedOutputItems.length == 0) {
@@ -91,61 +126,180 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
     }
 
     if (data.type === 'new-design') {
-      toast.promise(
-        async (): Promise<IAssetItem<IDesignProject>> => {
-          const designProject = await createDesignProject({
-            displayName: data.extraData?.newDesignDisplayName
-              ? JSON.stringify(data.extraData.newDesignDisplayName)
-              : '{"zh-CN":"未命名设计项目","en-US":"Untitled design project"}',
-          });
-          if (!designProject) throw new Error('design project created failed');
-          return designProject;
-        },
-        {
-          success: (designProject) => {
-            const tid = `insert-images-${Date.now()}`;
-            setTemp(tid, selectedOutputItems);
-
-            startTransition(() => {
-              setCurrentPage({ [teamId]: { ...GLOBAL_DESIGN_BOARD_PAGE, groupId: 'global-design-board' } });
-            });
-
-            navigate({
-              to: '/$teamId',
-              params: {
-                teamId,
-              },
-              // to: '/$teamId/design/$designProjectId',
-              // params: {
-              //   teamId,
-              //   designProjectId: designProject.id,
-              // },
-              search: {
-                operation: 'insert-images',
-                tid,
-                designProjectId: designProject.id,
-              },
-            });
-            return t('common.create.success');
-          },
-          loading: t('common.create.loading'),
-          error: t('common.create.error'),
-        },
-      );
+      setAssignDialogOpen(true);
     }
   };
 
+  const handleSendToBoard = async () => {
+    if (targetMode === 'existing') {
+      if (!targetProjectId || !targetBoardId) {
+        toast.error(t('workspace.operation.to-board.select-board', { defaultValue: 'Please select a board' }));
+        return;
+      }
+      const tid = `insert-images-${Date.now()}`;
+      setTemp(tid, selectedOutputItems);
+      startTransition(() => {
+        setCurrentPage({ [teamId]: { ...GLOBAL_DESIGN_BOARD_PAGE, groupId: 'global-design-board' } });
+      });
+      navigate({
+        to: '/$teamId',
+        params: { teamId },
+        search: {
+          operation: 'insert-images',
+          tid,
+          designProjectId: targetProjectId,
+          designBoardId: targetBoardId,
+        },
+      });
+      setAssignDialogOpen(false);
+      return;
+    }
+
+    // 新建画板后导入
+    toast.promise(
+      async (): Promise<IAssetItem<IDesignProject>> => {
+        const designProject = await createDesignProject({
+          displayName: data.extraData?.newDesignDisplayName
+            ? JSON.stringify(data.extraData.newDesignDisplayName)
+            : '{"zh-CN":"未命名设计项目","en-US":"Untitled design project"}',
+        });
+        if (!designProject) throw new Error('design project created failed');
+        return designProject;
+      },
+      {
+        success: (designProject) => {
+          const tid = `insert-images-${Date.now()}`;
+          setTemp(tid, selectedOutputItems);
+
+          startTransition(() => {
+            setCurrentPage({ [teamId]: { ...GLOBAL_DESIGN_BOARD_PAGE, groupId: 'global-design-board' } });
+          });
+
+          navigate({
+            to: '/$teamId',
+            params: {
+              teamId,
+            },
+            search: {
+              operation: 'insert-images',
+              tid,
+              designProjectId: designProject.id,
+            },
+          });
+          setAssignDialogOpen(false);
+          return t('common.create.success');
+        },
+        loading: t('common.create.loading'),
+        error: t('common.create.error'),
+      },
+    );
+  };
+
   return (
-    <CommonOperationBarItem
-      ref={ref}
-      id={data.id}
-      mode={mode}
-      iconUrl={data.iconUrl}
-      tooltipContent={getI18nContent(data.displayName)}
-      tooltipSide="left"
-      onClick={onItemClick}
-      expanded={expanded}
-    />
+    <>
+      <CommonOperationBarItem
+        ref={ref}
+        id={data.id}
+        mode={mode}
+        iconUrl={data.iconUrl}
+        tooltipContent={getI18nContent(data.displayName)}
+        tooltipSide="left"
+        onClick={onItemClick}
+        expanded={expanded}
+      />
+
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent className="w-[480px]">
+          <DialogHeader>
+            <DialogTitle>
+              {t('workspace.operation.to-board.title', { defaultValue: 'Choose target board' })}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-2">
+              <Button variant={targetMode === 'new' ? 'default' : 'outline'} onClick={() => setTargetMode('new')}>
+                {t('workspace.operation.to-board.create-new', { defaultValue: 'Create new board' })}
+              </Button>
+              <Button
+                variant={targetMode === 'existing' ? 'default' : 'outline'}
+                onClick={() => setTargetMode('existing')}
+              >
+                {t('workspace.operation.to-board.use-existing', { defaultValue: 'Use existing board' })}
+              </Button>
+            </div>
+
+            {targetMode === 'existing' && (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <Label>{t('workspace.operation.to-board.project', { defaultValue: 'Design Project' })}</Label>
+                  <Select
+                    value={targetProjectId}
+                    onValueChange={(val) => {
+                      setTargetProjectId(val);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t('workspace.operation.to-board.select-project', {
+                          defaultValue: 'Select project',
+                        })}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projectOptions.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {getI18nContent(p.displayName) ?? p.id}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <Label>{t('workspace.operation.to-board.board', { defaultValue: 'Board' })}</Label>
+                  <Select
+                    value={targetBoardId}
+                    onValueChange={(val) => setTargetBoardId(val)}
+                    disabled={!targetProjectId || boardOptions.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={t('workspace.operation.to-board.select-board-placeholder', {
+                          defaultValue: 'Select board',
+                        })}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {boardOptions.map((b) => {
+                        const rawNameVal = getI18nContent(b.displayName) ?? b.displayName ?? b.id;
+                        const rawName = typeof rawNameVal === 'string' ? rawNameVal : b.id;
+                        const displayName =
+                          rawName === '画板' || rawName === 'Board'
+                            ? t('workspace.operation.to-board.board-default', { defaultValue: 'Board' })
+                            : rawName;
+                        return (
+                          <SelectItem key={b.id} value={b.id}>
+                            {displayName}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>
+              {t('common.utils.cancel', { defaultValue: 'Cancel' })}
+            </Button>
+            <Button onClick={handleSendToBoard}>
+              {t('common.utils.confirm', { defaultValue: 'Confirm' })}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 });
 OperationItem.displayName = 'VirtuaWorkbenchOperationItem';

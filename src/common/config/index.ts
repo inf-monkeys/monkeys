@@ -110,6 +110,66 @@ export type CustomizationForm = {
   variant: 'bento' | 'ghost';
 };
 
+export type CustomizationLoginPageStyle = 'classic' | 'modern';
+export type CustomizationLoginPageLogoLocation = 'top' | 'middle' | 'bottom';
+
+export type CustomizationLoginPageTheme = {
+  cardBackground?: string;
+  cardBorder?: string;
+  cardBorderImage?: string;
+  cardBlur?: string;
+  tabInactiveColor?: string;
+  inputBackground?: string;
+  inputBorder?: string;
+  inputPlaceholder?: string;
+  inputTextColor?: string;
+  checkboxBackground?: string;
+  checkboxCheckedBackground?: string;
+  checkboxCheckColor?: string;
+  checkboxBorder?: string;
+  checkboxShape?: 'round' | 'square' | 'rounded';
+  checkboxShadow?: string;
+  titleGradient?: string;
+  textColor?: string;
+};
+
+export type CustomizationLoginPage = {
+  /**
+   * 登录页样式：
+   * - classic：旧版登录页（当前默认行为）
+   * - modern：基于 Artist 登录/注册页的新版模板
+   */
+  style?: CustomizationLoginPageStyle;
+  /**
+   * 背景图片地址；如果未配置则沿用原有背景（如 Artist 的 DynamicBackground）
+   */
+  background?: string;
+  /**
+   * 登录页左侧/底部展示的 logo 图片
+   */
+  logo?: string;
+  /**
+   * logo 的垂直位置：上/中/下
+   */
+  logoLocation?: CustomizationLoginPageLogoLocation;
+  /**
+   * logo 的大小，支持 CSS 值，如 "48px", "60px", "3rem", "200%" 等
+   */
+  logoSize?: string;
+  /**
+   * logo 的左边距，支持 CSS 值，如 "30px", "50px", "5%" 等
+   */
+  logoLeft?: string;
+  /**
+   * 登录表单卡片的圆角大小，例如 '25px'
+   */
+  formRadius?: string;
+  /**
+   * UI 主题色/渐变等额外样式
+   */
+  theme?: CustomizationLoginPageTheme;
+};
+
 export type CustomizationUploader = {
   orientation: 'vertical' | 'horizontal';
   pasteButton: boolean;
@@ -212,6 +272,13 @@ export interface ServerConfig {
     views: {
       form: CustomizationFormView;
     };
+    /**
+     * 登录页配置（classic / modern）
+     *
+     * 注意：真正的配置来自顶层 YAML 中的 `login-page` 节点，
+     * 这里仅是把解析结果挂载到 customization 里，方便前端统一从 theme 中读取。
+     */
+    loginPage?: CustomizationLoginPage;
     extraLanguageURL?: ExtraLanguageURL;
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
@@ -694,6 +761,9 @@ const logoConfig = readConfig('server.customization.logo', {
 });
 const faviconConfig = readConfig('server.customization.favicon', 'https://monkeyminio01.daocloud.cn/monkeys/logo/InfMonkeys-ICO.svg');
 
+const readLoginConfig = <T = any>(path: string, defaultValue?: T) =>
+  readConfig(`server.login-page.${path}`, readConfig(`login-page.${path}`, defaultValue));
+
 export const config: Config = {
   server: {
     port,
@@ -721,6 +791,41 @@ export const config: Config = {
       roundedSize: readConfig('server.customization.roundedSize', undefined),
       form: {
         variant: readConfig('server.customization.form.variant', 'bento'),
+      },
+      loginPage: {
+        // OEM 配置：优先 server.login-page，兼容顶层 login-page
+        //   style: classic | modern
+        //   background: ...
+        //   logo: ...
+        //   logo-location: top | middle | bottom
+        //   form-radius: 25px
+        style: readLoginConfig('style', undefined),
+        background: readLoginConfig('background', undefined),
+        logo: readLoginConfig('logo', undefined),
+        logoLocation: readLoginConfig('logo-location', undefined),
+        logoSize: readLoginConfig('logo-size', undefined),
+        logoLeft: readLoginConfig('logo-left', undefined),
+        // 如果未单独配置圆角，则回退到主题全局 roundedSize
+        formRadius: readLoginConfig('form-radius', readConfig('server.customization.roundedSize', undefined)),
+        theme: {
+          cardBackground: readLoginConfig('theme.card-background', undefined),
+          cardBorder: readLoginConfig('theme.card-border', undefined),
+          cardBorderImage: readLoginConfig('theme.card-border-image', undefined),
+          cardBlur: readLoginConfig('theme.card-blur', undefined),
+          tabInactiveColor: readLoginConfig('theme.tab-inactive-color', undefined),
+          inputBackground: readLoginConfig('theme.input-background', undefined),
+          inputBorder: readLoginConfig('theme.input-border', undefined),
+          inputPlaceholder: readLoginConfig('theme.input-placeholder', undefined),
+          inputTextColor: readLoginConfig('theme.input-text-color', undefined),
+          checkboxBackground: readLoginConfig('theme.checkbox-background', undefined),
+          checkboxCheckedBackground: readLoginConfig('theme.checkbox-checked-background', undefined),
+          checkboxCheckColor: readLoginConfig('theme.checkbox-check-color', undefined),
+          checkboxBorder: readLoginConfig('theme.checkbox-border', undefined),
+          checkboxShape: readLoginConfig('theme.checkbox-shape', undefined),
+          checkboxShadow: readLoginConfig('theme.checkbox-shadow', undefined),
+          titleGradient: readLoginConfig('theme.title-gradient', undefined),
+          textColor: readLoginConfig('theme.text-color', undefined),
+        },
       },
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),

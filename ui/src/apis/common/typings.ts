@@ -94,6 +94,40 @@ export type CustomizationForm = {
   variant: 'bento' | 'ghost';
 };
 
+export type CustomizationLoginPageStyle = 'classic' | 'modern';
+export type CustomizationLoginPageLogoLocation = 'top' | 'middle' | 'bottom';
+
+export type CustomizationLoginPageTheme = {
+  cardBackground?: string;
+  cardBorder?: string;
+  cardBorderImage?: string;
+  cardBlur?: string;
+  tabInactiveColor?: string;
+  inputBackground?: string;
+  inputBorder?: string;
+  inputPlaceholder?: string;
+  inputTextColor?: string;
+  checkboxBackground?: string;
+  checkboxCheckedBackground?: string;
+  checkboxCheckColor?: string;
+  checkboxBorder?: string;
+  checkboxShape?: 'round' | 'square' | 'rounded';
+  checkboxShadow?: string;
+  titleGradient?: string;
+  textColor?: string;
+};
+
+export type CustomizationLoginPage = {
+  style?: CustomizationLoginPageStyle;
+  background?: string;
+  logo?: string;
+  logoLocation?: CustomizationLoginPageLogoLocation;
+  logoSize?: string; // Logo 大小，支持 CSS 值，如 "48px", "60px", "3rem" 等
+  logoLeft?: string; // Logo 左边距，支持 CSS 值，如 "30px", "50px", "5%" 等
+  formRadius?: string;
+  theme?: CustomizationLoginPageTheme;
+};
+
 export type CustomizationUploader = {
   orientation: 'vertical' | 'horizontal';
   pasteButton: boolean;
@@ -188,6 +222,7 @@ export interface ISystemConfig {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
     icons?: CustomIcons;
+    loginPage?: CustomizationLoginPage;
     views: {
       form: CustomizationFormView;
     };

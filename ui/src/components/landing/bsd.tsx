@@ -184,14 +184,14 @@ export const BSDLandingPage: React.FC = () => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mb-8 flex flex-wrap items-center justify-center gap-3 text-white/70 sm:mb-12 sm:gap-6"
+            className="mb-8 flex flex-wrap items-center justify-center gap-3 text-white sm:mb-12 sm:gap-6"
           >
             <span className="text-base sm:text-lg">懂设计</span>
-            <span className="hidden text-gray-500 sm:inline">|</span>
+            <span className="hidden text-white/60 sm:inline">|</span>
             <span className="text-base sm:text-lg">知市场</span>
-            <span className="hidden text-gray-500 sm:inline">|</span>
+            <span className="hidden text-white/60 sm:inline">|</span>
             <span className="text-base sm:text-lg">通工艺</span>
-            <span className="hidden text-gray-500 sm:inline">|</span>
+            <span className="hidden text-white/60 sm:inline">|</span>
             <span className="text-base sm:text-lg">助营销</span>
           </motion.div>
 

@@ -27,7 +27,7 @@ import { useGetUgcViewIconOnlyMode } from '../../util';
 interface ICreateDesignProjectDialogProps {
   visible?: boolean;
   setVisible?: (visible: boolean) => void;
-  afterCreate?: () => void;
+  afterCreate?: (project: IAssetItem<IDesignProject>) => void;
   isTemplate?: boolean;
 }
 
@@ -85,7 +85,7 @@ export const CreateDesignProjectDialog: React.FC<ICreateDesignProjectDialogProps
             open(`/${teamId}/design/${designProject.id}`, '_blank');
           }
           setIsOpen(false);
-          afterCreate?.(); // 调用回调函数
+          afterCreate?.(designProject); // 调用回调函数
           return t('common.create.success');
         },
         loading: t('common.create.loading'),
