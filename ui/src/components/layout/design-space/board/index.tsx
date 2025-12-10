@@ -472,6 +472,29 @@ export const Board: React.FC<BoardProps> = ({
     [showPageAndLayerSidebar, frameShapeId],
   );
 
+  // 根据画板尺寸对图片进行自适应缩放，避免拖入时过大撑满画板
+  const getScaledImageSize = React.useCallback(
+    (naturalWidth: number, naturalHeight: number) => {
+      const baseWidth = width || canvasWidth || 1280;
+      const baseHeight = height || canvasHeight || 720;
+      const padding = 40; // 给四周留一点边距，避免贴边
+      const maxWidth = Math.max(50, baseWidth - padding);
+      const maxHeight = Math.max(50, baseHeight - padding);
+
+      if (naturalWidth <= 0 || naturalHeight <= 0) {
+        return { w: naturalWidth, h: naturalHeight };
+      }
+
+      if (naturalWidth <= maxWidth && naturalHeight <= maxHeight) {
+        return { w: naturalWidth, h: naturalHeight };
+      }
+
+      const scale = Math.min(maxWidth / naturalWidth, maxHeight / naturalHeight, 1);
+      return { w: naturalWidth * scale, h: naturalHeight * scale };
+    },
+    [width, height, canvasWidth, canvasHeight],
+  );
+
   // 监听选中画板变化（多画板模式）
   useEffect(() => {
     if (!editor || oneOnOne === true) return;
@@ -1038,7 +1061,8 @@ export const Board: React.FC<BoardProps> = ({
           const dropPoint = editor.screenToPage({ x: e.clientX, y: e.clientY });
 
           try {
-            const { width, height } = await getImageSize(imageUrl);
+            const { width: naturalWidth, height: naturalHeight } = await getImageSize(imageUrl);
+            const { w: displayWidth, h: displayHeight } = getScaledImageSize(naturalWidth, naturalHeight);
             const id = AssetRecordType.createId();
 
             editor.createAssets([
@@ -1051,8 +1075,8 @@ export const Board: React.FC<BoardProps> = ({
                   src: imageUrl,
                   mimeType: 'image/png',
                   isAnimated: false,
-                  h: height,
-                  w: width,
+                  h: naturalHeight,
+                  w: naturalWidth,
                 },
                 meta: {},
               },
@@ -1061,9 +1085,9 @@ export const Board: React.FC<BoardProps> = ({
             // 将图片放在鼠标位置
             editor.createShape({
               type: 'image',
-              x: dropPoint.x - width / 2,
-              y: dropPoint.y - height / 2,
-              props: { assetId: id, w: width, h: height },
+              x: dropPoint.x - displayWidth / 2,
+              y: dropPoint.y - displayHeight / 2,
+              props: { assetId: id, w: displayWidth, h: displayHeight },
             });
           } catch (error) {
             console.error('Failed to insert image:', error);
@@ -1201,12 +1225,13 @@ export const Board: React.FC<BoardProps> = ({
 
                       // 创建 asset
                       const imageUrl = url;
-                      const { width, height } = await getImageSize(imageUrl);
+                    const { width: naturalWidth, height: naturalHeight } = await getImageSize(imageUrl);
+                    const { w: displayWidth, h: displayHeight } = getScaledImageSize(naturalWidth, naturalHeight);
                       const assetData = {
                         id: AssetRecordType.createId(),
                         url: imageUrl,
-                        width: width,
-                        height: height,
+                      width: naturalWidth,
+                      height: naturalHeight,
                       };
 
                       editor.createAssets([
@@ -1219,8 +1244,8 @@ export const Board: React.FC<BoardProps> = ({
                             src: assetData.url,
                             mimeType: 'image/png',
                             isAnimated: false,
-                            h: assetData.height,
-                            w: assetData.width,
+                          h: assetData.height,
+                          w: assetData.width,
                           },
                           meta: {},
                         },
@@ -1228,12 +1253,12 @@ export const Board: React.FC<BoardProps> = ({
 
                       editor.createShape({
                         type: 'image',
-                        x: point ? point.x - width / 2 : 0,
-                        y: point ? point.y - height / 2 : 0,
+                      x: point ? point.x - displayWidth / 2 : 0,
+                      y: point ? point.y - displayHeight / 2 : 0,
                         props: {
                           assetId: assetData.id,
-                          w: assetData.width,
-                          h: assetData.height,
+                        w: displayWidth,
+                        h: displayHeight,
                         },
                       });
 
