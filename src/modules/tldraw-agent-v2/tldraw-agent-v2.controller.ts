@@ -23,7 +23,7 @@ type StreamRequestBody = TldrawAgentV2RequestPayload & { sessionId?: string };
 @Controller('tldraw-agent-v2')
 export class TldrawAgentV2Controller {
   private readonly logger = new Logger(TldrawAgentV2Controller.name);
-  
+
   constructor(private readonly service: TldrawAgentV2Service) {}
 
   @Post('stream')
@@ -81,10 +81,10 @@ export class TldrawAgentV2Controller {
     try {
       // 获取当前用户的真实信息
       const { teamId, userId } = req;
-      
+
       this.logger.log(`Starting tldraw agent session with teamId: ${teamId}, userId: ${userId}`);
       this.logger.log(`Request headers: ${JSON.stringify(req.headers)}`);
-      
+
       // 验证认证信息
       if (!teamId || !userId) {
         this.logger.error(`Missing authentication info - teamId: ${teamId}, userId: ${userId}`);
@@ -92,7 +92,7 @@ export class TldrawAgentV2Controller {
         abort();
         return;
       }
-      
+
       // 检查是否是现有会话
       if (body.sessionId) {
         const existingSession = this.service.getSession(body.sessionId);
@@ -106,11 +106,7 @@ export class TldrawAgentV2Controller {
 
       // 如果不是现有会话，创建新会话
       if (!isExistingSession) {
-        const tempSessionId = await this.service.startSession(
-          'default-tldraw-agent',
-          userId,
-          teamId
-        );
+        const tempSessionId = await this.service.startSession('default-tldraw-agent', userId, teamId);
         sessionId = tempSessionId;
         this.logger.log(`Created new session: ${sessionId}`);
       }

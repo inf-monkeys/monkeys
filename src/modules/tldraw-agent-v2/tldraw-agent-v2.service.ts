@@ -12,18 +12,12 @@ export interface TldrawAgentV2StreamCallbacks {
 export class TldrawAgentV2Service {
   private readonly logger = new Logger(TldrawAgentV2Service.name);
 
-  constructor(
-    private readonly bridgeService: TldrawAgentV2BridgeService,
-  ) {}
+  constructor(private readonly bridgeService: TldrawAgentV2BridgeService) {}
 
   /**
    * 启动流式处理
    */
-  async startStream(
-    sessionId: string,
-    request: TldrawAgentV2Request,
-    callbacks: TldrawAgentV2StreamCallbacks = {},
-  ): Promise<void> {
+  async startStream(sessionId: string, request: TldrawAgentV2Request, callbacks: TldrawAgentV2StreamCallbacks = {}): Promise<void> {
     this.logger.log(`Starting stream for session: ${sessionId}`);
 
     try {
@@ -33,7 +27,7 @@ export class TldrawAgentV2Service {
           callbacks.onDelta?.({ content: chunk });
         },
         onToolCall: (toolCalls: any[]) => {
-          toolCalls.forEach(tool => {
+          toolCalls.forEach((tool) => {
             callbacks.onDelta?.({ action: tool });
           });
         },
@@ -51,7 +45,6 @@ export class TldrawAgentV2Service {
 
       // 处理请求 - 使用流式处理
       await this.bridgeService.processStreamRequest(sessionId, request, agentCallbacks);
-
     } catch (error) {
       this.logger.error(`Stream processing failed for session ${sessionId}:`, error);
       callbacks.onError?.(error instanceof Error ? error.message : 'Unknown error');
@@ -61,12 +54,7 @@ export class TldrawAgentV2Service {
   /**
    * 启动新会话
    */
-  async startSession(
-    agentId: string,
-    userId: string,
-    teamId: string,
-    editor?: any,
-  ): Promise<string> {
+  async startSession(agentId: string, userId: string, teamId: string, editor?: any): Promise<string> {
     return this.bridgeService.startSession(agentId, userId, teamId, editor);
   }
 
@@ -90,7 +78,6 @@ export class TldrawAgentV2Service {
   updateSessionEditor(sessionId: string, editor: any): void {
     this.bridgeService.updateSessionEditor(sessionId, editor);
   }
-
 
   /**
    * 取消会话

@@ -18,7 +18,7 @@ export class ReActController {
     return {
       success: true,
       message: 'ReAct controller is working!',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 

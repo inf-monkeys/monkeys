@@ -13,56 +13,56 @@ export type TldrawAgentAction =
   | { _type: 'move'; ids: string[]; dx: number; dy: number }
   | { _type: 'rotate'; ids: string[]; angle: number }
   | { _type: 'resize'; ids: string[]; scaleX?: number; scaleY?: number; w?: number; h?: number }
-  | { _type: 'pen_draw'; points: Array<{ x: number; y: number }>; color?: string; size?: number }
+  | { _type: 'pen_draw'; points: Array<{ x: number; y: number }>; color?: string; size?: number };
 
 export type TldrawAgentRequestPayload = {
-  message: string
-  bounds?: { x: number; y: number; w: number; h: number }
-  modelName?: string
-  context?: any
-}
+  message: string;
+  bounds?: { x: number; y: number; w: number; h: number };
+  modelName?: string;
+  context?: any;
+};
 
 type StreamCallbacks = {
-  onInfo?: (message: string) => void
-  onDelta?: (payload: { content?: string; action?: TldrawAgentAction }) => void
-  onDone?: (message: string) => void
-  onError?: (message: string) => void
-}
+  onInfo?: (message: string) => void;
+  onDelta?: (payload: { content?: string; action?: TldrawAgentAction }) => void;
+  onDone?: (message: string) => void;
+  onError?: (message: string) => void;
+};
 
 @Injectable()
 export class TldrawAgentService {
-  private readonly logger = new Logger(TldrawAgentService.name)
-  private readonly abortControllers = new Map<string, AbortController>()
-  private readonly toolBuffers = new Map<string, Map<string, { name: string; jsonText: string }>>()
+  private readonly logger = new Logger(TldrawAgentService.name);
+  private readonly abortControllers = new Map<string, AbortController>();
+  private readonly toolBuffers = new Map<string, Map<string, { name: string; jsonText: string }>>();
 
   async startStream(sessionId: string, body: TldrawAgentRequestPayload, callbacks: StreamCallbacks = {}) {
-    this.logger.log(`[STREAM] start session ${sessionId}`)
+    this.logger.log(`[STREAM] start session ${sessionId}`);
 
     // Cancel previous session if it exists
-    this.cancelSession(sessionId)
+    this.cancelSession(sessionId);
 
-    const ac = new AbortController()
-    this.abortControllers.set(sessionId, ac)
-    this.toolBuffers.set(sessionId, new Map())
+    const ac = new AbortController();
+    this.abortControllers.set(sessionId, ac);
+    this.toolBuffers.set(sessionId, new Map());
 
-    let reportedError = false
+    let reportedError = false;
     const reportError = (message: string) => {
-      if (reportedError) return
-      reportedError = true
-      callbacks.onError?.(message)
-    }
+      if (reportedError) return;
+      reportedError = true;
+      callbacks.onError?.(message);
+    };
 
     try {
-      const baseUrl = (config.agentv2?.openaiCompatible?.url || '').replace(/\/$/, '')
-      const apiKey = config.agentv2?.openaiCompatible?.apiKey
-      const model = body.modelName || 'claude-sonnet-4-20250514-thinking'
+      const baseUrl = (config.agentv2?.openaiCompatible?.url || '').replace(/\/$/, '');
+      const apiKey = config.agentv2?.openaiCompatible?.apiKey;
+      const model = body.modelName || 'claude-sonnet-4-20250514-thinking';
 
       if (!baseUrl || !apiKey) {
-        reportError('未配置模型服务地址或 API Key（agentv2.openaiCompatible）')
-        return
+        reportError('未配置模型服务地址或 API Key（agentv2.openaiCompatible）');
+        return;
       }
 
-      callbacks.onInfo?.(`使用模型 ${model} 进行流式生成…`)
+      callbacks.onInfo?.(`使用模型 ${model} 进行流式生成…`);
 
       const tools = [
         {
@@ -212,12 +212,12 @@ export class TldrawAgentService {
             required: ['points'],
           },
         },
-      ]
+      ];
 
-      const ctx = body.context || {}
+      const ctx = body.context || {};
       const ctxText = `\n[viewport] ${JSON.stringify(ctx.viewport ?? null)}\n[selectionIds] ${JSON.stringify(
         ctx.selectionIds ?? [],
-      )}\n[shapes-in-viewport] ${JSON.stringify((ctx.shapes ?? []).slice(0, 100))}`
+      )}\n[shapes-in-viewport] ${JSON.stringify((ctx.shapes ?? []).slice(0, 100))}`;
       const systemPrompt = `You are a drafting assistant for a tldraw canvas. Follow these rules:
 - Default language: respond in Simplified Chinese for every natural-language message.
 - The tool suite listed below is always在线且可用，不允许说“工具不可用”或类似表述。
@@ -239,12 +239,12 @@ Available tools:
 - move: Move shapes by {ids, dx, dy}
 - rotate: Rotate shapes by {ids, angle}
 - resize: Resize shapes by {ids, scaleX?, scaleY?, w?, h?}
-- pen_draw: Draw freehand by {points, color?, size?}`
+- pen_draw: Draw freehand by {points, color?, size?}`;
 
       const messages: any[] = [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `${body.message}\n\n---\ncontext:\n${ctxText}` },
-      ]
+      ];
 
       loop: while (true) {
         const payload = {
@@ -254,7 +254,7 @@ Available tools:
           tool_choice: { type: 'auto' },
           max_tokens: 10240,
           messages,
-        }
+        };
 
         const resp = await fetch(`${baseUrl}/messages`, {
           method: 'POST',
@@ -265,197 +265,191 @@ Available tools:
           },
           body: JSON.stringify(payload),
           signal: ac.signal,
-        })
+        });
 
         if (!resp.ok || !resp.body) {
-          const text = await resp.text().catch(() => '')
-          reportError(`模型接口错误：${text || resp.statusText}`)
-          return
+          const text = await resp.text().catch(() => '');
+          reportError(`模型接口错误：${text || resp.statusText}`);
+          return;
         }
 
-        const reader = resp.body.getReader()
-        const decoder = new TextDecoder('utf-8')
-        let buffer = ''
-        let pendingTool: { id: string; name: string; input?: any } | null = null
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+        let pendingTool: { id: string; name: string; input?: any } | null = null;
 
         while (true) {
-          if (ac.signal.aborted) throw new Error('aborted')
+          if (ac.signal.aborted) throw new Error('aborted');
 
-          const { done, value } = await reader.read()
-          if (done) break
+          const { done, value } = await reader.read();
+          if (done) break;
 
-          buffer += decoder.decode(value, { stream: true })
+          buffer += decoder.decode(value, { stream: true });
 
-          let index
+          let index;
           while ((index = buffer.indexOf('\n\n')) !== -1) {
-            const chunk = buffer.slice(0, index)
-            buffer = buffer.slice(index + 2)
-            if (!chunk) continue
+            const chunk = buffer.slice(0, index);
+            buffer = buffer.slice(index + 2);
+            if (!chunk) continue;
 
-            const lines = chunk.split('\n')
-            let eventName: string | null = null
-            let dataStr: string | null = null
+            const lines = chunk.split('\n');
+            let eventName: string | null = null;
+            let dataStr: string | null = null;
 
             for (const ln of lines) {
               if (ln.startsWith('event:')) {
-                eventName = ln.slice(6).trim()
+                eventName = ln.slice(6).trim();
               } else if (ln.startsWith('data:')) {
-                dataStr = (dataStr ?? '') + ln.slice(5).trim()
+                dataStr = (dataStr ?? '') + ln.slice(5).trim();
               }
             }
 
             if (dataStr === '[DONE]') {
-              callbacks.onDone?.('生成完成')
-              continue
+              callbacks.onDone?.('生成完成');
+              continue;
             }
-            if (!dataStr) continue
+            if (!dataStr) continue;
 
             try {
-              const json = JSON.parse(dataStr)
-              this.logger.debug(`[STREAM] event=${eventName ?? 'message'} payload=${dataStr.slice(0, 200)}`)
+              const json = JSON.parse(dataStr);
+              this.logger.debug(`[STREAM] event=${eventName ?? 'message'} payload=${dataStr.slice(0, 200)}`);
 
               if (eventName === 'content_block_start') {
-                const block = json?.content_block
+                const block = json?.content_block;
                 if (block?.type === 'tool_use') {
-                  const id = (block.id || json?.id || block.tool_use_id) as string | undefined
-                  const name = block.name as string | undefined
-                  const input = block.input
-                  const map = this.toolBuffers.get(sessionId)
+                  const id = (block.id || json?.id || block.tool_use_id) as string | undefined;
+                  const name = block.name as string | undefined;
+                  const input = block.input;
+                  const map = this.toolBuffers.get(sessionId);
                   if (id && name && map) {
                     if (!map.has(id)) {
-                      map.set(id, { name, jsonText: '' })
+                      map.set(id, { name, jsonText: '' });
                     }
                     if (input && typeof input === 'object' && Object.keys(input).length > 0) {
-                      callbacks.onDelta?.({ action: { _type: name, ...input } as TldrawAgentAction })
-                      pendingTool = { id, name, input }
-                      this.logger.debug(`[STREAM] tool_use immediate id=${id} name=${name}`)
+                      callbacks.onDelta?.({ action: { _type: name, ...input } as TldrawAgentAction });
+                      pendingTool = { id, name, input };
+                      this.logger.debug(`[STREAM] tool_use immediate id=${id} name=${name}`);
                     } else {
-                      pendingTool = { id, name }
-                      this.logger.debug(`[STREAM] tool_use pending id=${id} name=${name}`)
+                      pendingTool = { id, name };
+                      this.logger.debug(`[STREAM] tool_use pending id=${id} name=${name}`);
                     }
                   }
                 }
               } else if (eventName === 'content_block_delta') {
-                const delta = json?.delta
+                const delta = json?.delta;
                 if (delta?.text) {
-                  callbacks.onDelta?.({ content: String(delta.text) })
+                  callbacks.onDelta?.({ content: String(delta.text) });
                 }
-                const id = (json?.id || json?.tool_use_id || json?.content_block_id) as string | undefined
+                const id = (json?.id || json?.tool_use_id || json?.content_block_id) as string | undefined;
                 if (delta?.partial_json && id) {
-                  const map = this.toolBuffers.get(sessionId)
-                  const buf = map?.get(id)
+                  const map = this.toolBuffers.get(sessionId);
+                  const buf = map?.get(id);
                   if (buf) {
-                    buf.jsonText += delta.partial_json
+                    buf.jsonText += delta.partial_json;
                     try {
-                      const parsed = JSON.parse(buf.jsonText)
-                      callbacks.onDelta?.({ action: { _type: buf.name, ...parsed } as TldrawAgentAction })
-                      map.delete(id)
-                      pendingTool = { id, name: buf.name, input: parsed }
-                      this.logger.debug(`[STREAM] tool_use completed id=${id} name=${buf.name}`)
+                      const parsed = JSON.parse(buf.jsonText);
+                      callbacks.onDelta?.({ action: { _type: buf.name, ...parsed } as TldrawAgentAction });
+                      map.delete(id);
+                      pendingTool = { id, name: buf.name, input: parsed };
+                      this.logger.debug(`[STREAM] tool_use completed id=${id} name=${buf.name}`);
                     } catch {}
                   }
                 }
               } else if (eventName === 'message_delta') {
-                const delta = json?.delta?.text
-                if (delta) callbacks.onDelta?.({ content: String(delta) })
+                const delta = json?.delta?.text;
+                if (delta) callbacks.onDelta?.({ content: String(delta) });
               } else if (eventName === 'tool_use') {
-                const name = json?.name as string | undefined
-                const input = json?.input
-                const id = (json?.id || json?.tool_use_id || json?.tool_call_id) as string | undefined
+                const name = json?.name as string | undefined;
+                const input = json?.input;
+                const id = (json?.id || json?.tool_use_id || json?.tool_call_id) as string | undefined;
 
                 if (name && input && typeof input === 'object') {
-                  callbacks.onDelta?.({ action: { _type: name, ...input } as TldrawAgentAction })
-                  pendingTool = { id: id || `${Date.now()}`, name, input }
+                  callbacks.onDelta?.({ action: { _type: name, ...input } as TldrawAgentAction });
+                  pendingTool = { id: id || `${Date.now()}`, name, input };
                 } else if (name && id) {
-                  const map = this.toolBuffers.get(sessionId)!
-                  if (!map.has(id)) map.set(id, { name, jsonText: '' })
-                  pendingTool = { id, name }
+                  const map = this.toolBuffers.get(sessionId)!;
+                  if (!map.has(id)) map.set(id, { name, jsonText: '' });
+                  pendingTool = { id, name };
                 }
               } else if (eventName === 'input_json_delta') {
-                const id = (json?.tool_use_id || json?.id || json?.tool_call_id) as string | undefined
-                const partial = (json?.partial_json || json?.delta || json?.text || '') as string
+                const id = (json?.tool_use_id || json?.id || json?.tool_call_id) as string | undefined;
+                const partial = (json?.partial_json || json?.delta || json?.text || '') as string;
                 if (id && partial) {
-                  const map = this.toolBuffers.get(sessionId)
-                  const buf = map?.get(id)
+                  const map = this.toolBuffers.get(sessionId);
+                  const buf = map?.get(id);
                   if (buf) {
-                    buf.jsonText += partial
+                    buf.jsonText += partial;
                     try {
-                      const parsed = JSON.parse(buf.jsonText)
-                      callbacks.onDelta?.({ action: { _type: buf.name, ...parsed } as TldrawAgentAction })
-                      map.delete(id)
-                      pendingTool = { id, name: buf.name, input: parsed }
-                      this.logger.debug(`[STREAM] tool_use completed (input_json_delta) id=${id} name=${buf.name}`)
+                      const parsed = JSON.parse(buf.jsonText);
+                      callbacks.onDelta?.({ action: { _type: buf.name, ...parsed } as TldrawAgentAction });
+                      map.delete(id);
+                      pendingTool = { id, name: buf.name, input: parsed };
+                      this.logger.debug(`[STREAM] tool_use completed (input_json_delta) id=${id} name=${buf.name}`);
                     } catch {}
                   }
                 }
               } else if (eventName === 'message_stop') {
-                callbacks.onDone?.('生成完成')
+                callbacks.onDone?.('生成完成');
               }
             } catch {
-              callbacks.onDelta?.({ content: dataStr })
+              callbacks.onDelta?.({ content: dataStr });
             }
           }
         }
-
 
         if (pendingTool) {
           messages.push({
             role: 'assistant',
             content: [{ type: 'tool_use', id: pendingTool.id, name: pendingTool.name, input: pendingTool.input || {} }],
-          })
+          });
           messages.push({
             role: 'user',
             content: [
               {
                 type: 'tool_result',
                 tool_use_id: pendingTool.id,
-                content: typeof pendingTool.input === 'object' && pendingTool.input
-                  ? JSON.stringify({ status: 'ok' })
-                  : 'ok',
+                content: typeof pendingTool.input === 'object' && pendingTool.input ? JSON.stringify({ status: 'ok' }) : 'ok',
               },
             ],
-          })
-          console.log('[tldraw-agent] tool invoked', pendingTool)
-          pendingTool = null
-          continue loop
+          });
+          console.log('[tldraw-agent] tool invoked', pendingTool);
+          pendingTool = null;
+          continue loop;
         }
 
-        break loop
+        break loop;
       }
 
-      callbacks.onDone?.('流结束')
+      callbacks.onDone?.('流结束');
     } catch (error) {
-      const message = (error as Error)?.message
+      const message = (error as Error)?.message;
       if (message === 'aborted') {
-        callbacks.onInfo?.('任务已取消')
+        callbacks.onInfo?.('任务已取消');
       } else if (message === 'terminated') {
-        this.logger.warn(`[STREAM] session ${sessionId} terminated by upstream`)
-        callbacks.onInfo?.('模型连接已结束')
+        this.logger.warn(`[STREAM] session ${sessionId} terminated by upstream`);
+        callbacks.onInfo?.('模型连接已结束');
       } else {
-        const msg = message || '处理失败'
-        this.logger.error(`[STREAM] session ${sessionId} failed`, error as Error)
-        reportError(msg)
+        const msg = message || '处理失败';
+        this.logger.error(`[STREAM] session ${sessionId} failed`, error as Error);
+        reportError(msg);
       }
     } finally {
-      this.abortControllers.delete(sessionId)
-      this.toolBuffers.delete(sessionId)
-      this.logger.log(`[STREAM] session ${sessionId} finished`)
+      this.abortControllers.delete(sessionId);
+      this.toolBuffers.delete(sessionId);
+      this.logger.log(`[STREAM] session ${sessionId} finished`);
     }
   }
 
   cancelSession(sessionId: string) {
-    const controller = this.abortControllers.get(sessionId)
+    const controller = this.abortControllers.get(sessionId);
     if (controller && !controller.signal.aborted) {
-      controller.abort()
+      controller.abort();
     }
-    this.abortControllers.delete(sessionId)
-    this.toolBuffers.delete(sessionId)
+    this.abortControllers.delete(sessionId);
+    this.toolBuffers.delete(sessionId);
   }
 
   resetSession(sessionId: string) {
-    this.cancelSession(sessionId)
+    this.cancelSession(sessionId);
   }
 }
-
-
-

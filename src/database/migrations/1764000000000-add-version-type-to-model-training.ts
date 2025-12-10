@@ -34,4 +34,3 @@ export class AddVersionTypeToModelTraining1764000000000 implements MigrationInte
     `);
   }
 }
-

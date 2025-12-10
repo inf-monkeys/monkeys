@@ -18,9 +18,7 @@ export class TldrawToolExecutorService {
   private readonly logger = new Logger(TldrawToolExecutorService.name);
   private readonly executors = new Map<string, TldrawToolExecutor>();
 
-  constructor(
-    private readonly toolsRegistry: TldrawToolsRegistryService,
-  ) {
+  constructor(private readonly toolsRegistry: TldrawToolsRegistryService) {
     this.registerExecutors();
   }
 
@@ -79,16 +77,16 @@ export class TldrawToolExecutorService {
   private registerExecutors(): void {
     // 形状操作执行器
     this.registerShapeExecutors();
-    
+
     // 布局执行器
     this.registerLayoutExecutors();
-    
+
     // 绘图执行器
     this.registerDrawingExecutors();
-    
+
     // 外部API执行器
     this.registerExternalExecutors();
-    
+
     // 规划执行器
     this.registerPlanningExecutors();
   }
@@ -382,7 +380,7 @@ export class TldrawToolExecutorService {
 
         try {
           const allShapes = editor.getCurrentPageShapes();
-          const shapeIds = allShapes.map(shape => shape.id);
+          const shapeIds = allShapes.map((shape) => shape.id);
           editor.deleteShapes(shapeIds);
 
           return {
@@ -500,10 +498,13 @@ export class TldrawToolExecutorService {
 
         try {
           const allShapes = editor.getCurrentPageShapes();
-          const shapeCounts = allShapes.reduce((acc, shape) => {
-            acc[shape.type] = (acc[shape.type] || 0) + 1;
-            return acc;
-          }, {} as Record<string, number>);
+          const shapeCounts = allShapes.reduce(
+            (acc, shape) => {
+              acc[shape.type] = (acc[shape.type] || 0) + 1;
+              return acc;
+            },
+            {} as Record<string, number>,
+          );
 
           return {
             success: true,
@@ -542,7 +543,7 @@ export class TldrawToolExecutorService {
           const allShapes = editor.getCurrentPageShapes();
           const review = {
             shapeCount: allShapes.length,
-            shapeTypes: [...new Set(allShapes.map(s => s.type))],
+            shapeTypes: [...new Set(allShapes.map((s) => s.type))],
             bounds: editor.getViewportPageBounds(),
           };
 

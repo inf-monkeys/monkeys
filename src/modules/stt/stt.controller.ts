@@ -1,10 +1,10 @@
-import { config } from '@/common/config'
-import { Controller, HttpCode, HttpStatus, Post, UploadedFile, UseInterceptors } from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
-import * as fs from 'fs'
-import OpenAI from 'openai'
-import * as os from 'os'
-import * as path from 'path'
+import { config } from '@/common/config';
+import { Controller, HttpCode, HttpStatus, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as fs from 'fs';
+import OpenAI from 'openai';
+import * as os from 'os';
+import * as path from 'path';
 
 @Controller('STT')
 export class SttController {
@@ -29,38 +29,29 @@ export class SttController {
   @HttpCode(HttpStatus.OK)
   async transcribe(@UploadedFile() file: any) {
     if (!file?.buffer?.length) {
-      return { text: '' }
+      return { text: '' };
     }
 
     // 根据上传文件名动态选择后缀，避免写死为 .webm 导致部分上游服务按扩展名解析失败
-    const extFromName = file.originalname ? path.extname(file.originalname) : ''
-    const safeExt = extFromName && typeof extFromName === 'string' ? extFromName : '.webm'
+    const extFromName = file.originalname ? path.extname(file.originalname) : '';
+    const safeExt = extFromName && typeof extFromName === 'string' ? extFromName : '.webm';
 
-    const tmpFile = path.join(os.tmpdir(), `stt-audio-${Date.now()}${safeExt}`)
-    await fs.promises.writeFile(tmpFile, file.buffer)
+    const tmpFile = path.join(os.tmpdir(), `stt-audio-${Date.now()}${safeExt}`);
+    await fs.promises.writeFile(tmpFile, file.buffer);
 
-     try {
-       const apiKey =
-         process.env.STT_API_KEY ||
-         process.env.SPEECH_OPENAI_API_KEY ||
-         process.env.OPENAI_API_KEY ||
-         config.agentv2.openaiCompatible.apiKey
+    try {
+      const apiKey = process.env.STT_API_KEY || process.env.SPEECH_OPENAI_API_KEY || process.env.OPENAI_API_KEY || config.agentv2.openaiCompatible.apiKey;
 
-       const baseURL =
-         process.env.STT_BASE_URL ||
-         process.env.SPEECH_OPENAI_BASE_URL ||
-         process.env.OPENAI_BASE_URL ||
-         config.agentv2.openaiCompatible.url ||
-         'https://api.cursorai.art/v1'
+      const baseURL = process.env.STT_BASE_URL || process.env.SPEECH_OPENAI_BASE_URL || process.env.OPENAI_BASE_URL || config.agentv2.openaiCompatible.url || 'https://api.cursorai.art/v1';
 
       if (!apiKey) {
-        console.error('[STT] transcribe: missing API key')
-        return { text: '' }
+        console.error('[STT] transcribe: missing API key');
+        return { text: '' };
       }
 
-      const client = new OpenAI({ apiKey, baseURL })
-      const timeoutMs = Number(process.env.STT_TIMEOUT_MS || 20000)
-      const model = process.env.STT_MODEL || 'whisper-1'
+      const client = new OpenAI({ apiKey, baseURL });
+      const timeoutMs = Number(process.env.STT_TIMEOUT_MS || 20000);
+      const model = process.env.STT_MODEL || 'whisper-1';
 
       const result = await client.audio.transcriptions.create(
         {
@@ -68,17 +59,15 @@ export class SttController {
           model,
         },
         { timeout: timeoutMs } as any,
-      )
+      );
 
-      const text = (result as any)?.text || ''
-      return { text }
+      const text = (result as any)?.text || '';
+      return { text };
     } catch (error) {
-      console.error('[STT] transcribe failed:', error)
-      return { text: '' }
+      console.error('[STT] transcribe failed:', error);
+      return { text: '' };
     } finally {
-      fs.promises.unlink(tmpFile).catch(() => undefined)
+      fs.promises.unlink(tmpFile).catch(() => undefined);
     }
   }
 }
-
-

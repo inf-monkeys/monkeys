@@ -33,7 +33,7 @@ export class TldrawToolsRegistryService {
     private readonly toolsRepository: ToolsRepository,
   ) {
     // 延迟注册工具，避免构造函数中的异步操作
-    this.initializeTools().catch(error => {
+    this.initializeTools().catch((error) => {
       this.logger.error('Failed to initialize tldraw tools:', error);
     });
   }
@@ -55,7 +55,7 @@ export class TldrawToolsRegistryService {
   async registerTool(tool: TldrawToolDefinition, teamId?: string): Promise<void> {
     this.tools.set(tool.name, tool);
     this.logger.log(`Registered tldraw tool: ${tool.name}`);
-    
+
     // 同时注册到全局工具注册表
     try {
       await this.registerToGlobalRegistry(tool, teamId);
@@ -85,7 +85,7 @@ export class TldrawToolsRegistryService {
         type: ToolType.SIMPLE,
         name: tool.name,
         namespace: SYSTEM_NAMESPACE,
-        displayName: tool.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        displayName: tool.name.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
         description: tool.description,
         categories: [tool.category],
         icon: 'emoji:🎨:#ceefc5',
@@ -95,20 +95,20 @@ export class TldrawToolsRegistryService {
             displayName: 'Success',
             name: 'success',
             type: 'boolean',
-            description: '操作是否成功'
+            description: '操作是否成功',
           },
           {
             displayName: 'Message',
             name: 'message',
             type: 'string',
-            description: '操作结果消息'
+            description: '操作结果消息',
           },
           {
             displayName: 'Result',
             name: 'result',
             type: 'json',
-            description: '操作结果数据'
-          }
+            description: '操作结果数据',
+          },
         ],
         public: true,
         creatorUserId: 'system',
@@ -137,8 +137,8 @@ export class TldrawToolsRegistryService {
         displayName: 'Intent',
         name: 'intent',
         type: 'string',
-        description: '操作意图描述'
-      }
+        description: '操作意图描述',
+      },
     ];
   }
 
@@ -153,7 +153,7 @@ export class TldrawToolsRegistryService {
    * 获取指定类别的工具
    */
   getToolsByCategory(category: TldrawToolDefinition['category']): TldrawToolDefinition[] {
-    return Array.from(this.tools.values()).filter(tool => tool.category === category);
+    return Array.from(this.tools.values()).filter((tool) => tool.category === category);
   }
 
   /**
@@ -169,16 +169,16 @@ export class TldrawToolsRegistryService {
   private async registerBuiltinTools(): Promise<void> {
     // 形状操作工具
     await this.registerShapeTools();
-    
+
     // 布局工具
     await this.registerLayoutTools();
-    
+
     // 绘图工具
     await this.registerDrawingTools();
-    
+
     // 外部API工具
     await this.registerExternalTools();
-    
+
     // 规划工具
     await this.registerPlanningTools();
   }
@@ -399,10 +399,12 @@ export class TldrawToolsRegistryService {
       schema: z.object({
         _type: z.literal('pen'),
         intent: z.string(),
-        points: z.array(z.object({
-          x: z.number(),
-          y: z.number(),
-        })),
+        points: z.array(
+          z.object({
+            x: z.number(),
+            y: z.number(),
+          }),
+        ),
         color: z.string().optional(),
         size: z.number().optional(),
       }),

@@ -305,19 +305,17 @@ export class DesignController {
   async exportProjectAsZip(@Req() req: IRequest, @Param('projectId') projectId: string, @Res() res: Response) {
     const { userId } = req;
     const zipBuffer = await this.designProjectService.exportProjectAsZip(projectId, userId);
-    
+
     // 获取项目名称用于文件名
     const project = await this.designProjectService.findById(projectId);
-    const projectName = project?.displayName 
-      ? (typeof project.displayName === 'string' ? project.displayName : JSON.stringify(project.displayName))
-      : 'design-project';
-    
+    const projectName = project?.displayName ? (typeof project.displayName === 'string' ? project.displayName : JSON.stringify(project.displayName)) : 'design-project';
+
     // 设置响应头
     res.set({
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="${encodeURIComponent(projectName)}-${Date.now()}.zip"`,
     });
-    
+
     res.send(zipBuffer);
   }
 
@@ -368,23 +366,13 @@ export class DesignController {
     summary: '创建设计项目新版本',
     description: '基于当前版本创建新版本，会复制所有画板内容',
   })
-  async createProjectVersion(
-    @Req() req: IRequest,
-    @Param('projectId') projectId: string,
-    @Body() body: CreateDesignProjectVersionDto,
-  ) {
+  async createProjectVersion(@Req() req: IRequest, @Param('projectId') projectId: string, @Body() body: CreateDesignProjectVersionDto) {
     const { teamId, userId } = req;
-    const result = await this.designProjectService.createProjectVersion(
-      projectId,
-      body.currentVersion,
-      teamId,
-      userId,
-      {
-        displayName: body.displayName,
-        description: body.description,
-        iconUrl: body.iconUrl,
-      },
-    );
+    const result = await this.designProjectService.createProjectVersion(projectId, body.currentVersion, teamId, userId, {
+      displayName: body.displayName,
+      description: body.description,
+      iconUrl: body.iconUrl,
+    });
     return new SuccessResponse({ data: result });
   }
 
@@ -408,11 +396,7 @@ export class DesignController {
     summary: '删除设计项目的指定版本',
     description: '删除指定版本，至少需要保留一个版本',
   })
-  async deleteProjectVersion(
-    @Req() req: IRequest,
-    @Param('projectId') projectId: string,
-    @Param('version') version: string,
-  ) {
+  async deleteProjectVersion(@Req() req: IRequest, @Param('projectId') projectId: string, @Param('version') version: string) {
     const { teamId, userId } = req;
     const versionNum = parseInt(version, 10);
     await this.designProjectService.deleteProjectVersion(projectId, versionNum, teamId, userId);

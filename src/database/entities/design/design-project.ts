@@ -5,7 +5,7 @@ import { AssetType } from '@inf-monkeys/monkeys';
 @Entity({ name: 'design_project' })
 export class DesignProjectEntity extends BaseAssetEntity {
   assetType: AssetType = 'design-project';
-  
+
   public getAssetId() {
     return this.projectId;
   }

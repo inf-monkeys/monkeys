@@ -1326,4 +1326,52 @@ Step ${stepCount}: Check your todo list:
       }
     }
   }
+
+  /**
+   * 生成文本（简化接口，用于不需要流式响应的场景）
+   */
+  public async generateTextByLlm(
+    teamId: string,
+    params: {
+      systemPrompt?: string;
+      prompt: string;
+      model: string;
+      temperature?: number;
+      maxTokens?: number;
+      responseFormat?: ResponseFormat;
+    },
+  ): Promise<string> {
+    const { systemPrompt, prompt, model, temperature, maxTokens, responseFormat } = params;
+
+    const result = await this.createChatCompelitions(
+      null, // 不传递 res，使用非流式模式
+      teamId,
+      {
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        model,
+        temperature,
+        max_tokens: maxTokens,
+        stream: false,
+        systemPrompt,
+        response_format: responseFormat,
+      },
+      {
+        apiResponseType: 'simple',
+      },
+    );
+
+    // 从返回结果中提取文本
+    if (typeof result === 'string') {
+      return result;
+    }
+    if (result && typeof result === 'object' && 'message' in result) {
+      return result.message as string;
+    }
+    throw new Error('无法从 LLM 响应中提取文本');
+  }
 }

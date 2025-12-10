@@ -32,7 +32,8 @@ export class TrainingLogAnalysisResult {
       elapsed_time: '05:34',
       remaining_time: '22:51',
       avr_loss: '0.434',
-      full_line: '[2025-10-24 13:58:28] - INFO - [main] - main] - [steps:  20%|██████████████████████████████████████▊                                                                                                                                                               | 196/1000 [05:34<22:51,  1.71s/it, avr_loss=0.434]'
+      full_line:
+        '[2025-10-24 13:58:28] - INFO - [main] - main] - [steps:  20%|██████████████████████████████████████▊                                                                                                                                                               | 196/1000 [05:34<22:51,  1.71s/it, avr_loss=0.434]',
     },
     required: false,
   })

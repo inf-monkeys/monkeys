@@ -18,4 +18,3 @@ export class UploadFileWithTagsDto {
   @IsString({ each: true })
   tagIds: string[];
 }
-

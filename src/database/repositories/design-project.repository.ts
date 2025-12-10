@@ -47,10 +47,7 @@ export class DesignProjectRepository {
     const searchText = typeof search === 'string' ? search.trim() : '';
 
     // 先获取所有符合条件的项目
-    const queryBuilder = this.designProjectRepository
-      .createQueryBuilder('dp')
-      .where('dp.team_id = :teamId', { teamId })
-      .andWhere('dp.is_deleted = false');
+    const queryBuilder = this.designProjectRepository.createQueryBuilder('dp').where('dp.team_id = :teamId', { teamId }).andWhere('dp.is_deleted = false');
 
     // Apply filtering if provided
     if (filter) {
@@ -76,7 +73,7 @@ export class DesignProjectRepository {
 
     // 先获取所有项目，然后在应用层过滤出每个 projectId 的最新版本
     const allProjects = await queryBuilder.getMany();
-    
+
     // 按 projectId 分组，保留每组中 version 最大的
     const projectMap = new Map<string, DesignProjectEntity>();
     for (const project of allProjects) {
@@ -85,10 +82,10 @@ export class DesignProjectRepository {
         projectMap.set(project.projectId, project);
       }
     }
-    
+
     // 转换为数组
     let projects = Array.from(projectMap.values());
-    
+
     // 计数
     const totalCount = projects.length;
 
@@ -114,18 +111,11 @@ export class DesignProjectRepository {
     // 🚀 性能优化：批量获取每个项目的第一个画板元数据，避免 N+1 查询
     if (projects.length > 0) {
       const projectIds = projects.map((p) => p.id);
-      
+
       // 使用子查询获取每个项目的第一个画板（按创建时间排序）
       const firstBoards = await this.designMetadataEntityRepository
         .createQueryBuilder('dm')
-        .select([
-          'dm.id',
-          'dm.displayName',
-          'dm.thumbnailUrl',
-          'dm.designProjectId',
-          'dm.updatedTimestamp',
-          'dm.createdTimestamp',
-        ])
+        .select(['dm.id', 'dm.displayName', 'dm.thumbnailUrl', 'dm.designProjectId', 'dm.updatedTimestamp', 'dm.createdTimestamp'])
         .where('dm.design_project_id IN (:...projectIds)', { projectIds })
         .andWhere('dm.is_deleted = false')
         .orderBy('dm.created_timestamp', 'ASC')
@@ -201,12 +191,7 @@ export class DesignProjectRepository {
   /**
    * 创建新版本（复制现有版本）
    */
-  public async createNewVersion(
-    sourceProjectId: string,
-    sourceVersion: number,
-    newVersion: number,
-    updates?: Partial<DesignProjectEntity>,
-  ): Promise<DesignProjectEntity> {
+  public async createNewVersion(sourceProjectId: string, sourceVersion: number, newVersion: number, updates?: Partial<DesignProjectEntity>): Promise<DesignProjectEntity> {
     const sourceProject = await this.findByProjectIdAndVersion(sourceProjectId, sourceVersion);
     if (!sourceProject) {
       throw new Error('Source project not found');

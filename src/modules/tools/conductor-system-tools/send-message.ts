@@ -57,7 +57,7 @@ export default defineNode({
   },
   handler: async (inputs: Record<string, any>, context) => {
     const { message, intent } = inputs;
-    
+
     // 对于 send_message 工具，我们只需要返回成功状态
     // 实际的消息发送逻辑应该在调用方处理
     return {

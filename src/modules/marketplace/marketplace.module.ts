@@ -17,13 +17,7 @@ import { MarketplaceService } from './services/marketplace.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      MarketplaceAppEntity,
-      MarketplaceAppVersionEntity,
-      InstalledAppEntity,
-      WorkflowPageEntity,
-      WorkflowPageGroupEntity,
-    ]),
+    TypeOrmModule.forFeature([MarketplaceAppEntity, MarketplaceAppVersionEntity, InstalledAppEntity, WorkflowPageEntity, WorkflowPageGroupEntity]),
     forwardRef(() => WorkflowModule),
     forwardRef(() => AssetsModule),
     forwardRef(() => DesignModule),

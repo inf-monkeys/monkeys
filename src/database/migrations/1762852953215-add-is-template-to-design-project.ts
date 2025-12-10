@@ -14,4 +14,3 @@ export class AddIsTemplateToDesignProject1762852953215 implements MigrationInter
     await queryRunner.query(`ALTER TABLE "${appId}_design_project" DROP COLUMN "is_template"`);
   }
 }
-

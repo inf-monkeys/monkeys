@@ -71,5 +71,3 @@ export class AssetsPermissionService {
     }
   }
 }
-
-

@@ -39,5 +39,3 @@ export class WorkflowBuiltinPinnedPageEntity extends BaseEntity {
   })
   sortIndex?: number | null;
 }
-
-

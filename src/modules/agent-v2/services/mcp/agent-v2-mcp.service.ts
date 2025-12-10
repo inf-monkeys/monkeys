@@ -59,7 +59,6 @@ export class AgentV2McpService {
    * 在实际实现中，这里会连接到MCP服务器
    */
   async initializeServer(server: McpServer): Promise<boolean> {
-
     if (server.disabled) {
       this.logger.warn(`MCP server ${server.name} is disabled`);
       return false;
@@ -117,7 +116,6 @@ export class AgentV2McpService {
    * Execute a tool on an MCP server
    */
   async callTool(serverName: string, toolName: string, args: Record<string, unknown> = {}): Promise<McpToolCallResponse> {
-
     const server = this.connectedServers.get(serverName);
     if (!server) {
       throw new Error(`MCP server '${serverName}' not found or not connected`);
@@ -160,7 +158,6 @@ export class AgentV2McpService {
    * Read a resource from an MCP server
    */
   async readResource(serverName: string, uri: string): Promise<McpResourceResponse> {
-
     const server = this.connectedServers.get(serverName);
     if (!server) {
       throw new Error(`MCP server '${serverName}' not found or not connected`);

@@ -24,10 +24,7 @@ export class TextExpansionController {
     try {
       const url = readConfig('textExpansion.zaowuyunUrl', process.env.ZAOWUYUN_URL);
       if (!url) {
-        throw new HttpException(
-          'Zaowuyun URL not configured. Please set textExpansion.zaowuyunUrl in config.yaml or ZAOWUYUN_URL env variable',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        throw new HttpException('Zaowuyun URL not configured. Please set textExpansion.zaowuyunUrl in config.yaml or ZAOWUYUN_URL env variable', HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
       const response = await firstValueFrom(
@@ -51,14 +48,13 @@ export class TextExpansionController {
       console.log('[TextToImage] 原始响应数据:', JSON.stringify(response.data, null, 2));
 
       // 解包响应数据（可能包装在 data 字段中）
-      let data = response.data;
-      
+      const data = response.data;
+
       // 提取图片 URL 和文本结果
       let imageUrl = '';
       let textResult = '';
 
       if (data && typeof data === 'object') {
-
         // 处理 images.0 或 images[0] 格式（造物云的格式）
         if (data['images.0']) {
           const img = data['images.0'];
@@ -87,16 +83,14 @@ export class TextExpansionController {
 
         // 尝试从各种可能的字段中提取图片 URL
         if (!imageUrl) {
-          imageUrl = data['imageUrl'] || data['image_url'] || data['image'] || data['imageURL'] || 
-                     data['img'] || data['picture'] || data['photo'] || data['url'] || '';
+          imageUrl = data['imageUrl'] || data['image_url'] || data['image'] || data['imageURL'] || data['img'] || data['picture'] || data['photo'] || data['url'] || '';
         }
 
         // 尝试从 output 字段中提取
         if (!imageUrl && data['output']) {
           const output = data['output'];
           if (typeof output === 'object' && !Array.isArray(output)) {
-            imageUrl = output['imageUrl'] || output['image_url'] || output['image'] || output['url'] || 
-                       output['images.0'] || (output['images'] && output['images'][0]) || '';
+            imageUrl = output['imageUrl'] || output['image_url'] || output['image'] || output['url'] || output['images.0'] || (output['images'] && output['images'][0]) || '';
           } else if (typeof output === 'string' && output.startsWith('http')) {
             imageUrl = output;
           }
@@ -111,8 +105,7 @@ export class TextExpansionController {
                 imageUrl = val;
                 break;
               } else if (typeof val === 'object' && val) {
-                const extracted = val['imageUrl'] || val['image_url'] || val['image'] || val['url'] || 
-                                 val['images.0'] || (val['images'] && val['images'][0]) || '';
+                const extracted = val['imageUrl'] || val['image_url'] || val['image'] || val['url'] || val['images.0'] || (val['images'] && val['images'][0]) || '';
                 if (extracted) {
                   imageUrl = extracted;
                   break;
@@ -124,47 +117,44 @@ export class TextExpansionController {
 
         // 提取文本描述（如果有）
         textResult = data['text'] || data['description'] || data['content'] || '';
-        
+
         console.log('[TextToImage] 提取的图片 URL:', imageUrl);
         console.log('[TextToImage] 提取的文本:', textResult);
       }
 
       if (!imageUrl || !imageUrl.trim()) {
         console.error('[TextToImage] 无法提取图片 URL，完整响应数据:', JSON.stringify(data, null, 2));
-        throw new HttpException(
-          `Unable to extract image URL from response. Response data: ${JSON.stringify(data)}`, 
-          HttpStatus.BAD_GATEWAY
-        );
+        throw new HttpException(`Unable to extract image URL from response. Response data: ${JSON.stringify(data)}`, HttpStatus.BAD_GATEWAY);
       }
 
       console.log('[TextToImage] 成功生成图片:', imageUrl);
-      return new SuccessResponse({ 
+      return new SuccessResponse({
         data: {
           imageUrl: imageUrl,
           text: textResult || userPrompt,
-        }
+        },
       });
     } catch (error) {
       console.error('[TextToImage] 文生图失败，错误对象:', error);
-      
+
       // 如果是 axios 错误，打印响应数据
       if ((error as any)?.response) {
         const axiosError = error as any;
         console.error('[TextToImage] Axios 错误状态:', axiosError.response?.status);
         console.error('[TextToImage] Axios 错误数据:', JSON.stringify(axiosError.response?.data, null, 2));
-        
+
         const errorData = axiosError.response?.data;
         let errorMessage = 'Text-to-image generation failed';
-        
+
         if (typeof errorData === 'string') {
           errorMessage = errorData;
         } else if (typeof errorData === 'object' && errorData) {
           errorMessage = errorData.message || errorData.error || JSON.stringify(errorData);
         }
-        
+
         throw new HttpException(errorMessage, HttpStatus.BAD_GATEWAY);
       }
-      
+
       // 其他错误
       const message = (error as Error)?.message || 'Text-to-image generation failed';
       throw new HttpException(message, HttpStatus.BAD_GATEWAY);
@@ -187,10 +177,7 @@ export class TextExpansionController {
     try {
       const url = readConfig('textExpansion.expandUrl', process.env.TEXT_EXPANSION_URL || process.env.MONKEYS_EXPAND_URL);
       if (!url) {
-        throw new HttpException(
-          'Text expansion URL not configured. Please set textExpansion.expandUrl in config.yaml or TEXT_EXPANSION_URL env variable',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        throw new HttpException('Text expansion URL not configured. Please set textExpansion.expandUrl in config.yaml or TEXT_EXPANSION_URL env variable', HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
       const { data } = await firstValueFrom(
@@ -270,5 +257,3 @@ export class TextExpansionController {
     }
   }
 }
-
-
