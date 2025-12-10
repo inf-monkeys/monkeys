@@ -2774,6 +2774,19 @@
     }
   },
   "workspace": {
+    "operation": {
+      "to-board": {
+        "title": "选择导入画板",
+        "create-new": "新建画板",
+        "use-existing": "使用已有画板",
+        "select-board": "请选择要导入的画板",
+        "project": "设计项目",
+        "select-project": "选择设计项目",
+        "board": "画板",
+        "select-board-placeholder": "选择画板",
+        "board-default": "画板"
+      }
+    },
     "404": {
       "description": "页面正在建设中"
     },

@@ -2746,6 +2746,19 @@
     }
   },
   "workspace": {
+    "operation": {
+      "to-board": {
+        "title": "Choose target board",
+        "create-new": "Create new board",
+        "use-existing": "Use existing board",
+        "select-board": "Please select a board",
+        "project": "Design Project",
+        "select-project": "Select project",
+        "board": "Board",
+        "select-board-placeholder": "Select board",
+        "board-default": "Board"
+      }
+    },
     "404": {
       "description": "Pages under construction"
     },
