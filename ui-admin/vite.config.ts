@@ -11,6 +11,7 @@ export default defineConfig(({ command, mode }) => {
     env.VITE_SERVER_ENDPOINT || env.SERVER_ENDPOINT || 'http://localhost:3000';
 
   return {
+    base: '/admin',
     plugins: [
       react(),
       tsconfigPaths(),
