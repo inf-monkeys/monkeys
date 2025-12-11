@@ -11,6 +11,7 @@ import { AdminPermissionEntity } from '@/database/entities/admin/admin-permissio
 import { AdminTokenGuard } from './guards/admin-token.guard';
 import { AdminJwtGuard } from './guards/admin-jwt.guard';
 import { AdminPermissionsGuard } from './guards/admin-permissions.guard';
+import { DataManagementModule } from './data-management/data-management.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AdminPermissionsGuard } from './guards/admin-permissions.guard';
       AdminRoleEntity,
       AdminPermissionEntity,
     ]),
+    DataManagementModule,
   ],
   controllers: [AdminAuthController],
   providers: [

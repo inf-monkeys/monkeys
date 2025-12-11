@@ -1,10 +1,17 @@
 import type {
+  DataView,
   DataCategory,
   DataItem,
   DataListResponse,
   DataQueryParams,
   DataExportOptions,
   DataImportResult,
+  ViewQueryParams,
+  CreateViewDto,
+  UpdateViewDto,
+  MoveViewDto,
+  ViewTreeResponse,
+  AssetListResponse,
 } from '@/types/data';
 import { getStoredToken } from './auth';
 
@@ -37,12 +44,97 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
-// 获取数据分类列表
-export async function getDataCategories(): Promise<DataCategory[]> {
-  return request<DataCategory[]>(`${API_BASE}/data/categories`);
+// ========== 视图管理 ==========
+
+/**
+ * 获取视图树形结构
+ */
+export async function getViewTree(teamId?: string): Promise<DataView[]> {
+  const params = new URLSearchParams();
+  if (teamId) params.append('teamId', teamId);
+
+  const queryString = params.toString();
+  const url = `${API_BASE}/data/views/tree${queryString ? `?${queryString}` : ''}`;
+
+  const response = await request<ViewTreeResponse>(url);
+  return response.tree;
 }
 
-// 获取数据列表
+/**
+ * 获取视图列表
+ */
+export async function getViews(params?: ViewQueryParams): Promise<DataView[]> {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {})
+      .filter(([, value]) => value !== undefined && value !== null)
+      .map(([key, value]) => [key, String(value)])
+  ).toString();
+
+  const url = queryString
+    ? `${API_BASE}/data/views?${queryString}`
+    : `${API_BASE}/data/views`;
+
+  return request<DataView[]>(url);
+}
+
+/**
+ * 获取数据分类列表（兼容旧接口）
+ */
+export async function getDataCategories(): Promise<DataCategory[]> {
+  return getViewTree();
+}
+
+/**
+ * 获取单个视图详情
+ */
+export async function getView(id: string): Promise<DataView> {
+  return request<DataView>(`${API_BASE}/data/views/${id}`);
+}
+
+/**
+ * 创建视图
+ */
+export async function createView(data: CreateViewDto): Promise<DataView> {
+  return request<DataView>(`${API_BASE}/data/views`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * 更新视图
+ */
+export async function updateView(id: string, data: UpdateViewDto): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`${API_BASE}/data/views/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * 移动视图
+ */
+export async function moveView(id: string, data: MoveViewDto): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`${API_BASE}/data/views/${id}/move`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * 删除视图
+ */
+export async function deleteView(id: string): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`${API_BASE}/data/views/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// ========== 数据/资产管理 ==========
+
+/**
+ * 获取数据列表
+ */
 export async function getDataList(
   params?: DataQueryParams
 ): Promise<DataListResponse> {
@@ -56,15 +148,27 @@ export async function getDataList(
     ? `${API_BASE}/data?${queryString}`
     : `${API_BASE}/data`;
 
-  return request<DataListResponse>(url);
+  const response = await request<AssetListResponse>(url);
+
+  // 转换后端响应格式 (list -> items)
+  return {
+    items: response.list,
+    total: response.total,
+    page: response.page,
+    pageSize: response.pageSize,
+  };
 }
 
-// 获取单个数据项
+/**
+ * 获取单个数据项
+ */
 export async function getDataItem(id: string): Promise<DataItem> {
   return request<DataItem>(`${API_BASE}/data/${id}`);
 }
 
-// 创建数据项
+/**
+ * 创建数据项
+ */
 export async function createDataItem(
   data: Partial<DataItem>
 ): Promise<DataItem> {
@@ -74,7 +178,9 @@ export async function createDataItem(
   });
 }
 
-// 更新数据项
+/**
+ * 更新数据项
+ */
 export async function updateDataItem(
   id: string,
   data: Partial<DataItem>
@@ -85,14 +191,18 @@ export async function updateDataItem(
   });
 }
 
-// 删除数据项
+/**
+ * 删除数据项
+ */
 export async function deleteDataItem(id: string): Promise<void> {
   return request<void>(`${API_BASE}/data/${id}`, {
     method: 'DELETE',
   });
 }
 
-// 批量删除数据项
+/**
+ * 批量删除数据项
+ */
 export async function batchDeleteDataItems(ids: string[]): Promise<void> {
   return request<void>(`${API_BASE}/data/batch-delete`, {
     method: 'POST',
@@ -100,7 +210,11 @@ export async function batchDeleteDataItems(ids: string[]): Promise<void> {
   });
 }
 
-// 导出数据
+// ========== 导入导出 ==========
+
+/**
+ * 导出数据
+ */
 export async function exportData(
   options: DataExportOptions
 ): Promise<Blob> {
@@ -127,7 +241,9 @@ export async function exportData(
   return response.blob();
 }
 
-// 导入数据
+/**
+ * 导入数据
+ */
 export async function importData(
   file: File,
   category?: string

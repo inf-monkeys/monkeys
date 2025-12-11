@@ -79,11 +79,18 @@ import { TemporaryWorkflowEntity } from './entities/workflow/temporary-workflow.
 import { WorkflowArtifactEntity } from './entities/workflow/workflow-artifact.entity';
 import { WorkflowAssociationsEntity } from './entities/workflow/workflow-association';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
+import { DataViewEntity } from './entities/data-management/data-view.entity';
+import { DataAssetEntity } from './entities/data-management/data-asset.entity';
+import { DataViewPermissionEntity, DataAssetPermissionEntity } from './entities/data-management/data-permission.entity';
 
 export const entities: EntityClassOrSchema[] = [
   AdminUserEntity,
   AdminRoleEntity,
   AdminPermissionEntity,
+  DataViewEntity,
+  DataAssetEntity,
+  DataViewPermissionEntity,
+  DataAssetPermissionEntity,
   ThemeEntity,
   ToolsEntity,
   ToolsCredentialTypeEntity,

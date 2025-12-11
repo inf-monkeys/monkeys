@@ -2,12 +2,16 @@ import {
   batchDeleteDataItems,
   deleteDataItem,
   exportData,
-  importData
+  importData,
+  getDataCategories,
+  getDataList,
+  createView,
+  deleteView,
 } from '@/apis/data';
 import { DataSidebar } from '@/components/admin/data/data-sidebar';
 import { DataTable } from '@/components/admin/data/data-table';
 import { DataToolbar } from '@/components/admin/data/data-toolbar';
-import type { DataCategory, DataExportOptions, DataItem } from '@/types/data';
+import type { DataCategory, DataExportOptions, DataItem, CreateViewDto } from '@/types/data';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -24,7 +28,7 @@ function DataManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
 
-  // 加载分类数据
+  // 加载视图数据
   useEffect(() => {
     loadCategories();
   }, []);
@@ -36,106 +40,30 @@ function DataManagementPage() {
 
   const loadCategories = async () => {
     try {
-      // 模拟数据，实际应该从 API 获取
-      const mockCategories: DataCategory[] = [
-        {
-          id: 'user',
-          name: '用户数据',
-          children: [
-            { id: 'user-basic', name: '基础信息' },
-            { id: 'user-profile', name: '用户档案' },
-            { id: 'user-activity', name: '活动记录' },
-          ],
-        },
-        {
-          id: 'workflow',
-          name: '工作流数据',
-          children: [
-            { id: 'workflow-templates', name: '工作流模板' },
-            { id: 'workflow-executions', name: '执行记录' },
-          ],
-        },
-        {
-          id: 'system',
-          name: '系统数据',
-          children: [
-            { id: 'system-config', name: '系统配置' },
-            { id: 'system-logs', name: '系统日志' },
-          ],
-        },
-      ];
-      setCategories(mockCategories);
-      // const data = await getDataCategories();
-      // setCategories(data);
+      const data = await getDataCategories();
+      setCategories(data);
     } catch (error: any) {
-      toast.error(error.message || '加载分类失败');
+      console.error('加载视图失败:', error);
+      toast.error(error.message || '加载视图失败');
+      // 使用空数据
+      setCategories([]);
     }
   };
 
   const loadDataList = async () => {
     setIsLoading(true);
     try {
-      // 模拟数据，实际应该从 API 获取
-      const mockData: DataItem[] = [
-        {
-          id: '1',
-          name: '用户注册数据',
-          category: selectedCategory || 'user-basic',
-          type: 'JSON',
-          size: 1024 * 500,
-          status: 'active',
-          createdAt: '2024-01-15T10:00:00Z',
-          updatedAt: '2024-01-20T15:30:00Z',
-          description: '用户注册时的基础信息数据',
-        },
-        {
-          id: '2',
-          name: '工作流执行日志',
-          category: selectedCategory || 'workflow-executions',
-          type: 'CSV',
-          size: 1024 * 1024 * 2,
-          status: 'active',
-          createdAt: '2024-01-10T08:00:00Z',
-          updatedAt: '2024-01-22T09:15:00Z',
-        },
-        {
-          id: '3',
-          name: '系统配置备份',
-          category: selectedCategory || 'system-config',
-          type: 'JSON',
-          size: 1024 * 256,
-          status: 'archived',
-          createdAt: '2024-01-05T12:00:00Z',
-          updatedAt: '2024-01-18T14:20:00Z',
-        },
-        {
-          id: '4',
-          name: '用户活动追踪',
-          category: selectedCategory || 'user-activity',
-          type: 'Database',
-          size: 1024 * 1024 * 50,
-          status: 'active',
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-23T16:45:00Z',
-        },
-      ];
-
-      // 根据搜索关键词过滤
-      const filteredData = searchKeyword
-        ? mockData.filter((item) =>
-            item.name.toLowerCase().includes(searchKeyword.toLowerCase())
-          )
-        : mockData;
-
-      setDataItems(filteredData);
-
-      // const response = await getDataList({
-      //   category: selectedCategory,
-      //   keyword: searchKeyword,
-      // });
-      // setDataItems(response.items);
+      const response = await getDataList({
+        viewId: selectedCategory || undefined,
+        keyword: searchKeyword || undefined,
+        page: 1,
+        pageSize: 100,
+      });
+      setDataItems(response.items);
     } catch (error: any) {
+      console.error('加载数据失败:', error);
       toast.error(error.message || '加载数据失败');
+      setDataItems([]);
     } finally {
       setIsLoading(false);
     }
@@ -147,6 +75,7 @@ function DataManagementPage() {
 
   const handleRefresh = () => {
     loadDataList();
+    loadCategories();
     toast.success('数据已刷新');
   };
 
@@ -194,6 +123,10 @@ function DataManagementPage() {
   };
 
   const handleDelete = async (item: DataItem) => {
+    if (!item.id) {
+      toast.error('无效的数据项');
+      return;
+    }
     try {
       await deleteDataItem(item.id);
       toast.success('删除成功');
@@ -213,13 +146,40 @@ function DataManagementPage() {
     // TODO: 打开详情对话框
   };
 
+  const handleCreateCategory = async (data: CreateViewDto) => {
+    try {
+      await createView(data);
+      toast.success('创建成功');
+      loadCategories();
+    } catch (error: any) {
+      toast.error(error.message || '创建失败');
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      await deleteView(categoryId);
+      toast.success('删除成功');
+      // 如果删除的是当前选中的视图，清空选择
+      if (selectedCategory === categoryId) {
+        setSelectedCategory('');
+      }
+      loadCategories();
+    } catch (error: any) {
+      toast.error(error.message || '删除失败');
+    }
+  };
+
   return (
     <div className="flex h-full overflow-hidden">
-      {/* 左侧分类导航 */}
+      {/* 左侧视图导航 */}
       <DataSidebar
         categories={categories}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
+        onCreateCategory={handleCreateCategory}
+        onDeleteCategory={handleDeleteCategory}
+        onRefresh={loadCategories}
       />
 
       {/* 右侧内容区 */}

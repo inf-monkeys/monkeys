@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import * as React from 'react';
 import {
   flexRender,
   getCoreRowModel,
@@ -39,8 +39,8 @@ export function DataTable({
   onView,
   onSelectionChange,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState({});
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const columns: ColumnDef<DataItem>[] = [
     {
@@ -92,7 +92,7 @@ export function DataTable({
     },
     {
       accessorKey: 'category',
-      header: '分类',
+      header: '视图',
     },
     {
       accessorKey: 'status',
@@ -139,7 +139,10 @@ export function DataTable({
         );
       },
       cell: ({ row }) => {
-        return format(new Date(row.getValue('updatedAt')), 'yyyy-MM-dd HH:mm');
+        const updatedAt = row.getValue('updatedAt') as string | number | undefined;
+        if (!updatedAt) return '-';
+        const date = typeof updatedAt === 'number' ? new Date(updatedAt) : new Date(updatedAt);
+        return format(date, 'yyyy-MM-dd HH:mm');
       },
     },
     {
@@ -204,13 +207,16 @@ export function DataTable({
   });
 
   // 通知父组件选择变化
-  const selectedIds = table
-    .getFilteredSelectedRowModel()
-    .rows.map((row) => row.original.id);
+  React.useEffect(() => {
+    const selectedIds = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row) => row.original.id)
+      .filter((id): id is string => !!id);
 
-  if (onSelectionChange && selectedIds.length > 0) {
-    onSelectionChange(selectedIds);
-  }
+    if (onSelectionChange) {
+      onSelectionChange(selectedIds);
+    }
+  }, [rowSelection, onSelectionChange]);
 
   if (isLoading) {
     return (
