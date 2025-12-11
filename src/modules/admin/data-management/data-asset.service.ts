@@ -1,15 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { DataAssetEntity } from '@/database/entities/data-management/data-asset.entity';
 import { DataAssetRepository } from '@/database/repositories/data-asset.repository';
 import { DataAssetPermissionRepository } from '@/database/repositories/data-permission.repository';
 import { DataViewRepository } from '@/database/repositories/data-view.repository';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateDataAssetDto,
-  UpdateDataAssetDto,
-  QueryDataAssetDto,
-  DataAssetResponseDto,
   DataAssetListResponseDto,
+  DataAssetResponseDto,
+  QueryDataAssetDto,
+  UpdateDataAssetDto,
 } from './dto/data-asset.dto';
-import { DataAssetEntity } from '@/database/entities/data-management/data-asset.entity';
 
 @Injectable()
 export class DataAssetService {
@@ -40,13 +40,13 @@ export class DataAssetService {
       primaryContent: dto.primaryContent,
       properties: dto.properties,
       files: dto.files,
+      media: dto.media,
+      thumbnail: dto.thumbnail,
       creatorUserId: userId,
       teamId: dto.teamId || view.teamId,
-      iconUrl: dto.iconUrl,
       displayName: dto.displayName,
       description: dto.description,
       status: dto.status,
-      sort: dto.sort,
     });
 
     return this.toResponseDto(asset);
@@ -112,12 +112,12 @@ export class DataAssetService {
       name: dto.name,
       displayName: dto.displayName,
       description: dto.description,
-      iconUrl: dto.iconUrl,
       primaryContent: dto.primaryContent,
       properties: dto.properties,
       files: dto.files,
+      media: dto.media,
+      thumbnail: dto.thumbnail,
       status: dto.status,
-      sort: dto.sort,
     });
 
     // 如果需要发布，单独处理
@@ -157,22 +157,20 @@ export class DataAssetService {
       id: asset.id,
       name: asset.name,
       viewId: asset.viewId,
-      assetType: asset.dataAssetType,
+      assetType: asset.assetType,
       primaryContent: asset.primaryContent,
       properties: asset.properties,
       files: asset.files,
+      media: asset.media,
+      thumbnail: asset.thumbnail,
       viewCount: asset.viewCount,
       downloadCount: asset.downloadCount,
       status: asset.status,
-      publishedAt: asset.publishedAt,
       teamId: asset.teamId,
       creatorUserId: asset.creatorUserId,
-      iconUrl: asset.iconUrl,
       displayName: typeof asset.displayName === 'string' ? asset.displayName : asset.displayName?.en || asset.name,
       description: typeof asset.description === 'string' ? asset.description : asset.description?.en || undefined,
-      isPreset: asset.isPreset,
       isPublished: asset.isPublished,
-      sort: asset.sort,
       createdTimestamp: asset.createdTimestamp,
       updatedTimestamp: asset.updatedTimestamp,
     };

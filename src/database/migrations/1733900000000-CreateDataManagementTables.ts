@@ -168,11 +168,6 @@ export class CreateDataManagementTables1733900000000 implements MigrationInterfa
             default: "'draft'",
           },
           {
-            name: 'published_at',
-            type: 'bigint',
-            isNullable: true,
-          },
-          {
             name: 'team_id',
             type: 'varchar',
             length: '128',
@@ -185,7 +180,13 @@ export class CreateDataManagementTables1733900000000 implements MigrationInterfa
             isNullable: false,
           },
           {
-            name: 'icon_url',
+            name: 'media',
+            type: 'varchar',
+            length: '500',
+            isNullable: true,
+          },
+          {
+            name: 'thumbnail',
             type: 'varchar',
             length: '500',
             isNullable: true,
@@ -201,11 +202,6 @@ export class CreateDataManagementTables1733900000000 implements MigrationInterfa
             isNullable: true,
           },
           {
-            name: 'is_preset',
-            type: 'boolean',
-            default: false,
-          },
-          {
             name: 'is_published',
             type: 'boolean',
             default: false,
@@ -214,16 +210,6 @@ export class CreateDataManagementTables1733900000000 implements MigrationInterfa
             name: 'publish_config',
             type: 'json',
             isNullable: true,
-          },
-          {
-            name: 'prefer_app_id',
-            type: 'varchar',
-            isNullable: true,
-          },
-          {
-            name: 'sort',
-            type: 'int',
-            default: 0,
           },
           {
             name: 'created_timestamp',

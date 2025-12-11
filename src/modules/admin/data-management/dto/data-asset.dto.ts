@@ -1,6 +1,6 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsObject, IsEnum, IsArray } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AssetStatus, DataAssetType } from '@/database/entities/data-management/data-asset.entity';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
 
 /**
  * 创建资产 DTO
@@ -52,10 +52,15 @@ export class CreateDataAssetDto {
     size: number;
   }>;
 
-  @ApiPropertyOptional({ description: '资产图标 URL' })
+  @ApiPropertyOptional({ description: '媒体文件 URL' })
   @IsString()
   @IsOptional()
-  iconUrl?: string;
+  media?: string;
+
+  @ApiPropertyOptional({ description: '缩略图 URL' })
+  @IsString()
+  @IsOptional()
+  thumbnail?: string;
 
   @ApiProperty({ description: '显示名称' })
   @IsString()
@@ -71,11 +76,6 @@ export class CreateDataAssetDto {
   @IsEnum(['draft', 'published', 'archived'])
   @IsOptional()
   status?: AssetStatus;
-
-  @ApiPropertyOptional({ description: '排序序号', default: 0 })
-  @IsNumber()
-  @IsOptional()
-  sort?: number;
 
   @ApiPropertyOptional({ description: '所属团队 ID' })
   @IsString()
@@ -105,7 +105,12 @@ export class UpdateDataAssetDto {
   @ApiPropertyOptional({ description: '资产图标 URL' })
   @IsString()
   @IsOptional()
-  iconUrl?: string;
+  media?: string;
+
+  @ApiPropertyOptional({ description: '缩略图 URL' })
+  @IsString()
+  @IsOptional()
+  thumbnail?: string;
 
   @ApiPropertyOptional({ description: '主展示内容' })
   @IsObject()
@@ -142,11 +147,6 @@ export class UpdateDataAssetDto {
   @IsEnum(['draft', 'published', 'archived'])
   @IsOptional()
   status?: AssetStatus;
-
-  @ApiPropertyOptional({ description: '排序序号' })
-  @IsNumber()
-  @IsOptional()
-  sort?: number;
 }
 
 /**
@@ -184,6 +184,12 @@ export class DataAssetResponseDto {
   @ApiPropertyOptional({ description: '关联文件列表' })
   files?: any[];
 
+  @ApiPropertyOptional({ description: '媒体文件 URL' })
+  media?: string;
+
+  @ApiPropertyOptional({ description: '缩略图 URL' })
+  thumbnail?: string;
+
   @ApiProperty({ description: '浏览次数' })
   viewCount: number;
 
@@ -193,17 +199,11 @@ export class DataAssetResponseDto {
   @ApiProperty({ description: '资产状态' })
   status: AssetStatus;
 
-  @ApiPropertyOptional({ description: '发布时间' })
-  publishedAt?: number;
-
   @ApiPropertyOptional({ description: '所属团队 ID' })
   teamId?: string;
 
   @ApiProperty({ description: '创建者用户 ID' })
   creatorUserId: string;
-
-  @ApiPropertyOptional({ description: '资产图标 URL' })
-  iconUrl?: string;
 
   @ApiProperty({ description: '显示名称' })
   displayName: string;
@@ -211,14 +211,8 @@ export class DataAssetResponseDto {
   @ApiPropertyOptional({ description: '资产描述' })
   description?: string;
 
-  @ApiProperty({ description: '是否预置' })
-  isPreset: boolean;
-
   @ApiProperty({ description: '是否已发布' })
   isPublished: boolean;
-
-  @ApiProperty({ description: '排序序号' })
-  sort: number;
 
   @ApiProperty({ description: '创建时间' })
   createdTimestamp: number;

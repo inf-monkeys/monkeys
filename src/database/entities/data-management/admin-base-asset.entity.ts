@@ -1,4 +1,4 @@
-import { AssetType, I18nValue } from '@inf-monkeys/monkeys';
+import { I18nValue } from '@inf-monkeys/monkeys';
 import { AfterLoad, Column } from 'typeorm';
 import { AdminBaseEntity } from '../admin/admin-base.entity';
 
@@ -18,7 +18,7 @@ export class AssetPublishConfig {
  * 使用 bigint 时间戳，继承 AdminBaseEntity
  */
 export class AdminBaseAssetEntity extends AdminBaseEntity {
-  assetType: AssetType;
+  assetType: string;
   public getAssetId(): string {
     return this.id;
   }
@@ -36,12 +36,6 @@ export class AdminBaseAssetEntity extends AdminBaseEntity {
   creatorUserId: string;
 
   @Column({
-    nullable: true,
-    name: 'icon_url',
-  })
-  iconUrl?: string;
-
-  @Column({
     name: 'display_name',
     type: 'varchar',
     nullable: false,
@@ -55,12 +49,6 @@ export class AdminBaseAssetEntity extends AdminBaseEntity {
   description?: string | I18nValue;
 
   @Column({
-    name: 'is_preset',
-    default: false,
-  })
-  isPreset?: boolean;
-
-  @Column({
     name: 'is_published',
     default: false,
     comment: '此资产是否被发布',
@@ -69,25 +57,10 @@ export class AdminBaseAssetEntity extends AdminBaseEntity {
 
   @Column({
     name: 'publish_config',
-    type: 'simple-json',
+    type: 'json',
     nullable: true,
   })
   publishConfig?: AssetPublishConfig;
-
-  @Column({
-    name: 'prefer_app_id',
-    nullable: true,
-    type: 'varchar',
-  })
-  preferAppId?: string;
-
-  @Column({
-    name: 'sort',
-    type: 'integer',
-    nullable: true,
-    default: 0,
-  })
-  sort?: number;
 
   @AfterLoad()
   afterLoad?() {

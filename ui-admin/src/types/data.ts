@@ -64,15 +64,13 @@ export interface DataAsset {
   viewCount: number;
   downloadCount: number;
   status: 'draft' | 'published' | 'archived';
-  publishedAt?: number;
   teamId?: string;
   creatorUserId: string;
-  iconUrl?: string;
+  media?: string;
+  thumbnail?: string;
   displayName: string;
   description?: string;
-  isPreset: boolean;
   isPublished: boolean;
-  sort: number;
   createdTimestamp: number;
   updatedTimestamp: number;
 }

@@ -44,7 +44,7 @@ export class DataAssetEntity extends AdminBaseAssetEntity {
     nullable: false,
     comment: '资产类型：image/video/3d/text/document/audio/other',
   })
-  dataAssetType: DataAssetType;
+  assetType: DataAssetType;
 
   @Column({
     name: 'primary_content',
@@ -90,6 +90,24 @@ export class DataAssetEntity extends AdminBaseAssetEntity {
     size: number;
   }>;
 
+  @Column({
+    name: 'media',
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+    comment: '媒体文件 URL',
+  })
+  media?: string;
+
+  @Column({
+    name: 'thumbnail',
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+    comment: '缩略图 URL',
+  })
+  thumbnail?: string;
+
   // ========== 统计信息 ==========
 
   @Column({
@@ -118,12 +136,4 @@ export class DataAssetEntity extends AdminBaseAssetEntity {
     comment: '状态：draft/published/archived',
   })
   status: AssetStatus;
-
-  @Column({
-    name: 'published_at',
-    type: 'bigint',
-    nullable: true,
-    comment: '发布时间',
-  })
-  publishedAt?: number;
 }

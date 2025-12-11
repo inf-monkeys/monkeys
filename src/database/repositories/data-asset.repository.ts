@@ -1,7 +1,7 @@
-import { DataAssetEntity, AssetStatus, DataAssetType } from '@/database/entities/data-management/data-asset.entity';
+import { AssetStatus, DataAssetEntity, DataAssetType } from '@/database/entities/data-management/data-asset.entity';
 import { Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
-import { DataSource, Repository, Like, In } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 
 export interface DataAssetFilter {
   viewId?: string;
@@ -39,8 +39,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     const query = this.createQueryBuilder('asset')
       .where('asset.viewId = :viewId', { viewId })
       .andWhere('asset.isDeleted = :isDeleted', { isDeleted: false })
-      .orderBy('asset.sort', 'ASC')
-      .addOrderBy('asset.createdTimestamp', 'DESC');
+      .orderBy('asset.createdTimestamp', 'DESC');
 
     if (pagination) {
       const { page, pageSize } = pagination;
@@ -60,13 +59,13 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     primaryContent: any;
     properties?: any;
     files?: any[];
+    media?: string;
+    thumbnail?: string;
     teamId?: string;
     creatorUserId: string;
-    iconUrl?: string;
     displayName: string;
     description?: string;
     status?: AssetStatus;
-    sort?: number;
   }): Promise<DataAssetEntity> {
     const now = Date.now();
 
@@ -74,21 +73,19 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       id: nanoid(),
       name: data.name,
       viewId: data.viewId,
-      dataAssetType: data.assetType,
+      assetType: data.assetType,
       primaryContent: data.primaryContent,
       properties: data.properties,
       files: data.files,
+      media: data.media,
+      thumbnail: data.thumbnail,
       teamId: data.teamId,
       creatorUserId: data.creatorUserId,
-      iconUrl: data.iconUrl,
       displayName: data.displayName,
       description: data.description,
       status: data.status || AssetStatus.DRAFT,
-      sort: data.sort || 0,
       viewCount: 0,
       downloadCount: 0,
-      isPreset: false,
-      isPublished: false,
       createdTimestamp: now,
       updatedTimestamp: now,
       isDeleted: false,
@@ -106,12 +103,12 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       name?: string;
       displayName?: string;
       description?: string;
-      iconUrl?: string;
       primaryContent?: any;
       properties?: any;
       files?: any[];
+      media?: string;
+      thumbnail?: string;
       status?: AssetStatus;
-      sort?: number;
     }
   ): Promise<void> {
     await this.update(
@@ -166,14 +163,12 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
    * 发布资产
    */
   async publishAsset(id: string): Promise<void> {
-    const now = Date.now();
     await this.update(
       { id, isDeleted: false },
       {
         status: AssetStatus.PUBLISHED,
         isPublished: true,
-        publishedAt: now,
-        updatedTimestamp: now,
+        updatedTimestamp: Date.now(),
       }
     );
   }
@@ -207,7 +202,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     }
 
     if (filter.assetType) {
-      query.andWhere('asset.dataAssetType = :assetType', { assetType: filter.assetType });
+      query.andWhere('asset.assetType = :assetType', { assetType: filter.assetType });
     }
 
     if (filter.status) {
@@ -228,7 +223,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       });
     }
 
-    query.orderBy('asset.sort', 'ASC').addOrderBy('asset.createdTimestamp', 'DESC');
+    query.orderBy('asset.createdTimestamp', 'DESC');
 
     if (pagination) {
       const { page, pageSize } = pagination;
