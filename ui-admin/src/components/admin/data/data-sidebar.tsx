@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import type { DataCategory, CreateViewDto } from '@/types/data';
+import type { DataCategory, CreateViewDto, UpdateViewDto } from '@/types/data';
 import {
   ChevronDown,
   ChevronRight,
@@ -48,6 +48,7 @@ interface DataSidebarProps {
   selectedCategory?: string;
   onSelectCategory: (categoryId: string) => void;
   onCreateCategory: (data: CreateViewDto) => void;
+  onUpdateCategory: (categoryId: string, data: UpdateViewDto) => void;
   onDeleteCategory: (categoryId: string) => void;
   onRefresh: () => void;
 }
@@ -57,6 +58,7 @@ export function DataSidebar({
   selectedCategory,
   onSelectCategory,
   onCreateCategory,
+  onUpdateCategory,
   onDeleteCategory,
   onRefresh,
 }: DataSidebarProps) {
@@ -217,6 +219,7 @@ export function DataSidebar({
                 category={category}
                 selectedCategory={selectedCategory}
                 onSelectCategory={onSelectCategory}
+                onUpdateCategory={onUpdateCategory}
                 onDeleteCategory={onDeleteCategory}
                 onCreateSubCategory={handleOpenCreateDialog}
                 level={0}
@@ -233,6 +236,7 @@ interface CategoryTreeItemProps {
   category: DataCategory;
   selectedCategory?: string;
   onSelectCategory: (categoryId: string) => void;
+  onUpdateCategory: (categoryId: string, data: UpdateViewDto) => void;
   onDeleteCategory: (categoryId: string) => void;
   onCreateSubCategory: (parentId: string) => void;
   level: number;
@@ -242,11 +246,15 @@ function CategoryTreeItem({
   category,
   selectedCategory,
   onSelectCategory,
+  onUpdateCategory,
   onDeleteCategory,
   onCreateSubCategory,
   level,
 }: CategoryTreeItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
   const hasChildren = category.children && category.children.length > 0;
   const isSelected = selectedCategory === category.id;
 
@@ -255,6 +263,23 @@ function CategoryTreeItem({
       ? FolderOpen
       : Folder
     : Database;
+
+  const handleOpenEditDialog = () => {
+    setEditName(category.name);
+    setEditDescription(category.description || '');
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSubmit = () => {
+    if (!editName.trim()) return;
+
+    onUpdateCategory(category.id, {
+      name: editName.trim(),
+      description: editDescription.trim() || undefined,
+    });
+
+    setEditDialogOpen(false);
+  };
 
   return (
     <div>
@@ -301,6 +326,10 @@ function CategoryTreeItem({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleOpenEditDialog}>
+              <Edit className="mr-2 h-4 w-4" />
+              编辑视图
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onCreateSubCategory(category.id)}
             >
@@ -322,6 +351,47 @@ function CategoryTreeItem({
         </DropdownMenu>
       </div>
 
+      {/* 编辑视图对话框 */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>编辑视图</DialogTitle>
+            <DialogDescription>
+              修改视图的名称和描述
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">名称</Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="输入视图名称"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">描述</Label>
+              <Textarea
+                id="edit-description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="输入视图描述（可选）"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditDialogOpen(false)}
+            >
+              取消
+            </Button>
+            <Button onClick={handleEditSubmit}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* 子视图 */}
       {hasChildren && isExpanded && (
         <div className="mt-0.5 space-y-0.5">
@@ -331,6 +401,7 @@ function CategoryTreeItem({
               category={child}
               selectedCategory={selectedCategory}
               onSelectCategory={onSelectCategory}
+              onUpdateCategory={onUpdateCategory}
               onDeleteCategory={onDeleteCategory}
               onCreateSubCategory={onCreateSubCategory}
               level={level + 1}

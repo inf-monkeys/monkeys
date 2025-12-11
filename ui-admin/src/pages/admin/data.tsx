@@ -6,12 +6,14 @@ import {
   getDataCategories,
   getDataList,
   createView,
+  updateView,
   deleteView,
 } from '@/apis/data';
 import { DataSidebar } from '@/components/admin/data/data-sidebar';
 import { DataTable } from '@/components/admin/data/data-table';
+import { DataCardView } from '@/components/admin/data/data-card-view';
 import { DataToolbar } from '@/components/admin/data/data-toolbar';
-import type { DataCategory, DataExportOptions, DataItem, CreateViewDto } from '@/types/data';
+import type { DataCategory, DataExportOptions, DataItem, CreateViewDto, UpdateViewDto } from '@/types/data';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -27,6 +29,10 @@ function DataManagementPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
 
   // 加载视图数据
   useEffect(() => {
@@ -36,7 +42,7 @@ function DataManagementPage() {
   // 加载数据列表
   useEffect(() => {
     loadDataList();
-  }, [selectedCategory, searchKeyword]);
+  }, [selectedCategory, searchKeyword, currentPage, pageSize]);
 
   const loadCategories = async () => {
     try {
@@ -56,14 +62,16 @@ function DataManagementPage() {
       const response = await getDataList({
         viewId: selectedCategory || undefined,
         keyword: searchKeyword || undefined,
-        page: 1,
-        pageSize: 100,
+        page: currentPage,
+        pageSize: pageSize,
       });
       setDataItems(response.items);
+      setTotal(response.total);
     } catch (error: any) {
       console.error('加载数据失败:', error);
       toast.error(error.message || '加载数据失败');
       setDataItems([]);
+      setTotal(0);
     } finally {
       setIsLoading(false);
     }
@@ -71,6 +79,11 @@ function DataManagementPage() {
 
   const handleSearch = (keyword: string) => {
     setSearchKeyword(keyword);
+    setCurrentPage(1); // 搜索时重置到第一页
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleRefresh = () => {
@@ -156,6 +169,16 @@ function DataManagementPage() {
     }
   };
 
+  const handleUpdateCategory = async (categoryId: string, data: UpdateViewDto) => {
+    try {
+      await updateView(categoryId, data);
+      toast.success('更新成功');
+      loadCategories();
+    } catch (error: any) {
+      toast.error(error.message || '更新失败');
+    }
+  };
+
   const handleDeleteCategory = async (categoryId: string) => {
     try {
       await deleteView(categoryId);
@@ -178,6 +201,7 @@ function DataManagementPage() {
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
         onCreateCategory={handleCreateCategory}
+        onUpdateCategory={handleUpdateCategory}
         onDeleteCategory={handleDeleteCategory}
         onRefresh={loadCategories}
       />
@@ -187,6 +211,8 @@ function DataManagementPage() {
         {/* 工具栏 */}
         <DataToolbar
           selectedCount={selectedIds.length}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
           onSearch={handleSearch}
           onRefresh={handleRefresh}
           onExport={handleExport}
@@ -194,16 +220,36 @@ function DataManagementPage() {
           onBatchDelete={handleBatchDelete}
         />
 
-        {/* 数据表格 */}
+        {/* 数据显示区域 */}
         <div className="flex-1 overflow-auto">
-          <DataTable
-            data={dataItems}
-            isLoading={isLoading}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onView={handleView}
-            onSelectionChange={setSelectedIds}
-          />
+          {viewMode === 'table' ? (
+            <DataTable
+              data={dataItems}
+              isLoading={isLoading}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={handlePageChange}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onView={handleView}
+              onSelectionChange={setSelectedIds}
+            />
+          ) : (
+            <DataCardView
+              data={dataItems}
+              isLoading={isLoading}
+              selectedIds={selectedIds}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={handlePageChange}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onView={handleView}
+              onSelectionChange={setSelectedIds}
+            />
+          )}
         </div>
       </div>
     </div>

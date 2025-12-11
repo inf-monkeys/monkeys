@@ -18,6 +18,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { MoreHorizontal, ArrowUpDown, Edit, Trash2, Eye } from 'lucide-react';
 import type { DataItem } from '@/types/data';
 import { format } from 'date-fns';
@@ -25,6 +34,10 @@ import { format } from 'date-fns';
 interface DataTableProps {
   data: DataItem[];
   isLoading?: boolean;
+  currentPage?: number;
+  pageSize?: number;
+  total?: number;
+  onPageChange?: (page: number) => void;
   onEdit?: (item: DataItem) => void;
   onDelete?: (item: DataItem) => void;
   onView?: (item: DataItem) => void;
@@ -34,6 +47,10 @@ interface DataTableProps {
 export function DataTable({
   data,
   isLoading,
+  currentPage = 1,
+  pageSize = 20,
+  total = 0,
+  onPageChange,
   onEdit,
   onDelete,
   onView,
@@ -83,9 +100,11 @@ export function DataTable({
       accessorKey: 'type',
       header: '类型',
       cell: ({ row }) => {
+        const type = (row.getValue('type') as string) || row.original.assetType;
+        if (!type) return '-';
         return (
           <Badge variant="secondary">
-            {row.getValue('type')}
+            {String(type)}
           </Badge>
         );
       },
@@ -99,14 +118,15 @@ export function DataTable({
       header: '状态',
       cell: ({ row }) => {
         const status = row.getValue('status') as string;
-        const variants: Record<string, 'success' | 'warning' | 'secondary'> = {
-          active: 'success',
-          inactive: 'warning',
-          archived: 'secondary',
+        if (!status) return '-';
+        const variants: Record<string, 'default' | 'secondary' | 'outline'> = {
+          published: 'default',
+          draft: 'secondary',
+          archived: 'outline',
         };
         const labels: Record<string, string> = {
-          active: '活跃',
-          inactive: '未激活',
+          published: '已发布',
+          draft: '草稿',
           archived: '已归档',
         };
         return (
@@ -126,7 +146,7 @@ export function DataTable({
       },
     },
     {
-      accessorKey: 'updatedAt',
+      accessorKey: 'updatedTimestamp',
       header: ({ column }) => {
         return (
           <Button
@@ -139,9 +159,14 @@ export function DataTable({
         );
       },
       cell: ({ row }) => {
-        const updatedAt = row.getValue('updatedAt') as string | number | undefined;
-        if (!updatedAt) return '-';
-        const date = typeof updatedAt === 'number' ? new Date(updatedAt) : new Date(updatedAt);
+        const updatedTimestamp = row.getValue('updatedTimestamp') as string | number | undefined;
+        if (!updatedTimestamp) return '-';
+        // 将字符串时间戳转换为数字
+        const timestamp = typeof updatedTimestamp === 'string' ? parseInt(updatedTimestamp, 10) : updatedTimestamp;
+        if (isNaN(timestamp)) return '-';
+        const date = new Date(timestamp);
+        // 检查日期是否有效
+        if (isNaN(date.getTime())) return '-';
         return format(date, 'yyyy-MM-dd HH:mm');
       },
     },
@@ -281,11 +306,22 @@ export function DataTable({
         </table>
       </div>
 
-      {/* 分页信息 */}
-      <div className="flex items-center justify-between border-t bg-background px-3 py-2">
-        <div className="text-sm text-muted-foreground">
+      {/* 底部信息和分页 */}
+      <div className="relative flex items-center border-t bg-background px-4 py-3">
+        <div className="text-sm text-muted-foreground whitespace-nowrap">
           已选择 {table.getFilteredSelectedRowModel().rows.length} / {data.length} 项
+          {total > 0 && ` · 共 ${total} 条数据`}
         </div>
+        {onPageChange && total > pageSize && (
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <DataTablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={onPageChange}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -297,4 +333,98 @@ function formatFileSize(bytes: number): string {
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+// 分页组件
+interface DataTablePaginationProps {
+  currentPage: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+}
+
+function DataTablePagination({
+  currentPage,
+  pageSize,
+  total,
+  onPageChange,
+}: DataTablePaginationProps) {
+  const totalPages = Math.ceil(total / pageSize);
+
+  // 生成页码数组
+  const getPageNumbers = () => {
+    const pages: (number | 'ellipsis')[] = [];
+    const showEllipsisThreshold = 7;
+
+    if (totalPages <= showEllipsisThreshold) {
+      // 如果总页数少，显示所有页码
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // 总是显示第一页
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push('ellipsis');
+      }
+
+      // 显示当前页附近的页码
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push('ellipsis');
+      }
+
+      // 总是显示最后一页
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
+  const pageNumbers = getPageNumbers();
+
+  return (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+          />
+        </PaginationItem>
+
+        {pageNumbers.map((page, index) =>
+          page === 'ellipsis' ? (
+            <PaginationItem key={`ellipsis-${index}`}>
+              <PaginationEllipsis />
+            </PaginationItem>
+          ) : (
+            <PaginationItem key={page}>
+              <PaginationLink
+                onClick={() => onPageChange(page)}
+                isActive={currentPage === page}
+                className="cursor-pointer"
+              >
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          )
+        )}
+
+        <PaginationItem>
+          <PaginationNext
+            onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
+            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
 }

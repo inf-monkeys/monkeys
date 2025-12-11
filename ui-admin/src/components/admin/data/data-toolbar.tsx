@@ -8,15 +8,18 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import type { DataExportOptions } from '@/types/data';
 import {
     Download,
     FileJson,
     FileSpreadsheet,
     FileText,
+    LayoutGrid,
     MoreHorizontal,
     RefreshCw,
     Search,
+    Table,
     Trash2,
     Upload,
 } from 'lucide-react';
@@ -25,6 +28,8 @@ import { toast } from 'sonner';
 
 interface DataToolbarProps {
   selectedCount?: number;
+  viewMode?: 'table' | 'card';
+  onViewModeChange?: (mode: 'table' | 'card') => void;
   onSearch: (keyword: string) => void;
   onRefresh: () => void;
   onExport: (options: DataExportOptions) => void;
@@ -34,6 +39,8 @@ interface DataToolbarProps {
 
 export function DataToolbar({
   selectedCount = 0,
+  viewMode = 'table',
+  onViewModeChange,
   onSearch,
   onRefresh,
   onExport,
@@ -95,6 +102,28 @@ export function DataToolbar({
             <Trash2 className="mr-2 h-4 w-4" />
             删除 ({selectedCount})
           </Button>
+        )}
+
+        {/* 视图切换 */}
+        {onViewModeChange && (
+          <div className="flex items-center border rounded-md">
+            <Button
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="rounded-r-none border-0"
+              onClick={() => onViewModeChange('table')}
+            >
+              <Table className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'card' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="rounded-l-none border-0"
+              onClick={() => onViewModeChange('card')}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+          </div>
         )}
 
         {/* 导入 */}
