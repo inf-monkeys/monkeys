@@ -13,6 +13,7 @@ import { RepositoryMoule } from './database/repositories.module';
 import { AgentV2Module } from './modules/agent-v2/agent-v2.module';
 import { AgentV3Module } from './modules/agent-v3/agent-v3.module';
 import { AiWorkflowBuilderModule } from './modules/ai-workflow-builder/ai-workflow-builder.module';
+import { AiWorkflowAgentModule } from './modules/ai-workflow-agent/ai-workflow-agent.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
@@ -50,6 +51,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     AgentV2Module,
     AgentV3Module,
     AiWorkflowBuilderModule,
+    AiWorkflowAgentModule,
     OpenapiModule,
     ScheduleModule.forRoot(),
     CronJobModule,

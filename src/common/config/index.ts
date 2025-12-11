@@ -655,6 +655,12 @@ export interface Config {
   tenant: TenantStatisticsConfig;
   admin: AdminConfig;
   evaluation: EvaluationConfig;
+  aiWorkflowBuilder: {
+    model: string;
+  };
+  aiWorkflowAgent?: {
+    model: string;
+  };
   agentv2: AgentV2Config;
   agentv3: AgentV3Config;
   modelTraining: ModelTrainingConfig;
@@ -1011,6 +1017,12 @@ When answer to user:
   },
   evaluation: {
     defaultLlmEvaluatorModel: readConfig('evaluation.defaultLlmEvaluatorModel', ''),
+  },
+  aiWorkflowBuilder: {
+    model: readConfig('aiWorkflowBuilder.model', 'gpt-5'),
+  },
+  aiWorkflowAgent: {
+    model: readConfig('aiWorkflowAgent.model', 'gpt-5'),
   },
   agentv2: {
     openaiCompatible: {

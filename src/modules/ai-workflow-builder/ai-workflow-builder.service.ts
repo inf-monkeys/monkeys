@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { config } from '@/common/config';
 import { ToolsCatalogService } from './tools-catalog.service';
 import { PromptBuilderService } from './prompt-builder.service';
 import { LlmService } from '../tools/llm/llm.service';
@@ -291,8 +292,8 @@ export class AiWorkflowBuilderService {
    */
   private async callLLMToGenerateWorkflow(systemPrompt: string, userPrompt: string, teamId: string): Promise<string> {
     try {
-      // 从环境变量读取模型配置，默认使用 gpt-5
-      const model = process.env.AI_WORKFLOW_BUILDER_MODEL || 'gpt-5';
+      // 从配置文件读取模型配置（config.yaml 中的 aiWorkflowBuilder.model）
+      const model = config.aiWorkflowBuilder.model;
 
       const response = await this.llmService.generateTextByLlm(teamId, {
         systemPrompt,

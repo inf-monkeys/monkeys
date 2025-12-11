@@ -1,33 +1,33 @@
 version: '2.3'
 
 services:
-  server:
-    build:
-      context: ../
-      dockerfile: docker/server/Dockerfile
-    volumes:
-      - ./server/config/server-config.yaml:/usr/src/app/config.yaml
-    networks:
-      - monkeys
-    healthcheck:
-      test: ['CMD', 'curl', '-I', '-XGET', 'http://localhost:3000/api/healthz']
-      interval: 60s
-      timeout: 30s
-      retries: 12
-    depends_on:
-      monkeys-redis:
-        condition: service_healthy
-      monkeys-postgres:
-        condition: service_healthy
-      monkeys-elasticsearch:
-        condition: service_healthy
-    logging:
-      driver: 'json-file'
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 4G
+  # server:
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/server/Dockerfile
+  #   volumes:
+  #     - ./server/config/server-config.yaml:/usr/src/app/config.yaml
+  #   networks:
+  #     - monkeys
+  #   healthcheck:
+  #     test: ['CMD', 'curl', '-I', '-XGET', 'http://localhost:3000/api/healthz']
+  #     interval: 60s
+  #     timeout: 30s
+  #     retries: 12
+  #   depends_on:
+  #     monkeys-redis:
+  #       condition: service_healthy
+  #     monkeys-postgres:
+  #       condition: service_healthy
+  #     monkeys-elasticsearch:
+  #       condition: service_healthy
+  #   logging:
+  #     driver: 'json-file'
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: 4G
 
   # ui:
   #   build:
@@ -55,8 +55,8 @@ services:
       - 80:80
     logging:
       driver: 'json-file'
-    depends_on:
-      - server
+    # depends_on:
+      # - server
       # - ui
 
 networks:
