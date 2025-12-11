@@ -9,14 +9,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LogOut } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { logout as apiLogout } from '@/apis/auth';
 import { toast } from 'sonner';
+import { useSidebarStore } from '@/store/sidebar';
 
 export function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { toggle } = useSidebarStore();
 
   const handleLogout = async () => {
     try {
@@ -40,8 +42,20 @@ export function Header() {
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-background px-6">
-      <div className="flex-1">
-        {/* 可以添加搜索框或面包屑导航 */}
+      <div className="flex items-center gap-4">
+        {/* Sidebar Toggle 按钮 */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggle}
+          className="h-9 w-9"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        <div className="flex-1">
+          {/* 可以添加搜索框或面包屑导航 */}
+        </div>
       </div>
 
       <div className="flex items-center gap-4">
@@ -67,16 +81,6 @@ export function Header() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {/* TODO: 添加个人资料和设置页面 */}
-            {/* <DropdownMenuItem onClick={() => navigate({ to: '/admin/profile' as any })}>
-              <User className="mr-2 h-4 w-4" />
-              <span>个人资料</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate({ to: '/admin/settings' as any })}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>设置</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator /> */}
             <DropdownMenuItem onClick={handleLogout} className="text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
               <span>退出登录</span>

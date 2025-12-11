@@ -9,8 +9,17 @@ import {
   CreditCard,
   FolderOpen,
   Settings,
-  ChevronRight,
+  ChevronDown,
+  Database,
 } from 'lucide-react';
+import { useSidebarStore } from '@/store/sidebar';
+import { useState } from 'react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface NavItem {
   title: string;
@@ -25,6 +34,11 @@ const navItems: NavItem[] = [
     title: 'Dashboard',
     href: '/admin',
     icon: LayoutDashboard,
+  },
+  {
+    title: '数据管理',
+    href: '/admin/data',
+    icon: Database,
   },
   {
     title: '用户管理',
@@ -72,91 +86,154 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const router = useRouterState();
   const pathname = router.location.pathname;
+  const { isCollapsed } = useSidebarStore();
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-background">
-      {/* Logo */}
-      <div className="flex h-16 items-center border-b px-6">
-        <Link to="/admin" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <LayoutDashboard className="h-4 w-4" />
+    <TooltipProvider>
+      <div
+        className={cn(
+          'flex h-full flex-col border-r bg-background transition-all duration-300',
+          isCollapsed ? 'w-16' : 'w-64'
+        )}
+      >
+        {/* Logo */}
+        <div className="flex h-16 items-center border-b px-4">
+          <Link to="/admin" className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <LayoutDashboard className="h-4 w-4" />
+            </div>
+            {!isCollapsed && (
+              <span className="text-lg font-semibold whitespace-nowrap">
+                Monkeys Admin
+              </span>
+            )}
+          </Link>
+        </div>
+
+        {/* 导航菜单 */}
+        <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+          {navItems.map((item) => (
+            <NavItemComponent
+              key={item.href}
+              item={item}
+              pathname={pathname}
+              isCollapsed={isCollapsed}
+            />
+          ))}
+        </nav>
+
+        {/* 底部信息 */}
+        {!isCollapsed && (
+          <div className="border-t p-4">
+            <p className="text-xs text-muted-foreground">Version 1.0.0</p>
           </div>
-          <span className="text-lg font-semibold">Monkeys Admin</span>
-        </Link>
+        )}
       </div>
-
-      {/* 导航菜单 */}
-      <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-        {navItems.map((item) => (
-          <NavItemComponent key={item.href} item={item} pathname={pathname} />
-        ))}
-      </nav>
-
-      {/* 底部信息 */}
-      <div className="border-t p-4">
-        <p className="text-xs text-muted-foreground">
-          Version 1.0.0
-        </p>
-      </div>
-    </div>
+    </TooltipProvider>
   );
 }
 
 interface NavItemProps {
   item: NavItem;
   pathname: string;
+  isCollapsed: boolean;
 }
 
-function NavItemComponent({ item, pathname }: NavItemProps) {
+function NavItemComponent({ item, pathname, isCollapsed }: NavItemProps) {
   const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
   const Icon = item.icon;
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (item.children) {
-    return (
+    const content = (
       <div>
-        <div
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
           className={cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
             isActive
               ? 'bg-primary/10 text-primary'
-              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+            isCollapsed && 'justify-center px-2'
           )}
         >
-          <Icon className="h-4 w-4" />
-          <span className="flex-1">{item.title}</span>
-          <ChevronRight className={cn(
-            'h-4 w-4 transition-transform',
-            isActive && 'rotate-90'
-          )} />
-        </div>
-        {isActive && (
+          <Icon className="h-4 w-4 shrink-0" />
+          {!isCollapsed && (
+            <>
+              <span className="flex-1 text-left">{item.title}</span>
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 shrink-0 transition-transform',
+                  isExpanded && 'rotate-180'
+                )}
+              />
+            </>
+          )}
+        </button>
+        {!isCollapsed && isExpanded && (
           <div className="ml-6 mt-1 space-y-1">
             {item.children.map((child) => (
-              <NavItemComponent key={child.href} item={child} pathname={pathname} />
+              <NavItemComponent
+                key={child.href}
+                item={child}
+                pathname={pathname}
+                isCollapsed={isCollapsed}
+              />
             ))}
           </div>
         )}
       </div>
     );
+
+    if (isCollapsed) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>{content}</TooltipTrigger>
+          <TooltipContent side="right">
+            <p>{item.title}</p>
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return content;
   }
 
-  return (
+  const linkContent = (
     <Link
       to={item.href}
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
         isActive
           ? 'bg-primary/10 text-primary'
-          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+        isCollapsed && 'justify-center px-2'
       )}
     >
-      <Icon className="h-4 w-4" />
-      <span className="flex-1">{item.title}</span>
-      {item.badge && (
-        <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-          {item.badge}
-        </span>
+      <Icon className="h-4 w-4 shrink-0" />
+      {!isCollapsed && (
+        <>
+          <span className="flex-1">{item.title}</span>
+          {item.badge && (
+            <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+              {item.badge}
+            </span>
+          )}
+        </>
       )}
     </Link>
   );
+
+  if (isCollapsed) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{linkContent}</TooltipTrigger>
+        <TooltipContent side="right">
+          <p>{item.title}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return linkContent;
 }

@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { AdminLayout } from '@/components/layout/admin-layout';
 import { useAuthGuard } from '@/hooks/use-auth-guard';
 
@@ -8,6 +8,10 @@ export const Route = createFileRoute('/admin')({
 
 function AdminLayoutRoute() {
   const { isLoading } = useAuthGuard();
+  const router = useRouterState();
+
+  // 判断是否需要 flush 布局（无边距）
+  const isFlushLayout = router.location.pathname.startsWith('/admin/data');
 
   if (isLoading) {
     return (
@@ -21,7 +25,7 @@ function AdminLayoutRoute() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout flush={isFlushLayout}>
       <Outlet />
     </AdminLayout>
   );

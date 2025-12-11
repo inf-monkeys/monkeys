@@ -15,6 +15,7 @@ import { Route as LoginImport } from './pages/login'
 import { Route as AdminImport } from './pages/admin'
 import { Route as IndexImport } from './pages/index'
 import { Route as AdminIndexImport } from './pages/admin/index'
+import { Route as AdminDataImport } from './pages/admin/data'
 
 // Create/Update Routes
 
@@ -38,6 +39,11 @@ const AdminIndexRoute = AdminIndexImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 
+const AdminDataRoute = AdminDataImport.update({
+  path: '/data',
+  getParentRoute: () => AdminRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -54,6 +60,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/admin/data': {
+      preLoaderRoute: typeof AdminDataImport
+      parentRoute: typeof AdminImport
+    }
     '/admin/': {
       preLoaderRoute: typeof AdminIndexImport
       parentRoute: typeof AdminImport
@@ -65,7 +75,7 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
-  AdminRoute.addChildren([AdminIndexRoute]),
+  AdminRoute.addChildren([AdminDataRoute, AdminIndexRoute]),
   LoginRoute,
 ])
 

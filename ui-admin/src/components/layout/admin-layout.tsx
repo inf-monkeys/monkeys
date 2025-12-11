@@ -3,9 +3,11 @@ import { Header } from './header';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
+  /** 是否使用无边距布局（适用于表格等全屏内容） */
+  flush?: boolean;
 }
 
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminLayout({ children, flush = false }: AdminLayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* 侧边栏 */}
@@ -17,8 +19,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <Header />
 
         {/* 内容 */}
-        <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">
-          <div className="container mx-auto p-6">{children}</div>
+        <main className="flex-1 overflow-y-auto bg-background">
+          {flush ? (
+            children
+          ) : (
+            <div className="container mx-auto p-6">{children}</div>
+          )}
         </main>
       </div>
     </div>
