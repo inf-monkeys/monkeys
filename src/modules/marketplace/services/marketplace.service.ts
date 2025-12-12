@@ -750,6 +750,33 @@ export class MarketplaceService {
         const refs = latestVersion?.sourceAssetReferences || [];
         for (const ref of refs) {
           if (ref.assetType === 'workflow' && ref.assetId) {
+            const normalizeGroupLabel = (displayName: any): string | null => {
+              if (!displayName) return null;
+              if (typeof displayName === 'string') {
+                const s = displayName.trim();
+                // displayName 可能是 JSON 字符串（I18nValue），尽量取 zh-CN，否则取第一个 value
+                if ((s.startsWith('{') && s.endsWith('}')) || (s.startsWith('"') && s.endsWith('"'))) {
+                  try {
+                    const parsed = JSON.parse(s);
+                    if (parsed && typeof parsed === 'object') {
+                      if (typeof parsed['zh-CN'] === 'string' && parsed['zh-CN'].trim()) return parsed['zh-CN'].trim();
+                      const first = Object.values(parsed).find((v) => typeof v === 'string' && (v as string).trim());
+                      if (typeof first === 'string') return first.trim();
+                    }
+                  } catch {
+                    // ignore
+                  }
+                }
+                return s || null;
+              }
+              if (typeof displayName === 'object') {
+                if (typeof displayName['zh-CN'] === 'string' && displayName['zh-CN'].trim()) return displayName['zh-CN'].trim();
+                const first = Object.values(displayName).find((v) => typeof v === 'string' && (v as string).trim());
+                if (typeof first === 'string') return first.trim();
+              }
+              return null;
+            };
+
             // 1) 从作者团队读取该 workflow 的「表单视图固定」分组（可多选）
             //    固定视图菜单的本质是：哪些 workflow_page_group.pageIds 包含该 workflow 的 preview pageId
             const pages = await this.workflowPageService.listWorkflowPages(ref.assetId);
@@ -763,8 +790,9 @@ export class MarketplaceService {
                 .map((g) => {
                   if (g.isBuiltIn) return 'default';
                   if ((g as any).presetRelationId) return (g as any).presetRelationId as string;
-                  // 非预设分组：用 displayName 作为 key（长度过长则忽略，避免写入 group_key 失败）
-                  if (typeof g.displayName === 'string' && g.displayName.length <= 255) return g.displayName;
+                  // 非预设分组：用“展示名”作为 key（解析 JSON i18n，避免把 JSON 字符串当成 key 导致其它团队/作者团队重复建分组）
+                  const label = normalizeGroupLabel(g.displayName);
+                  if (label && label.length <= 255) return label;
                   return null;
                 })
                 .filter(Boolean) as string[];
@@ -781,7 +809,7 @@ export class MarketplaceService {
             }
 
             // 3) 写入全局 pinned 配置：先清理旧的，再按分组逐条写入（支持多分组）
-            await this.workflowPageService.removeBuiltinPinnedPagesForWorkflow(ref.assetId);
+            await this.workflowPageService.removeBuiltinPinnedPagesForWorkflow(ref.assetId, 'preview');
             if (targetGroupKeys.length === 0) {
               await this.workflowPageService.addBuiltinPinnedPage(ref.assetId, 'preview');
             } else {

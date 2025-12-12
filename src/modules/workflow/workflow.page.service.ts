@@ -4,13 +4,13 @@ import { ConversationAppEntity } from '@/database/entities/conversation-app/conv
 import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { WorkflowBuiltinPinnedPageEntity } from '@/database/entities/workflow/workflow-builtin-pinned-page';
-import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
+import { PageInstanceType, WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isEmpty, keyBy, pick, pickBy, set, uniq } from 'lodash';
-import { In, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { marketplaceDataManager } from '../marketplace/services/marketplace.data';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
@@ -190,12 +190,16 @@ export class WorkflowPageService {
       sortIndex?: number | null;
     },
   ) {
+    // NOTE:
+    // - groupKey 是区分「同一个 workflow + pageType」落到不同工作台分组的关键
+    // - 即使调用方未显式传 options/groupKey，也应当把它视作 "null"（默认分组）参与查询
     const groupKey = options?.groupKey ?? null;
     const exists = await this.builtinPinnedPageRepository.findOne({
       where: {
         workflowId,
         pageType,
-        ...(typeof options?.groupKey !== 'undefined' ? { groupKey } : {}),
+        // 永远带上 groupKey，避免误命中其它分组的记录
+        groupKey: groupKey === null ? IsNull() : groupKey,
         isDeleted: false,
       },
     });
@@ -221,10 +225,11 @@ export class WorkflowPageService {
     return await this.builtinPinnedPageRepository.save(entity);
   }
 
-  public async removeBuiltinPinnedPagesForWorkflow(workflowId: string) {
+  public async removeBuiltinPinnedPagesForWorkflow(workflowId: string, pageType?: PageInstanceType) {
     await this.builtinPinnedPageRepository.update(
       {
         workflowId,
+        ...(pageType ? { pageType } : {}),
         isDeleted: false,
       },
       {
@@ -232,6 +237,77 @@ export class WorkflowPageService {
         updatedTimestamp: Date.now(),
       },
     );
+  }
+
+  /**
+   * 当作者团队修改「表单视图固定分组」后，同步到全局 builtin pinned 配置，
+   * 使其它团队无需取消/重新设置内置应用即可生效。
+   */
+  private async syncBuiltinPinnedPreviewFromAuthorGroup(teamId: string, workflowId: string) {
+    // 仅对已存在 builtin pinned 配置的 workflow 生效（也就是已经被设置为内置应用）
+    const hasBuiltinPinned = await this.builtinPinnedPageRepository.findOne({
+      where: { workflowId, isDeleted: false },
+      select: ['id'],
+    });
+    if (!hasBuiltinPinned) return;
+
+    const previewPage = await this.pageRepository.findOne({
+      where: {
+        teamId,
+        workflowId,
+        type: 'preview',
+        isDeleted: false,
+      },
+    });
+    if (!previewPage) return;
+
+    const groups = await this.pageGroupRepository.find({
+      where: { teamId },
+      order: { sortIndex: 1 },
+    });
+    const matchedGroups = (groups ?? []).filter((g) => (g.pageIds ?? []).includes(previewPage.id));
+    const groupKeys = uniq(
+      matchedGroups
+        .map((g) => {
+          if (g.isBuiltIn) return 'default';
+          if ((g as any).presetRelationId) return (g as any).presetRelationId as string;
+          return this.normalizeGroupLabel((g as any).displayName);
+        })
+        .filter(Boolean)
+        .map((s) => (s as string).trim())
+        .filter((s) => s.length > 0 && s.length <= 255),
+    );
+
+    // 只同步 preview，避免影响未来可能存在的其它 pageType 配置
+    await this.removeBuiltinPinnedPagesForWorkflow(workflowId, 'preview');
+
+    if (groupKeys.length === 0) {
+      // 作者团队未将 preview 固定到任何分组：回退默认注入（NULL groupKey）
+      await this.addBuiltinPinnedPage(workflowId, 'preview');
+      return;
+    }
+
+    for (const gk of groupKeys) {
+      await this.addBuiltinPinnedPage(workflowId, 'preview', { groupKey: gk });
+    }
+  }
+
+  private async syncBuiltinPinnedPreviewForTeamByPageIds(teamId: string, pageIds: string[]) {
+    const ids = uniq((pageIds ?? []).filter(Boolean));
+    if (ids.length === 0) return;
+
+    const previewPages = await this.pageRepository.find({
+      where: {
+        teamId,
+        id: In(ids),
+        type: 'preview',
+        isDeleted: false,
+      },
+    });
+    const workflowIds = uniq(previewPages.map((p) => p.workflowId));
+    for (const wid of workflowIds) {
+      await this.syncBuiltinPinnedPreviewFromAuthorGroup(teamId, wid);
+    }
   }
 
   async removeWorkflowPage(workflowId: string, teamId: string, userId: string, pageId: string) {
@@ -270,6 +346,53 @@ export class WorkflowPageService {
     const designBoardPageIds = pageIds.filter((id) => id && id.startsWith('design-board-'));
     const normalPageIds = pageIds.filter((id) => id && !designBoardPageIds.includes(id) && !agentPageIds.includes(id) && !agentV2PageIds.includes(id));
     return { agentPageIds, agentV2PageIds, designBoardPageIds, normalPageIds };
+  }
+
+  private normalizeGroupLabel(displayName: any): string | null {
+    if (!displayName) return null;
+    if (typeof displayName === 'string') {
+      const s = displayName.trim();
+      // displayName 可能是 JSON 字符串（I18nValue），尽量取 zh-CN，否则取第一个 value
+      if ((s.startsWith('{') && s.endsWith('}')) || (s.startsWith('"') && s.endsWith('"'))) {
+        try {
+          const parsed = JSON.parse(s);
+          if (parsed && typeof parsed === 'object') {
+            if (typeof parsed['zh-CN'] === 'string' && parsed['zh-CN'].trim()) return parsed['zh-CN'].trim();
+            const first = Object.values(parsed).find((v) => typeof v === 'string' && (v as string).trim());
+            if (typeof first === 'string') return first.trim();
+          }
+        } catch {
+          // ignore
+        }
+      }
+      return s || null;
+    }
+    if (typeof displayName === 'object') {
+      if (typeof displayName['zh-CN'] === 'string' && displayName['zh-CN'].trim()) return displayName['zh-CN'].trim();
+      const first = Object.values(displayName).find((v) => typeof v === 'string' && (v as string).trim());
+      if (typeof first === 'string') return first.trim();
+    }
+    return null;
+  }
+
+  private normalizeGroupKeyToLabel(groupKey: string): string {
+    const s = (groupKey ?? '').trim();
+    if (!s) return s;
+    // 兼容旧数据：group_key 可能被写成 JSON 字符串（I18nValue）
+    if (s.startsWith('{') && s.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(s);
+        if (parsed && typeof parsed === 'object') {
+          const zh = parsed['zh-CN'];
+          if (typeof zh === 'string' && zh.trim()) return zh.trim();
+          const first = Object.values(parsed).find((v) => typeof v === 'string' && (v as string).trim());
+          if (typeof first === 'string') return first.trim();
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return s;
   }
 
   public async getPinnedPages(teamId: string) {
@@ -486,8 +609,17 @@ export class WorkflowPageService {
         Object.assign(workflowMap, extraWorkflowMap);
       }
 
+      // 如果某团队已经在分组里固定了某 workflow 的真实页面（例如作者团队自己 pin 了 preview），
+      // 则不要再注入 builtin 虚拟页，避免出现「重复工作流卡片」。
+      const existingPinnedWorkflowTypeKey = new Set<string>(
+        filteredPages.map((p) => `${p.workflowId}:${p.type}`),
+      );
+
       const builtinPagesWithConfig = builtinPinnedConfigs
         .map((pin) => {
+          if (existingPinnedWorkflowTypeKey.has(`${pin.workflowId}:${pin.pageType}`)) {
+            return null;
+          }
           const workflow = workflowMap[pin.workflowId];
           if (!workflow) return null;
 
@@ -537,12 +669,18 @@ export class WorkflowPageService {
           if (!pageId) continue;
 
           let targetGroup: any | undefined = undefined;
-          const groupKey = (item?.groupKey ?? null) as string | null;
+          const rawGroupKey = (item?.groupKey ?? null) as string | null;
+          const groupKey = rawGroupKey ? this.normalizeGroupKeyToLabel(rawGroupKey) : rawGroupKey;
           if (groupKey === 'default') {
             targetGroup = defaultGroup as any;
           } else if (groupKey) {
             // 1) 优先找已存在的 preset 分组
             targetGroup = groupsWithBuiltin.find((g) => (g as any).presetRelationId === groupKey);
+
+            // 1.5) 再按“展示名”匹配（避免同名分组被重复创建：displayName 可能是 JSON i18n）
+            if (!targetGroup) {
+              targetGroup = groupsWithBuiltin.find((g) => this.normalizeGroupLabel((g as any).displayName) === groupKey);
+            }
 
             // 2) 不存在则创建（并加入当前返回的 groups 中）
             if (!targetGroup) {
@@ -555,7 +693,8 @@ export class WorkflowPageService {
                   targetGroup = created as any;
                 } else {
                   // 使用 displayName 创建一个普通分组（不绑定 presetRelationId）
-                  const [created] = await this.workflowRepository.getPageGroupsAndCreateIfNotExists(teamId, [groupKey]);
+                  const i18nDisplayName = JSON.stringify({ 'zh-CN': groupKey, 'en-US': groupKey });
+                  const created = (await this.createPageGroup(teamId, i18nDisplayName)).slice(-1)[0];
                   groupsWithBuiltin.push(created as any);
                   targetGroup = created as any;
                 }
@@ -703,6 +842,10 @@ export class WorkflowPageService {
     };
     await this.pageGroupRepository.save(pageGroup);
 
+    if (pageId) {
+      await this.syncBuiltinPinnedPreviewForTeamByPageIds(teamId, [pageId]);
+    }
+
     return [...teamGroups, pageGroup];
   }
 
@@ -724,10 +867,19 @@ export class WorkflowPageService {
   }
 
   async removePageGroup(teamId: string, groupId: string) {
+    const group = await this.pageGroupRepository.findOne({
+      where: {
+        id: groupId,
+        teamId,
+      },
+    });
     await this.pageGroupRepository.delete({
       id: groupId,
       teamId,
     });
+    if (group?.pageIds?.length) {
+      await this.syncBuiltinPinnedPreviewForTeamByPageIds(teamId, group.pageIds);
+    }
     return await this.pageGroupRepository.find({
       where: {
         teamId,
@@ -748,6 +900,13 @@ export class WorkflowPageService {
         teamId,
       },
     });
+
+    // 保存原始 pageIds，用于之后做同步（rename/delete/add/remove 都会影响分组映射）
+    let originPageIds: string[] = [];
+    const originGroupDirect = groups.find((g) => g.id === groupId);
+    if (originGroupDirect?.pageIds) {
+      originPageIds = uniq(originGroupDirect.pageIds);
+    }
 
     if (groupId === 'default') {
       const defaultGroup = groups.find((group) => group.isBuiltIn);
@@ -805,6 +964,16 @@ export class WorkflowPageService {
       },
       values,
     );
+
+    // 同步：作者团队修改表单视图固定分组后，立即更新 builtin pinned 配置
+    const affectedPageIds = uniq([
+      ...originPageIds,
+      ...(Array.isArray(values.pageIds) ? (values.pageIds as string[]) : []),
+      ...(pageId ? [pageId] : []),
+    ]);
+    if (affectedPageIds.length > 0) {
+      await this.syncBuiltinPinnedPreviewForTeamByPageIds(teamId, affectedPageIds);
+    }
 
     return { groups, message: result ? 'Group updated' : 'Group update failed' };
   }
