@@ -750,7 +750,45 @@ export class MarketplaceService {
         const refs = latestVersion?.sourceAssetReferences || [];
         for (const ref of refs) {
           if (ref.assetType === 'workflow' && ref.assetId) {
-            await this.workflowPageService.addBuiltinPinnedPage(ref.assetId, 'preview');
+            // 1) 从作者团队读取该 workflow 的「表单视图固定」分组（可多选）
+            //    固定视图菜单的本质是：哪些 workflow_page_group.pageIds 包含该 workflow 的 preview pageId
+            const pages = await this.workflowPageService.listWorkflowPages(ref.assetId);
+            const previewPage = pages.find((p) => p.type === 'preview');
+
+            let targetGroupKeys: string[] = [];
+            if (previewPage?.teamId) {
+              const authorGroups = await this.workflowPageService.getPageGroups(previewPage.teamId);
+              const matchedGroups = (authorGroups ?? []).filter((g) => (g.pageIds ?? []).includes(previewPage.id));
+              targetGroupKeys = matchedGroups
+                .map((g) => {
+                  if (g.isBuiltIn) return 'default';
+                  if ((g as any).presetRelationId) return (g as any).presetRelationId as string;
+                  // 非预设分组：用 displayName 作为 key（长度过长则忽略，避免写入 group_key 失败）
+                  if (typeof g.displayName === 'string' && g.displayName.length <= 255) return g.displayName;
+                  return null;
+                })
+                .filter(Boolean) as string[];
+            }
+
+            // 2) 没有配置时兜底：按 presetAppSort 的分组落一次（仍然比默认分组更符合预期）
+            if (targetGroupKeys.length === 0) {
+              const presetSortGroup = marketplaceDataManager.presetAppSort.find((g) =>
+                (g.pages ?? []).some((p) => p.appId === appId && p.pageType === 'preview'),
+              );
+              if (presetSortGroup?.id) {
+                targetGroupKeys = [presetSortGroup.id];
+              }
+            }
+
+            // 3) 写入全局 pinned 配置：先清理旧的，再按分组逐条写入（支持多分组）
+            await this.workflowPageService.removeBuiltinPinnedPagesForWorkflow(ref.assetId);
+            if (targetGroupKeys.length === 0) {
+              await this.workflowPageService.addBuiltinPinnedPage(ref.assetId, 'preview');
+            } else {
+              for (const gk of targetGroupKeys) {
+                await this.workflowPageService.addBuiltinPinnedPage(ref.assetId, 'preview', { groupKey: gk });
+              }
+            }
           }
         }
         // 同步清理预置 workflow 定义中的 credential，保证从此以后以「内置应用」方式使用时不再依赖旧团队的密钥

@@ -175,20 +175,48 @@ export class WorkflowPageService {
    * - 不绑定具体的 pageId / groupId
    * - 仅在 getPinnedPages 时按需解析为虚拟 pinned 视图
    */
-  public async addBuiltinPinnedPage(workflowId: string, pageType: 'process' | 'log' | 'preview' | 'chat' = 'preview') {
+  public async addBuiltinPinnedPage(
+    workflowId: string,
+    pageType: 'process' | 'log' | 'preview' | 'chat' = 'preview',
+    options?: {
+      /**
+       * 目标分组 key（通常写入 preset app sort group id），用于在 getPinnedPages 时决定注入到哪个工作台文件夹。
+       * - 不传 / 为空：注入到默认内置分组
+       */
+      groupKey?: string | null;
+      /**
+       * 可选排序，用于在配置层面排序
+       */
+      sortIndex?: number | null;
+    },
+  ) {
+    const groupKey = options?.groupKey ?? null;
     const exists = await this.builtinPinnedPageRepository.findOne({
       where: {
         workflowId,
         pageType,
+        ...(typeof options?.groupKey !== 'undefined' ? { groupKey } : {}),
         isDeleted: false,
       },
     });
-    if (exists) return exists;
+    if (exists) {
+      const nextGroupKey = typeof options?.groupKey === 'undefined' ? exists.groupKey : options?.groupKey ?? null;
+      const nextSortIndex = typeof options?.sortIndex === 'undefined' ? exists.sortIndex : options?.sortIndex ?? null;
+      const needUpdate = exists.groupKey !== nextGroupKey || exists.sortIndex !== nextSortIndex;
+      if (!needUpdate) return exists;
+
+      exists.groupKey = nextGroupKey ?? null;
+      exists.sortIndex = typeof nextSortIndex === 'number' ? nextSortIndex : (nextSortIndex ?? null);
+      exists.updatedTimestamp = Date.now();
+      return await this.builtinPinnedPageRepository.save(exists);
+    }
 
     const entity = this.builtinPinnedPageRepository.create({
       id: generateDbId(),
       workflowId,
       pageType,
+      ...(typeof options?.groupKey !== 'undefined' ? { groupKey: options?.groupKey ?? null } : {}),
+      ...(typeof options?.sortIndex !== 'undefined' ? { sortIndex: options?.sortIndex ?? null } : {}),
     });
     return await this.builtinPinnedPageRepository.save(entity);
   }
@@ -458,7 +486,7 @@ export class WorkflowPageService {
         Object.assign(workflowMap, extraWorkflowMap);
       }
 
-      const builtinPages = builtinPinnedConfigs
+      const builtinPagesWithConfig = builtinPinnedConfigs
         .map((pin) => {
           const workflow = workflowMap[pin.workflowId];
           if (!workflow) return null;
@@ -470,28 +498,89 @@ export class WorkflowPageService {
           const id = `builtin-${pin.workflowId}-${pageType}`;
 
           return {
-            id,
-            type: pageType,
-            // 关键：显式带上 workflowId，让前端识别为 workflow 视图分组
-            workflowId: pin.workflowId,
-            displayName: workflow.displayName as any,
-            workflow,
-            instance,
-            // 标记为全局内置 pinned，前端如有需要可以据此区分只读/不可删除等
-            isBuiltinPinned: true,
-          } as any;
+            groupKey: pin.groupKey ?? null,
+            page: {
+              id,
+              type: pageType,
+              // 关键：显式带上 workflowId，让前端识别为 workflow 视图分组
+              workflowId: pin.workflowId,
+              displayName: workflow.displayName as any,
+              workflow,
+              instance,
+              // 标记为全局内置 pinned，前端如有需要可以据此区分只读/不可删除等
+              isBuiltinPinned: true,
+            } as any,
+          };
         })
         .filter(Boolean);
 
-      if (builtinPages.length > 0) {
+      if (builtinPagesWithConfig.length > 0) {
+        // 去重：同一个 workflow+pageType 可能配置了多个 groupKey（表单视图固定可多选），pageId 会重复
+        const builtinPageMap = new Map<string, any>();
+        for (const it of builtinPagesWithConfig as any[]) {
+          const p = it?.page;
+          if (p?.id) builtinPageMap.set(p.id, p);
+        }
+        const builtinPages = Array.from(builtinPageMap.values());
         allPages = [...allPagesBase, ...builtinPages];
 
-        // 虚拟注入到当前团队的默认分组（isBuiltIn = true 的 group）
+        // 虚拟注入到当前团队的分组：
+        // - 若配置了 groupKey（通常是 preset app sort group id），则注入到对应文件夹（不存在则自动创建）
+        // - 否则注入到默认内置分组（isBuiltIn = true 的 group）
         groupsWithBuiltin = groups.map((g) => ({ ...g }));
+
         const defaultGroup = groupsWithBuiltin.find((g) => g.isBuiltIn);
-        if (defaultGroup) {
-          const builtinIds = builtinPages.map((p) => p.id);
-          defaultGroup.pageIds = uniq([...(defaultGroup.pageIds || []), ...builtinIds]);
+        const groupIdToBuiltinIds = new Map<string, string[]>();
+
+        for (const item of builtinPagesWithConfig as any[]) {
+          const pageId = item?.page?.id as string | undefined;
+          if (!pageId) continue;
+
+          let targetGroup: any | undefined = undefined;
+          const groupKey = (item?.groupKey ?? null) as string | null;
+          if (groupKey === 'default') {
+            targetGroup = defaultGroup as any;
+          } else if (groupKey) {
+            // 1) 优先找已存在的 preset 分组
+            targetGroup = groupsWithBuiltin.find((g) => (g as any).presetRelationId === groupKey);
+
+            // 2) 不存在则创建（并加入当前返回的 groups 中）
+            if (!targetGroup) {
+              try {
+                // groupKey 可能是 presetRelationId，也可能是纯 displayName
+                const presetCandidate = marketplaceDataManager.presetAppSort.find((it) => it.id === groupKey);
+                if (presetCandidate) {
+                  const created = await this.getPageGroupByPresetId(teamId, groupKey);
+                  groupsWithBuiltin.push(created as any);
+                  targetGroup = created as any;
+                } else {
+                  // 使用 displayName 创建一个普通分组（不绑定 presetRelationId）
+                  const [created] = await this.workflowRepository.getPageGroupsAndCreateIfNotExists(teamId, [groupKey]);
+                  groupsWithBuiltin.push(created as any);
+                  targetGroup = created as any;
+                }
+              } catch (_e) {
+                // groupKey 无法解析时，回退默认分组
+                targetGroup = undefined;
+              }
+            }
+          }
+
+          if (!targetGroup) {
+            targetGroup = defaultGroup as any;
+          }
+          if (!targetGroup) continue;
+
+          const gid = targetGroup.id as string;
+          const list = groupIdToBuiltinIds.get(gid) ?? [];
+          list.push(pageId);
+          groupIdToBuiltinIds.set(gid, list);
+        }
+
+        for (const [gid, ids] of groupIdToBuiltinIds.entries()) {
+          const g = groupsWithBuiltin.find((it) => it.id === gid);
+          if (!g) continue;
+          g.pageIds = uniq([...(g.pageIds || []), ...ids]);
         }
       }
     }
@@ -768,6 +857,8 @@ export class WorkflowPageService {
       await this.pageGroupRepository.update(newGroup.id, {
         presetRelationId: presetId,
       });
+      // 关键：把 presetRelationId 回填到返回对象上，避免调用方在同一请求内重复创建
+      (newGroup as any).presetRelationId = presetId;
       return newGroup;
     }
     return pageGroup;
