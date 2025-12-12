@@ -250,7 +250,7 @@ export const AssetDetail: React.FC = () => {
                   <div className="size-full min-h-0">
                     {preview.previewType === 'video' && preview.url ? (
                       <div className="h-full w-full p-global">
-                        <VinesAbstractVideo autoPlay={false} className="w-full">
+                        <VinesAbstractVideo autoPlay playOnHover={false} className="w-full">
                           {preview.url}
                         </VinesAbstractVideo>
                       </div>

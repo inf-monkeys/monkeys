@@ -6,9 +6,19 @@ interface IVinesAbstractVideoProps {
   children: string;
   className?: string;
   autoPlay?: boolean;
+  /**
+   * Whether to auto-play on hover (used by small preview cards).
+   * For asset detail large preview, set to false for click-to-play.
+   */
+  playOnHover?: boolean;
 }
 
-export const VinesAbstractVideo: React.FC<IVinesAbstractVideoProps> = ({ children, className, autoPlay = false }) => {
+export const VinesAbstractVideo: React.FC<IVinesAbstractVideoProps> = ({
+  children,
+  className,
+  autoPlay = false,
+  playOnHover = true,
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ratio, setRatio] = useState<number>(16 / 9);
   const [ready, setReady] = useState(false);
@@ -57,27 +67,41 @@ export const VinesAbstractVideo: React.FC<IVinesAbstractVideoProps> = ({ childre
     showFirstFrame();
   }, [showFirstFrame, syncRatio]);
 
+  const togglePlay = useCallback(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (el.paused) {
+      el.play().catch(() => {
+        // ignore
+      });
+    } else {
+      el.pause();
+    }
+  }, []);
+
+  const controls = useMemo(() => {
+    // hover 模式：默认只展示首帧，hover 才显示控件/播放
+    // click 模式：始终显示控件，点击播放即可
+    return playOnHover ? autoPlay || hovered : true;
+  }, [autoPlay, hovered, playOnHover]);
+
   const handleEnter = useCallback(() => {
+    if (!playOnHover || autoPlay) return;
     setHovered(true);
     const el = videoRef.current;
     if (!el) return;
-    // hover 交互播放
     el.play().catch(() => {
       // ignore
     });
-  }, []);
+  }, [autoPlay, playOnHover]);
 
   const handleLeave = useCallback(() => {
+    if (!playOnHover || autoPlay) return;
     setHovered(false);
     const el = videoRef.current;
     if (!el) return;
     showFirstFrame();
-  }, [showFirstFrame]);
-
-  const controls = useMemo(() => {
-    // 默认只展示首帧，hover 才显示控件/播放
-    return autoPlay || hovered;
-  }, [autoPlay, hovered]);
+  }, [autoPlay, playOnHover, showFirstFrame]);
 
   return (
     <div
@@ -88,8 +112,9 @@ export const VinesAbstractVideo: React.FC<IVinesAbstractVideoProps> = ({ childre
         background: '#0B1220',
         position: 'relative',
       }}
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
+      onClick={!playOnHover ? togglePlay : undefined}
+      onMouseEnter={playOnHover ? handleEnter : undefined}
+      onMouseLeave={playOnHover ? handleLeave : undefined}
     >
       <video
         ref={videoRef}
@@ -98,8 +123,8 @@ export const VinesAbstractVideo: React.FC<IVinesAbstractVideoProps> = ({ childre
         autoPlay={autoPlay}
         // hover 播放时允许用户控制暂停/全屏等；非 hover 时隐藏控件避免“加载中导致缩放”
         controls={controls}
-        // autoplay 需要 muted；hover 也保持静音避免突然出声（用户可在控件里手动开声音）
-        muted
+        // autoplay 需要 muted；hover 自动播放也保持静音（避免突然出声）
+        muted={autoPlay || playOnHover}
         playsInline
         preload="metadata"
         onLoadedMetadata={handleLoadedMetadata}
