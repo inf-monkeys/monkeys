@@ -78,6 +78,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         ...((file as any).meta || {}),
         relativePath: (file as any).relativePath || null,
         originalName: file.name, // 保存原始文件名
+        type: file.type,
       } as any,
     };
   });
@@ -104,12 +105,18 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
   const files = Object.values(filesMapper);
 
   const latestFiles = useLatest(files);
-  useUppyEvent(uppy, 'complete', () => {
-    onChange?.(latestFiles.current.map((it) => it.uploadURL || it.meta.remoteUrl) as string[], latestFiles.current);
+
+  const emitChange = useMemoizedFn((filesOverride?: UppyFile<Meta, Record<string, never>>[]) => {
+    if (!onChange) return;
+    const currentFiles = filesOverride ?? uppy.getFiles();
+    const urls = currentFiles.map((it) => it.uploadURL || (it.meta as any)?.remoteUrl).filter(Boolean) as string[];
+    onChange(urls, currentFiles);
   });
+
+  useUppyEvent(uppy, 'complete', () => emitChange());
   useUppyEvent(uppy, 'file-removed', (file) => {
-    const finalFiles = latestFiles.current.filter((it) => it.id !== file.id);
-    onChange?.(finalFiles.map((it) => it.uploadURL || it.meta.remoteUrl) as string[], finalFiles);
+    const finalFiles = uppy.getFiles().filter((it) => it.id !== file.id);
+    emitChange(finalFiles);
   });
   useUppyEvent(uppy, 'upload-success', (file, response) => {
     // 确保 uploadURL 被设置
@@ -122,7 +129,13 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         });
       }
     }
+
+    // 某些场景（如秒传/远程 URL）可能不会触发 complete，这里兜底触发一次 onChange
+    emitChange();
   });
+
+  useUppyEvent(uppy, 'rapid-upload:complete', () => emitChange());
+  useUppyEvent(uppy, 'remote-url-to-file:complete', () => emitChange());
 
   const addRemoteUrlAsFile = useMemoizedFn(async (rawUrl: string | null | undefined) => {
     const trimmed = rawUrl?.trim();
