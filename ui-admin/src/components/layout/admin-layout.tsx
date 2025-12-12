@@ -14,12 +14,12 @@ export function AdminLayout({ children, flush = false }: AdminLayoutProps) {
       <Sidebar />
 
       {/* 主内容区 */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden min-h-0">
         {/* 顶部栏 */}
         <Header />
 
         {/* 内容 */}
-        <main className={`flex-1 bg-background ${flush ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+        <main className={`flex-1 bg-background min-h-0 ${flush ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           {flush ? (
             children
           ) : (

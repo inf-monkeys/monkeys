@@ -1,6 +1,4 @@
-import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -22,7 +20,6 @@ import {
 } from '@/components/ui/pagination';
 import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
 import type { DataItem } from '@/types/data';
-import { format } from 'date-fns';
 
 interface DataCardViewProps {
   data: DataItem[];
@@ -59,16 +56,6 @@ export function DataCardView({
       : [...selectedIds, itemId];
 
     onSelectionChange(newSelectedIds);
-  };
-
-  const handleToggleAll = () => {
-    if (!onSelectionChange) return;
-
-    if (selectedIds.length === data.length) {
-      onSelectionChange([]);
-    } else {
-      onSelectionChange(data.map((item) => item.id).filter((id): id is string => !!id));
-    }
   };
 
   if (isLoading) {
@@ -111,11 +98,6 @@ export function DataCardView({
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                      {(item.description || item.primaryContent?.description) && (
-                        <p className="text-xs text-muted-foreground line-clamp-6 mt-1">
-                          {item.description || item.primaryContent?.description}
-                        </p>
-                      )}
                     </div>
                   </div>
                   <DropdownMenu>
@@ -155,15 +137,29 @@ export function DataCardView({
                   </DropdownMenu>
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                {/* 缩略图或图标 */}
+              <CardContent className="flex-1 flex flex-col gap-2">
+                {/* 缩略图 */}
                 {item.thumbnail && (
-                  <div className="w-full h-32 rounded-md overflow-hidden bg-muted">
+                  <div className="w-full h-32 rounded-md overflow-hidden bg-muted mb-2">
                     <img
                       src={item.thumbnail}
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />
+                  </div>
+                )}
+
+                {/* Primary Content - 显示所有键值对 */}
+                {item.primaryContent && typeof item.primaryContent === 'object' && (
+                  <div className="space-y-1 text-xs">
+                    {Object.entries(item.primaryContent).map(([key, value]) => (
+                      <div key={key} className="flex flex-col">
+                        <span className="font-medium text-foreground">{key}:</span>
+                        <span className="text-muted-foreground whitespace-pre-wrap break-words pl-2">
+                          {String(value)}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
@@ -191,26 +187,6 @@ export function DataCardView({
       </div>
     </div>
   );
-}
-
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-}
-
-function formatDate(date: string | number | undefined): string {
-  if (!date) return '-';
-  // 将字符串时间戳转换为数字
-  const timestamp = typeof date === 'string' ? parseInt(date, 10) : date;
-  // 检查是否为有效的时间戳
-  if (isNaN(timestamp)) return '-';
-  const d = new Date(timestamp);
-  // 检查日期是否有效
-  if (isNaN(d.getTime())) return '-';
-  return format(d, 'yyyy-MM-dd HH:mm');
 }
 
 // 分页组件
