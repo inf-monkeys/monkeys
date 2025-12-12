@@ -830,7 +830,8 @@ export class MarketplaceService {
       const refs = latestVersion?.sourceAssetReferences || [];
       for (const ref of refs) {
         if (ref.assetType === 'workflow' && ref.assetId) {
-          await this.workflowPageService.removeBuiltinPinnedPagesForWorkflow(ref.assetId);
+          // 与启用时保持一致：这里只清理 preview 类型的 builtin pinned 配置，避免误删其它 pageType 配置
+          await this.workflowPageService.removeBuiltinPinnedPagesForWorkflow(ref.assetId, 'preview');
         }
       }
     }

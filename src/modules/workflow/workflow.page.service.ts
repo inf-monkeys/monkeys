@@ -193,7 +193,8 @@ export class WorkflowPageService {
     // NOTE:
     // - groupKey 是区分「同一个 workflow + pageType」落到不同工作台分组的关键
     // - 即使调用方未显式传 options/groupKey，也应当把它视作 "null"（默认分组）参与查询
-    const groupKey = options?.groupKey ?? null;
+    // 统一归一化：避免 groupKey 含空格导致写入/查找不一致
+    const groupKey = (options?.groupKey ?? null) ? String(options?.groupKey).trim() : null;
     const exists = await this.builtinPinnedPageRepository.findOne({
       where: {
         workflowId,
@@ -204,7 +205,12 @@ export class WorkflowPageService {
       },
     });
     if (exists) {
-      const nextGroupKey = typeof options?.groupKey === 'undefined' ? exists.groupKey : options?.groupKey ?? null;
+      const nextGroupKey =
+        typeof options?.groupKey === 'undefined'
+          ? exists.groupKey
+          : (options?.groupKey ?? null)
+            ? String(options?.groupKey).trim()
+            : null;
       const nextSortIndex = typeof options?.sortIndex === 'undefined' ? exists.sortIndex : options?.sortIndex ?? null;
       const needUpdate = exists.groupKey !== nextGroupKey || exists.sortIndex !== nextSortIndex;
       if (!needUpdate) return exists;
@@ -219,7 +225,7 @@ export class WorkflowPageService {
       id: generateDbId(),
       workflowId,
       pageType,
-      ...(typeof options?.groupKey !== 'undefined' ? { groupKey: options?.groupKey ?? null } : {}),
+      ...(typeof options?.groupKey !== 'undefined' ? { groupKey } : {}),
       ...(typeof options?.sortIndex !== 'undefined' ? { sortIndex: options?.sortIndex ?? null } : {}),
     });
     return await this.builtinPinnedPageRepository.save(entity);
