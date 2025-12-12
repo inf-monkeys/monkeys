@@ -22,6 +22,7 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 import { ImagesResult, useSetExecutionImages } from '@/store/useExecutionImageResultStore';
+import { useSetExecutionAssets } from '@/store/useExecutionAssetResultStore';
 import { useSetThumbImages } from '@/store/useExecutionImageTumbStore';
 import { useExecutionStore } from '@/store/useExecutionStore';
 import { useFlowStore } from '@/store/useFlowStore';
@@ -30,6 +31,8 @@ import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem, newConvertExecutionResultToItemList, removeRepeatKey } from '@/utils/execution.ts';
 import { getThumbUrl } from '@/utils/file';
+import { extract3DModelUrls, extractVideoUrls } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/utils';
+import { isTextLikeOutput, normalizeTextOutput } from '@/utils/asset-preview';
 
 import { ErrorFilter } from './grid/error-filter';
 import { useVinesIframeMessage } from './iframe-message';
@@ -369,6 +372,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const setImages = useSetExecutionImages();
   const setThumbImages = useSetThumbImages();
+  const setAssets = useSetExecutionAssets();
   // filter results for image detail route
   useEffect(() => {
     const allImages = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
@@ -382,6 +386,26 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     setImages(allImages as ImagesResult[]);
     setThumbImages(thumbImages);
   }, [executionResultList, setImages, setThumbImages]);
+
+  // filter results for asset detail route (text / markdown / 3d / video)
+  useEffect(() => {
+    const allAssets = executionResultList.filter((item) => {
+      const t = (item.render.type ?? '').toLowerCase();
+      if (t === 'video') return true;
+      // treat json-with-text-fields as text output
+      if (isTextLikeOutput(item.render.type, item.render.data)) return true;
+      try {
+        const text = typeof item.render.data === 'string' ? item.render.data : JSON.stringify(item.render.data);
+        // 3D / Video embedded url in json/string
+        if (extractVideoUrls(text).length > 0 || extract3DModelUrls(text).length > 0) return true;
+        // fallback: if json has text fields (even if render.type not text/json)
+        return !!normalizeTextOutput(item.render.data);
+      } catch {
+        return false;
+      }
+    });
+    setAssets(allAssets);
+  }, [executionResultList, setAssets]);
 
   useVinesIframeMessage({
     outputs: iframeOutputs,

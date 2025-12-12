@@ -21,7 +21,7 @@ import { cn } from '@/utils';
 
 export const WorkspaceLayout: React.FC = () => {
   // 获取路由信息，判断是否是图片详情页
-  const { isImageDetailPage, isUseDesign } = useVinesRoute();
+  const { isImageDetailPage, isAssetDetailPage, isUseDesign } = useVinesRoute();
   // const { t } = useTranslation();
   // const { teamId } = useVinesTeam();
 
@@ -32,7 +32,7 @@ export const WorkspaceLayout: React.FC = () => {
   //   },
   // });
 
-  const showNav = isImageDetailPage;
+  const showNav = isImageDetailPage || isAssetDetailPage;
 
   const { data: oem } = useSystemConfig();
   const themeMode = get(oem, 'theme.themeMode', 'shadow');
@@ -59,8 +59,8 @@ export const WorkspaceLayout: React.FC = () => {
       )}
       <VinesSpace
         sidebar={
-          // 图片详情页不显示侧边栏
-          !isImageDetailPage ? (
+          // 详情页不显示侧边栏（图片/资产）
+          !(isImageDetailPage || isAssetDetailPage) ? (
             <SpaceSidebar>
               <ScrollArea className="h-full flex-1 overflow-y-scroll" scrollBarDisabled>
                 <SpaceTabs />

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { SWRInfiniteResponse } from 'swr/infinite';
 
+import { useNavigate } from '@tanstack/react-router';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { get } from 'lodash';
 import { Check, CirclePause, FileMinus } from 'lucide-react';
@@ -14,6 +15,8 @@ import { extract3DModelUrls, extractVideoUrls } from '@/components/layout/worksp
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid/index.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesLoading } from '@/components/ui/loading';
+import useUrlState from '@/hooks/use-url-state';
+import { useExecutionAssetResultStore } from '@/store/useExecutionAssetResultStore';
 import { getAlt } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
@@ -60,6 +63,11 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
   const { render, startTime } = result;
   const { type, data, status } = render;
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  const isMiniFrame = mode === 'mini';
+  const assets = useExecutionAssetResultStore((s) => s.assets);
+  const setAssetPosition = useExecutionAssetResultStore((s) => s.setPosition);
   const alt = getAlt(result);
 
   const { data: oem } = useSystemConfig();
@@ -107,6 +115,55 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
     e.stopPropagation();
     onSelect?.(render.key);
   };
+
+  const handlePreviewClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (clickBehavior === 'none') return;
+      e.stopPropagation();
+
+      if (clickBehavior === 'preview' && !isSelectionMode && workflowId && result.instanceId) {
+        // 图片单独走 image-detail；其他资产走 asset-detail
+        if (type !== 'image') {
+          const parts = (render.key ?? '').split('-');
+          const outputIndex = Number(parts[parts.length - 1] ?? 0);
+          const position = assets?.findIndex((it) => it.render.key === render.key) ?? -1;
+          if (position >= 0) setAssetPosition(position);
+          navigate({
+            to: '/$teamId/workspace/$workflowId/asset-detail/',
+            params: { workflowId } as any,
+            search: {
+              instanceId: result.instanceId,
+              outputIndex: Number.isFinite(outputIndex) ? outputIndex : 0,
+              mode: isMiniFrame ? 'mini' : '',
+            },
+          });
+          return;
+        }
+      }
+
+      if ((clickBehavior === 'select' || isSelectionMode) && onSelect) {
+        onSelect(render.key);
+      }
+
+      if (clickBehavior === 'fill-form' && event$) {
+        event$?.emit?.();
+      }
+    },
+    [
+      clickBehavior,
+      isSelectionMode,
+      workflowId,
+      result.instanceId,
+      type,
+      assets,
+      render.key,
+      setAssetPosition,
+      navigate,
+      isMiniFrame,
+      onSelect,
+      event$,
+    ],
+  );
 
   const renderSelectionOverlay = () => {
     if ((clickBehavior !== 'select' && !isSelectionMode) || !isSelected) return null;
@@ -245,7 +302,7 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
                 ? 'h-[500px]'
                 : ''
           }`}
-          onClick={handleSelect}
+          onClick={handlePreviewClick}
           // 同步为非图片卡片增加左右外边距，避免边框贴合
           style={{ marginLeft: 6, marginRight: 6 }}
         >

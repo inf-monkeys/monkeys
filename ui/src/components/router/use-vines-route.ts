@@ -21,6 +21,7 @@ export const useVinesRoute = () => {
 
   // 检查是否是图片详情页面
   const isImageDetailPage = routeIds?.[3] === 'image-detail';
+  const isAssetDetailPage = routeIds?.[3] === 'asset-detail';
 
   // 之后再考虑是否改为开头匹配 vines-
   const isUseOutside = !routeIds;
@@ -28,7 +29,8 @@ export const useVinesRoute = () => {
   const isUseIFrame = routeIds?.[4] === 'view-iframe';
   const isUseWorkbench = !routeAppId;
   // 图片详情页面应该使用WorkspaceLayout，但不显示侧边栏
-  const isUseWorkSpace = (routeAppId === 'workspace' && !isUseShareView && !isUseIFrame) || isImageDetailPage;
+  const isUseWorkSpace =
+    (routeAppId === 'workspace' && !isUseShareView && !isUseIFrame) || isImageDetailPage || isAssetDetailPage;
   const isUseAgent = routeAppId === 'agent';
   const isUseDesign = routeAppId === 'design';
   const isUseEvaluation = routeAppId === 'evaluations' && routeIds?.[2] && routeIds?.[3]; // 有moduleId和tab时使用评测布局
@@ -43,7 +45,7 @@ export const useVinesRoute = () => {
 
   // 对于图片详情页面，确保路由信息中包含workbench，以便高亮工作台选项
   // 对于邀请页面，设置为 'invite' 以绕过认证检查
-  window['vinesRoute'] = isImageDetailPage
+  window['vinesRoute'] = isImageDetailPage || isAssetDetailPage
     ? ['workbench', params?.['teamId'], params?.['workflowId']]
     : isInvitePage
       ? ['invite', params?.['teamId'], params?.['inviteId']]
@@ -67,6 +69,7 @@ export const useVinesRoute = () => {
     isUseWorkbench,
     isUsePanel,
     isImageDetailPage,
+    isAssetDetailPage,
     isUseAppStore,
     isUseEvaluation,
     isUseCustomNav,
