@@ -263,8 +263,8 @@ export function DataTable({
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0">
-      <div className="flex-1 overflow-auto min-h-0">
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-auto">
         <table className="w-full caption-bottom text-sm">
           <thead className="sticky top-0 bg-background z-10 border-b">
             {table.getHeaderGroups().map((headerGroup) => (

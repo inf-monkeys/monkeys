@@ -210,7 +210,7 @@ function DataManagementPage() {
       />
 
       {/* 右侧内容区 */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden min-h-0">
         {/* 工具栏 */}
         <DataToolbar
           selectedCount={selectedIds.length}

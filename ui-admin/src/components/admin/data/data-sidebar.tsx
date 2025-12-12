@@ -295,8 +295,8 @@ function CategoryTreeItem({
           onClick={() => onSelectCategory(category.id)}
         >
           {hasChildren && (
-            <button
-              className="mr-1 p-0.5 hover:bg-accent rounded"
+            <span
+              className="mr-1 p-0.5 hover:bg-accent rounded inline-flex items-center cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
@@ -307,7 +307,7 @@ function CategoryTreeItem({
               ) : (
                 <ChevronRight className="h-3.5 w-3.5" />
               )}
-            </button>
+            </span>
           )}
           {!hasChildren && <span className="w-5" />}
           <Icon className="mr-2 h-4 w-4" />
