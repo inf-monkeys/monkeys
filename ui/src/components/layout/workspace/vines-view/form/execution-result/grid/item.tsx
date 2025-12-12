@@ -18,6 +18,7 @@ import { VinesLoading } from '@/components/ui/loading';
 import useUrlState from '@/hooks/use-url-state';
 import { useExecutionAssetResultStore } from '@/store/useExecutionAssetResultStore';
 import { getAlt } from '@/utils';
+import { isTextLikeOutput } from '@/utils/asset-preview';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 import { VirtuaExecutionResultGridImageItem } from '../virtua/item/image';
@@ -316,6 +317,8 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
             isSelected={isSelected}
             selectionModeDisplayType={selectionModeDisplayType}
             displayType={displayType}
+            // 文本预览不展示「...」执行详情按钮（hover 时只保留删除按钮）
+            showDetailButton={!isTextLikeOutput(type, data)}
           >
             <div
               className={`p-2 ${
