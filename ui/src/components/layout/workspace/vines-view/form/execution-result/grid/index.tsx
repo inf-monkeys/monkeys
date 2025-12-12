@@ -213,6 +213,36 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const viewportWidth = scrollViewportWidth || fallbackContainerWidth;
   const containerWidth = Math.max(0, viewportWidth - (hasAssociationSidebar ? 80 : 0));
   const shouldFilterError = useShouldFilterError();
+
+  // 3D 结果在 masonry(瀑布流) 下会被 columnWidth 限制宽度，这里做检测并提升布局宽度
+  const MODEL_URL_REGEX = /(https?:\/\/[^\s)]+?\.(?:glb|gltf|usdz|fbx|obj)(?:\?[^\s)]+)?)/i;
+  const URL_REGEX = /^https?:\/\/\S+$/i;
+  const looksLikeMinio3D = (s: string) => {
+    const lower = s.toLowerCase();
+    if (!URL_REGEX.test(s)) return false;
+    const isMinio = lower.includes('minio');
+    const has3dHints = lower.includes('3d') || lower.includes('model') || lower.includes('ai-generated-3d');
+    const hasAdsHint = lower.includes('/ads/') || lower.includes('ads/');
+    return isMinio && (has3dHints || hasAdsHint);
+  };
+  const is3DModelData = (d: any) => {
+    if (!d) return false;
+    if (typeof d === 'string') return MODEL_URL_REGEX.test(d) || looksLikeMinio3D(d);
+    try {
+      const str = JSON.stringify(d);
+      if (MODEL_URL_REGEX.test(str)) return true;
+      const url = (d?.url ?? d?.data?.url ?? d?.output ?? d?.result ?? '') as string;
+      const displayName = (d?.displayName ?? d?.name ?? '') as string;
+      if (typeof url === 'string' && (MODEL_URL_REGEX.test(url) || looksLikeMinio3D(url))) return true;
+      if (typeof displayName === 'string' && displayName.includes('AI_generate_3D')) return true;
+      return /minio/i.test(str) && /(3d|model)/i.test(str);
+    } catch {
+      return false;
+    }
+  };
+  const has3DOutputs = React.useMemo(() => data.some((item) => is3DModelData(item?.render?.data)), [data]);
+  const masonryColumnCount = has3DOutputs ? 1 : isMiniFrame ? 2 : void 0;
+
   const positioner = usePositioner(
     {
       width:
@@ -220,9 +250,10 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
           ? containerWidth - 80
           : containerWidth,
       columnGutter: 10,
+      // masonry 默认列宽（当 columnCount 未显式指定时生效）
       columnWidth: 160,
       rowGutter: 10,
-      columnCount: isMiniFrame ? 2 : void 0,
+      columnCount: masonryColumnCount,
     },
     [data.length, workflowId, shouldFilterError, displayType],
   );
@@ -322,7 +353,8 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     items: data,
     overscanBy: 3,
     render: useCallback(({ data: item }) => renderItem(item), [renderItem]),
-    itemKey: (item, index) => `${index}-${item.render.key}`,
+    // 关键：必须使用稳定 key，否则滚动/插入/过滤会触发卸载重挂，导致 3D 视角/状态被重置
+    itemKey: (item) => item.render.key || item.instanceId,
     onRender: loadMore,
     // POM 卡片包含大量测量数据的表格，需要更大的高度估算值避免重叠
     itemHeightEstimate: displayType === 'grid' ? 300 : isPomWorkflow ? 550 : 400,
@@ -353,6 +385,8 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     const itemSize = 160;
     const gap = 10;
     const columnsCount = Math.floor((containerWidthValue + gap) / (itemSize + gap));
+
+    const is3DModelItem = (item: IVinesExecutionResultItem) => is3DModelData(item?.render?.data);
 
     const isPomItem = (item: IVinesExecutionResultItem) => {
       const d: any = item?.render?.data as any;
@@ -391,12 +425,18 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       >
         {data.map((item, index) => {
           const isPom = isPomItem(item);
+          const is3d = is3DModelItem(item);
+          const isLarge = isPom || is3d;
           const span2 = isPom && columnsCount >= 2;
           return (
             <div
-              key={`${index}-${item.render.key}`}
-              className={cn(span2 && 'col-span-2', !isPom && 'aspect-square')}
-              style={{ minHeight: isPom ? 320 : 200 }}
+              key={item.render.key || item.instanceId}
+              className={cn(span2 ? 'col-span-2' : '', !isLarge && 'aspect-square')}
+              style={{
+                minHeight: is3d ? 520 : isPom ? 320 : 200,
+                // 3D 卡片在 grid 模式下占满整行（避免受列宽限制）
+                gridColumn: is3d ? '1 / -1' : undefined,
+              }}
             >
               {renderItem(item)}
             </div>

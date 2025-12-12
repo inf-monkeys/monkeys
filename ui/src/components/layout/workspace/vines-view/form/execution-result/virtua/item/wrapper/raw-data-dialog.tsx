@@ -10,16 +10,17 @@ import { toast } from 'sonner';
 
 import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
+import { Vines3DModelRenderModeContext } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/3d-model.tsx';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
@@ -97,7 +98,9 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
             <TabsTrigger value="logs">{t('workspace.pre-view.actuator.detail.form-render.tabs.logs')}</TabsTrigger>
           </TabsList>
           <TabsContent value="data">
-            <VinesAbstractDataPreview className="h-96" data={data.render.data} />
+            <Vines3DModelRenderModeContext.Provider value="detail">
+              <VinesAbstractDataPreview className="h-96" data={data.render.data} />
+            </Vines3DModelRenderModeContext.Provider>
             {alt && (
               <Textarea
                 className="rounded border p-2 text-sm"
