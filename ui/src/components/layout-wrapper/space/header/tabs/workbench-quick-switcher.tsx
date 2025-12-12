@@ -40,6 +40,7 @@ export const WorkbenchQuickSwitcher: React.FC<IWorkbenchQuickSwitcherProps> = ({
   const setCurrentPage = useSetCurrentPage();
 
   const [selectedWorkbenchPageName, setSelectedWorkbenchPageName] = useState(DEFAULT_LABEL);
+  const isDarkHeadbar = headbarTheme === 'bsd-blue' || headbarTheme === 'glassy';
 
   const groupedPages = useMemo(() => {
     if (!workspaceData?.groups?.length) return [];
@@ -149,7 +150,12 @@ export const WorkbenchQuickSwitcher: React.FC<IWorkbenchQuickSwitcherProps> = ({
                         {getPageIconUrl(page)}
                       </VinesIcon>
                     ) : (
-                      <VinesLucideIcon className="size-4 text-muted-foreground" size={14} src={getPageInstanceIcon(page)} />
+                      <VinesLucideIcon
+                        className={cn('size-4', isDarkHeadbar ? 'text-white' : 'text-muted-foreground')}
+                        size={14}
+                        src={getPageInstanceIcon(page)}
+                        style={isDarkHeadbar ? { stroke: '#FFFFFF' } : undefined}
+                      />
                     )}
                     <span className="text-sm font-medium leading-tight text-foreground">{getPageDisplayName(page)}</span>
                   </DropdownMenuItem>

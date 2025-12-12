@@ -21,6 +21,7 @@ export const VinesLucideIcon = forwardRef<HTMLDivElement, IVinesLucideIconProps>
   ({ src, className, size, style, active, ...attr }, ref) => {
     const initialized = useAppStore((s) => s.iconInitialized);
     const iconNames = useAppStore((s) => s.iconNames);
+    const darkMode = useAppStore((s) => s.darkMode);
 
     useEffect(() => {
       if (!initialized) {
@@ -58,6 +59,12 @@ export const VinesLucideIcon = forwardRef<HTMLDivElement, IVinesLucideIconProps>
       return { finalSrc: emoji, isLucide: false };
     }, [src, iconNames]);
 
+    const { color: attrColor, stroke: attrStroke, ...restAttr } = attr;
+    const fallbackColor = attrColor ?? style?.color ?? (darkMode ? '#FFFFFF' : undefined);
+    const fallbackStroke = attrStroke ?? style?.stroke ?? (darkMode ? '#FFFFFF' : undefined);
+    const mergedStyle = { ...style, color: fallbackColor, stroke: fallbackStroke };
+    const sizeProps = size ? { width: size, height: size } : {};
+
     return (
       <AnimatePresence mode="popLayout">
         {initialized ? (
@@ -72,8 +79,11 @@ export const VinesLucideIcon = forwardRef<HTMLDivElement, IVinesLucideIconProps>
               <LucideIconRender
                 src={finalSrc ?? 'box'}
                 className={cn(className, active && 'stroke-vines-500')}
-                style={style}
-                {...attr}
+                style={mergedStyle}
+                color={attrColor}
+                stroke={attrStroke}
+                {...sizeProps}
+                {...restAttr}
               />
             ) : (
               finalSrc
