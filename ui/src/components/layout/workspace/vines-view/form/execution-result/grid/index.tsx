@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
 import { useWorkflowAssociationList } from '@/apis/workflow/association';
+import { extractVideoUrls } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/utils.ts';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { Button } from '@/components/ui/button';
@@ -355,6 +356,17 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     const gap = 10;
     const columnsCount = Math.floor((containerWidthValue + gap) / (itemSize + gap));
 
+    const isVideoItem = (item: IVinesExecutionResultItem) => {
+      if (item.render.type === 'video') return true;
+      try {
+        const d: any = item?.render?.data as any;
+        const text = typeof d === 'string' ? d : JSON.stringify(d);
+        return extractVideoUrls(text).length > 0;
+      } catch {
+        return false;
+      }
+    };
+
     const isPomItem = (item: IVinesExecutionResultItem) => {
       const d: any = item?.render?.data as any;
       const payload = d && typeof d === 'object' ? (d.data ? d.data : d) : null;
@@ -392,12 +404,13 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       >
         {data.map((item, index) => {
           const isPom = isPomItem(item);
+          const isVideo = isVideoItem(item);
           const span2 = isPom && columnsCount >= 2;
           return (
             <div
               key={`${index}-${item.render.key}`}
-              className={cn(span2 && 'col-span-2', !isPom && 'aspect-square')}
-              style={{ minHeight: isPom ? 320 : 200 }}
+              className={cn(span2 && 'col-span-2', !isPom && !isVideo && 'aspect-square')}
+              style={{ minHeight: isPom ? 320 : isVideo ? 0 : 200 }}
             >
               {renderItem(item)}
             </div>

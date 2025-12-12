@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useSystemConfig } from '@/apis/common';
 import { ExectuionResultGridDisplayType } from '@/apis/common/typings';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
-import { extract3DModelUrls } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/utils';
+import { extract3DModelUrls, extractVideoUrls } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/utils';
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid/index.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesLoading } from '@/components/ui/loading';
@@ -66,6 +66,16 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
 
   const progressType = get(oem, 'theme.views.form.progress', 'infinite');
 
+  const isVideo = React.useMemo(() => {
+    if (type === 'video') return true;
+    try {
+      const text = typeof data === 'string' ? data : JSON.stringify(data);
+      return extractVideoUrls(text).length > 0;
+    } catch {
+      return false;
+    }
+  }, [type, data]);
+
   // 3D 模型下载：给 Wrapper 传 src，即可复用「像图片一样」的下载按钮（Download icon）
   const downloadSrc = React.useMemo(() => {
     try {
@@ -117,7 +127,9 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
             ? // 网格模式下，非 POM 仍保持方形比例，POM 使用内容自适应高度避免与相邻卡片重叠
               isPom
               ? 'h-full'
-              : 'aspect-square h-full'
+              : isVideo
+                ? 'h-full'
+                : 'aspect-square h-full'
             : 'h-10'
         }`}
       >
@@ -137,7 +149,9 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
               ? // 网格模式下，非 POM 使用固定方形比例，POM 根据内容自适应高度，避免结果表格被压缩后与下方卡片重叠
                 isPom
                 ? 'h-full'
-                : 'aspect-square h-full'
+                : isVideo
+                  ? 'h-full'
+                  : 'aspect-square h-full'
               : // 非网格（masonry 等）模式下，POM 运行中卡片组固定高度避免重叠
                 isPom
                 ? 'h-[500px]'
@@ -160,7 +174,9 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
               ? // 网格模式下，非 POM 使用固定方形比例，POM 根据内容自适应高度
                 isPom
                 ? 'h-full'
-                : 'aspect-square h-full'
+                : isVideo
+                  ? 'h-full'
+                  : 'aspect-square h-full'
               : // 非网格（masonry 等）模式下，POM 暂停卡片组固定高度避免重叠
                 isPom
                 ? 'h-[500px]'
@@ -221,7 +237,9 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
               ? // 网格模式下，非 POM 使用固定方形比例，POM 根据内容自适应高度
                 isPom
                 ? 'h-full'
-                : 'aspect-square h-full'
+                : isVideo
+                  ? 'h-full'
+                  : 'aspect-square h-full'
               : // 非 grid 模式下，POM 卡片固定高度避免重叠
                 isPom
                 ? 'h-[500px]'
@@ -249,8 +267,10 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
                   : // 非 grid 模式下，POM 内容区占满固定高度；非 POM 使用原来的自适应高度
                     isPom
                     ? 'h-full'
-                    : 'max-h-96 min-h-40'
-              } ${isPom ? 'overflow-hidden' : 'overflow-auto'}`}
+                    : isVideo
+                      ? ''
+                      : 'max-h-96 min-h-40'
+              } ${isPom || isVideo ? 'overflow-hidden' : 'overflow-auto'}`}
             >
               {renderSelectionOverlay()}
               <VinesAbstractDataPreview data={data} className="h-full" />
