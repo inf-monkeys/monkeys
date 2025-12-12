@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useSystemConfig } from '@/apis/common';
 import { ExectuionResultGridDisplayType } from '@/apis/common/typings';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
+import { extract3DModelUrls } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/utils';
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid/index.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesLoading } from '@/components/ui/loading';
@@ -64,6 +65,16 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
   const { data: oem } = useSystemConfig();
 
   const progressType = get(oem, 'theme.views.form.progress', 'infinite');
+
+  // 3D 模型下载：给 Wrapper 传 src，即可复用「像图片一样」的下载按钮（Download icon）
+  const downloadSrc = React.useMemo(() => {
+    try {
+      const text = typeof data === 'string' ? data : JSON.stringify(data);
+      return extract3DModelUrls(text)?.[0];
+    } catch {
+      return undefined;
+    }
+  }, [data]);
 
   // 检测是否为 POM 相关结果：
   // - 当前条目直接包含 measurements_table
@@ -222,6 +233,7 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
         >
           <VirtuaExecutionResultGridWrapper
             data={result}
+            src={downloadSrc}
             event$={event$}
             addDeletedInstanceId={addDeletedInstanceId}
             mutate={mutate}
