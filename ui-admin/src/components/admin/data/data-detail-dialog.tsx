@@ -8,6 +8,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { MediaPreview } from '@/components/ui/media-preview';
 import type { DataItem } from '@/types/data';
 import { format } from 'date-fns';
 import {
@@ -101,45 +102,66 @@ export function DataDetailDialog({
         <ScrollArea className="max-h-[calc(90vh-120px)]">
           <div className="space-y-6 pr-4">
             {/* 缩略图或主内容 */}
-            {(item.thumbnail || item.media || item.primaryContent) && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold">预览</h3>
-                <div className="rounded-lg border bg-muted overflow-hidden">
-                  {item.thumbnail ? (
-                    <img
-                      src={item.thumbnail}
-                      alt={item.name}
-                      className="w-full h-auto max-h-80 object-contain"
-                    />
-                  ) : item.media ? (
-                    <img
-                      src={item.media}
-                      alt={item.name}
-                      className="w-full h-auto max-h-80 object-contain"
-                    />
-                  ) : item.primaryContent?.type === 'image' ? (
-                    <img
-                      src={item.primaryContent.value}
-                      alt={item.name}
-                      className="w-full h-auto max-h-80 object-contain"
-                    />
-                  ) : item.primaryContent?.type === 'text' ? (
-                    <div className="p-4 text-sm whitespace-pre-wrap">
-                      {item.primaryContent.value}
-                    </div>
-                  ) : item.primaryContent ? (
-                    <pre className="p-4 text-xs overflow-auto max-h-80 bg-muted">
-                      {JSON.stringify(item.primaryContent, null, 2)}
-                    </pre>
-                  ) : (
-                    <div className="p-8 text-center text-muted-foreground">
-                      <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      <p>无预览</p>
-                    </div>
-                  )}
-                </div>
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold">预览</h3>
+              <div className="rounded-lg border overflow-hidden">
+                {/* 优先使用 media 或 thumbnail */}
+                {(item.media || item.thumbnail) ? (
+                  <MediaPreview
+                    src={item.media || item.thumbnail || ''}
+                    alt={item.name}
+                    type="auto"
+                    thumbnail={item.thumbnail}
+                    aspectRatio="auto"
+                    className="max-h-96"
+                  />
+                ) : item.primaryContent ? (
+                  <>
+                    {/* 根据 primaryContent.type 渲染 */}
+                    {item.primaryContent.type === 'image' ? (
+                      <MediaPreview
+                        src={item.primaryContent.value}
+                        alt={item.name}
+                        type="image"
+                        aspectRatio="auto"
+                        className="max-h-96"
+                      />
+                    ) : item.primaryContent.type === 'video' ? (
+                      <MediaPreview
+                        src={item.primaryContent.value}
+                        alt={item.name}
+                        type="video"
+                        thumbnail={item.primaryContent.metadata?.thumbnailUrl}
+                        aspectRatio="auto"
+                        className="max-h-96"
+                      />
+                    ) : item.primaryContent.type === '3d' ? (
+                      <MediaPreview
+                        src={item.primaryContent.value}
+                        alt={item.name}
+                        type="3d"
+                        thumbnail={item.primaryContent.metadata?.thumbnailUrl}
+                        aspectRatio="auto"
+                        className="max-h-96"
+                      />
+                    ) : item.primaryContent.type === 'text' ? (
+                      <div className="p-4 text-sm whitespace-pre-wrap bg-muted">
+                        {item.primaryContent.value}
+                      </div>
+                    ) : (
+                      <pre className="p-4 text-xs overflow-auto max-h-80 bg-muted">
+                        {JSON.stringify(item.primaryContent, null, 2)}
+                      </pre>
+                    )}
+                  </>
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground bg-muted">
+                    <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>无预览</p>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
 
             <Separator />
 

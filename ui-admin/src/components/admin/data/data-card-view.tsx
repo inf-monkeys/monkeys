@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { InfiniteScroll } from '@/components/ui/infinite-scroll';
+import { MediaPreview } from '@/components/ui/media-preview';
 import { MoreHorizontal, Edit, Trash2, Eye, Loader2 } from 'lucide-react';
 import type { DataItem } from '@/types/data';
 
@@ -147,15 +148,13 @@ export function DataCardView({
                   </CardHeader>
                   {hasMedia && (
                     <CardContent className="p-0">
-                      {/* 方形缩略图 */}
-                      <div className="w-full aspect-square overflow-hidden bg-muted">
-                        <img
-                          src={item.thumbnail || item.media}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      </div>
+                      <MediaPreview
+                        src={item.media || item.thumbnail || ''}
+                        alt={item.name}
+                        type="auto"
+                        thumbnail={item.thumbnail}
+                        aspectRatio="square"
+                      />
                     </CardContent>
                   )}
                 </Card>

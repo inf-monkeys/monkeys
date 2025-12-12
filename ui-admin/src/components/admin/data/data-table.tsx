@@ -9,15 +9,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '@/components/ui/pagination';
 import type { DataItem } from '@/types/data';
 import {
     flexRender,
@@ -28,7 +19,7 @@ import {
     type SortingState,
 } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { ArrowUpDown, Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Edit, Eye, MoreHorizontal, Trash2, Loader2 } from 'lucide-react';
 import * as React from 'react';
 
 interface DataTableProps {
@@ -58,6 +49,35 @@ export function DataTable({
 }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
+  const hasMore = total > data.length;
+  const observerRef = React.useRef<IntersectionObserver | null>(null);
+  const sentinelRef = React.useRef<HTMLDivElement | null>(null);
+
+  // 使用 IntersectionObserver 监听哨兵元素
+  React.useEffect(() => {
+    if (!onPageChange || !hasMore || isLoading) return;
+
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    // 创建 IntersectionObserver
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          onPageChange(currentPage + 1);
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    observerRef.current.observe(sentinel);
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMore, isLoading, currentPage, onPageChange]);
 
   const columns: ColumnDef<DataItem>[] = [
     {
@@ -243,7 +263,7 @@ export function DataTable({
     }
   }, [rowSelection, onSelectionChange]);
 
-  if (isLoading) {
+  if (isLoading && data.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="text-center">
@@ -254,7 +274,7 @@ export function DataTable({
     );
   }
 
-  if (data.length === 0) {
+  if (data.length === 0 && !isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-muted-foreground">暂无数据</p>
@@ -304,24 +324,33 @@ export function DataTable({
             ))}
           </tbody>
         </table>
-      </div>
 
-      {/* 底部信息和分页 */}
-      <div className="relative flex items-center border-t bg-background px-4 py-3">
-        <div className="text-sm text-muted-foreground whitespace-nowrap">
-          已选择 {table.getFilteredSelectedRowModel().rows.length} / {data.length} 项
-          {total > 0 && ` · 共 ${total} 条数据`}
-        </div>
-        {onPageChange && total > pageSize && (
-          <div className="absolute left-1/2 -translate-x-1/2">
-            <DataTablePagination
-              currentPage={currentPage}
-              pageSize={pageSize}
-              total={total}
-              onPageChange={onPageChange}
-            />
+        {/* 哨兵元素用于触发无限滚动 */}
+        {hasMore && <div ref={sentinelRef} className="h-px" />}
+
+        {/* 加载状态 */}
+        {isLoading && hasMore && (
+          <div className="flex justify-center py-8">
+            <div className="text-center">
+              <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">加载更多...</p>
+            </div>
           </div>
         )}
+
+        {/* 已加载全部 */}
+        {!hasMore && data.length > 0 && (
+          <div className="text-center py-8 text-sm text-muted-foreground">
+            已加载全部 {total} 条数据
+          </div>
+        )}
+      </div>
+
+      {/* 底部信息栏 */}
+      <div className="flex items-center border-t bg-background px-4 py-3">
+        <div className="text-sm text-muted-foreground whitespace-nowrap">
+          已选择 {table.getFilteredSelectedRowModel().rows.length} 项 · 已加载 {data.length} / {total} 条数据
+        </div>
       </div>
     </div>
   );
@@ -333,98 +362,4 @@ function formatFileSize(bytes: number): string {
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-}
-
-// 分页组件
-interface DataTablePaginationProps {
-  currentPage: number;
-  pageSize: number;
-  total: number;
-  onPageChange: (page: number) => void;
-}
-
-function DataTablePagination({
-  currentPage,
-  pageSize,
-  total,
-  onPageChange,
-}: DataTablePaginationProps) {
-  const totalPages = Math.ceil(total / pageSize);
-
-  // 生成页码数组
-  const getPageNumbers = () => {
-    const pages: (number | 'ellipsis')[] = [];
-    const showEllipsisThreshold = 7;
-
-    if (totalPages <= showEllipsisThreshold) {
-      // 如果总页数少，显示所有页码
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // 总是显示第一页
-      pages.push(1);
-
-      if (currentPage > 3) {
-        pages.push('ellipsis');
-      }
-
-      // 显示当前页附近的页码
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      if (currentPage < totalPages - 2) {
-        pages.push('ellipsis');
-      }
-
-      // 总是显示最后一页
-      pages.push(totalPages);
-    }
-
-    return pages;
-  };
-
-  const pageNumbers = getPageNumbers();
-
-  return (
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
-            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-          />
-        </PaginationItem>
-
-        {pageNumbers.map((page, index) =>
-          page === 'ellipsis' ? (
-            <PaginationItem key={`ellipsis-${index}`}>
-              <PaginationEllipsis />
-            </PaginationItem>
-          ) : (
-            <PaginationItem key={page}>
-              <PaginationLink
-                onClick={() => onPageChange(page)}
-                isActive={currentPage === page}
-                className="cursor-pointer"
-              >
-                {page}
-              </PaginationLink>
-            </PaginationItem>
-          )
-        )}
-
-        <PaginationItem>
-          <PaginationNext
-            onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
-            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
-  );
 }
