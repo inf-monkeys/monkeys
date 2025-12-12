@@ -18,6 +18,7 @@ import {
   QueryDataViewDto,
   DataViewResponseDto,
   DataViewTreeResponseDto,
+  BatchUpdateViewSortDto,
 } from './dto/data-view.dto';
 import { AdminJwtGuard } from '../guards/admin-jwt.guard';
 import { CurrentAdmin } from '../decorators/current-admin.decorator';
@@ -153,6 +154,23 @@ export class DataViewController {
     @CurrentAdmin() admin: AdminUserDto,
   ): Promise<{ success: boolean }> {
     await this.dataViewService.deleteView(id, admin.id);
+    return { success: true };
+  }
+
+  /**
+   * 批量更新视图排序
+   */
+  @Post('batch/sort')
+  @ApiOperation({ summary: '批量更新视图排序' })
+  @ApiResponse({
+    status: 200,
+    description: '更新成功',
+  })
+  async batchUpdateSort(
+    @CurrentAdmin() admin: AdminUserDto,
+    @Body() dto: BatchUpdateViewSortDto,
+  ): Promise<{ success: boolean }> {
+    await this.dataViewService.batchUpdateSort(admin.id, dto);
     return { success: true };
   }
 }

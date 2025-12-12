@@ -42,6 +42,12 @@ function DataManagementPage() {
     loadCategories();
   }, []);
 
+  // 切换分类或搜索时重置状态
+  useEffect(() => {
+    setCurrentPage(1);
+    setDataItems([]);
+  }, [selectedCategory, searchKeyword]);
+
   // 加载数据列表
   useEffect(() => {
     loadDataList();
@@ -68,13 +74,21 @@ function DataManagementPage() {
         page: currentPage,
         pageSize: pageSize,
       });
-      setDataItems(response.items);
+
+      // 如果是第一页，替换数据；否则追加数据（用于无限滚动）
+      if (currentPage === 1) {
+        setDataItems(response.items);
+      } else {
+        setDataItems(prev => [...prev, ...response.items]);
+      }
       setTotal(response.total);
     } catch (error: any) {
       console.error('加载数据失败:', error);
       toast.error(error.message || '加载数据失败');
-      setDataItems([]);
-      setTotal(0);
+      if (currentPage === 1) {
+        setDataItems([]);
+        setTotal(0);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +96,6 @@ function DataManagementPage() {
 
   const handleSearch = (keyword: string) => {
     setSearchKeyword(keyword);
-    setCurrentPage(1); // 搜索时重置到第一页
   };
 
   const handlePageChange = (page: number) => {
@@ -90,6 +103,8 @@ function DataManagementPage() {
   };
 
   const handleRefresh = () => {
+    setCurrentPage(1);
+    setDataItems([]);
     loadDataList();
     loadCategories();
     toast.success('数据已刷新');

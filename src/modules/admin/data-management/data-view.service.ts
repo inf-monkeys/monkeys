@@ -10,6 +10,7 @@ import {
   MoveDataViewDto,
   QueryDataViewDto,
   DataViewResponseDto,
+  BatchUpdateViewSortDto,
 } from './dto/data-view.dto';
 
 @Injectable()
@@ -140,6 +141,19 @@ export class DataViewService {
     }
 
     await this.dataViewRepository.softDeleteView(viewId);
+  }
+
+  /**
+   * 批量更新视图排序
+   */
+  async batchUpdateSort(userId: string, dto: BatchUpdateViewSortDto): Promise<void> {
+    // 检查所有视图的权限
+    for (const item of dto.items) {
+      await this.checkPermission(item.id, userId, 'write');
+    }
+
+    // 批量更新排序
+    await this.dataViewRepository.batchUpdateSort(dto.items);
   }
 
   /**

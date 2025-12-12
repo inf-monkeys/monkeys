@@ -130,6 +130,16 @@ export async function deleteView(id: string): Promise<{ success: boolean }> {
   });
 }
 
+/**
+ * 批量更新视图排序
+ */
+export async function batchUpdateViewSort(items: Array<{ id: string; sort: number }>): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`${API_BASE}/data/views/batch/sort`, {
+    method: 'POST',
+    body: JSON.stringify({ items }),
+  });
+}
+
 // ========== 数据/资产管理 ==========
 
 /**

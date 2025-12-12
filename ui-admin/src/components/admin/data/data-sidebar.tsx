@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { DataCategory, CreateViewDto, UpdateViewDto } from '@/types/data';
+import { batchUpdateViewSort } from '@/apis/data';
 import {
   ChevronDown,
   ChevronRight,
@@ -40,8 +41,27 @@ import {
   Trash2,
   Edit,
   FolderPlus,
+  GripVertical,
 } from 'lucide-react';
 import { useState } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { toast } from 'sonner';
 
 interface DataSidebarProps {
   categories: DataCategory[];
@@ -67,6 +87,90 @@ export function DataSidebar({
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string | undefined>(undefined);
 
+  // 配置拖拽传感器
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 需要拖动 8px 才激活，避免误触
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // 扁平化所有视图（包括子视图）
+  const flattenCategories = (cats: DataCategory[]): DataCategory[] => {
+    const result: DataCategory[] = [];
+    const flatten = (items: DataCategory[]) => {
+      for (const item of items) {
+        result.push(item);
+        if (item.children && item.children.length > 0) {
+          flatten(item.children);
+        }
+      }
+    };
+    flatten(cats);
+    return result;
+  };
+
+  const allCategories = flattenCategories(categories);
+
+  // 处理拖拽结束
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    // 查找拖动的项和目标项
+    const activeItem = allCategories.find((cat) => cat.id === active.id);
+    const overItem = allCategories.find((cat) => cat.id === over.id);
+
+    if (!activeItem || !overItem) {
+      return;
+    }
+
+    // 只允许同一父视图下的拖拽
+    if (activeItem.parentId !== overItem.parentId) {
+      toast.error('只能在同一层级内调整顺序');
+      return;
+    }
+
+    // 获取同一父视图下的所有项
+    const siblings = allCategories.filter(
+      (cat) => cat.parentId === activeItem.parentId
+    );
+
+    const oldIndex = siblings.findIndex((item) => item.id === active.id);
+    const newIndex = siblings.findIndex((item) => item.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    // 重新排序
+    const reorderedItems = arrayMove(siblings, oldIndex, newIndex);
+
+    // 更新 sort 字段
+    const updates = reorderedItems.map((item, index) => ({
+      id: item.id,
+      sort: index,
+    }));
+
+    try {
+      // 调用 API 更新排序
+      await batchUpdateViewSort(updates);
+      toast.success('排序已更新');
+
+      // 刷新数据
+      onRefresh();
+    } catch (error: any) {
+      toast.error(error.message || '更新排序失败');
+    }
+  };
+
   const handleCreateSubmit = () => {
     if (!newCategoryName.trim()) return;
 
@@ -88,19 +192,19 @@ export function DataSidebar({
     setCreateDialogOpen(true);
   };
 
-  // 扁平化所有视图，用于父视图选择
-  const flattenCategories = (cats: DataCategory[], level = 0): Array<DataCategory & { displayLevel: number }> => {
+  // 扁平化所有视图，用于父视图选择（带层级信息）
+  const flattenCategoriesWithLevel = (cats: DataCategory[], level = 0): Array<DataCategory & { displayLevel: number }> => {
     const result: Array<DataCategory & { displayLevel: number }> = [];
     for (const cat of cats) {
       result.push({ ...cat, displayLevel: level });
       if (cat.children && cat.children.length > 0) {
-        result.push(...flattenCategories(cat.children, level + 1));
+        result.push(...flattenCategoriesWithLevel(cat.children, level + 1));
       }
     }
     return result;
   };
 
-  const flatCategories = flattenCategories(categories);
+  const flatCategories = flattenCategoriesWithLevel(categories);
 
   return (
     <div className="flex h-full w-64 flex-col border-r bg-muted/5">
@@ -213,18 +317,29 @@ export function DataSidebar({
               点击右上角 + 创建新视图
             </div>
           ) : (
-            categories.map((category) => (
-              <CategoryTreeItem
-                key={category.id}
-                category={category}
-                selectedCategory={selectedCategory}
-                onSelectCategory={onSelectCategory}
-                onUpdateCategory={onUpdateCategory}
-                onDeleteCategory={onDeleteCategory}
-                onCreateSubCategory={handleOpenCreateDialog}
-                level={0}
-              />
-            ))
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={allCategories.map((cat) => cat.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {categories.map((category) => (
+                  <CategoryTreeItem
+                    key={category.id}
+                    category={category}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={onSelectCategory}
+                    onUpdateCategory={onUpdateCategory}
+                    onDeleteCategory={onDeleteCategory}
+                    onCreateSubCategory={handleOpenCreateDialog}
+                    level={0}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
           )}
         </div>
       </ScrollArea>
@@ -258,6 +373,22 @@ function CategoryTreeItem({
   const hasChildren = category.children && category.children.length > 0;
   const isSelected = selectedCategory === category.id;
 
+  // 使用 useSortable hook
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   const Icon = hasChildren
     ? isExpanded
       ? FolderOpen
@@ -282,8 +413,18 @@ function CategoryTreeItem({
   };
 
   return (
-    <div>
+    <div ref={setNodeRef} style={style}>
       <div className="group relative flex items-center">
+        {/* 拖拽手柄 */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute left-0 h-full flex items-center px-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+          style={{ paddingLeft: `${level * 0.75}rem` }}
+        >
+          <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
+        </div>
+
         <Button
           variant="ghost"
           size="sm"
@@ -291,7 +432,7 @@ function CategoryTreeItem({
             'w-full justify-start font-normal pr-8',
             isSelected && 'bg-accent text-accent-foreground'
           )}
-          style={{ paddingLeft: `${(level + 1) * 0.75}rem` }}
+          style={{ paddingLeft: `${(level + 1) * 0.75 + 1.5}rem` }}
           onClick={() => onSelectCategory(category.id)}
         >
           {hasChildren && (

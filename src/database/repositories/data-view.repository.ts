@@ -277,4 +277,25 @@ export class DataViewRepository extends Repository<DataViewEntity> {
       order: { path: 'ASC', sort: 'ASC' },
     });
   }
+
+  /**
+   * 批量更新视图排序
+   */
+  async batchUpdateSort(items: Array<{ id: string; sort: number }>): Promise<void> {
+    const now = Date.now();
+
+    // 使用事务批量更新
+    await this.manager.transaction(async (transactionalEntityManager) => {
+      for (const item of items) {
+        await transactionalEntityManager.update(
+          DataViewEntity,
+          { id: item.id, isDeleted: false },
+          {
+            sort: item.sort,
+            updatedTimestamp: now,
+          }
+        );
+      }
+    });
+  }
 }

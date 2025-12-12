@@ -212,3 +212,15 @@ export class QueryDataViewDto {
   @IsOptional()
   keyword?: string;
 }
+
+/**
+ * 批量更新视图排序 DTO
+ */
+export class BatchUpdateViewSortDto {
+  @ApiProperty({ description: '视图排序列表', type: [Object] })
+  @IsObject({ each: true })
+  items: Array<{
+    id: string;
+    sort: number;
+  }>;
+}
