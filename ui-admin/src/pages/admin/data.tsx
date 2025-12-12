@@ -1,20 +1,20 @@
 import {
-  batchDeleteDataItems,
-  deleteDataItem,
-  exportData,
-  importData,
-  getDataCategories,
-  getDataList,
-  createView,
-  updateView,
-  deleteView,
+    batchDeleteDataItems,
+    createView,
+    deleteDataItem,
+    deleteView,
+    exportData,
+    getDataCategories,
+    getDataList,
+    importData,
+    updateView,
 } from '@/apis/data';
+import { DataCardView } from '@/components/admin/data/data-card-view';
+import { DataDetailDialog } from '@/components/admin/data/data-detail-dialog';
 import { DataSidebar } from '@/components/admin/data/data-sidebar';
 import { DataTable } from '@/components/admin/data/data-table';
-import { DataCardView } from '@/components/admin/data/data-card-view';
 import { DataToolbar } from '@/components/admin/data/data-toolbar';
-import { DataDetailDialog } from '@/components/admin/data/data-detail-dialog';
-import type { DataCategory, DataExportOptions, DataItem, CreateViewDto, UpdateViewDto } from '@/types/data';
+import type { CreateViewDto, DataCategory, DataExportOptions, DataItem, UpdateViewDto } from '@/types/data';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -197,7 +197,7 @@ function DataManagementPage() {
   };
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div className="flex h-full overflow-hidden min-h-0">
       {/* 左侧视图导航 */}
       <DataSidebar
         categories={categories}
@@ -224,7 +224,7 @@ function DataManagementPage() {
         />
 
         {/* 数据显示区域 */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-hidden min-h-0">
           {viewMode === 'table' ? (
             <DataTable
               data={dataItems}
