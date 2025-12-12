@@ -5,6 +5,7 @@ import { CircleSlash, CircleX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
+import { VinesAbstract3DModel } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/3d-model.tsx';
 import { VinesAbstractBoolean } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/boolean.tsx';
 import { VinesAbstractImage } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/image.tsx';
 import { VinesAbstractPDB } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/pdb.tsx';
@@ -66,7 +67,10 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
               {!isResultFailed &&
                 previewData.map(({ name, type, value }, i) => {
                   return (
-                    <div key={name} className="flex flex-col items-start justify-center">
+                    <div
+                      key={`${name}::${type}::${typeof value === 'string' ? value : String(value)}::${i}`}
+                      className="flex flex-col items-start justify-center"
+                    >
                       {visibleKey && <h1 className="break-all text-sm font-medium">{name}</h1>}
                       {type === 'string' && <VinesAbstractString>{value}</VinesAbstractString>}
                       {type === 'boolean' && <VinesAbstractBoolean>{value}</VinesAbstractBoolean>}
@@ -76,6 +80,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
                         <VinesAbstractPDB height={(style?.height as number) ?? void 0}>{value}</VinesAbstractPDB>
                       )}
                       {type === 'video' && <VinesAbstractVideo>{value?.toString() ?? ''}</VinesAbstractVideo>}
+                      {type === '3d-model' && <VinesAbstract3DModel>{value}</VinesAbstract3DModel>}
                       {i !== previewDataLength - 1 && <Separator className="mt-3" />}
                     </div>
                   );
