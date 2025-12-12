@@ -120,16 +120,6 @@ export class AssetsCommonRepository {
     });
   }
 
-  public async getTagsByName(teamId: string, name: string) {
-    return await this.assetTagRepo.find({
-      where: {
-        teamId,
-        name,
-        isDeleted: false,
-      },
-    });
-  }
-
   public async createTag(teamId: string, name: string, color?: string) {
     if (typeof name !== 'string' || !name.trim()) {
       throw new Error('请输入标签名称');

@@ -39,20 +39,6 @@ export class WorkflowCrudController {
     return new SuccessListResponse({ data: list, total: totalCount, page: +page, limit: +limit });
   }
 
-  @Get('/folder-view')
-  @ApiOperation({
-    summary: '获取工作流文件夹视图数据',
-    description: '返回基于内置应用分类的文件夹视图，用于工作流列表页面的文件夹显示',
-  })
-  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
-  public async listWorkflowsForFolderView(@Req() req: IRequest, @Query('search') search?: string) {
-    const { teamId } = req;
-    const folders = await this.service.listWorkflowsForFolderView(teamId, search);
-    return new SuccessResponse({
-      data: folders,
-    });
-  }
-
   @Get('/:workflowId')
   @ApiOperation({
     summary: '获取 workflow 定义',

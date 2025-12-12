@@ -746,12 +746,11 @@ export class MarketplaceService {
       const installResult = await this.installAppLatestVersionToAllTeams(appId);
       // 为 workflow 类型的预置应用添加全局 pinned 视图配置（默认表单视图）
       if (updatedApp.assetType === 'workflow') {
-        const groupKey = Array.isArray(updatedApp.categories) && updatedApp.categories.length > 0 ? updatedApp.categories[0] : null;
         const latestVersion = await this.getAppLatestVersion(appId);
         const refs = latestVersion?.sourceAssetReferences || [];
         for (const ref of refs) {
           if (ref.assetType === 'workflow' && ref.assetId) {
-            await this.workflowPageService.addBuiltinPinnedPage(ref.assetId, 'preview', { groupKey });
+            await this.workflowPageService.addBuiltinPinnedPage(ref.assetId, 'preview');
           }
         }
         // 同步清理预置 workflow 定义中的 credential，保证从此以后以「内置应用」方式使用时不再依赖旧团队的密钥
@@ -903,44 +902,6 @@ export class MarketplaceService {
     }
 
     return Array.from(builtinWorkflowIds);
-  }
-
-  /**
-   * 根据 workflowId 列表获取对应的应用市场应用信息（包括分类信息）
-   */
-  public async getAppsByWorkflowIds(workflowIds: string[]): Promise<MarketplaceAppEntity[]> {
-    if (workflowIds.length === 0) {
-      return [];
-    }
-
-    // 查询包含这些 workflowId 的应用版本
-    const apps = await this.appRepo
-      .createQueryBuilder('app')
-      .leftJoinAndSelect('app.versions', 'version')
-      .where('app.isPreset = :isPreset', { isPreset: true })
-      .andWhere('app.assetType = :assetType', { assetType: 'workflow' })
-      .orderBy('version.createdTimestamp', 'DESC')
-      .getMany();
-
-    // 筛选出包含目标 workflowId 的应用
-    const result: MarketplaceAppEntity[] = [];
-    for (const app of apps) {
-      if (!app.versions || app.versions.length === 0) continue;
-
-      const latestVersion = app.versions[0];
-      if (!latestVersion.sourceAssetReferences) continue;
-
-      // 检查是否包含目标 workflowId
-      const hasTargetWorkflow = latestVersion.sourceAssetReferences.some(
-        (ref) => ref.assetType === 'workflow' && workflowIds.includes(ref.assetId)
-      );
-
-      if (hasTargetWorkflow) {
-        result.push(app);
-      }
-    }
-
-    return result;
   }
 
   public async initPresetAppMarketplace() {

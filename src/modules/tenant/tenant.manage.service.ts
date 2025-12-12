@@ -1,4 +1,4 @@
-import { generateDbId, getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
+import { getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { ApiKeyEntity } from '@/database/entities/apikey/apikey';
 import { BaseEntity } from '@/database/entities/base/base';
 import { DesignAssociationEntity } from '@/database/entities/design/design-association';
@@ -9,10 +9,7 @@ import { TeamEntity } from '@/database/entities/identity/team';
 import { InstalledAppEntity } from '@/database/entities/marketplace/installed-app.entity';
 import { MarketplaceAppEntity } from '@/database/entities/marketplace/marketplace-app.entity';
 import { WorkflowObservabilityEntity } from '@/database/entities/observability/workflow-observability';
-import { WorkflowBuiltinPinnedPageEntity } from '@/database/entities/workflow/workflow-builtin-pinned-page';
-import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
-import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { MarketplaceService } from '@/modules/marketplace/services/marketplace.service';
@@ -35,7 +32,6 @@ export class TenantManageService {
     private readonly workflowRepository: WorkflowRepository,
     private readonly marketplaceService: MarketplaceService,
     private readonly entityManager: EntityManager,
-    private readonly assetsCommonRepository: AssetsCommonRepository,
   ) {}
 
   async _delete(entity: EntityTarget<BaseEntity>, where: FindOptionsWhere<BaseEntity & { teamId?: string }>, transactionalEntityManager?: EntityManager, soft = true) {
@@ -280,41 +276,13 @@ export class TenantManageService {
    *   如果尚未创建，会自动为该 workflow 创建一个应用、审批并设置为预置应用。
    *
    * @param workflowId 工作流 ID（workflowId，而非数据库主键）
-   * @param categories 可选的分类数组，如果不提供或为空，则使用 ['默认']
-   * @param teamId 可选的团队 ID（已废弃，系统会为所有团队创建分类筛选规则）
    */
-  async setWorkflowAsBuiltinApp(workflowId: string, categories?: string[], teamId?: string) {
+  async setWorkflowAsBuiltinApp(workflowId: string) {
     // 1. 尝试根据 workflowId 在应用市场中查找对应的 App 版本
     const existsAppVersion = await this.marketplaceService.getAppVersionByAssetId(workflowId, 'workflow');
 
-    // 处理分类：如果没有提供或为空，则使用 ['默认']
-    const finalCategories = categories && categories.length > 0 ? categories : ['默认'];
-    const finalGroupKey = finalCategories[0] ?? null;
-
     if (existsAppVersion?.app) {
       const appId = existsAppVersion.app.id;
-
-      // 更新应用的分类
-      await this.entityManager.update(MarketplaceAppEntity, { id: appId }, { categories: finalCategories });
-
-      // 为所有团队创建对应的 AssetFilterEntity
-      await this.createAssetFiltersForAllTeams(finalCategories);
-
-      // 同步更新全局内置 pinned 视图的 groupKey（用于工作台分组展示）
-      await this.entityManager.update(
-        WorkflowBuiltinPinnedPageEntity,
-        { workflowId, isDeleted: false },
-        { groupKey: finalGroupKey, updatedTimestamp: Date.now() },
-      );
-
-      // 确保所有团队存在对应的工作台分组（避免回落到默认）
-      // 为所有分类都创建工作台分组
-      for (const category of finalCategories) {
-        if (category && category !== '默认') {
-          await this.ensureWorkbenchGroupForAllTeams(category);
-        }
-      }
-
       // 如果已经是预置应用，则直接返回，不重复安装
       if (existsAppVersion.app.isPreset) {
         return {
@@ -344,7 +312,7 @@ export class TenantManageService {
     //     避免在后续生成 snapshot 时，因为缺少 comfyui-workflow 应用而导致 404
     await this.ensureComfyuiDependenciesPublished(workflow);
 
-    const workflowTeamId = workflow.teamId;
+    const teamId = workflow.teamId;
     const userId = workflow.creatorUserId || 'system';
     const version = workflow.version;
 
@@ -356,7 +324,7 @@ export class TenantManageService {
         description: typeof workflow.description === 'string' ? workflow.description : undefined,
         iconUrl: workflow.iconUrl,
         assetType: 'workflow' as const,
-        categories: finalCategories,
+        categories: [] as string[],
       },
       version: {
         version: '1.0.0',
@@ -371,7 +339,7 @@ export class TenantManageService {
       },
     };
 
-    await this.marketplaceService.createAppWithVersion(workflowTeamId, userId, dto as any);
+    await this.marketplaceService.createAppWithVersion(teamId, userId, dto as any);
 
     // 3. 审批并标记为预置应用
     await this.marketplaceService.approveSubmission(appId, true);
@@ -379,152 +347,12 @@ export class TenantManageService {
     // 4. 将应用标记为预置应用（isPreset = true），并为所有团队安装最新版本
     const result = await this.marketplaceService.setPreset(appId, true);
 
-    // 5. 为所有团队创建对应的 AssetFilterEntity
-    await this.createAssetFiltersForAllTeams(finalCategories);
-
-    // 6. 确保所有团队存在对应的工作台分组
-    // 为所有分类都创建工作台分组
-    for (const category of finalCategories) {
-      if (category && category !== '默认') {
-        await this.ensureWorkbenchGroupForAllTeams(category);
-      }
-    }
-
     return {
       appId,
       ...result,
       builtin: true,
       created: true,
     };
-  }
-
-  /**
-   * 为所有团队创建指定分类的 AssetFilterEntity
-   * @param categories 分类数组
-   */
-  private async createAssetFiltersForAllTeams(categories: string[]) {
-    if (!categories || categories.length === 0) {
-      return;
-    }
-
-    // 获取所有团队
-    const teams = await this.teamRepository.getAllTeams();
-    this.logger.debug(`Creating asset filters for ${teams.length} teams with categories: ${categories.join(', ')}`);
-
-    for (const team of teams) {
-      for (const categoryName of categories) {
-        try {
-          // 检查是否已存在同名的筛选规则
-          const existingRules = await this.assetsCommonRepository.listFilters(team.id, 'workflow');
-          const existingRule = existingRules.find((rule) => rule.name === categoryName);
-
-          if (!existingRule) {
-            // 1. 查找或创建同名的 tag
-            let tagId: string | undefined;
-            const existingTags = await this.assetsCommonRepository.getTagsByName(team.id, categoryName);
-
-            if (existingTags.length > 0) {
-              // 使用已存在的 tag
-              tagId = existingTags[0].id;
-              this.logger.debug(`Found existing tag '${categoryName}' (${tagId}) for team ${team.id}`);
-            } else {
-              // 创建新的 tag
-              const newTag = await this.assetsCommonRepository.createTag(team.id, categoryName);
-              tagId = newTag.id;
-              this.logger.debug(`Created new tag '${categoryName}' (${tagId}) for team ${team.id}`);
-            }
-
-            // 2. 创建新的筛选规则，同时包含 marketplace 分类筛选和 tag 筛选
-            await this.assetsCommonRepository.createAssetFilter(team.id, 'system', {
-              name: categoryName,
-              type: 'workflow',
-              rules: {
-                marketplaceCategories: [categoryName], // 筛选内置应用
-                tagIds: tagId ? [tagId] : undefined,   // 筛选用户自己的工作流
-              },
-            });
-            this.logger.debug(`Created asset filter '${categoryName}' for team ${team.id} with marketplace categories and tag ${tagId}`);
-          } else {
-            this.logger.debug(`Asset filter '${categoryName}' already exists for team ${team.id}`);
-          }
-        } catch (error) {
-          this.logger.error(`Failed to create asset filter '${categoryName}' for team ${team.id}`, error.stack);
-          // 继续处理其他团队，不中断整个过程
-          continue;
-        }
-      }
-    }
-  }
-
-  /**
-   * 为所有团队确保存在指定名称的工作台分组
-   * 仅在内置应用设置了非“默认”分类时调用
-   */
-  private async ensureWorkbenchGroupForAllTeams(groupKey: string) {
-    const key = (groupKey || '').trim();
-    if (!key || key === '默认') {
-      return;
-    }
-
-    const teams = await this.teamRepository.getAllTeams();
-    if (!teams || teams.length === 0) return;
-
-    const teamIds = teams.map((t) => t.id);
-    const allGroups = await this.entityManager.find(WorkflowPageGroupEntity, {
-      where: {
-        teamId: In(teamIds),
-      },
-    });
-
-    const groupsByTeam: Record<string, WorkflowPageGroupEntity[]> = {};
-    for (const g of allGroups) {
-      (groupsByTeam[g.teamId] ||= []).push(g);
-    }
-
-    const normalizeGroupNames = (displayName?: string): string[] => {
-      if (!displayName) return [];
-      try {
-        const parsed = JSON.parse(displayName);
-        if (parsed && typeof parsed === 'object') {
-          return Object.values(parsed).filter((v) => typeof v === 'string') as string[];
-        }
-      } catch {
-        // ignore
-      }
-      return [displayName];
-    };
-
-    const now = Date.now();
-    const toCreate: WorkflowPageGroupEntity[] = [];
-
-    for (const team of teams) {
-      const teamGroups = groupsByTeam[team.id] || [];
-      const exists = teamGroups.some((g) => {
-        if (g.presetRelationId === key) return true;
-        return normalizeGroupNames(g.displayName)
-          .map((n) => (n || '').trim())
-          .includes(key);
-      });
-
-      if (!exists) {
-        toCreate.push(
-          this.entityManager.create(WorkflowPageGroupEntity, {
-            id: generateDbId(),
-            displayName: JSON.stringify({ 'zh-CN': key, 'en-US': key }),
-            isBuiltIn: false,
-            teamId: team.id,
-            pageIds: [],
-            createdTimestamp: now,
-            updatedTimestamp: now,
-          }),
-        );
-      }
-    }
-
-    if (toCreate.length > 0) {
-      await this.entityManager.save(WorkflowPageGroupEntity, toCreate);
-      this.logger.debug(`Created workbench page groups for ${toCreate.length} teams with key: ${key}`);
-    }
   }
 
   /**
