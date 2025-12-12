@@ -1,5 +1,5 @@
-import { Sidebar } from './sidebar';
 import { Header } from './header';
+import { Sidebar } from './sidebar';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export function AdminLayout({ children, flush = false }: AdminLayoutProps) {
         <Header />
 
         {/* 内容 */}
-        <main className="flex-1 overflow-y-auto bg-background">
+        <main className={`flex-1 bg-background ${flush ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           {flush ? (
             children
           ) : (

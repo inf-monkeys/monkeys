@@ -1,35 +1,35 @@
-import * as React from 'react';
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  type ColumnDef,
-  type SortingState,
-  getSortedRowModel,
-} from '@tanstack/react-table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
 } from '@/components/ui/pagination';
-import { MoreHorizontal, ArrowUpDown, Edit, Trash2, Eye } from 'lucide-react';
 import type { DataItem } from '@/types/data';
+import {
+    flexRender,
+    getCoreRowModel,
+    getSortedRowModel,
+    useReactTable,
+    type ColumnDef,
+    type SortingState,
+} from '@tanstack/react-table';
 import { format } from 'date-fns';
+import { ArrowUpDown, Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
+import * as React from 'react';
 
 interface DataTableProps {
   data: DataItem[];
@@ -263,8 +263,8 @@ export function DataTable({
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 overflow-auto">
+    <div className="flex flex-col h-full min-h-0">
+      <div className="flex-1 overflow-auto min-h-0">
         <table className="w-full caption-bottom text-sm">
           <thead className="sticky top-0 bg-background z-10 border-b">
             {table.getHeaderGroups().map((headerGroup) => (

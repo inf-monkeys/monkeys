@@ -98,7 +98,7 @@ export function DataCardView({
           {data.map((item) => (
             <Card
               key={item.id}
-              className={`relative ${selectedIds.includes(item.id || '') ? 'ring-2 ring-primary' : ''}`}
+              className={`relative min-h-[180px] flex flex-col ${selectedIds.includes(item.id || '') ? 'ring-2 ring-primary' : ''}`}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
@@ -112,7 +112,7 @@ export function DataCardView({
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-sm truncate">{item.name}</h3>
                       {(item.description || item.primaryContent?.description) && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                        <p className="text-xs text-muted-foreground line-clamp-6 mt-1">
                           {item.description || item.primaryContent?.description}
                         </p>
                       )}
@@ -155,10 +155,10 @@ export function DataCardView({
                   </DropdownMenu>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="flex-1 flex flex-col">
                 {/* 缩略图或图标 */}
                 {item.thumbnail && (
-                  <div className="aspect-video w-full rounded-md overflow-hidden bg-muted">
+                  <div className="w-full h-32 rounded-md overflow-hidden bg-muted">
                     <img
                       src={item.thumbnail}
                       alt={item.name}
@@ -166,61 +166,6 @@ export function DataCardView({
                     />
                   </div>
                 )}
-
-                {/* 元数据 */}
-                <div className="space-y-1.5 text-xs">
-                  {(item.type || item.assetType) && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">类型</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {item.type || item.assetType}
-                      </Badge>
-                    </div>
-                  )}
-                  {item.category && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">视图</span>
-                      <span className="font-medium">{item.category}</span>
-                    </div>
-                  )}
-                  {item.status && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">状态</span>
-                      <Badge
-                        variant={
-                          item.status === 'published'
-                            ? 'default'
-                            : item.status === 'draft'
-                            ? 'secondary'
-                            : 'outline'
-                        }
-                        className="text-xs"
-                      >
-                        {item.status === 'published'
-                          ? '已发布'
-                          : item.status === 'draft'
-                          ? '草稿'
-                          : item.status === 'archived'
-                          ? '已归档'
-                          : item.status}
-                      </Badge>
-                    </div>
-                  )}
-                  {item.size && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">大小</span>
-                      <span className="font-medium">{formatFileSize(item.size)}</span>
-                    </div>
-                  )}
-                  {item.updatedTimestamp && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">更新时间</span>
-                      <span className="font-medium">
-                        {formatDate(item.updatedTimestamp)}
-                      </span>
-                    </div>
-                  )}
-                </div>
               </CardContent>
             </Card>
           ))}

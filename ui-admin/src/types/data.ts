@@ -45,6 +45,7 @@ export interface DataAsset {
   primaryContent: {
     type: 'text' | 'image' | 'video' | '3d';
     value: string;
+    description?: string;
     metadata?: {
       width?: number;
       height?: number;
