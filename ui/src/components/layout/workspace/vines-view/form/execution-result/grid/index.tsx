@@ -215,7 +215,8 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const shouldFilterError = useShouldFilterError();
 
   // 3D 结果在 masonry(瀑布流) 下会被 columnWidth 限制宽度，这里做检测并提升布局宽度
-  const MODEL_URL_REGEX = /(https?:\/\/[^\s)]+?\.(?:glb|gltf|usdz|fbx|obj)(?:\?[^\s)]+)?)/i;
+  // 与 abstract/utils.ts 的 extract3DModelUrls 保持一致（避免引号/括号导致解析不一致）
+  const MODEL_URL_REGEX = /(https?:\/\/[^\s"')]+?\.(?:glb|gltf|usdz|fbx|obj)(?:\?[^\s"')]+)?)/i;
   const URL_REGEX = /^https?:\/\/\S+$/i;
   const looksLikeMinio3D = (s: string) => {
     const lower = s.toLowerCase();

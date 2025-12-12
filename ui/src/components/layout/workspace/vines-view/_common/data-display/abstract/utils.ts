@@ -27,7 +27,10 @@ export const extractPdbUrls = (text: unknown): string[] => {
 export const extract3DModelUrls = (text: unknown): string[] => {
   if (typeof text !== 'string') return [];
 
-  const regex = /https?:\/\/[^\s"]+?\.(glb|gltf|usdz|fbx|obj)(\?[^\s"]+)?/gi;
+  // 与 execution-result/grid/index.tsx 的 MODEL_URL_REGEX 保持一致：
+  // - 避免吃到 markdown 的 ")" 或引号包裹的结尾
+  // - 支持查询参数
+  const regex = /https?:\/\/[^\s"')]+?\.(glb|gltf|usdz|fbx|obj)(\?[^\s"')]+)?/gi;
   return text.match(regex) || [];
 };
 
