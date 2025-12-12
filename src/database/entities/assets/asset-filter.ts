@@ -7,6 +7,7 @@ export interface AssetFilterRule {
   updatedTimestamp?: [number, number];
   tagIds?: string[];
   userIds?: string[];
+  marketplaceCategories?: string[]; // 用于筛选 marketplace 应用分类
 }
 
 @Entity({ name: 'asset_filters' })

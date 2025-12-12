@@ -301,11 +301,12 @@ export class WorkflowCrudService implements IAssetHandler {
   public async listWorkflows(teamId: string, dto: ListDto) {
     const { page = 1, limit = 24 } = dto;
 
-    // 解析工作流特有的过滤条件（是否仅看本团队 / 是否仅看内置应用），并从通用 filter 中剥离，避免影响通用资产过滤逻辑
+    // 解析工作流特有的过滤条件（是否仅看本团队 / 是否仅看内置应用 / marketplace 分类筛选），并从通用 filter 中剥离，避免影响通用资产过滤逻辑
     const rawFilter = ((dto.filter || {}) as any) || {};
     const onlySelf: boolean = !!rawFilter.isSelf;
     const onlyBuiltin: boolean = !!rawFilter.isBuiltin;
-    const { isSelf, isBuiltin, ...restFilter } = rawFilter;
+    const marketplaceCategories: string[] | undefined = rawFilter.marketplaceCategories;
+    const { isSelf, isBuiltin, marketplaceCategories: _marketplaceCategories, ...restFilter } = rawFilter;
 
     const repoDto: ListDto = {
       ...dto,
@@ -429,13 +430,43 @@ export class WorkflowCrudService implements IAssetHandler {
       builtin: builtinWorkflowIdSet.has(item.workflowId),
     }));
 
-    // 内存中做一次筛选，用于“是否本团队 / 是否内置应用”切换（通过 filter.isSelf / filter.isBuiltin）
+    // 内存中做一次筛选，用于"是否本团队 / 是否内置应用 / marketplace 分类"切换（通过 filter.isSelf / filter.isBuiltin / filter.marketplaceCategories）
     let scopedList = listWithBuiltin;
     if (onlySelf) {
       scopedList = scopedList.filter((item) => item.teamId === teamId);
     }
     if (onlyBuiltin) {
       scopedList = scopedList.filter((item) => builtinWorkflowIdSet.has(item.workflowId));
+    }
+
+    // 按 marketplace 分类筛选（仅对内置应用有效）
+    if (marketplaceCategories && marketplaceCategories.length > 0) {
+      // 批量获取所有内置 workflow 的 marketplace app 信息
+      const builtinWorkflowIdsInList = scopedList
+        .filter((item) => builtinWorkflowIdSet.has(item.workflowId))
+        .map((item) => item.workflowId);
+
+      if (builtinWorkflowIdsInList.length > 0) {
+        const marketplaceApps = await this.marketplaceService.getAppsByWorkflowIds(builtinWorkflowIdsInList);
+        const workflowIdToCategories = new Map<string, string[]>();
+
+        for (const app of marketplaceApps) {
+          const workflowId = app.versions?.[0]?.sourceAssetReferences?.find((ref) => ref.assetType === 'workflow')?.assetId;
+          if (workflowId && app.categories) {
+            workflowIdToCategories.set(workflowId, app.categories);
+          }
+        }
+
+        // 筛选出分类匹配的 workflow
+        scopedList = scopedList.filter((item) => {
+          const categories = workflowIdToCategories.get(item.workflowId);
+          if (!categories) return false;
+          return marketplaceCategories.some((cat) => categories.includes(cat));
+        });
+      } else {
+        // 如果没有内置应用，直接返回空列表
+        scopedList = [];
+      }
     }
 
     const totalCount = scopedList.length;
@@ -447,6 +478,96 @@ export class WorkflowCrudService implements IAssetHandler {
       totalCount,
       list: pagedList,
     };
+  }
+
+  /**
+   * 获取工作流文件夹视图数据，基于内置应用的分类生成文件夹
+   */
+  public async listWorkflowsForFolderView(teamId: string, search?: string) {
+    // 获取所有内置工作流的应用信息
+    const builtinWorkflowIds = await this.marketplaceService.getBuiltinWorkflowIds();
+    if (builtinWorkflowIds.length === 0) {
+      return [];
+    }
+
+    // 批量查询内置工作流的应用市场应用信息
+    const marketplaceApps = await this.marketplaceService.getAppsByWorkflowIds(builtinWorkflowIds);
+
+    // 按分类分组
+    const categoryMap = new Map<string, {
+      workflowIds: string[];
+      categoryName: string;
+    }>();
+
+    // 遍历应用，按分类分组
+    for (const app of marketplaceApps) {
+      const categories = app.categories || ['默认'];
+      for (const category of categories) {
+        if (!categoryMap.has(category)) {
+          categoryMap.set(category, {
+            workflowIds: [],
+            categoryName: category,
+          });
+        }
+
+        // 从 sourceAssetReferences 中提取 workflowId
+        if (app.versions && app.versions.length > 0) {
+          const latestVersion = app.versions[0];
+          if (latestVersion.sourceAssetReferences) {
+            const workflowRefs = latestVersion.sourceAssetReferences.filter(
+              (ref) => ref.assetType === 'workflow'
+            );
+            for (const ref of workflowRefs) {
+              categoryMap.get(category)!.workflowIds.push(ref.assetId);
+            }
+          }
+        }
+      }
+    }
+
+    // 为每个分类生成文件夹数据
+    const folders = [];
+    for (const [categoryName, categoryData] of categoryMap.entries()) {
+      const { workflowIds } = categoryData;
+
+      if (workflowIds.length === 0) {
+        continue;
+      }
+
+      // 获取该分类下的工作流（最多4个用于预览）
+      const workflows = await this.workflowRepository.findWorkflowByIds(
+        workflowIds.slice(0, 4)
+      );
+
+      // 提取预览图
+      const previewImages = workflows
+        .filter((wf) => wf.iconUrl)
+        .slice(0, 4)
+        .map((wf) => wf.iconUrl);
+
+      // 计算最后更新时间
+      const lastUpdatedTimestamp = Math.max(
+        ...workflows.map((wf) => wf.updatedTimestamp || 0)
+      );
+
+      folders.push({
+        id: `category-${categoryName}`,
+        name: categoryName,
+        assetCount: workflowIds.length,
+        lastUpdated: new Date(lastUpdatedTimestamp).toISOString(),
+        previewImages,
+        previewAssets: workflows.slice(0, 4),
+        filterRules: {
+          isBuiltin: true,
+          categoryName: categoryName,
+        },
+      });
+    }
+
+    // 按资产数量降序排序
+    folders.sort((a, b) => b.assetCount - a.assetCount);
+
+    return folders;
   }
 
   /**

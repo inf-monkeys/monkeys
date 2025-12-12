@@ -109,17 +109,18 @@ export const useAllWorkflowList = () => useWorkflowList({ page: 1, limit: 9999 }
 
 const TENANT_BEARER_TOKEN = import.meta.env.VITE_TENANT_BEARER_TOKEN as string | undefined;
 
-export const setWorkflowAsBuiltinApp = (workflowId: string, tenantToken: string) =>
+export const setWorkflowAsBuiltinApp = (workflowId: string, tenantToken: string, categories?: string[], teamId?: string) =>
   vinesFetcher<{ appId: string; created?: boolean }>({
     method: 'POST',
-    simple: false, // 改为 false 以便捕获详细错误信息
+    simple: true, // 改为 true 以正确发送请求体
     auth: false,
     fetchOptions: {
       headers: {
         authorization: `Bearer ${tenantToken}`,
+        ...(teamId && { 'x-monkeys-teamid': teamId }),
       },
     },
-  })(`/api/tenant/manage/builtin/workflows/${workflowId}`)
+  })(`/api/tenant/manage/builtin/workflows/${workflowId}`, { categories })
     .catch((error) => {
       // 重新抛出错误，包含原始错误信息
       throw error;
@@ -140,7 +141,7 @@ export const getWorkflowBuiltinStatus = (workflowId: string, tenantToken: string
 export const unsetWorkflowBuiltinApp = (workflowId: string, tenantToken: string) =>
   vinesFetcher<{ appId?: string }>({
     method: 'DELETE',
-    simple: false, // 改为 false 以便捕获详细错误信息
+    simple: true, // 改为 true 以正确处理响应
     auth: false,
     fetchOptions: {
       headers: {

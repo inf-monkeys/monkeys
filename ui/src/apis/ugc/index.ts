@@ -283,6 +283,11 @@ export const useUgcMediaDataForFolderView = (search?: string) => {
   return useSWR<IFolderViewData[] | undefined>(url, vinesFetcher());
 };
 
+export const useUgcWorkflowsForFolderView = (search?: string) => {
+  const url = search ? `/api/workflow/metadata/folder-view?search=${encodeURIComponent(search)}` : '/api/workflow/metadata/folder-view';
+  return useSWR<IFolderViewData[] | undefined>(url, vinesFetcher());
+};
+
 export const useUgcApplicationStore = (dto: IListUgcDto) =>
   useUgcItems<IApplicationStoreItemDetail>(dto, '/api/assets/workflow/marketplace');
 export const preloadUgcApplicationStore = (dto: IListUgcDto) =>

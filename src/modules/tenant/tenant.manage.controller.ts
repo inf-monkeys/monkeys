@@ -153,8 +153,9 @@ export class TenantManageController {
     summary: '将工作流设置为内置应用（预置应用）',
     description: '根据 workflowId 查找对应的应用市场应用，设置为预置应用并自动安装到所有团队（租户级鉴权）。',
   })
-  async setWorkflowAsBuiltinApp(@Param('workflowId') workflowId: string) {
-    const data = await this.tenantManageService.setWorkflowAsBuiltinApp(workflowId);
+  async setWorkflowAsBuiltinApp(@Param('workflowId') workflowId: string, @Body() body: { categories?: string[] }, @Req() req: Request) {
+    const teamId = req.headers['x-monkeys-teamid'] as string | undefined;
+    const data = await this.tenantManageService.setWorkflowAsBuiltinApp(workflowId, body.categories, teamId);
     return new SuccessResponse({
       data,
     });
