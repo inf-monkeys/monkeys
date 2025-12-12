@@ -47,6 +47,15 @@ async function loadScene(url: string): Promise<THREE.Group> {
 
   const p = new Promise<THREE.Group>((resolve, reject) => {
     const loader = new GLTFLoader();
+    // 尽量避免跨域贴图导致的渲染/截屏异常
+    try {
+      // three 新版本
+      (loader as any).setCrossOrigin?.('anonymous');
+      // three 旧版本
+      (loader as any).crossOrigin = 'anonymous';
+    } catch {
+      // ignore
+    }
     loader.load(
       url,
       (gltf) => {
@@ -198,27 +207,59 @@ function CaptureThumbnail({ enabled, onCaptured }: { enabled: boolean; onCapture
 
   useEffect(() => {
     if (!enabled) return;
+    let cancelled = false;
+    let raf = 0;
+    let lastW = 0;
+    let lastH = 0;
+    let stableCount = 0;
+    let tries = 0;
 
-    let raf1 = 0;
-    let raf2 = 0;
+    const tick = () => {
+      if (cancelled) return;
+      tries += 1;
 
-    // demand 模式下两帧后截屏
-    invalidate();
-    raf1 = requestAnimationFrame(() => {
+      // 触发渲染
       invalidate();
-      raf2 = requestAnimationFrame(() => {
+
+      const canvas = gl.domElement;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // 等待尺寸稳定（瀑布流布局/resize 期间截容易白图）
+      if (w > 0 && h > 0) {
+        if (w === lastW && h === lastH) stableCount += 1;
+        else stableCount = 0;
+        lastW = w;
+        lastH = h;
+      }
+
+      const ctx = (gl as any).getContext?.();
+      const lost = ctx?.isContextLost?.() ?? false;
+      const hasRendered = (gl.info?.render?.calls ?? 0) > 0;
+
+      // 条件满足：尺寸稳定两帧 + 有渲染调用 + context 正常
+      if (!lost && stableCount >= 2 && hasRendered) {
         try {
-          const dataUrl = gl.domElement.toDataURL('image/png');
+          const dataUrl = canvas.toDataURL('image/png');
           if (dataUrl) onCaptured(dataUrl);
+          return;
         } catch {
-          // ignore
+          // 如果截屏失败，继续重试几帧
         }
-      });
-    });
+      }
+
+      // 最多重试 60 帧（约 1s），避免一直占用
+      if (tries < 60) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+
+    // 给一个极短延时，让 glTF 贴图/材质先开始加载
+    raf = requestAnimationFrame(tick);
 
     return () => {
-      if (raf1) cancelAnimationFrame(raf1);
-      if (raf2) cancelAnimationFrame(raf2);
+      cancelled = true;
+      if (raf) cancelAnimationFrame(raf);
     };
   }, [enabled, gl, invalidate, onCaptured]);
 
@@ -336,21 +377,5 @@ export const VinesAbstract3DModel: React.FC<IVinesAbstract3DModelProps> = ({ chi
 
   if (!url) return null;
 
-  return (
-    <div className="flex flex-col gap-2">
-      <ModelViewer3D url={url} mode={mode} />
-      <div className="flex items-center gap-2 text-xs text-gray-600">
-        <span className="font-medium">3D 模型</span>
-        <a
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-          className="text-blue-600 hover:underline break-all"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {url}
-        </a>
-      </div>
-    </div>
-  );
+  return <ModelViewer3D url={url} mode={mode} />;
 };
