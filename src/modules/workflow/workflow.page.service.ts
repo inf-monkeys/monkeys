@@ -1028,6 +1028,23 @@ export class WorkflowPageService {
       if (!presetAppSortGroup) {
         throw new NotFoundException('Preset app sort group not found');
       }
+
+      // 兼容线上历史数据/人工创建分组：
+      // - 可能已经存在一个“显示名相同”的分组，但没有 presetRelationId
+      // - 这会导致后续按 presetId 查不到，从而重复创建同名分组
+      const presetLabel = this.normalizeGroupLabel(presetAppSortGroup.displayName) ?? presetId;
+      const teamGroups = await this.pageGroupRepository.find({
+        where: {
+          teamId,
+        },
+      });
+      const existedSameLabel = teamGroups.find((g) => this.normalizeGroupLabel((g as any).displayName) === presetLabel);
+      if (existedSameLabel && !(existedSameLabel as any).presetRelationId) {
+        await this.pageGroupRepository.update(existedSameLabel.id, { presetRelationId: presetId });
+        (existedSameLabel as any).presetRelationId = presetId;
+        return existedSameLabel;
+      }
+
       const newGroup = (await this.createPageGroup(teamId, JSON.stringify(presetAppSortGroup.displayName), presetAppSortGroup.iconUrl)).pop();
       await this.pageGroupRepository.update(newGroup.id, {
         presetRelationId: presetId,
