@@ -322,7 +322,8 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     items: data,
     overscanBy: 3,
     render: useCallback(({ data: item }) => renderItem(item), [renderItem]),
-    itemKey: (item, index) => `${index}-${item.render.key}`,
+    // 使用稳定 key，避免滚动/插入导致卸载重挂（3D Canvas 会闪烁）
+    itemKey: (item) => item.render.key || item.instanceId,
     onRender: loadMore,
     // POM 卡片包含大量测量数据的表格，需要更大的高度估算值避免重叠
     itemHeightEstimate: displayType === 'grid' ? 300 : isPomWorkflow ? 550 : 400,

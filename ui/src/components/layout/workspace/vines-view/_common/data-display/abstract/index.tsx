@@ -67,7 +67,10 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
               {!isResultFailed &&
                 previewData.map(({ name, type, value }, i) => {
                   return (
-                    <div key={name} className="flex flex-col items-start justify-center">
+                    <div
+                      key={`${name}::${type}::${typeof value === 'string' ? value : String(value)}::${i}`}
+                      className="flex flex-col items-start justify-center"
+                    >
                       {visibleKey && <h1 className="break-all text-sm font-medium">{name}</h1>}
                       {type === 'string' && <VinesAbstractString>{value}</VinesAbstractString>}
                       {type === 'boolean' && <VinesAbstractBoolean>{value}</VinesAbstractBoolean>}
