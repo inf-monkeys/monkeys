@@ -13,6 +13,7 @@ import { DataSidebar } from '@/components/admin/data/data-sidebar';
 import { DataTable } from '@/components/admin/data/data-table';
 import { DataCardView } from '@/components/admin/data/data-card-view';
 import { DataToolbar } from '@/components/admin/data/data-toolbar';
+import { DataDetailDialog } from '@/components/admin/data/data-detail-dialog';
 import type { DataCategory, DataExportOptions, DataItem, CreateViewDto, UpdateViewDto } from '@/types/data';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
@@ -33,6 +34,8 @@ function DataManagementPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [total, setTotal] = useState(0);
+  const [viewingItem, setViewingItem] = useState<DataItem | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
   // 加载视图数据
   useEffect(() => {
@@ -155,8 +158,8 @@ function DataManagementPage() {
   };
 
   const handleView = (item: DataItem) => {
-    toast.info(`查看: ${item.name}`);
-    // TODO: 打开详情对话框
+    setViewingItem(item);
+    setDetailDialogOpen(true);
   };
 
   const handleCreateCategory = async (data: CreateViewDto) => {
@@ -252,6 +255,13 @@ function DataManagementPage() {
           )}
         </div>
       </div>
+
+      {/* 数据详情对话框 */}
+      <DataDetailDialog
+        item={viewingItem}
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+      />
     </div>
   );
 }
