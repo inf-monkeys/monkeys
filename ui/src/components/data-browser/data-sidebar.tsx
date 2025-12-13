@@ -43,7 +43,7 @@ import {
   FolderPlus,
   GripVertical,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -86,6 +86,43 @@ export function DataSidebar({
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string | undefined>(undefined);
+  const [sidebarWidth, setSidebarWidth] = useState(256); // 初始宽度 256px (w-64)
+  const [isResizing, setIsResizing] = useState(false);
+
+  // 处理侧边栏宽度调整
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      const newWidth = e.clientX;
+      // 限制宽度在 200px 到 600px 之间
+      if (newWidth >= 200 && newWidth <= 600) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
+  // 计算内容区宽度（减去 padding）
+  const contentWidth = sidebarWidth - 24; // 24px = px-3 的左右 padding (12px * 2)
 
   // 配置拖拽传感器
   const sensors = useSensors(
@@ -204,11 +241,15 @@ export function DataSidebar({
   const flatCategories = flattenCategoriesWithLevel(categories);
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-muted/5">
+    <div
+      className="relative flex h-full flex-col border-r bg-muted/5"
+      style={{ width: `${sidebarWidth}px` }}
+    >
       {/* 标题 */}
       <div className="flex h-14 items-center justify-between border-b px-4">
         <h2 className="text-sm font-semibold">数据视图</h2>
-        <div className="flex items-center gap-1">
+        {/* 只读模式下隐藏操作按钮 */}
+        {/* <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
@@ -284,7 +325,7 @@ export function DataSidebar({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </div>
+        </div> */}
       </div>
 
       {/* 视图列表 */}
@@ -293,9 +334,9 @@ export function DataSidebar({
           {/* 全部数据 */}
           <Button
             variant="ghost"
-            size="sm"
+            size="default"
             className={cn(
-              'w-full justify-start font-normal',
+              'w-full justify-start font-normal h-9',
               !selectedCategory && 'bg-accent text-accent-foreground'
             )}
             onClick={() => onSelectCategory('')}
@@ -310,8 +351,6 @@ export function DataSidebar({
           {categories.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">
               暂无视图
-              <br />
-              点击右上角 + 创建新视图
             </div>
           ) : (
             <DndContext
@@ -333,6 +372,7 @@ export function DataSidebar({
                     onDeleteCategory={onDeleteCategory}
                     onCreateSubCategory={handleOpenCreateDialog}
                     level={0}
+                    contentWidth={contentWidth}
                   />
                 ))}
               </SortableContext>
@@ -340,6 +380,13 @@ export function DataSidebar({
           )}
         </div>
       </ScrollArea>
+
+      {/* 拖动手柄 */}
+      <div
+        className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/20 active:bg-primary/40 transition-colors"
+        onMouseDown={handleMouseDown}
+        style={{ cursor: isResizing ? 'col-resize' : 'col-resize' }}
+      />
     </div>
   );
 }
@@ -352,6 +399,7 @@ interface CategoryTreeItemProps {
   onDeleteCategory: (categoryId: string) => void;
   onCreateSubCategory: (parentId: string) => void;
   level: number;
+  contentWidth: number; // 侧边栏内容区宽度
 }
 
 function CategoryTreeItem({
@@ -362,6 +410,7 @@ function CategoryTreeItem({
   onDeleteCategory,
   onCreateSubCategory,
   level,
+  contentWidth,
 }: CategoryTreeItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -412,24 +461,24 @@ function CategoryTreeItem({
   return (
     <div ref={setNodeRef} style={style}>
       <div className="group relative flex items-center">
-        {/* 拖拽手柄 */}
-        <div
+        {/* 拖拽手柄 - 只读模式下隐藏 */}
+        {/* <div
           {...attributes}
           {...listeners}
           className="absolute left-0 h-full flex items-center px-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
           style={{ paddingLeft: `${level * 0.75}rem` }}
         >
           <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
-        </div>
+        </div> */}
 
         <Button
           variant="ghost"
-          size="sm"
+          size="default"
           className={cn(
-            'w-full justify-start font-normal pr-8',
+            'w-full justify-start font-normal h-9',
             isSelected && 'bg-accent text-accent-foreground'
           )}
-          style={{ paddingLeft: `${(level + 1) * 0.75 + 1.5}rem` }}
+          style={{ paddingLeft: `${level * 0.75 + 0.75}rem` }}
           onClick={() => onSelectCategory(category.id)}
         >
           {hasChildren && (
@@ -452,7 +501,8 @@ function CategoryTreeItem({
           <span className="flex-1 text-left truncate">{category.name}</span>
         </Button>
 
-        <DropdownMenu>
+        {/* 更多操作 - 只读模式下隐藏 */}
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
@@ -486,7 +536,7 @@ function CategoryTreeItem({
               删除
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
 
       {/* 编辑视图对话框 */}
@@ -543,6 +593,7 @@ function CategoryTreeItem({
               onDeleteCategory={onDeleteCategory}
               onCreateSubCategory={onCreateSubCategory}
               level={level + 1}
+              contentWidth={contentWidth}
             />
           ))}
         </div>

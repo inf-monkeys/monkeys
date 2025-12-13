@@ -43,7 +43,7 @@ import {
   FolderPlus,
   GripVertical,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -86,6 +86,43 @@ export function DataSidebar({
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
   const [selectedParentId, setSelectedParentId] = useState<string | undefined>(undefined);
+  const [sidebarWidth, setSidebarWidth] = useState(256); // 初始宽度 256px (w-64)
+  const [isResizing, setIsResizing] = useState(false);
+
+  // 处理侧边栏宽度调整
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      const newWidth = e.clientX;
+      // 限制宽度在 200px 到 600px 之间
+      if (newWidth >= 200 && newWidth <= 600) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
+  // 计算内容区宽度（减去 padding）
+  const contentWidth = sidebarWidth - 24; // 24px = px-3 的左右 padding (12px * 2)
 
   // 配置拖拽传感器
   const sensors = useSensors(
@@ -207,7 +244,10 @@ export function DataSidebar({
   const flatCategories = flattenCategoriesWithLevel(categories);
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-muted/5">
+    <div
+      className="relative flex h-full flex-col border-r bg-muted/5"
+      style={{ width: `${sidebarWidth}px` }}
+    >
       {/* 标题 */}
       <div className="flex h-14 items-center justify-between border-b px-4">
         <h2 className="text-sm font-semibold">数据视图</h2>
@@ -292,7 +332,7 @@ export function DataSidebar({
 
       {/* 视图列表 */}
       <ScrollArea className="flex-1 px-3 py-4">
-        <div className="space-y-0.5">
+        <div className="space-y-0.5" style={{ maxWidth: '100%', overflow: 'hidden' }}>
           {/* 全部数据 */}
           <Button
             variant="ghost"
@@ -317,32 +357,42 @@ export function DataSidebar({
               点击右上角 + 创建新视图
             </div>
           ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={allCategories.map((cat) => cat.id)}
-                strategy={verticalListSortingStrategy}
+            <div style={{ maxWidth: '100%' }}>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
               >
-                {categories.map((category) => (
-                  <CategoryTreeItem
-                    key={category.id}
-                    category={category}
-                    selectedCategory={selectedCategory}
-                    onSelectCategory={onSelectCategory}
-                    onUpdateCategory={onUpdateCategory}
-                    onDeleteCategory={onDeleteCategory}
-                    onCreateSubCategory={handleOpenCreateDialog}
-                    level={0}
-                  />
-                ))}
-              </SortableContext>
-            </DndContext>
+                <SortableContext
+                  items={allCategories.map((cat) => cat.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {categories.map((category) => (
+                    <CategoryTreeItem
+                      key={category.id}
+                      category={category}
+                      selectedCategory={selectedCategory}
+                      onSelectCategory={onSelectCategory}
+                      onUpdateCategory={onUpdateCategory}
+                      onDeleteCategory={onDeleteCategory}
+                      onCreateSubCategory={handleOpenCreateDialog}
+                      level={0}
+                      contentWidth={contentWidth}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            </div>
           )}
         </div>
       </ScrollArea>
+
+      {/* 拖动手柄 */}
+      <div
+        className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/20 active:bg-primary/40 transition-colors"
+        onMouseDown={handleMouseDown}
+        style={{ cursor: isResizing ? 'col-resize' : 'col-resize' }}
+      />
     </div>
   );
 }
@@ -355,6 +405,7 @@ interface CategoryTreeItemProps {
   onDeleteCategory: (categoryId: string) => void;
   onCreateSubCategory: (parentId: string) => void;
   level: number;
+  contentWidth: number; // 侧边栏内容区宽度
 }
 
 function CategoryTreeItem({
@@ -365,6 +416,7 @@ function CategoryTreeItem({
   onDeleteCategory,
   onCreateSubCategory,
   level,
+  contentWidth,
 }: CategoryTreeItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -413,8 +465,12 @@ function CategoryTreeItem({
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
-      <div className="group relative flex items-center">
+    <div
+      ref={setNodeRef}
+      style={{ ...style, maxWidth: '100%', overflow: 'hidden' }}
+      className="w-full"
+    >
+      <div className="group relative flex items-center w-full min-w-0">
         {/* 拖拽手柄 */}
         <div
           {...attributes}
@@ -429,10 +485,13 @@ function CategoryTreeItem({
           variant="ghost"
           size="sm"
           className={cn(
-            'w-full justify-start font-normal pr-8',
+            'w-full justify-start font-normal pr-10 overflow-hidden min-w-0',
             isSelected && 'bg-accent text-accent-foreground'
           )}
-          style={{ paddingLeft: `${(level + 1) * 0.75 + 1.5}rem` }}
+          style={{
+            paddingLeft: `${(level + 1) * 0.75 + 1.5}rem`,
+            maxWidth: `${contentWidth}px`,
+          }}
           onClick={() => onSelectCategory(category.id)}
         >
           {hasChildren && (
@@ -460,7 +519,7 @@ function CategoryTreeItem({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity z-10"
               onClick={(e) => e.stopPropagation()}
             >
               <MoreVertical className="h-3.5 w-3.5" />
@@ -535,7 +594,7 @@ function CategoryTreeItem({
 
       {/* 子视图 */}
       {hasChildren && isExpanded && (
-        <div className="mt-0.5 space-y-0.5">
+        <div className="mt-0.5 space-y-0.5 w-full">
           {category.children!.map((child) => (
             <CategoryTreeItem
               key={child.id}
@@ -546,6 +605,7 @@ function CategoryTreeItem({
               onDeleteCategory={onDeleteCategory}
               onCreateSubCategory={onCreateSubCategory}
               level={level + 1}
+              contentWidth={contentWidth}
             />
           ))}
         </div>

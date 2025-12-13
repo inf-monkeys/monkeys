@@ -41,7 +41,7 @@ interface DataToolbarProps {
 
 export function DataToolbar({
   selectedCount = 0,
-  viewMode = 'table',
+  viewMode = 'card',
   onViewModeChange,
   onSearch,
   onRefresh,
@@ -142,16 +142,22 @@ export function DataToolbar({
           <div className="flex items-center border rounded-md">
             <Button
               variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-              size="sm"
-              className="rounded-r-none border-0"
+              size="default"
+              className={cn(
+                'rounded-r-none border-0 h-9 px-3',
+                viewMode === 'table' && 'bg-secondary'
+              )}
               onClick={() => onViewModeChange('table')}
             >
               <Table className="h-4 w-4" />
             </Button>
             <Button
               variant={viewMode === 'card' ? 'secondary' : 'ghost'}
-              size="sm"
-              className="rounded-l-none border-0"
+              size="default"
+              className={cn(
+                'rounded-l-none border-0 h-9 px-3',
+                viewMode === 'card' && 'bg-secondary'
+              )}
               onClick={() => onViewModeChange('card')}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -160,13 +166,13 @@ export function DataToolbar({
         )}
 
         {/* 导入 */}
-        <Button variant="outline" size="sm" onClick={handleImportClick}>
+        {/* <Button variant="outline" size="sm" onClick={handleImportClick}>
           <Upload className="mr-2 h-4 w-4" />
           导入
-        </Button>
+        </Button> */}
 
         {/* 导出下拉菜单 */}
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
               <Download className="mr-2 h-4 w-4" />
@@ -189,10 +195,10 @@ export function DataToolbar({
               Excel 文件
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
 
         {/* 更多操作 */}
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
               <MoreHorizontal className="h-4 w-4" />
@@ -208,7 +214,7 @@ export function DataToolbar({
               数据统计
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
     </div>
   );
