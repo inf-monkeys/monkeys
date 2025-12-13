@@ -213,8 +213,13 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       query.andWhere('asset.creatorUserId = :creatorUserId', { creatorUserId: filter.creatorUserId });
     }
 
+    // 如果指定了 teamId，返回该团队的资产 + 全局资产（team_id = '0'）
+    // 这样可以让所有团队看到公开的全局资产
     if (filter.teamId) {
-      query.andWhere('asset.teamId = :teamId', { teamId: filter.teamId });
+      query.andWhere('(asset.teamId = :teamId OR asset.teamId = :globalTeamId)', {
+        teamId: filter.teamId,
+        globalTeamId: '0'
+      });
     }
 
     if (filter.keyword) {

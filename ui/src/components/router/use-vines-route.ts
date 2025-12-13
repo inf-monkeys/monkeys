@@ -32,6 +32,7 @@ export const useVinesRoute = () => {
   const isUseAgent = routeAppId === 'agent';
   const isUseDesign = routeAppId === 'design';
   const isUseEvaluation = routeAppId === 'evaluations' && routeIds?.[2] && routeIds?.[3]; // 有moduleId和tab时使用评测布局
+  const isUseDataBrowser = routeAppId === 'data-browser'; // 数据浏览器页面
   const isUsePanel =
     (!!routeIds || !isUseWorkbench) && !isUseWorkSpace && !isUseAgent && !isUseDesign && !isUseEvaluation;
   const isUseAppStore = routeAppId === 'store';
@@ -71,5 +72,6 @@ export const useVinesRoute = () => {
     isUseEvaluation,
     isUseCustomNav,
     isInvitePage,
+    isUseDataBrowser,
   };
 };

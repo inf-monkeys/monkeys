@@ -71,6 +71,9 @@ const TeamIdDesignTemplatesIndexLazyImport = createFileRoute(
 const TeamIdDesignSoftwareEvaluationsIndexLazyImport = createFileRoute(
   '/$teamId/design-software-evaluations/',
 )()
+const TeamIdDataBrowserIndexLazyImport = createFileRoute(
+  '/$teamId/data-browser/',
+)()
 const TeamIdComfyuiIndexLazyImport = createFileRoute('/$teamId/comfyui/')()
 const TeamIdComfyuiStoreIndexLazyImport = createFileRoute(
   '/$teamId/comfyui-store/',
@@ -345,6 +348,15 @@ const TeamIdDesignSoftwareEvaluationsIndexLazyRoute =
       (d) => d.Route,
     ),
   )
+
+const TeamIdDataBrowserIndexLazyRoute = TeamIdDataBrowserIndexLazyImport.update(
+  {
+    path: '/$teamId/data-browser/',
+    getParentRoute: () => rootRoute,
+  } as any,
+).lazy(() =>
+  import('./pages/$teamId/data-browser/index.lazy').then((d) => d.Route),
+)
 
 const TeamIdComfyuiIndexLazyRoute = TeamIdComfyuiIndexLazyImport.update({
   path: '/$teamId/comfyui/',
@@ -688,6 +700,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdComfyuiIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/data-browser/': {
+      preLoaderRoute: typeof TeamIdDataBrowserIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/design-software-evaluations/': {
       preLoaderRoute: typeof TeamIdDesignSoftwareEvaluationsIndexLazyImport
       parentRoute: typeof rootRoute
@@ -887,6 +903,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdChatV2IndexLazyRoute,
   TeamIdComfyuiStoreIndexLazyRoute,
   TeamIdComfyuiIndexLazyRoute,
+  TeamIdDataBrowserIndexLazyRoute,
   TeamIdDesignSoftwareEvaluationsIndexLazyRoute,
   TeamIdDesignTemplatesIndexLazyRoute,
   TeamIdDesignsIndexLazyRoute,

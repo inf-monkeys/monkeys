@@ -17,6 +17,7 @@ import {
   QueryDataAssetDto,
   DataAssetResponseDto,
   DataAssetListResponseDto,
+  BatchUpdateStatusDto,
 } from './dto/data-asset.dto';
 import { AdminJwtGuard } from '../guards/admin-jwt.guard';
 import { CurrentAdmin } from '../decorators/current-admin.decorator';
@@ -30,7 +31,7 @@ export class DataAssetController {
   constructor(private readonly dataAssetService: DataAssetService) {}
 
   @Post()
-  @ApiOperation({ summary: 'úpnD§' })
+  @ApiOperation({ summary: 'ï¿½pnDï¿½' })
   @ApiResponse({ status: 201, type: DataAssetResponseDto })
   async createAsset(
     @CurrentAdmin() admin: AdminUserDto,
@@ -40,7 +41,7 @@ export class DataAssetController {
   }
 
   @Get()
-  @ApiOperation({ summary: '·ÖpnD§h' })
+  @ApiOperation({ summary: 'ï¿½ï¿½pnDï¿½h' })
   @ApiResponse({ status: 200, type: DataAssetListResponseDto })
   async getAssets(
     @CurrentAdmin() admin: AdminUserDto,
@@ -50,7 +51,7 @@ export class DataAssetController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: '·ÖU*pnD§' })
+  @ApiOperation({ summary: 'ï¿½ï¿½U*pnDï¿½' })
   @ApiResponse({ status: 200, type: DataAssetResponseDto })
   async getAsset(
     @CurrentAdmin() admin: AdminUserDto,
@@ -60,7 +61,7 @@ export class DataAssetController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'ô°pnD§' })
+  @ApiOperation({ summary: 'ï¿½ï¿½pnDï¿½' })
   @ApiResponse({ status: 200, type: DataAssetResponseDto })
   async updateAsset(
     @CurrentAdmin() admin: AdminUserDto,
@@ -71,7 +72,7 @@ export class DataAssetController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: ' dpnD§' })
+  @ApiOperation({ summary: ' dpnDï¿½' })
   @ApiResponse({ status: 204 })
   async deleteAsset(
     @CurrentAdmin() admin: AdminUserDto,
@@ -81,12 +82,23 @@ export class DataAssetController {
   }
 
   @Post('batch-delete')
-  @ApiOperation({ summary: 'yÏ dpnD§' })
+  @ApiOperation({ summary: 'æ‰¹é‡åˆ é™¤æ•°æ®èµ„äº§' })
   @ApiResponse({ status: 204 })
   async batchDeleteAssets(
     @CurrentAdmin() admin: AdminUserDto,
     @Body('ids') ids: string[],
   ): Promise<void> {
     return this.dataAssetService.batchDeleteAssets(admin.id, ids);
+  }
+
+  @Post('batch-update-status')
+  @ApiOperation({ summary: 'æ‰¹é‡æ›´æ–°æ•°æ®èµ„äº§çŠ¶æ€' })
+  @ApiResponse({ status: 200, description: 'æ›´æ–°æˆåŠŸ' })
+  async batchUpdateStatus(
+    @CurrentAdmin() admin: AdminUserDto,
+    @Body() dto: BatchUpdateStatusDto,
+  ): Promise<{ success: boolean }> {
+    await this.dataAssetService.batchUpdateStatus(admin.id, dto.ids, dto.status);
+    return { success: true };
   }
 }

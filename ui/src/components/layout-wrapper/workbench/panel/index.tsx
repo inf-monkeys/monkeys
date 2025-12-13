@@ -36,6 +36,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   const isStoreRoute = layoutId === 'vines-outlet-main-$teamId-store';
   const isWorkspaceRoute = layoutId.startsWith('vines-outlet-main-$teamId-') && !isStoreRoute;
   const isDesignRoute = layoutId === 'vines-outlet-main-$teamId-design-$designProjectId-$designBoardId';
+  const isDataBrowserRoute = layoutId === 'vines-outlet-main-$teamId-data-browser';
 
   const pathName = useRouterState({
     select: (state) => {
@@ -81,6 +82,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
           isWorkspaceRoute &&
           !hideSidebar &&
           !isDesignRoute &&
+          !isDataBrowserRoute &&
           !isModelTrainingV2Route &&
           layoutId != 'vines-outlet-main-$teamId-nav-$navId' && <VinesPanelSidebar />
         }

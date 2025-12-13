@@ -1,5 +1,6 @@
 import {
     batchDeleteDataItems,
+    batchUpdateDataStatus,
     createView,
     deleteDataItem,
     deleteView,
@@ -10,7 +11,7 @@ import {
     updateView,
 } from '@/apis/data';
 import { DataCardView } from '@/components/admin/data/data-card-view';
-import { DataDetailDialog } from '@/components/admin/data/data-detail-dialog';
+import { DataDetailPanel } from '@/components/admin/data/data-detail-panel';
 import { DataSidebar } from '@/components/admin/data/data-sidebar';
 import { DataTable } from '@/components/admin/data/data-table';
 import { DataToolbar } from '@/components/admin/data/data-toolbar';
@@ -30,12 +31,11 @@ function DataManagementPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('card');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [total, setTotal] = useState(0);
   const [viewingItem, setViewingItem] = useState<DataItem | null>(null);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
   // 加载视图数据
   useEffect(() => {
@@ -153,6 +153,24 @@ function DataManagementPage() {
     }
   };
 
+  const handleBatchUpdateStatus = async (status: 'draft' | 'published' | 'archived') => {
+    if (selectedIds.length === 0) return;
+
+    try {
+      await batchUpdateDataStatus(selectedIds, status);
+      const statusLabels = {
+        draft: '草稿',
+        published: '已发布',
+        archived: '已归档',
+      };
+      toast.success(`已将 ${selectedIds.length} 条数据设为${statusLabels[status]}`);
+      setSelectedIds([]);
+      loadDataList();
+    } catch (error: any) {
+      toast.error(error.message || '更新状态失败');
+    }
+  };
+
   const handleDelete = async (item: DataItem) => {
     if (!item.id) {
       toast.error('无效的数据项');
@@ -174,7 +192,10 @@ function DataManagementPage() {
 
   const handleView = (item: DataItem) => {
     setViewingItem(item);
-    setDetailDialogOpen(true);
+  };
+
+  const handleBackToList = () => {
+    setViewingItem(null);
   };
 
   const handleCreateCategory = async (data: CreateViewDto) => {
@@ -226,57 +247,58 @@ function DataManagementPage() {
 
       {/* 右侧内容区 */}
       <div className="flex flex-1 flex-col overflow-hidden min-h-0">
-        {/* 工具栏 */}
-        <DataToolbar
-          selectedCount={selectedIds.length}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          onSearch={handleSearch}
-          onRefresh={handleRefresh}
-          onExport={handleExport}
-          onImport={handleImport}
-          onBatchDelete={handleBatchDelete}
-        />
+        {viewingItem ? (
+          /* 详情页面 */
+          <DataDetailPanel item={viewingItem} onBack={handleBackToList} />
+        ) : (
+          <>
+            {/* 工具栏 */}
+            <DataToolbar
+              selectedCount={selectedIds.length}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              onSearch={handleSearch}
+              onRefresh={handleRefresh}
+              onExport={handleExport}
+              onImport={handleImport}
+              onBatchDelete={handleBatchDelete}
+              onBatchUpdateStatus={handleBatchUpdateStatus}
+            />
 
-        {/* 数据显示区域 */}
-        <div className="flex-1 overflow-hidden min-h-0">
-          {viewMode === 'table' ? (
-            <DataTable
-              data={dataItems}
-              isLoading={isLoading}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              total={total}
-              onPageChange={handlePageChange}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onView={handleView}
-              onSelectionChange={setSelectedIds}
-            />
-          ) : (
-            <DataCardView
-              data={dataItems}
-              isLoading={isLoading}
-              selectedIds={selectedIds}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              total={total}
-              onPageChange={handlePageChange}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onView={handleView}
-              onSelectionChange={setSelectedIds}
-            />
-          )}
-        </div>
+            {/* 数据显示区域 */}
+            <div className="flex-1 overflow-hidden min-h-0">
+              {viewMode === 'table' ? (
+                <DataTable
+                  data={dataItems}
+                  isLoading={isLoading}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  total={total}
+                  onPageChange={handlePageChange}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                  onSelectionChange={setSelectedIds}
+                />
+              ) : (
+                <DataCardView
+                  data={dataItems}
+                  isLoading={isLoading}
+                  selectedIds={selectedIds}
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  total={total}
+                  onPageChange={handlePageChange}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                  onSelectionChange={setSelectedIds}
+                />
+              )}
+            </div>
+          </>
+        )}
       </div>
-
-      {/* 数据详情对话框 */}
-      <DataDetailDialog
-        item={viewingItem}
-        open={detailDialogOpen}
-        onOpenChange={setDetailDialogOpen}
-      />
     </div>
   );
 }

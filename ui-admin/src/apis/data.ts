@@ -220,6 +220,19 @@ export async function batchDeleteDataItems(ids: string[]): Promise<void> {
   });
 }
 
+/**
+ * 批量更新数据项状态
+ */
+export async function batchUpdateDataStatus(
+  ids: string[],
+  status: 'draft' | 'published' | 'archived'
+): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`${API_BASE}/data/batch-update-status`, {
+    method: 'POST',
+    body: JSON.stringify({ ids, status }),
+  });
+}
+
 // ========== 导入导出 ==========
 
 /**

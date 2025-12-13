@@ -54,6 +54,7 @@ const RootComponent: React.FC = () => {
     isUsePanel,
     isUseEvaluation,
     isUseCustomNav,
+    isUseDataBrowser,
   } = useVinesRoute();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });

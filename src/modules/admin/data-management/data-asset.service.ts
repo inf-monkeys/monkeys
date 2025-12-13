@@ -1,4 +1,4 @@
-import { DataAssetEntity } from '@/database/entities/data-management/data-asset.entity';
+import { DataAssetEntity, AssetStatus } from '@/database/entities/data-management/data-asset.entity';
 import { DataAssetRepository } from '@/database/repositories/data-asset.repository';
 import { DataAssetPermissionRepository } from '@/database/repositories/data-permission.repository';
 import { DataViewRepository } from '@/database/repositories/data-view.repository';
@@ -147,6 +147,33 @@ export class DataAssetService {
    */
   async batchDeleteAssets(userId: string, assetIds: string[]): Promise<void> {
     await this.dataAssetRepository.batchSoftDelete(assetIds);
+  }
+
+  /**
+   * 批量更新资产状态
+   */
+  async batchUpdateStatus(
+    userId: string,
+    assetIds: string[],
+    status: AssetStatus
+  ): Promise<void> {
+    // 获取所有需要更新的资产
+    const assets = await Promise.all(
+      assetIds.map(id => this.dataAssetRepository.findById(id))
+    );
+
+    // 过滤掉不存在的资产
+    const validAssets = assets.filter(asset => asset !== null);
+
+    // 批量更新状态
+    for (const asset of validAssets) {
+      await this.dataAssetRepository.updateAsset(asset.id, { status });
+
+      // 如果状态是 published，需要同时更新 isPublished 字段
+      if (status === AssetStatus.PUBLISHED && !asset.isPublished) {
+        await this.dataAssetRepository.publishAsset(asset.id);
+      }
+    }
   }
 
   /**

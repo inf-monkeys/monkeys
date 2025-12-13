@@ -160,21 +160,6 @@ export class MoveDataAssetDto {
 }
 
 /**
- * 批量更新资产状态 DTO
- */
-export class BatchUpdateStatusDto {
-  @ApiProperty({ description: '资产 ID 列表' })
-  @IsArray()
-  @IsNotEmpty()
-  ids: string[];
-
-  @ApiProperty({ description: '资产状态', enum: ['draft', 'published', 'archived'] })
-  @IsEnum(['draft', 'published', 'archived'])
-  @IsNotEmpty()
-  status: AssetStatus;
-}
-
-/**
  * 资产响应 DTO
  */
 export class DataAssetResponseDto {

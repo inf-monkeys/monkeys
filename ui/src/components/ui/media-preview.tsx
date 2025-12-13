@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Play } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils';
 
 export interface MediaPreviewProps {
   src: string;
@@ -118,9 +118,24 @@ export function MediaPreview({
       }
     }, [src]);
 
+    // 根据 aspectRatio 决定是否使用固定最小高度
+    const useFixedHeight = aspectRatio !== 'square';
+    const innerDivClass = useFixedHeight ? "relative w-full h-full min-h-[400px]" : "relative w-full h-full";
+    const modelStyle: React.CSSProperties = {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'transparent',
+      position: 'relative',
+      zIndex: 1,
+    };
+
+    if (useFixedHeight) {
+      modelStyle.minHeight = '400px';
+    }
+
     return (
       <div className={containerClass} style={{ minHeight: aspectRatio === 'square' ? 'auto' : '400px' }}>
-        <div className="relative w-full h-full min-h-[400px]">
+        <div className={innerDivClass}>
           {/* 加载提示 - 只在未加载完成时显示 */}
           {!isModelLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
@@ -140,14 +155,7 @@ export function MediaPreview({
             camera-controls
             auto-rotate
             interaction-prompt="auto"
-            style={{
-              width: '100%',
-              height: '100%',
-              minHeight: '400px',
-              backgroundColor: 'transparent',
-              position: 'relative',
-              zIndex: 1,
-            }}
+            style={modelStyle}
             className="w-full h-full"
           />
         </div>

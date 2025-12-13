@@ -69,6 +69,28 @@ export class DataViewRepository extends Repository<DataViewEntity> {
   }
 
   /**
+   * 获取公开视图树形结构（只返回 isPublic = true 的视图）
+   * 包括：1. team_id = 指定teamId 的视图，2. team_id = '0' 的全局视图（所有团队可见）
+   */
+  async findPublicTree(teamId?: string): Promise<DataViewEntity[]> {
+    const baseWhere = { isDeleted: false, isPublic: true };
+
+    // 如果指定了 teamId，返回该团队的视图 + 全局视图（team_id = '0'）
+    // 如果没有指定 teamId，只返回全局视图
+    const where = teamId
+      ? [
+          { ...baseWhere, teamId },      // 该团队的视图
+          { ...baseWhere, teamId: '0' }  // 全局视图（team_id = '0'）
+        ]
+      : { ...baseWhere, teamId: '0' };   // 只返回全局视图
+
+    return this.find({
+      where,
+      order: { path: 'ASC', sort: 'ASC' },
+    });
+  }
+
+  /**
    * 创建视图
    */
   async createView(data: {

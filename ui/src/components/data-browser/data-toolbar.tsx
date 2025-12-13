@@ -8,7 +8,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils';
 import type { DataExportOptions } from '@/types/data';
 import {
     Download,
@@ -22,7 +22,6 @@ import {
     Table,
     Trash2,
     Upload,
-    Edit2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -36,7 +35,6 @@ interface DataToolbarProps {
   onExport: (options: DataExportOptions) => void;
   onImport: (file: File) => void;
   onBatchDelete?: () => void;
-  onBatchUpdateStatus?: (status: 'draft' | 'published' | 'archived') => void;
 }
 
 export function DataToolbar({
@@ -48,7 +46,6 @@ export function DataToolbar({
   onExport,
   onImport,
   onBatchDelete,
-  onBatchUpdateStatus,
 }: DataToolbarProps) {
   const [searchKeyword, setSearchKeyword] = useState('');
 
@@ -95,46 +92,16 @@ export function DataToolbar({
 
       {/* 右侧：操作按钮 */}
       <div className="flex items-center gap-2">
-        {/* 批量操作 */}
-        {selectedCount > 0 && (
-          <>
-            {/* 批量编辑状态 */}
-            {onBatchUpdateStatus && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Edit2 className="mr-2 h-4 w-4" />
-                    批量编辑 ({selectedCount})
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>更改状态</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onBatchUpdateStatus('draft')}>
-                    设为草稿
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onBatchUpdateStatus('published')}>
-                    设为已发布
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onBatchUpdateStatus('archived')}>
-                    设为已归档
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            {/* 批量删除 */}
-            {onBatchDelete && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={onBatchDelete}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                删除 ({selectedCount})
-              </Button>
-            )}
-          </>
+        {/* 批量删除 */}
+        {selectedCount > 0 && onBatchDelete && (
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={onBatchDelete}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            删除 ({selectedCount})
+          </Button>
         )}
 
         {/* 视图切换 */}
