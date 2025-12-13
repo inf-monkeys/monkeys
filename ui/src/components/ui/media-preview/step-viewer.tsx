@@ -18,18 +18,41 @@ export function StepViewer({
   aspectRatio = 'square',
 }: StepViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
+  const animationIdRef = useRef<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [isInView, setIsInView] = useState(false);
+
+  // 使用 Intersection Observer 检测组件是否在视口中
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsInView(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.1 } // 当 10% 可见时触发
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    // 只有在视口中时才初始化
+    if (!containerRef.current || !isInView) return;
 
-    let scene: THREE.Scene;
-    let camera: THREE.PerspectiveCamera;
-    let renderer: THREE.WebGLRenderer;
-    let controls: OrbitControls;
-    let animationId: number;
+    let cancelled = false;
 
     const initViewer = async () => {
       try {
@@ -38,29 +61,33 @@ export function StepViewer({
         setProgress(0);
 
         const container = containerRef.current;
-        if (!container) return;
+        if (!container || cancelled) return;
 
         // 初始化 Three.js 场景
-        scene = new THREE.Scene();
+        const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xf5f5f5);
+        sceneRef.current = scene;
 
         // 相机设置
         const width = container.clientWidth;
         const height = container.clientHeight;
-        camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000);
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000);
         camera.position.set(100, 100, 100);
         camera.lookAt(0, 0, 0);
+        cameraRef.current = camera;
 
         // 渲染器设置
-        renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(width, height);
         renderer.setPixelRatio(window.devicePixelRatio);
         container.appendChild(renderer.domElement);
+        rendererRef.current = renderer;
 
         // 添加轨道控制器
-        controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
+        controlsRef.current = controls;
 
         // 添加光源
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -180,25 +207,30 @@ export function StepViewer({
         camera.lookAt(center);
         controls.target.copy(center);
 
+        if (cancelled) return;
+
         setProgress(100);
         setIsLoading(false);
 
         // 动画循环
         const animate = () => {
-          animationId = requestAnimationFrame(animate);
-          controls.update();
-          renderer.render(scene, camera);
+          if (cancelled) return;
+          animationIdRef.current = requestAnimationFrame(animate);
+          controlsRef.current?.update();
+          if (rendererRef.current && sceneRef.current && cameraRef.current) {
+            rendererRef.current.render(sceneRef.current, cameraRef.current);
+          }
         };
         animate();
 
         // 处理窗口大小变化
         const handleResize = () => {
-          if (!containerRef.current) return;
+          if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
           const width = containerRef.current.clientWidth;
           const height = containerRef.current.clientHeight;
-          camera.aspect = width / height;
-          camera.updateProjectionMatrix();
-          renderer.setSize(width, height);
+          cameraRef.current.aspect = width / height;
+          cameraRef.current.updateProjectionMatrix();
+          rendererRef.current.setSize(width, height);
         };
         window.addEventListener('resize', handleResize);
 
@@ -206,6 +238,7 @@ export function StepViewer({
           window.removeEventListener('resize', handleResize);
         };
       } catch (err) {
+        if (cancelled) return;
         console.error('Error loading STEP file:', err);
         setError(err instanceof Error ? err.message : 'Failed to load STEP file');
         setIsLoading(false);
@@ -216,20 +249,65 @@ export function StepViewer({
 
     // 清理函数
     return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
+      cancelled = true;
+
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = null;
       }
-      if (controls) {
-        controls.dispose();
+      if (controlsRef.current) {
+        controlsRef.current.dispose();
+        controlsRef.current = null;
       }
-      if (renderer) {
-        renderer.dispose();
+      if (sceneRef.current) {
+        // 遍历场景中的所有对象并释放资源
+        sceneRef.current.traverse((object) => {
+          if (object instanceof THREE.Mesh) {
+            object.geometry?.dispose();
+            if (object.material) {
+              if (Array.isArray(object.material)) {
+                object.material.forEach((material) => material.dispose());
+              } else {
+                object.material.dispose();
+              }
+            }
+          }
+          if (object instanceof THREE.LineSegments) {
+            object.geometry?.dispose();
+            if (object.material) {
+              if (Array.isArray(object.material)) {
+                object.material.forEach((material) => material.dispose());
+              } else {
+                object.material.dispose();
+              }
+            }
+          }
+        });
+        sceneRef.current.clear();
+        sceneRef.current = null;
       }
-      if (containerRef.current && renderer) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (rendererRef.current) {
+        // 先移除 DOM 元素，再释放渲染器
+        if (containerRef.current && rendererRef.current.domElement.parentNode === containerRef.current) {
+          containerRef.current.removeChild(rendererRef.current.domElement);
+        }
+
+        // 尝试强制释放 WebGL 上下文
+        try {
+          const gl = rendererRef.current.getContext();
+          const ext = gl.getExtension('WEBGL_lose_context');
+          if (ext) {
+            ext.loseContext();
+          }
+        } catch (e) {
+          // 如果获取扩展失败，继续清理
+        }
+
+        rendererRef.current.dispose();
+        rendererRef.current = null;
       }
     };
-  }, [src]);
+  }, [src, isInView]); // 依赖于 src 和 isInView
 
   const aspectClasses = {
     square: 'aspect-square',
@@ -247,8 +325,18 @@ export function StepViewer({
     <div className={containerClass} style={{ minHeight: aspectRatio === 'square' ? 'auto' : '400px' }}>
       <div ref={containerRef} className="w-full h-full min-h-[400px]" />
 
+      {/* 未进入视口的占位符 */}
+      {!isInView && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
+          <div className="text-center">
+            <div className="mb-2 h-8 w-8 rounded-full border-4 border-muted-foreground/20 mx-auto"></div>
+            <p className="text-sm text-muted-foreground">STEP 模型</p>
+          </div>
+        </div>
+      )}
+
       {/* 加载状态 */}
-      {isLoading && (
+      {isInView && isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
           <div className="text-center">
             <div className="mb-2 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
@@ -258,7 +346,7 @@ export function StepViewer({
       )}
 
       {/* 错误状态 */}
-      {error && (
+      {isInView && error && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted z-10">
           <div className="text-center px-4">
             <p className="text-sm text-destructive mb-2">加载失败</p>
