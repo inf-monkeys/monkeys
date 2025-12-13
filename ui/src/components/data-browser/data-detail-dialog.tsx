@@ -135,99 +135,89 @@ export function DataDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent ref={dialogContentRef} className="max-w-3xl max-h-[90vh] border-4 border-red-500">
-        <DialogHeader className="border-2 border-blue-500">
+      <DialogContent ref={dialogContentRef} className="max-w-[90vw] max-h-[90vh] w-full">
+        <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {getTypeIcon(item.type || item.assetType)}
             {item.name || item.displayName}
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea ref={scrollAreaRef} className="max-h-[calc(90vh-120px)] border-2 border-green-500">
-          <div className="space-y-6 pr-4 border-2 border-yellow-500">
-            {/* 缩略图或主内容 */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold">预览</h3>
-              <div className="rounded-lg border overflow-hidden border-2 border-purple-500">
-                {/* 优先使用 media 或 thumbnail */}
-                {(item.media || item.thumbnail) ? (
-                  <MediaPreview
-                    src={item.media || item.thumbnail || ''}
-                    alt={item.name}
-                    type="auto"
-                    thumbnail={item.thumbnail}
-                    aspectRatio="auto"
-                    className="max-h-96"
-                  />
-                ) : item.primaryContent ? (
-                  <>
-                    {/* 根据 primaryContent.type 渲染 */}
-                    {item.primaryContent.type === 'image' ? (
-                      <MediaPreview
-                        src={item.primaryContent.value}
-                        alt={item.name}
-                        type="image"
-                        aspectRatio="auto"
-                        className="max-h-96"
-                      />
-                    ) : item.primaryContent.type === 'video' ? (
-                      <MediaPreview
-                        src={item.primaryContent.value}
-                        alt={item.name}
-                        type="video"
-                        thumbnail={item.primaryContent.metadata?.thumbnailUrl}
-                        aspectRatio="auto"
-                        className="max-h-96"
-                      />
-                    ) : item.primaryContent.type === '3d' ? (
-                      <MediaPreview
-                        src={item.primaryContent.value}
-                        alt={item.name}
-                        type="3d"
-                        thumbnail={item.primaryContent.metadata?.thumbnailUrl}
-                        aspectRatio="auto"
-                        className="max-h-96"
-                      />
-                    ) : item.primaryContent.type === 'text' ? (
-                      <div className="p-4 text-sm whitespace-pre-wrap bg-muted">
-                        {item.primaryContent.value}
-                      </div>
-                    ) : (
-                      <div className="w-full overflow-hidden bg-muted border-2 border-orange-500">
-                        <pre ref={previewJsonRef} className="p-4 text-xs overflow-x-auto max-h-80 font-mono border-2 border-pink-500">
-                          {JSON.stringify(item.primaryContent, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="p-8 text-center text-muted-foreground bg-muted">
-                    <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>无预览</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 描述信息 */}
-            {(item.description || item.primaryContent?.description) && (
-              <>
-                <Separator />
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold">描述</h3>
-                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {item.description || item.primaryContent?.description}
-                  </div>
+        {/* 左右布局 */}
+        <div className="flex gap-6 h-[calc(90vh-120px)] overflow-hidden">
+          {/* 左侧：预览区域 */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            <h3 className="text-sm font-semibold mb-3">预览</h3>
+            <div className="flex-1 rounded-lg border overflow-hidden bg-muted flex items-center justify-center">
+              {/* 优先使用 media 或 thumbnail */}
+              {(item.media || item.thumbnail) ? (
+                <MediaPreview
+                  src={item.media || item.thumbnail || ''}
+                  alt={item.name}
+                  type="auto"
+                  thumbnail={item.thumbnail}
+                  aspectRatio="auto"
+                  className="w-full h-full object-contain"
+                />
+              ) : item.primaryContent ? (
+                <>
+                  {/* 根据 primaryContent.type 渲染 */}
+                  {item.primaryContent.type === 'image' ? (
+                    <MediaPreview
+                      src={item.primaryContent.value}
+                      alt={item.name}
+                      type="image"
+                      aspectRatio="auto"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : item.primaryContent.type === 'video' ? (
+                    <MediaPreview
+                      src={item.primaryContent.value}
+                      alt={item.name}
+                      type="video"
+                      thumbnail={item.primaryContent.metadata?.thumbnailUrl}
+                      aspectRatio="auto"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : item.primaryContent.type === '3d' ? (
+                    <MediaPreview
+                      src={item.primaryContent.value}
+                      alt={item.name}
+                      type="3d"
+                      thumbnail={item.primaryContent.metadata?.thumbnailUrl}
+                      aspectRatio="auto"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : item.primaryContent.type === 'text' ? (
+                    <div className="w-full h-full p-4 text-sm whitespace-pre-wrap overflow-auto">
+                      {item.primaryContent.value}
+                    </div>
+                  ) : (
+                    <div className="w-full h-full overflow-auto">
+                      <pre ref={previewJsonRef} className="p-4 text-xs font-mono">
+                        {JSON.stringify(item.primaryContent, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="p-8 text-center text-muted-foreground">
+                  <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>无预览</p>
                 </div>
-              </>
-            )}
+              )}
+            </div>
+          </div>
 
-            <Separator />
+          {/* 右侧：详细信息 */}
+          <div className="w-[400px] flex-shrink-0 flex flex-col">
+            <ScrollArea ref={scrollAreaRef} className="flex-1">
+              <div className="space-y-6 pr-4">
 
             {/* 基本信息 */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold">基本信息</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="space-y-3 text-sm">
                 {item.id && (
                   <div className="space-y-1">
                     <div className="text-muted-foreground">ID</div>
@@ -311,7 +301,7 @@ export function DataDetailDialog({
                 <Separator />
                 <div className="space-y-3">
                   <h3 className="text-sm font-semibold">内容元数据</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-3 text-sm">
                     {item.primaryContent.metadata.width && (
                       <div className="space-y-1">
                         <div className="text-muted-foreground">宽度</div>
@@ -420,7 +410,7 @@ export function DataDetailDialog({
             {/* 时间信息 */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold">时间信息</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="space-y-3 text-sm">
                 {item.createdTimestamp && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1 text-muted-foreground">
@@ -442,19 +432,34 @@ export function DataDetailDialog({
               </div>
             </div>
 
+            {/* 描述信息 */}
+            {(item.description || item.primaryContent?.description) && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold">描述</h3>
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {item.description || item.primaryContent?.description}
+                  </div>
+                </div>
+              </>
+            )}
+
             <Separator />
 
             {/* 完整数据 JSON */}
-            <div className="space-y-3 w-full border-2 border-cyan-500">
+            <div className="space-y-3">
               <h3 className="text-sm font-semibold">完整元数据 (JSON)</h3>
-              <div className="w-full overflow-hidden rounded-lg border bg-muted border-2 border-indigo-500">
-                <pre ref={metadataJsonRef} className="p-4 text-xs overflow-x-auto overflow-y-auto max-h-96 font-mono border-2 border-teal-500">
+              <div className="w-full overflow-hidden rounded-lg border bg-muted">
+                <pre ref={metadataJsonRef} className="p-4 text-xs overflow-x-auto overflow-y-auto max-h-96 font-mono">
                   {JSON.stringify(item, null, 2)}
                 </pre>
               </div>
             </div>
+              </div>
+            </ScrollArea>
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

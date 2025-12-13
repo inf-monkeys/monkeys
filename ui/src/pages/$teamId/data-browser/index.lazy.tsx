@@ -107,7 +107,7 @@ function DataBrowserPage() {
   };
 
   return (
-    <div className="flex h-full overflow-hidden min-h-0">
+    <div className="absolute inset-0 flex h-full w-full overflow-hidden">
       {/* 左侧视图导航 - 只读模式，移除创建/更新/删除功能 */}
       <DataSidebar
         categories={categories}
@@ -121,7 +121,7 @@ function DataBrowserPage() {
       />
 
       {/* 右侧内容区 */}
-      <div className="flex flex-1 flex-col overflow-hidden min-h-0">
+      <div className="flex flex-1 flex-col overflow-hidden">
         {/* 工具栏 - 只读模式，移除导入/导出/批量删除功能 */}
         <DataToolbar
           selectedCount={0}
@@ -136,7 +136,7 @@ function DataBrowserPage() {
         />
 
         {/* 数据显示区域 */}
-        <div className="flex-1 overflow-hidden min-h-0">
+        <div className="flex-1 overflow-hidden">
           {viewMode === 'table' ? (
             <DataTable
               data={dataItems}

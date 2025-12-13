@@ -1,18 +1,18 @@
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { InfiniteScroll } from '@/components/ui/infinite-scroll';
 import { MediaPreview } from '@/components/ui/media-preview';
-import { MoreHorizontal, Edit, Trash2, Eye, Loader2 } from 'lucide-react';
 import type { DataItem } from '@/types/data';
+import { Edit, Eye, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
 
 interface DataCardViewProps {
   data: DataItem[];
@@ -89,8 +89,10 @@ export function DataCardView({
             next={handleLoadMore}
             threshold={0.8}
           >
-            {data.map((item) => {
+            {data.map((item, index) => {
               const hasMedia = !!(item.thumbnail || item.media);
+              const mediaUrl = item.media || item.thumbnail || '';
+
               return (
                 <Card
                   key={item.id}
@@ -149,7 +151,7 @@ export function DataCardView({
                   {hasMedia && (
                     <CardContent className="p-0">
                       <MediaPreview
-                        src={item.media || item.thumbnail || ''}
+                        src={mediaUrl}
                         alt={item.name}
                         type="auto"
                         thumbnail={item.thumbnail}

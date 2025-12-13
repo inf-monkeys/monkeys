@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Play } from 'lucide-react';
 import { cn } from '@/utils';
+import { Play } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export interface MediaPreviewProps {
   src: string;
@@ -60,6 +60,8 @@ export function MediaPreview({
   const containerClass = cn(
     'w-full overflow-hidden bg-muted',
     aspectClasses[aspectRatio],
+    // 在卡片视图中限制最大高度
+    aspectRatio === 'square' && 'max-h-[300px]',
     className
   );
 
@@ -118,9 +120,14 @@ export function MediaPreview({
       }
     }, [src]);
 
-    // 根据 aspectRatio 决定是否使用固定最小高度
-    const useFixedHeight = aspectRatio !== 'square';
-    const innerDivClass = useFixedHeight ? "relative w-full h-full min-h-[400px]" : "relative w-full h-full";
+    // 在卡片视图中使用固定宽高比，在详情页使用固定高度
+    const use3DCardMode = aspectRatio === 'square';
+    const containerStyle = use3DCardMode
+      ? { maxHeight: '300px' }
+      : { minHeight: '400px' };
+    const innerDivClass = use3DCardMode
+      ? "relative w-full h-full"
+      : "relative w-full h-full min-h-[400px]";
     const modelStyle: React.CSSProperties = {
       width: '100%',
       height: '100%',
@@ -129,12 +136,12 @@ export function MediaPreview({
       zIndex: 1,
     };
 
-    if (useFixedHeight) {
+    if (!use3DCardMode) {
       modelStyle.minHeight = '400px';
     }
 
     return (
-      <div className={containerClass} style={{ minHeight: aspectRatio === 'square' ? 'auto' : '400px' }}>
+      <div className={containerClass} style={containerStyle}>
         <div className={innerDivClass}>
           {/* 加载提示 - 只在未加载完成时显示 */}
           {!isModelLoaded && (
