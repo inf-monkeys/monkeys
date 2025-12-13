@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,6 +12,15 @@ import { InfiniteScroll } from '@/components/ui/infinite-scroll';
 import { MediaPreview } from '@/components/ui/media-preview';
 import type { DataItem } from '@/types/data';
 import { Edit, Eye, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
+
+/**
+ * 检测是否是文本文件
+ */
+function isTextFile(url: string): boolean {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  return !!lowerUrl.match(/\.(txt|md|csv|json|xml|log|conf|ini|yaml|yml)$/);
+}
 
 interface DataCardViewProps {
   data: DataItem[];
@@ -90,26 +98,23 @@ export function DataCardView({
             threshold={0.8}
           >
             {data.map((item, index) => {
-              const hasMedia = !!(item.thumbnail || item.media);
-              const mediaUrl = item.media || item.thumbnail || '';
+              // 检查是否有媒体文件且不是文本文件
+              const mediaUrl = Array.isArray(item.media) ? item.media[0] : item.media;
+              const isText = isTextFile(mediaUrl || item.thumbnail || '');
+              const hasMedia = !isText && !!(item.thumbnail || item.media);
+              const mediaDisplayUrl = Array.isArray(item.media)
+                ? item.media
+                : item.media || item.thumbnail || '';
 
               return (
                 <Card
                   key={item.id}
-                  className={`relative flex flex-col break-inside-avoid mb-4 ${selectedIds.includes(item.id || '') ? 'ring-2 ring-primary' : ''}`}
+                  className="relative flex flex-col break-inside-avoid mb-4"
                 >
                   <CardHeader className={hasMedia ? 'pb-3' : 'pb-2'}>
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-start gap-2 flex-1 min-w-0">
-                        <Checkbox
-                          checked={selectedIds.includes(item.id || '')}
-                          onCheckedChange={() => handleToggleSelection(item.id)}
-                          aria-label="Select item"
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm truncate">{item.name}</h3>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -151,11 +156,12 @@ export function DataCardView({
                   {hasMedia && (
                     <CardContent className="p-0">
                       <MediaPreview
-                        src={mediaUrl}
+                        src={mediaDisplayUrl}
                         alt={item.name}
                         type="auto"
                         thumbnail={item.thumbnail}
                         aspectRatio="square"
+                        onViewAll={() => onView?.(item)}
                       />
                     </CardContent>
                   )}
@@ -186,7 +192,7 @@ export function DataCardView({
       {/* 底部信息栏 */}
       <div className="flex items-center border-t bg-background px-4 py-3">
         <div className="text-sm text-muted-foreground whitespace-nowrap">
-          已选择 {selectedIds.length} 项 · 已加载 {data.length} / {total} 条数据
+          已加载 {data.length} / {total} 条数据
         </div>
       </div>
     </div>

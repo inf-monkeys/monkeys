@@ -67,7 +67,7 @@ export interface DataAsset {
   status: 'draft' | 'published' | 'archived';
   teamId?: string;
   creatorUserId: string;
-  media?: string;
+  media?: string | string[];
   thumbnail?: string;
   displayName: string;
   description?: string;

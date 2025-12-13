@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -18,7 +18,18 @@ import {
   Video,
   File,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
+
+/**
+ * 检测是否是文本文件
+ */
+function isTextFile(url: string): boolean {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  return !!lowerUrl.match(/\.(txt|md|csv|json|xml|log|conf|ini|yaml|yml)$/);
+}
 
 interface DataDetailPanelProps {
   item: DataItem | null;
@@ -29,7 +40,67 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
   const previewJsonRef = useRef<HTMLPreElement>(null);
   const metadataJsonRef = useRef<HTMLPreElement>(null);
 
+  // 多图轮播状态
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // 文本文件内容状态
+  const [textContent, setTextContent] = useState<string>('');
+  const [isLoadingText, setIsLoadingText] = useState(false);
+  const [textError, setTextError] = useState<string>('');
+
   if (!item) return null;
+
+  // 获取图片数组
+  const getMediaArray = (): string[] => {
+    if (Array.isArray(item.media)) {
+      return item.media;
+    }
+    if (item.media) {
+      return [item.media];
+    }
+    if (item.thumbnail) {
+      return [item.thumbnail];
+    }
+    return [];
+  };
+
+  const mediaArray = getMediaArray();
+  const hasMultipleImages = mediaArray.length > 1;
+  const currentMedia = mediaArray[currentImageIndex] || mediaArray[0];
+  const isText = isTextFile(currentMedia);
+
+  // 加载文本文件内容
+  useEffect(() => {
+    if (isText && currentMedia) {
+      setIsLoadingText(true);
+      setTextError('');
+      fetch(currentMedia)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to load file');
+          return res.text();
+        })
+        .then(content => {
+          setTextContent(content);
+          setIsLoadingText(false);
+        })
+        .catch(error => {
+          setTextError(error.message || '加载文件失败');
+          setIsLoadingText(false);
+        });
+    }
+  }, [currentMedia, isText]);
+
+  const handlePreviousImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev > 0 ? prev - 1 : mediaArray.length - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev < mediaArray.length - 1 ? prev + 1 : 0
+    );
+  };
 
   const formatDate = (timestamp: string | number | undefined): string => {
     if (!timestamp) return '-';
@@ -95,18 +166,84 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
       <div className="flex gap-6 flex-1 overflow-hidden p-6">
         {/* Left: Preview Area */}
         <div className="flex-1 min-w-0 flex flex-col">
-          <h3 className="text-sm font-semibold mb-3">预览</h3>
-          <div className="flex-1 rounded-lg border overflow-hidden bg-muted flex items-center justify-center">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold">预览</h3>
+            {hasMultipleImages && (
+              <div className="text-xs text-muted-foreground">
+                {currentImageIndex + 1} / {mediaArray.length}
+              </div>
+            )}
+          </div>
+          <div className="flex-1 rounded-lg border overflow-hidden bg-muted flex items-center justify-center relative">
             {/* Priority: media or thumbnail */}
             {(item.media || item.thumbnail) ? (
-              <MediaPreview
-                src={item.media || item.thumbnail || ''}
-                alt={item.name}
-                type="auto"
-                thumbnail={item.thumbnail}
-                aspectRatio="auto"
-                className="w-full h-full object-contain"
-              />
+              <>
+                {/* 文本文件显示 */}
+                {isText ? (
+                  <div className="w-full h-full overflow-auto p-4">
+                    {isLoadingText ? (
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <div className="mb-2 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                        <p className="text-sm text-muted-foreground">加载文本文件...</p>
+                      </div>
+                    ) : textError ? (
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <FileText className="h-12 w-12 mb-2 opacity-50 text-destructive" />
+                        <p className="text-sm text-destructive">{textError}</p>
+                      </div>
+                    ) : (
+                      <pre className="text-xs font-mono whitespace-pre-wrap break-all">{textContent}</pre>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <MediaPreview
+                      src={currentMedia}
+                      alt={item.name}
+                      type="auto"
+                      thumbnail={item.thumbnail}
+                      aspectRatio="auto"
+                      className="w-full h-full object-contain"
+                    />
+                    {/* 左右切换按钮 */}
+                    {hasMultipleImages && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-background/80 hover:bg-background shadow-lg"
+                          onClick={handlePreviousImage}
+                        >
+                          <ChevronLeft className="h-6 w-6" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-background/80 hover:bg-background shadow-lg"
+                          onClick={handleNextImage}
+                        >
+                          <ChevronRight className="h-6 w-6" />
+                        </Button>
+                        {/* 图片索引指示器 */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                          {mediaArray.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setCurrentImageIndex(index)}
+                              className={`w-2 h-2 rounded-full transition-all ${
+                                index === currentImageIndex
+                                  ? 'bg-primary w-6'
+                                  : 'bg-background/60 hover:bg-background/80'
+                              }`}
+                              aria-label={`跳转到第 ${index + 1} 张图片`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </>
             ) : item.primaryContent ? (
               <>
                 {/* Render based on primaryContent.type */}

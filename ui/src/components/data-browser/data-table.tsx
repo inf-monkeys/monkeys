@@ -1,6 +1,5 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -48,7 +47,6 @@ export function DataTable({
   onSelectionChange,
 }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = React.useState({});
   const hasMore = total > data.length;
   const observerRef = React.useRef<IntersectionObserver | null>(null);
   const sentinelRef = React.useRef<HTMLDivElement | null>(null);
@@ -80,25 +78,6 @@ export function DataTable({
   }, [hasMore, isLoading, currentPage, onPageChange]);
 
   const columns: ColumnDef<DataItem>[] = [
-    {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
     {
       accessorKey: 'name',
       header: ({ column }) => {
@@ -244,24 +223,10 @@ export function DataTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      rowSelection,
     },
   });
-
-  // 通知父组件选择变化
-  React.useEffect(() => {
-    const selectedIds = table
-      .getFilteredSelectedRowModel()
-      .rows.map((row) => row.original.id)
-      .filter((id): id is string => !!id);
-
-    if (onSelectionChange) {
-      onSelectionChange(selectedIds);
-    }
-  }, [rowSelection, onSelectionChange]);
 
   if (isLoading && data.length === 0) {
     return (
@@ -292,7 +257,7 @@ export function DataTable({
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="h-9 px-3 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&:has([role=checkbox])]:pl-3"
+                    className="h-9 px-3 text-left align-middle font-medium text-muted-foreground"
                   >
                     {header.isPlaceholder
                       ? null
@@ -309,13 +274,12 @@ export function DataTable({
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                className="border-b transition-colors hover:bg-muted/50"
               >
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    className="px-3 py-2 align-middle [&:has([role=checkbox])]:pr-0 [&:has([role=checkbox])]:pl-3"
+                    className="px-3 py-2 align-middle"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
@@ -349,7 +313,7 @@ export function DataTable({
       {/* 底部信息栏 */}
       <div className="flex items-center border-t bg-background px-4 py-3">
         <div className="text-sm text-muted-foreground whitespace-nowrap">
-          已选择 {table.getFilteredSelectedRowModel().rows.length} 项 · 已加载 {data.length} / {total} 条数据
+          已加载 {data.length} / {total} 条数据
         </div>
       </div>
     </div>

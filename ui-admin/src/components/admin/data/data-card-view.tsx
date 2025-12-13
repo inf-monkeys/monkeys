@@ -14,6 +14,15 @@ import { MediaPreview } from '@/components/ui/media-preview';
 import { MoreHorizontal, Edit, Trash2, Eye, Loader2 } from 'lucide-react';
 import type { DataItem } from '@/types/data';
 
+/**
+ * 检测是否是文本文件
+ */
+function isTextFile(url: string): boolean {
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase();
+  return !!lowerUrl.match(/\.(txt|md|csv|json|xml|log|conf|ini|yaml|yml)$/);
+}
+
 interface DataCardViewProps {
   data: DataItem[];
   isLoading?: boolean;
@@ -90,7 +99,11 @@ export function DataCardView({
             threshold={0.8}
           >
             {data.map((item) => {
-              const hasMedia = !!(item.thumbnail || item.media);
+              // 检查是否有媒体文件且不是文本文件
+              const mediaUrl = Array.isArray(item.media) ? item.media[0] : item.media;
+              const isText = isTextFile(mediaUrl || item.thumbnail || '');
+              const hasMedia = !isText && !!(item.thumbnail || item.media);
+
               return (
                 <Card
                   key={item.id}
@@ -149,11 +162,16 @@ export function DataCardView({
                   {hasMedia && (
                     <CardContent className="p-0">
                       <MediaPreview
-                        src={item.media || item.thumbnail || ''}
+                        src={
+                          Array.isArray(item.media)
+                            ? item.media
+                            : item.media || item.thumbnail || ''
+                        }
                         alt={item.name}
                         type="auto"
                         thumbnail={item.thumbnail}
                         aspectRatio="square"
+                        onViewAll={() => onView?.(item)}
                       />
                     </CardContent>
                   )}

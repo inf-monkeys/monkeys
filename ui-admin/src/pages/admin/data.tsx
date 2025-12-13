@@ -75,11 +75,24 @@ function DataManagementPage() {
         pageSize: pageSize,
       });
 
+      // 解析 media 字段（如果是 JSON 字符串）
+      const processedItems = response.items.map(item => {
+        if (typeof item.media === 'string' && item.media.startsWith('[')) {
+          try {
+            item.media = JSON.parse(item.media);
+          } catch (e) {
+            // 如果解析失败，保持原样
+            console.warn('Failed to parse media field:', item.media);
+          }
+        }
+        return item;
+      });
+
       // 如果是第一页，替换数据；否则追加数据（用于无限滚动）
       if (currentPage === 1) {
-        setDataItems(response.items);
+        setDataItems(processedItems);
       } else {
-        setDataItems(prev => [...prev, ...response.items]);
+        setDataItems(prev => [...prev, ...processedItems]);
       }
       setTotal(response.total);
     } catch (error: any) {

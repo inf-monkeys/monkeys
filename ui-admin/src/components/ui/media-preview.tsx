@@ -1,21 +1,33 @@
 import { useEffect, useState } from 'react';
 import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { StepViewer } from './step-viewer';
 
 export interface MediaPreviewProps {
-  src: string;
+  src: string | string[];
   alt?: string;
-  type?: 'image' | 'video' | '3d' | 'auto';
+  type?: 'image' | 'video' | '3d' | 'step' | 'auto';
   thumbnail?: string;
   className?: string;
   aspectRatio?: 'square' | 'video' | 'auto';
+  onViewAll?: () => void;
 }
 
 /**
  * 检测文件类型
  */
-function detectMediaType(src: string): 'image' | 'video' | '3d' {
+function detectMediaType(src: string): 'image' | 'video' | '3d' | 'step' | 'text' {
   const url = src.toLowerCase();
+
+  // 文本文件格式
+  if (url.match(/\.(txt|md|csv|json|xml|log|conf|ini|yaml|yml)$/)) {
+    return 'text';
+  }
+
+  // CAD STEP 格式
+  if (url.match(/\.(step|stp)$/)) {
+    return 'step';
+  }
 
   // 3D 模型格式
   if (url.endsWith('.glb') || url.endsWith('.gltf')) {
@@ -38,8 +50,14 @@ export function MediaPreview({
   thumbnail,
   className,
   aspectRatio = 'square',
+  onViewAll,
 }: MediaPreviewProps) {
-  const mediaType = type === 'auto' ? detectMediaType(src) : type;
+  // 处理数组类型的 src，使用第一个作为主图
+  const srcArray = Array.isArray(src) ? src : [src];
+  const primarySrc = srcArray[0];
+  const hasMultiple = srcArray.length > 1;
+
+  const mediaType = type === 'auto' ? detectMediaType(primarySrc) : type;
 
   // 动态加载 model-viewer 脚本
   useEffect(() => {
@@ -66,13 +84,33 @@ export function MediaPreview({
   // 图片预览
   if (mediaType === 'image') {
     return (
-      <div className={containerClass}>
+      <div className={cn(containerClass, 'relative group')}>
         <img
-          src={src}
+          src={primarySrc}
           alt={alt}
           className="w-full h-full object-cover"
           loading="lazy"
         />
+        {/* 多图角标 */}
+        {hasMultiple && (
+          <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>{srcArray.length}</span>
+          </div>
+        )}
+        {/* 点击查看全部的提示 */}
+        {hasMultiple && onViewAll && (
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            onClick={onViewAll}
+          >
+            <div className="bg-white/90 px-4 py-2 rounded-lg text-sm font-medium">
+              查看全部 {srcArray.length} 张图片
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -83,7 +121,7 @@ export function MediaPreview({
       <div className={cn(containerClass, 'relative group')}>
         {/* 视频播放器 */}
         <video
-          src={src}
+          src={primarySrc}
           poster={thumbnail}
           controls
           preload="metadata"
@@ -110,13 +148,13 @@ export function MediaPreview({
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       const handleLoad = () => setIsModelLoaded(true);
-      const modelViewer = document.querySelector(`model-viewer[src="${src}"]`);
+      const modelViewer = document.querySelector(`model-viewer[src="${primarySrc}"]`);
 
       if (modelViewer) {
         modelViewer.addEventListener('load', handleLoad);
         return () => modelViewer.removeEventListener('load', handleLoad);
       }
-    }, [src]);
+    }, [primarySrc]);
 
     return (
       <div className={containerClass} style={{ minHeight: aspectRatio === 'square' ? 'auto' : '400px' }}>
@@ -133,7 +171,7 @@ export function MediaPreview({
 
           {/* 3D 模型查看器 */}
           <model-viewer
-            src={src}
+            src={primarySrc}
             alt={alt}
             poster={thumbnail}
             loading="lazy"
@@ -152,6 +190,18 @@ export function MediaPreview({
           />
         </div>
       </div>
+    );
+  }
+
+  // STEP CAD 模型预览
+  if (mediaType === 'step') {
+    return (
+      <StepViewer
+        src={primarySrc}
+        alt={alt}
+        className={className}
+        aspectRatio={aspectRatio}
+      />
     );
   }
 
