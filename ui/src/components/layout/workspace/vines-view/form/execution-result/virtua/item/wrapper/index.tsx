@@ -36,6 +36,8 @@ interface IVirtuaExecutionResultGridWrapperProps {
   selectionModeDisplayType?: ISelectionModeDisplayType;
   onClick?: (e: React.MouseEvent) => void;
   displayType?: ExectuionResultGridDisplayType;
+  /** control whether to show the "..." execution detail button on hover */
+  showDetailButton?: boolean;
 }
 
 const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResultGridWrapperProps> = ({
@@ -50,6 +52,7 @@ const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResult
   selectionModeDisplayType = 'dropdown-menu',
   onClick,
   displayType = 'masonry',
+  showDetailButton = true,
 }) => {
   // const { mutate } = useSWRConfig();
 
@@ -143,7 +146,12 @@ const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResult
       <div className={`z-10 ${displayType === 'grid' ? 'h-full w-full' : 'flex-1'}`}>{children}</div>
 
       {/* 操作按钮区域 - hover 显示 */}
-      <div className="absolute right-14 top-4 z-30 flex gap-1 opacity-0 transition-opacity group-hover/vgi:opacity-100">
+      <div
+        className={`absolute top-4 z-30 flex gap-1 opacity-0 transition-opacity group-hover/vgi:opacity-100 ${
+          // selectionModeDisplayType === 'operation-button' 时右上角会有 select 按钮（right-4），这里需要预留空间
+          selectionModeDisplayType === 'operation-button' ? 'right-14' : 'right-4'
+        }`}
+      >
         {data.status === 'FAILED' && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -212,7 +220,7 @@ const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResult
           <TooltipContent>{t('common.utils.delete')}</TooltipContent>
         </Tooltip>
 
-        {(oem?.theme?.workflowPreviewExecutionGrid?.showDetailButton ?? true) && (
+        {(oem?.theme?.workflowPreviewExecutionGrid?.showDetailButton ?? true) && showDetailButton && (
           <VirtuaExecutionResultRawDataDialog data={data}>
             <Button
               className={OPERATION_ICON_BUTTON_CLASSNAME}

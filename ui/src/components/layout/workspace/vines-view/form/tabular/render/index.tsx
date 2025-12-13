@@ -26,8 +26,8 @@ import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
-import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import {
   useResetWorkbenchCacheVal,
   useSetWorkbenchCacheVal,
@@ -115,7 +115,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   const pathName = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const inImageDetailRoute = pathName.includes('/image-detail');
+  const inImageDetailRoute = pathName.includes('/image-detail') || pathName.includes('/asset-detail');
   useEffect(() => {
     if (workbenchCacheVal && !hasRestoreValues && !inImageDetailRoute) {
       useFormResetRef.current = true;

@@ -198,7 +198,13 @@ export class TenantManageService {
    * 这样在后续为 workflow 创建内置应用时，WorkflowCrudService.getSnapshot
    * 中解析 comfyui 依赖就不会因为缺少对应的 comfyui-workflow 应用而报 404。
    */
-  private async ensureComfyuiDependenciesPublished(workflow: WorkflowMetadataEntity) {
+  private async ensureComfyuiDependenciesPublished(workflow: WorkflowMetadataEntity, visited?: Set<string>) {
+    // 递归扫描子工作流时避免循环引用
+    const visitedSet = visited ?? new Set<string>();
+    const visitKey = `${workflow.workflowId || workflow.id}:${workflow.version ?? 'latest'}`;
+    if (visitedSet.has(visitKey)) return;
+    visitedSet.add(visitKey);
+
     const tasks: any[] = (workflow as any)?.tasks || [];
     if (!tasks.length) {
       return;
@@ -264,6 +270,61 @@ export class TenantManageService {
 
       // 审批通过，但不标记为预置应用；由引用它的 workflow 控制是否预置
       await this.marketplaceService.approveSubmission(appId);
+    }
+
+    // 递归处理子工作流：
+    // - 嵌套工作流（SUB_WORKFLOW）在存储态通常只包含 name/version，不包含 workflowDefinition，
+    //   所以需要在这里显式加载子工作流定义并继续扫描 comfyui 依赖。
+    const subWorkflowRefs = tasks
+      .filter((t) => t?.type === 'SUB_WORKFLOW')
+      .map((t) => {
+        const name = t?.subWorkflowParam?.name as string | undefined;
+        const version = t?.subWorkflowParam?.version as number | undefined;
+        return { name, version };
+      })
+      .filter((it) => typeof it.name === 'string' && !!it.name);
+
+    for (const ref of subWorkflowRefs) {
+      try {
+        const subWorkflow = typeof ref.version === 'number'
+          ? await this.workflowRepository.getWorkflowById(ref.name!, ref.version, false)
+          : await this.workflowRepository.getWorkflowByIdWithoutVersion(ref.name!, false);
+        if (!subWorkflow) continue;
+
+        // 确保子工作流本身在应用市场存在应用（否则 getSnapshot 解析子工作流会报错）
+        const existsSubAppVersion = await this.marketplaceService.getAppVersionByAssetId(ref.name!, 'workflow');
+        if (!existsSubAppVersion?.app) {
+          const subTeamId = subWorkflow.teamId;
+          const subUserId = subWorkflow.creatorUserId || 'system';
+          const subAppId = ref.name!;
+          const dto = {
+            app: {
+              name: subAppId,
+              description: typeof subWorkflow.description === 'string' ? subWorkflow.description : undefined,
+              iconUrl: subWorkflow.iconUrl,
+              assetType: 'workflow' as const,
+              categories: [] as string[],
+            },
+            version: {
+              version: '1.0.0',
+              releaseNotes: 'Created automatically for builtin workflow sub-workflow dependency',
+              assets: [
+                {
+                  assetType: 'workflow' as const,
+                  assetId: subAppId,
+                  version: subWorkflow.version,
+                },
+              ],
+            },
+          };
+          await this.marketplaceService.createAppWithVersion(subTeamId, subUserId, dto as any);
+          await this.marketplaceService.approveSubmission(subAppId);
+        }
+
+        await this.ensureComfyuiDependenciesPublished(subWorkflow, visitedSet);
+      } catch (e) {
+        this.logger.warn(`Skip scanning sub-workflow comfyui deps for ${ref.name}: ${e?.message || e}`);
+      }
     }
   }
 

@@ -172,13 +172,43 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
     }
   });
 
+  // 将剪贴板里的 file 类型输入归一化为 URL 字符串/数组
+  const normalizeFileValue = useMemoizedFn((val: any): any => {
+    const walk = (v: any): any => {
+      if (typeof v === 'string') return v;
+      if (Array.isArray(v)) {
+        return v.map((item) => walk(item)).filter((it) => typeof it === 'string');
+      }
+      if (v && typeof v === 'object') {
+        const candidate =
+          (v as any).url || (v as any).remoteUrl || (v as any).src || (v as any).href || (v as any).value;
+        if (typeof candidate === 'string') return candidate;
+        if ((v as any).data != null) return walk((v as any).data);
+      }
+      return v;
+    };
+
+    return walk(val);
+  });
+
+  const normalizePastedInputs = useMemoizedFn((inputs: any[]) => {
+    if (!Array.isArray(inputs)) return inputs;
+    return inputs.map((input) => {
+      const inputType = (input as any)?.type;
+      if (input && (inputType === 'file' || inputType === 'image')) {
+        return { ...input, data: normalizeFileValue((input as any).data) };
+      }
+      return input;
+    });
+  });
+
   const handlePasteInput = useMemoizedFn(async () => {
     const text = await read();
     if (text) {
       try {
         const inputData = JSON.parse(text);
         if (inputData.type === 'input-parameters') {
-          tabular$.emit({ type: 'paste-param', data: inputData.data });
+          tabular$.emit({ type: 'paste-param', data: normalizePastedInputs(inputData.data) });
         } else {
           toast.error(t('workspace.form-view.quick-toolbar.paste-param.bad-content'));
         }

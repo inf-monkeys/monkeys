@@ -124,6 +124,9 @@ const TeamIdActionToolsActionToolNameIndexLazyImport = createFileRoute(
 const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport = createFileRoute(
   '/$teamId/workspace/$workflowId/image-detail/',
 )()
+const TeamIdWorkspaceWorkflowIdAssetDetailIndexLazyImport = createFileRoute(
+  '/$teamId/workspace/$workflowId/asset-detail/',
+)()
 const TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport = createFileRoute(
   '/$teamId/workspace/$workflowId/$pageId/',
 )()
@@ -568,6 +571,16 @@ const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute =
     ).then((d) => d.Route),
   )
 
+const TeamIdWorkspaceWorkflowIdAssetDetailIndexLazyRoute =
+  TeamIdWorkspaceWorkflowIdAssetDetailIndexLazyImport.update({
+    path: '/$teamId/workspace/$workflowId/asset-detail/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import(
+      './pages/$teamId/workspace/$workflowId/asset-detail/index.lazy'
+    ).then((d) => d.Route),
+  )
+
 const TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute =
   TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport.update({
     path: '/$teamId/workspace/$workflowId/$pageId/',
@@ -872,6 +885,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/workspace/$workflowId/asset-detail/': {
+      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdAssetDetailIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/workspace/$workflowId/image-detail/': {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport
       parentRoute: typeof rootRoute
@@ -946,6 +963,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdEvaluationsModuleIdTabIndexLazyRoute,
   TeamIdNavNavIdSubModuleIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute,
+  TeamIdWorkspaceWorkflowIdAssetDetailIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute,
   TeamIdNavNavIdAssetAssetIdIndexLazyRoute,
 ])

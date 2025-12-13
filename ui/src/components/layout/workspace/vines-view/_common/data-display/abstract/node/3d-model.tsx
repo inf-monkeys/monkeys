@@ -306,7 +306,9 @@ function ModelViewer3D({ url, mode }: { url: string; mode: Vines3DModelRenderMod
       style={{
         width: '100%',
         // 列表缩略图更紧凑一些，避免卡片显得过高
-        height: isDetail ? '320px' : '200px',
+        // detail: allow parent to control height (asset-detail wants full-height canvas)
+        // fallback to 320px for other places that don't set a height
+        height: isDetail ? 'var(--vines-3d-detail-height, 320px)' : '200px',
         border: '1px solid #E5E7EB',
         borderRadius: '6px',
         backgroundColor: '#F8FAFC',

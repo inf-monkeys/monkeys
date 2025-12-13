@@ -1,4 +1,4 @@
-import { DoWhileTaskDef, ForkJoinTaskDef, SimpleTaskDef, SubWorkflowTaskDef, SwitchTaskDef } from '@inf-monkeys/conductor-javascript';
+import { DoWhileTaskDef, ForkJoinTaskDef, SimpleTaskDef, SwitchTaskDef } from '@inf-monkeys/conductor-javascript';
 import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 import crypto from 'crypto';
 import { isObject, isString, merge, omit, reduce } from 'lodash';
@@ -117,14 +117,20 @@ export function getComfyuiWorkflowDataListFromWorkflow(tasks: MonkeyTaskDefTypes
         }),
       );
     } else if (task.type === 'SUB_WORKFLOW') {
-      result.push(
-        ...getComfyuiWorkflowDataListFromWorkflow((task as SubWorkflowTaskDef).subWorkflowParam['workflowDefinition'].tasks).map((c) => {
-          return {
-            path: `[${index}].subWorkflowParam.workflowDefinition.tasks${c.path}`,
-            comfyuiWorkflowId: c.comfyuiWorkflowId,
-          };
-        }),
-      );
+      // 注意：运行态的 SUB_WORKFLOW task 可能携带 subWorkflowParam.workflowDefinition.tasks，
+      // 但存储态（workflow 元数据）通常只有 subWorkflowParam.name/version，并不包含 workflowDefinition。
+      // 这里必须容错，否则会在设置内置应用/扫描依赖时出现 undefined.tasks 报错。
+      const workflowDefTasks = (task as any)?.subWorkflowParam?.workflowDefinition?.tasks as MonkeyTaskDefTypes[] | undefined;
+      if (Array.isArray(workflowDefTasks) && workflowDefTasks.length > 0) {
+        result.push(
+          ...getComfyuiWorkflowDataListFromWorkflow(workflowDefTasks).map((c) => {
+            return {
+              path: `[${index}].subWorkflowParam.workflowDefinition.tasks${c.path}`,
+              comfyuiWorkflowId: c.comfyuiWorkflowId,
+            };
+          }),
+        );
+      }
     } else if (task.type === 'SWITCH') {
       Object.keys((task as SwitchTaskDef).decisionCases).forEach((key) => {
         const value = (task as SwitchTaskDef).decisionCases[key];

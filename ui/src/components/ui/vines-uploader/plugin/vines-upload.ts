@@ -271,8 +271,13 @@ export default class VinesUpload<M extends Meta, B extends Body> extends BasePlu
 
       await new Promise<void>((resolve, reject) => {
         const xhr = this.createXHR(presignMethod, presignedUrl, presignHeaders);
-        if (file.meta.type) {
-          xhr.setRequestHeader('Content-Type', file.meta.type as string);
+        const lowerHeaders = Object.fromEntries(
+          Object.entries(presignHeaders).map(([key, value]) => [key.toLowerCase(), value]),
+        );
+        const hasContentType = lowerHeaders['content-type'] != null;
+        const contentType = (file.meta.type as string | undefined) || file.type;
+        if (!hasContentType && contentType) {
+          xhr.setRequestHeader('Content-Type', contentType);
         }
         this.setupXHREvents(xhr, file, new AbortController(), resolve, reject);
         xhr.send(file.data);
