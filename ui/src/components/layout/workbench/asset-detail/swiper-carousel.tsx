@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { ArrowLeftIcon, ArrowRightIcon, Boxes, FileText, Video } from 'lucide-react';
+import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react';
 import { Mousewheel, Navigation, Virtual } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -108,7 +108,7 @@ export const AssetsCarousel: React.FC<{ className?: string }> = ({ className }) 
             key={`asset-slide-${item.render.key || index}`}
             style={{ width: 120, height: '100%' }}
             className={cn(
-              'flex items-center rounded-lg p-1 hover:cursor-pointer',
+              'flex items-center rounded-lg p-[2px] hover:cursor-pointer',
               index === position ? 'border-[2px] border-vines-500' : 'border border-border',
             )}
             onClick={() => setPosition(index)}
@@ -132,19 +132,8 @@ function AssetThumb({ item }: { item: any }) {
   }, [item]);
 
   return (
-    <div className="flex h-full w-full flex-col gap-1 overflow-hidden rounded-md bg-slate-1 p-2 dark:bg-[#111113]">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-muted-foreground">
-          {preview.type === 'video' ? 'VIDEO' : preview.type === 'json' ? 'JSON' : preview.type === 'text' ? 'TEXT' : '3D'}
-        </span>
-        {preview.type === 'video' && <Video className="size-4" />}
-        {preview.type === 'json' && <Boxes className="size-4" />}
-        {preview.type === 'text' && <FileText className="size-4" />}
-        {preview.type === '3d' && <Boxes className="size-4" />}
-      </div>
-
-      {/* Thumbnail area */}
-      <div className="relative w-full flex-1 overflow-hidden rounded border border-border bg-[#F8FAFC] dark:bg-[#111113]">
+    // 去掉顶部文字与 icon，让缩略图像图片一样只展示内容（预览交互不变）
+    <div className="relative h-full w-full overflow-hidden rounded-md border border-border bg-[#F8FAFC] dark:bg-[#111113]">
         {preview.type === 'video' && preview.url ? (
           <VideoThumbnail url={preview.url} />
         ) : preview.type === '3d' && preview.url ? (
@@ -164,13 +153,12 @@ function AssetThumb({ item }: { item: any }) {
             </div>
           </Vines3DModelRenderModeContext.Provider>
         ) : (
-          <div className="absolute inset-0 overflow-hidden p-1">
-            <div className="line-clamp-3 text-[10px] text-foreground">
-              <VinesMarkdown className="max-w-full [&_*]:text-[10px]">{preview.text.slice(0, 140)}</VinesMarkdown>
+          <div className="absolute inset-0 overflow-hidden p-2">
+            <div className="line-clamp-6 text-[11px] leading-snug text-foreground">
+              <VinesMarkdown className="max-w-full [&_*]:text-[11px]">{preview.text}</VinesMarkdown>
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

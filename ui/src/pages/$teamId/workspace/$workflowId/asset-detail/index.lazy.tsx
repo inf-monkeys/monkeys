@@ -256,10 +256,10 @@ export const AssetDetail: React.FC = () => {
                       </div>
                     ) : preview.previewType === '3d' && preview.url ? (
                       <div
-                        className="h-full w-full p-global"
+                        className="h-full w-full"
                         style={{
-                          // 保留底部历史条空间
-                          ['--vines-3d-detail-height' as any]: 'calc(100vh - 340px)',
+                          // 让 3D canvas 撑满预览区域（红框），高度由父容器控制
+                          ['--vines-3d-detail-height' as any]: '100%',
                         }}
                       >
                         <Vines3DModelRenderModeContext.Provider value="detail">
