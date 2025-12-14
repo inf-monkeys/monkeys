@@ -24,17 +24,71 @@ export class AddDataManagementIndexes1734200000000 implements MigrationInterface
   INDEX_DATA_ASSETS_STATUS = `${appId}_idx_data_assets_status_is_deleted_created_timestamp`;
   INDEX_DATA_ASSETS_CREATOR = `${appId}_idx_data_assets_creator_user_id_is_deleted`;
 
+  /**
+   * 为 PostgreSQL 创建并发索引，会自动清理失败的 INVALID 索引
+   */
+  private async createIndexConcurrently(
+    queryRunner: QueryRunner,
+    tableName: string,
+    indexName: string,
+    columns: string,
+  ): Promise<void> {
+    try {
+      console.log(`Creating index ${indexName} on ${tableName}...`);
+      await queryRunner.query(`CREATE INDEX CONCURRENTLY "${indexName}" ON "${tableName}" ${columns}`);
+      console.log(`✓ Index ${indexName} created successfully`);
+    } catch (error) {
+      // 如果索引已存在，忽略错误
+      if (error.message?.includes('already exists')) {
+        console.log(`Index ${indexName} already exists, skipping...`);
+        return;
+      }
+
+      // 检查是否有 INVALID 索引（创建失败留下的）
+      console.error(`Failed to create index ${indexName}:`, error.message);
+      console.log(`Checking for invalid index ${indexName}...`);
+
+      const result = await queryRunner.query(
+        `SELECT indexname, pg_index.indisvalid
+         FROM pg_indexes
+         JOIN pg_class ON pg_indexes.indexname = pg_class.relname
+         JOIN pg_index ON pg_class.oid = pg_index.indexrelid
+         WHERE indexname = $1`,
+        [indexName],
+      );
+
+      if (result.length > 0 && !result[0].indisvalid) {
+        console.log(`Found invalid index ${indexName}, dropping it...`);
+        await queryRunner.query(`DROP INDEX CONCURRENTLY IF EXISTS "${indexName}"`);
+        console.log(`Invalid index ${indexName} dropped. Please run migration again.`);
+      }
+
+      throw error;
+    }
+  }
+
   public async up(queryRunner: QueryRunner): Promise<void> {
     // 检查是否是 PostgreSQL，如果是则使用 CONCURRENTLY 避免锁表
     const isPostgres = queryRunner.connection.options.type === 'postgres';
 
+    console.log(`\n=== Starting index creation for data management tables ===`);
+    console.log(`Database type: ${queryRunner.connection.options.type}`);
+    if (isPostgres) {
+      console.log(`Using CONCURRENTLY mode for PostgreSQL (non-blocking)`);
+    }
+
     // data_views 表索引
     const dataViewsTable = await queryRunner.getTable(this.DATA_VIEWS_TABLE);
     if (dataViewsTable) {
+      console.log(`\n--- Creating indexes for ${this.DATA_VIEWS_TABLE} ---`);
+
       if (!(await isIndexExist(this.INDEX_DATA_VIEWS_PARENT_ID, this.DATA_VIEWS_TABLE, queryRunner))) {
         if (isPostgres) {
-          await queryRunner.query(
-            `CREATE INDEX CONCURRENTLY "${this.INDEX_DATA_VIEWS_PARENT_ID}" ON "${this.DATA_VIEWS_TABLE}" ("parent_id", "is_deleted")`,
+          await this.createIndexConcurrently(
+            queryRunner,
+            this.DATA_VIEWS_TABLE,
+            this.INDEX_DATA_VIEWS_PARENT_ID,
+            '("parent_id", "is_deleted")',
           );
         } else {
           await queryRunner.createIndex(
@@ -50,8 +104,11 @@ export class AddDataManagementIndexes1734200000000 implements MigrationInterface
 
       if (!(await isIndexExist(this.INDEX_DATA_VIEWS_TEAM_ID, this.DATA_VIEWS_TABLE, queryRunner))) {
         if (isPostgres) {
-          await queryRunner.query(
-            `CREATE INDEX CONCURRENTLY "${this.INDEX_DATA_VIEWS_TEAM_ID}" ON "${this.DATA_VIEWS_TABLE}" ("team_id", "is_public", "is_deleted")`,
+          await this.createIndexConcurrently(
+            queryRunner,
+            this.DATA_VIEWS_TABLE,
+            this.INDEX_DATA_VIEWS_TEAM_ID,
+            '("team_id", "is_public", "is_deleted")',
           );
         } else {
           await queryRunner.createIndex(
@@ -67,8 +124,11 @@ export class AddDataManagementIndexes1734200000000 implements MigrationInterface
 
       if (!(await isIndexExist(this.INDEX_DATA_VIEWS_CREATED, this.DATA_VIEWS_TABLE, queryRunner))) {
         if (isPostgres) {
-          await queryRunner.query(
-            `CREATE INDEX CONCURRENTLY "${this.INDEX_DATA_VIEWS_CREATED}" ON "${this.DATA_VIEWS_TABLE}" ("is_deleted", "created_timestamp")`,
+          await this.createIndexConcurrently(
+            queryRunner,
+            this.DATA_VIEWS_TABLE,
+            this.INDEX_DATA_VIEWS_CREATED,
+            '("is_deleted", "created_timestamp")',
           );
         } else {
           await queryRunner.createIndex(
@@ -84,8 +144,11 @@ export class AddDataManagementIndexes1734200000000 implements MigrationInterface
 
       if (!(await isIndexExist(this.INDEX_DATA_VIEWS_PATH, this.DATA_VIEWS_TABLE, queryRunner))) {
         if (isPostgres) {
-          await queryRunner.query(
-            `CREATE INDEX CONCURRENTLY "${this.INDEX_DATA_VIEWS_PATH}" ON "${this.DATA_VIEWS_TABLE}" ("path")`,
+          await this.createIndexConcurrently(
+            queryRunner,
+            this.DATA_VIEWS_TABLE,
+            this.INDEX_DATA_VIEWS_PATH,
+            '("path")',
           );
         } else {
           await queryRunner.createIndex(
@@ -103,10 +166,15 @@ export class AddDataManagementIndexes1734200000000 implements MigrationInterface
     // data_assets 表索引
     const dataAssetsTable = await queryRunner.getTable(this.DATA_ASSETS_TABLE);
     if (dataAssetsTable) {
+      console.log(`\n--- Creating indexes for ${this.DATA_ASSETS_TABLE} ---`);
+
       if (!(await isIndexExist(this.INDEX_DATA_ASSETS_VIEW_ID, this.DATA_ASSETS_TABLE, queryRunner))) {
         if (isPostgres) {
-          await queryRunner.query(
-            `CREATE INDEX CONCURRENTLY "${this.INDEX_DATA_ASSETS_VIEW_ID}" ON "${this.DATA_ASSETS_TABLE}" ("view_id", "is_deleted", "status")`,
+          await this.createIndexConcurrently(
+            queryRunner,
+            this.DATA_ASSETS_TABLE,
+            this.INDEX_DATA_ASSETS_VIEW_ID,
+            '("view_id", "is_deleted", "status")',
           );
         } else {
           await queryRunner.createIndex(
@@ -122,8 +190,11 @@ export class AddDataManagementIndexes1734200000000 implements MigrationInterface
 
       if (!(await isIndexExist(this.INDEX_DATA_ASSETS_TEAM_ID, this.DATA_ASSETS_TABLE, queryRunner))) {
         if (isPostgres) {
-          await queryRunner.query(
-            `CREATE INDEX CONCURRENTLY "${this.INDEX_DATA_ASSETS_TEAM_ID}" ON "${this.DATA_ASSETS_TABLE}" ("team_id", "is_deleted", "status")`,
+          await this.createIndexConcurrently(
+            queryRunner,
+            this.DATA_ASSETS_TABLE,
+            this.INDEX_DATA_ASSETS_TEAM_ID,
+            '("team_id", "is_deleted", "status")',
           );
         } else {
           await queryRunner.createIndex(
@@ -139,8 +210,11 @@ export class AddDataManagementIndexes1734200000000 implements MigrationInterface
 
       if (!(await isIndexExist(this.INDEX_DATA_ASSETS_STATUS, this.DATA_ASSETS_TABLE, queryRunner))) {
         if (isPostgres) {
-          await queryRunner.query(
-            `CREATE INDEX CONCURRENTLY "${this.INDEX_DATA_ASSETS_STATUS}" ON "${this.DATA_ASSETS_TABLE}" ("status", "is_deleted", "created_timestamp")`,
+          await this.createIndexConcurrently(
+            queryRunner,
+            this.DATA_ASSETS_TABLE,
+            this.INDEX_DATA_ASSETS_STATUS,
+            '("status", "is_deleted", "created_timestamp")',
           );
         } else {
           await queryRunner.createIndex(
@@ -156,8 +230,11 @@ export class AddDataManagementIndexes1734200000000 implements MigrationInterface
 
       if (!(await isIndexExist(this.INDEX_DATA_ASSETS_CREATOR, this.DATA_ASSETS_TABLE, queryRunner))) {
         if (isPostgres) {
-          await queryRunner.query(
-            `CREATE INDEX CONCURRENTLY "${this.INDEX_DATA_ASSETS_CREATOR}" ON "${this.DATA_ASSETS_TABLE}" ("creator_user_id", "is_deleted")`,
+          await this.createIndexConcurrently(
+            queryRunner,
+            this.DATA_ASSETS_TABLE,
+            this.INDEX_DATA_ASSETS_CREATOR,
+            '("creator_user_id", "is_deleted")',
           );
         } else {
           await queryRunner.createIndex(
@@ -171,6 +248,8 @@ export class AddDataManagementIndexes1734200000000 implements MigrationInterface
         }
       }
     }
+
+    console.log(`\n=== Index creation completed successfully ===\n`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
