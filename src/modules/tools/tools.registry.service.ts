@@ -34,6 +34,9 @@ import { OpenAPIParserOptions, parseOpenApiSpecAsTools } from './utils/openapi-p
 
 @Injectable()
 export class ToolsRegistryService {
+  // ✅ 添加内存缓存：记录上次成功注册的manifest内容hash
+  private manifestCache = new Map<string, string>();
+
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly comfyuiWorkflowRepository: ComfyuiRepository,
@@ -151,6 +154,15 @@ export class ToolsRegistryService {
       display_name,
     } = manifestData;
 
+    // ✅ 优化：计算manifest内容hash，如果没有变化则跳过数据库更新
+    const manifestHash = JSON.stringify(manifestData);
+    const cachedHash = this.manifestCache.get(manifestUrl);
+
+    if (cachedHash === manifestHash) {
+      logger.debug(`[ToolsRegistry] Manifest for ${namespace} unchanged, skipping update`);
+      return [];
+    }
+
     let realSpecUrl = specUrl;
     let baseUrl: string;
     if (!realSpecUrl.startsWith('http://') && !realSpecUrl.startsWith('https://')) {
@@ -183,6 +195,11 @@ export class ToolsRegistryService {
     }
 
     await this.toolsRepository.createOrUpdateTools(namespace, tools, options);
+
+    // ✅ 更新成功后，缓存hash
+    this.manifestCache.set(manifestUrl, manifestHash);
+    logger.debug(`[ToolsRegistry] Successfully updated ${namespace}, cached new version`);
+
     return tools;
   }
 

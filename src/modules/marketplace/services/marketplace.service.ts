@@ -425,50 +425,31 @@ export class MarketplaceService {
       let currentInstallation: InstalledAppEntity = null;
 
       if (existingInstallation) {
-        // ✅ 优化2: 简化asset存在性检查，只记录缺失的asset，减少查询
-        let assetsExist = true;
+        // ✅ 优化2: 移除资产存在性预检查，减少大量数据库查询
+        // 原因：
+        // 1. 如果资产真的不存在，upgradeSpecificInstalledApp 会自然失败并触发重新安装
+        // 2. 大多数情况下资产都存在，预检查是不必要的开销
+        // 3. 通过错误处理机制更高效地处理异常情况
 
-        // 快速检查：如果installedAssetIds为空或不合法，直接标记为不存在
+        // 快速检查：如果installedAssetIds为空或不合法，直接重新安装
         if (!existingInstallation.installedAssetIds || Object.keys(existingInstallation.installedAssetIds).length === 0) {
-          assetsExist = false;
-        } else {
-          // 注意：asset存在性检查仍需要调用handler.getById
-          // 但我们可以收集所有需要检查的assetId，然后批量查询
-          // 这里保持原逻辑，但优化错误处理避免过多日志
-          for (const [assetType, assetIds] of Object.entries(existingInstallation.installedAssetIds)) {
-            const handler = this.assetsMapperService.getAssetHandler(assetType as any);
-            // 检查每个资产是否存在
-            for (const assetId of assetIds) {
-              try {
-                const asset = await handler.getById(assetId, teamId);
-                if (!asset) {
-                  this.logger.warn(`Asset ${assetId} of type ${assetType} not found in team ${teamId}, will reinstall app`);
-                  assetsExist = false;
-                  break;
-                }
-              } catch (error) {
-                // 减少错误日志，只在debug模式输出
-                this.logger.debug(`Failed to check asset ${assetId} existence: ${error.message}`);
-                assetsExist = false;
-                break;
-              }
-            }
-            if (!assetsExist) break;
-          }
-        }
-
-        if (assetsExist) {
-          // 如果资产都存在，尝试更新到最新版本
-          shouldInstallNew = false;
-          // 更新后重新获取安装信息
-          currentInstallation = await this.upgradeSpecificInstalledApp(app.id, latestVersion, existingInstallation);
-          installedApps.push({
-            installation: currentInstallation,
-            appVersion: latestVersion,
-          });
-        } else {
-          // 如果有资产不存在，删除旧的安装记录
+          this.logger.debug(`Installation ${existingInstallation.id} has empty installedAssetIds, will reinstall app ${app.id}`);
           await this.installedAppRepo.delete(existingInstallation.id);
+        } else {
+          // 尝试升级现有安装，如果失败则删除并重新安装
+          try {
+            shouldInstallNew = false;
+            currentInstallation = await this.upgradeSpecificInstalledApp(app.id, latestVersion, existingInstallation);
+            installedApps.push({
+              installation: currentInstallation,
+              appVersion: latestVersion,
+            });
+          } catch (error) {
+            // 升级失败（可能是资产不存在或其他错误），删除安装记录并标记为需要重新安装
+            this.logger.warn(`Failed to upgrade installation ${existingInstallation.id} for app ${app.id}: ${error.message}. Will reinstall.`);
+            await this.installedAppRepo.delete(existingInstallation.id);
+            shouldInstallNew = true;
+          }
         }
       }
 
@@ -789,7 +770,14 @@ export class MarketplaceService {
     // 预置应用状态发生变化时清空缓存
     this.presetAppsCache = null;
     if (isPreset) {
+      this.logger.log(`[SetPreset] Setting app ${appId} (${app.name}) as preset, will install to all teams...`);
+      const startTime = Date.now();
       const installResult = await this.installAppLatestVersionToAllTeams(appId);
+      const duration = Date.now() - startTime;
+      this.logger.log(
+        `[SetPreset] Completed app ${appId} installation: ${installResult.totalTeams} teams processed, ` +
+        `${installResult.failedInstallations.length} failed, duration: ${duration}ms`
+      );
       // 为 workflow 类型的预置应用添加全局 pinned 视图配置（默认表单视图）
       if (updatedApp.assetType === 'workflow') {
         const latestVersion = await this.getAppLatestVersion(appId);
@@ -940,18 +928,31 @@ export class MarketplaceService {
 
       this.logger.debug(`Found ${teamsWithoutApp.length} teams without the app installed`);
 
-      // 3. 为每个团队安装应用
+      // 3. 为每个团队安装应用（批量处理，每批10个团队，避免连接池耗尽）
       const failedInstallations = [];
-      for (const team of teamsWithoutApp) {
-        try {
-          // 使用团队所有者作为安装者
-          await this.installApp(latestVersion.id, team.id, team.ownerUserId);
-          this.logger.debug(`Successfully installed app for team ${team.id}`);
-        } catch (error) {
-          this.logger.error(`Failed to install app for team ${team.id}:`, error);
-          failedInstallations.push(team.id);
-          // 继续处理其他团队，不中断整个过程
-          continue;
+      const batchSize = 10;
+
+      for (let i = 0; i < teamsWithoutApp.length; i += batchSize) {
+        const batch = teamsWithoutApp.slice(i, i + batchSize);
+        this.logger.debug(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(teamsWithoutApp.length / batchSize)} (${batch.length} teams)`);
+
+        // 批内串行执行，批间有间隔
+        for (const team of batch) {
+          try {
+            // 使用团队所有者作为安装者
+            await this.installApp(latestVersion.id, team.id, team.ownerUserId);
+            this.logger.debug(`Successfully installed app for team ${team.id}`);
+          } catch (error) {
+            this.logger.error(`Failed to install app for team ${team.id}:`, error);
+            failedInstallations.push(team.id);
+            // 继续处理其他团队，不中断整个过程
+            continue;
+          }
+        }
+
+        // 批次之间等待100ms，释放数据库连接
+        if (i + batchSize < teamsWithoutApp.length) {
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
 
