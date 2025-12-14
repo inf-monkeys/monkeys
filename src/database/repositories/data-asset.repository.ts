@@ -50,6 +50,37 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
   }
 
   /**
+   * 生成可搜索文本
+   */
+  private generateSearchableText(data: {
+    name: string;
+    displayName: string | any;
+    description?: string | any;
+  }): string {
+    // 处理 displayName（可能是 string 或 I18nValue）
+    const displayNameStr = typeof data.displayName === 'string'
+      ? data.displayName
+      : data.displayName?.en || JSON.stringify(data.displayName || '');
+
+    // 处理 description（可能是 string 或 I18nValue）
+    const descriptionStr = typeof data.description === 'string'
+      ? data.description
+      : data.description?.en || JSON.stringify(data.description || '');
+
+    const parts = [
+      data.name,
+      displayNameStr,
+      descriptionStr
+    ];
+
+    return parts
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .trim();
+  }
+
+  /**
    * 创建资产
    */
   async createAsset(data: {
@@ -86,6 +117,11 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       status: data.status || AssetStatus.DRAFT,
       viewCount: 0,
       downloadCount: 0,
+      searchableText: this.generateSearchableText({
+        name: data.name,
+        displayName: data.displayName,
+        description: data.description,
+      }),
       createdTimestamp: now,
       updatedTimestamp: now,
       isDeleted: false,
@@ -111,10 +147,25 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       status?: AssetStatus;
     }
   ): Promise<void> {
+    // 如果更新了影响搜索的字段，重新生成 searchableText
+    let searchableText: string | undefined;
+    if (updates.name || updates.displayName || updates.description !== undefined) {
+      // 获取当前资产数据
+      const current = await this.findById(id);
+      if (current) {
+        searchableText = this.generateSearchableText({
+          name: updates.name ?? current.name,
+          displayName: updates.displayName ?? current.displayName,
+          description: updates.description ?? current.description,
+        });
+      }
+    }
+
     await this.update(
       { id, isDeleted: false },
       {
         ...updates,
+        ...(searchableText !== undefined && { searchableText }),
         updatedTimestamp: Date.now(),
       }
     );
@@ -223,14 +274,23 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     }
 
     if (filter.keyword) {
-      // displayName 和 description 是 varchar 存储的 JSON 字符串或普通字符串
-      // 使用 LOWER 进行大小写不敏感搜索，提高匹配率
-      query.andWhere(
-        '(LOWER(asset.name) LIKE LOWER(:keyword) OR ' +
-        'LOWER(asset.displayName) LIKE LOWER(:keyword) OR ' +
-        'LOWER(CAST(asset.description AS TEXT)) LIKE LOWER(:keyword))',
-        { keyword: `%${filter.keyword}%` }
-      );
+      // 使用优化的 searchable_text 字段进行搜索
+      // PostgreSQL 使用全文搜索，SQLite 使用 LIKE（但只搜索一个字段，比之前快）
+      const isPostgres = this.manager.connection.options.type === 'postgres';
+
+      if (isPostgres) {
+        // PostgreSQL: 使用全文搜索索引 (GIN)
+        query.andWhere(
+          `to_tsvector('simple', COALESCE(asset.searchableText, '')) @@ plainto_tsquery('simple', :keyword)`,
+          { keyword: filter.keyword }
+        );
+      } else {
+        // SQLite: 使用优化的单字段搜索
+        query.andWhere(
+          'LOWER(asset.searchableText) LIKE LOWER(:keyword)',
+          { keyword: `%${filter.keyword}%` }
+        );
+      }
     }
 
     query.orderBy('asset.createdTimestamp', 'DESC');
@@ -280,5 +340,56 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     }
 
     return countMap;
+  }
+
+  /**
+   * 批量更新现有资产的 searchable_text（用于数据迁移）
+   * @param batchSize 每批处理数量，默认 1000
+   */
+  async batchUpdateSearchableText(batchSize: number = 1000): Promise<number> {
+    let updated = 0;
+    let offset = 0;
+
+    while (true) {
+      // 分批获取需要更新的资产
+      const assets = await this.createQueryBuilder('asset')
+        .where('asset.isDeleted = :isDeleted', { isDeleted: false })
+        .andWhere('(asset.searchableText IS NULL OR asset.searchableText = :empty)', { empty: '' })
+        .orderBy('asset.id', 'ASC')
+        .skip(offset)
+        .take(batchSize)
+        .getMany();
+
+      if (assets.length === 0) {
+        break;
+      }
+
+      // 批量更新
+      for (const asset of assets) {
+        const searchableText = this.generateSearchableText({
+          name: asset.name,
+          displayName: asset.displayName,
+          description: asset.description,
+        });
+
+        await this.update(
+          { id: asset.id },
+          { searchableText, updatedTimestamp: Date.now() }
+        );
+
+        updated++;
+      }
+
+      console.log(`Updated ${updated} assets...`);
+
+      // 如果返回的数量少于 batchSize，说明已经处理完了
+      if (assets.length < batchSize) {
+        break;
+      }
+
+      offset += batchSize;
+    }
+
+    return updated;
   }
 }

@@ -139,4 +139,14 @@ export class DataAssetEntity extends AdminBaseAssetEntity {
     comment: '状态：draft/published/archived',
   })
   status: AssetStatus;
+
+  // ========== 搜索优化 ==========
+
+  @Column({
+    name: 'searchable_text',
+    type: 'text',
+    nullable: true,
+    comment: '可搜索文本（name + displayName + description 的组合，用于全文搜索）',
+  })
+  searchableText?: string;
 }
