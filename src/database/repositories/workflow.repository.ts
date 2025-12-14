@@ -688,86 +688,38 @@ export class WorkflowRepository {
     const appId = config.server.appId;
     const groupCondition = onlyGroup ? `"group" LIKE 'shortcut-%'` : `("group" IS NULL OR "group" NOT LIKE 'shortcut-%')`;
 
-    const callsPerDateSql = `
-SELECT
-    workflow_id,
-    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
-    COUNT(*) AS total_calls
-FROM
-    ${appId}_workflow_execution
-WHERE workflow_id = '${workflowId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
-  AND ${groupCondition}
-  AND is_temporary = false
-GROUP BY
-    workflow_id,
-    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
-ORDER BY
-    workflow_id,
-    date;
-    `;
-
-    const successPerDateSql = `
-SELECT
-    workflow_id,
-    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
-    COUNT(*) AS total_calls
-FROM
-    ${appId}_workflow_execution
-WHERE workflow_id = '${workflowId}' AND status = 'COMPLETED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
-  AND ${groupCondition}
-  AND is_temporary = false
-GROUP BY
-    workflow_id,
-    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
-ORDER BY
-    workflow_id,
-    date;
-`;
-
-    const failedPerDateSql = `
-SELECT
-    workflow_id,
-    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
-    COUNT(*) AS total_calls
-FROM
-    ${appId}_workflow_execution
-WHERE workflow_id = '${workflowId}' AND status in ('FAILED','TERMINATED','PAUSED') AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
-  AND ${groupCondition}
-  AND is_temporary = false
-GROUP BY
-    workflow_id,
-    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
-ORDER BY
-    workflow_id,
-    date;
-`;
-
-    const averageTakesPerDateSql = `
+    // ✅ 优化：合并4个SQL查询为1个，使用条件聚合
+    const combinedStatsSql = `
 SELECT
   workflow_id,
   TO_CHAR(TO_TIMESTAMP(created_timestamp / 1000), 'YYYY-MM-DD') AS date,
-  AVG(takes) AS average_time
+  COUNT(*) AS total_calls,
+  COUNT(*) FILTER (WHERE status = 'COMPLETED') AS success_calls,
+  COUNT(*) FILTER (WHERE status IN ('FAILED', 'TERMINATED', 'PAUSED')) AS failed_calls,
+  AVG(takes) FILTER (WHERE status = 'COMPLETED') AS average_time
 FROM
   ${appId}_workflow_execution
 WHERE
-  status = 'COMPLETED' AND workflow_id = '${workflowId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+  workflow_id = '${workflowId}'
+  AND created_timestamp >= ${startTimestamp}
+  AND created_timestamp <= ${endTimestamp}
   AND ${groupCondition}
   AND is_temporary = false
 GROUP BY
   workflow_id,
-  date
+  TO_CHAR(TO_TIMESTAMP(created_timestamp / 1000), 'YYYY-MM-DD')
 ORDER BY
   workflow_id,
   date;
     `;
 
     const dateList = this.getDateList(startTimestamp, endTimestamp);
-    const [callsPerDayResult, successPerDayResult, failedPerDayResult, averageTakesPerDayResult] = await Promise.all([
-      this.workflowExecutionRepository.query(callsPerDateSql),
-      this.workflowExecutionRepository.query(successPerDateSql),
-      this.workflowExecutionRepository.query(failedPerDateSql),
-      this.workflowExecutionRepository.query(averageTakesPerDateSql),
-    ]);
+    const statsResult = await this.workflowExecutionRepository.query(combinedStatsSql);
+
+    // 创建日期到统计数据的映射，优化查找性能
+    const statsMap = new Map(
+      statsResult.map((row: any) => [row.date, row])
+    );
 
     const result: Array<{
       date: string;
@@ -776,19 +728,18 @@ ORDER BY
       failedCount: number;
       averageTime: number;
     }> = [];
+
     for (const date of dateList) {
-      const callsPerDay = callsPerDayResult.find((x: { date: any }) => x.date === date);
-      const successPerDay = successPerDayResult.find((x: { date: any }) => x.date === date);
-      const failedPerDay = failedPerDayResult.find((x: { date: any }) => x.date === date);
-      const averageTakesPerDay = averageTakesPerDayResult.find((x: { date: any }) => x.date === date);
+      const stats: any = statsMap.get(date);
       result.push({
         date,
-        totalCount: parseInt(callsPerDay?.total_calls) || 0,
-        successCount: parseInt(successPerDay?.total_calls) || 0,
-        failedCount: parseInt(failedPerDay?.total_calls) || 0,
-        averageTime: parseInt(averageTakesPerDay?.average_time) || 0,
+        totalCount: parseInt(stats?.total_calls) || 0,
+        successCount: parseInt(stats?.success_calls) || 0,
+        failedCount: parseInt(stats?.failed_calls) || 0,
+        averageTime: parseInt(stats?.average_time) || 0,
       });
     }
+
     return result;
   }
 

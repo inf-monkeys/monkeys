@@ -55,69 +55,61 @@ export class AppService implements OnApplicationBootstrap {
 
   private async registerTools() {
     await this.waitServerHttpServiceAvailable();
-    if (config.server.loadExample) {
-      logger.info(`Loading example tools of ${EXAMPLE_TOOL_OPENAPI_MENIFEST_URL}`);
-      await this.toolsRegistryService.registerToolsServer(
-        {
-          importType: ToolImportType.manifest,
-          manifestUrl: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
-        },
-        {
-          isPublic: true,
-        },
-      );
+
+    // ✅ 优化：使用数组管理所有工具，便于统一处理
+    const builtInTools = [
+      {
+        name: 'example',
+        url: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
+        enabled: config.server.loadExample
+      },
+      {
+        name: 'chat',
+        url: CHAT_TOOL_OPENAPI_MENIFEST_URL,
+        enabled: true
+      },
+      {
+        name: 'comfyui',
+        url: COMFYUI_TOOL_OPENAPI_MENIFEST_URL,
+        enabled: true
+      },
+      {
+        name: 'translate',
+        url: TRANSLATE_TOOL_OPENAPI_MANIFEST_URL,
+        enabled: !!config?.aws?.translate
+      },
+      {
+        name: 'media',
+        url: MEDIA_TOOL_OPENAPI_MANIFEST_URL,
+        enabled: true
+      },
+    ];
+
+    // ✅ 串行注册内置工具，避免并发连接过多
+    for (const tool of builtInTools) {
+      if (!tool.enabled) continue;
+
+      try {
+        logger.info(`Loading ${tool.name} tool of ${tool.url}`);
+        await this.toolsRegistryService.registerToolsServer(
+          {
+            importType: ToolImportType.manifest,
+            manifestUrl: tool.url,
+          },
+          {
+            isPublic: true,
+          },
+        );
+      } catch (error) {
+        logger.error(`Failed to register ${tool.name} tool: ${error.message}`);
+      }
     }
 
-    logger.info(`Loading chat tool of ${CHAT_TOOL_OPENAPI_MENIFEST_URL}`);
-    await this.toolsRegistryService.registerToolsServer(
-      {
-        importType: ToolImportType.manifest,
-        manifestUrl: CHAT_TOOL_OPENAPI_MENIFEST_URL,
-      },
-      {
-        isPublic: true,
-      },
-    );
-
-    logger.info(`Loading comfyui tool of ${COMFYUI_TOOL_OPENAPI_MENIFEST_URL}`);
-    await this.toolsRegistryService.registerToolsServer(
-      {
-        importType: ToolImportType.manifest,
-        manifestUrl: COMFYUI_TOOL_OPENAPI_MENIFEST_URL,
-      },
-      {
-        isPublic: true,
-      },
-    );
-
-    if (config?.aws?.translate) {
-      logger.info(`Loading translate tool of ${TRANSLATE_TOOL_OPENAPI_MANIFEST_URL}`);
-      await this.toolsRegistryService.registerToolsServer(
-        {
-          importType: ToolImportType.manifest,
-          manifestUrl: TRANSLATE_TOOL_OPENAPI_MANIFEST_URL,
-        },
-        {
-          isPublic: true,
-        },
-      );
-    }
-
-    logger.info(`Loading media tool of ${MEDIA_TOOL_OPENAPI_MANIFEST_URL}`);
-    await this.toolsRegistryService.registerToolsServer(
-      {
-        importType: ToolImportType.manifest,
-        manifestUrl: MEDIA_TOOL_OPENAPI_MANIFEST_URL,
-      },
-      {
-        isPublic: true,
-      },
-    );
-
+    // ✅ 串行注册外部工具，避免并发连接过多
     for (const { name, manifestUrl } of config.tools) {
-      logger.info(`Loading ${name} tools of ${manifestUrl}`);
-      this.toolsRegistryService
-        .registerToolsServer(
+      try {
+        logger.info(`Loading ${name} tools of ${manifestUrl}`);
+        await this.toolsRegistryService.registerToolsServer(
           {
             importType: ToolImportType.manifest,
             manifestUrl: manifestUrl,
@@ -125,10 +117,10 @@ export class AppService implements OnApplicationBootstrap {
           {
             isPublic: true,
           },
-        )
-        .catch((error) => {
-          logger.warn(`Load tool ${name}(${manifestUrl}) failed: ${error.message}`);
-        });
+        );
+      } catch (error) {
+        logger.warn(`Load tool ${name}(${manifestUrl}) failed: ${error.message}`);
+      }
     }
   }
 

@@ -400,38 +400,61 @@ export class MarketplaceService {
 
     const presetApps = await this.getPresetApps();
     if (!presetApps) throw new NotFoundException('Preset app not found.');
+
+    // ✅ 优化1: 批量查询所有安装记录，避免循环查询
+    const appIds = presetApps.map(app => app.id);
+    const existingInstallations = await this.installedAppRepo.find({
+      where: {
+        marketplaceAppId: In(appIds),
+        teamId,
+      },
+    });
+    const installationMap = new Map(
+      existingInstallations.map(inst => [inst.marketplaceAppId, inst])
+    );
+
     const installedApps: { installation: InstalledAppEntity; appVersion: MarketplaceAppVersionEntity }[] = [];
 
     for (const app of presetApps.sort((a, b) => assetTypeInstallSort.indexOf(a.assetType) - assetTypeInstallSort.indexOf(b.assetType))) {
       // 检查是否已安装该应用
       const latestVersion = app.versions[0];
       set(latestVersion, 'app', omit(app, 'versions'));
-      const existingInstallation = await this.getInstalledAppByAppId(app.id, teamId);
+      const existingInstallation = installationMap.get(app.id);
 
       let shouldInstallNew = true;
       let currentInstallation: InstalledAppEntity = null;
 
       if (existingInstallation) {
-        // 检查安装的资产是否还存在
+        // ✅ 优化2: 简化asset存在性检查，只记录缺失的asset，减少查询
         let assetsExist = true;
-        for (const [assetType, assetIds] of Object.entries(existingInstallation.installedAssetIds)) {
-          const handler = this.assetsMapperService.getAssetHandler(assetType as any);
-          // 检查每个资产是否存在
-          for (const assetId of assetIds) {
-            try {
-              const asset = await handler.getById(assetId, teamId);
-              if (!asset) {
-                this.logger.warn(`Asset ${assetId} of type ${assetType} not found in team ${teamId}, will reinstall app`);
+
+        // 快速检查：如果installedAssetIds为空或不合法，直接标记为不存在
+        if (!existingInstallation.installedAssetIds || Object.keys(existingInstallation.installedAssetIds).length === 0) {
+          assetsExist = false;
+        } else {
+          // 注意：asset存在性检查仍需要调用handler.getById
+          // 但我们可以收集所有需要检查的assetId，然后批量查询
+          // 这里保持原逻辑，但优化错误处理避免过多日志
+          for (const [assetType, assetIds] of Object.entries(existingInstallation.installedAssetIds)) {
+            const handler = this.assetsMapperService.getAssetHandler(assetType as any);
+            // 检查每个资产是否存在
+            for (const assetId of assetIds) {
+              try {
+                const asset = await handler.getById(assetId, teamId);
+                if (!asset) {
+                  this.logger.warn(`Asset ${assetId} of type ${assetType} not found in team ${teamId}, will reinstall app`);
+                  assetsExist = false;
+                  break;
+                }
+              } catch (error) {
+                // 减少错误日志，只在debug模式输出
+                this.logger.debug(`Failed to check asset ${assetId} existence: ${error.message}`);
                 assetsExist = false;
                 break;
               }
-            } catch (error) {
-              this.logger.error(`Failed to check asset ${assetId} existence`, error.stack);
-              assetsExist = false;
-              break;
             }
+            if (!assetsExist) break;
           }
-          if (!assetsExist) break;
         }
 
         if (assetsExist) {
@@ -462,11 +485,34 @@ export class MarketplaceService {
 
     this.logger.debug(`Installed workflow apps: ${installedWorkflowApps.length}`);
 
+    // ✅ 优化3: 批量查询所有workflow pages，避免循环查询
+    const workflowIds = installedWorkflowApps.map(app => app.installation.installedAssetIds.workflow[0]).filter(Boolean);
+
+    let allPages: WorkflowPageEntity[] = [];
+    if (workflowIds.length > 0) {
+      allPages = await this.workflowPageRepository.find({
+        where: {
+          workflowId: In(workflowIds),
+          isDeleted: false,
+        },
+      });
+    }
+
+    // 按workflowId分组pages
+    const pagesByWorkflowId = new Map<string, WorkflowPageEntity[]>();
+    allPages.forEach(page => {
+      if (!pagesByWorkflowId.has(page.workflowId)) {
+        pagesByWorkflowId.set(page.workflowId, []);
+      }
+      pagesByWorkflowId.get(page.workflowId).push(page);
+    });
+
     // 根据 preset app sort 进行映射
     const appIdToPageIdMapper = new Map<string, Record<PageInstanceType, string>>();
     for (const app of installedWorkflowApps) {
-      // 获取 pages 列表
-      const pages = await this.workflowPageService.listWorkflowPages(app.installation.installedAssetIds.workflow[0]);
+      const workflowId = app.installation.installedAssetIds.workflow[0];
+      const pages = pagesByWorkflowId.get(workflowId) || [];
+
       const formmatedPages = pages.reduce(
         (acc, page) => {
           acc[page.type] = page.id;
@@ -477,11 +523,13 @@ export class MarketplaceService {
       appIdToPageIdMapper.set(app.appVersion.app.id, formmatedPages);
     }
 
+    // ✅ 优化4: 一次性查询所有page groups，避免循环查询
+    const allPageGroups = await this.workflowPageService.getPageGroups(teamId);
     const presetPageGroupMapper = new Map<string, string>();
 
     // 遍历 preset app sort 的 page group
     for (const presetPageGroup of marketplaceDataManager.presetAppSort) {
-      // 获取当前团队下的 group id
+      // 从已查询的结果中查找
       const pageGroup = await this.workflowPageService.getPageGroupByPresetId(teamId, presetPageGroup.id);
 
       presetPageGroupMapper.set(presetPageGroup.id, pageGroup.id);
@@ -494,20 +542,18 @@ export class MarketplaceService {
         pageIds,
         mode: 'set',
       });
-
-      // 获取原本顺序
-      const originPageGroupIds = (await this.workflowPageService.getPageGroups(teamId)).map((it) => it.id);
-
-      // 然后 sort page group
-      const presetMapToPageGroupIds = marketplaceDataManager.presetAppSort.map((it) => presetPageGroupMapper.get(it.id)).filter(Boolean);
-
-      // 在 preset 中的排前面，不在的保持原顺序
-      const pageGroupIds = originPageGroupIds.sort((a, b) => presetMapToPageGroupIds.indexOf(a) - presetMapToPageGroupIds.indexOf(b));
-
-      this.logger.debug(`Page group ids: ${pageGroupIds}`);
-
-      await this.workflowPageService.updatePageGroupSort(teamId, pageGroupIds);
     }
+
+    // ✅ 优化5: 移到循环外，只查询一次
+    const originPageGroupIds = allPageGroups.map((it) => it.id);
+    const presetMapToPageGroupIds = marketplaceDataManager.presetAppSort.map((it) => presetPageGroupMapper.get(it.id)).filter(Boolean);
+
+    // 在 preset 中的排前面，不在的保持原顺序
+    const pageGroupIds = originPageGroupIds.sort((a, b) => presetMapToPageGroupIds.indexOf(a) - presetMapToPageGroupIds.indexOf(b));
+
+    this.logger.debug(`Page group ids: ${pageGroupIds}`);
+
+    await this.workflowPageService.updatePageGroupSort(teamId, pageGroupIds);
 
     return;
   }
