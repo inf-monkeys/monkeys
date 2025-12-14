@@ -7,7 +7,7 @@ import { WorkflowTriggerType } from '@inf-monkeys/monkeys';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { ConductorService } from '../workflow/conductor/conductor.service';
 import { CreateTemporaryWorkflowByInstanceDto, CreateTemporaryWorkflowDto } from '../workflow/dto/req/create-temporary-workflow.dto';
 import { WorkflowExecutionService } from '../workflow/workflow.execution.service';
@@ -343,7 +343,7 @@ export class TemporaryWorkflowService {
    * 定时清理过期的临时工作流
    */
   async cleanupExpiredTemporaryWorkflows(): Promise<number> {
-    const result = await this.temporaryWorkflowRepository.update({ expiresAt: { $lt: Date.now() } as any, isDeleted: false }, { isDeleted: true, updatedTimestamp: Date.now() });
+    const result = await this.temporaryWorkflowRepository.update({ expiresAt: LessThan(Date.now()), isDeleted: false }, { isDeleted: true, updatedTimestamp: Date.now() });
     logger.info(`清理过期临时工作流: ${result.affected} 条记录`);
     return result.affected || 0;
   }
