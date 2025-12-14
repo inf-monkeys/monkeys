@@ -46,8 +46,13 @@ export class DataViewRepository extends Repository<DataViewEntity> {
    * 根据路径查找所有子孙视图
    */
   async findDescendantsByPath(path: string): Promise<DataViewEntity[]> {
+    // 特殊处理根路径的情况
+    const searchPath = path === '/' ? '/' : `${path}/`;
+    const likePattern = path === '/' ? '/%' : `${path}%`;
+
     return this.createQueryBuilder('view')
-      .where('view.path LIKE :path', { path: `${path}/%` })
+      .where('view.path LIKE :path', { path: likePattern })
+      .andWhere('view.path != :exactPath', { exactPath: path })
       .andWhere('view.isDeleted = :isDeleted', { isDeleted: false })
       .orderBy('view.path', 'ASC')
       .getMany();

@@ -74,6 +74,7 @@ export class DataBrowserService {
   /**
    * 获取资产列表（只读）
    * 只返回已发布的资产
+   * 如果指定了 viewId，会返回该视图及其所有子视图的资产
    */
   async getAssets(
     userId: string,
@@ -83,9 +84,24 @@ export class DataBrowserService {
     const page = dto.page || 1;
     const pageSize = dto.pageSize || 20;
 
+    // 如果指定了 viewId，需要获取该视图及其所有子孙视图的资产
+    let viewIds: string[] | undefined;
+    if (dto.viewId) {
+      const view = await this.dataViewRepository.findById(dto.viewId);
+      if (view) {
+        // 获取所有子孙视图
+        const descendants = await this.dataViewRepository.findDescendantsByPath(view.path);
+        // 收集当前视图和所有子孙视图的 ID
+        viewIds = [view.id, ...descendants.map(v => v.id)];
+      } else {
+        // 如果视图不存在，使用原始的 viewId（保持原有行为）
+        viewIds = [dto.viewId];
+      }
+    }
+
     const [assets, total] = await this.dataAssetRepository.findByFilter(
       {
-        viewId: dto.viewId,
+        viewIds: viewIds,
         assetType: dto.assetType,
         // 强制只返回已发布的内容
         status: AssetStatus.PUBLISHED,

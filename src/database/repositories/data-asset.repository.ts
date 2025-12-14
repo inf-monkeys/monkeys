@@ -5,6 +5,7 @@ import { DataSource, In, Repository } from 'typeorm';
 
 export interface DataAssetFilter {
   viewId?: string;
+  viewIds?: string[];
   assetType?: DataAssetType;
   status?: AssetStatus;
   creatorUserId?: string;
@@ -197,7 +198,10 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     const query = this.createQueryBuilder('asset')
       .where('asset.isDeleted = :isDeleted', { isDeleted: false });
 
-    if (filter.viewId) {
+    // viewIds 优先于 viewId（如果传了 viewIds，就忽略 viewId）
+    if (filter.viewIds && filter.viewIds.length > 0) {
+      query.andWhere('asset.viewId IN (:...viewIds)', { viewIds: filter.viewIds });
+    } else if (filter.viewId) {
       query.andWhere('asset.viewId = :viewId', { viewId: filter.viewId });
     }
 
@@ -228,7 +232,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       });
     }
 
-    query.orderBy('asset.createdTimestamp', 'DESC');
+    query.orderBy('asset.updatedTimestamp', 'DESC');
 
     if (pagination) {
       const { page, pageSize } = pagination;
