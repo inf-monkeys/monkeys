@@ -3,6 +3,7 @@ import { DataAssetRepository } from '@/database/repositories/data-asset.reposito
 import { DataAssetPermissionRepository } from '@/database/repositories/data-permission.repository';
 import { DataViewRepository } from '@/database/repositories/data-view.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { In } from 'typeorm';
 import {
   CreateDataAssetDto,
   DataAssetListResponseDto,
@@ -157,23 +158,29 @@ export class DataAssetService {
     assetIds: string[],
     status: AssetStatus
   ): Promise<void> {
-    // 获取所有需要更新的资产
-    const assets = await Promise.all(
-      assetIds.map(id => this.dataAssetRepository.findById(id))
-    );
-
-    // 过滤掉不存在的资产
-    const validAssets = assets.filter(asset => asset !== null);
-
-    // 批量更新状态
-    for (const asset of validAssets) {
-      await this.dataAssetRepository.updateAsset(asset.id, { status });
-
-      // 如果状态是 published，需要同时更新 isPublished 字段
-      if (status === AssetStatus.PUBLISHED && !asset.isPublished) {
-        await this.dataAssetRepository.publishAsset(asset.id);
-      }
+    if (assetIds.length === 0) {
+      return;
     }
+
+    // 使用事务批量更新所有资产的状态
+    await this.dataAssetRepository.manager.transaction(async (manager) => {
+      const updateData: any = {
+        status,
+        updatedTimestamp: Date.now(),
+      };
+
+      // 如果状态是 published，同时更新 isPublished 字段
+      if (status === AssetStatus.PUBLISHED) {
+        updateData.isPublished = true;
+      }
+
+      // 批量更新，一次性更新所有资产
+      await manager.update(
+        'data_assets',
+        { id: In(assetIds), isDeleted: false },
+        updateData
+      );
+    });
   }
 
   /**

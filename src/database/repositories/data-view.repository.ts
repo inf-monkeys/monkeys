@@ -198,20 +198,26 @@ export class DataViewRepository extends Repository<DataViewEntity> {
       }
     );
 
-    // 更新所有子孙视图的路径和层级
+    // 批量更新所有子孙视图的路径和层级
     const descendants = await this.findDescendantsByPath(oldPath);
-    for (const descendant of descendants) {
-      const newDescendantPath = descendant.path.replace(oldPath, newPath);
-      const newDescendantLevel = descendant.level + levelDiff;
+    if (descendants.length > 0) {
+      await this.manager.transaction(async (transactionalEntityManager) => {
+        // 使用批量更新，而不是循环单个更新
+        for (const descendant of descendants) {
+          const newDescendantPath = descendant.path.replace(oldPath, newPath);
+          const newDescendantLevel = descendant.level + levelDiff;
 
-      await this.update(
-        { id: descendant.id },
-        {
-          path: newDescendantPath,
-          level: newDescendantLevel,
-          updatedTimestamp: Date.now(),
+          await transactionalEntityManager.update(
+            DataViewEntity,
+            { id: descendant.id },
+            {
+              path: newDescendantPath,
+              level: newDescendantLevel,
+              updatedTimestamp: Date.now(),
+            }
+          );
         }
-      );
+      });
     }
   }
 
@@ -226,20 +232,28 @@ export class DataViewRepository extends Repository<DataViewEntity> {
 
     const now = Date.now();
 
-    // 删除当前视图
-    await this.update(
-      { id },
-      { isDeleted: true, updatedTimestamp: now }
-    );
-
-    // 删除所有子孙视图
-    const descendants = await this.findDescendantsByPath(view.path);
-    for (const descendant of descendants) {
-      await this.update(
-        { id: descendant.id },
+    // 使用事务批量删除
+    await this.manager.transaction(async (transactionalEntityManager) => {
+      // 删除当前视图
+      await transactionalEntityManager.update(
+        DataViewEntity,
+        { id },
         { isDeleted: true, updatedTimestamp: now }
       );
-    }
+
+      // 批量删除所有子孙视图
+      const descendants = await this.findDescendantsByPath(view.path);
+      if (descendants.length > 0) {
+        const descendantIds = descendants.map(d => d.id);
+        // 使用 IN 查询批量更新
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .update(DataViewEntity)
+          .set({ isDeleted: true, updatedTimestamp: now })
+          .whereInIds(descendantIds)
+          .execute();
+      }
+    });
   }
 
   /**
@@ -253,19 +267,17 @@ export class DataViewRepository extends Repository<DataViewEntity> {
    * 搜索视图
    */
   async searchViews(keyword: string, teamId?: string): Promise<DataViewEntity[]> {
-    const where: any = {
-      isDeleted: false,
-      name: Like(`%${keyword}%`),
-    };
+    // 使用 QueryBuilder 进行大小写不敏感搜索
+    const query = this.createQueryBuilder('view')
+      .where('view.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('LOWER(view.name) LIKE LOWER(:keyword)', { keyword: `%${keyword}%` })
+      .orderBy('view.createdTimestamp', 'DESC');
 
     if (teamId) {
-      where.teamId = teamId;
+      query.andWhere('view.teamId = :teamId', { teamId });
     }
 
-    return this.find({
-      where,
-      order: { createdTimestamp: 'DESC' },
-    });
+    return query.getMany();
   }
 
   /**

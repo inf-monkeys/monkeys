@@ -1,4 +1,4 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { AdminBaseEntity } from '../admin/admin-base.entity';
 
 /**
@@ -6,6 +6,10 @@ import { AdminBaseEntity } from '../admin/admin-base.entity';
  * 用于组织和分类数据资产，支持树形结构和筛选配置
  */
 @Entity({ name: 'data_views' })
+@Index(['parentId', 'isDeleted']) // 优化父子查询
+@Index(['teamId', 'isPublic', 'isDeleted']) // 优化团队+公开查询
+@Index(['isDeleted', 'createdTimestamp']) // 优化列表查询
+@Index(['path']) // 优化树形查询
 export class DataViewEntity extends AdminBaseEntity {
   @Column({
     name: 'name',

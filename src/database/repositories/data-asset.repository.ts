@@ -223,9 +223,14 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     }
 
     if (filter.keyword) {
-      query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword OR asset.description LIKE :keyword)', {
-        keyword: `%${filter.keyword}%`,
-      });
+      // displayName 和 description 是 varchar 存储的 JSON 字符串或普通字符串
+      // 使用 LOWER 进行大小写不敏感搜索，提高匹配率
+      query.andWhere(
+        '(LOWER(asset.name) LIKE LOWER(:keyword) OR ' +
+        'LOWER(asset.displayName) LIKE LOWER(:keyword) OR ' +
+        'LOWER(CAST(asset.description AS TEXT)) LIKE LOWER(:keyword))',
+        { keyword: `%${filter.keyword}%` }
+      );
     }
 
     query.orderBy('asset.createdTimestamp', 'DESC');

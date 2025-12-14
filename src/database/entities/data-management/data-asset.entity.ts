@@ -1,4 +1,4 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { AdminBaseAssetEntity } from './admin-base-asset.entity';
 
 export type DataAssetType = 'image' | 'video' | '3d' | 'text' | 'document' | 'audio' | 'other';
@@ -14,6 +14,10 @@ export enum AssetStatus {
  * 存储实际的数据内容（图片、视频、3D模型、文本等）
  */
 @Entity({ name: 'data_assets' })
+@Index(['viewId', 'isDeleted', 'status']) // 优化按视图查询已发布资产
+@Index(['teamId', 'isDeleted', 'status']) // 优化按团队查询
+@Index(['status', 'isDeleted', 'createdTimestamp']) // 优化列表查询
+@Index(['creatorUserId', 'isDeleted']) // 优化按创建者查询
 export class DataAssetEntity extends AdminBaseAssetEntity {
   @Column({
     name: 'name',

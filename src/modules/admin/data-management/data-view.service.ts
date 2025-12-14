@@ -147,9 +147,32 @@ export class DataViewService {
    * 批量更新视图排序
    */
   async batchUpdateSort(userId: string, dto: BatchUpdateViewSortDto): Promise<void> {
+    if (dto.items.length === 0) {
+      return;
+    }
+
+    // 批量获取所有视图和权限
+    const viewIds = dto.items.map(item => item.id);
+    const views = await Promise.all(viewIds.map(id => this.dataViewRepository.findById(id)));
+    const permissions = await this.dataViewPermissionRepository.findUserPermissionsForViews(viewIds, userId);
+
     // 检查所有视图的权限
-    for (const item of dto.items) {
-      await this.checkPermission(item.id, userId, 'write');
+    for (let i = 0; i < views.length; i++) {
+      const view = views[i];
+      const viewId = viewIds[i];
+
+      if (!view) {
+        throw new NotFoundException(`视图 ${viewId} 不存在`);
+      }
+
+      // 检查是否是创建者或有写权限
+      const isCreator = view.creatorUserId === userId;
+      const permission = permissions.get(viewId);
+      const hasPermission = isCreator || (permission && this.comparePermission(permission.permission, 'write'));
+
+      if (!hasPermission) {
+        throw new ForbiddenException(`无权修改视图 ${viewId}`);
+      }
     }
 
     // 批量更新排序

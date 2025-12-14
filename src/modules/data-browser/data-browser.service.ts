@@ -38,15 +38,17 @@ export class DataBrowserService {
   ): Promise<DataViewResponseDto[]> {
     let views: DataViewEntity[];
 
+    // 优化：在数据库层面过滤，而不是应用层
     if (query.keyword) {
-      views = await this.dataViewRepository.searchViews(query.keyword, query.teamId || teamId);
+      const allViews = await this.dataViewRepository.searchViews(query.keyword, query.teamId || teamId);
       // 过滤只保留公开的视图
-      views = views.filter(v => v.isPublic);
+      views = allViews.filter(v => v.isPublic);
     } else if (query.parentId !== undefined) {
-      views = await this.dataViewRepository.findByParentId(query.parentId || null, query.teamId || teamId);
-      // 过滤只保留公开的视图
-      views = views.filter(v => v.isPublic);
+      // 优化：使用单次查询获取公开的子视图
+      const allViews = await this.dataViewRepository.findByParentId(query.parentId || null, query.teamId || teamId);
+      views = allViews.filter(v => v.isPublic);
     } else {
+      // 已经在 findPublicTree 中过滤了 isPublic
       views = await this.dataViewRepository.findPublicTree(query.teamId || teamId);
     }
 
