@@ -63,17 +63,25 @@ export class ToolsRepository {
 
   public async createOrUpdateTools(namespace: string, latestTools: ToolDef[], options?: RegisterToolOptions) {
     const { isPublic, teamId, userId } = options || {};
-    const latestToolNames = latestTools.map((x) => x.name);
+
+    // ✅ 优化：使用Set提高查找性能
+    const latestToolNames = new Set(latestTools.map((x) => x.name));
+
     const originalTools = await this.toolsRepository.find({
       where: {
         namespace,
       },
     });
-    const originalToolNames = originalTools.map((x) => x.name);
-    const toolsToDelete = originalTools.filter((x) => !latestToolNames.includes(x.name));
-    const toolsToCreate = latestTools.filter((x) => !originalToolNames.includes(x.name));
-    const toolsToUpdate = originalTools.filter((x) => latestToolNames.includes(x.name));
 
+    // ✅ 优化：使用Map提高查找性能，避免多次find
+    const originalToolsMap = new Map(originalTools.map((x) => [x.name, x]));
+    const latestToolsMap = new Map(latestTools.map((x) => [x.name, x]));
+
+    const toolsToDelete = originalTools.filter((x) => !latestToolNames.has(x.name));
+    const toolsToCreate = latestTools.filter((x) => !originalToolsMap.has(x.name));
+    const toolsToUpdate = originalTools.filter((x) => latestToolNames.has(x.name));
+
+    // ✅ 批量操作：创建新工具
     if (toolsToCreate.length) {
       const entitiesToCreate: ToolsEntity[] = toolsToCreate.map(
         (x): ToolsEntity => ({
@@ -101,6 +109,7 @@ export class ToolsRepository {
       await this.toolsRepository.save(entitiesToCreate);
     }
 
+    // ✅ 批量操作：标记删除
     if (toolsToDelete.length) {
       await this.toolsRepository.update(
         {
@@ -113,9 +122,10 @@ export class ToolsRepository {
       );
     }
 
+    // ✅ 批量操作：更新工具（使用Map优化查找）
     if (toolsToUpdate.length) {
       const entitiesToUpdate = toolsToUpdate.map((x): ToolsEntity => {
-        const latestDef = latestTools.find((t) => x.name === t.name);
+        const latestDef = latestToolsMap.get(x.name);  // O(1) 查找
         return {
           ...x,
           id: x.id,
