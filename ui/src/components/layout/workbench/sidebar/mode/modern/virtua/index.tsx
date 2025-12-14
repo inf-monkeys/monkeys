@@ -145,17 +145,39 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
     syncingRef.current = false;
   };
 
+  // 点击容器外部时收起展开态
+  useEffect(() => {
+    if (!expanded) return;
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      const container = containerRef.current;
+      if (!container) return;
+      if (!container.contains(event.target as Node)) {
+        setExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [expanded]);
+
   const expandButtonM = 'ml-[0.25rem]';
 
-  const ToggleButton = (
+  const renderToggleButton = () => (
     <Tooltip>
-      <TooltipTrigger>
+      <TooltipTrigger asChild>
         <Button
+          type="button"
           onClick={() => setExpanded((s) => !s)}
           icon={expanded ? <Minimize2Icon /> : <Maximize2Icon />}
           size="icon"
           variant="ghost"
           theme="black"
+          aria-pressed={expanded}
         />
       </TooltipTrigger>
       <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
@@ -194,7 +216,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
             </SortableContext>
           </ScrollArea>
         </DndContext>
-        <div className={expandButtonM}>{ToggleButton}</div>
+        <div className={expandButtonM}>{renderToggleButton()}</div>
       </div>
 
       {/* 悬浮层 */}
@@ -235,7 +257,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
                 </div>
               </ScrollArea>
 
-              <div className={expandButtonM}>{ToggleButton}</div>
+              <div className={expandButtonM}>{renderToggleButton()}</div>
             </div>
           </motion.div>
         )}
