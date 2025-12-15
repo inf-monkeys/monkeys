@@ -214,11 +214,10 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         'asset.teamId',
         'asset.creatorUserId',
         'asset.displayName',
-        'asset.description',
         'asset.isPublished',
         'asset.createdTimestamp',
         'asset.updatedTimestamp',
-        // 排除 primaryContent 和 properties
+        // 排除 primaryContent, properties 和 description
       ]);
     }
 
