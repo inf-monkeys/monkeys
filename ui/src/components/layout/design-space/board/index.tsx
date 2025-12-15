@@ -165,7 +165,7 @@ type BoardInstance = {
 
 interface BoardProps {
   editor: Editor | null;
-  setEditor: (editor: Editor) => void;
+  setEditor: (editor: Editor | null) => void;
   canvasWidth?: number;
   canvasHeight?: number;
   instance?: BoardInstance;
@@ -393,6 +393,13 @@ export const Board: React.FC<BoardProps> = ({
   instance,
   persistenceKey,
 }) => {
+  // 重要：画板卸载时清理 editor，避免共享 store 中残留旧 editor 引用导致后续逻辑（如 insert-images）误用已卸载实例
+  useEffect(() => {
+    return () => {
+      setEditor(null);
+    };
+  }, [setEditor]);
+
   const frameShapeId = instance?.frameShapeId || createShapeId();
   const { data: oem } = useSystemConfig();
 

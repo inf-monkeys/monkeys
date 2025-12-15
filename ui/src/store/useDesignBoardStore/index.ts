@@ -6,7 +6,7 @@ export interface DesignBoardStore {
   designBoardId: string;
   setDesignBoardId: (designBoardId: string) => void;
   editor: Editor | null;
-  setEditor: (editor: Editor) => void;
+  setEditor: (editor: Editor | null) => void;
 }
 
 const createDesignBoardStore = () =>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
@@ -115,9 +115,18 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
     }
   }, [currentDesignBoardId, setDesignBoardId]);
 
-  useMemo(() => {
-    if (currentDesignProjectId && designBoardList && designBoardList.length > 0) {
-      setCurrentDesignBoardId(designBoardList[0].id);
+  useEffect(() => {
+    if (!currentDesignProjectId) {
+      setCurrentDesignBoardId(undefined);
+      return;
+    }
+
+    // 仅在未选择/选择无效时，回落到第一个画板；避免覆盖来自 URL search 的 designBoardId
+    if (designBoardList && designBoardList.length > 0) {
+      setCurrentDesignBoardId((prev) => {
+        if (prev && designBoardList.some((b) => b.id === prev)) return prev;
+        return designBoardList[0].id;
+      });
     } else {
       setCurrentDesignBoardId(undefined);
     }
