@@ -165,6 +165,36 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
   }
 
   /**
+   * 批量更新资产状态（单次 SQL 优化）
+   */
+  async batchUpdateStatus(ids: string[], status: AssetStatus): Promise<void> {
+    if (ids.length === 0) return;
+
+    await this.update(
+      { id: In(ids), isDeleted: false },
+      {
+        status,
+        updatedTimestamp: Date.now(),
+      }
+    );
+  }
+
+  /**
+   * 批量发布资产（单次 SQL 优化）
+   */
+  async batchPublishAssets(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+
+    await this.update(
+      { id: In(ids), isDeleted: false, isPublished: false },
+      {
+        isPublished: true,
+        updatedTimestamp: Date.now(),
+      }
+    );
+  }
+
+  /**
    * 发布资产
    */
   async publishAsset(id: string): Promise<void> {
@@ -279,6 +309,94 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       } else if (page) {
         // 传统分页：仅用于首页或兼容旧逻辑
         // 警告：大偏移量性能差，建议迁移到游标分页
+        query.skip((page - 1) * pageSize).take(pageSize);
+      } else {
+        query.take(pageSize);
+      }
+    }
+
+    return query.getManyAndCount();
+  }
+
+  /**
+   * 查询视图及其所有子孙视图的资产（性能优化版本）
+   * 使用 JOIN 减少查询次数，从 3 次降到 1 次
+   */
+  async findByViewWithDescendants(
+    viewPath: string,
+    filter: DataAssetFilter,
+    pagination?: DataAssetPagination
+  ): Promise<[DataAssetEntity[], number]> {
+    const query = this.createQueryBuilder('asset')
+      .innerJoin('data_views', 'view', 'asset.viewId = view.id')
+      .where('asset.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('view.isDeleted = :viewIsDeleted', { viewIsDeleted: false })
+      // 查询该视图路径及其所有子孙视图的资产
+      .andWhere('(view.path = :viewPath OR view.path LIKE :viewPathPattern)', {
+        viewPath,
+        viewPathPattern: `${viewPath}%`,
+      });
+
+    // 如果需要排除大字段，使用 select 指定要查询的字段
+    if (filter.excludeLargeFields) {
+      query.select([
+        'asset.id',
+        'asset.name',
+        'asset.viewId',
+        'asset.assetType',
+        'asset.thumbnail',
+        'asset.media',
+        'asset.viewCount',
+        'asset.downloadCount',
+        'asset.status',
+        'asset.teamId',
+        'asset.creatorUserId',
+        'asset.displayName',
+        'asset.isPublished',
+        'asset.createdTimestamp',
+        'asset.updatedTimestamp',
+      ]);
+    }
+
+    // 应用其他筛选条件
+    if (filter.status) {
+      query.andWhere('asset.status = :status', { status: filter.status });
+    }
+
+    if (filter.teamId) {
+      query.andWhere('(asset.teamId = :teamId OR asset.teamId = :globalTeamId)', {
+        teamId: filter.teamId,
+        globalTeamId: '0'
+      });
+    }
+
+    if (filter.assetType) {
+      query.andWhere('asset.assetType = :assetType', { assetType: filter.assetType });
+    }
+
+    if (filter.creatorUserId) {
+      query.andWhere('asset.creatorUserId = :creatorUserId', { creatorUserId: filter.creatorUserId });
+    }
+
+    if (filter.keyword) {
+      query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword)', {
+        keyword: `%${filter.keyword}%`,
+      });
+    }
+
+    query.orderBy('asset.updatedTimestamp', 'DESC')
+      .addOrderBy('asset.id', 'DESC');
+
+    if (pagination) {
+      const { page, pageSize, cursorTimestamp, cursorId } = pagination;
+
+      if (cursorTimestamp && cursorId) {
+        query.andWhere(
+          '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+          { cursorTimestamp, cursorId }
+        );
+        query.take(pageSize);
+      } else if (page) {
         query.skip((page - 1) * pageSize).take(pageSize);
       } else {
         query.take(pageSize);

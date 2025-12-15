@@ -32,6 +32,34 @@ export class DataViewPermissionRepository extends Repository<DataViewPermissionE
   }
 
   /**
+   * 批量查找用户在多个视图上的权限（性能优化）
+   * @returns Map<viewId, permission>
+   */
+  async findUserPermissionsBatch(
+    viewIds: string[],
+    userId: string
+  ): Promise<Map<string, PermissionType>> {
+    if (viewIds.length === 0) {
+      return new Map();
+    }
+
+    const permissions = await this.find({
+      where: {
+        viewId: In(viewIds),
+        userId,
+        isDeleted: false,
+      },
+    });
+
+    const permissionMap = new Map<string, PermissionType>();
+    for (const permission of permissions) {
+      permissionMap.set(permission.viewId, permission.permission);
+    }
+
+    return permissionMap;
+  }
+
+  /**
    * 查找角色在视图上的权限
    */
   async findRolePermissions(viewId: string, roleIds: string[]): Promise<DataViewPermissionEntity[]> {

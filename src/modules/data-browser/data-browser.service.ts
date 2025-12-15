@@ -75,6 +75,7 @@ export class DataBrowserService {
    * 获取资产列表（只读）
    * 只返回已发布的资产
    * 如果指定了 viewId，会返回该视图及其所有子视图的资产
+   * 优化：使用 JOIN 查询，从 3 次查询降到 1-2 次
    */
   async getAssets(
     userId: string,
@@ -84,41 +85,57 @@ export class DataBrowserService {
     const page = dto.page || 1;
     const pageSize = dto.pageSize || 20;
 
-    // 如果指定了 viewId，需要获取该视图及其所有子孙视图的资产
-    let viewIds: string[] | undefined;
-    if (dto.viewId) {
-      const view = await this.dataViewRepository.findById(dto.viewId);
-      if (view) {
-        // 获取所有子孙视图
-        const descendants = await this.dataViewRepository.findDescendantsByPath(view.path);
-        // 收集当前视图和所有子孙视图的 ID
-        viewIds = [view.id, ...descendants.map(v => v.id)];
-      } else {
-        // 如果视图不存在，使用原始的 viewId（保持原有行为）
-        viewIds = [dto.viewId];
-      }
-    }
+    let assets: DataAssetEntity[];
+    let total: number;
 
-    const [assets, total] = await this.dataAssetRepository.findByFilter(
-      {
-        viewIds: viewIds,
-        assetType: dto.assetType,
-        // 强制只返回已发布的内容
-        status: AssetStatus.PUBLISHED,
-        keyword: dto.keyword,
-        teamId: dto.teamId || teamId,
-        creatorUserId: dto.creatorUserId,
-        // 列表查询时排除大字段，提升性能
-        excludeLargeFields: true,
-      },
-      {
-        page,
-        pageSize,
-        // 游标分页优化
-        cursorTimestamp: dto.cursorTimestamp,
-        cursorId: dto.cursorId,
+    // 优化：如果指定了 viewId，使用 JOIN 查询获取该视图及所有子孙视图的资产
+    if (dto.viewId) {
+      // 先获取视图信息（单次查询）
+      const view = await this.dataViewRepository.findById(dto.viewId);
+
+      if (view) {
+        // 使用优化的 JOIN 查询（单次查询，包含所有子孙视图的资产）
+        [assets, total] = await this.dataAssetRepository.findByViewWithDescendants(
+          view.path,
+          {
+            assetType: dto.assetType,
+            status: AssetStatus.PUBLISHED, // 强制只返回已发布的内容
+            keyword: dto.keyword,
+            teamId: dto.teamId || teamId,
+            creatorUserId: dto.creatorUserId,
+            excludeLargeFields: true, // 列表查询时排除大字段
+          },
+          {
+            page,
+            pageSize,
+            cursorTimestamp: dto.cursorTimestamp,
+            cursorId: dto.cursorId,
+          }
+        );
+      } else {
+        // 视图不存在，返回空结果
+        assets = [];
+        total = 0;
       }
-    );
+    } else {
+      // 没有指定 viewId，使用普通查询
+      [assets, total] = await this.dataAssetRepository.findByFilter(
+        {
+          assetType: dto.assetType,
+          status: AssetStatus.PUBLISHED, // 强制只返回已发布的内容
+          keyword: dto.keyword,
+          teamId: dto.teamId || teamId,
+          creatorUserId: dto.creatorUserId,
+          excludeLargeFields: true, // 列表查询时排除大字段
+        },
+        {
+          page,
+          pageSize,
+          cursorTimestamp: dto.cursorTimestamp,
+          cursorId: dto.cursorId,
+        }
+      );
+    }
 
     return {
       list: assets.map((asset) => this.toResponseDto(asset)),

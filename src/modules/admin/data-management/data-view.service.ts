@@ -215,17 +215,67 @@ export class DataViewService {
   }
 
   /**
-   * 过滤用户有权限访问的视图
+   * 过滤用户有权限访问的视图（性能优化：批量查询）
+   * 优化前：N 次数据库查询（每个视图一次）
+   * 优化后：1-2 次数据库查询
    */
   private async filterAccessibleViews(views: DataViewEntity[], userId: string): Promise<DataViewEntity[]> {
+    if (views.length === 0) return [];
+
+    // 1. 批量查询所有视图的用户权限（单次查询）
+    const viewIds = views.map(v => v.id);
+    const userPermissions = await this.dataViewPermissionRepository.findUserPermissionsBatch(viewIds, userId);
+
+    // 2. 构建视图映射，便于查找
+    const viewMap = new Map<string, DataViewEntity>();
+    for (const view of views) {
+      viewMap.set(view.id, view);
+    }
+
+    // 3. 在内存中过滤有权限的视图
     const accessibleViews: DataViewEntity[] = [];
 
     for (const view of views) {
-      try {
-        await this.checkPermission(view.id, userId, 'read');
+      // 检查是否是创建者
+      if (view.creatorUserId === userId) {
         accessibleViews.push(view);
-      } catch (error) {
-        // 无权限，跳过
+        continue;
+      }
+
+      // 检查是否是公开视图
+      if (view.isPublic) {
+        accessibleViews.push(view);
+        continue;
+      }
+
+      // 检查直接权限
+      if (userPermissions.has(view.id)) {
+        accessibleViews.push(view);
+        continue;
+      }
+
+      // 检查继承权限（从父视图继承）
+      // 优化：在内存中检查父视图链，避免递归数据库查询
+      let hasInheritedPermission = false;
+      let currentParentId = view.parentId;
+
+      while (currentParentId) {
+        const parentView = viewMap.get(currentParentId);
+        if (!parentView) break;
+
+        // 检查父视图的权限
+        if (parentView.creatorUserId === userId ||
+            parentView.isPublic ||
+            userPermissions.has(parentView.id)) {
+          hasInheritedPermission = true;
+          break;
+        }
+
+        currentParentId = parentView.parentId;
+      }
+
+      if (hasInheritedPermission) {
+        accessibleViews.push(view);
       }
     }
 

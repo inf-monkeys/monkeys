@@ -127,6 +127,7 @@ export function DataBrowserPage() {
   const handleRefresh = () => {
     setCurrentPage(1);
     setDataItems([]);
+    setCursor(null); // 重置游标
     loadDataList();
     loadCategories();
     toast.success('数据已刷新');

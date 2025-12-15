@@ -40,7 +40,7 @@ function DataManagementPage() {
   // 游标分页优化：记录最后一条数据的时间戳和 ID
   const [cursor, setCursor] = useState<{ timestamp?: number; id?: string } | null>(null);
 
-  // 加载视图数据
+  // 加载视图数据 - 只加载分类，数据列表由下面的 useEffect 加载
   useEffect(() => {
     loadCategories();
   }, []);
@@ -52,7 +52,7 @@ function DataManagementPage() {
     setCursor(null); // 重置游标
   }, [selectedCategory, searchKeyword]);
 
-  // 加载数据列表
+  // 加载数据列表 - 响应分类、搜索、分页变化
   useEffect(() => {
     loadDataList();
   }, [selectedCategory, searchKeyword, currentPage, pageSize]);
