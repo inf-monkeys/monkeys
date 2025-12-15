@@ -37,6 +37,7 @@ export const CommonOperationBarItem = forwardRef<HTMLDivElement, CommonOperation
       className,
       children,
       expanded = false,
+      onClick,
       ...rest
     },
     ref,
@@ -83,6 +84,7 @@ export const CommonOperationBarItem = forwardRef<HTMLDivElement, CommonOperation
         style={style}
         {...attributes}
         {...listeners}
+        onClick={onClick}
         className={cn(
           'z-10 flex flex-shrink-0 cursor-pointer items-center justify-center gap-global-1/2 rounded-md p-global-1/2 transition-colors hover:bg-accent hover:text-accent-foreground',
           `size-[${heightCalcVal}]`,
@@ -111,6 +113,7 @@ export const CommonOperationBarItem = forwardRef<HTMLDivElement, CommonOperation
             <TooltipTrigger asChild>
               <motion.div
                 className="line-clamp-2 min-w-0 flex-1 whitespace-normal break-words text-[0.8rem] font-bold"
+                onClick={onClick}
                 variants={opacityVariants}
                 initial="hidden"
                 animate="visible"
