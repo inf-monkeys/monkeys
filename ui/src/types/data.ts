@@ -69,6 +69,7 @@ export interface DataAsset {
   creatorUserId: string;
   media?: string;
   thumbnail?: string;
+  keywords?: string[];
   displayName: string;
   description?: string;
   isPublished: boolean;

@@ -190,6 +190,11 @@ export class DataAssetResponseDto {
   @ApiPropertyOptional({ description: '缩略图 URL' })
   thumbnail?: string;
 
+  @ApiPropertyOptional({ description: '关键词（用于展示）', type: [String] })
+  @IsArray()
+  @IsOptional()
+  keywords?: string[];
+
   @ApiProperty({ description: '浏览次数' })
   viewCount: number;
 

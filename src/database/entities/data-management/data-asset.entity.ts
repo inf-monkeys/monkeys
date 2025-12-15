@@ -65,6 +65,14 @@ export class DataAssetEntity extends AdminBaseAssetEntity {
     };
   };
 
+  @Column({
+    name: 'keywords',
+    type: 'text',
+    nullable: true,
+    comment: '关键词（字符串）',
+  })
+  keywords?: string;
+
   // ========== 扩展属性（完全自定义） ==========
 
   @Column({

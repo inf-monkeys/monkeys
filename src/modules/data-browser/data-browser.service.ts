@@ -1,14 +1,14 @@
 import { AssetStatus, DataAssetEntity } from '@/database/entities/data-management/data-asset.entity';
+import { DataViewEntity } from '@/database/entities/data-management/data-view.entity';
 import { DataAssetRepository } from '@/database/repositories/data-asset.repository';
 import { DataViewRepository } from '@/database/repositories/data-view.repository';
-import { DataViewEntity } from '@/database/entities/data-management/data-view.entity';
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   DataAssetListResponseDto,
   DataAssetResponseDto,
+  DataViewResponseDto,
   QueryDataAssetDto,
   QueryDataViewDto,
-  DataViewResponseDto,
 } from './dto';
 
 @Injectable()
@@ -160,6 +160,7 @@ export class DataBrowserService {
       files: asset.files,
       media: asset.media,
       thumbnail: asset.thumbnail,
+      keywords: this.parseKeywords(asset.keywords),
       viewCount: asset.viewCount,
       downloadCount: asset.downloadCount,
       status: asset.status,
@@ -171,6 +172,33 @@ export class DataBrowserService {
       createdTimestamp: asset.createdTimestamp,
       updatedTimestamp: asset.updatedTimestamp,
     };
+  }
+
+  /**
+   * keywords 列目前为 string：
+   * - 绝大多数情况：单个关键词（无分隔符）
+   * - 兼容未来：支持逗号/分号/换行/竖线分隔
+   */
+  private parseKeywords(raw?: string | null): string[] {
+    if (!raw) return [];
+    const trimmed = raw.trim();
+    if (!trimmed) return [];
+
+    const parts = trimmed
+      .split(/[,，;；\n\r|]+/g)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    // 去重（保持顺序）
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const p of parts) {
+      if (!seen.has(p)) {
+        seen.add(p);
+        result.push(p);
+      }
+    }
+    return result;
   }
 
   /**
