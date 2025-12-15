@@ -103,6 +103,9 @@ export interface AssetQueryParams {
   keyword?: string;
   page?: number;
   pageSize?: number;
+  // 游标分页优化（用于大数据量场景）
+  cursorTimestamp?: number;
+  cursorId?: string;
 }
 
 // 数据查询参数（兼容旧代码）

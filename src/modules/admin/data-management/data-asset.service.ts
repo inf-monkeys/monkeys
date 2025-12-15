@@ -89,7 +89,13 @@ export class DataAssetService {
         // 列表查询时排除大字段，提升性能
         excludeLargeFields: true,
       },
-      { page, pageSize }
+      {
+        page,
+        pageSize,
+        // 游标分页优化
+        cursorTimestamp: dto.cursorTimestamp,
+        cursorId: dto.cursorId,
+      }
     );
 
     return {

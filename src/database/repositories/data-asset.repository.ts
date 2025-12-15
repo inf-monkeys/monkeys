@@ -15,8 +15,11 @@ export interface DataAssetFilter {
 }
 
 export interface DataAssetPagination {
-  page: number;
+  page?: number;
   pageSize: number;
+  // 游标分页优化（用于大数据量场景）
+  cursorTimestamp?: number; // 上一页最后一条的 updatedTimestamp
+  cursorId?: string; // 上一页最后一条的 id（解决时间戳相同的情况）
 }
 
 @Injectable()
@@ -221,7 +224,22 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       ]);
     }
 
-    // viewIds 优先于 viewId（如果传了 viewIds，就忽略 viewId）
+    // 优化：优先应用高选择性条件，减少扫描范围
+
+    // 1. 优先：status 条件（通常只查询 published）
+    if (filter.status) {
+      query.andWhere('asset.status = :status', { status: filter.status });
+    }
+
+    // 2. 优先：teamId 条件（有效过滤）
+    if (filter.teamId) {
+      query.andWhere('(asset.teamId = :teamId OR asset.teamId = :globalTeamId)', {
+        teamId: filter.teamId,
+        globalTeamId: '0'
+      });
+    }
+
+    // 3. viewIds 优先于 viewId（如果传了 viewIds，就忽略 viewId）
     if (filter.viewIds && filter.viewIds.length > 0) {
       query.andWhere('asset.viewId IN (:...viewIds)', { viewIds: filter.viewIds });
     } else if (filter.viewId) {
@@ -232,34 +250,39 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       query.andWhere('asset.assetType = :assetType', { assetType: filter.assetType });
     }
 
-    if (filter.status) {
-      query.andWhere('asset.status = :status', { status: filter.status });
-    }
-
     if (filter.creatorUserId) {
       query.andWhere('asset.creatorUserId = :creatorUserId', { creatorUserId: filter.creatorUserId });
     }
 
-    // 如果指定了 teamId，返回该团队的资产 + 全局资产（team_id = '0'）
-    // 这样可以让所有团队看到公开的全局资产
-    if (filter.teamId) {
-      query.andWhere('(asset.teamId = :teamId OR asset.teamId = :globalTeamId)', {
-        teamId: filter.teamId,
-        globalTeamId: '0'
-      });
-    }
-
+    // 关键词搜索放在最后（最耗时）
     if (filter.keyword) {
-      query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword OR asset.description LIKE :keyword)', {
+      // 优化：只搜索 name 和 displayName，避免扫描大字段 description
+      query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword)', {
         keyword: `%${filter.keyword}%`,
       });
     }
 
-    query.orderBy('asset.updatedTimestamp', 'DESC');
+    query.orderBy('asset.updatedTimestamp', 'DESC')
+      .addOrderBy('asset.id', 'DESC'); // 添加 id 排序，确保稳定排序
 
     if (pagination) {
-      const { page, pageSize } = pagination;
-      query.skip((page - 1) * pageSize).take(pageSize);
+      const { page, pageSize, cursorTimestamp, cursorId } = pagination;
+
+      // 优化：使用游标分页（性能更好，避免大偏移量）
+      if (cursorTimestamp && cursorId) {
+        // 游标分页：查询比游标更旧的数据
+        query.andWhere(
+          '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+          { cursorTimestamp, cursorId }
+        );
+        query.take(pageSize);
+      } else if (page) {
+        // 传统分页：仅用于首页或兼容旧逻辑
+        // 警告：大偏移量性能差，建议迁移到游标分页
+        query.skip((page - 1) * pageSize).take(pageSize);
+      } else {
+        query.take(pageSize);
+      }
     }
 
     return query.getManyAndCount();

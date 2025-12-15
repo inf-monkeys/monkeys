@@ -28,6 +28,8 @@ export function DataBrowserPage() {
   const [pageSize, setPageSize] = useState(20);
   const [total, setTotal] = useState(0);
   const [viewingItem, setViewingItem] = useState<DataItem | null>(null);
+  // 游标分页优化：记录最后一条数据的时间戳和 ID
+  const [cursor, setCursor] = useState<{ timestamp?: number; id?: string } | null>(null);
 
   // 加载视图数据
   useEffect(() => {
@@ -38,6 +40,7 @@ export function DataBrowserPage() {
   useEffect(() => {
     setCurrentPage(1);
     setDataItems([]);
+    setCursor(null); // 重置游标
   }, [selectedCategory, searchKeyword]);
 
   // 加载数据列表
@@ -62,7 +65,13 @@ export function DataBrowserPage() {
       const response = await getDataList({
         viewId: selectedCategory || undefined,
         keyword: searchKeyword || undefined,
-        page: currentPage,
+        // 游标分页优化：第一页用 page，后续页用游标
+        ...(currentPage === 1
+          ? { page: 1 }
+          : {
+              cursorTimestamp: cursor?.timestamp,
+              cursorId: cursor?.id,
+            }),
         pageSize: pageSize,
       });
 
@@ -86,6 +95,15 @@ export function DataBrowserPage() {
         setDataItems(prev => [...prev, ...processedItems]);
       }
       setTotal(response.total);
+
+      // 更新游标：记录最后一条数据的时间戳和 ID
+      if (processedItems.length > 0) {
+        const lastItem = processedItems[processedItems.length - 1];
+        setCursor({
+          timestamp: lastItem.updatedTimestamp,
+          id: lastItem.id,
+        });
+      }
     } catch (error: any) {
       console.error('加载数据失败:', error);
       toast.error(error.message || '加载数据失败');

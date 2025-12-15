@@ -279,6 +279,16 @@ export class QueryDataAssetDto {
   @IsNumber()
   @IsOptional()
   pageSize?: number;
+
+  @ApiPropertyOptional({ description: '游标分页：上一页最后一条的 updatedTimestamp' })
+  @IsNumber()
+  @IsOptional()
+  cursorTimestamp?: number;
+
+  @ApiPropertyOptional({ description: '游标分页：上一页最后一条的 id' })
+  @IsString()
+  @IsOptional()
+  cursorId?: string;
 }
 
 /**
