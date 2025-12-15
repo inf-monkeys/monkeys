@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useNavigate, useSearch } from '@tanstack/react-router';
 
@@ -42,7 +42,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { DEFAULT_DESIGN_PROJECT_ICON_URL, DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons';
+import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { cn, getI18nContent } from '@/utils';
 
@@ -115,9 +115,18 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
     }
   }, [currentDesignBoardId, setDesignBoardId]);
 
-  useMemo(() => {
-    if (currentDesignProjectId && designBoardList && designBoardList.length > 0) {
-      setCurrentDesignBoardId(designBoardList[0].id);
+  useEffect(() => {
+    if (!currentDesignProjectId) {
+      setCurrentDesignBoardId(undefined);
+      return;
+    }
+
+    // 仅在未选择/选择无效时，回落到第一个画板；避免覆盖来自 URL search 的 designBoardId
+    if (designBoardList && designBoardList.length > 0) {
+      setCurrentDesignBoardId((prev) => {
+        if (prev && designBoardList.some((b) => b.id === prev)) return prev;
+        return designBoardList[0].id;
+      });
     } else {
       setCurrentDesignBoardId(undefined);
     }
@@ -281,7 +290,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
                           )}
                         />
                         <div className="flex items-center gap-2">
-                          <VinesIcon src={designProject.iconUrl || DEFAULT_WORKFLOW_ICON_URL} size="xs" />
+                          <VinesIcon src={designProject.iconUrl || DEFAULT_DESIGN_PROJECT_ICON_URL} size="xs" />
                           <div className="flex flex-col">
                             <span className="font-medium">{getI18nContent(designProject.displayName)}</span>
                             {designProject.description && (

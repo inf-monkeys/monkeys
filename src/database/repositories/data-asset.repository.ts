@@ -239,6 +239,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         'asset.name',
         'asset.viewId',
         'asset.assetType',
+        'asset.keywords',
         'asset.thumbnail',
         'asset.media',
         'asset.viewCount',

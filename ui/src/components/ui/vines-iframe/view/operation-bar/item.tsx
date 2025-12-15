@@ -21,8 +21,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { VinesIconEditor } from '@/components/ui/vines-icon/editor';
+import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import useUrlState from '@/hooks/use-url-state';
 import { useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { useSetTemp } from '@/store/useGlobalTempStore';
@@ -60,6 +63,8 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
   const [targetProjectId, setTargetProjectId] = useState<string | undefined>();
   const { data: designBoards } = useDesignProjectMetadataList(targetProjectId);
   const [targetBoardId, setTargetBoardId] = useState<string | undefined>();
+  const [newProjectName, setNewProjectName] = useState<string>('');
+  const [newProjectIconUrl, setNewProjectIconUrl] = useState<string>(DEFAULT_DESIGN_PROJECT_ICON_URL);
 
   useEffect(() => {
     if (!targetProjectId && designProjects && designProjects.length > 0) {
@@ -126,6 +131,13 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
     }
 
     if (data.type === 'new-design') {
+      // 初始化“新建画板”的默认名称/图标
+      const defaultName =
+        getI18nContent(data.extraData?.newDesignDisplayName) ??
+        t('common.utils.untitled', { defaultValue: 'Untitled' }) +
+          t('common.type.design-project', { defaultValue: ' design project' });
+      setNewProjectName(defaultName);
+      setNewProjectIconUrl(DEFAULT_DESIGN_PROJECT_ICON_URL);
       setAssignDialogOpen(true);
     }
   };
@@ -158,10 +170,15 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
     // 新建画板后导入
     toast.promise(
       async (): Promise<IAssetItem<IDesignProject>> => {
+        const displayName = newProjectName?.trim();
+        if (!displayName) {
+          throw new Error(
+            t('workspace.operation.to-board.new-name-required', { defaultValue: 'Please input a board name' }),
+          );
+        }
         const designProject = await createDesignProject({
-          displayName: data.extraData?.newDesignDisplayName
-            ? JSON.stringify(data.extraData.newDesignDisplayName)
-            : '{"zh-CN":"未命名设计项目","en-US":"Untitled design project"}',
+          displayName,
+          iconUrl: newProjectIconUrl,
         });
         if (!designProject) throw new Error('design project created failed');
         return designProject;
@@ -285,6 +302,30 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
                       })}
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+            )}
+
+            {targetMode === 'new' && (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <Label>{t('workspace.operation.to-board.new-name', { defaultValue: 'Board Name' })}</Label>
+                  <div className="flex items-center gap-3">
+                    <VinesIconEditor
+                      value={newProjectIconUrl}
+                      onChange={(val) => setNewProjectIconUrl(val)}
+                      size="md"
+                    />
+                    <Input
+                      value={newProjectName}
+                      onChange={(val) => setNewProjectName(val)}
+                      placeholder={t('workspace.operation.to-board.new-name-placeholder', {
+                        defaultValue: 'Enter board name',
+                      })}
+                      wrapperClassName="flex-1"
+                      autoFocus
+                    />
+                  </div>
                 </div>
               </div>
             )}

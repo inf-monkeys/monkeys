@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useNavigate, useSearch } from '@tanstack/react-router';
-import { useParams } from '@tanstack/react-router';
+import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 
 import { useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -504,6 +503,8 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
 
       // 以当前画板的实际位置和尺寸为准，确保新建图片落在画板内部
       const frameShape = editor.getShape(frameShapeId as TLShapeId);
+      const hasFrame = Boolean(frameShape);
+      const parentId = hasFrame ? frameShapeId : editor.getCurrentPageId();
       const frameX = (frameShape as any)?.x ?? 0;
       const frameY = (frameShape as any)?.y ?? 0;
       const frameWidth = (frameShape as any)?.props?.w ?? canvasWidth;
@@ -564,14 +565,18 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         }
 
         // 计算居中位置
-        const x = frameX + padding + (availableWidth - displayWidth) / 2;
-        const y = frameY + padding + (availableHeight - displayHeight) / 2;
+        // 注意：tldraw 中 shape 的 x/y 是相对于 parentId 的坐标。
+        // - 如果 parentId 是 frame，则应使用 frame 内相对坐标（不需要叠加 frameX/frameY）
+        // - 如果 parentId 是 page 根节点，则需要用 frame 的绝对坐标定位到 frame 内
+        const x = hasFrame ? padding + (availableWidth - displayWidth) / 2 : frameX + padding + (availableWidth - displayWidth) / 2;
+        const y = hasFrame ? padding + (availableHeight - displayHeight) / 2 : frameY + padding + (availableHeight - displayHeight) / 2;
 
         editor.createShape({
           type: 'image',
           x,
           y,
-          parentId: frameShapeId,
+          // 兼容旧/自定义画板：可能不存在固定 id 的 frameShape，此时插入到当前 page 根节点，避免图片“插入了但看不到”
+          parentId,
           props: {
             assetId: item.id,
             w: displayWidth,
