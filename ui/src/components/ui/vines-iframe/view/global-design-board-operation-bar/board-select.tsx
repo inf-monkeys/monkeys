@@ -42,7 +42,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { DEFAULT_DESIGN_PROJECT_ICON_URL, DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons';
+import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { cn, getI18nContent } from '@/utils';
 
@@ -290,7 +290,7 @@ export const GlobalDesignBoardOperationBarBoardSelect: React.FC = () => {
                           )}
                         />
                         <div className="flex items-center gap-2">
-                          <VinesIcon src={designProject.iconUrl || DEFAULT_WORKFLOW_ICON_URL} size="xs" />
+                          <VinesIcon src={designProject.iconUrl || DEFAULT_DESIGN_PROJECT_ICON_URL} size="xs" />
                           <div className="flex flex-col">
                             <span className="font-medium">{getI18nContent(designProject.displayName)}</span>
                             {designProject.description && (
