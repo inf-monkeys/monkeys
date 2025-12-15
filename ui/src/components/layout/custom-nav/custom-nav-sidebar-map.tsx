@@ -7,19 +7,19 @@ export const CUSTOM_NAV_LIST_MAP: Record<string, INavListSidebar> = {
   'concept-design:design-templates-and-innovation-approaches': [
     {
       id: 'design-project',
-      name: '设计项目',
+      name: '创新方法构建',
       icon: <BotIcon />,
       to: '/$teamId/nav/concept-design:design-templates-and-innovation-approaches/design-project',
     },
-    {
-      id: 'design-template',
-      name: '设计模板',
-      icon: <BotIcon />,
-      to: '/$teamId/nav/concept-design:design-templates-and-innovation-approaches/design-template',
-    },
+    // {
+    //   id: 'design-template',
+    //   name: '设计模板',
+    //   icon: <BotIcon />,
+    //   to: '/$teamId/nav/concept-design:design-templates-and-innovation-approaches/design-template',
+    // },
     {
       id: 'innovation-method',
-      name: '创新方法',
+      name: '创新方法预览',
       icon: <BotIcon />,
       to: '/$teamId/nav/concept-design:design-templates-and-innovation-approaches/innovation-method',
     },
