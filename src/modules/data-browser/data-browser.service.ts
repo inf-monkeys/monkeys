@@ -108,6 +108,8 @@ export class DataBrowserService {
         keyword: dto.keyword,
         teamId: dto.teamId || teamId,
         creatorUserId: dto.creatorUserId,
+        // 列表查询时排除大字段，提升性能
+        excludeLargeFields: true,
       },
       { page, pageSize }
     );

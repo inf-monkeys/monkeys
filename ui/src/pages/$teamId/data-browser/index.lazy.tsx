@@ -1,6 +1,7 @@
 import {
   getDataCategories,
   getDataList,
+  getDataItem,
 } from '@/apis/data-browser';
 import { DataCardView } from '@/components/data-browser/data-card-view';
 import { DataDetailPanel } from '@/components/data-browser/data-detail-panel';
@@ -113,8 +114,19 @@ export function DataBrowserPage() {
     toast.success('数据已刷新');
   };
 
-  const handleView = (item: DataItem) => {
-    setViewingItem(item);
+  const handleView = async (item: DataItem) => {
+    try {
+      // 获取完整的资产详情（包含 primaryContent 和 properties）
+      const fullItem = await getDataItem(item.id!);
+      if (fullItem) {
+        setViewingItem(fullItem);
+      } else {
+        toast.error('获取详情失败');
+      }
+    } catch (error: any) {
+      console.error('获取详情失败:', error);
+      toast.error(error.message || '获取详情失败');
+    }
   };
 
   const handleBackToList = () => {

@@ -11,6 +11,7 @@ export interface DataAssetFilter {
   creatorUserId?: string;
   teamId?: string;
   keyword?: string;
+  excludeLargeFields?: boolean; // 是否排除大字段（primaryContent, properties）
 }
 
 export interface DataAssetPagination {
@@ -197,6 +198,29 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
   ): Promise<[DataAssetEntity[], number]> {
     const query = this.createQueryBuilder('asset')
       .where('asset.isDeleted = :isDeleted', { isDeleted: false });
+
+    // 如果需要排除大字段，使用 select 指定要查询的字段
+    if (filter.excludeLargeFields) {
+      query.select([
+        'asset.id',
+        'asset.name',
+        'asset.viewId',
+        'asset.assetType',
+        'asset.thumbnail',
+        'asset.media',
+        'asset.viewCount',
+        'asset.downloadCount',
+        'asset.status',
+        'asset.teamId',
+        'asset.creatorUserId',
+        'asset.displayName',
+        'asset.description',
+        'asset.isPublished',
+        'asset.createdTimestamp',
+        'asset.updatedTimestamp',
+        // 排除 primaryContent 和 properties
+      ]);
+    }
 
     // viewIds 优先于 viewId（如果传了 viewIds，就忽略 viewId）
     if (filter.viewIds && filter.viewIds.length > 0) {

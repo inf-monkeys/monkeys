@@ -7,6 +7,7 @@ import {
     exportData,
     getDataCategories,
     getDataList,
+    getDataItem,
     importData,
     updateView,
 } from '@/apis/data';
@@ -203,8 +204,19 @@ function DataManagementPage() {
     // TODO: 打开编辑对话框
   };
 
-  const handleView = (item: DataItem) => {
-    setViewingItem(item);
+  const handleView = async (item: DataItem) => {
+    try {
+      // 获取完整的资产详情（包含 primaryContent 和 properties）
+      const fullItem = await getDataItem(item.id!);
+      if (fullItem) {
+        setViewingItem(fullItem);
+      } else {
+        toast.error('获取详情失败');
+      }
+    } catch (error: any) {
+      console.error('获取详情失败:', error);
+      toast.error(error.message || '获取详情失败');
+    }
   };
 
   const handleBackToList = () => {
