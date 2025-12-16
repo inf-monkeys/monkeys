@@ -111,7 +111,8 @@ export class DataViewRepository extends Repository<DataViewEntity> {
     sort?: number;
   }): Promise<DataViewEntity> {
     const now = Date.now();
-    let path = '/';
+    const id = nanoid();
+    let path: string;
     let level = 0;
 
     // 如果有父视图，需要计算路径和层级
@@ -122,10 +123,13 @@ export class DataViewRepository extends Repository<DataViewEntity> {
       }
       path = `${parent.path}${parent.id}/`;
       level = parent.level + 1;
+    } else {
+      // 根视图的 path 应该是 /<viewId>/
+      path = `/${id}/`;
     }
 
     const view = this.create({
-      id: nanoid(),
+      id,
       ...data,
       path,
       level,
