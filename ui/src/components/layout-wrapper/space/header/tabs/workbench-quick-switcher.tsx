@@ -9,10 +9,10 @@ import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
@@ -40,7 +40,6 @@ export const WorkbenchQuickSwitcher: React.FC<IWorkbenchQuickSwitcherProps> = ({
   const setCurrentPage = useSetCurrentPage();
 
   const [selectedWorkbenchPageName, setSelectedWorkbenchPageName] = useState(DEFAULT_LABEL);
-  const isDarkHeadbar = headbarTheme === 'bsd-blue' || headbarTheme === 'glassy';
 
   const groupedPages = useMemo(() => {
     if (!workspaceData?.groups?.length) return [];
@@ -146,15 +145,20 @@ export const WorkbenchQuickSwitcher: React.FC<IWorkbenchQuickSwitcherProps> = ({
                     }}
                   >
                     {getPageIconUrl(page) ? (
-                      <VinesIcon className="size-4" size="sm" disabledPreview>
+                        <VinesIcon
+                          className="size-4 text-foreground [&_svg]:text-foreground [&_svg]:stroke-current"
+                          size="sm"
+                          disabledPreview
+                        >
                         {getPageIconUrl(page)}
                       </VinesIcon>
                     ) : (
                       <VinesLucideIcon
-                        className={cn('size-4', isDarkHeadbar ? 'text-white' : 'text-muted-foreground')}
+                          className="size-4 text-foreground"
                         size={14}
                         src={getPageInstanceIcon(page)}
-                        style={isDarkHeadbar ? { stroke: '#FFFFFF' } : undefined}
+                          color="currentColor"
+                          stroke="currentColor"
                       />
                     )}
                     <span className="text-sm font-medium leading-tight text-foreground">{getPageDisplayName(page)}</span>
