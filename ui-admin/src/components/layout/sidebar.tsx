@@ -1,25 +1,27 @@
-import { Link, useRouterState } from '@tanstack/react-router';
-import { cn } from '@/lib/utils';
 import {
-  LayoutDashboard,
-  Users,
-  Building2,
-  Wrench,
-  Workflow,
-  CreditCard,
-  FolderOpen,
-  Settings,
-  ChevronDown,
-  Database,
-} from 'lucide-react';
-import { useSidebarStore } from '@/store/sidebar';
-import { useState } from 'react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import { useSidebarStore } from '@/store/sidebar';
+import { Link, useRouterState } from '@tanstack/react-router';
+import {
+    Building2,
+    ChevronDown,
+    CreditCard,
+    Database,
+    FolderOpen,
+    LayoutDashboard,
+    Settings,
+    Users,
+    Workflow,
+    Wrench,
+} from 'lucide-react';
+import { useState } from 'react';
+
+import { formatAdminTitle, getBrandLogoUrl, getBrandTitle, useSystemConfigStore } from '@/store/system-config';
 
 interface NavItem {
   title: string;
@@ -87,6 +89,14 @@ export function Sidebar() {
   const router = useRouterState();
   const pathname = router.location.pathname;
   const { isCollapsed } = useSidebarStore();
+  const config = useSystemConfigStore((s) => s.config);
+  const brandTitle = getBrandTitle(config);
+  const adminTitle = formatAdminTitle(brandTitle);
+  const prefersDark =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const logoUrl = getBrandLogoUrl(config, { darkMode: prefersDark });
 
   return (
     <TooltipProvider>
@@ -99,12 +109,21 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex h-16 items-center border-b px-4">
           <Link to="/admin" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <LayoutDashboard className="h-4 w-4" />
+            <div
+              className={cn(
+                'flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden',
+                logoUrl ? 'bg-transparent' : 'bg-primary text-primary-foreground',
+              )}
+            >
+              {logoUrl ? (
+                <img src={logoUrl} alt={brandTitle} className="h-full w-full object-contain" />
+              ) : (
+                <LayoutDashboard className="h-4 w-4" />
+              )}
             </div>
             {!isCollapsed && (
               <span className="text-lg font-semibold whitespace-nowrap">
-                Monkeys Admin
+                {adminTitle}
               </span>
             )}
           </Link>
