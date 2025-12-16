@@ -1,19 +1,21 @@
-import { useState } from 'react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { login } from '@/apis/auth';
 import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { login } from '@/apis/auth';
 import { useAuthStore } from '@/store/auth';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Loader2, LogIn } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
-import { LogIn, Loader2 } from 'lucide-react';
+
+import { formatAdminTitle, getBrandLogoUrl, getBrandTitle, useSystemConfigStore } from '@/store/system-config';
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -22,6 +24,14 @@ export const Route = createFileRoute('/login')({
 function LoginPage() {
   const navigate = useNavigate();
   const loginStore = useAuthStore((state) => state.login);
+  const config = useSystemConfigStore((s) => s.config);
+  const brandTitle = getBrandTitle(config);
+  const adminTitle = formatAdminTitle(brandTitle);
+  const prefersDark =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const logoUrl = getBrandLogoUrl(config, { darkMode: prefersDark });
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -55,11 +65,19 @@ function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
-            <LogIn className="h-8 w-8" />
+          <div
+            className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg overflow-hidden ${
+              logoUrl ? 'bg-transparent' : 'bg-primary text-primary-foreground'
+            }`}
+          >
+            {logoUrl ? (
+              <img src={logoUrl} alt={brandTitle} className="h-full w-full object-contain" />
+            ) : (
+              <LogIn className="h-8 w-8" />
+            )}
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Monkeys Admin</h1>
-          <p className="mt-2 text-sm text-muted-foreground">猴子无限管理后台</p>
+          <h1 className="text-3xl font-bold tracking-tight">{adminTitle}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{brandTitle} 管理后台</p>
         </div>
 
         {/* 登录卡片 */}
@@ -124,7 +142,7 @@ function LoginPage() {
 
         {/* 底部信息 */}
         <p className="mt-8 text-center text-sm text-muted-foreground">
-          © 2024 Monkeys. All rights reserved.
+          © 2024 {brandTitle}. All rights reserved.
         </p>
       </div>
     </div>

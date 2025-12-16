@@ -1,8 +1,8 @@
+import { cn } from '@/lib/utils';
+import occtimportjs from 'occt-import-js';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import occtimportjs from 'occt-import-js';
-import { cn } from '@/lib/utils';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 export interface StepViewerProps {
   src: string;
