@@ -166,9 +166,11 @@ export const SpaceHeaderTabs: React.FC<ISpaceHeaderTabsProps> = ({ defaultValue 
                     size={14}
                     className={cn(
                       'size-[14px]',
-                      headbarTheme === 'glassy' && (item.id === value ? 'stroke-white' : 'stroke-vines-500'),
-                      headbarTheme === 'bsd-blue' && 'stroke-white',
+                      headbarTheme === 'glassy' && (item.id === value ? 'text-white' : 'text-vines-500'),
+                      headbarTheme === 'bsd-blue' && (item.id === value ? 'text-white' : 'text-white/85'),
                     )}
+                    color="currentColor"
+                    stroke="currentColor"
                   />
                 )}
                 {getI18nContent(item.displayName, t(`components.layout.header.tabs.${item.id}`))}

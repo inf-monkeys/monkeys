@@ -145,11 +145,21 @@ export const WorkbenchQuickSwitcher: React.FC<IWorkbenchQuickSwitcherProps> = ({
                     }}
                   >
                     {getPageIconUrl(page) ? (
-                      <VinesIcon className="size-4" size="sm" disabledPreview>
+                        <VinesIcon
+                          className="size-4 text-foreground [&_svg]:text-foreground [&_svg]:stroke-current"
+                          size="sm"
+                          disabledPreview
+                        >
                         {getPageIconUrl(page)}
                       </VinesIcon>
                     ) : (
-                      <VinesLucideIcon className="size-4 text-muted-foreground" size={14} src={getPageInstanceIcon(page)} />
+                      <VinesLucideIcon
+                          className="size-4 text-foreground"
+                        size={14}
+                        src={getPageInstanceIcon(page)}
+                          color="currentColor"
+                          stroke="currentColor"
+                      />
                     )}
                     <span className="text-sm font-medium leading-tight text-foreground">{getPageDisplayName(page)}</span>
                   </DropdownMenuItem>
