@@ -1,4 +1,5 @@
 import { AssetStatus, DataAssetEntity, DataAssetType } from '@/database/entities/data-management/data-asset.entity';
+import { DataViewEntity } from '@/database/entities/data-management/data-view.entity';
 import { Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { DataSource, In, Repository } from 'typeorm';
@@ -329,14 +330,20 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     pagination?: DataAssetPagination
   ): Promise<[DataAssetEntity[], number]> {
     const query = this.createQueryBuilder('asset')
-      .innerJoin('data_views', 'view', 'asset.viewId = view.id')
+      .innerJoin(DataViewEntity, 'view', 'asset.viewId = view.id')
       .where('asset.isDeleted = :isDeleted', { isDeleted: false })
-      .andWhere('view.isDeleted = :viewIsDeleted', { viewIsDeleted: false })
-      // 查询该视图路径及其所有子孙视图的资产
-      .andWhere('(view.path = :viewPath OR view.path LIKE :viewPathPattern)', {
-        viewPath,
-        viewPathPattern: `${viewPath}%`,
-      });
+      .andWhere('view.isDeleted = :viewIsDeleted', { viewIsDeleted: false });
+
+    // 查询该视图路径及其所有子孙视图的资产
+    // viewPath 格式为 /<id>/ 或 /<parentId>/<id>/，以 / 结尾
+    // 匹配规则：
+    // 1. 自己：view.path = viewPath
+    // 2. 子孙视图：view.path LIKE 'viewPath_%'（路径以 viewPath 开头，且后面至少还有一个字符）
+    query.andWhere('(view.path = :viewPath OR view.path LIKE :viewPathPattern)', {
+      viewPath,
+      viewPathPattern: `${viewPath}_%`,
+    });
+
 
     // 如果需要排除大字段，使用 select 指定要查询的字段
     if (filter.excludeLargeFields) {
