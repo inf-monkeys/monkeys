@@ -144,7 +144,11 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({
         <VinesUploader
           max={1}
           files={[src]}
-          onChange={(files) => onFinished?.(files[0])}
+          onChange={(urls) => {
+            const first = urls?.[0];
+            if (!first) return;
+            onFinished?.(first);
+          }}
           className="w-full"
           uppy$={uppy$}
           basePath="workflow/image-mask"
