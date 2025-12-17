@@ -74,6 +74,36 @@ export const CommonOperationBar = <T extends CommonOperationBarItemShape>({
   const syncingRef = useRef(false);
   const [expanded, setExpanded] = useState(false);
 
+  // 点击容器外部时收起展开态（与左侧列表一致），并避免点击 Radix Portal 浮层时误触发
+  useEffect(() => {
+    if (!expanded) return;
+
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const targetNode = event.target as Node | null;
+      if (!targetNode) return;
+
+      // 忽略 Radix Tooltip/Popover 等通过 Portal 渲染的浮层内容点击
+      if (targetNode instanceof Element && targetNode.closest('[data-radix-popper-content-wrapper]')) {
+        return;
+      }
+
+      if (!container.contains(targetNode)) {
+        setExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
+  }, [expanded]);
+
   useLayoutEffect(() => {
     if (expanded && expandedViewportRef.current) {
       expandedViewportRef.current.scrollTop = collapsedViewportRef.current?.scrollTop ?? 0;
@@ -157,8 +187,8 @@ export const CommonOperationBar = <T extends CommonOperationBarItemShape>({
   const scrollAreaCls = cn('h-full', scrollAreaClassName);
 
   return (
-    <div className={containerClassName} {...rest}>
-      <div ref={containerRef} className="relative flex min-h-0 flex-1 flex-col">
+    <div ref={containerRef} className={containerClassName} {...rest}>
+      <div className="relative flex min-h-0 flex-1 flex-col">
         {/* 固定层 */}
         <div className="flex min-h-0 flex-1 flex-col items-end">
           <OperationBarTipButton className={extraButtonClassName} {...tipButtonProps} />
