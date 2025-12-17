@@ -12,6 +12,11 @@ import { AdminTokenGuard } from './guards/admin-token.guard';
 import { AdminJwtGuard } from './guards/admin-jwt.guard';
 import { AdminPermissionsGuard } from './guards/admin-permissions.guard';
 import { DataManagementModule } from './data-management/data-management.module';
+import { AdminUserManagementController } from './user-management/admin-user-management.controller';
+import { AdminUserManagementService } from './user-management/admin-user-management.service';
+import { UserManagementController } from './user-management/user-management.controller';
+import { UserManagementService } from './user-management/user-management.service';
+import { UserEntity } from '@/database/entities/identity/user';
 
 @Module({
   imports: [
@@ -19,10 +24,11 @@ import { DataManagementModule } from './data-management/data-management.module';
       AdminUserEntity,
       AdminRoleEntity,
       AdminPermissionEntity,
+      UserEntity,
     ]),
     DataManagementModule,
   ],
-  controllers: [AdminAuthController],
+  controllers: [AdminAuthController, AdminUserManagementController, UserManagementController],
   providers: [
     AdminAuthService,
     AdminUserRepository,
@@ -31,6 +37,8 @@ import { DataManagementModule } from './data-management/data-management.module';
     AdminTokenGuard,
     AdminJwtGuard,
     AdminPermissionsGuard,
+    AdminUserManagementService,
+    UserManagementService,
   ],
   exports: [AdminAuthService],
 })

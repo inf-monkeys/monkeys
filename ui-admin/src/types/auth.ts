@@ -13,6 +13,11 @@ export enum Permission {
   USER_WRITE = 'user:write',
   USER_DELETE = 'user:delete',
 
+  // 管理员管理
+  ADMIN_READ = 'admin:read',
+  ADMIN_WRITE = 'admin:write',
+  ADMIN_DELETE = 'admin:delete',
+
   // 团队管理
   TEAM_READ = 'team:read',
   TEAM_WRITE = 'team:write',

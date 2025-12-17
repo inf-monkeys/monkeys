@@ -15,6 +15,7 @@ import { Route as LoginImport } from './pages/login'
 import { Route as AdminImport } from './pages/admin'
 import { Route as IndexImport } from './pages/index'
 import { Route as AdminIndexImport } from './pages/admin/index'
+import { Route as AdminUsersImport } from './pages/admin/users'
 import { Route as AdminDataImport } from './pages/admin/data'
 
 // Create/Update Routes
@@ -36,6 +37,11 @@ const IndexRoute = IndexImport.update({
 
 const AdminIndexRoute = AdminIndexImport.update({
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+
+const AdminUsersRoute = AdminUsersImport.update({
+  path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -64,6 +70,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDataImport
       parentRoute: typeof AdminImport
     }
+    '/admin/users': {
+      preLoaderRoute: typeof AdminUsersImport
+      parentRoute: typeof AdminImport
+    }
     '/admin/': {
       preLoaderRoute: typeof AdminIndexImport
       parentRoute: typeof AdminImport
@@ -75,7 +85,7 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
-  AdminRoute.addChildren([AdminDataRoute, AdminIndexRoute]),
+  AdminRoute.addChildren([AdminDataRoute, AdminUsersRoute, AdminIndexRoute]),
   LoginRoute,
 ])
 

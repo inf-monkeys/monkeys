@@ -11,7 +11,9 @@ function AdminLayoutRoute() {
   const router = useRouterState();
 
   // 判断是否需要 flush 布局（无边距）
-  const isFlushLayout = router.location.pathname.startsWith('/admin/data');
+  const isFlushLayout =
+    router.location.pathname.startsWith('/admin/data') ||
+    router.location.pathname.startsWith('/admin/users');
 
   if (isLoading) {
     return (
