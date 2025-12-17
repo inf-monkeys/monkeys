@@ -233,6 +233,7 @@ export class DataAssetService {
       displayName: typeof asset.displayName === 'string' ? asset.displayName : asset.displayName?.en || asset.name,
       description: typeof asset.description === 'string' ? asset.description : asset.description?.en || undefined,
       isPublished: asset.isPublished,
+      keywords: asset.keywords,
       createdTimestamp: asset.createdTimestamp,
       updatedTimestamp: asset.updatedTimestamp,
     };

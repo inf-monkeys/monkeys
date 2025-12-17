@@ -361,6 +361,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         'asset.creatorUserId',
         'asset.displayName',
         'asset.isPublished',
+        'asset.keywords',
         'asset.createdTimestamp',
         'asset.updatedTimestamp',
       ]);
