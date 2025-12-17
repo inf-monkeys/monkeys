@@ -7,7 +7,7 @@ import { Folder } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn } from '@/utils';
 
 const opacityVariants = {
@@ -55,11 +55,12 @@ export const CommonOperationBarItem = forwardRef<HTMLDivElement, CommonOperation
       renderIcon?.() ??
       children ??
       (typeof iconUrl === 'string' ? (
-        <VinesLucideIcon
+        <VinesIcon
           className={cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon')}
-          size={20}
-          src={iconUrl}
-        />
+          size="md"
+        >
+          {iconUrl}
+        </VinesIcon>
       ) : (
         React.createElement(Folder, {
           className: cn('shrink-0', mode === 'mini' ? 'size-icon-sm' : 'size-icon'),

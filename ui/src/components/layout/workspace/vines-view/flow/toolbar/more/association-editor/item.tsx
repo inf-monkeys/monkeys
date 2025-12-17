@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Tag } from '@/components/ui/tag';
-import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events';
 
@@ -53,7 +53,7 @@ export const WorkflowAssociationEditorItem: React.FC<IWorkflowAssociationEditorI
     <Card className={cn('mb-0.5 flex flex-col gap-2 p-global', classNames)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <VinesLucideIcon src={data.iconUrl ?? 'tools'} />
+          <VinesIcon size="md">{data.iconUrl ?? 'lucide:tools'}</VinesIcon>
           <h1 className="font-bold">{getI18nContent(data.displayName)}</h1>
         </div>
         <div className="flex items-center gap-2">
