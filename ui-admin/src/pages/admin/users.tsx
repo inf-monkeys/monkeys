@@ -322,14 +322,18 @@ const UserTable = forwardRef<ManagementTableHandle>(function UserTable(_, ref) {
               items.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">{u.name}</TableCell>
-                  <TableCell>{u.email}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span>{u.email}</span>
+                      {!u.verified ? (
+                        <Badge variant="secondary">未验证</Badge>
+                      ) : null}
+                    </div>
+                  </TableCell>
                   <TableCell>{u.phone || "-"}</TableCell>
                   <TableCell>{u.nickname || "-"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant={u.verified ? "default" : "secondary"}>
-                        {u.verified ? "已验证" : "未验证"}
-                      </Badge>
                       <Badge variant={u.isBlocked ? "destructive" : "outline"}>
                         {u.isBlocked ? "已拉黑" : "正常"}
                       </Badge>
