@@ -1,6 +1,7 @@
 import { WorkflowArtifactEntity } from '@/database/entities/workflow/workflow-artifact.entity';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
+import { MediaUrlTransformerService } from '@/modules/assets/media/media.url-transformer.service';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
@@ -16,6 +17,7 @@ export class WorkflowArtifactService {
     @InjectRepository(WorkflowMetadataEntity)
     private readonly workflowMetadataRepository: Repository<WorkflowMetadataEntity>,
     private readonly workflowExecutionService: WorkflowExecutionService,
+    private readonly urlTransformer: MediaUrlTransformerService,
   ) {}
 
   async getWorkflowArtifacts(instanceId: string, teamId: string) {
@@ -33,10 +35,21 @@ export class WorkflowArtifactService {
       throw new ForbiddenException('No permission to access this workflow execution');
     }
 
-    return await this.workflowArtifactRepository.find({
+    const artifacts = await this.workflowArtifactRepository.find({
       where: { instanceId, isDeleted: false },
       order: { createdTimestamp: 'DESC' },
     });
+
+    // 转换私有桶 URL
+    return await Promise.all(
+      artifacts.map(async (artifact) => {
+        const transformedUrl = await this.urlTransformer.transformUrl(artifact.url);
+        return {
+          ...artifact,
+          url: transformedUrl || artifact.url,
+        };
+      }),
+    );
   }
 
   async getWorkflowInstanceByArtfactUrl(url: string, teamId: string) {
@@ -127,22 +140,29 @@ export class WorkflowArtifactService {
       return Number.isNaN(num) ? null : num;
     };
 
-    const data = artifacts
-      .filter((artifact) => artifact.execution)
-      .map((artifact) => ({
-        url: artifact.url,
-        type: artifact.type,
-        instanceId: artifact.instanceId,
-        workflowId: artifact.execution?.workflowId,
-        status: artifact.execution?.status ?? null,
-        userId: artifact.execution?.userId,
-        startTime: toNumber(artifact.execution?.conductorStartTime),
-        endTime: toNumber(artifact.execution?.conductorEndTime),
-        updateTime: toNumber(artifact.execution?.conductorUpdateTime),
-        createdTimestamp: toNumber(artifact.createdTimestamp) ?? undefined,
-        updatedTimestamp: toNumber(artifact.updatedTimestamp) ?? undefined,
-        teamId,
-      }));
+    const data = await Promise.all(
+      artifacts
+        .filter((artifact) => artifact.execution)
+        .map(async (artifact) => {
+          // 转换私有桶 URL
+          const transformedUrl = await this.urlTransformer.transformUrl(artifact.url);
+
+          return {
+            url: transformedUrl || artifact.url,
+            type: artifact.type,
+            instanceId: artifact.instanceId,
+            workflowId: artifact.execution?.workflowId,
+            status: artifact.execution?.status ?? null,
+            userId: artifact.execution?.userId,
+            startTime: toNumber(artifact.execution?.conductorStartTime),
+            endTime: toNumber(artifact.execution?.conductorEndTime),
+            updateTime: toNumber(artifact.execution?.conductorUpdateTime),
+            createdTimestamp: toNumber(artifact.createdTimestamp) ?? undefined,
+            updatedTimestamp: toNumber(artifact.updatedTimestamp) ?? undefined,
+            teamId,
+          };
+        }),
+    );
 
     return {
       total,
