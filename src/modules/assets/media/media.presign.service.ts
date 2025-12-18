@@ -26,7 +26,7 @@ export class MediaPresignService {
   private readonly urlCache = new Map<string, CachedPresignResult>();
 
   // 缓存清理间隔（5分钟）
-  private readonly CACHE_CLEANUP_INTERVAL = 5 * 60 * 1000;
+  private readonly CACHE_CLEANUP_INTERVAL = 60 * 60 * 1000;
 
   constructor(private readonly bucketRegistry: MediaBucketRegistryService) {
     // 启动定期清理过期缓存的任务

@@ -1005,6 +1005,39 @@ export class WorkflowExecutionService {
     return true;
   }
 
+  /**
+   * 递归转换对象中的所有 URL（将私有桶 URL 转换为预签名 URL）
+   */
+  private async transformUrlsInData(data: any, expiresIn: number = 259200): Promise<any> {
+    if (!data) {
+      return data;
+    }
+
+    // 如果是字符串，尝试转换
+    if (typeof data === 'string') {
+      return await this.urlTransformer.transformUrl(data, expiresIn);
+    }
+
+    // 如果是数组，递归处理每个元素
+    if (Array.isArray(data)) {
+      return Promise.all(data.map(item => this.transformUrlsInData(item, expiresIn)));
+    }
+
+    // 如果是对象，递归处理每个属性
+    if (typeof data === 'object') {
+      const result: any = {};
+      for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          result[key] = await this.transformUrlsInData(data[key], expiresIn);
+        }
+      }
+      return result;
+    }
+
+    // 其他类型（数字、布尔值等）直接返回
+    return data;
+  }
+
   public async startWorkflow(request: StartWorkflowRequest, temp = false) {
     const { teamId, userId, triggerType, chatSessionId, apiKey, group } = request;
 
@@ -1069,6 +1102,10 @@ export class WorkflowExecutionService {
     if (inputData?.__context) {
       throw new Error('inputData 不能包含内置参数 __context');
     }
+
+    // 转换输入数据中的所有私有桶 URL 为预签名 URL
+    // 这样外部 API 才能访问私有桶中的图片
+    inputData = await this.transformUrlsInData(inputData);
 
     if (chatSessionId) {
       extra['chatSessionId'] = chatSessionId;

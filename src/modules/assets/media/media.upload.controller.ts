@@ -294,8 +294,9 @@ export class MediaUploadController {
       });
       // 返回字符串URL以保持与S3Helpers路径的兼容性
       // 前端期望data字段为字符串URL（参考 vines-upload.ts:234）
+      // 使用 canonicalUrl（不含签名参数）以保证 URL 干净，访问时通过 /s3/presign-v2 动态生成签名
       return new SuccessResponse({
-        data: result.url, // 立即可用（私有时为签名）
+        data: result.canonicalUrl,
       });
     } else {
       // 使用传统 S3Helpers（支持 S3/OSS）
