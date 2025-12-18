@@ -10,7 +10,6 @@ import { WorkbenchPanelLayout } from 'src/components/layout-wrapper/workbench/pa
 
 import { useSystemConfig } from '@/apis/common';
 import { ReportDialog } from '@/components/devtools/report/dialog';
-import { OEM } from '@/components/layout/oem';
 import { AgentLayout } from '@/components/layout-wrapper/agent';
 import { DesignLayout } from '@/components/layout-wrapper/design';
 import { EvaluationLayout } from '@/components/layout-wrapper/evaluation';
@@ -19,10 +18,11 @@ import { UniImagePreviewProvider } from '@/components/layout-wrapper/main/uni-im
 import { WorkbenchMiniModeLayout } from '@/components/layout-wrapper/workbench/mini-mode';
 import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
 import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-view';
+import { OEM } from '@/components/layout/oem';
 import { AuthWithRouteSearch } from '@/components/router/auth-with-route-search.tsx';
 import { RouteEvent } from '@/components/router/event.tsx';
-import { TeamsGuard, useVinesTeam } from '@/components/router/guard/team.tsx';
 import { TeamStatusGuard } from '@/components/router/guard/team-status.tsx';
+import { TeamsGuard, useVinesTeam } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -58,7 +58,9 @@ const RootComponent: React.FC = () => {
   } = useVinesRoute();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
-  const [{ zoom }] = useUrlState<{ zoom: number }>({ zoom: 1 });
+  // 全局缩放：URL ?zoom= 优先；否则走 OEM 默认值（LF 期望默认 0.8）
+  // 注意：useUrlState 的 initialState 只在首次 render 生效，因此这里不要给 zoom 固定默认值
+  const [{ zoom: zoomFromUrl }] = useUrlState<{ zoom?: string | number }>({});
 
   const namePath = SIDEBAR_MAP.flatMap((it) =>
     it.items
@@ -153,36 +155,85 @@ const RootComponent: React.FC = () => {
     window.localStorage.setItem(APP_VERSION_STORAGE_KEY, APP_VERSION);
   }, [oem]);
 
+  const oemId = oem?.theme?.id;
+  const isLf = oemId === 'lf';
+  // 仅 LF 启用全局缩放；其他 OEM 保持 1（避免误伤现有页面）
+  const rawOemDefaultZoom = isLf ? get(oem, 'theme.pageZoom', 0.8) : 1;
+  const oemDefaultZoom = Number.isFinite(Number(rawOemDefaultZoom)) ? Number(rawOemDefaultZoom) : 1;
+  const parsedZoom = isLf && zoomFromUrl !== undefined ? Number(zoomFromUrl) : undefined;
+  const zoom: number =
+    isLf && typeof parsedZoom === 'number' && Number.isFinite(parsedZoom) ? parsedZoom : isLf ? oemDefaultZoom : 1;
+
+  // 重要：全局 body 是 overflow-hidden + h-screen（见 styles/index.scss）。
+  // 使用 zoom 在不同布局里容易出现 vh 被一起缩小/被裁切，导致底部留白或侧栏消失。
+  // 这里改成 transform 缩放：外层固定贴 viewport，内层按 1/scale 做宽高补偿，视觉上满屏且不会裁侧栏。
+  const safeZoom = zoom > 0 ? zoom : 1;
+  const shouldScale = isLf && safeZoom !== 1;
+  const invZoom = shouldScale ? 1 / safeZoom : 1;
+
+  const viewportFixedStyle: React.CSSProperties | undefined = shouldScale
+    ? ({
+        position: 'fixed',
+        inset: 0,
+        overflow: 'hidden',
+        // 自定义 CSS 变量（用于在布局中替换 100vh/100vw）
+        ['--oem-scale' as any]: String(safeZoom),
+      } as React.CSSProperties)
+    : undefined;
+
+  const scaledContentStyle: React.CSSProperties | undefined = shouldScale
+    ? {
+        width: `${invZoom * 100}vw`,
+        height: `${invZoom * 100}vh`,
+        transform: `scale(${safeZoom})`,
+        transformOrigin: '0 0',
+        willChange: 'transform',
+      }
+    : undefined;
+
+  const content = (
+    <AnimatePresence mode="popLayout">
+      {visible && (
+        <motion.div
+          className="vines-center relative size-full flex-col"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {isUseShareView && <WorkspaceShareView />}
+          {isUseIFrame && <WorkspaceIframe />}
+          {isUseOutside && <Outlet />}
+          {isUseWorkSpace && <WorkspaceLayout />}
+          {isUseAgent && <AgentLayout />}
+          {isUseDesign && designNewTabOpenBoard && <DesignLayout />}
+          {isUseEvaluation && <EvaluationLayout />}
+          {((isUsePanel && !isUseIFrame) || (isUseDesign && !designNewTabOpenBoard)) && mode !== 'mini' && (
+            <WorkbenchPanelLayout layoutId={layoutId} />
+          )}
+          {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
+          {(isUseDefault || isUseCustomNav) && <MainWrapper layoutId={layoutId} />}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <>
       <ScrollRestoration />
       <TooltipProvider delayDuration={100}>
         <UniImagePreviewProvider>
           <ReportDialog />
-          <main className="vines-ui grid size-full min-h-screen" style={{ zoom }}>
-            <AnimatePresence mode="popLayout">
-              {visible && (
-                <motion.div
-                  className="vines-center relative size-full flex-col"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  {isUseShareView && <WorkspaceShareView />}
-                  {isUseIFrame && <WorkspaceIframe />}
-                  {isUseOutside && <Outlet />}
-                  {isUseWorkSpace && <WorkspaceLayout />}
-                  {isUseAgent && <AgentLayout />}
-                  {isUseDesign && designNewTabOpenBoard && <DesignLayout />}
-                  {isUseEvaluation && <EvaluationLayout />}
-                  {((isUsePanel && !isUseIFrame) || (isUseDesign && !designNewTabOpenBoard)) && mode !== 'mini' && (
-                    <WorkbenchPanelLayout layoutId={layoutId} />
-                  )}
-                  {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
-                  {(isUseDefault || isUseCustomNav) && <MainWrapper layoutId={layoutId} />}
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <main
+            className={`vines-ui grid size-full min-h-screen${shouldScale ? ' oem-scale-root' : ''}`}
+            style={viewportFixedStyle}
+          >
+            {shouldScale ? (
+              <div className="size-full" style={scaledContentStyle}>
+                {content}
+              </div>
+            ) : (
+              content
+            )}
           </main>
         </UniImagePreviewProvider>
       </TooltipProvider>

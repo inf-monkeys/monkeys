@@ -60,7 +60,7 @@ export const TemporaryWorkflowOverlay: React.FC<TemporaryWorkflowOverlayProps> =
 
   const isMiniFrame = mode === 'mini';
 
-  const height = 'calc(100vh-4rem)';
+  const height = 'calc(var(--oem-vh) - 4rem)';
 
   const form = useForm<IWorkflowInputForm>({
     resolver: zodResolver(workflowInputFormSchema),
@@ -233,7 +233,7 @@ export const TemporaryWorkflowOverlay: React.FC<TemporaryWorkflowOverlayProps> =
         <DialogContent className={cn('min-h-64 pb-8', mode === 'mini' && 'flex h-full flex-col')}>
           {isExecuting ? (
             result && ['COMPLETED', 'FAILED', 'CANCELLED'].includes(result.status) ? (
-              <div className="grid max-h-[calc(100vh-4rem)] grid-cols-2 gap-global overflow-y-auto">
+              <div className="grid max-h-[calc(var(--oem-vh)-4rem)] grid-cols-2 gap-global overflow-y-auto">
                 {result.output.map((it) => {
                   return (
                     <ExecutionResultItem

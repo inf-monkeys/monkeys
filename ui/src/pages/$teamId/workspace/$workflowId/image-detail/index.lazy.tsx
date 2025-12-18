@@ -196,7 +196,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [workflowAssociationList, setWorkflowAssociationList] = useState<IWorkflowAssociation[]>([]);
   const [tabularEvent$, setTabularEvent$] = useState<any>(null);
 
-  const baseWidth = showFormInImageDetail ? '70vw' : '100vw';
+  const baseWidth = showFormInImageDetail ? 'calc(var(--oem-vw) * 0.7)' : 'var(--oem-vw)';
   const spacingFormula =
     imagePreviewOperationBarStyle === 'simple'
       ? '0'
@@ -207,7 +207,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   // const widthClass = isLoading ? 'w-0' : `w-[calc(${baseWidth}-${spacingFormula})]`;
 
   const width = isMiniFrame
-    ? 'calc(100vw - var(--operation-bar-width) - (var(--global-spacing)))'
+    ? 'calc(var(--oem-vw) - var(--operation-bar-width) - (var(--global-spacing)))'
     : `calc(${baseWidth} - ${spacingFormula})`;
 
   return (
@@ -248,7 +248,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                             width: 'auto',
                             height: 'auto',
                             objectFit: 'contain',
-                            maxHeight: 'calc(100vh - 340px)',
+                            maxHeight: 'calc(var(--oem-vh) - 340px)',
                             transition: 'transform 0.3s ease',
                           }}
                           // preview={false}

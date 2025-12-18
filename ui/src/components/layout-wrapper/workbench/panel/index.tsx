@@ -6,11 +6,11 @@ import { get, isString } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
 import { ISystemConfig } from '@/apis/common/typings';
-import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
 import { SpaceHeaderTabs } from '@/components/layout-wrapper/space/header/tabs';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
+import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import useUrlState from '@/hooks/use-url-state';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
@@ -74,7 +74,8 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
       </SpaceHeader>
       <VinesSpace
         className={cn(
-          isWorkbenchRoute && 'overflow-auto bg-transparent p-0 shadow-none transition-colors',
+          // Workbench 主视图只需要纵向滚动；横向滚动条通常来自 1px 溢出/缩放后的宽度取整误差
+          isWorkbenchRoute && 'overflow-y-auto overflow-x-hidden bg-transparent p-0 shadow-none transition-colors',
           isWorkspaceRoute && !isSettingRoute && `w-full rounded-lg border border-input p-global`,
           isSettingRoute && `w-full rounded-lg border border-input px-global py-1`,
         )}
