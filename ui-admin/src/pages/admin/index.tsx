@@ -9,11 +9,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { getAdminDashboardStats } from '@/apis/dashboard';
+import type { AdminDashboardMetric } from '@/types/dashboard';
 import {
   Users,
   Building2,
   Wrench,
   Workflow,
+  TrendingDown,
+  TrendingUp,
   Activity,
   ArrowRight,
 } from 'lucide-react';
@@ -29,16 +32,11 @@ function Dashboard() {
   const { user } = useAuth();
 
   const [stats, setStats] = useState<{
-    users: number | null;
-    teams: number | null;
-    tools: number | null;
-    workflows: number | null;
-  }>({
-    users: null,
-    teams: null,
-    tools: null,
-    workflows: null,
-  });
+    users: AdminDashboardMetric | null;
+    teams: AdminDashboardMetric | null;
+    tools: AdminDashboardMetric | null;
+    workflows: AdminDashboardMetric | null;
+  }>({ users: null, teams: null, tools: null, workflows: null });
 
   useEffect(() => {
     let isCancelled = false;
@@ -62,28 +60,50 @@ function Dashboard() {
     const formatNumber = (value: number | null) =>
       value === null ? '—' : new Intl.NumberFormat('zh-CN').format(value);
 
+    const formatChange = (value: number | null) => {
+      if (value === null) return '—';
+      const abs = Math.abs(value);
+      const pct = `${abs.toFixed(1)}%`;
+      return value >= 0 ? `+${pct}` : `-${pct}`;
+    };
+
+    const resolveTrend = (metric: AdminDashboardMetric | null) => {
+      if (!metric) return { icon: Activity, className: 'text-muted-foreground', change: '—' };
+      if (metric.trend === 'up') {
+        return { icon: TrendingUp, className: 'text-green-600', change: formatChange(metric.changePct) };
+      }
+      if (metric.trend === 'down') {
+        return { icon: TrendingDown, className: 'text-red-600', change: formatChange(metric.changePct) };
+      }
+      return { icon: Activity, className: 'text-muted-foreground', change: formatChange(metric.changePct) };
+    };
+
     return [
       {
         title: '用户总数',
-        value: formatNumber(stats.users),
+        value: formatNumber(stats.users?.total ?? null),
+        trend: resolveTrend(stats.users),
         icon: Users,
         href: '/admin/users',
       },
       {
         title: '团队总数',
-        value: formatNumber(stats.teams),
+        value: formatNumber(stats.teams?.total ?? null),
+        trend: resolveTrend(stats.teams),
         icon: Building2,
         href: '/admin/teams',
       },
       {
         title: '工具数量',
-        value: formatNumber(stats.tools),
+        value: formatNumber(stats.tools?.total ?? null),
+        trend: resolveTrend(stats.tools),
         icon: Wrench,
         href: '/admin/tools',
       },
       {
         title: '工作流',
-        value: formatNumber(stats.workflows),
+        value: formatNumber(stats.workflows?.total ?? null),
+        trend: resolveTrend(stats.workflows),
         icon: Workflow,
         href: '/admin/workflows',
       },
@@ -134,6 +154,7 @@ function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
+          const TrendIcon = stat.trend.icon;
           return (
             <Link key={stat.title} to={stat.href}>
               <Card className="transition-all hover:shadow-md cursor-pointer">
@@ -145,6 +166,11 @@ function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stat.value}</div>
+                  <div className="flex items-center text-xs text-muted-foreground mt-1">
+                    <TrendIcon className={`mr-1 h-3 w-3 ${stat.trend.className}`} />
+                    <span className={stat.trend.className}>{stat.trend.change}</span>
+                    <span className="ml-1">较上月</span>
+                  </div>
                 </CardContent>
               </Card>
             </Link>

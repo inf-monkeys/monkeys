@@ -173,7 +173,10 @@ interface NavItemProps {
 }
 
 function NavItemComponent({ item, pathname, isCollapsed }: NavItemProps) {
-  const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+  const isActive =
+    item.href === '/admin'
+      ? pathname === '/admin' || pathname === '/admin/'
+      : pathname === item.href || pathname.startsWith(item.href + '/');
   const Icon = item.icon;
   const [isExpanded, setIsExpanded] = useState(false);
 
