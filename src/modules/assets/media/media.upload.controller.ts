@@ -292,13 +292,10 @@ export class MediaUploadController {
         contentType: file.mimetype,
         randomFilename: config.s3.randomFilename,
       });
+      // 返回字符串URL以保持与S3Helpers路径的兼容性
+      // 前端期望data字段为字符串URL（参考 vines-upload.ts:234）
       return new SuccessResponse({
-        data: {
-          url: result.url, // 立即可用（私有时为签名）
-          canonicalUrl: result.canonicalUrl ?? result.url,
-          key: result.key,
-          bucketId: result.bucketId,
-        },
+        data: result.url, // 立即可用（私有时为签名）
       });
     } else {
       // 使用传统 S3Helpers（支持 S3/OSS）
