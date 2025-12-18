@@ -15,6 +15,7 @@ import {
     FolderOpen,
     LayoutDashboard,
     Settings,
+    Shield,
     Users,
     Workflow,
     Wrench,
@@ -22,6 +23,7 @@ import {
 import { useState } from 'react';
 
 import { formatAdminTitle, getBrandLogoUrl, getBrandTitle, useSystemConfigStore } from '@/store/system-config';
+import { useAuth } from '@/hooks/use-auth';
 
 interface NavItem {
   title: string;
@@ -29,6 +31,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
   children?: NavItem[];
+  requiresSuperAdmin?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -41,6 +44,12 @@ const navItems: NavItem[] = [
     title: '数据管理',
     href: '/admin/data',
     icon: Database,
+  },
+  {
+    title: '权限管理',
+    href: '/admin/permissions',
+    icon: Shield,
+    requiresSuperAdmin: true,
   },
   {
     title: '用户管理',
@@ -89,6 +98,8 @@ export function Sidebar() {
   const router = useRouterState();
   const pathname = router.location.pathname;
   const { isCollapsed } = useSidebarStore();
+  const { isSuperAdmin } = useAuth();
+  const showSuperAdminItems = isSuperAdmin();
   const config = useSystemConfigStore((s) => s.config);
   const brandTitle = getBrandTitle(config);
   const adminTitle = formatAdminTitle(brandTitle);
@@ -97,6 +108,9 @@ export function Sidebar() {
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-color-scheme: dark)').matches;
   const logoUrl = getBrandLogoUrl(config, { darkMode: prefersDark });
+  const visibleNavItems = navItems.filter(
+    (item) => !item.requiresSuperAdmin || showSuperAdminItems,
+  );
 
   return (
     <TooltipProvider>
@@ -131,7 +145,7 @@ export function Sidebar() {
 
         {/* 导航菜单 */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavItemComponent
               key={item.href}
               item={item}

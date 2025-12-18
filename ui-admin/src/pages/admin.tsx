@@ -13,7 +13,8 @@ function AdminLayoutRoute() {
   // 判断是否需要 flush 布局（无边距）
   const isFlushLayout =
     router.location.pathname.startsWith('/admin/data') ||
-    router.location.pathname.startsWith('/admin/users');
+    router.location.pathname.startsWith('/admin/users') ||
+    router.location.pathname.startsWith('/admin/permissions');
 
   if (isLoading) {
     return (

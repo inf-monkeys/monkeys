@@ -139,8 +139,6 @@ function UsersManagementPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 p-6">
-      <h1 className="text-2xl font-bold tracking-tight">用户管理</h1>
-
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="flex min-h-0 flex-1 flex-col">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <TabsList>

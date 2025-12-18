@@ -17,6 +17,10 @@ import { AdminUserManagementService } from './user-management/admin-user-managem
 import { UserManagementController } from './user-management/user-management.controller';
 import { UserManagementService } from './user-management/user-management.service';
 import { UserEntity } from '@/database/entities/identity/user';
+import { AdminSuperAdminGuard } from './guards/admin-super-admin.guard';
+import { AdminRoleManagementController } from './rbac-management/admin-role-management.controller';
+import { AdminPermissionManagementController } from './rbac-management/admin-permission-management.controller';
+import { RbacManagementService } from './rbac-management/rbac-management.service';
 
 @Module({
   imports: [
@@ -28,7 +32,13 @@ import { UserEntity } from '@/database/entities/identity/user';
     ]),
     DataManagementModule,
   ],
-  controllers: [AdminAuthController, AdminUserManagementController, UserManagementController],
+  controllers: [
+    AdminAuthController,
+    AdminUserManagementController,
+    UserManagementController,
+    AdminRoleManagementController,
+    AdminPermissionManagementController,
+  ],
   providers: [
     AdminAuthService,
     AdminUserRepository,
@@ -37,8 +47,10 @@ import { UserEntity } from '@/database/entities/identity/user';
     AdminTokenGuard,
     AdminJwtGuard,
     AdminPermissionsGuard,
+    AdminSuperAdminGuard,
     AdminUserManagementService,
     UserManagementService,
+    RbacManagementService,
   ],
   exports: [AdminAuthService],
 })
