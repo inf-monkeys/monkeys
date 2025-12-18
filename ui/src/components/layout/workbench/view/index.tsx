@@ -180,7 +180,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
             >
               <GitBranchPlus size={64} />
               <div className="flex flex-col text-center">
-                <h2 className="font-bold">请在 Vision Pro 中打开使用</h2>
+                <h2 className="font-bold">{t('ugc-page.workflow.ugc-view.vision-pro.open-in-vision-pro')}</h2>
               </div>
             </motion.div>
           ) : isBsdCustomPage ? (
@@ -239,7 +239,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
         >
           <AlertDialogHeader>
             <AlertDialogTitle>{t('common.utils.tips')}</AlertDialogTitle>
-            <AlertDialogDescription>请在 Vision Pro 中打开使用</AlertDialogDescription>
+            <AlertDialogDescription>{t('ugc-page.workflow.ugc-view.vision-pro.open-in-vision-pro')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setVisionProAlertVisible(false)}>

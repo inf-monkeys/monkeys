@@ -1335,8 +1335,38 @@
             "create-a-copy": "创建副本",
             "edit-info": "编辑信息",
             "export-current-version": "导出当前版本",
-            "export-all-versions": "导出全部版本"
+            "export-all-versions": "导出全部版本",
+            "set-builtin": {
+              "label": "设为内置应用",
+              "loading": "正在设置为内置应用...",
+              "success": "已设置为内置应用",
+              "error": "设置内置应用失败",
+              "already": "该工作流已是内置应用",
+              "token-title": "设置内置应用需要 Tenant Token",
+              "token-desc": "请输入后端配置的 Tenant Bearer Token。Token 仅存储在浏览器会话中，关闭标签页或刷新页面后会自动清除。",
+              "token-placeholder": "请输入 Tenant Token",
+              "token-saved-hint": "Token 已保存（仅本次会话有效）",
+              "token-cleared": "Token 已清除",
+              "clear-token": "清除",
+              "token-required": "请先输入 Tenant Token",
+              "token-invalid": "Token 无效或已过期，请重新输入"
+            },
+            "unset-builtin": {
+              "label": "取消内置应用",
+              "loading": "正在取消内置应用...",
+              "success": "已取消内置应用",
+              "error": "取消内置应用失败"
+            }
           }
+        },
+        "filter": {
+          "button": {
+            "only-self": "仅本团队工作流",
+            "only-builtin": "仅内置应用"
+          }
+        },
+        "vision-pro": {
+          "open-in-vision-pro": "请在 Vision Pro 中打开使用"
         },
         "subtitle": {
           "import": {

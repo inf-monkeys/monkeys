@@ -1338,8 +1338,38 @@
             "create-a-copy": "Create a Copy",
             "edit-info": "Edit Info",
             "export-current-version": "Export Current Version",
-            "export-all-versions": "Export All Versions"
+            "export-all-versions": "Export All Versions",
+            "set-builtin": {
+              "label": "Set as built-in app",
+              "loading": "Setting as built-in app...",
+              "success": "Set as built-in app",
+              "error": "Failed to set as built-in app",
+              "already": "This workflow is already a built-in app",
+              "token-title": "Tenant Token required to set as built-in app",
+              "token-desc": "Please enter the Tenant Bearer Token configured on the backend. The token is stored only in the current browser session and will be cleared when you refresh or close the tab.",
+              "token-placeholder": "Enter Tenant Token",
+              "token-saved-hint": "Token saved (valid for this session only)",
+              "token-cleared": "Token cleared",
+              "clear-token": "Clear",
+              "token-required": "Please enter Tenant Token first",
+              "token-invalid": "Token is invalid or expired. Please re-enter."
+            },
+            "unset-builtin": {
+              "label": "Unset built-in app",
+              "loading": "Unsetting built-in app...",
+              "success": "Built-in app unset",
+              "error": "Failed to unset built-in app"
+            }
           }
+        },
+        "filter": {
+          "button": {
+            "only-self": "Only workflows in this team",
+            "only-builtin": "Only built-in apps"
+          }
+        },
+        "vision-pro": {
+          "open-in-vision-pro": "Please open this in Vision Pro"
         },
         "subtitle": {
           "import": {
