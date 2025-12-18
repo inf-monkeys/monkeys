@@ -6,6 +6,7 @@ import {
   UseGuards,
   Headers,
   UnauthorizedException,
+  HttpCode,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AdminAuthService } from './admin-auth.service';
@@ -16,6 +17,7 @@ import {
   AdminUserDto,
 } from './dto/admin-user.dto';
 import { config } from '@/common/config';
+import { AdminJwtGuard } from '../guards/admin-jwt.guard';
 
 @ApiTags('Admin Auth')
 @Controller('admin/auth')
@@ -57,6 +59,20 @@ export class AdminAuthController {
   })
   async login(@Body() loginDto: AdminLoginDto): Promise<AdminLoginResponseDto> {
     return this.adminAuthService.login(loginDto);
+  }
+
+  /**
+   * 管理员登出（JWT 无状态，仅用于前端统一调用）
+   * TODO: 如需“真退出/踢下线”，可引入 token 黑名单（Redis + TTL）或 refresh token 机制，使已签发 JWT 可立即失效。
+   */
+  @Post('logout')
+  @HttpCode(204)
+  @UseGuards(AdminJwtGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '管理员登出' })
+  @ApiResponse({ status: 204, description: '登出成功' })
+  async logout(): Promise<void> {
+    return;
   }
 
   /**
