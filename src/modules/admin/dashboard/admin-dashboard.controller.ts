@@ -2,7 +2,9 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminJwtGuard } from '../guards/admin-jwt.guard';
 import { AdminDashboardService } from './admin-dashboard.service';
-import { AdminDashboardStatsDto } from './dto/admin-dashboard.dto';
+import { AdminDashboardRecentUserDto, AdminDashboardStatsDto } from './dto/admin-dashboard.dto';
+import { AdminPermissionsGuard } from '../guards/admin-permissions.guard';
+import { AdminPermissions } from '../decorators/admin-permissions.decorator';
 
 @ApiTags('Admin - Dashboard')
 @Controller('admin/dashboard')
@@ -17,5 +19,13 @@ export class AdminDashboardController {
   async stats(): Promise<AdminDashboardStatsDto> {
     return this.service.getStats();
   }
-}
 
+  @Get('recent-users')
+  @UseGuards(AdminPermissionsGuard)
+  @AdminPermissions('user:read')
+  @ApiOperation({ summary: '获取最近注册的用户（固定少量）' })
+  @ApiResponse({ status: 200, type: [AdminDashboardRecentUserDto] })
+  async recentUsers(): Promise<AdminDashboardRecentUserDto[]> {
+    return this.service.getRecentUsers(3);
+  }
+}

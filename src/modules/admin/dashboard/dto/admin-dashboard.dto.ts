@@ -35,3 +35,20 @@ export class AdminDashboardStatsDto {
   @ApiProperty({ description: '工作流统计（按 workflow_id 去重，未删除）' })
   workflows: AdminDashboardMetricDto;
 }
+
+export class AdminDashboardRecentUserDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  email: string;
+
+  @ApiProperty({ required: false })
+  photo?: string;
+
+  @ApiProperty()
+  createdTimestamp: number;
+}

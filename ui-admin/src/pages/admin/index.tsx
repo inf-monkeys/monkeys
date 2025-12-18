@@ -8,8 +8,9 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
-import { getAdminDashboardStats } from '@/apis/dashboard';
-import type { AdminDashboardMetric } from '@/types/dashboard';
+import { getAdminDashboardRecentUsers, getAdminDashboardStats } from '@/apis/dashboard';
+import type { AdminDashboardMetric, AdminDashboardRecentUser } from '@/types/dashboard';
+import { Permission } from '@/types/auth';
 import {
   Users,
   Building2,
@@ -23,13 +24,15 @@ import {
 import { Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const Route = createFileRoute('/admin/')({
   component: Dashboard,
 });
 
 function Dashboard() {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
+  const canViewUsers = hasPermission(Permission.USER_READ);
 
   const [stats, setStats] = useState<{
     users: AdminDashboardMetric | null;
@@ -37,6 +40,9 @@ function Dashboard() {
     tools: AdminDashboardMetric | null;
     workflows: AdminDashboardMetric | null;
   }>({ users: null, teams: null, tools: null, workflows: null });
+
+  const [recentUsers, setRecentUsers] = useState<AdminDashboardRecentUser[]>([]);
+  const [isRecentUsersLoading, setIsRecentUsersLoading] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -55,6 +61,35 @@ function Dashboard() {
       isCancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+    if (!canViewUsers) {
+      setRecentUsers([]);
+      setIsRecentUsersLoading(false);
+      return;
+    }
+
+    setIsRecentUsersLoading(true);
+    void (async () => {
+      try {
+        if (isCancelled) return;
+        const list = await getAdminDashboardRecentUsers();
+        if (isCancelled) return;
+        setRecentUsers(list);
+      } catch (e: any) {
+        if (isCancelled) return;
+        toast.error(e?.message || '加载最近用户失败');
+      } finally {
+        if (isCancelled) return;
+        setIsRecentUsersLoading(false);
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [canViewUsers]);
 
   const statCards = useMemo(() => {
     const formatNumber = (value: number | null) =>
@@ -220,20 +255,37 @@ function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-full bg-muted"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">User {i}</p>
-                    <p className="text-xs text-muted-foreground">
-                      user{i}@example.com
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    查看
-                  </Button>
+              {!canViewUsers ? (
+                <div className="py-6 text-sm text-muted-foreground">
+                  您暂时无法查看
                 </div>
-              ))}
+              ) : isRecentUsersLoading ? (
+                <div className="py-6 text-sm text-muted-foreground">加载中...</div>
+              ) : recentUsers.length === 0 ? (
+                <div className="py-6 text-sm text-muted-foreground">暂无用户</div>
+              ) : (
+                recentUsers.map((u) => (
+                  <div key={u.id} className="flex items-center gap-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={u.photo} alt={u.name} />
+                      <AvatarFallback>
+                        {(u.name || 'U').slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{u.name || '-'}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {u.email || '-'}
+                      </p>
+                    </div>
+                    <Link to="/admin/users">
+                      <Button variant="ghost" size="sm">
+                        查看
+                      </Button>
+                    </Link>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

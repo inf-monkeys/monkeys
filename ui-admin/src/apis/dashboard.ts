@@ -7,3 +7,10 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
   return apiRequest<AdminDashboardStats>(`${API_BASE}/stats`);
 }
 
+export async function getAdminDashboardRecentUsers(): Promise<
+  import("@/types/dashboard").AdminDashboardRecentUser[]
+> {
+  return apiRequest<import("@/types/dashboard").AdminDashboardRecentUser[]>(
+    `${API_BASE}/recent-users`
+  );
+}

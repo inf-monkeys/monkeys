@@ -14,3 +14,11 @@ export interface AdminDashboardMetric {
   changePct: number | null;
   trend: AdminDashboardTrend;
 }
+
+export interface AdminDashboardRecentUser {
+  id: string;
+  name: string;
+  email: string;
+  photo?: string;
+  createdTimestamp: number;
+}

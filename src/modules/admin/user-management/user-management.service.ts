@@ -28,8 +28,8 @@ export class UserManagementService {
   ) {}
 
   async listUsers(dto: QueryUserListDto): Promise<UserListResponseDto> {
-    const page = Number(dto.page) || 1;
-    const pageSize = Number(dto.pageSize) || 20;
+    const page = Math.max(Number(dto.page) || 1, 1);
+    const pageSize = Math.min(Math.max(Number(dto.pageSize) || 20, 1), 100);
     const keyword = dto.keyword?.trim();
 
     const qb = this.userRepository
@@ -239,4 +239,3 @@ export class UserManagementService {
     };
   }
 }
-

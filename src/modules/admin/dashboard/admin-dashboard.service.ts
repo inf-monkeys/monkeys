@@ -6,6 +6,7 @@ import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import {
   AdminDashboardMetricDto,
+  AdminDashboardRecentUserDto,
   AdminDashboardStatsDto,
   AdminDashboardTrend,
 } from './dto/admin-dashboard.dto';
@@ -13,6 +14,25 @@ import {
 @Injectable()
 export class AdminDashboardService {
   constructor(private readonly dataSource: DataSource) {}
+
+  async getRecentUsers(limit = 3): Promise<AdminDashboardRecentUserDto[]> {
+    const safeLimit = Math.min(Math.max(Number(limit) || 3, 1), 5);
+    const userRepo = this.dataSource.getRepository(UserEntity);
+
+    const users = await userRepo.find({
+      where: { isDeleted: false },
+      order: { createdTimestamp: 'DESC' },
+      take: safeLimit,
+    });
+
+    return users.map((u) => ({
+      id: u.id,
+      name: u.name || '',
+      email: u.email || '',
+      photo: u.photo,
+      createdTimestamp: u.createdTimestamp,
+    }));
+  }
 
   async getStats(): Promise<AdminDashboardStatsDto> {
     const userRepo = this.dataSource.getRepository(UserEntity);
