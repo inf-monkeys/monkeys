@@ -21,6 +21,8 @@ import { AdminSuperAdminGuard } from './guards/admin-super-admin.guard';
 import { AdminRoleManagementController } from './rbac-management/admin-role-management.controller';
 import { AdminPermissionManagementController } from './rbac-management/admin-permission-management.controller';
 import { RbacManagementService } from './rbac-management/rbac-management.service';
+import { AdminDashboardController } from './dashboard/admin-dashboard.controller';
+import { AdminDashboardService } from './dashboard/admin-dashboard.service';
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { RbacManagementService } from './rbac-management/rbac-management.service
     UserManagementController,
     AdminRoleManagementController,
     AdminPermissionManagementController,
+    AdminDashboardController,
   ],
   providers: [
     AdminAuthService,
@@ -51,6 +54,7 @@ import { RbacManagementService } from './rbac-management/rbac-management.service
     AdminUserManagementService,
     UserManagementService,
     RbacManagementService,
+    AdminDashboardService,
   ],
   exports: [AdminAuthService],
 })

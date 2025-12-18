@@ -8,16 +8,18 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
+import { getAdminDashboardStats } from '@/apis/dashboard';
 import {
   Users,
   Building2,
   Wrench,
   Workflow,
-  TrendingUp,
   Activity,
   ArrowRight,
 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 export const Route = createFileRoute('/admin/')({
   component: Dashboard,
@@ -26,41 +28,67 @@ export const Route = createFileRoute('/admin/')({
 function Dashboard() {
   const { user } = useAuth();
 
-  // 统计数据（后续从 API 获取）
-  const stats = [
-    {
-      title: '用户总数',
-      value: '1,234',
-      change: '+12.5%',
-      trend: 'up',
-      icon: Users,
-      href: '/admin/users',
-    },
-    {
-      title: '团队总数',
-      value: '456',
-      change: '+8.2%',
-      trend: 'up',
-      icon: Building2,
-      href: '/admin/teams',
-    },
-    {
-      title: '工具数量',
-      value: '89',
-      change: '+3.1%',
-      trend: 'up',
-      icon: Wrench,
-      href: '/admin/tools',
-    },
-    {
-      title: '工作流',
-      value: '2,567',
-      change: '+24.3%',
-      trend: 'up',
-      icon: Workflow,
-      href: '/admin/workflows',
-    },
-  ];
+  const [stats, setStats] = useState<{
+    users: number | null;
+    teams: number | null;
+    tools: number | null;
+    workflows: number | null;
+  }>({
+    users: null,
+    teams: null,
+    tools: null,
+    workflows: null,
+  });
+
+  useEffect(() => {
+    let isCancelled = false;
+    void (async () => {
+      try {
+        const result = await getAdminDashboardStats();
+        if (isCancelled) return;
+        setStats(result);
+      } catch (e: any) {
+        if (isCancelled) return;
+        toast.error(e?.message || '加载统计数据失败');
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const statCards = useMemo(() => {
+    const formatNumber = (value: number | null) =>
+      value === null ? '—' : new Intl.NumberFormat('zh-CN').format(value);
+
+    return [
+      {
+        title: '用户总数',
+        value: formatNumber(stats.users),
+        icon: Users,
+        href: '/admin/users',
+      },
+      {
+        title: '团队总数',
+        value: formatNumber(stats.teams),
+        icon: Building2,
+        href: '/admin/teams',
+      },
+      {
+        title: '工具数量',
+        value: formatNumber(stats.tools),
+        icon: Wrench,
+        href: '/admin/tools',
+      },
+      {
+        title: '工作流',
+        value: formatNumber(stats.workflows),
+        icon: Workflow,
+        href: '/admin/workflows',
+      },
+    ];
+  }, [stats]);
 
   // 快速操作
   const quickActions = [
@@ -104,7 +132,7 @@ function Dashboard() {
 
       {/* 统计卡片 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
+        {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <Link key={stat.title} to={stat.href}>
@@ -117,11 +145,6 @@ function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="flex items-center text-xs text-muted-foreground mt-1">
-                    <TrendingUp className="mr-1 h-3 w-3 text-green-600" />
-                    <span className="text-green-600">{stat.change}</span>
-                    <span className="ml-1">较上月</span>
-                  </div>
                 </CardContent>
               </Card>
             </Link>
