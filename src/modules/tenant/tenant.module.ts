@@ -2,6 +2,7 @@ import { TemporaryWorkflowEntity } from '@/database/entities/workflow/temporary-
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MediaModule } from '../assets/media/media.module';
 import { TeamsModule } from '../auth/teams/teams.module';
 import { MarketplaceModule } from '../marketplace/marketplace.module';
 import { TemporaryWorkflowModule } from '../temporary-workflow/temporary-workflow.module';
@@ -21,6 +22,7 @@ import { TenantService } from './tenant.service';
     WorkflowModule,
     TemporaryWorkflowModule,
     TeamsModule,
+    MediaModule,
     forwardRef(() => MarketplaceModule),
   ],
   exports: [TenantService],
