@@ -13,13 +13,13 @@ import { CustomizationFormView } from '@/apis/common/typings';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
+import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import {
   GLOBAL_DESIGN_BOARD_PAGE,
   GLOBAL_DESIGN_BOARD_PAGE_GROUP,
 } from '@/components/layout/workbench/sidebar/mode/normal/consts';
 import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
-import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator';
@@ -336,7 +336,10 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
       ) : (
         <WorkbenchViewItemCurrentData.Provider value={{ pageId, groupId }}>
           {hasGroups ? (
-            <div className="flex h-full justify-between rounded-lg bg-slate-1">
+            <div
+              className="flex h-full justify-between rounded-lg bg-slate-1"
+              data-workbench-group-list-container
+            >
               <VirtuaWorkbenchViewGroupList
                 data={lists}
                 groupId={groupId}

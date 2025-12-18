@@ -151,7 +151,16 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
     const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
       const container = containerRef.current;
       if (!container) return;
-      if (!container.contains(event.target as Node)) {
+
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      // 切换“文件夹/分组”视图时保持展开：点击分组栏不触发收拢
+      if (target instanceof Element && target.closest('[data-workbench-group-list-container]')) {
+        return;
+      }
+
+      if (!container.contains(target)) {
         setExpanded(false);
       }
     };
