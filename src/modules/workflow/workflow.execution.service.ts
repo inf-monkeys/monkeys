@@ -22,6 +22,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
 import { FindManyOptions, In, IsNull, Not, Repository } from 'typeorm';
+import { MediaUrlTransformerService } from '../assets/media/media.url-transformer.service';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
@@ -83,6 +84,7 @@ export class WorkflowExecutionService {
     private readonly teamRepository: TeamRepository,
     @Inject(forwardRef(() => MarketplaceService))
     private readonly marketplaceService: MarketplaceService,
+    private readonly urlTransformer: MediaUrlTransformerService,
   ) {}
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
@@ -445,11 +447,12 @@ export class WorkflowExecutionService {
       const images = extractImageUrls(value);
       const videos = extractVideoUrls(value);
 
-      // 处理图片
+      // 处理图片 - 转换私有桶 URL
       for (const image of images) {
+        const transformedUrl = await this.urlTransformer.transformUrl(image);
         finalOutput.push({
           type: 'image',
-          data: image,
+          data: transformedUrl,
           alt,
           key: key,
         });
@@ -562,11 +565,12 @@ export class WorkflowExecutionService {
       const images = extractImageUrls(value);
       const videos = extractVideoUrls(value);
 
-      // 处理图片
+      // 处理图片 - 转换私有桶 URL
       for (const image of images) {
+        const transformedUrl = await this.urlTransformer.transformUrl(image);
         finalOutput.push({
           type: 'image',
-          data: image,
+          data: transformedUrl,
           alt,
           key: key,
         });
