@@ -43,12 +43,30 @@ export class WorkflowAssociationService {
   }
 
   async updateWorkflowAssociation(id: string, scope: 'global' | string, teamId: string, updateAssociation: UpdateAndCreateWorkflowAssociation) {
+    // If scope is undefined, null, or empty, we need to determine the type by querying the association
+    if (!scope || scope === 'undefined') {
+      // Try to get the association to determine its scope
+      const association = await this.getWorkflowAssociation(id, false);
+      if (association) {
+        scope = association.scope;
+      }
+    }
+
     return scope === 'global'
       ? await this.workflowRepository.updateGlobalWorkflowAssociation(id, teamId, updateAssociation)
       : await this.workflowRepository.updateWorkflowAssociation(id, teamId, updateAssociation);
   }
 
   async removeWorkflowAssociation(id: string, scope: 'global' | string, teamId: string) {
+    // If scope is undefined, null, or empty, we need to determine the type by querying the association
+    if (!scope || scope === 'undefined') {
+      // Try to get the association to determine its scope
+      const association = await this.getWorkflowAssociation(id, false);
+      if (association) {
+        scope = association.scope;
+      }
+    }
+
     return scope === 'global' ? await this.workflowRepository.removeGlobalWorkflowAssociation(id, teamId) : await this.workflowRepository.removeWorkflowAssociation(id, teamId);
   }
 }
