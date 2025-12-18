@@ -977,9 +977,27 @@ function SimplePagination(props: { page: number; totalPages: number; onPageChang
   );
 }
 
-function formatTime(ts: number): string {
+function toTimestamp(ts: unknown): number | null {
+  if (ts === null || ts === undefined) return null;
+  if (typeof ts === "number" && Number.isFinite(ts)) return ts;
+  if (typeof ts === "string") {
+    const value = ts.trim();
+    if (!value) return null;
+    if (/^\d+$/.test(value)) {
+      const parsed = Number.parseInt(value, 10);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function formatTime(ts: unknown): string {
   try {
-    return format(new Date(ts), "yyyy-MM-dd HH:mm");
+    const ms = toTimestamp(ts);
+    if (ms === null) return "-";
+    return format(new Date(ms), "yyyy-MM-dd HH:mm");
   } catch {
     return "-";
   }

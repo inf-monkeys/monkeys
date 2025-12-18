@@ -13,10 +13,10 @@ export type AdminAccount = {
   isActive: boolean;
   roles: string[];
   photo?: string;
-  lastLoginAt?: number;
+  lastLoginAt?: number | string;
   loginsCount: number;
-  createdTimestamp: number;
-  updatedTimestamp: number;
+  createdTimestamp: number | string;
+  updatedTimestamp: number | string;
   createdBy?: string;
 };
 
@@ -67,4 +67,3 @@ export type UpdateUserInput = Partial<{
   verified?: boolean;
   isBlocked?: boolean;
 }>;
-
