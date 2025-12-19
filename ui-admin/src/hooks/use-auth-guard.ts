@@ -2,9 +2,10 @@ import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useAuthStore } from '@/store/auth';
 
-export function useAuthGuard() {
+export function useAuthGuard(options?: { enabled?: boolean }) {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, hydrate } = useAuthStore();
+  const enabled = options?.enabled ?? true;
 
   useEffect(() => {
     // 初始化时从 localStorage 恢复认证状态
@@ -13,10 +14,10 @@ export function useAuthGuard() {
 
   useEffect(() => {
     // 如果加载完成且未认证，跳转到登录页
-    if (!isLoading && !isAuthenticated) {
+    if (enabled && !isLoading && !isAuthenticated) {
       navigate({ to: '/admin/login' });
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [enabled, isAuthenticated, isLoading, navigate]);
 
   return { isAuthenticated, isLoading };
 }
