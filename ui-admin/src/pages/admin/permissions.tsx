@@ -344,11 +344,13 @@ function PermissionsManagementPage() {
             </Button>
           </div>
 
-          <Input
-            placeholder="搜索角色 code/name"
-            value={roleKeyword}
-            onChange={(e) => setRoleKeyword(e.target.value)}
-          />
+          <div className="pr-2">
+            <Input
+              placeholder="搜索角色 code/name"
+              value={roleKeyword}
+              onChange={(e) => setRoleKeyword(e.target.value)}
+            />
+          </div>
 
           <ScrollArea className="min-h-0 flex-1 pr-2">
             <div className="space-y-1">
@@ -365,7 +367,7 @@ function PermissionsManagementPage() {
                         : "border-transparent hover:bg-accent"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="truncate text-sm font-medium">{role.name}</div>
                         <div className="truncate text-xs text-muted-foreground">{role.code}</div>
