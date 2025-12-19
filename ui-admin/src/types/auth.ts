@@ -41,6 +41,10 @@ export enum Permission {
   TASK_READ = 'task:read',
   TASK_MANAGE = 'task:manage',
 
+  // 计费管理
+  BILLING_READ = 'billing:read',
+  BILLING_WRITE = 'billing:write',
+
   // 工作流管理
   WORKFLOW_READ = 'workflow:read',
   WORKFLOW_WRITE = 'workflow:write',

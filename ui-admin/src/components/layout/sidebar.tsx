@@ -8,22 +8,23 @@ import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/store/sidebar';
 import { Link, useRouterState } from '@tanstack/react-router';
 import {
-    Building2,
-    ChevronDown,
-    CreditCard,
-    Database,
-    FolderOpen,
-    LayoutDashboard,
-    Settings,
-    Shield,
-    Users,
-    Workflow,
-    Wrench,
+  Building2,
+  ChevronDown,
+  CreditCard,
+  Database,
+  FolderOpen,
+  LayoutDashboard,
+  Settings,
+  Shield,
+  Users,
+  Workflow,
+  Wrench,
 } from 'lucide-react';
 import { useState } from 'react';
 
 import { formatAdminTitle, getBrandLogoUrl, getBrandTitle, useSystemConfigStore } from '@/store/system-config';
 import { useAuth } from '@/hooks/use-auth';
+import { Permission } from '@/types/auth';
 
 interface NavItem {
   title: string;
@@ -32,6 +33,7 @@ interface NavItem {
   badge?: string;
   children?: NavItem[];
   requiresSuperAdmin?: boolean;
+  requiresAnyPermissions?: Permission[];
 }
 
 const navItems: NavItem[] = [
@@ -44,6 +46,7 @@ const navItems: NavItem[] = [
     title: '数据管理',
     href: '/admin/data',
     icon: Database,
+    requiresAnyPermissions: [Permission.ASSET_READ],
   },
   {
     title: '权限管理',
@@ -55,26 +58,31 @@ const navItems: NavItem[] = [
     title: '用户管理',
     href: '/admin/users',
     icon: Users,
+    requiresAnyPermissions: [Permission.USER_READ],
   },
   {
     title: '团队管理',
     href: '/admin/teams',
     icon: Building2,
+    requiresAnyPermissions: [Permission.TEAM_READ],
   },
   {
     title: '工具管理',
     href: '/admin/tools',
     icon: Wrench,
+    requiresAnyPermissions: [Permission.TOOL_READ],
   },
   {
     title: '工作流管理',
     href: '/admin/workflows',
     icon: Workflow,
+    requiresAnyPermissions: [Permission.WORKFLOW_READ],
   },
   {
     title: '计费管理',
     href: '/admin/pricing',
     icon: CreditCard,
+    requiresAnyPermissions: [Permission.BILLING_READ],
     children: [
       { title: '余额管理', href: '/admin/pricing/balances', icon: CreditCard },
       { title: '订单管理', href: '/admin/pricing/orders', icon: CreditCard },
@@ -86,11 +94,13 @@ const navItems: NavItem[] = [
     title: '资产管理',
     href: '/admin/assets',
     icon: FolderOpen,
+    requiresAnyPermissions: [Permission.ASSET_READ],
   },
   {
     title: '全局配置',
     href: '/admin/config',
     icon: Settings,
+    requiresAnyPermissions: [Permission.CONFIG_READ],
   },
 ];
 
@@ -98,7 +108,7 @@ export function Sidebar() {
   const router = useRouterState();
   const pathname = router.location.pathname;
   const { isCollapsed } = useSidebarStore();
-  const { isSuperAdmin } = useAuth();
+  const { isSuperAdmin, hasAnyPermission } = useAuth();
   const showSuperAdminItems = isSuperAdmin();
   const config = useSystemConfigStore((s) => s.config);
   const brandTitle = getBrandTitle(config);
@@ -108,9 +118,31 @@ export function Sidebar() {
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-color-scheme: dark)').matches;
   const logoUrl = getBrandLogoUrl(config, { darkMode: prefersDark });
-  const visibleNavItems = navItems.filter(
-    (item) => !item.requiresSuperAdmin || showSuperAdminItems,
-  );
+
+  const filterNavItems = (items: NavItem[]): NavItem[] => {
+    return items
+      .map((item) => {
+        const allowedByRole = !item.requiresSuperAdmin || showSuperAdminItems;
+        if (!allowedByRole) return null;
+
+        const allowedByPermission =
+          !item.requiresAnyPermissions ||
+          item.requiresAnyPermissions.length === 0 ||
+          hasAnyPermission(item.requiresAnyPermissions);
+        if (!allowedByPermission) return null;
+
+        if (item.children && item.children.length > 0) {
+          const children = filterNavItems(item.children);
+          if (children.length === 0) return null;
+          return { ...item, children };
+        }
+
+        return item;
+      })
+      .filter(Boolean) as NavItem[];
+  };
+
+  const visibleNavItems = filterNavItems(navItems);
 
   return (
     <TooltipProvider>

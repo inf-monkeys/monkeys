@@ -20,7 +20,7 @@ import {
 } from "@/apis/admin-users";
 import { createUser, deleteUser, listUsers, resetUserPassword, updateUser } from "@/apis/users";
 import { useAuth } from "@/hooks/use-auth";
-import { UserRole } from "@/types/auth";
+import { Permission, UserRole } from "@/types/auth";
 import type {
   AdminAccount,
   CreateAdminAccountInput,
@@ -90,10 +90,18 @@ type ManagementTableHandle = {
 };
 
 function UsersManagementPage() {
-  const { hasAnyRole, isSuperAdmin } = useAuth();
+  const { hasAnyRole, isSuperAdmin, hasPermission } = useAuth();
 
   const canAccess = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.ADMIN]);
   const showAdminAccountsTab = isSuperAdmin();
+
+  const canReadUsers = hasPermission(Permission.USER_READ);
+  const canWriteUsers = hasPermission(Permission.USER_WRITE);
+  const canDeleteUsers = hasPermission(Permission.USER_DELETE);
+
+  const canReadAdmins = hasPermission(Permission.ADMIN_READ);
+  const canWriteAdmins = hasPermission(Permission.ADMIN_WRITE);
+  const canDeleteAdmins = hasPermission(Permission.ADMIN_DELETE);
 
   const [tab, setTab] = useState<"users" | "admin-users">("users");
   const userTableRef = useRef<ManagementTableHandle | null>(null);
@@ -111,20 +119,34 @@ function UsersManagementPage() {
     }
   }, [showAdminAccountsTab, tab]);
 
+  useEffect(() => {
+    if (tab === "users" && !canReadUsers && showAdminAccountsTab && canReadAdmins) {
+      setTab("admin-users");
+      return;
+    }
+    if (tab === "admin-users" && (!showAdminAccountsTab || !canReadAdmins)) {
+      setTab("users");
+    }
+  }, [tab, canReadUsers, canReadAdmins, showAdminAccountsTab]);
+
   const triggerSearch = () => {
     const keyword = keywordInput.trim();
     if (tab === "users") {
+      if (!canReadUsers) return;
       userTableRef.current?.applySearch(keyword);
       return;
     }
+    if (!canReadAdmins) return;
     adminTableRef.current?.applySearch(keyword);
   };
 
   const triggerCreate = () => {
     if (tab === "users") {
+      if (!canWriteUsers) return;
       userTableRef.current?.openCreate();
       return;
     }
+    if (!canWriteAdmins) return;
     adminTableRef.current?.openCreate();
   };
 
@@ -142,8 +164,8 @@ function UsersManagementPage() {
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="flex min-h-0 flex-1 flex-col">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <TabsList>
-            <TabsTrigger value="users">用户管理</TabsTrigger>
-            {showAdminAccountsTab ? <TabsTrigger value="admin-users">管理员管理</TabsTrigger> : null}
+            {canReadUsers ? <TabsTrigger value="users">用户管理</TabsTrigger> : null}
+            {showAdminAccountsTab && canReadAdmins ? <TabsTrigger value="admin-users">管理员管理</TabsTrigger> : null}
           </TabsList>
 
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -155,23 +177,48 @@ function UsersManagementPage() {
                 if (e.key === "Enter") triggerSearch();
               }}
               className="w-full sm:w-96"
+              disabled={tab === "users" ? !canReadUsers : !canReadAdmins}
             />
             <div className="flex gap-2">
               <Button variant="secondary" onClick={triggerSearch}>
                 搜索
               </Button>
-              <Button onClick={triggerCreate}>{tab === "users" ? "创建用户" : "创建管理员"}</Button>
+              {tab === "users" ? (
+                canWriteUsers ? (
+                  <Button onClick={triggerCreate}>创建用户</Button>
+                ) : null
+              ) : canWriteAdmins ? (
+                <Button onClick={triggerCreate}>创建管理员</Button>
+              ) : null}
             </div>
           </div>
         </div>
 
         <TabsContent value="users" className="mt-4 flex min-h-0 flex-1 flex-col">
-          <UserTable ref={userTableRef} />
+          {canReadUsers ? (
+            <UserTable ref={userTableRef} canWrite={canWriteUsers} canDelete={canDeleteUsers} />
+          ) : (
+            <div className="rounded-lg border p-8 text-center">
+              <h2 className="text-lg font-semibold">无权限</h2>
+              <p className="mt-2 text-sm text-muted-foreground">当前账号无权查看用户列表</p>
+            </div>
+          )}
         </TabsContent>
 
         {showAdminAccountsTab ? (
           <TabsContent value="admin-users" className="mt-4 flex min-h-0 flex-1 flex-col">
-            <AdminAccountTable ref={adminTableRef} />
+            {canReadAdmins ? (
+              <AdminAccountTable
+                ref={adminTableRef}
+                canWrite={canWriteAdmins}
+                canDelete={canDeleteAdmins}
+              />
+            ) : (
+              <div className="rounded-lg border p-8 text-center">
+                <h2 className="text-lg font-semibold">无权限</h2>
+                <p className="mt-2 text-sm text-muted-foreground">当前账号无权查看管理员列表</p>
+              </div>
+            )}
           </TabsContent>
         ) : null}
       </Tabs>
@@ -179,7 +226,7 @@ function UsersManagementPage() {
   );
 }
 
-const UserTable = forwardRef<ManagementTableHandle>(function UserTable(_, ref) {
+const UserTable = forwardRef<ManagementTableHandle, { canWrite: boolean; canDelete: boolean }>(function UserTable(props, ref) {
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
@@ -230,7 +277,10 @@ const UserTable = forwardRef<ManagementTableHandle>(function UserTable(_, ref) {
 
   useImperativeHandle(ref, () => ({
     applySearch,
-    openCreate,
+    openCreate: () => {
+      if (!props.canWrite) return;
+      openCreate();
+    },
   }));
 
   const onCreate = async (data: Omit<CreateUserInput, "password">) => {
@@ -343,6 +393,9 @@ const UserTable = forwardRef<ManagementTableHandle>(function UserTable(_, ref) {
                   <TableCell>{formatTime(u.createdTimestamp)}</TableCell>
                   <TableCell className="text-right">
                     <RowActions
+                      canEdit={props.canWrite}
+                      canResetPassword={props.canWrite}
+                      canDelete={props.canDelete}
                       onEdit={() => setEditing(u)}
                       onResetPassword={() => void onResetPassword(u)}
                       onDelete={() => void onDelete(u.id)}
@@ -397,7 +450,7 @@ const UserTable = forwardRef<ManagementTableHandle>(function UserTable(_, ref) {
   );
 });
 
-const AdminAccountTable = forwardRef<ManagementTableHandle>(function AdminAccountTable(_, ref) {
+const AdminAccountTable = forwardRef<ManagementTableHandle, { canWrite: boolean; canDelete: boolean }>(function AdminAccountTable(props, ref) {
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
@@ -448,7 +501,10 @@ const AdminAccountTable = forwardRef<ManagementTableHandle>(function AdminAccoun
 
   useImperativeHandle(ref, () => ({
     applySearch,
-    openCreate,
+    openCreate: () => {
+      if (!props.canWrite) return;
+      openCreate();
+    },
   }));
 
   const onCreate = async (data: Omit<CreateAdminAccountInput, "password">) => {
@@ -556,6 +612,9 @@ const AdminAccountTable = forwardRef<ManagementTableHandle>(function AdminAccoun
                   <TableCell>{formatTime(u.createdTimestamp)}</TableCell>
                   <TableCell className="text-right">
                     <RowActions
+                      canEdit={props.canWrite}
+                      canResetPassword={props.canWrite}
+                      canDelete={props.canDelete}
                       onEdit={() => setEditing(u)}
                       onResetPassword={() => void onResetPassword(u)}
                       onDelete={() => void onDelete(u.id)}
@@ -612,12 +671,18 @@ const AdminAccountTable = forwardRef<ManagementTableHandle>(function AdminAccoun
 });
 
 function RowActions(props: {
+  canEdit: boolean;
+  canResetPassword: boolean;
+  canDelete: boolean;
   onEdit: () => void;
   onResetPassword: () => void;
   onDelete: () => void;
   deleteTitle: string;
   deleteDescription: string;
 }) {
+  const hasAnyAction = props.canEdit || props.canResetPassword || props.canDelete;
+  if (!hasAnyAction) return null;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -627,31 +692,37 @@ function RowActions(props: {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>操作</DropdownMenuLabel>
-        <DropdownMenuItem onClick={props.onEdit}>编辑</DropdownMenuItem>
-        <DropdownMenuItem onClick={props.onResetPassword}>重置密码</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
-              删除
-            </DropdownMenuItem>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{props.deleteTitle}</AlertDialogTitle>
-              <AlertDialogDescription>{props.deleteDescription}</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>取消</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={props.onDelete}
-              >
-                确认删除
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {props.canEdit ? <DropdownMenuItem onClick={props.onEdit}>编辑</DropdownMenuItem> : null}
+        {props.canResetPassword ? (
+          <DropdownMenuItem onClick={props.onResetPassword}>重置密码</DropdownMenuItem>
+        ) : null}
+        {props.canDelete ? (
+          <>
+            <DropdownMenuSeparator />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive">
+                  删除
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{props.deleteTitle}</AlertDialogTitle>
+                  <AlertDialogDescription>{props.deleteDescription}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>取消</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={props.onDelete}
+                  >
+                    确认删除
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );
