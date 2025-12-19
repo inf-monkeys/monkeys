@@ -273,10 +273,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     currentPage?.[teamId],
     data,
     teamId,
+    activePage,
     activePageFromWorkflowDisplayName,
     activePageFromType,
     workflowExecution,
     activePageFromWorkflowInstanceId,
+    isOemLoading,
+    isLoading,
+    originalPages.length,
+    originalGroups.length,
   ]);
 
   const { ref: wrapperRef, height: wrapperHeight } = useElementSize();
