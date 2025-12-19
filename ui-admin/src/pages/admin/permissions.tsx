@@ -333,8 +333,6 @@ function PermissionsManagementPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 p-6">
-      <h1 className="text-2xl font-bold tracking-tight">权限管理</h1>
-
       <div className="flex min-h-0 flex-1 flex-col gap-6 lg:flex-row">
         <div className="flex min-h-0 flex-col gap-3 rounded-lg border bg-card p-4 lg:w-80">
           <div className="flex items-center justify-between">
