@@ -93,7 +93,6 @@ function UsersManagementPage() {
   const { hasAnyRole, isSuperAdmin, hasPermission } = useAuth();
 
   const canAccess = hasAnyRole([UserRole.SUPER_ADMIN, UserRole.ADMIN]);
-  const showAdminAccountsTab = isSuperAdmin();
 
   const canReadUsers = hasPermission(Permission.USER_READ);
   const canWriteUsers = hasPermission(Permission.USER_WRITE);
@@ -102,6 +101,7 @@ function UsersManagementPage() {
   const canReadAdmins = hasPermission(Permission.ADMIN_READ);
   const canWriteAdmins = hasPermission(Permission.ADMIN_WRITE);
   const canDeleteAdmins = hasPermission(Permission.ADMIN_DELETE);
+  const showAdminAccountsTab = canReadAdmins;
 
   const [tab, setTab] = useState<"users" | "admin-users">("users");
   const userTableRef = useRef<ManagementTableHandle | null>(null);
