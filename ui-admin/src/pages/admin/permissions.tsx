@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ChevronDown, ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -80,6 +81,7 @@ function PermissionsManagementPage() {
   const [originalPermissionIds, setOriginalPermissionIds] = useState<Set<string>>(
     () => new Set()
   );
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => new Set());
   const [isSaving, setIsSaving] = useState(false);
 
   const [isCreateRoleOpen, setIsCreateRoleOpen] = useState(false);
@@ -138,6 +140,26 @@ function PermissionsManagementPage() {
     });
   }, [permissions, permissionKeyword]);
 
+  const groupedPermissions = useMemo(() => {
+    const groups = new Map<string, AdminPermission[]>();
+    for (const perm of filteredPermissions) {
+      const key = perm.resource || perm.code.split(":")[0] || "other";
+      const list = groups.get(key) || [];
+      list.push(perm);
+      groups.set(key, list);
+    }
+
+    const entries = Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b));
+    return entries.map(([key, list]) => {
+      const perms = [...list].sort((x, y) => {
+        const actionCmp = x.action.localeCompare(y.action);
+        if (actionCmp !== 0) return actionCmp;
+        return x.code.localeCompare(y.code);
+      });
+      return { key, perms };
+    });
+  }, [filteredPermissions]);
+
   const isDirty = useMemo(() => {
     if (selectedPermissionIds.size !== originalPermissionIds.size) return true;
     for (const id of selectedPermissionIds) {
@@ -172,6 +194,33 @@ function PermissionsManagementPage() {
       } else {
         filteredPermissions.forEach((p) => next.delete(p.id));
       }
+      return next;
+    });
+  };
+
+  const isGroupAllSelected = (perms: AdminPermission[]) => {
+    if (perms.length === 0) return false;
+    return perms.every((p) => selectedPermissionIds.has(p.id));
+  };
+
+  const isGroupAnySelected = (perms: AdminPermission[]) => {
+    return perms.some((p) => selectedPermissionIds.has(p.id));
+  };
+
+  const toggleGroupPermissions = (perms: AdminPermission[], checked: boolean) => {
+    setSelectedPermissionIds((prev) => {
+      const next = new Set(prev);
+      if (checked) perms.forEach((p) => next.add(p.id));
+      else perms.forEach((p) => next.delete(p.id));
+      return next;
+    });
+  };
+
+  const toggleGroupCollapse = (key: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   };
@@ -440,27 +489,95 @@ function PermissionsManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPermissions.map((perm) => {
-                  const checked = selectedPermissionIds.has(perm.id);
-                  return (
-                    <TableRow key={perm.id}>
-                      <TableCell className="w-12">
+                {groupedPermissions.flatMap(({ key, perms }) => {
+                  const allSelected = isGroupAllSelected(perms);
+                  const anySelected = isGroupAnySelected(perms);
+                  const selectedCount = perms.reduce(
+                    (acc, p) => acc + (selectedPermissionIds.has(p.id) ? 1 : 0),
+                    0
+                  );
+                  const isCollapsed = collapsedGroups.has(key);
+
+                  const groupHeader = (
+                    <TableRow
+                      key={`group-${key}`}
+                      className="h-10 bg-muted/40 cursor-pointer select-none"
+                      onClick={() => toggleGroupCollapse(key)}
+                    >
+                      <TableCell
+                        className="w-12"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
                         <Checkbox
-                          checked={checked}
-                          onCheckedChange={(v) => togglePermission(perm.id, !!v)}
-                          aria-label={`选择权限 ${perm.code}`}
-                          disabled={!selectedRole}
+                          checked={allSelected ? true : anySelected ? "indeterminate" : false}
+                          onCheckedChange={(v) => toggleGroupPermissions(perms, !!v)}
+                          aria-label={`选择分组 ${key}`}
+                          disabled={!selectedRole || perms.length === 0}
                         />
                       </TableCell>
-                      <TableCell className="font-mono text-xs">{perm.code}</TableCell>
-                      <TableCell>{perm.name}</TableCell>
-                      <TableCell className="font-mono text-xs">{perm.resource}</TableCell>
-                      <TableCell className="font-mono text-xs">{perm.action}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {perm.description || "-"}
+                      <TableCell colSpan={5} className="py-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Badge variant="secondary" className="font-mono">
+                              {key}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {selectedCount}/{perms.length} 已选
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground whitespace-nowrap">
+                            <span className="text-xs">{isCollapsed ? "展开" : "收起"}</span>
+                            {isCollapsed ? (
+                              <ChevronLeft className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </div>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
+
+                  if (isCollapsed) return [groupHeader];
+
+                  const rows = perms.map((perm) => {
+                    const checked = selectedPermissionIds.has(perm.id);
+                    return (
+                      <TableRow
+                        key={perm.id}
+                        className={!selectedRole ? "h-12" : "h-12 cursor-pointer"}
+                        onClick={() => {
+                          if (!selectedRole) return;
+                          togglePermission(perm.id, !checked);
+                        }}
+                      >
+                        <TableCell
+                          className="w-12"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={(v) => togglePermission(perm.id, !!v)}
+                            aria-label={`选择权限 ${perm.code}`}
+                            disabled={!selectedRole}
+                          />
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">{perm.code}</TableCell>
+                        <TableCell>{perm.name}</TableCell>
+                        <TableCell className="font-mono text-xs">{perm.resource}</TableCell>
+                        <TableCell className="font-mono text-xs">{perm.action}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {perm.description || "-"}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  });
+
+                  return [groupHeader, ...rows];
                 })}
                 {!isLoading && filteredPermissions.length === 0 ? (
                   <TableRow>
