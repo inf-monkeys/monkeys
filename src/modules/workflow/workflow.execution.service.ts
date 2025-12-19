@@ -7,7 +7,7 @@ import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-contex
 import { TooManyRequestsException } from '@/common/exceptions/too-many-requests';
 import { logger } from '@/common/logger';
 import { extractImageUrls, extractVideoUrls, flattenKeys, flattenObjectToSearchableText, getDataType } from '@/common/utils';
-import { convertOutputFromRawOutput } from '@/common/utils/output';
+import { convertOutputFromRawOutputAsync } from '@/common/utils/output';
 import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
@@ -22,6 +22,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
 import { FindManyOptions, In, IsNull, Not, Repository } from 'typeorm';
+import { MediaUrlTransformerService } from '../assets/media/media.url-transformer.service';
 import { MarketplaceService } from '../marketplace/services/marketplace.service';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
@@ -83,6 +84,7 @@ export class WorkflowExecutionService {
     private readonly teamRepository: TeamRepository,
     @Inject(forwardRef(() => MarketplaceService))
     private readonly marketplaceService: MarketplaceService,
+    private readonly urlTransformer: MediaUrlTransformerService,
   ) {}
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
@@ -445,11 +447,12 @@ export class WorkflowExecutionService {
       const images = extractImageUrls(value);
       const videos = extractVideoUrls(value);
 
-      // 处理图片
+      // 处理图片 - 转换私有桶 URL
       for (const image of images) {
+        const transformedUrl = await this.urlTransformer.transformUrl(image);
         finalOutput.push({
           type: 'image',
-          data: image,
+          data: transformedUrl,
           alt,
           key: key,
         });
@@ -562,11 +565,12 @@ export class WorkflowExecutionService {
       const images = extractImageUrls(value);
       const videos = extractVideoUrls(value);
 
-      // 处理图片
+      // 处理图片 - 转换私有桶 URL
       for (const image of images) {
+        const transformedUrl = await this.urlTransformer.transformUrl(image);
         finalOutput.push({
           type: 'image',
-          data: image,
+          data: transformedUrl,
           alt,
           key: key,
         });
@@ -694,7 +698,7 @@ export class WorkflowExecutionService {
       take: limitNum,
     } as FindManyOptions<WorkflowExecutionEntity>);
 
-    const formattedExecutions = executions.map((entity) => {
+    const formattedExecutions = await Promise.all(executions.map(async (entity) => {
       const {
         input,
         output,
@@ -733,11 +737,12 @@ export class WorkflowExecutionService {
         const images = extractImageUrls(value);
         const videos = extractVideoUrls(value);
 
-        // 处理图片
+        // 处理图片 - 转换私有桶 URL
         for (const image of images) {
+          const transformedUrl = await this.urlTransformer.transformUrl(image);
           finalOutput.push({
             type: 'image',
-            data: image,
+            data: transformedUrl,
             alt,
             key: key,
           });
@@ -807,7 +812,7 @@ export class WorkflowExecutionService {
         extraMetadata,
         searchableText,
       } as WorkflowExecutionOutput;
-    });
+    }));
 
     return {
       total,
@@ -860,90 +865,95 @@ export class WorkflowExecutionService {
       max: 3,
     });
 
-    return {
-      total: data?.totalHits ?? 0,
-      data: (data?.results ?? [])
-        // 1. 过滤掉快捷方式和临时工作流
-        .filter((it) => (!isShortcutFlow ? !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('shortcut') : true))
-        .filter((it) => !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('temporary-'))
-        // 2. 非作者团队视角：仅保留本团队的执行记录
-        .filter((it) => {
-          if (isBuiltinOwnerView) return true;
-          const ctxTeamId = it.input?.['__context']?.['teamId'] as string | undefined;
-          // 对于预置（内置）应用的跨团队共享视图，严格按照 teamId 匹配，避免老数据（缺少 teamId）泄露到其他团队
-          return isSharedPresetWorkflow ? ctxTeamId === teamId : !ctxTeamId || ctxTeamId === teamId;
-        })
-        .map((it) => {
-          const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
+    const filteredResults = (data?.results ?? [])
+      // 1. 过滤掉快捷方式和临时工作流
+      .filter((it) => (!isShortcutFlow ? !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('shortcut') : true))
+      .filter((it) => !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('temporary-'))
+      // 2. 非作者团队视角：仅保留本团队的执行记录
+      .filter((it) => {
+        if (isBuiltinOwnerView) return true;
+        const ctxTeamId = it.input?.['__context']?.['teamId'] as string | undefined;
+        // 对于预置（内置）应用的跨团队共享视图，严格按照 teamId 匹配，避免老数据（缺少 teamId）泄露到其他团队
+        return isSharedPresetWorkflow ? ctxTeamId === teamId : !ctxTeamId || ctxTeamId === teamId;
+      });
 
-          const finalOutput = convertOutputFromRawOutput(output);
+    const formattedData = await Promise.all(
+      filteredResults.map(async (it) => {
+        const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
 
-          const ctx = input?.['__context'];
+        const finalOutput = await convertOutputFromRawOutputAsync(output, (url) => this.urlTransformer.transformUrl(url));
 
-          let formattedInput = null;
+        const ctx = input?.['__context'];
 
-          const variables = workflow.variables;
-          if (variables && input) {
-            formattedInput = Object.keys(input)
-              .filter((inputName) => !inputName.startsWith('__') && inputName !== 'extraMetadata')
-              .map((inputName) => {
-                const dataVal = input[inputName];
-                const variable = variables.find((variable) => variable.name === inputName);
-                return {
-                  id: inputName,
-                  displayName: variable?.displayName || inputName,
-                  description: variable?.description || '',
-                  data: dataVal,
-                  type: getDataType(dataVal),
-                };
-              });
+        let formattedInput = null;
+
+        const variables = workflow.variables;
+        if (variables && input) {
+          formattedInput = Object.keys(input)
+            .filter((inputName) => !inputName.startsWith('__') && inputName !== 'extraMetadata')
+            .map((inputName) => {
+              const dataVal = input[inputName];
+              const variable = variables.find((variable) => variable.name === inputName);
+              return {
+                id: inputName,
+                displayName: variable?.displayName || inputName,
+                description: variable?.description || '',
+                data: dataVal,
+                type: getDataType(dataVal),
+              };
+            });
+        }
+
+        // 从输入数据中提取 extraMetadata
+        let extraMetadata = input?.extraMetadata;
+        if (typeof extraMetadata === 'string' && extraMetadata !== '') {
+          try {
+            extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
+          } catch (e) {
+            // 如果解析失败，保持原始值
+            logger.warn('Failed to parse extraMetadata from base64', e);
           }
+        }
 
-          // 从输入数据中提取 extraMetadata
-          let extraMetadata = input?.extraMetadata;
-          if (typeof extraMetadata === 'string' && extraMetadata !== '') {
-            try {
-              extraMetadata = JSON.parse(Buffer.from(extraMetadata, 'base64').toString('utf-8'));
-            } catch (e) {
-              // 如果解析失败，保持原始值
-              logger.warn('Failed to parse extraMetadata from base64', e);
-            }
-          }
-
-          // 生成searchableText，优先使用提示词
-          let searchableText = '';
-          if (formattedInput && Array.isArray(formattedInput)) {
-            // 尝试提取提示词
-            const promptText = extractPromptFromFormattedInput(formattedInput);
-            if (promptText) {
-              searchableText = promptText.trim();
-            } else {
-              // 如果没有找到提示词，回退到原有逻辑
-              const inputForSearch = input ? _.omit(input, ['__context', 'extraMetadata']) : null;
-              const outputForSearch = output || null;
-              searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
-            }
+        // 生成searchableText，优先使用提示词
+        let searchableText = '';
+        if (formattedInput && Array.isArray(formattedInput)) {
+          // 尝试提取提示词
+          const promptText = extractPromptFromFormattedInput(formattedInput);
+          if (promptText) {
+            searchableText = promptText.trim();
           } else {
-            // 如果没有formattedInput，使用原有逻辑
+            // 如果没有找到提示词，回退到原有逻辑
             const inputForSearch = input ? _.omit(input, ['__context', 'extraMetadata']) : null;
             const outputForSearch = output || null;
             searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
           }
+        } else {
+          // 如果没有formattedInput，使用原有逻辑
+          const inputForSearch = input ? _.omit(input, ['__context', 'extraMetadata']) : null;
+          const outputForSearch = output || null;
+          searchableText = `${flattenObjectToSearchableText(inputForSearch)} ${flattenObjectToSearchableText(outputForSearch)}`.trim();
+        }
 
-          return {
-            ...rest,
-            input: formattedInput,
-            rawInput: input,
-            output: finalOutput,
-            rawOutput: output,
-            workflowId: inputWorkflowId,
-            instanceId: execWorkflowId,
-            userId: ctx?.userId ?? '',
-            teamId: ctx?.teamId ?? '',
-            extraMetadata,
-            searchableText,
-          } as WorkflowExecutionOutput;
-        }),
+        return {
+          ...rest,
+          input: formattedInput,
+          rawInput: input,
+          output: finalOutput,
+          rawOutput: output,
+          workflowId: inputWorkflowId,
+          instanceId: execWorkflowId,
+          userId: ctx?.userId ?? '',
+          teamId: ctx?.teamId ?? '',
+          extraMetadata,
+          searchableText,
+        } as WorkflowExecutionOutput;
+      }),
+    );
+
+    return {
+      total: data?.totalHits ?? 0,
+      data: formattedData,
       page,
       limit,
     };
@@ -993,6 +1003,39 @@ export class WorkflowExecutionService {
     }
 
     return true;
+  }
+
+  /**
+   * 递归转换对象中的所有 URL（将私有桶 URL 转换为预签名 URL）
+   */
+  private async transformUrlsInData(data: any, expiresIn: number = 259200): Promise<any> {
+    if (!data) {
+      return data;
+    }
+
+    // 如果是字符串，尝试转换
+    if (typeof data === 'string') {
+      return await this.urlTransformer.transformUrl(data, expiresIn);
+    }
+
+    // 如果是数组，递归处理每个元素
+    if (Array.isArray(data)) {
+      return Promise.all(data.map(item => this.transformUrlsInData(item, expiresIn)));
+    }
+
+    // 如果是对象，递归处理每个属性
+    if (typeof data === 'object') {
+      const result: any = {};
+      for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          result[key] = await this.transformUrlsInData(data[key], expiresIn);
+        }
+      }
+      return result;
+    }
+
+    // 其他类型（数字、布尔值等）直接返回
+    return data;
   }
 
   public async startWorkflow(request: StartWorkflowRequest, temp = false) {
@@ -1059,6 +1102,10 @@ export class WorkflowExecutionService {
     if (inputData?.__context) {
       throw new Error('inputData 不能包含内置参数 __context');
     }
+
+    // 转换输入数据中的所有私有桶 URL 为预签名 URL
+    // 这样外部 API 才能访问私有桶中的图片
+    inputData = await this.transformUrlsInData(inputData);
 
     if (chatSessionId) {
       extra['chatSessionId'] = chatSessionId;
@@ -1226,7 +1273,14 @@ export class WorkflowExecutionService {
         break;
       }
     }
-    return thumbnails.slice(0, limit);
+
+    // 转换私有桶 URL
+    const slicedThumbnails = thumbnails.slice(0, limit);
+    const transformedThumbnails = await Promise.all(
+      slicedThumbnails.map(url => this.urlTransformer.transformUrl(url))
+    );
+
+    return transformedThumbnails.filter(url => url !== null && url !== undefined) as string[];
   }
 
   public async getWorkflowInstanceByImageUrl(teamId: string, workflowId: string, imageUrl: string, page = 1, limit = 500) {
@@ -1245,11 +1299,16 @@ export class WorkflowExecutionService {
       const flattenOutput = flattenKeys(execution.output);
       const outputValues = Object.values(flattenOutput);
       if (outputValues.some((it) => extractImageUrls(it).includes(imageUrl))) {
-        const { workflowId: execWorkflowId, input: execInput, ...rest } = pick(execution, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
+        const { workflowId: execWorkflowId, input: execInput, output: execOutput, ...rest } = pick(execution, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
+
+        // 转换输出中的私有桶图片 URL
+        const transformedOutput = await convertOutputFromRawOutputAsync(execOutput, (url) => this.urlTransformer.transformUrl(url));
+
         return {
           instance: {
             ...rest,
             input: execInput,
+            output: transformedOutput,
             instanceId: execWorkflowId,
             userId: execInput?.__context?.userId ?? null,
             teamId: execInput?.__context?.teamId ?? teamId,
