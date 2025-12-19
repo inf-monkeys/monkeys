@@ -1,3 +1,4 @@
+import { config } from '@/common/config';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MediaBucketRegistryService } from './media.bucket-registry.service';
 import { MediaPresignService } from './media.presign.service';
@@ -29,6 +30,11 @@ export class MediaUrlTransformerService {
       return url;
     }
 
+    // 如果配置的 S3 桶不是私有的，直接返回原 URL，不进行转换
+    if (!config.s3.isPrivate) {
+      return url;
+    }
+
     try {
       // 尝试解析并检查是否是注册的桶
       const urlObj = new URL(url);
@@ -39,7 +45,7 @@ export class MediaUrlTransformerService {
         return url;
       }
 
-      // 是注册的桶，生成预签名URL
+      // 是注册的私有桶，生成预签名URL
       const result = await this.presignService.getPresignedUrl(url, expiresIn);
       return result.signedUrl;
     } catch (error) {
