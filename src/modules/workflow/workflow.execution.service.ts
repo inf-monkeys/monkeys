@@ -1103,9 +1103,12 @@ export class WorkflowExecutionService {
       throw new Error('inputData 不能包含内置参数 __context');
     }
 
-    // 转换输入数据中的所有私有桶 URL 为预签名 URL
+    // 如果是私有桶，转换输入数据中的所有 URL 为预签名 URL
     // 这样外部 API 才能访问私有桶中的图片
-    inputData = await this.transformUrlsInData(inputData);
+    // 公开桶不需要转换
+    if (config.s3.isPrivate) {
+      inputData = await this.transformUrlsInData(inputData);
+    }
 
     if (chatSessionId) {
       extra['chatSessionId'] = chatSessionId;
