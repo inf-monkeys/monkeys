@@ -7,8 +7,15 @@ export const Route = createFileRoute('/admin')({
 });
 
 function AdminLayoutRoute() {
-  const { isLoading } = useAuthGuard();
   const router = useRouterState();
+  const isLoginRoute = router.location.pathname.startsWith('/admin/login');
+
+  // /admin/login 不走鉴权与后台布局
+  const { isLoading } = isLoginRoute ? { isLoading: false } : useAuthGuard();
+
+  if (isLoginRoute) {
+    return <Outlet />;
+  }
 
   // 判断是否需要 flush 布局（无边距）
   const isFlushLayout =

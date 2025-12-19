@@ -2,7 +2,7 @@ import { clearStoredToken, getStoredToken } from './auth-storage';
 
 function redirectToLogin() {
   clearStoredToken();
-  window.location.href = '/login';
+  window.location.href = '/admin/login';
 }
 
 export function getAuthHeaders(): Record<string, string> {
@@ -61,7 +61,8 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   const maybeJson = contentType.includes('application/json') ? tryParseJson(text) : undefined;
 
   if (!response.ok) {
-    if (response.status === 401) {
+    // 登录接口的 401 交由页面展示错误提示，避免刷新/跳转导致白屏
+    if (response.status === 401 && !url.includes('/api/admin/auth/login')) {
       redirectToLogin();
     }
     throw new Error(buildErrorMessage(maybeJson, text || '请求失败'));
@@ -92,4 +93,3 @@ export async function apiRequestBlob(url: string, options?: RequestInit): Promis
 
   return response.blob();
 }
-

@@ -25,7 +25,7 @@ export function Header() {
       await apiLogout();
       logout();
       toast.success('已退出登录');
-      navigate({ to: '/login' });
+      navigate({ to: '/admin/login' });
     } catch (error: any) {
       toast.error(error.message || '退出失败');
     }

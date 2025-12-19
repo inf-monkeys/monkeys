@@ -11,20 +11,15 @@
 // Import Routes
 
 import { Route as rootRoute } from './pages/__root'
-import { Route as LoginImport } from './pages/login'
 import { Route as AdminImport } from './pages/admin'
 import { Route as IndexImport } from './pages/index'
 import { Route as AdminIndexImport } from './pages/admin/index'
 import { Route as AdminUsersImport } from './pages/admin/users'
 import { Route as AdminPermissionsImport } from './pages/admin/permissions'
+import { Route as AdminLoginImport } from './pages/admin/login'
 import { Route as AdminDataImport } from './pages/admin/data'
 
 // Create/Update Routes
-
-const LoginRoute = LoginImport.update({
-  path: '/login',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const AdminRoute = AdminImport.update({
   path: '/admin',
@@ -51,6 +46,11 @@ const AdminPermissionsRoute = AdminPermissionsImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 
+const AdminLoginRoute = AdminLoginImport.update({
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+
 const AdminDataRoute = AdminDataImport.update({
   path: '/data',
   getParentRoute: () => AdminRoute,
@@ -68,12 +68,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImport
       parentRoute: typeof rootRoute
     }
-    '/login': {
-      preLoaderRoute: typeof LoginImport
-      parentRoute: typeof rootRoute
-    }
     '/admin/data': {
       preLoaderRoute: typeof AdminDataImport
+      parentRoute: typeof AdminImport
+    }
+    '/admin/login': {
+      preLoaderRoute: typeof AdminLoginImport
       parentRoute: typeof AdminImport
     }
     '/admin/permissions': {
@@ -97,11 +97,11 @@ export const routeTree = rootRoute.addChildren([
   IndexRoute,
   AdminRoute.addChildren([
     AdminDataRoute,
+    AdminLoginRoute,
     AdminPermissionsRoute,
     AdminUsersRoute,
     AdminIndexRoute,
   ]),
-  LoginRoute,
 ])
 
 /* prettier-ignore-end */

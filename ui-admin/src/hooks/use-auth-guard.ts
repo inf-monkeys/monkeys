@@ -14,7 +14,7 @@ export function useAuthGuard() {
   useEffect(() => {
     // 如果加载完成且未认证，跳转到登录页
     if (!isLoading && !isAuthenticated) {
-      navigate({ to: '/login' });
+      navigate({ to: '/admin/login' });
     }
   }, [isAuthenticated, isLoading, navigate]);
 
