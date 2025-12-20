@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { EventSourcePolyfill } from 'event-source-polyfill';
-
 import { ITeamInitStatusEnum } from '@/apis/authz/team/typings.ts';
 import { vinesHeader } from '@/apis/utils';
 import { useTeamStatusStore } from '@/store/useTeamStatusStore';
@@ -10,10 +8,11 @@ import { useTeamStatusStore } from '@/store/useTeamStatusStore';
  * SSE 事件结构
  */
 interface TeamStatusSSEEvent {
-  type: 'connected' | 'status_update' | 'heartbeat' | 'complete';
+  type: 'connected' | 'status_update' | 'heartbeat' | 'complete' | 'error';
   teamId: string;
   status?: ITeamInitStatusEnum;
   timestamp: string;
+  error?: string;
 }
 
 /**
@@ -44,12 +43,9 @@ const SSE_INTERNAL_CONFIG = {
   maxReconnectAttempts: 5, // 最大重连次数
 };
 
-// 注意：不使用全局连接池，每个组件实例独立管理自己的 SSE 连接
-// 这样可以避免多标签页或多组件实例之间的事件监听器冲突
-
 /**
  * Hook: useTeamStatusSSE
- * 自动区分普通响应和 SSE 流，内置鉴权与重连逻辑。
+ * 使用 SharedWorker 共享 SSE 连接，避免 HTTP/1.1 连接限制
  */
 export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOptions = {}): UseTeamStatusSSEReturn => {
   const { enabled = true, onStatusChange, onError, onConnect, onDisconnect } = options;
@@ -59,7 +55,7 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const eventSourceRef = useRef<EventSourcePolyfill | null>(null);
+  const workerRef = useRef<SharedWorker | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const manualCloseRef = useRef(false);
@@ -71,9 +67,13 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
   const disconnect = useCallback(() => {
     manualCloseRef.current = true;
 
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
+    if (workerRef.current) {
+      workerRef.current.port.postMessage({
+        action: 'unsubscribe',
+        teamId,
+      });
+      workerRef.current.port.close();
+      workerRef.current = null;
     }
 
     if (reconnectTimeoutRef.current) {
@@ -86,103 +86,102 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
     reconnectAttemptsRef.current = 0;
 
     onDisconnect?.();
-  }, [onDisconnect]);
+  }, [onDisconnect, teamId]);
 
-  // ---- 建立 SSE 连接 ----
-  const connectSSE = useCallback(
-    (sseUrl: string) => {
-      // 检查当前实例是否已有连接
-      if (eventSourceRef.current && eventSourceRef.current.readyState !== EventSource.CLOSED) {
-        console.warn('当前实例已有 SSE 连接，跳过重复连接');
-        return;
-      }
+  // ---- 建立 SharedWorker 连接 ----
+  const connectWorker = useCallback(() => {
+    if (!teamId || !enabled) return;
 
-      manualCloseRef.current = false;
+    manualCloseRef.current = false;
 
-      try {
-        const headers = vinesHeader({});
+    try {
+      // 创建 SharedWorker
+      const worker = new SharedWorker(new URL('@/workers/team-status-worker.ts', import.meta.url), {
+        type: 'module',
+      });
 
-        const es = new EventSourcePolyfill(sseUrl, {
-          headers,
-          withCredentials: false,
-        });
+      workerRef.current = worker;
 
-        eventSourceRef.current = es;
+      // 监听来自 Worker 的消息
+      worker.port.onmessage = (event: MessageEvent<TeamStatusSSEEvent>) => {
+        const data = event.data;
 
-        es.onopen = () => {
-          setIsConnected(true);
-          setIsLoading(false);
-          setError(null);
-          reconnectAttemptsRef.current = 0;
-          onConnect?.();
-        };
+        switch (data.type) {
+          case 'connected':
+            setIsConnected(true);
+            setIsLoading(false);
+            setError(null);
+            reconnectAttemptsRef.current = 0;
+            onConnect?.();
+            break;
 
-        const handleEvent = (_: string) => (event: MessageEvent) => {
-          try {
-            const data: TeamStatusSSEEvent = JSON.parse(event.data);
-
-            switch (data.type) {
-              case 'connected':
-                setIsConnected(true);
-                break;
-
-              case 'status_update':
-                if (data.status !== undefined) {
-                  setStatus(data.status);
-                  onStatusChange?.(data.status);
-                }
-                break;
-
-              case 'complete':
-                if (data.status !== undefined) {
-                  setStatus(data.status);
-                  onStatusChange?.(data.status);
-                }
-                disconnect();
-                break;
-
-              case 'heartbeat':
-                // 心跳包，不做处理
-                break;
+          case 'status_update':
+            if (data.status !== undefined) {
+              setStatus(data.status);
+              onStatusChange?.(data.status);
             }
-          } catch (err) {
-            console.warn('解析 SSE 消息失败:', err);
-          }
-        };
+            break;
 
-        const eventTypes = ['connected', 'status_update', 'heartbeat', 'complete'];
-        eventTypes.forEach((type) => es.addEventListener(type as any, handleEvent(type)));
+          case 'complete':
+            if (data.status !== undefined) {
+              setStatus(data.status);
+              onStatusChange?.(data.status);
+            }
+            // SSE 流结束，但不断开 Worker 连接
+            setIsConnected(false);
+            setIsLoading(false);
+            break;
 
-        es.onerror = () => {
-          if (manualCloseRef.current) return;
+          case 'heartbeat':
+            // 心跳包，不做处理
+            break;
 
-          setIsConnected(false);
-          setIsLoading(false);
-          const err = new Error('SSE 连接中断');
-          setError(err);
-          onError?.(err);
+          case 'error':
+            if (!manualCloseRef.current) {
+              setIsConnected(false);
+              setIsLoading(false);
+              const err = new Error(data.error || 'SSE 连接错误');
+              setError(err);
+              onError?.(err);
 
-          // 自动重连
-          const { reconnectDelay, maxReconnectAttempts } = SSE_INTERNAL_CONFIG;
-          if (reconnectAttemptsRef.current < maxReconnectAttempts) {
-            const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current);
-            reconnectAttemptsRef.current++;
-            reconnectTimeoutRef.current = setTimeout(() => {
-              connectSSE(sseUrl);
-            }, delay);
-          } else {
-            onDisconnect?.();
-          }
-        };
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('创建 SSE 连接失败');
-        setError(error);
-        setIsLoading(false);
-        onError?.(error);
-      }
-    },
-    [onConnect, onDisconnect, onError, onStatusChange, disconnect],
-  );
+              // 自动重连
+              const { reconnectDelay, maxReconnectAttempts } = SSE_INTERNAL_CONFIG;
+              if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+                const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current);
+                reconnectAttemptsRef.current++;
+                reconnectTimeoutRef.current = setTimeout(() => {
+                  reconnect();
+                }, delay);
+              } else {
+                onDisconnect?.();
+              }
+            }
+            break;
+        }
+      };
+
+      // 启动端口
+      worker.port.start();
+
+      // 获取 token
+      const headers = vinesHeader({});
+      const token = headers.Authorization || '';
+
+      // 订阅团队状态
+      worker.port.postMessage({
+        action: 'subscribe',
+        teamId,
+        token,
+      });
+
+      setIsLoading(true);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('创建 SharedWorker 失败');
+      setError(error);
+      setIsLoading(false);
+      onError?.(error);
+    }
+  }, [teamId, enabled, onConnect, onDisconnect, onError, onStatusChange]);
 
   // ---- 普通请求（探测响应类型） ----
   const fetchTeamStatus = useCallback(async () => {
@@ -212,7 +211,8 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
         }
         setIsLoading(false);
       } else if (contentType.includes('text/event-stream')) {
-        connectSSE(statusUrl);
+        // 使用 SharedWorker 连接 SSE
+        connectWorker();
       } else {
         throw new Error('未知响应类型');
       }
@@ -222,7 +222,7 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
       setIsLoading(false);
       onError?.(error);
     }
-  }, [teamId, enabled, connectSSE, onStatusChange, onError]);
+  }, [teamId, enabled, connectWorker, onStatusChange, onError]);
 
   // ---- 手动重连 ----
   const reconnect = useCallback(() => {
