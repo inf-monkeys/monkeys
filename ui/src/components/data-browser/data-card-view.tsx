@@ -12,7 +12,7 @@ import {
 import { MediaPreview } from '@/components/ui/media-preview';
 import type { DataItem } from '@/types/data';
 import { Edit, Eye, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * 检测是否是文本文件
@@ -91,17 +91,22 @@ export function DataCardView({
     }
   }, [isLoading]);
 
-  useEffect(() => {
-    const container = masonryContainerRef.current;
-    if (!container) return;
+  useLayoutEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
 
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      setContainerWidth(entry.contentRect.width);
-    });
+    const updateWidth = () => {
+      const computed = window.getComputedStyle(scrollContainer);
+      const paddingLeft = Number.parseFloat(computed.paddingLeft || '0') || 0;
+      const paddingRight = Number.parseFloat(computed.paddingRight || '0') || 0;
+      const contentWidth = Math.max(0, scrollContainer.clientWidth - paddingLeft - paddingRight);
+      setContainerWidth(contentWidth);
+    };
 
-    observer.observe(container);
+    updateWidth();
+
+    const observer = new ResizeObserver(() => updateWidth());
+    observer.observe(scrollContainer);
     return () => observer.disconnect();
   }, []);
 
@@ -192,6 +197,8 @@ export function DataCardView({
     return { positions, height };
   }, [containerWidth, columnCount, data, estimatedHeights, layoutVersion]);
 
+  const isLayoutReady = containerWidth > 0;
+
   useEffect(() => {
     const root = scrollContainerRef.current;
     const sentinel = sentinelRef.current;
@@ -255,7 +262,7 @@ export function DataCardView({
       <div ref={scrollContainerRef} className="flex-1 overflow-auto p-4">
         <div
           ref={masonryContainerRef}
-          className="relative"
+          className="relative w-full"
           style={{ height: masonryLayout.height }}
         >
           {data.map((item) => {
@@ -282,7 +289,7 @@ export function DataCardView({
               <div
                 key={item.id}
                 style={
-                  pos
+                  isLayoutReady && pos
                     ? {
                         position: 'absolute',
                         width: pos.width,
