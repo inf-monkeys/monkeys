@@ -12,7 +12,7 @@ import {
 import { MediaPreview } from '@/components/ui/media-preview';
 import type { DataItem } from '@/types/data';
 import { Edit, Eye, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * 检测是否是文本文件
@@ -40,15 +40,12 @@ interface DataCardViewProps {
 export function DataCardView({
   data,
   isLoading,
-  selectedIds = [],
   currentPage = 1,
-  pageSize = 20,
   total = 0,
   onPageChange,
   onEdit,
   onDelete,
   onView,
-  onSelectionChange,
 }: DataCardViewProps) {
   const hasMore = total > data.length;
   const [expandedKeywordItemIds, setExpandedKeywordItemIds] = useState<Set<string>>(() => new Set());
@@ -59,8 +56,11 @@ export function DataCardView({
   const itemElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const itemHeightsRef = useRef<Map<string, number>>(new Map());
   const [containerWidth, setContainerWidth] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 0));
   const [layoutVersion, setLayoutVersion] = useState(0);
   const loadMoreLockRef = useRef(false);
+  const updateWidthRef = useRef<(() => void) | null>(null);
+  const widthObserverRef = useRef<ResizeObserver | null>(null);
 
   const toggleKeywordsExpanded = (itemId?: string) => {
     if (!itemId) return;
@@ -75,34 +75,85 @@ export function DataCardView({
     });
   };
 
-  const handleToggleSelection = (itemId: string | undefined) => {
-    if (!itemId || !onSelectionChange) return;
-
-    const newSelectedIds = selectedIds.includes(itemId)
-      ? selectedIds.filter((id) => id !== itemId)
-      : [...selectedIds, itemId];
-
-    onSelectionChange(newSelectedIds);
-  };
-
   useEffect(() => {
     if (!isLoading) {
       loadMoreLockRef.current = false;
     }
   }, [isLoading]);
 
+  useLayoutEffect(() => {
+    // 组件初次渲染可能处于 loading/空态分支，此时 scrollContainerRef 还不存在。
+    // 当数据到达并渲染出滚动容器后，需要重新挂载测量逻辑，否则 containerWidth 会一直是 0。
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const updateWidth = () => {
+      const computed = window.getComputedStyle(scrollContainer);
+      const paddingLeft = Number.parseFloat(computed.paddingLeft || '0') || 0;
+      const paddingRight = Number.parseFloat(computed.paddingRight || '0') || 0;
+      const contentWidth = Math.max(0, scrollContainer.clientWidth - paddingLeft - paddingRight);
+      setContainerWidth(contentWidth);
+    };
+
+    updateWidthRef.current = updateWidth;
+
+    // 先断开旧 observer（如果之前因切换视图/状态重跑了 effect）
+    if (widthObserverRef.current) {
+      widthObserverRef.current.disconnect();
+      widthObserverRef.current = null;
+    }
+
+    updateWidth();
+
+    // 初次进入/刷新时某些布局可能会先以 0 宽度挂载（例如容器隐藏/过渡中），
+    // 使用 rAF 再测几帧，尽量在可见后尽快拿到有效宽度。
+    const raf1 = requestAnimationFrame(() => updateWidth());
+    const raf2 = requestAnimationFrame(() => updateWidth());
+
+    const observer = new ResizeObserver(() => updateWidth());
+    observer.observe(scrollContainer);
+    widthObserverRef.current = observer;
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      observer.disconnect();
+      if (widthObserverRef.current === observer) {
+        widthObserverRef.current = null;
+      }
+    };
+  }, [data.length, isLoading]);
+
   useEffect(() => {
-    const container = masonryContainerRef.current;
-    if (!container) return;
+    if (containerWidth > 0) return;
+    const updateWidth = updateWidthRef.current;
+    if (!updateWidth) return;
 
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      setContainerWidth(entry.contentRect.width);
-    });
+    let cancelled = false;
+    let tries = 0;
+    let rafId = 0;
 
-    observer.observe(container);
-    return () => observer.disconnect();
+    const tick = () => {
+      if (cancelled) return;
+      if (containerWidth > 0) return;
+      if (tries >= 30) return;
+      tries += 1;
+      updateWidth();
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [containerWidth]);
+
+  useEffect(() => {
+    const handler = () => setViewportWidth(window.innerWidth);
+    handler();
+    window.addEventListener('resize', handler, { passive: true } as any);
+    return () => window.removeEventListener('resize', handler as any);
   }, []);
 
   useEffect(() => {
@@ -133,11 +184,12 @@ export function DataCardView({
   }, [data.length]);
 
   const columnCount = useMemo(() => {
-    if (containerWidth >= 1280) return 4;
-    if (containerWidth >= 1024) return 3;
-    if (containerWidth >= 768) return 2;
+    // 跟 Tailwind 断点一致：根据 viewport 决定列数，确保体验与之前 `md/lg/xl:columns-*` 一致
+    if (viewportWidth >= 1280) return 4;
+    if (viewportWidth >= 1024) return 3;
+    if (viewportWidth >= 768) return 2;
     return 1;
-  }, [containerWidth]);
+  }, [viewportWidth]);
 
   const gapPx = 16;
 
@@ -191,6 +243,8 @@ export function DataCardView({
     const height = columnHeights.length ? Math.max(...columnHeights) : 0;
     return { positions, height };
   }, [containerWidth, columnCount, data, estimatedHeights, layoutVersion]);
+
+  const isLayoutReady = containerWidth > 0;
 
   useEffect(() => {
     const root = scrollContainerRef.current;
@@ -255,7 +309,7 @@ export function DataCardView({
       <div ref={scrollContainerRef} className="flex-1 overflow-auto p-4">
         <div
           ref={masonryContainerRef}
-          className="relative"
+          className="relative w-full"
           style={{ height: masonryLayout.height }}
         >
           {data.map((item) => {
@@ -282,7 +336,7 @@ export function DataCardView({
               <div
                 key={item.id}
                 style={
-                  pos
+                  isLayoutReady && pos
                     ? {
                         position: 'absolute',
                         width: pos.width,
@@ -291,65 +345,52 @@ export function DataCardView({
                     : undefined
                 }
               >
-                <div ref={setItemRef(item.id)}>
-                  <Card className="relative flex flex-col">
-                    <div className="absolute right-2 top-2 z-10">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 bg-background/70 backdrop-blur-sm"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">打开菜单</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>操作</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {onView && (
-                            <DropdownMenuItem onClick={() => onView(item)}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              查看详情
-                            </DropdownMenuItem>
-                          )}
-                          {onEdit && (
-                            <DropdownMenuItem onClick={() => onEdit(item)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              编辑
-                            </DropdownMenuItem>
-                          )}
-                          {onDelete && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => onDelete(item)}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                删除
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+	                <div ref={setItemRef(item.id)}>
+	                  <Card className="relative flex flex-col">
+	                    <DropdownMenu>
+	                      {/* 有标题/标签时：菜单按钮跟标题同一行；否则：浮在右上角 */}
+	                      {showHeader ? null : (
+	                        <div className="absolute right-2 top-2 z-10">
+	                          <DropdownMenuTrigger asChild>
+	                            <Button
+	                              variant="ghost"
+	                              size="icon"
+	                              className="h-8 w-8 bg-background/70 backdrop-blur-sm"
+	                            >
+	                              <MoreHorizontal className="h-4 w-4" />
+	                              <span className="sr-only">打开菜单</span>
+	                            </Button>
+	                          </DropdownMenuTrigger>
+	                        </div>
+	                      )}
 
-                    {showHeader && (
-                      <CardHeader className={hasMedia ? 'pb-3' : 'pb-2'}>
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            {hasTitle && (
-                              <h3 className="font-semibold text-sm truncate">{title}</h3>
-                            )}
-                            {hasKeywords && (
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                {visibleKeywords.map((k) => (
-                                  <Badge
-                                    key={k}
-                                    variant="secondary"
-                                    title={k}
+	                    {showHeader && (
+	                      <CardHeader className={hasMedia ? 'pt-3 pb-3' : 'pt-3 pb-2'}>
+	                        <div className="flex items-center justify-between gap-2">
+	                          <div className="min-w-0 flex-1">
+	                            {hasTitle ? (
+	                              <h3 className="truncate text-sm font-semibold leading-none">{title}</h3>
+	                            ) : (
+	                              <div />
+	                            )}
+	                          </div>
+	                          <div className="shrink-0">
+	                            <DropdownMenuTrigger asChild>
+	                              <Button variant="ghost" size="icon" className="h-8 w-8">
+	                                <MoreHorizontal className="h-4 w-4" />
+	                                <span className="sr-only">打开菜单</span>
+	                              </Button>
+	                            </DropdownMenuTrigger>
+	                          </div>
+	                        </div>
+
+	                        {hasKeywords && (
+	                          <div className="mt-1 flex flex-wrap gap-2">
+	                                {visibleKeywords.map((k) => (
+	                                  <Badge
+	                                    key={k}
+	                                    variant="secondary"
+	                                    title={k}
                                     className="font-normal max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
                                   >
                                     {k}
@@ -376,10 +417,10 @@ export function DataCardView({
                                     +{restKeywordCount}
                                   </Badge>
                                 )}
-                                {isKeywordsExpanded && keywords.length > 3 && (
-                                  <Badge
-                                    variant="outline"
-                                    className="font-normal cursor-pointer select-none"
+	                                {isKeywordsExpanded && keywords.length > 3 && (
+	                                  <Badge
+	                                    variant="outline"
+	                                    className="font-normal cursor-pointer select-none"
                                     role="button"
                                     tabIndex={0}
                                     aria-expanded={isKeywordsExpanded}
@@ -395,18 +436,47 @@ export function DataCardView({
                                     }}
                                   >
                                     收起
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                    )}
-                    {hasMedia && (
-                      <CardContent className="p-0">
-                        <MediaPreview
-                          src={mediaDisplayUrl}
+	                                  </Badge>
+	                                )}
+	                          </div>
+	                        )}
+	                      </CardHeader>
+	                    )}
+
+	                      <DropdownMenuContent align="end">
+	                        <DropdownMenuLabel>操作</DropdownMenuLabel>
+	                        <DropdownMenuSeparator />
+	                        {onView && (
+	                          <DropdownMenuItem onClick={() => onView(item)}>
+	                            <Eye className="mr-2 h-4 w-4" />
+	                            查看详情
+	                          </DropdownMenuItem>
+	                        )}
+	                        {onEdit && (
+	                          <DropdownMenuItem onClick={() => onEdit(item)}>
+	                            <Edit className="mr-2 h-4 w-4" />
+	                            编辑
+	                          </DropdownMenuItem>
+	                        )}
+	                        {onDelete && (
+	                          <>
+	                            <DropdownMenuSeparator />
+	                            <DropdownMenuItem
+	                              onClick={() => onDelete(item)}
+	                              className="text-destructive"
+	                            >
+	                              <Trash2 className="mr-2 h-4 w-4" />
+	                              删除
+	                            </DropdownMenuItem>
+	                          </>
+	                        )}
+	                      </DropdownMenuContent>
+	                    </DropdownMenu>
+
+	                    {hasMedia && (
+	                      <CardContent className="p-0">
+	                        <MediaPreview
+	                          src={mediaDisplayUrl}
                           alt={item.name}
                           type="auto"
                           thumbnail={item.thumbnail}

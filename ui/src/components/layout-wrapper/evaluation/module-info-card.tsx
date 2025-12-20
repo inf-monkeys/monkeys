@@ -1,7 +1,7 @@
 import React from 'react';
 
-import useSWR from 'swr';
 import { useParams } from '@tanstack/react-router';
+import useSWR from 'swr';
 
 import { Calendar, Target, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -47,14 +47,14 @@ export const EvaluationModuleInfoCard: React.FC = () => {
           </Badge>
         </div>
 
-        <div className="flex items-center gap-global text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
+        <div className="mt-1 flex flex-nowrap items-center gap-global overflow-hidden text-xs text-muted-foreground">
+          <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
             <Calendar className="h-3 w-3" />
             <span>{formatTimeDiffPrevious(module.createdTimestamp || 0)}</span>
           </div>
 
           {module.participantAssetIds && (
-            <div className="flex items-center gap-1">
+            <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
               <Users className="h-3 w-3" />
               <span>
                 {module.participantAssetIds.length} {t('evaluation.participants')}
@@ -63,9 +63,9 @@ export const EvaluationModuleInfoCard: React.FC = () => {
           )}
 
           {module.evaluationCriteria && (
-            <div className="flex items-center gap-1">
+            <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
               <Target className="h-3 w-3" />
-              <span className="max-w-32 truncate">{module.evaluationCriteria}</span>
+              <span className="truncate">{module.evaluationCriteria}</span>
             </div>
           )}
         </div>
