@@ -44,9 +44,8 @@ const SSE_INTERNAL_CONFIG = {
   maxReconnectAttempts: 5, // 最大重连次数
 };
 
-// 标签页内连接跟踪（同一标签页内的多个组件实例共享连接）
-// 注意：不同浏览器标签页有各自的 JavaScript 运行时，此 Map 不会跨标签页共享
-const activeConnections = new Map<string, EventSourcePolyfill>();
+// 注意：不使用全局连接池，每个组件实例独立管理自己的 SSE 连接
+// 这样可以避免多标签页或多组件实例之间的事件监听器冲突
 
 /**
  * Hook: useTeamStatusSSE
@@ -73,10 +72,6 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
     manualCloseRef.current = true;
 
     if (eventSourceRef.current) {
-      // 从标签页内连接池中移除
-      const statusUrl = `/api/teams/${teamId}/init-status`;
-      activeConnections.delete(statusUrl);
-
       eventSourceRef.current.close();
       eventSourceRef.current = null;
     }
@@ -91,21 +86,11 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
     reconnectAttemptsRef.current = 0;
 
     onDisconnect?.();
-  }, [onDisconnect, teamId]);
+  }, [onDisconnect]);
 
   // ---- 建立 SSE 连接 ----
   const connectSSE = useCallback(
     (sseUrl: string) => {
-      // 检查当前标签页内是否已有该 URL 的活跃连接
-      const existingConnection = activeConnections.get(sseUrl);
-      if (existingConnection && existingConnection.readyState !== EventSource.CLOSED) {
-        // 复用现有连接
-        console.log(`复用标签页内现有的 SSE 连接: ${sseUrl}`);
-        eventSourceRef.current = existingConnection;
-        setIsConnected(true);
-        return;
-      }
-
       // 检查当前实例是否已有连接
       if (eventSourceRef.current && eventSourceRef.current.readyState !== EventSource.CLOSED) {
         console.warn('当前实例已有 SSE 连接，跳过重复连接');
@@ -122,8 +107,6 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
           withCredentials: false,
         });
 
-        // 将连接添加到标签页内连接池
-        activeConnections.set(sseUrl, es);
         eventSourceRef.current = es;
 
         es.onopen = () => {
@@ -173,9 +156,6 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
         es.onerror = () => {
           if (manualCloseRef.current) return;
 
-          // 从标签页内连接池中移除失败的连接
-          activeConnections.delete(sseUrl);
-
           setIsConnected(false);
           setIsLoading(false);
           const err = new Error('SSE 连接中断');
@@ -195,9 +175,6 @@ export const useTeamStatusSSE = (teamId: string, options: UseTeamStatusSSEOption
           }
         };
       } catch (err) {
-        // 从连接池中移除失败的连接
-        activeConnections.delete(sseUrl);
-
         const error = err instanceof Error ? err : new Error('创建 SSE 连接失败');
         setError(error);
         setIsLoading(false);
