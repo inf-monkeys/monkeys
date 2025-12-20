@@ -5,12 +5,12 @@ import { createLazyFileRoute } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { preloadUgcMediaData, useUgcMediaData } from '@/apis/ugc';
-import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createMediaDataColumns } from '@/components/layout/ugc-pages/media-data/consts.tsx';
 import { OperateArea } from '@/components/layout/ugc-pages/media-data/operate-area';
 import { UploadMedia } from '@/components/layout/ugc-pages/media-data/upload';
+import { AssetContentPreview } from '@/components/layout/ugc/detail/asset-content-preview';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const NeuralModels: React.FC = () => {
@@ -87,6 +87,7 @@ export const NeuralModels: React.FC = () => {
         useUgcFetcher={useNeuralModelsOnly}
         preloadUgcFetcher={preloadUgcMediaData}
         createColumns={() => createNeuralModelColumns()}
+        showSidebar={false}
         // 过滤条件：只显示 params.type 为 'neural-model' 的媒体文件
         renderOptions={{
           subtitle: (item) => (
