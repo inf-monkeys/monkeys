@@ -47,7 +47,7 @@ export const EvaluationModuleInfoCard: React.FC = () => {
           </Badge>
         </div>
 
-        <div className="flex flex-nowrap items-center gap-global overflow-hidden text-xs text-muted-foreground">
+        <div className="mt-1 flex flex-nowrap items-center gap-global overflow-hidden text-xs text-muted-foreground">
           <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
             <Calendar className="h-3 w-3" />
             <span>{formatTimeDiffPrevious(module.createdTimestamp || 0)}</span>
