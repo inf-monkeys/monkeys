@@ -40,6 +40,7 @@ export function DataBrowserPage() {
   useEffect(() => {
     setCurrentPage(1);
     setDataItems([]);
+    setTotal(0);
     setCursor(null); // 重置游标
   }, [selectedCategory, searchKeyword]);
 
@@ -62,6 +63,10 @@ export function DataBrowserPage() {
   const loadDataList = async () => {
     setIsLoading(true);
     try {
+      // 注意：后端在游标分页模式下返回的 total 实际是“剩余数量（包含本次返回的 items）”。
+      // 因此总数应当用“请求前已加载数量 + 后端返回 remainingTotal”来还原。
+      const loadedCountBeforeRequest = currentPage === 1 ? 0 : dataItems.length;
+
       const response = await getDataList({
         viewId: selectedCategory || undefined,
         keyword: searchKeyword || undefined,
@@ -94,7 +99,11 @@ export function DataBrowserPage() {
       } else {
         setDataItems(prev => [...prev, ...processedItems]);
       }
-      setTotal(response.total);
+
+      // 计算用于展示的“总数”
+      const totalCandidate =
+        currentPage === 1 ? response.total : loadedCountBeforeRequest + response.total;
+      setTotal(totalCandidate);
 
       // 更新游标：记录最后一条数据的时间戳和 ID
       if (processedItems.length > 0) {
