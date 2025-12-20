@@ -64,6 +64,8 @@ interface IUgcViewProps<E extends object> {
   defaultPageSize?: number;
   assetIdKey?: string;
   showSearch?: boolean;
+  showSidebar?: boolean;
+  sidebarDefaultVisible?: boolean;
 }
 
 export const UgcView = <E extends object>({
@@ -83,6 +85,8 @@ export const UgcView = <E extends object>({
   defaultPageSize = 24,
   assetIdKey = 'id',
   showSearch,
+  showSidebar = true,
+  sidebarDefaultVisible = true,
 }: IUgcViewProps<E>): React.ReactNode => {
   const { t } = useTranslation();
 
@@ -432,23 +436,26 @@ export const UgcView = <E extends object>({
   const { data: assetFilterRules } = useAssetFilterRuleList(assetType as any, isMarket);
   return (
     <div className="flex size-full">
-      <UgcSidebar
-        title={assetName}
-        assetKey={assetKey}
-        assetType={assetType}
-        isMarket={isMarket}
-        filterListProps={{
-          onChange: setFilter,
-          filterButtonProps: {
-            filter,
+      {showSidebar && (
+        <UgcSidebar
+          title={assetName}
+          assetKey={assetKey}
+          assetType={assetType}
+          isMarket={isMarket}
+          defaultVisible={sidebarDefaultVisible}
+          filterListProps={{
             onChange: setFilter,
-          },
-          toolsData:
-            assetType === 'tools' ? ((allDataRaw?.data ?? []) as unknown as IAssetItem<ICommonTool>[]) : undefined,
-          selectedRuleId,
-          onSelectedRuleIdChange: setSelectedRuleId,
-        }}
-      />
+            filterButtonProps: {
+              filter,
+              onChange: setFilter,
+            },
+            toolsData:
+              assetType === 'tools' ? ((allDataRaw?.data ?? []) as unknown as IAssetItem<ICommonTool>[]) : undefined,
+            selectedRuleId,
+            onSelectedRuleIdChange: setSelectedRuleId,
+          }}
+        />
+      )}
       <div className="relative w-full flex-1 overflow-x-clip">
         <UgcViewHeader
           assetKey={assetKey}
