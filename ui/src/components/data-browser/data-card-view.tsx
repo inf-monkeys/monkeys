@@ -290,7 +290,7 @@ export function DataCardView({
                 <div ref={setItemRef(item.id)}>
                   <Card className="relative flex flex-col">
                     <CardHeader className={hasMedia ? 'pb-3' : 'pb-2'}>
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-sm truncate">{item.name}</h3>
                           {keywords.length > 0 && (
