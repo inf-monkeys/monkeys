@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import { InfiniteScroll } from '@/components/ui/infinite-scroll';
 import { MediaPreview } from '@/components/ui/media-preview';
 import { MoreHorizontal, Edit, Trash2, Eye, Loader2 } from 'lucide-react';
 import type { DataItem } from '@/types/data';
+import { useState } from 'react';
 
 /**
  * 检测是否是文本文件
@@ -51,6 +53,20 @@ export function DataCardView({
   onSelectionChange,
 }: DataCardViewProps) {
   const hasMore = total > data.length;
+  const [expandedKeywordItemIds, setExpandedKeywordItemIds] = useState<Set<string>>(() => new Set());
+
+  const toggleKeywordsExpanded = (itemId?: string) => {
+    if (!itemId) return;
+    setExpandedKeywordItemIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(itemId)) {
+        next.delete(itemId);
+      } else {
+        next.add(itemId);
+      }
+      return next;
+    });
+  };
 
   const handleToggleSelection = (itemId: string | undefined) => {
     if (!itemId || !onSelectionChange) return;
@@ -104,6 +120,18 @@ export function DataCardView({
               const isText = isTextFile(mediaUrl || item.thumbnail || '');
               const hasMedia = !isText && !!(item.thumbnail || item.media);
 
+              // 解析 keywords
+              const keywords = item.keywords
+                ? (typeof item.keywords === 'string'
+                    ? item.keywords.split(/[,，;；\n\r|]+/).map(k => k.trim()).filter(Boolean)
+                    : Array.isArray(item.keywords)
+                      ? item.keywords
+                      : [])
+                : [];
+              const isKeywordsExpanded = !!item.id && expandedKeywordItemIds.has(item.id);
+              const visibleKeywords = isKeywordsExpanded ? keywords : keywords.slice(0, 3);
+              const restKeywordCount = Math.max(0, keywords.length - visibleKeywords.length);
+
               return (
                 <Card
                   key={item.id}
@@ -120,6 +148,62 @@ export function DataCardView({
                         />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-sm truncate">{item.name}</h3>
+                          {keywords.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {visibleKeywords.map((k) => (
+                                <Badge
+                                  key={k}
+                                  variant="secondary"
+                                  title={k}
+                                  className="font-normal max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                                >
+                                  {k}
+                                </Badge>
+                              ))}
+                              {restKeywordCount > 0 && (
+                                <Badge
+                                  variant="outline"
+                                  className="font-normal cursor-pointer select-none"
+                                  role="button"
+                                  tabIndex={0}
+                                  aria-expanded={isKeywordsExpanded}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleKeywordsExpanded(item.id);
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      toggleKeywordsExpanded(item.id);
+                                    }
+                                  }}
+                                >
+                                  +{restKeywordCount}
+                                </Badge>
+                              )}
+                              {isKeywordsExpanded && keywords.length > 3 && (
+                                <Badge
+                                  variant="outline"
+                                  className="font-normal cursor-pointer select-none"
+                                  role="button"
+                                  tabIndex={0}
+                                  aria-expanded={isKeywordsExpanded}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleKeywordsExpanded(item.id);
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      toggleKeywordsExpanded(item.id);
+                                    }
+                                  }}
+                                >
+                                  收起
+                                </Badge>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <DropdownMenu>

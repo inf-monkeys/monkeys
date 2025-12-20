@@ -35,19 +35,26 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
   // 判断当前图标类型
   const isEmojiIcon = value && value.startsWith('emoji:');
   const isLucideIcon = value && value.startsWith('lucide:');
-  const isOldIconIcon = value && !value.startsWith('emoji:') && !value.startsWith('lucide:');
+  const isCustomIcon = value && value.startsWith('custom-icon:');
+  const isOldIconIcon = value && !value.startsWith('emoji:') && !value.startsWith('lucide:') && !value.startsWith('custom-icon:');
 
   // 初始化图标类型
   React.useEffect(() => {
     if (isEmojiIcon) {
       setIconType('emoji');
-    } else if (isLucideIcon || isOldIconIcon) {
+    } else if (isLucideIcon || isCustomIcon || isOldIconIcon) {
       setIconType('icon');
     }
   }, [value]);
 
   // 处理图标选择
   const handleIconSelect = (iconName: string) => {
+    // 如果已经是 custom-icon: 格式，直接使用
+    if (iconName.startsWith('custom-icon:')) {
+      onChange?.(iconName);
+      setIconDialogOpen(false);
+      return;
+    }
     // 如果选择的是 lucide 图标，自动添加 lucide: 前缀
     const formattedIconName = `lucide:${iconName}`;
     onChange?.(formattedIconName);
@@ -77,6 +84,8 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
     if (isEmojiIcon) {
       return value;
     } else if (isLucideIcon) {
+      return value;
+    } else if (isCustomIcon) {
       return value;
     } else if (isOldIconIcon) {
       // 如果是旧格式的图标，转换为 lucide 格式

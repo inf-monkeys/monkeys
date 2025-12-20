@@ -60,6 +60,23 @@ body {
   @apply backdrop-blur;
 }
 
+/**
+ * OEM 全局缩放支持（LF 需要默认 0.8）
+ * - --oem-scale: 缩放比例（例如 0.8）
+ * - --oem-vh/--oem-vw: “缩放后的等效 viewport 单位”，用于替换代码里的 100vh/100vw 计算
+ *   这样可以避免 transform/zoom 把 vh/vw 也一起缩小导致底部留白、侧栏被裁切。
+ */
+:root {
+  --oem-scale: 1;
+  --oem-vh: 100vh;
+  --oem-vw: 100vw;
+}
+
+.oem-scale-root {
+  --oem-vh: calc(100vh / var(--oem-scale, 1));
+  --oem-vw: calc(100vw / var(--oem-scale, 1));
+}
+
 .text-adjust {
   -webkit-text-size-adjust: none;
 }

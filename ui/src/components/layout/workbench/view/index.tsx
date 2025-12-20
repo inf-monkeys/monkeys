@@ -10,6 +10,7 @@ import { useSystemConfig } from '@/apis/common';
 import { CustomizationWorkbenchViewTheme } from '@/apis/common/typings';
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings';
+import { GLOBAL_DESIGN_BOARD_PAGE } from '@/components/layout/workbench/sidebar/mode/normal/consts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -52,9 +53,19 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
 
   useEffect(() => {
     if (typeof data !== 'undefined') {
-      setPages(data?.pages ?? []);
+      const serverPages = data?.pages ?? [];
+      const modern = systemConfig?.theme?.workbenchSidebarModernMode ?? false;
+
+      // modern 工作台：即使后端未返回任何 page，也要能默认加载“全局画板”
+      // 侧栏会注入 global-design-board，但主视图也需要注入，否则 hasPages 为 false 不会渲染 VinesIFrame
+      const nextPages = [...serverPages];
+      if (modern && !nextPages.some((p) => p.id === GLOBAL_DESIGN_BOARD_PAGE.id)) {
+        nextPages.unshift(GLOBAL_DESIGN_BOARD_PAGE);
+      }
+
+      setPages(nextPages);
     }
-  }, [data?.pages]);
+  }, [data?.pages, systemConfig?.theme?.workbenchSidebarModernMode]);
 
   const { ref, width, height } = useElementSize();
 
@@ -180,7 +191,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
             >
               <GitBranchPlus size={64} />
               <div className="flex flex-col text-center">
-                <h2 className="font-bold">请在 Vision Pro 中打开使用</h2>
+                <h2 className="font-bold">{t('ugc-page.workflow.ugc-view.vision-pro.open-in-vision-pro')}</h2>
               </div>
             </motion.div>
           ) : isBsdCustomPage ? (
@@ -239,7 +250,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
         >
           <AlertDialogHeader>
             <AlertDialogTitle>{t('common.utils.tips')}</AlertDialogTitle>
-            <AlertDialogDescription>请在 Vision Pro 中打开使用</AlertDialogDescription>
+            <AlertDialogDescription>{t('ugc-page.workflow.ugc-view.vision-pro.open-in-vision-pro')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setVisionProAlertVisible(false)}>

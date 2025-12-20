@@ -1,15 +1,16 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { useCreation } from 'ahooks';
 import { motion } from 'framer-motion';
 import { get } from 'lodash';
+import { createPortal } from 'react-dom';
 
 import { useSystemConfig } from '@/apis/common';
-import { Page404 } from '@/components/layout/workspace/404.tsx';
 import { VinesAgentViewWrapper } from '@/components/layout-wrapper/agent/view-wrapper.tsx';
 import { VinesDesignBoardViewWrapper } from '@/components/layout-wrapper/design/view-wrapper.tsx';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper.tsx';
+import { Page404 } from '@/components/layout/workspace/404.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { IFRAME_MAP } from '@/components/ui/vines-iframe/consts.ts';
 import useUrlState from '@/hooks/use-url-state';
@@ -39,6 +40,83 @@ interface IVinesViewProps {
   from?: string;
   iframeUrl?: string;
 }
+
+/**
+ * tldraw 不支持处在 transform: scale(...) 的祖先节点下（会出现选框/指针坐标系错位）。
+ * LF 目前使用全局 transform 缩放（见 __root.tsx），所以这里对画板做一个“脱离 transform 渲染”的兜底：
+ * - 在原位置渲染一个占位容器用于测量屏幕 rect
+ * - 将真实内容通过 portal 渲染到 document.body，并用 fixed 定位到同样的 rect
+ * 这样视觉位置/尺寸不变，但内容不再受 transform 影响，选框会对齐。
+ */
+const TransformScaleSafePortal: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const anchorRef = useRef<HTMLDivElement | null>(null);
+  const [enabled, setEnabled] = useState(false);
+  const [rect, setRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    // 仅在启用了 OEM transform 缩放时启用（LF）
+    setEnabled(Boolean(document.querySelector('main.oem-scale-root')));
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!enabled) return;
+    const el = anchorRef.current;
+    if (!el) return;
+
+    let raf = 0;
+    const measure = () => {
+      if (!anchorRef.current) return;
+      const r = anchorRef.current.getBoundingClientRect();
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    };
+
+    const schedule = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
+    };
+
+    // 初次测量（layout effect 阶段，避免首帧闪烁）
+    measure();
+
+    const ro = new ResizeObserver(schedule);
+    ro.observe(el);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('scroll', schedule, true);
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('scroll', schedule, true);
+    };
+  }, [enabled]);
+
+  if (!enabled) return <>{children}</>;
+
+  return (
+    <>
+      <div ref={anchorRef} className="size-full" />
+      {rect
+        ? createPortal(
+            <div
+              style={{
+                position: 'fixed',
+                top: rect.top,
+                left: rect.left,
+                width: rect.width,
+                height: rect.height,
+                zIndex: 50,
+              }}
+            >
+              {children}
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+};
 
 export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type, from, iframeUrl }: IVinesViewProps) {
   const setVisible = useViewStore((s) => s.setVisible);
@@ -88,7 +166,7 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
     }
 
     if (type === 'global-design-board' || type === 'design-board') {
-      return (
+      const boardContent = (
         <DesignBoardProvider
           createStore={type === 'global-design-board' ? getGlobalDesignBoardStore : createDesignBoardStore}
         >
@@ -108,6 +186,9 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
             )}
           </VinesDesignBoardViewWrapper>
         </DesignBoardProvider>
+      );
+      return (
+        <TransformScaleSafePortal>{boardContent}</TransformScaleSafePortal>
       );
     }
 

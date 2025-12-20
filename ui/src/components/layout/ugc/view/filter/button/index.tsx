@@ -244,7 +244,7 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
         {assetType === 'workflow' && (
           <>
             <div className="flex items-center justify-between">
-              <Label>{t('ugc-page.workflow.ugc-view.filter.button.only-self', '仅本团队工作流')}</Label>
+              <Label>{t('ugc-page.workflow.ugc-view.filter.button.only-self')}</Label>
               <Switch
                 checked={!!filter?.isSelf}
                 onCheckedChange={(checked) =>
@@ -256,7 +256,7 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
               />
             </div>
             <div className="flex items-center justify-between">
-              <Label>{t('ugc-page.workflow.ugc-view.filter.button.only-builtin', '仅内置应用')}</Label>
+              <Label>{t('ugc-page.workflow.ugc-view.filter.button.only-builtin')}</Label>
               <Switch
                 checked={!!filter?.isBuiltin}
                 onCheckedChange={(checked) =>

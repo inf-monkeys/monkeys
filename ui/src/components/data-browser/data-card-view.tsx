@@ -136,7 +136,7 @@ export function DataCardView({
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                        {item.assetType === 'text' && keywords.length > 0 && (
+                        {keywords.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2">
                             {visibleKeywords.map((k) => (
                               <Badge

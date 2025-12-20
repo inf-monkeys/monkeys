@@ -71,6 +71,7 @@ export interface DataAsset {
   thumbnail?: string;
   displayName: string;
   description?: string;
+  keywords?: string | string[];
   isPublished: boolean;
   createdTimestamp: number;
   updatedTimestamp: number;

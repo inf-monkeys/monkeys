@@ -274,14 +274,14 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
         themeMode === 'shadow' && 'shadow-around',
         className,
         modern
-          ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*5)-320px)] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
+          ? 'w-[calc(var(--oem-vw)-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*5)-320px)] max-w-[calc(var(--oem-vw)-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
           : onlyShowWorkbenchIcon
             ? density === 'compact'
               ? embedSidebar
-                ? 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*5)-320px)] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
-                : 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
-              : 'w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*6.5))] max-w-[calc(100vw-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*3))]'
-            : 'w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))] max-w-[calc(100vw-11rem-14rem-(var(--global-spacing)*3.5))]',
+                ? 'w-[calc(var(--oem-vw)-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*5)-320px)] max-w-[calc(var(--oem-vw)-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
+                : 'w-[calc(var(--oem-vw)-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*5))] max-w-[calc(var(--oem-vw)-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)))]'
+              : 'w-[calc(var(--oem-vw)-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*6.5))] max-w-[calc(var(--oem-vw)-var(--global-spacing)-var(--operation-bar-width)-1px-36px-(var(--global-spacing)*3))]'
+            : 'w-[calc(var(--oem-vw)-11rem-14rem-(var(--global-spacing)*3.5))] max-w-[calc(var(--oem-vw)-11rem-14rem-(var(--global-spacing)*3.5))]',
       )}
       ref={containerRef}
     >
@@ -404,7 +404,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
         >
           <div
             ref={popupScrollRef}
-            className="max-h-[60vh] overflow-y-auto p-global"
+            className="max-h-[calc(var(--oem-vh)*0.6)] overflow-y-auto p-global"
             style={{ marginBottom: ITEM_SIZE }}
             onScroll={onGridScroll}
           >

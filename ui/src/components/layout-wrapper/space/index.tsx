@@ -44,8 +44,8 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
       className={cn(
         'flex w-full gap-global',
         hideSpaceHeader
-          ? 'h-[calc(100vh-var(--global-spacing)*2)]'
-          : 'h-[calc(100vh-(var(--global-spacing)*5.5)-2rem)]',
+          ? 'h-[calc(var(--oem-vh)-var(--global-spacing)*2)]'
+          : 'h-[calc(var(--oem-vh)-(var(--global-spacing)*5.5)-2rem)]',
       )}
     >
       {!vinesIFrameVisible && sidebar}
@@ -54,7 +54,7 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
           'dark:bg-workspace-dark bg-workspace-light relative overflow-hidden rounded-lg',
           !vinesIFrameVisible && sidebar && 'ml-0',
           // 修改这里，当没有侧边栏时使用全宽
-          isMiniFrame ? '' : sidebar ? 'w-[calc(100vw-17rem)]' : 'w-full',
+          isMiniFrame ? '' : sidebar ? 'w-[calc(var(--oem-vw)-17rem)]' : 'w-full',
           className,
         )}
       >

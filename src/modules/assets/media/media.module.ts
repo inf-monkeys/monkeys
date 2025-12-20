@@ -7,12 +7,13 @@ import { MediaPresignService } from './media.presign.service';
 import { MediaFileService } from './media.service';
 import { MediaStorageService } from './media.storage.service';
 import { MediaThumbnailService } from './media.thumbnail.service';
+import { MediaUrlTransformerService } from './media.url-transformer.service';
 import { MediaUploadController } from './media.upload.controller';
 
 @Module({
   controllers: [MediaUploadController, MediaFileCrudController],
-  providers: [MediaFileService, MediaThumbnailService, MediaBucketRegistryService, MediaPresignService, MediaStorageService],
+  providers: [MediaFileService, MediaThumbnailService, MediaBucketRegistryService, MediaPresignService, MediaStorageService, MediaUrlTransformerService],
   imports: [forwardRef(() => EvaluationModule), ToolsModule],
-  exports: [MediaFileService, MediaThumbnailService, MediaBucketRegistryService, MediaPresignService, MediaStorageService],
+  exports: [MediaFileService, MediaThumbnailService, MediaBucketRegistryService, MediaPresignService, MediaStorageService, MediaUrlTransformerService],
 })
 export class MediaModule {}

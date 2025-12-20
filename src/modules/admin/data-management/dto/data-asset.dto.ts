@@ -229,6 +229,9 @@ export class DataAssetResponseDto {
   @ApiProperty({ description: '是否已发布' })
   isPublished: boolean;
 
+  @ApiPropertyOptional({ description: '关键词' })
+  keywords?: string;
+
   @ApiProperty({ description: '创建时间' })
   createdTimestamp: number;
 

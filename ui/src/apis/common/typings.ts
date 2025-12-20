@@ -252,6 +252,12 @@ export interface ISystemConfig {
     teamAsUser: boolean;
     themeMode: 'shadow' | 'border';
     density: CustomizationDensity;
+    /**
+     * 全局页面缩放比例（例如 0.8 表示整体缩小到 80%）
+     * - URL 参数 ?zoom= 仍可覆盖
+     * - 不配置则使用前端默认值
+     */
+    pageZoom?: number;
     miniMode: {
       showPreviewViewExecutionResultGrid: boolean;
     };

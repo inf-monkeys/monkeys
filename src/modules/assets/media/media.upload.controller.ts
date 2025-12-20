@@ -292,13 +292,12 @@ export class MediaUploadController {
         contentType: file.mimetype,
         randomFilename: config.s3.randomFilename,
       });
+      // 返回字符串URL以保持与S3Helpers路径的兼容性
+      // 前端期望data字段为字符串URL（参考 vines-upload.ts:234）
+      // 对于私有桶：返回带签名的 URL 用于立即预览
+      // 数据库会存储这个 URL，但显示时 MediaUrlTransformerService 会自动刷新签名
       return new SuccessResponse({
-        data: {
-          url: result.url, // 立即可用（私有时为签名）
-          canonicalUrl: result.canonicalUrl ?? result.url,
-          key: result.key,
-          bucketId: result.bucketId,
-        },
+        data: result.url,
       });
     } else {
       // 使用传统 S3Helpers（支持 S3/OSS）

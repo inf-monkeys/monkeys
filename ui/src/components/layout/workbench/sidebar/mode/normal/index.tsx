@@ -13,10 +13,10 @@ import { CustomizationFormView, ISystemConfig } from '@/apis/common/typings';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
+import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
 import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
-import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -273,10 +273,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     currentPage?.[teamId],
     data,
     teamId,
+    activePage,
     activePageFromWorkflowDisplayName,
     activePageFromType,
     workflowExecution,
     activePageFromWorkflowInstanceId,
+    isOemLoading,
+    isLoading,
+    originalPages.length,
+    originalGroups.length,
   ]);
 
   const { ref: wrapperRef, height: wrapperHeight } = useElementSize();
@@ -510,7 +515,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         >
           <AlertDialogHeader>
             <AlertDialogTitle>{t('common.utils.tips')}</AlertDialogTitle>
-            <AlertDialogDescription>请在 Vision Pro 中打开使用</AlertDialogDescription>
+            <AlertDialogDescription>{t('ugc-page.workflow.ugc-view.vision-pro.open-in-vision-pro')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setVisionProAlertVisible(false)}>

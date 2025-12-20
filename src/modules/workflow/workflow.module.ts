@@ -12,6 +12,7 @@ import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-p
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssetsModule } from '../assets/assets.module';
+import { MediaModule } from '../assets/media/media.module';
 import { MarketplaceModule } from '../marketplace/marketplace.module';
 import { ToolsModule } from '../tools/tools.module';
 import { ConductorModule } from './conductor/conductor.module';
@@ -88,6 +89,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
   imports: [
     ConductorModule,
     forwardRef(() => AssetsModule),
+    MediaModule,
     TypeOrmModule.forFeature([
       WorkflowPageEntity,
       WorkflowPageGroupEntity,

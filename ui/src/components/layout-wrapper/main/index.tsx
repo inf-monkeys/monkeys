@@ -6,8 +6,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
-import { Sidebar } from '@/components/layout/main/sidebar';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
+import { Sidebar } from '@/components/layout/main/sidebar';
 import { cn } from '@/utils';
 
 interface IProps {
@@ -23,12 +23,12 @@ export const MainWrapper: React.FC<IProps> = ({ layoutId }) => {
   const backgroundClass = isShadowMode ? 'bg-[#f2f3f4] dark:bg-[#000000]' : 'bg-slate-3';
 
   return (
-    <ViewGuard className={cn('flex w-screen', backgroundClass)}>
+    <ViewGuard className={cn('flex w-[var(--oem-vw)]', backgroundClass)}>
       <Sidebar />
       <AnimatePresence mode="wait">
         <div
           className={cn(
-            `m-4 ml-0 flex h-[calc(100vh-2rem)] w-full max-w-[calc(100vw-15rem)] flex-1 rounded-lg border bg-background p-6 shadow-sm`,
+            `m-4 ml-0 flex h-[calc(var(--oem-vh)-2rem)] w-full max-w-[calc(var(--oem-vw)-15rem)] flex-1 rounded-lg border bg-background p-6 shadow-sm`,
             layoutId === 'vines-outlet-main-$teamId-workbench' && 'p-0',
           )}
         >

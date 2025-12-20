@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { VinesIconSelector } from '@/components/ui/icon-selector';
-import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import { VinesIcon } from '@/components/ui/vines-icon';
 import { IWorkflowAssociationForEditor } from '@/schema/workspace/workflow-association';
 
 interface IFieldIconUrlProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -37,7 +37,7 @@ export const FieldIconUrl: React.FC<IFieldIconUrlProps> = ({ form }) => {
           <FormControl>
             <div className="flex items-center gap-3">
               <div className="flex size-11 items-center justify-center rounded-lg border border-input bg-background">
-                <VinesLucideIcon src={currentIconUrl ?? 'link'} />
+                <VinesIcon size="md">{currentIconUrl || 'lucide:link'}</VinesIcon>
               </div>
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>

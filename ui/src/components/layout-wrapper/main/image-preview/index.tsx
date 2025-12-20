@@ -209,7 +209,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
                           width: 'auto',
                           height: 'auto',
                           objectFit: 'contain',
-                          maxHeight: 'calc(100vh - 340px)',
+                          maxHeight: 'calc(var(--oem-vh) - 340px)',
                           transition: 'transform 0.3s ease',
                         }}
                       />
@@ -235,7 +235,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
                       className={cn(
                         'w-full',
                         imagePreviewOperationBarStyle === 'normal' &&
-                          'max-w-[calc(100vw-(var(--global-spacing)*7)-var(--operation-bar-width))]',
+                          'max-w-[calc(var(--oem-vw)-(var(--global-spacing)*7)-var(--operation-bar-width))]',
                       )}
                     >
                       <Carousel

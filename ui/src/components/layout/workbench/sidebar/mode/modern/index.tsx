@@ -13,13 +13,13 @@ import { CustomizationFormView } from '@/apis/common/typings';
 import { useUpdateGroupPageSort, useUpdateGroupSort, useWorkspacePages } from '@/apis/pages';
 import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { useWorkflowExecutionSimple } from '@/apis/workflow/execution';
+import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import {
   GLOBAL_DESIGN_BOARD_PAGE,
   GLOBAL_DESIGN_BOARD_PAGE_GROUP,
 } from '@/components/layout/workbench/sidebar/mode/normal/consts';
 import { pageGroupProcess } from '@/components/layout/workbench/sidebar/mode/utils';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
-import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator';
@@ -204,6 +204,16 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
 
     const setEmptyOrFirstPage = () => {
       if (pagesLength && groupsLength) {
+        // modern 工作台期望刷新后默认加载“全局画板”
+        // 只要存在 global-design-board，就优先选中它；否则再按分组顺序挑第一个页面
+        const globalBoardPage = latestOriginalPages.current.find((it) => it.id === GLOBAL_DESIGN_BOARD_PAGE.id);
+        const globalBoardGroup = latestOriginalGroups.current.find((it) => it.id === GLOBAL_DESIGN_BOARD_PAGE_GROUP.id);
+        if (globalBoardPage && globalBoardGroup) {
+          setCurrentPage({ [teamId]: { ...globalBoardPage, groupId: globalBoardGroup.id } });
+          setGroupId(globalBoardGroup.id);
+          return;
+        }
+
         const sortedGroups = cloneDeep(latestOriginalGroups.current).sort((a) => (a.isBuiltIn ? 1 : -1));
         // 使用 some 来避免多次设置状态
         sortedGroups.some(({ id, pageIds }) => {
@@ -249,11 +259,16 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
     currentPage?.[teamId],
     data,
     teamId,
+    activePage,
     activePageFromWorkflowDisplayName,
     activePageFromType,
     workflowExecution,
     activePageFromWorkflowInstanceId,
     event$,
+    isOemLoading,
+    isLoading,
+    originalPages.length,
+    originalGroups.length,
   ]);
 
   const { ref: wrapperRef, height: wrapperHeight } = useElementSize();
@@ -336,7 +351,10 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
       ) : (
         <WorkbenchViewItemCurrentData.Provider value={{ pageId, groupId }}>
           {hasGroups ? (
-            <div className="flex h-full justify-between rounded-lg bg-slate-1">
+            <div
+              className="flex h-full justify-between rounded-lg bg-slate-1"
+              data-workbench-group-list-container
+            >
               <VirtuaWorkbenchViewGroupList
                 data={lists}
                 groupId={groupId}

@@ -527,6 +527,48 @@ export class WorkflowRepository {
           },
         });
       }
+
+      // 获取被删除的工作流记录IDs
+      const deletedWorkflows = await transactionalEntityManager.find(WorkflowMetadataEntity, {
+        where: {
+          teamId,
+          ...(workflowId === '*' ? {} : { workflowId }),
+          isDeleted: true,
+        },
+        select: ['id'],
+      });
+      const deletedWorkflowIds = deletedWorkflows.map((w) => w.id);
+
+      if (deletedWorkflowIds.length > 0) {
+        // 标记以这些工作流为目标的关联为已删除
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .update(WorkflowAssociationsEntity)
+          .set({ isDeleted: true, updatedTimestamp: Date.now() })
+          .where('targetWorkflowId IN (:...ids)', { ids: deletedWorkflowIds })
+          .andWhere('type = :type', { type: 'to-workflow' })
+          .andWhere('isDeleted = :isDeleted', { isDeleted: false })
+          .execute();
+
+        // 标记以这些工作流为源的关联为已删除
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .update(WorkflowAssociationsEntity)
+          .set({ isDeleted: true, updatedTimestamp: Date.now() })
+          .where('originWorkflowId IN (:...ids)', { ids: deletedWorkflowIds })
+          .andWhere('isDeleted = :isDeleted', { isDeleted: false })
+          .execute();
+
+        // 标记全局关联中以这些工作流为目标的关联为已删除
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .update(GlobalWorkflowAssociationsEntity)
+          .set({ isDeleted: true, updatedTimestamp: Date.now() })
+          .where('targetWorkflowId IN (:...ids)', { ids: deletedWorkflowIds })
+          .andWhere('type = :type', { type: 'to-workflow' })
+          .andWhere('isDeleted = :isDeleted', { isDeleted: false })
+          .execute();
+      }
     });
   }
 
@@ -1349,28 +1391,36 @@ ORDER BY
 
   public async listGlobalWorkflowAssociations(teamId: string, detail = false): Promise<BaseWorkflowAssosciation[]> {
     return await this.globalWorkflowAssociationRepository
-      .find({
-        where: {
-          isDeleted: false,
-          teamId,
-        },
-        relations: {
-          targetWorkflow: true,
-        },
+      .createQueryBuilder('association')
+      .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+      .where('association.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('association.teamId = :teamId', { teamId })
+      .getMany()
+      .then((data) => {
+        // Filter out associations where target workflow is deleted (if type is to-workflow)
+        return data.filter(association =>
+          association.type !== 'to-workflow' ||
+          (association.targetWorkflow && !association.targetWorkflow.isDeleted)
+        );
       })
       .then((data) => (detail ? data : data.map((item) => omit(item, ['targetWorkflow']))))
       .then((data) => data.map((item) => ({ ...item, scope: 'global' }) as BaseWorkflowAssosciation));
   }
 
   public async getGlobalWorkflowAssociation(workflowAssociationId: string, relation = true) {
-    return await this.globalWorkflowAssociationRepository.findOne({
-      where: { id: workflowAssociationId, isDeleted: false },
-      relations: relation
-        ? {
-            targetWorkflow: true,
-          }
-        : undefined,
-    });
+    if (!relation) {
+      return await this.globalWorkflowAssociationRepository.findOne({
+        where: { id: workflowAssociationId, isDeleted: false },
+      });
+    }
+
+    // Use query builder with LEFT JOIN to handle deleted target workflows
+    return await this.globalWorkflowAssociationRepository
+      .createQueryBuilder('association')
+      .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+      .where('association.id = :id', { id: workflowAssociationId })
+      .andWhere('association.isDeleted = :isDeleted', { isDeleted: false })
+      .getOne();
   }
 
   public async createGlobalWorkflowAssociation(teamId: string, createAssociation: UpdateAndCreateGlobalWorkflowAssociations) {
@@ -1401,18 +1451,19 @@ ORDER BY
 
   public async updateGlobalWorkflowAssociation(id: string, teamId: string, updateAssociation: UpdateAndCreateGlobalWorkflowAssociations) {
     return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
-      const association = await transactionalEntityManager.findOne(GlobalWorkflowAssociationsEntity, {
-        where: { id, isDeleted: false },
-        relations: {
-          targetWorkflow: true,
-        },
-      });
+      // Use query builder with LEFT JOIN to handle deleted target workflows
+      const association = await transactionalEntityManager
+        .createQueryBuilder(GlobalWorkflowAssociationsEntity, 'association')
+        .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+        .where('association.id = :id', { id })
+        .andWhere('association.isDeleted = :isDeleted', { isDeleted: false })
+        .getOne();
 
       if (!association) {
         throw new NotFoundException(`global workflow association not found: ${id}`);
       }
 
-      if (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId) {
+      if (association.type === 'to-workflow' && association.targetWorkflow && association.targetWorkflow.teamId !== teamId) {
         throw new ForbiddenException(`no permission to operate the global workflow association: ${id}`);
       }
 
@@ -1448,30 +1499,32 @@ ORDER BY
         updatedTimestamp: Date.now(),
       };
       await transactionalEntityManager.update(GlobalWorkflowAssociationsEntity, { id, isDeleted: false }, updateFields);
-      const updatedAssociation = await transactionalEntityManager.findOne(GlobalWorkflowAssociationsEntity, {
-        where: { id, isDeleted: false },
-        relations: {
-          targetWorkflow: true,
-        },
-      });
+      // Use query builder with LEFT JOIN to handle deleted target workflows
+      const updatedAssociation = await transactionalEntityManager
+        .createQueryBuilder(GlobalWorkflowAssociationsEntity, 'association')
+        .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+        .where('association.id = :id', { id })
+        .andWhere('association.isDeleted = :isDeleted', { isDeleted: false })
+        .getOne();
       return updatedAssociation;
     });
   }
 
   public async removeGlobalWorkflowAssociation(id: string, teamId: string) {
     return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
-      const association = await transactionalEntityManager.findOne(GlobalWorkflowAssociationsEntity, {
-        where: { id, isDeleted: false },
-        relations: {
-          targetWorkflow: true,
-        },
-      });
+      // Use query builder with LEFT JOIN to handle deleted target workflows
+      const association = await transactionalEntityManager
+        .createQueryBuilder(GlobalWorkflowAssociationsEntity, 'association')
+        .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+        .where('association.id = :id', { id })
+        .andWhere('association.isDeleted = :isDeleted', { isDeleted: false })
+        .getOne();
 
       if (!association) {
         throw new NotFoundException(`global workflow association not found: ${id}`);
       }
 
-      if (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId) {
+      if (association.type === 'to-workflow' && association.targetWorkflow && association.targetWorkflow.teamId !== teamId) {
         throw new ForbiddenException(`no permission to operate the global workflow association: ${id}`);
       }
 
@@ -1483,17 +1536,18 @@ ORDER BY
   public async listAllWorkflowAssociations(teamId: string, detail = false) {
     const globalWorkflowAssociations = await this.listGlobalWorkflowAssociations(teamId, detail);
     const allWorkflowAssociations = await this.workflowAssociationRepository
-      .find({
-        where: {
-          originWorkflow: {
-            teamId,
-          },
-          isDeleted: false,
-        },
-        relations: {
-          originWorkflow: true,
-          targetWorkflow: true,
-        },
+      .createQueryBuilder('association')
+      .leftJoinAndSelect('association.originWorkflow', 'originWorkflow')
+      .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+      .where('association.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('originWorkflow.teamId = :teamId', { teamId })
+      .getMany()
+      .then((data) => {
+        // Filter out associations where target workflow is deleted (if type is to-workflow)
+        return data.filter(association =>
+          association.type !== 'to-workflow' ||
+          (association.targetWorkflow && !association.targetWorkflow.isDeleted)
+        );
       })
       .then((data) => (detail ? data : data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow']))))
       .then((data) => data.map((item) => ({ ...item, scope: 'specific' }) as BaseWorkflowAssosciation));
@@ -1502,18 +1556,19 @@ ORDER BY
 
   public async listWorkflowAssociations(workflowId: string, teamId: string, detail = false): Promise<BaseWorkflowAssosciation[]> {
     const currentWorkflowAssociations = await this.workflowAssociationRepository
-      .find({
-        where: {
-          originWorkflowId: workflowId,
-          isDeleted: false,
-          originWorkflow: {
-            teamId,
-          },
-        },
-        relations: {
-          originWorkflow: true,
-          targetWorkflow: true,
-        },
+      .createQueryBuilder('association')
+      .leftJoinAndSelect('association.originWorkflow', 'originWorkflow')
+      .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+      .where('association.originWorkflowId = :workflowId', { workflowId })
+      .andWhere('association.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('originWorkflow.teamId = :teamId', { teamId })
+      .getMany()
+      .then((data) => {
+        // Filter out associations where target workflow is deleted (if type is to-workflow)
+        return data.filter(association =>
+          association.type !== 'to-workflow' ||
+          (association.targetWorkflow && !association.targetWorkflow.isDeleted)
+        );
       })
       .then((data) => (detail ? data : data.map((item) => omit(item, ['originWorkflow', 'targetWorkflow']))))
       .then((data) => data.map((item) => ({ ...item, scope: 'specific' }) as BaseWorkflowAssosciation));
@@ -1522,15 +1577,20 @@ ORDER BY
   }
 
   public async getWorkflowAssociation(workflowAssociationId: string, relation = true) {
-    return await this.workflowAssociationRepository.findOne({
-      where: { id: workflowAssociationId, isDeleted: false },
-      relations: relation
-        ? {
-            originWorkflow: true,
-            targetWorkflow: true,
-          }
-        : undefined,
-    });
+    if (!relation) {
+      return await this.workflowAssociationRepository.findOne({
+        where: { id: workflowAssociationId, isDeleted: false },
+      });
+    }
+
+    // Use query builder with LEFT JOIN to handle deleted target/origin workflows
+    return await this.workflowAssociationRepository
+      .createQueryBuilder('association')
+      .leftJoinAndSelect('association.originWorkflow', 'originWorkflow')
+      .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+      .where('association.id = :id', { id: workflowAssociationId })
+      .andWhere('association.isDeleted = :isDeleted', { isDeleted: false })
+      .getOne();
   }
 
   public async createWorkflowAssociation(workflowId: string, teamId: string, createAssociation: UpdateAndCreateWorkflowAssociation) {
@@ -1561,19 +1621,20 @@ ORDER BY
 
   public async updateWorkflowAssociation(id: string, teamId: string, updateAssociation: UpdateAndCreateWorkflowAssociation) {
     return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
-      const association = await transactionalEntityManager.findOne(WorkflowAssociationsEntity, {
-        where: { id, isDeleted: false },
-        relations: {
-          originWorkflow: true,
-          targetWorkflow: true,
-        },
-      });
+      // Use query builder with LEFT JOIN to handle deleted workflows
+      const association = await transactionalEntityManager
+        .createQueryBuilder(WorkflowAssociationsEntity, 'association')
+        .leftJoinAndSelect('association.originWorkflow', 'originWorkflow')
+        .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+        .where('association.id = :id', { id })
+        .andWhere('association.isDeleted = :isDeleted', { isDeleted: false })
+        .getOne();
 
       if (!association) {
         throw new NotFoundException(`workflow association not found: ${id}`);
       }
 
-      if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
+      if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow && association.targetWorkflow.teamId !== teamId)) {
         throw new ForbiddenException(`no permission to operate the workflow association: ${id}`);
       }
 
@@ -1609,32 +1670,34 @@ ORDER BY
         updatedTimestamp: Date.now(),
       };
       await transactionalEntityManager.update(WorkflowAssociationsEntity, { id, isDeleted: false }, updateFields);
-      const updatedAssociation = await transactionalEntityManager.findOne(WorkflowAssociationsEntity, {
-        where: { id, isDeleted: false },
-        relations: {
-          originWorkflow: true,
-          targetWorkflow: true,
-        },
-      });
+      // Use query builder with LEFT JOIN to handle deleted workflows
+      const updatedAssociation = await transactionalEntityManager
+        .createQueryBuilder(WorkflowAssociationsEntity, 'association')
+        .leftJoinAndSelect('association.originWorkflow', 'originWorkflow')
+        .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+        .where('association.id = :id', { id })
+        .andWhere('association.isDeleted = :isDeleted', { isDeleted: false })
+        .getOne();
       return updatedAssociation;
     });
   }
 
   public async removeWorkflowAssociation(id: string, teamId: string) {
     return await this.workflowAssociationRepository.manager.transaction(async (transactionalEntityManager) => {
-      const association = await transactionalEntityManager.findOne(WorkflowAssociationsEntity, {
-        where: { id, isDeleted: false },
-        relations: {
-          originWorkflow: true,
-          targetWorkflow: true,
-        },
-      });
+      // Use query builder with LEFT JOIN to handle deleted workflows
+      const association = await transactionalEntityManager
+        .createQueryBuilder(WorkflowAssociationsEntity, 'association')
+        .leftJoinAndSelect('association.originWorkflow', 'originWorkflow')
+        .leftJoinAndSelect('association.targetWorkflow', 'targetWorkflow')
+        .where('association.id = :id', { id })
+        .andWhere('association.isDeleted = :isDeleted', { isDeleted: false })
+        .getOne();
 
       if (!association) {
         throw new NotFoundException(`workflow association not found: ${id}`);
       }
 
-      if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow.teamId !== teamId)) {
+      if (association.originWorkflow.teamId !== teamId || (association.type === 'to-workflow' && association.targetWorkflow && association.targetWorkflow.teamId !== teamId)) {
         throw new ForbiddenException(`no permission to operate the workflow association: ${id}`);
       }
 

@@ -184,38 +184,35 @@ export const Workflows: React.FC = () => {
         // 重新打开对话框让用户输入正确的 token
         setPendingBuiltinWorkflow(workflow);
         setTenantTokenDialogVisible(true);
-        return t(
-          'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-invalid',
-          'Token 无效或已过期，请重新输入',
-        );
+        return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-invalid');
       }
       return isBuiltin
-        ? t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.error', '取消内置应用失败')
-        : t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.error', '设置内置应用失败');
+        ? t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.error')
+        : t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.error');
     };
 
     if (isBuiltin) {
       // 取消内置
       toast.promise(unsetWorkflowBuiltinApp(workflowId, token), {
-        loading: t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.loading', '正在取消内置应用...'),
+        loading: t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.loading'),
         success: () => {
           setBuiltinStatus((prev) => ({ ...prev, [workflowId]: false }));
           void mutateWorkflows();
-          return t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.success', '已取消内置应用');
+          return t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.success');
         },
         error: handleAuthError,
       });
     } else {
       // 设置为内置
       toast.promise(setWorkflowAsBuiltinApp(workflowId, token), {
-        loading: t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.loading', '正在设置为内置应用...'),
+        loading: t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.loading'),
         success: (res) => {
           setBuiltinStatus((prev) => ({ ...prev, [workflowId]: true }));
           void mutateWorkflows();
           if ((res as any)?.alreadyBuiltin) {
-            return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.already', '该工作流已是内置应用');
+            return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.already');
           }
-          return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.success', '已设置为内置应用');
+          return t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.success');
         },
         error: handleAuthError,
       });
@@ -376,8 +373,8 @@ export const Workflows: React.FC = () => {
                     {(typeof builtinStatus[item.workflowId] === 'boolean'
                       ? builtinStatus[item.workflowId]
                       : (item as any).builtin)
-                      ? t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.label', '取消内置应用')
-                      : t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.label', '设为内置应用')}
+                      ? t('ugc-page.workflow.ugc-view.operate-area.options.unset-builtin.label')
+                      : t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.label')}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
@@ -532,22 +529,16 @@ export const Workflows: React.FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-title', '设置内置应用需要 Tenant Token')}
+              {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-title')}
             </DialogTitle>
             <DialogDescription>
-              {t(
-                'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-desc',
-                '请输入后端配置的 Tenant Bearer Token。Token 仅存储在浏览器会话中，关闭标签页或刷新页面后会自动清除。',
-              )}
+              {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-desc')}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-2 space-y-2">
             <Input
               type="password"
-              placeholder={t(
-                'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-placeholder',
-                '请输入 Tenant Token',
-              )}
+              placeholder={t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-placeholder')}
               value={tenantToken}
               autoComplete="new-password"
               onChange={(v) => saveTenantToken(v)}
@@ -555,10 +546,7 @@ export const Workflows: React.FC = () => {
             {tenantToken && (
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
-                  {t(
-                    'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-saved-hint',
-                    'Token 已保存（仅本次会话有效）',
-                  )}
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-saved-hint')}
                 </span>
                 <Button
                   variant="ghost"
@@ -566,15 +554,10 @@ export const Workflows: React.FC = () => {
                   className="h-6 px-2 text-xs"
                   onClick={() => {
                     clearTenantToken();
-                    toast.success(
-                      t(
-                        'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-cleared',
-                        'Token 已清除',
-                      ),
-                    );
+                    toast.success(t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-cleared'));
                   }}
                 >
-                  {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.clear-token', '清除')}
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.clear-token')}
                 </Button>
               </div>
             )}
@@ -594,10 +577,7 @@ export const Workflows: React.FC = () => {
               onClick={() => {
                 if (!tenantToken) {
                   toast.warning(
-                    t(
-                      'ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-required',
-                      '请先输入 Tenant Token',
-                    ),
+                    t('ugc-page.workflow.ugc-view.operate-area.options.set-builtin.token-required'),
                   );
                   return;
                 }
@@ -627,7 +607,7 @@ export const Workflows: React.FC = () => {
         >
           <AlertDialogHeader>
             <AlertDialogTitle>{t('common.utils.tips')}</AlertDialogTitle>
-            <AlertDialogDescription>请在 Vision Pro 中打开使用</AlertDialogDescription>
+            <AlertDialogDescription>{t('ugc-page.workflow.ugc-view.vision-pro.open-in-vision-pro')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setVisionProAlertVisible(false)}>
