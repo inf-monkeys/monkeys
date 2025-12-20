@@ -8,20 +8,23 @@ import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/store/sidebar';
 import { Link, useRouterState } from '@tanstack/react-router';
 import {
-    Building2,
-    ChevronDown,
-    CreditCard,
-    Database,
-    FolderOpen,
-    LayoutDashboard,
-    Settings,
-    Users,
-    Workflow,
-    Wrench,
+  Building2,
+  ChevronDown,
+  CreditCard,
+  Database,
+  FolderOpen,
+  LayoutDashboard,
+  Settings,
+  Shield,
+  Users,
+  Workflow,
+  Wrench,
 } from 'lucide-react';
 import { useState } from 'react';
 
 import { formatAdminTitle, getBrandLogoUrl, getBrandTitle, useSystemConfigStore } from '@/store/system-config';
+import { useAuth } from '@/hooks/use-auth';
+import { Permission } from '@/types/auth';
 
 interface NavItem {
   title: string;
@@ -29,6 +32,8 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
   children?: NavItem[];
+  requiresSuperAdmin?: boolean;
+  requiresAnyPermissions?: Permission[];
 }
 
 const navItems: NavItem[] = [
@@ -41,31 +46,43 @@ const navItems: NavItem[] = [
     title: '数据管理',
     href: '/admin/data',
     icon: Database,
+    requiresAnyPermissions: [Permission.ASSET_READ],
+  },
+  {
+    title: '权限管理',
+    href: '/admin/permissions',
+    icon: Shield,
+    requiresSuperAdmin: true,
   },
   {
     title: '用户管理',
     href: '/admin/users',
     icon: Users,
+    requiresAnyPermissions: [Permission.USER_READ],
   },
   {
     title: '团队管理',
     href: '/admin/teams',
     icon: Building2,
+    requiresAnyPermissions: [Permission.TEAM_READ],
   },
   {
     title: '工具管理',
     href: '/admin/tools',
     icon: Wrench,
+    requiresAnyPermissions: [Permission.TOOL_READ],
   },
   {
     title: '工作流管理',
     href: '/admin/workflows',
     icon: Workflow,
+    requiresAnyPermissions: [Permission.WORKFLOW_READ],
   },
   {
     title: '计费管理',
     href: '/admin/pricing',
     icon: CreditCard,
+    requiresAnyPermissions: [Permission.BILLING_READ],
     children: [
       { title: '余额管理', href: '/admin/pricing/balances', icon: CreditCard },
       { title: '订单管理', href: '/admin/pricing/orders', icon: CreditCard },
@@ -77,11 +94,13 @@ const navItems: NavItem[] = [
     title: '资产管理',
     href: '/admin/assets',
     icon: FolderOpen,
+    requiresAnyPermissions: [Permission.ASSET_READ],
   },
   {
     title: '全局配置',
     href: '/admin/config',
     icon: Settings,
+    requiresAnyPermissions: [Permission.CONFIG_READ],
   },
 ];
 
@@ -89,6 +108,8 @@ export function Sidebar() {
   const router = useRouterState();
   const pathname = router.location.pathname;
   const { isCollapsed } = useSidebarStore();
+  const { isSuperAdmin, hasAnyPermission } = useAuth();
+  const showSuperAdminItems = isSuperAdmin();
   const config = useSystemConfigStore((s) => s.config);
   const brandTitle = getBrandTitle(config);
   const adminTitle = formatAdminTitle(brandTitle);
@@ -97,6 +118,31 @@ export function Sidebar() {
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-color-scheme: dark)').matches;
   const logoUrl = getBrandLogoUrl(config, { darkMode: prefersDark });
+
+  const filterNavItems = (items: NavItem[]): NavItem[] => {
+    return items
+      .map((item) => {
+        const allowedByRole = !item.requiresSuperAdmin || showSuperAdminItems;
+        if (!allowedByRole) return null;
+
+        const allowedByPermission =
+          !item.requiresAnyPermissions ||
+          item.requiresAnyPermissions.length === 0 ||
+          hasAnyPermission(item.requiresAnyPermissions);
+        if (!allowedByPermission) return null;
+
+        if (item.children && item.children.length > 0) {
+          const children = filterNavItems(item.children);
+          if (children.length === 0) return null;
+          return { ...item, children };
+        }
+
+        return item;
+      })
+      .filter(Boolean) as NavItem[];
+  };
+
+  const visibleNavItems = filterNavItems(navItems);
 
   return (
     <TooltipProvider>
@@ -131,7 +177,7 @@ export function Sidebar() {
 
         {/* 导航菜单 */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavItemComponent
               key={item.href}
               item={item}
@@ -159,7 +205,10 @@ interface NavItemProps {
 }
 
 function NavItemComponent({ item, pathname, isCollapsed }: NavItemProps) {
-  const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+  const isActive =
+    item.href === '/admin'
+      ? pathname === '/admin' || pathname === '/admin/'
+      : pathname === item.href || pathname.startsWith(item.href + '/');
   const Icon = item.icon;
   const [isExpanded, setIsExpanded] = useState(false);
 

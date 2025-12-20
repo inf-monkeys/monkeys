@@ -19,7 +19,11 @@ export class AdminUserEntity extends AdminBaseEntity {
   @Column({ nullable: true })
   photo?: string;
 
-  @Column({ name: 'last_login_at', nullable: true, type: 'bigint' })
+  @Column({
+    name: 'last_login_at',
+    nullable: true,
+    type: 'bigint',
+  })
   lastLoginAt?: number;
 
   @Column({ name: 'logins_count', default: 0 })

@@ -13,35 +13,13 @@ import type {
   ViewTreeResponse,
   AssetListResponse,
 } from '@/types/data';
-import { getStoredToken } from './auth';
+import { apiRequest, apiRequestBlob, getAuthHeaders } from './http';
 
 const API_BASE = '/api/admin';
 
 // HTTP 请求封装
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const token = getStoredToken();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...headers,
-      ...(options?.headers || {}),
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || '请求失败');
-  }
-
-  return response.json();
+  return apiRequest<T>(url, options);
 }
 
 // ========== 视图管理 ==========
@@ -241,27 +219,14 @@ export async function batchUpdateDataStatus(
 export async function exportData(
   options: DataExportOptions
 ): Promise<Blob> {
-  const token = getStoredToken();
-  const headers: Record<string, string> = {};
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${API_BASE}/data/export`, {
+  return apiRequestBlob(`${API_BASE}/data/export`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...headers,
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(options),
   });
-
-  if (!response.ok) {
-    throw new Error('导出失败');
-  }
-
-  return response.blob();
 }
 
 /**
@@ -271,28 +236,14 @@ export async function importData(
   file: File,
   category?: string
 ): Promise<DataImportResult> {
-  const token = getStoredToken();
   const formData = new FormData();
   formData.append('file', file);
   if (category) {
     formData.append('category', category);
   }
 
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${API_BASE}/data/import`, {
+  return apiRequest<DataImportResult>(`${API_BASE}/data/import`, {
     method: 'POST',
-    headers,
     body: formData,
   });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || '导入失败');
-  }
-
-  return response.json();
 }

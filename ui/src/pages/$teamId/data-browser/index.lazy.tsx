@@ -10,7 +10,7 @@ import { DataTable } from '@/components/data-browser/data-table';
 import { DataToolbar } from '@/components/data-browser/data-toolbar';
 import type { DataCategory, DataItem } from '@/types/data';
 import { createLazyFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 export const Route = createLazyFileRoute('/$teamId/data-browser/')({
@@ -30,6 +30,8 @@ export function DataBrowserPage() {
   const [viewingItem, setViewingItem] = useState<DataItem | null>(null);
   // 游标分页优化：记录最后一条数据的时间戳和 ID
   const [cursor, setCursor] = useState<{ timestamp?: number; id?: string } | null>(null);
+  // 请求序号：用于丢弃切换视图/搜索后返回的旧请求，避免旧数据污染新视图
+  const requestSeqRef = useRef(0);
 
   // 加载视图数据
   useEffect(() => {
@@ -38,8 +40,11 @@ export function DataBrowserPage() {
 
   // 切换分类或搜索时重置状态
   useEffect(() => {
+    // 立即使所有在途请求失效，避免旧请求在重置窗口内落盘到 state
+    requestSeqRef.current += 1;
     setCurrentPage(1);
     setDataItems([]);
+    setTotal(0);
     setCursor(null); // 重置游标
   }, [selectedCategory, searchKeyword]);
 
@@ -59,14 +64,20 @@ export function DataBrowserPage() {
     }
   };
 
-  const loadDataList = async () => {
+  const loadDataList = async (options?: { forceFirstPage?: boolean }) => {
+    const requestSeq = (requestSeqRef.current += 1);
     setIsLoading(true);
     try {
+      const effectivePage = options?.forceFirstPage ? 1 : currentPage;
+      // 注意：后端在游标分页模式下返回的 total 实际是“剩余数量（包含本次返回的 items）”。
+      // 因此总数应当用“请求前已加载数量 + 后端返回 remainingTotal”来还原。
+      const loadedCountBeforeRequest = effectivePage === 1 ? 0 : dataItems.length;
+
       const response = await getDataList({
         viewId: selectedCategory || undefined,
         keyword: searchKeyword || undefined,
         // 游标分页优化：第一页用 page，后续页用游标
-        ...(currentPage === 1
+        ...(effectivePage === 1
           ? { page: 1 }
           : {
               cursorTimestamp: cursor?.timestamp,
@@ -74,6 +85,9 @@ export function DataBrowserPage() {
             }),
         pageSize: pageSize,
       });
+
+      // 旧请求（例如切换视图/搜索后返回）直接丢弃，避免污染当前视图数据
+      if (requestSeq !== requestSeqRef.current) return;
 
       // 解析 media 字段（如果是 JSON 字符串）
       const processedItems = response.items.map(item => {
@@ -89,12 +103,16 @@ export function DataBrowserPage() {
       });
 
       // 如果是第一页，替换数据；否则追加数据（用于无限滚动）
-      if (currentPage === 1) {
+      if (effectivePage === 1) {
         setDataItems(processedItems);
       } else {
         setDataItems(prev => [...prev, ...processedItems]);
       }
-      setTotal(response.total);
+
+      // 计算用于展示的“总数”
+      const totalCandidate =
+        effectivePage === 1 ? response.total : loadedCountBeforeRequest + response.total;
+      setTotal(totalCandidate);
 
       // 更新游标：记录最后一条数据的时间戳和 ID
       if (processedItems.length > 0) {
@@ -105,6 +123,7 @@ export function DataBrowserPage() {
         });
       }
     } catch (error: any) {
+      if (requestSeq !== requestSeqRef.current) return;
       console.error('加载数据失败:', error);
       toast.error(error.message || '加载数据失败');
       if (currentPage === 1) {
@@ -112,6 +131,7 @@ export function DataBrowserPage() {
         setTotal(0);
       }
     } finally {
+      if (requestSeq !== requestSeqRef.current) return;
       setIsLoading(false);
     }
   };
@@ -125,10 +145,11 @@ export function DataBrowserPage() {
   };
 
   const handleRefresh = () => {
+    requestSeqRef.current += 1;
     setCurrentPage(1);
     setDataItems([]);
     setCursor(null); // 重置游标
-    loadDataList();
+    void loadDataList({ forceFirstPage: true });
     loadCategories();
     toast.success('数据已刷新');
   };

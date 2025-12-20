@@ -8,59 +8,142 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
+import { getAdminDashboardRecentUsers, getAdminDashboardStats } from '@/apis/dashboard';
+import type { AdminDashboardMetric, AdminDashboardRecentUser } from '@/types/dashboard';
+import { Permission } from '@/types/auth';
 import {
   Users,
   Building2,
   Wrench,
   Workflow,
+  TrendingDown,
   TrendingUp,
   Activity,
   ArrowRight,
 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const Route = createFileRoute('/admin/')({
   component: Dashboard,
 });
 
 function Dashboard() {
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
+  const canViewUsers = hasPermission(Permission.USER_READ);
 
-  // 统计数据（后续从 API 获取）
-  const stats = [
-    {
-      title: '用户总数',
-      value: '1,234',
-      change: '+12.5%',
-      trend: 'up',
-      icon: Users,
-      href: '/admin/users',
-    },
-    {
-      title: '团队总数',
-      value: '456',
-      change: '+8.2%',
-      trend: 'up',
-      icon: Building2,
-      href: '/admin/teams',
-    },
-    {
-      title: '工具数量',
-      value: '89',
-      change: '+3.1%',
-      trend: 'up',
-      icon: Wrench,
-      href: '/admin/tools',
-    },
-    {
-      title: '工作流',
-      value: '2,567',
-      change: '+24.3%',
-      trend: 'up',
-      icon: Workflow,
-      href: '/admin/workflows',
-    },
-  ];
+  const [stats, setStats] = useState<{
+    users: AdminDashboardMetric | null;
+    teams: AdminDashboardMetric | null;
+    tools: AdminDashboardMetric | null;
+    workflows: AdminDashboardMetric | null;
+  }>({ users: null, teams: null, tools: null, workflows: null });
+
+  const [recentUsers, setRecentUsers] = useState<AdminDashboardRecentUser[]>([]);
+  const [isRecentUsersLoading, setIsRecentUsersLoading] = useState(false);
+
+  useEffect(() => {
+    let isCancelled = false;
+    void (async () => {
+      try {
+        const result = await getAdminDashboardStats();
+        if (isCancelled) return;
+        setStats(result);
+      } catch (e: any) {
+        if (isCancelled) return;
+        toast.error(e?.message || '加载统计数据失败');
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+    if (!canViewUsers) {
+      setRecentUsers([]);
+      setIsRecentUsersLoading(false);
+      return;
+    }
+
+    setIsRecentUsersLoading(true);
+    void (async () => {
+      try {
+        if (isCancelled) return;
+        const list = await getAdminDashboardRecentUsers();
+        if (isCancelled) return;
+        setRecentUsers(list);
+      } catch (e: any) {
+        if (isCancelled) return;
+        toast.error(e?.message || '加载最近用户失败');
+      } finally {
+        if (isCancelled) return;
+        setIsRecentUsersLoading(false);
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [canViewUsers]);
+
+  const statCards = useMemo(() => {
+    const formatNumber = (value: number | null) =>
+      value === null ? '—' : new Intl.NumberFormat('zh-CN').format(value);
+
+    const formatChange = (value: number | null) => {
+      if (value === null) return '—';
+      const abs = Math.abs(value);
+      const pct = `${abs.toFixed(1)}%`;
+      return value >= 0 ? `+${pct}` : `-${pct}`;
+    };
+
+    const resolveTrend = (metric: AdminDashboardMetric | null) => {
+      if (!metric) return { icon: Activity, className: 'text-muted-foreground', change: '—' };
+      if (metric.trend === 'up') {
+        return { icon: TrendingUp, className: 'text-green-600', change: formatChange(metric.changePct) };
+      }
+      if (metric.trend === 'down') {
+        return { icon: TrendingDown, className: 'text-red-600', change: formatChange(metric.changePct) };
+      }
+      return { icon: Activity, className: 'text-muted-foreground', change: formatChange(metric.changePct) };
+    };
+
+    return [
+      {
+        title: '用户总数',
+        value: formatNumber(stats.users?.total ?? null),
+        trend: resolveTrend(stats.users),
+        icon: Users,
+        href: '/admin/users',
+      },
+      {
+        title: '团队总数',
+        value: formatNumber(stats.teams?.total ?? null),
+        trend: resolveTrend(stats.teams),
+        icon: Building2,
+        href: '/admin/teams',
+      },
+      {
+        title: '工具数量',
+        value: formatNumber(stats.tools?.total ?? null),
+        trend: resolveTrend(stats.tools),
+        icon: Wrench,
+        href: '/admin/tools',
+      },
+      {
+        title: '工作流',
+        value: formatNumber(stats.workflows?.total ?? null),
+        trend: resolveTrend(stats.workflows),
+        icon: Workflow,
+        href: '/admin/workflows',
+      },
+    ];
+  }, [stats]);
 
   // 快速操作
   const quickActions = [
@@ -104,8 +187,9 @@ function Dashboard() {
 
       {/* 统计卡片 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
+        {statCards.map((stat) => {
           const Icon = stat.icon;
+          const TrendIcon = stat.trend.icon;
           return (
             <Link key={stat.title} to={stat.href}>
               <Card className="transition-all hover:shadow-md cursor-pointer">
@@ -118,8 +202,8 @@ function Dashboard() {
                 <CardContent>
                   <div className="text-2xl font-bold">{stat.value}</div>
                   <div className="flex items-center text-xs text-muted-foreground mt-1">
-                    <TrendingUp className="mr-1 h-3 w-3 text-green-600" />
-                    <span className="text-green-600">{stat.change}</span>
+                    <TrendIcon className={`mr-1 h-3 w-3 ${stat.trend.className}`} />
+                    <span className={stat.trend.className}>{stat.trend.change}</span>
                     <span className="ml-1">较上月</span>
                   </div>
                 </CardContent>
@@ -171,20 +255,37 @@ function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-full bg-muted"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">User {i}</p>
-                    <p className="text-xs text-muted-foreground">
-                      user{i}@example.com
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    查看
-                  </Button>
+              {!canViewUsers ? (
+                <div className="py-6 text-sm text-muted-foreground">
+                  您暂时无法查看
                 </div>
-              ))}
+              ) : isRecentUsersLoading ? (
+                <div className="py-6 text-sm text-muted-foreground">加载中...</div>
+              ) : recentUsers.length === 0 ? (
+                <div className="py-6 text-sm text-muted-foreground">暂无用户</div>
+              ) : (
+                recentUsers.map((u) => (
+                  <div key={u.id} className="flex items-center gap-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={u.photo} alt={u.name} />
+                      <AvatarFallback>
+                        {(u.name || 'U').slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{u.name || '-'}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {u.email || '-'}
+                      </p>
+                    </div>
+                    <Link to="/admin/users">
+                      <Button variant="ghost" size="sm">
+                        查看
+                      </Button>
+                    </Link>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

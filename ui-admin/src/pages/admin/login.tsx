@@ -1,11 +1,11 @@
 import { login } from '@/apis/auth';
 import { Button } from '@/components/ui/button';
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,9 +15,14 @@ import { Loader2, LogIn } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { formatAdminTitle, getBrandLogoUrl, getBrandTitle, useSystemConfigStore } from '@/store/system-config';
+import {
+  formatAdminTitle,
+  getBrandLogoUrl,
+  getBrandTitle,
+  useSystemConfigStore,
+} from '@/store/system-config';
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute('/admin/login')({
   component: LoginPage,
 });
 
@@ -63,7 +68,6 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 text-center">
           <div
             className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg overflow-hidden ${
@@ -71,16 +75,21 @@ function LoginPage() {
             }`}
           >
             {logoUrl ? (
-              <img src={logoUrl} alt={brandTitle} className="h-full w-full object-contain" />
+              <img
+                src={logoUrl}
+                alt={brandTitle}
+                className="h-full w-full object-contain"
+              />
             ) : (
               <LogIn className="h-8 w-8" />
             )}
           </div>
           <h1 className="text-3xl font-bold tracking-tight">{adminTitle}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{brandTitle} 管理后台</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {brandTitle} 管理后台
+          </p>
         </div>
 
-        {/* 登录卡片 */}
         <Card className="shadow-xl">
           <CardHeader>
             <CardTitle>登录</CardTitle>
@@ -140,7 +149,6 @@ function LoginPage() {
           </CardContent>
         </Card>
 
-        {/* 底部信息 */}
         <p className="mt-8 text-center text-sm text-muted-foreground">
           © 2024 {brandTitle}. All rights reserved.
         </p>
@@ -148,3 +156,4 @@ function LoginPage() {
     </div>
   );
 }
+
