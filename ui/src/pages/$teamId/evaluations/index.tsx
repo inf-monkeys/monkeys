@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { Link, Pencil, Plus, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -11,10 +11,10 @@ import { deleteEvaluationModule } from '@/apis/evaluation';
 import { EvaluationModule } from '@/apis/evaluation/typings';
 import { preloadUgcEvaluationModules, useUgcEvaluationModules } from '@/apis/ugc/evaluation';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { UgcView } from '@/components/layout/ugc/view';
 import { createEvaluationModulesColumns } from '@/components/layout/ugc-pages/evaluations/consts.tsx';
 import { CreateEvaluationModuleDialog } from '@/components/layout/ugc-pages/evaluations/create-evaluation-module.tsx';
 import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
+import { UgcView } from '@/components/layout/ugc/view';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
@@ -63,6 +63,9 @@ export const EvaluationModules: React.FC = () => {
     toast.promise(deleteEvaluationModule(moduleId), {
       loading: t('common.delete.loading'),
       success: () => {
+        // 重要：删除成功后需要显式关闭弹窗/清理状态，避免残留 overlay 导致页面不可点击
+        setDeleteAlertDialogVisible(false);
+        setCurrentModule(undefined);
         void mutateEvaluationModules();
         return t('common.delete.success');
       },
@@ -96,7 +99,8 @@ export const EvaluationModules: React.FC = () => {
           ),
         }}
         operateArea={(item, trigger, tooltipTriggerContent) => (
-          <DropdownMenu>
+          // Radix DropdownMenu 默认是 modal（会禁用外部点击）。这里设为 false，避免在列表刷新/卸载时残留“全局不可点击”的锁定状态。
+          <DropdownMenu modal={false}>
             {tooltipTriggerContent ? (
               <Tooltip content={tooltipTriggerContent}>
                 <TooltipTrigger asChild>
@@ -110,7 +114,6 @@ export const EvaluationModules: React.FC = () => {
             <DropdownMenuContent
               onClick={(e) => {
                 e.stopPropagation();
-                e.preventDefault();
               }}
             >
               <DropdownMenuLabel>{t('ugc-page.evaluation.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
@@ -186,7 +189,15 @@ export const EvaluationModules: React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDeleteModule(currentModule?.id)}>
+            <AlertDialogAction
+              onClick={() => {
+                // 受控模式下这里也做一次兜底关闭，避免 overlay 残留
+                const moduleId = currentModule?.id;
+                setDeleteAlertDialogVisible(false);
+                setCurrentModule(undefined);
+                handleDeleteModule(moduleId);
+              }}
+            >
               {t('common.utils.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
