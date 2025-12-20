@@ -43,7 +43,16 @@ export const UgcViewCard = <E extends object>({
 
   const operateAreaNode = operateArea?.(
     row.original,
-    <Button icon={<MoreHorizontal />} size="small" variant="outline" className="scale-80 -m-1" />,
+    <Button
+      icon={<MoreHorizontal />}
+      size="small"
+      variant="outline"
+      className="scale-80 -m-1"
+      onClick={(e) => {
+        // 避免触发 Card 的 onClick（否则点“...”会跳转/打开详情页）
+        e.stopPropagation();
+      }}
+    />,
     t('common.utils.operate'),
   );
 
