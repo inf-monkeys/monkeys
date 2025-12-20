@@ -297,3 +297,17 @@ export class DataAssetListResponseDto {
   @ApiProperty({ description: '每页数量' })
   pageSize: number;
 }
+
+/**
+ * 资产下一页响应 DTO（不包含 total，用于滚动加载）
+ */
+export class DataAssetNextPageResponseDto {
+  @ApiProperty({ description: '资产列表', type: [DataAssetResponseDto] })
+  list: DataAssetResponseDto[];
+
+  @ApiProperty({ description: '是否还有更多数据' })
+  hasMore: boolean;
+
+  @ApiProperty({ description: '每页数量' })
+  pageSize: number;
+}

@@ -130,6 +130,13 @@ export interface AssetListResponse {
   pageSize: number;
 }
 
+// 资产下一页响应（滚动加载，不返回 total）
+export interface AssetNextPageResponse {
+  list: DataAsset[];
+  hasMore: boolean;
+  pageSize: number;
+}
+
 // 视图树响应
 export interface ViewTreeResponse {
   tree: DataView[];

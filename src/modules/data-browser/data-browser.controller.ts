@@ -12,6 +12,7 @@ import {
   QueryDataAssetDto,
   DataAssetResponseDto,
   DataAssetListResponseDto,
+  DataAssetNextPageResponseDto,
   QueryDataViewDto,
   DataViewResponseDto,
   DataViewTreeResponseDto,
@@ -97,6 +98,23 @@ export class DataBrowserController {
     @Query() dto: QueryDataAssetDto,
   ): Promise<DataAssetListResponseDto> {
     return this.dataBrowserService.getAssets(
+      request.userId,
+      dto,
+      request.teamId,
+    );
+  }
+
+  /**
+   * 获取数据资产下一页（滚动加载，不返回 total）
+   */
+  @Get('assets/nextpage')
+  @ApiOperation({ summary: '获取数据资产下一页（只读，不返回 total）' })
+  @ApiResponse({ status: 200, type: DataAssetNextPageResponseDto })
+  async getAssetsNextPage(
+    @Req() request: IRequest,
+    @Query() dto: QueryDataAssetDto,
+  ): Promise<DataAssetNextPageResponseDto> {
+    return this.dataBrowserService.getAssetsNextPage(
       request.userId,
       dto,
       request.teamId,

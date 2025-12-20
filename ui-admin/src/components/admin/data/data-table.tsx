@@ -28,6 +28,7 @@ interface DataTableProps {
   currentPage?: number;
   pageSize?: number;
   total?: number;
+  hasMore?: boolean;
   onPageChange?: (page: number) => void;
   onEdit?: (item: DataItem) => void;
   onDelete?: (item: DataItem) => void;
@@ -41,6 +42,7 @@ export function DataTable({
   currentPage = 1,
   pageSize = 20,
   total = 0,
+  hasMore: hasMoreProp,
   onPageChange,
   onEdit,
   onDelete,
@@ -49,7 +51,7 @@ export function DataTable({
 }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
-  const hasMore = total > data.length;
+  const hasMore = hasMoreProp ?? total > data.length;
   const observerRef = React.useRef<IntersectionObserver | null>(null);
   const sentinelRef = React.useRef<HTMLDivElement | null>(null);
 

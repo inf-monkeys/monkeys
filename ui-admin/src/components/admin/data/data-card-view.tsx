@@ -28,6 +28,7 @@ interface DataCardViewProps {
   currentPage?: number;
   pageSize?: number;
   total?: number;
+  hasMore?: boolean;
   onPageChange?: (page: number) => void;
   onEdit?: (item: DataItem) => void;
   onDelete?: (item: DataItem) => void;
@@ -41,13 +42,14 @@ export function DataCardView({
   selectedIds = [],
   currentPage = 1,
   total = 0,
+  hasMore: hasMoreProp,
   onPageChange,
   onEdit,
   onDelete,
   onView,
   onSelectionChange,
 }: DataCardViewProps) {
-  const hasMore = total > data.length;
+  const hasMore = hasMoreProp ?? total > data.length;
   const [expandedKeywordItemIds, setExpandedKeywordItemIds] = useState<Set<string>>(() => new Set());
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);

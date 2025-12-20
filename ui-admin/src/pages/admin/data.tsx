@@ -7,6 +7,7 @@ import {
     exportData,
     getDataCategories,
     getDataList,
+    getDataNextPage,
     getDataItem,
     importData,
     updateView,
@@ -36,6 +37,7 @@ function DataManagementPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [viewingItem, setViewingItem] = useState<DataItem | null>(null);
   // 游标分页优化：记录最后一条数据的时间戳和 ID
   const [cursor, setCursor] = useState<{ timestamp?: number; id?: string } | null>(null);
@@ -53,6 +55,7 @@ function DataManagementPage() {
     setCurrentPage(1);
     setDataItems([]);
     setTotal(0);
+    setHasMore(true);
     setCursor(null); // 重置游标
   }, [selectedCategory, searchKeyword]);
 
@@ -78,25 +81,36 @@ function DataManagementPage() {
     setIsLoading(true);
     try {
       const effectivePage = options?.forceFirstPage ? 1 : currentPage;
-      const loadedCountBeforeRequest = effectivePage === 1 ? 0 : dataItems.length;
 
-      const response = await getDataList({
+      const commonParams = {
         viewId: selectedCategory || undefined,
         keyword: searchKeyword || undefined,
-        // 游标分页优化：第一页用 page，后续页用游标
-        ...(effectivePage === 1
-          ? { page: 1 }
-          : {
-              cursorTimestamp: cursor?.timestamp,
-              cursorId: cursor?.id,
-            }),
-        pageSize: pageSize,
-      });
+        pageSize,
+      };
 
-      if (requestSeq !== requestSeqRef.current) return;
+      let items: DataItem[] = [];
+      let nextHasMore = true;
+      let firstPageTotal: number | null = null;
+
+      if (effectivePage === 1) {
+        const response = await getDataList({ ...commonParams, page: 1 });
+        if (requestSeq !== requestSeqRef.current) return;
+        items = response.items;
+        firstPageTotal = response.total;
+        nextHasMore = items.length < response.total;
+      } else {
+        const response = await getDataNextPage({
+          ...commonParams,
+          cursorTimestamp: cursor?.timestamp,
+          cursorId: cursor?.id,
+        });
+        if (requestSeq !== requestSeqRef.current) return;
+        items = response.items;
+        nextHasMore = response.hasMore;
+      }
 
       // 解析 media 字段（如果是 JSON 字符串）
-      const processedItems = response.items.map(item => {
+      const processedItems = items.map(item => {
         if (typeof item.media === 'string' && item.media.startsWith('[')) {
           try {
             item.media = JSON.parse(item.media);
@@ -111,14 +125,13 @@ function DataManagementPage() {
       // 如果是第一页，替换数据；否则追加数据（用于无限滚动）
       if (effectivePage === 1) {
         setDataItems(processedItems);
+        // 原接口第一页返回 total（仍为“剩余数量”，但第一页即总数），用于展示总量
+        setTotal(firstPageTotal || 0);
+        setHasMore(nextHasMore);
       } else {
         setDataItems(prev => [...prev, ...processedItems]);
+        setHasMore(nextHasMore);
       }
-
-      // 后端在游标分页模式下返回的 total 是“剩余数量（包含本次 items）”，需要还原为“总数”
-      const totalCandidate =
-        effectivePage === 1 ? response.total : loadedCountBeforeRequest + response.total;
-      setTotal(totalCandidate);
 
       // 更新游标：记录最后一条数据的时间戳和 ID
       if (processedItems.length > 0) {
@@ -135,6 +148,7 @@ function DataManagementPage() {
       if (currentPage === 1) {
         setDataItems([]);
         setTotal(0);
+        setHasMore(true);
       }
     } finally {
       if (requestSeq !== requestSeqRef.current) return;
@@ -155,6 +169,7 @@ function DataManagementPage() {
     setCurrentPage(1);
     setDataItems([]);
     setTotal(0);
+    setHasMore(true);
     setCursor(null); // 重置游标
     void loadDataList({ forceFirstPage: true });
     loadCategories();
@@ -336,6 +351,7 @@ function DataManagementPage() {
                   currentPage={currentPage}
                   pageSize={pageSize}
                   total={total}
+                  hasMore={hasMore}
                   onPageChange={handlePageChange}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
@@ -350,6 +366,7 @@ function DataManagementPage() {
                   currentPage={currentPage}
                   pageSize={pageSize}
                   total={total}
+                  hasMore={hasMore}
                   onPageChange={handlePageChange}
                   onEdit={handleEdit}
                   onDelete={handleDelete}

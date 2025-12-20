@@ -7,6 +7,7 @@ import type {
   ViewQueryParams,
   ViewTreeResponse,
   AssetListResponse,
+  AssetNextPageResponse,
 } from '@/types/data';
 import { vinesFetcher } from './fetcher';
 
@@ -97,6 +98,29 @@ export async function getDataList(
     total: response?.total || 0,
     page: response?.page || 1,
     pageSize: response?.pageSize || 20,
+  };
+}
+
+/**
+ * 获取下一页数据（滚动加载，不返回 total）
+ */
+export async function getDataNextPage(
+  params: DataQueryParams
+): Promise<{ items: DataItem[]; hasMore: boolean; pageSize: number }> {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {})
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => [key, String(value)])
+  ).toString();
+
+  const url = `${API_BASE}/assets/nextpage?${queryString}`;
+
+  const response = await get<AssetNextPageResponse>(url);
+
+  return {
+    items: response?.list || [],
+    hasMore: !!response?.hasMore,
+    pageSize: response?.pageSize || params.pageSize || 20,
   };
 }
 

@@ -2,9 +2,10 @@ import { AssetStatus, DataAssetEntity } from '@/database/entities/data-managemen
 import { DataViewEntity } from '@/database/entities/data-management/data-view.entity';
 import { DataAssetRepository } from '@/database/repositories/data-asset.repository';
 import { DataViewRepository } from '@/database/repositories/data-view.repository';
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   DataAssetListResponseDto,
+  DataAssetNextPageResponseDto,
   DataAssetResponseDto,
   DataViewResponseDto,
   QueryDataAssetDto,
@@ -141,6 +142,71 @@ export class DataBrowserService {
       list: assets.map((asset) => this.toResponseDto(asset)),
       total,
       page,
+      pageSize,
+    };
+  }
+
+  /**
+   * 获取资产下一页（只读，不返回 total）
+   * 用于滚动加载场景：避免 getManyAndCount() 带来的 COUNT(*) 开销。
+   */
+  async getAssetsNextPage(
+    userId: string,
+    dto: QueryDataAssetDto,
+    teamId?: string,
+  ): Promise<DataAssetNextPageResponseDto> {
+    const pageSize = dto.pageSize || 20;
+
+    if (!dto.cursorTimestamp || !dto.cursorId) {
+      throw new BadRequestException('cursorTimestamp and cursorId are required for nextpage');
+    }
+
+    let assets: DataAssetEntity[];
+    let hasMore: boolean;
+
+    if (dto.viewId) {
+      const view = await this.dataViewRepository.findById(dto.viewId);
+      if (!view) {
+        return { list: [], hasMore: false, pageSize };
+      }
+
+      ({ list: assets, hasMore } = await this.dataAssetRepository.findByViewWithDescendantsNextPage(
+        view.path,
+        {
+          assetType: dto.assetType,
+          status: AssetStatus.PUBLISHED,
+          keyword: dto.keyword,
+          teamId: dto.teamId || teamId,
+          creatorUserId: dto.creatorUserId,
+          excludeLargeFields: true,
+        },
+        {
+          pageSize,
+          cursorTimestamp: dto.cursorTimestamp,
+          cursorId: dto.cursorId,
+        }
+      ));
+    } else {
+      ({ list: assets, hasMore } = await this.dataAssetRepository.findByFilterNextPage(
+        {
+          assetType: dto.assetType,
+          status: AssetStatus.PUBLISHED,
+          keyword: dto.keyword,
+          teamId: dto.teamId || teamId,
+          creatorUserId: dto.creatorUserId,
+          excludeLargeFields: true,
+        },
+        {
+          pageSize,
+          cursorTimestamp: dto.cursorTimestamp,
+          cursorId: dto.cursorId,
+        }
+      ));
+    }
+
+    return {
+      list: assets.map((asset) => this.toResponseDto(asset)),
+      hasMore,
       pageSize,
     };
   }

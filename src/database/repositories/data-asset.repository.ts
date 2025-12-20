@@ -23,6 +23,11 @@ export interface DataAssetPagination {
   cursorId?: string; // 上一页最后一条的 id（解决时间戳相同的情况）
 }
 
+export interface DataAssetNextPageResult<T> {
+  list: T[];
+  hasMore: boolean;
+}
+
 @Injectable()
 export class DataAssetRepository extends Repository<DataAssetEntity> {
   constructor(private dataSource: DataSource) {
@@ -321,6 +326,86 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
   }
 
   /**
+   * 多条件筛选资产（不返回 COUNT，用于滚动加载）
+   * 通过 take(pageSize + 1) 计算 hasMore，避免额外 COUNT 查询。
+   */
+  async findByFilterNextPage(
+    filter: DataAssetFilter,
+    pagination: Required<Pick<DataAssetPagination, 'pageSize'>> & Pick<DataAssetPagination, 'cursorTimestamp' | 'cursorId'>
+  ): Promise<DataAssetNextPageResult<DataAssetEntity>> {
+    const query = this.createQueryBuilder('asset')
+      .where('asset.isDeleted = :isDeleted', { isDeleted: false });
+
+    if (filter.excludeLargeFields) {
+      query.select([
+        'asset.id',
+        'asset.name',
+        'asset.viewId',
+        'asset.assetType',
+        'asset.keywords',
+        'asset.thumbnail',
+        'asset.media',
+        'asset.viewCount',
+        'asset.downloadCount',
+        'asset.status',
+        'asset.teamId',
+        'asset.creatorUserId',
+        'asset.displayName',
+        'asset.isPublished',
+        'asset.createdTimestamp',
+        'asset.updatedTimestamp',
+      ]);
+    }
+
+    if (filter.status) {
+      query.andWhere('asset.status = :status', { status: filter.status });
+    }
+
+    if (filter.teamId) {
+      query.andWhere('(asset.teamId = :teamId OR asset.teamId = :globalTeamId)', {
+        teamId: filter.teamId,
+        globalTeamId: '0',
+      });
+    }
+
+    if (filter.viewIds && filter.viewIds.length > 0) {
+      query.andWhere('asset.viewId IN (:...viewIds)', { viewIds: filter.viewIds });
+    } else if (filter.viewId) {
+      query.andWhere('asset.viewId = :viewId', { viewId: filter.viewId });
+    }
+
+    if (filter.assetType) {
+      query.andWhere('asset.assetType = :assetType', { assetType: filter.assetType });
+    }
+
+    if (filter.creatorUserId) {
+      query.andWhere('asset.creatorUserId = :creatorUserId', { creatorUserId: filter.creatorUserId });
+    }
+
+    if (filter.keyword) {
+      query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword)', {
+        keyword: `%${filter.keyword}%`,
+      });
+    }
+
+    query.orderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
+
+    const { pageSize, cursorTimestamp, cursorId } = pagination;
+    if (cursorTimestamp && cursorId) {
+      query.andWhere(
+        '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+        { cursorTimestamp, cursorId }
+      );
+    }
+
+    query.take(pageSize + 1);
+
+    const rows = await query.getMany();
+    const hasMore = rows.length > pageSize;
+    return { list: hasMore ? rows.slice(0, pageSize) : rows, hasMore };
+  }
+
+  /**
    * 查询视图及其所有子孙视图的资产（性能优化版本）
    * 使用 JOIN 减少查询次数，从 3 次降到 1 次
    */
@@ -413,6 +498,88 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     }
 
     return query.getManyAndCount();
+  }
+
+  /**
+   * 查询视图及其所有子孙视图的资产（不返回 COUNT，用于滚动加载）
+   * 通过 take(pageSize + 1) 计算 hasMore，避免额外 COUNT 查询。
+   */
+  async findByViewWithDescendantsNextPage(
+    viewPath: string,
+    filter: DataAssetFilter,
+    pagination: Required<Pick<DataAssetPagination, 'pageSize'>> & Pick<DataAssetPagination, 'cursorTimestamp' | 'cursorId'>
+  ): Promise<DataAssetNextPageResult<DataAssetEntity>> {
+    const query = this.createQueryBuilder('asset')
+      .innerJoin(DataViewEntity, 'view', 'asset.viewId = view.id')
+      .where('asset.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('view.isDeleted = :viewIsDeleted', { viewIsDeleted: false });
+
+    query.andWhere('(view.path = :viewPath OR view.path LIKE :viewPathPattern)', {
+      viewPath,
+      viewPathPattern: `${viewPath}_%`,
+    });
+
+    if (filter.excludeLargeFields) {
+      query.select([
+        'asset.id',
+        'asset.name',
+        'asset.viewId',
+        'asset.assetType',
+        'asset.thumbnail',
+        'asset.media',
+        'asset.viewCount',
+        'asset.downloadCount',
+        'asset.status',
+        'asset.teamId',
+        'asset.creatorUserId',
+        'asset.displayName',
+        'asset.isPublished',
+        'asset.keywords',
+        'asset.createdTimestamp',
+        'asset.updatedTimestamp',
+      ]);
+    }
+
+    if (filter.status) {
+      query.andWhere('asset.status = :status', { status: filter.status });
+    }
+
+    if (filter.teamId) {
+      query.andWhere('(asset.teamId = :teamId OR asset.teamId = :globalTeamId)', {
+        teamId: filter.teamId,
+        globalTeamId: '0',
+      });
+    }
+
+    if (filter.assetType) {
+      query.andWhere('asset.assetType = :assetType', { assetType: filter.assetType });
+    }
+
+    if (filter.creatorUserId) {
+      query.andWhere('asset.creatorUserId = :creatorUserId', { creatorUserId: filter.creatorUserId });
+    }
+
+    if (filter.keyword) {
+      query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword)', {
+        keyword: `%${filter.keyword}%`,
+      });
+    }
+
+    query.orderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
+
+    const { pageSize, cursorTimestamp, cursorId } = pagination;
+    if (cursorTimestamp && cursorId) {
+      query.andWhere(
+        '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+        { cursorTimestamp, cursorId }
+      );
+    }
+
+    query.take(pageSize + 1);
+
+    const rows = await query.getMany();
+    const hasMore = rows.length > pageSize;
+    return { list: hasMore ? rows.slice(0, pageSize) : rows, hasMore };
   }
 
   /**

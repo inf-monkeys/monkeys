@@ -17,6 +17,7 @@ import {
   QueryDataAssetDto,
   DataAssetResponseDto,
   DataAssetListResponseDto,
+  DataAssetNextPageResponseDto,
   BatchUpdateStatusDto,
 } from './dto/data-asset.dto';
 import { AdminJwtGuard } from '../guards/admin-jwt.guard';
@@ -48,6 +49,16 @@ export class DataAssetController {
     @Query() dto: QueryDataAssetDto,
   ): Promise<DataAssetListResponseDto> {
     return this.dataAssetService.getAssets(admin.id, dto);
+  }
+
+  @Get('nextpage')
+  @ApiOperation({ summary: '获取数据资产下一页（不返回 total）' })
+  @ApiResponse({ status: 200, type: DataAssetNextPageResponseDto })
+  async getAssetsNextPage(
+    @CurrentAdmin() admin: AdminUserDto,
+    @Query() dto: QueryDataAssetDto,
+  ): Promise<DataAssetNextPageResponseDto> {
+    return this.dataAssetService.getAssetsNextPage(admin.id, dto);
   }
 
   @Get(':id')

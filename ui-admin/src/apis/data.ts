@@ -12,6 +12,7 @@ import type {
   MoveViewDto,
   ViewTreeResponse,
   AssetListResponse,
+  AssetNextPageResponse,
 } from '@/types/data';
 import { apiRequest, apiRequestBlob, getAuthHeaders } from './http';
 
@@ -144,6 +145,29 @@ export async function getDataList(
     total: response.total,
     page: response.page,
     pageSize: response.pageSize,
+  };
+}
+
+/**
+ * 获取下一页数据（滚动加载，不返回 total）
+ */
+export async function getDataNextPage(
+  params: DataQueryParams
+): Promise<{ items: DataItem[]; hasMore: boolean; pageSize: number }> {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {})
+      .filter(([, value]) => value !== undefined)
+      .map(([key, value]) => [key, String(value)])
+  ).toString();
+
+  const url = `${API_BASE}/data/nextpage?${queryString}`;
+
+  const response = await request<AssetNextPageResponse>(url);
+
+  return {
+    items: response?.list || [],
+    hasMore: !!response?.hasMore,
+    pageSize: response?.pageSize || params.pageSize || 20,
   };
 }
 
