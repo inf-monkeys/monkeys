@@ -295,11 +295,11 @@ export class TeamsController {
     const { userId } = req;
     const status = await this.service.getTeamInitStatus(teamId, userId);
 
-    console.log('status', status);
+    console.log('[Team Init Status]', { teamId, status });
 
     // 如果状态为 null 或者 SUCCESS，直接返回结果
     if (!status || status === TeamInitStatusEnum.SUCCESS) {
-      console.log('return status', status);
+      console.log('[Team Init] Return status directly', status);
 
       return res.json(
         new SuccessResponse({
@@ -310,7 +310,7 @@ export class TeamsController {
 
     // 如果状态为 PENDING 或 FAILED，进入 SSE 流式流程
     if (status === TeamInitStatusEnum.PENDING || status === TeamInitStatusEnum.FAILED) {
-      console.log('enter SSE stream');
+      console.log('[Team Init] Enter SSE stream for status:', status);
 
       // 设置 SSE 响应头
       res.setHeader('Content-Type', 'text/event-stream');
@@ -344,12 +344,14 @@ export class TeamsController {
 
       // 处理客户端断开连接
       req.on('close', () => {
+        console.log('[Team Init SSE] Client disconnected', { teamId });
         isConnected = false;
       });
 
       // 订阅团队状态变化
       const unsubscribe = await this.service.subscribeToTeamStatus(teamId, userId, (newStatus) => {
         if (isConnected) {
+          console.log('[Team Init SSE] Status update', { teamId, newStatus });
           res.write(`event: status_update\n`);
           res.write(
             `data: ${JSON.stringify({
@@ -362,6 +364,7 @@ export class TeamsController {
 
           // 如果状态变为 SUCCESS 或 null，结束流
           if (!newStatus || newStatus === TeamInitStatusEnum.SUCCESS) {
+            console.log('[Team Init SSE] Complete, closing connection', { teamId, newStatus });
             res.write(`event: complete\n`);
             res.write(
               `data: ${JSON.stringify({
