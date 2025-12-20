@@ -9,11 +9,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { InfiniteScroll } from '@/components/ui/infinite-scroll';
 import { MediaPreview } from '@/components/ui/media-preview';
 import type { DataItem } from '@/types/data';
 import { Edit, Eye, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * 检测是否是文本文件
@@ -54,6 +53,15 @@ export function DataCardView({
   const hasMore = total > data.length;
   const [expandedKeywordItemIds, setExpandedKeywordItemIds] = useState<Set<string>>(() => new Set());
 
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const masonryContainerRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const itemElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
+  const itemHeightsRef = useRef<Map<string, number>>(new Map());
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [layoutVersion, setLayoutVersion] = useState(0);
+  const loadMoreLockRef = useRef(false);
+
   const toggleKeywordsExpanded = (itemId?: string) => {
     if (!itemId) return;
     setExpandedKeywordItemIds((prev) => {
@@ -77,9 +85,148 @@ export function DataCardView({
     onSelectionChange(newSelectedIds);
   };
 
-  const handleLoadMore = () => {
-    if (onPageChange && hasMore && !isLoading) {
-      onPageChange(currentPage + 1);
+  useEffect(() => {
+    if (!isLoading) {
+      loadMoreLockRef.current = false;
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    const container = masonryContainerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      setContainerWidth(entry.contentRect.width);
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      let changed = false;
+      for (const entry of entries) {
+        const target = entry.target as HTMLDivElement;
+        const id = target.dataset['id'];
+        if (!id) continue;
+
+        const height = Math.ceil(entry.contentRect.height);
+        if (itemHeightsRef.current.get(id) !== height) {
+          itemHeightsRef.current.set(id, height);
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        setLayoutVersion((v) => v + 1);
+      }
+    });
+
+    for (const el of itemElementsRef.current.values()) {
+      resizeObserver.observe(el);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, [data.length]);
+
+  const columnCount = useMemo(() => {
+    if (containerWidth >= 1280) return 4;
+    if (containerWidth >= 1024) return 3;
+    if (containerWidth >= 768) return 2;
+    return 1;
+  }, [containerWidth]);
+
+  const gapPx = 16;
+
+  const estimatedHeights = useMemo(() => {
+    const availableWidth = Math.max(0, containerWidth - gapPx * (columnCount - 1));
+    const columnWidth = columnCount > 0 ? availableWidth / columnCount : 0;
+    const estimatedHeaderHeight = 84;
+
+    return new Map<string, number>(
+      data
+        .filter((item) => !!item.id)
+        .map((item) => {
+          const mediaUrl = Array.isArray(item.media) ? item.media[0] : item.media;
+          const isText = isTextFile(mediaUrl || item.thumbnail || '');
+          const hasMedia = !isText && !!(item.thumbnail || item.media);
+
+          const estimatedHeight = hasMedia
+            ? Math.ceil(estimatedHeaderHeight + columnWidth)
+            : estimatedHeaderHeight;
+
+          return [item.id as string, estimatedHeight];
+        })
+    );
+  }, [containerWidth, columnCount, data]);
+
+  const masonryLayout = useMemo(() => {
+    const availableWidth = Math.max(0, containerWidth - gapPx * (columnCount - 1));
+    const columnWidth = columnCount > 0 ? availableWidth / columnCount : 0;
+    const columnHeights = new Array(columnCount).fill(0) as number[];
+
+    const positions = new Map<string, { x: number; y: number; width: number }>();
+
+    for (const item of data) {
+      if (!item.id) continue;
+
+      const height =
+        itemHeightsRef.current.get(item.id) ?? estimatedHeights.get(item.id) ?? 0;
+
+      let targetCol = 0;
+      for (let col = 1; col < columnHeights.length; col++) {
+        if (columnHeights[col] < columnHeights[targetCol]) targetCol = col;
+      }
+
+      const x = targetCol * (columnWidth + gapPx);
+      const y = columnHeights[targetCol];
+
+      positions.set(item.id, { x, y, width: columnWidth });
+      columnHeights[targetCol] = y + height + gapPx;
+    }
+
+    const height = columnHeights.length ? Math.max(...columnHeights) : 0;
+    return { positions, height };
+  }, [containerWidth, columnCount, data, estimatedHeights, layoutVersion]);
+
+  useEffect(() => {
+    const root = scrollContainerRef.current;
+    const sentinel = sentinelRef.current;
+    if (!root || !sentinel || !onPageChange) return;
+
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+        if (isLoading) return;
+        if (!hasMore) return;
+        if (loadMoreLockRef.current) return;
+
+        loadMoreLockRef.current = true;
+        onPageChange(currentPage + 1);
+      },
+      { root, rootMargin: '200px', threshold: 0.1 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [currentPage, hasMore, isLoading, onPageChange]);
+
+  const setItemRef = (id?: string) => (node: HTMLDivElement | null) => {
+    if (!id) return;
+
+    const prev = itemElementsRef.current.get(id);
+    if (prev && prev !== node) {
+      itemElementsRef.current.delete(id);
+    }
+
+    if (node) {
+      node.dataset['id'] = id;
+      itemElementsRef.current.set(id, node);
     }
   };
 
@@ -104,99 +251,58 @@ export function DataCardView({
 
   return (
     <div className="h-full flex flex-col">
-      {/* 瀑布流卡片 */}
-      <div className="flex-1 overflow-auto p-4">
-        <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4">
-          <InfiniteScroll
-            isLoading={!!isLoading}
-            hasMore={hasMore}
-            next={handleLoadMore}
-            threshold={0.8}
-          >
-            {data.map((item, index) => {
-              // 检查是否有媒体文件且不是文本文件
-              const mediaUrl = Array.isArray(item.media) ? item.media[0] : item.media;
-              const isText = isTextFile(mediaUrl || item.thumbnail || '');
-              const hasMedia = !isText && !!(item.thumbnail || item.media);
-              const mediaDisplayUrl = Array.isArray(item.media)
-                ? item.media
-                : item.media || item.thumbnail || '';
+      {/* Masonry 卡片（追加稳定；列数变化允许重排） */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-auto p-4">
+        <div
+          ref={masonryContainerRef}
+          className="relative"
+          style={{ height: masonryLayout.height }}
+        >
+          {data.map((item) => {
+            // 检查是否有媒体文件且不是文本文件
+            const mediaUrl = Array.isArray(item.media) ? item.media[0] : item.media;
+            const isText = isTextFile(mediaUrl || item.thumbnail || '');
+            const hasMedia = !isText && !!(item.thumbnail || item.media);
+            const mediaDisplayUrl = Array.isArray(item.media)
+              ? item.media
+              : item.media || item.thumbnail || '';
 
-              const keywords = Array.isArray(item.keywords) ? item.keywords : [];
-              const isKeywordsExpanded = !!item.id && expandedKeywordItemIds.has(item.id);
-              const visibleKeywords = isKeywordsExpanded ? keywords : keywords.slice(0, 3);
-              const restKeywordCount = Math.max(0, keywords.length - visibleKeywords.length);
+            const keywords = Array.isArray(item.keywords) ? item.keywords : [];
+            const isKeywordsExpanded = !!item.id && expandedKeywordItemIds.has(item.id);
+            const visibleKeywords = isKeywordsExpanded ? keywords : keywords.slice(0, 3);
+            const restKeywordCount = Math.max(0, keywords.length - visibleKeywords.length);
+            const title = (item.name || '').trim();
+            const hasTitle = title.length > 0;
+            const hasKeywords = keywords.length > 0;
+            const showHeader = hasTitle || hasKeywords;
 
-              return (
-                <Card
-                  key={item.id}
-                  className="relative flex flex-col break-inside-avoid mb-4"
-                >
-                  <CardHeader className={hasMedia ? 'pb-3' : 'pb-2'}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                        {keywords.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {visibleKeywords.map((k) => (
-                              <Badge
-                                key={k}
-                                variant="secondary"
-                                title={k}
-                                className="font-normal max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
-                              >
-                                {k}
-                              </Badge>
-                            ))}
-                            {restKeywordCount > 0 && (
-                              <Badge
-                                variant="outline"
-                                className="font-normal cursor-pointer select-none"
-                                role="button"
-                                tabIndex={0}
-                                aria-expanded={isKeywordsExpanded}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleKeywordsExpanded(item.id);
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    toggleKeywordsExpanded(item.id);
-                                  }
-                                }}
-                              >
-                                +{restKeywordCount}
-                              </Badge>
-                            )}
-                            {isKeywordsExpanded && keywords.length > 3 && (
-                              <Badge
-                                variant="outline"
-                                className="font-normal cursor-pointer select-none"
-                                role="button"
-                                tabIndex={0}
-                                aria-expanded={isKeywordsExpanded}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleKeywordsExpanded(item.id);
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    toggleKeywordsExpanded(item.id);
-                                  }
-                                }}
-                              >
-                                收起
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                      </div>
+            const pos = item.id ? masonryLayout.positions.get(item.id) : undefined;
+
+            return (
+              <div
+                key={item.id}
+                style={
+                  pos
+                    ? {
+                        position: 'absolute',
+                        width: pos.width,
+                        transform: `translate3d(${pos.x}px, ${pos.y}px, 0)`,
+                      }
+                    : undefined
+                }
+              >
+                <div ref={setItemRef(item.id)}>
+                  <Card className="relative flex flex-col">
+                    <div className="absolute right-2 top-2 z-10">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-background/70 backdrop-blur-sm"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">打开菜单</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -229,24 +335,95 @@ export function DataCardView({
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                  </CardHeader>
-                  {hasMedia && (
-                    <CardContent className="p-0">
-                      <MediaPreview
-                        src={mediaDisplayUrl}
-                        alt={item.name}
-                        type="auto"
-                        thumbnail={item.thumbnail}
-                        aspectRatio="square"
-                        onViewAll={() => onView?.(item)}
-                      />
-                    </CardContent>
-                  )}
-                </Card>
-              );
-            })}
-          </InfiniteScroll>
+
+                    {showHeader && (
+                      <CardHeader className={hasMedia ? 'pb-3' : 'pb-2'}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            {hasTitle && (
+                              <h3 className="font-semibold text-sm truncate">{title}</h3>
+                            )}
+                            {hasKeywords && (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {visibleKeywords.map((k) => (
+                                  <Badge
+                                    key={k}
+                                    variant="secondary"
+                                    title={k}
+                                    className="font-normal max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                                  >
+                                    {k}
+                                  </Badge>
+                                ))}
+                                {restKeywordCount > 0 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="font-normal cursor-pointer select-none"
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-expanded={isKeywordsExpanded}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleKeywordsExpanded(item.id);
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        toggleKeywordsExpanded(item.id);
+                                      }
+                                    }}
+                                  >
+                                    +{restKeywordCount}
+                                  </Badge>
+                                )}
+                                {isKeywordsExpanded && keywords.length > 3 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="font-normal cursor-pointer select-none"
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-expanded={isKeywordsExpanded}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleKeywordsExpanded(item.id);
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        toggleKeywordsExpanded(item.id);
+                                      }
+                                    }}
+                                  >
+                                    收起
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CardHeader>
+                    )}
+                    {hasMedia && (
+                      <CardContent className="p-0">
+                        <MediaPreview
+                          src={mediaDisplayUrl}
+                          alt={item.name}
+                          type="auto"
+                          thumbnail={item.thumbnail}
+                          aspectRatio="square"
+                          onViewAll={() => onView?.(item)}
+                        />
+                      </CardContent>
+                    )}
+                  </Card>
+                </div>
+              </div>
+            );
+          })}
         </div>
+
+        {/* 哨兵元素用于触发无限滚动（基于滚动容器 root） */}
+        {hasMore && <div ref={sentinelRef} className="h-px w-full" />}
 
         {/* 加载状态 */}
         {isLoading && hasMore && (
