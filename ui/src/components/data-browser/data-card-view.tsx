@@ -40,15 +40,12 @@ interface DataCardViewProps {
 export function DataCardView({
   data,
   isLoading,
-  selectedIds = [],
   currentPage = 1,
-  pageSize = 20,
   total = 0,
   onPageChange,
   onEdit,
   onDelete,
   onView,
-  onSelectionChange,
 }: DataCardViewProps) {
   const hasMore = total > data.length;
   const [expandedKeywordItemIds, setExpandedKeywordItemIds] = useState<Set<string>>(() => new Set());
@@ -59,8 +56,11 @@ export function DataCardView({
   const itemElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const itemHeightsRef = useRef<Map<string, number>>(new Map());
   const [containerWidth, setContainerWidth] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 0));
   const [layoutVersion, setLayoutVersion] = useState(0);
   const loadMoreLockRef = useRef(false);
+  const updateWidthRef = useRef<(() => void) | null>(null);
+  const widthObserverRef = useRef<ResizeObserver | null>(null);
 
   const toggleKeywordsExpanded = (itemId?: string) => {
     if (!itemId) return;
@@ -75,16 +75,6 @@ export function DataCardView({
     });
   };
 
-  const handleToggleSelection = (itemId: string | undefined) => {
-    if (!itemId || !onSelectionChange) return;
-
-    const newSelectedIds = selectedIds.includes(itemId)
-      ? selectedIds.filter((id) => id !== itemId)
-      : [...selectedIds, itemId];
-
-    onSelectionChange(newSelectedIds);
-  };
-
   useEffect(() => {
     if (!isLoading) {
       loadMoreLockRef.current = false;
@@ -92,6 +82,8 @@ export function DataCardView({
   }, [isLoading]);
 
   useLayoutEffect(() => {
+    // 组件初次渲染可能处于 loading/空态分支，此时 scrollContainerRef 还不存在。
+    // 当数据到达并渲染出滚动容器后，需要重新挂载测量逻辑，否则 containerWidth 会一直是 0。
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;
 
@@ -103,11 +95,65 @@ export function DataCardView({
       setContainerWidth(contentWidth);
     };
 
+    updateWidthRef.current = updateWidth;
+
+    // 先断开旧 observer（如果之前因切换视图/状态重跑了 effect）
+    if (widthObserverRef.current) {
+      widthObserverRef.current.disconnect();
+      widthObserverRef.current = null;
+    }
+
     updateWidth();
+
+    // 初次进入/刷新时某些布局可能会先以 0 宽度挂载（例如容器隐藏/过渡中），
+    // 使用 rAF 再测几帧，尽量在可见后尽快拿到有效宽度。
+    const raf1 = requestAnimationFrame(() => updateWidth());
+    const raf2 = requestAnimationFrame(() => updateWidth());
 
     const observer = new ResizeObserver(() => updateWidth());
     observer.observe(scrollContainer);
-    return () => observer.disconnect();
+    widthObserverRef.current = observer;
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      observer.disconnect();
+      if (widthObserverRef.current === observer) {
+        widthObserverRef.current = null;
+      }
+    };
+  }, [data.length, isLoading]);
+
+  useEffect(() => {
+    if (containerWidth > 0) return;
+    const updateWidth = updateWidthRef.current;
+    if (!updateWidth) return;
+
+    let cancelled = false;
+    let tries = 0;
+    let rafId = 0;
+
+    const tick = () => {
+      if (cancelled) return;
+      if (containerWidth > 0) return;
+      if (tries >= 30) return;
+      tries += 1;
+      updateWidth();
+      rafId = requestAnimationFrame(tick);
+    };
+
+    rafId = requestAnimationFrame(tick);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [containerWidth]);
+
+  useEffect(() => {
+    const handler = () => setViewportWidth(window.innerWidth);
+    handler();
+    window.addEventListener('resize', handler, { passive: true } as any);
+    return () => window.removeEventListener('resize', handler as any);
   }, []);
 
   useEffect(() => {
@@ -138,11 +184,12 @@ export function DataCardView({
   }, [data.length]);
 
   const columnCount = useMemo(() => {
-    if (containerWidth >= 1280) return 4;
-    if (containerWidth >= 1024) return 3;
-    if (containerWidth >= 768) return 2;
+    // 跟 Tailwind 断点一致：根据 viewport 决定列数，确保体验与之前 `md/lg/xl:columns-*` 一致
+    if (viewportWidth >= 1280) return 4;
+    if (viewportWidth >= 1024) return 3;
+    if (viewportWidth >= 768) return 2;
     return 1;
-  }, [containerWidth]);
+  }, [viewportWidth]);
 
   const gapPx = 16;
 
