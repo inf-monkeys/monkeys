@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { Eye, Plus, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { vinesFetcher } from '@/apis/fetcher';
-import { IAssetItem } from '@/apis/ugc/typings.ts';
 import {
+  DesignSoftwareTask,
   preloadUgcDesignSoftwareEvaluationTasks,
   useUgcDesignSoftwareEvaluationTasks,
-  DesignSoftwareTask,
 } from '@/apis/ugc/design-software-evaluation';
-import { UgcView } from '@/components/layout/ugc/view';
-import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
+import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { createDesignSoftwareEvaluationTasksColumns } from '@/components/layout/ugc-pages/design-software-evaluations/consts';
 import { CreateDesignSoftwareTaskDialog } from '@/components/layout/ugc-pages/design-software-evaluations/create-design-software-task-dialog';
+import { useGetUgcViewIconOnlyMode } from '@/components/layout/ugc-pages/util';
+import { UgcView } from '@/components/layout/ugc/view';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,7 +85,7 @@ export const DesignSoftwareEvaluations: React.FC = () => {
         useUgcFetcher={useUgcDesignSoftwareEvaluationTasks}
         preloadUgcFetcher={preloadUgcDesignSoftwareEvaluationTasks}
         createColumns={createDesignSoftwareEvaluationTasksColumns}
-        sidebarDefaultVisible={false}
+        showSidebar={false}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
