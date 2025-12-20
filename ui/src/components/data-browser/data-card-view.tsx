@@ -271,6 +271,10 @@ export function DataCardView({
             const isKeywordsExpanded = !!item.id && expandedKeywordItemIds.has(item.id);
             const visibleKeywords = isKeywordsExpanded ? keywords : keywords.slice(0, 3);
             const restKeywordCount = Math.max(0, keywords.length - visibleKeywords.length);
+            const title = (item.name || '').trim();
+            const hasTitle = title.length > 0;
+            const hasKeywords = keywords.length > 0;
+            const showHeader = hasTitle || hasKeywords;
 
             const pos = item.id ? masonryLayout.positions.get(item.id) : undefined;
 
@@ -289,104 +293,116 @@ export function DataCardView({
               >
                 <div ref={setItemRef(item.id)}>
                   <Card className="relative flex flex-col">
-                    <CardHeader className={hasMedia ? 'pb-3' : 'pb-2'}>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm truncate">{item.name}</h3>
-                          {keywords.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {visibleKeywords.map((k) => (
-                                <Badge
-                                  key={k}
-                                  variant="secondary"
-                                  title={k}
-                                  className="font-normal max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
-                                >
-                                  {k}
-                                </Badge>
-                              ))}
-                              {restKeywordCount > 0 && (
-                                <Badge
-                                  variant="outline"
-                                  className="font-normal cursor-pointer select-none"
-                                  role="button"
-                                  tabIndex={0}
-                                  aria-expanded={isKeywordsExpanded}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleKeywordsExpanded(item.id);
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault();
-                                      toggleKeywordsExpanded(item.id);
-                                    }
-                                  }}
-                                >
-                                  +{restKeywordCount}
-                                </Badge>
-                              )}
-                              {isKeywordsExpanded && keywords.length > 3 && (
-                                <Badge
-                                  variant="outline"
-                                  className="font-normal cursor-pointer select-none"
-                                  role="button"
-                                  tabIndex={0}
-                                  aria-expanded={isKeywordsExpanded}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleKeywordsExpanded(item.id);
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault();
-                                      toggleKeywordsExpanded(item.id);
-                                    }
-                                  }}
-                                >
-                                  收起
-                                </Badge>
-                              )}
-                            </div>
+                    <div className="absolute right-2 top-2 z-10">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-background/70 backdrop-blur-sm"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">打开菜单</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>操作</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {onView && (
+                            <DropdownMenuItem onClick={() => onView(item)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              查看详情
+                            </DropdownMenuItem>
                           )}
+                          {onEdit && (
+                            <DropdownMenuItem onClick={() => onEdit(item)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              编辑
+                            </DropdownMenuItem>
+                          )}
+                          {onDelete && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => onDelete(item)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                删除
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    {showHeader && (
+                      <CardHeader className={hasMedia ? 'pb-3' : 'pb-2'}>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            {hasTitle && (
+                              <h3 className="font-semibold text-sm truncate">{title}</h3>
+                            )}
+                            {hasKeywords && (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {visibleKeywords.map((k) => (
+                                  <Badge
+                                    key={k}
+                                    variant="secondary"
+                                    title={k}
+                                    className="font-normal max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                                  >
+                                    {k}
+                                  </Badge>
+                                ))}
+                                {restKeywordCount > 0 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="font-normal cursor-pointer select-none"
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-expanded={isKeywordsExpanded}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleKeywordsExpanded(item.id);
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        toggleKeywordsExpanded(item.id);
+                                      }
+                                    }}
+                                  >
+                                    +{restKeywordCount}
+                                  </Badge>
+                                )}
+                                {isKeywordsExpanded && keywords.length > 3 && (
+                                  <Badge
+                                    variant="outline"
+                                    className="font-normal cursor-pointer select-none"
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-expanded={isKeywordsExpanded}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleKeywordsExpanded(item.id);
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        toggleKeywordsExpanded(item.id);
+                                      }
+                                    }}
+                                  >
+                                    收起
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>操作</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {onView && (
-                              <DropdownMenuItem onClick={() => onView(item)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                查看详情
-                              </DropdownMenuItem>
-                            )}
-                            {onEdit && (
-                              <DropdownMenuItem onClick={() => onEdit(item)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                编辑
-                              </DropdownMenuItem>
-                            )}
-                            {onDelete && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => onDelete(item)}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  删除
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </CardHeader>
+                      </CardHeader>
+                    )}
                     {hasMedia && (
                       <CardContent className="p-0">
                         <MediaPreview
