@@ -105,6 +105,11 @@ export class TeamsService extends EventEmitter {
             if (result.status === 200 && result.data.code === 200) {
               await this.updateTeamInitStatus(teamId, TeamInitStatusEnum.SUCCESS);
             }
+          })
+          .catch(async (error) => {
+            logger.error('Webhook error during team initialization', error);
+            console.error('[Team Init Error]', { teamId, error: error.message, stack: error.stack });
+            await this.updateTeamInitStatus(teamId, TeamInitStatusEnum.FAILED);
           });
         return null;
       } else {
@@ -112,6 +117,9 @@ export class TeamsService extends EventEmitter {
         return null;
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to initialize team', { teamId, error: errorMessage, stack: error instanceof Error ? error.stack : undefined });
+      console.error('[Team Init Error]', { teamId, error: errorMessage, stack: error instanceof Error ? error.stack : undefined });
       await this.updateTeamInitStatus(teamId, TeamInitStatusEnum.FAILED);
       throw error;
     }
