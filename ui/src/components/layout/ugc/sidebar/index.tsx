@@ -15,12 +15,13 @@ import { cn } from '@/utils';
 interface IUgcSidebarProps extends IUgcCustomProps {
   title: string;
   filterListProps: Omit<IUgcViewFilterListProps, keyof IUgcCustomProps>;
+  defaultVisible?: boolean;
 }
 
-export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, isMarket, title, filterListProps }) => {
+export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, isMarket, title, filterListProps, defaultVisible = true }) => {
   const { t } = useTranslation();
 
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(defaultVisible);
 
   const { data: oem } = useSystemConfig();
   const titleStyle =
@@ -36,7 +37,7 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, is
     <div className="flex h-full max-w-64">
       <motion.div
         className="flex flex-col gap-global overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
-        initial={{ width: 256, paddingRight: 16 }}
+        initial={{ width: defaultVisible ? 256 : 0, paddingRight: defaultVisible ? 16 : 0 }}
         animate={{
           width: visible ? 256 : 0,
           paddingRight: visible ? 16 : 0,

@@ -85,6 +85,7 @@ export const DesignSoftwareEvaluations: React.FC = () => {
         useUgcFetcher={useUgcDesignSoftwareEvaluationTasks}
         preloadUgcFetcher={preloadUgcDesignSoftwareEvaluationTasks}
         createColumns={createDesignSoftwareEvaluationTasksColumns}
+        sidebarDefaultVisible={false}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">

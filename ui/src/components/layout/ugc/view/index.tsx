@@ -65,6 +65,7 @@ interface IUgcViewProps<E extends object> {
   assetIdKey?: string;
   showSearch?: boolean;
   showSidebar?: boolean;
+  sidebarDefaultVisible?: boolean;
 }
 
 export const UgcView = <E extends object>({
@@ -85,6 +86,7 @@ export const UgcView = <E extends object>({
   assetIdKey = 'id',
   showSearch,
   showSidebar = true,
+  sidebarDefaultVisible = true,
 }: IUgcViewProps<E>): React.ReactNode => {
   const { t } = useTranslation();
 
@@ -440,6 +442,7 @@ export const UgcView = <E extends object>({
           assetKey={assetKey}
           assetType={assetType}
           isMarket={isMarket}
+          defaultVisible={sidebarDefaultVisible}
           filterListProps={{
             onChange: setFilter,
             filterButtonProps: {

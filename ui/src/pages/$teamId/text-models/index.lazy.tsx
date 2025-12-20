@@ -24,6 +24,7 @@ export const TextModels: React.FC = () => {
         useUgcFetcher={useUgcTextModels}
         preloadUgcFetcher={preloadUgcTextModels}
         createColumns={createTextModelsColumns}
+        sidebarDefaultVisible={false}
         renderOptions={{
           subtitle: (item) => {
             const userName = item.user?.name;

@@ -87,7 +87,7 @@ export const NeuralModels: React.FC = () => {
         useUgcFetcher={useNeuralModelsOnly}
         preloadUgcFetcher={preloadUgcMediaData}
         createColumns={() => createNeuralModelColumns()}
-        showSidebar={false}
+        sidebarDefaultVisible={false}
         // 过滤条件：只显示 params.type 为 'neural-model' 的媒体文件
         renderOptions={{
           subtitle: (item) => (

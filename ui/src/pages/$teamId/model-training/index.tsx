@@ -39,6 +39,7 @@ export const ModelTraining: React.FC = () => {
             },
           })
         }
+        sidebarDefaultVisible={false}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">

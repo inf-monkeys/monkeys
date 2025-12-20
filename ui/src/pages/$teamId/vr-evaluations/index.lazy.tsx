@@ -80,6 +80,7 @@ export const VREvaluations: React.FC = () => {
         useUgcFetcher={useUgcVREvaluationTasks}
         preloadUgcFetcher={preloadUgcVREvaluationTasks}
         createColumns={createVREvaluationTasksColumns}
+        sidebarDefaultVisible={false}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">

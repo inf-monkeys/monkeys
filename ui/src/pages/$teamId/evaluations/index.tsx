@@ -83,6 +83,7 @@ export const EvaluationModules: React.FC = () => {
         useUgcFetcher={useUgcEvaluationModules}
         preloadUgcFetcher={preloadUgcEvaluationModules}
         createColumns={createEvaluationModulesColumns}
+        sidebarDefaultVisible={false}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">

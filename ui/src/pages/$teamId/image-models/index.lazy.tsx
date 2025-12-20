@@ -43,6 +43,7 @@ export const ImageModels: React.FC = () => {
             },
           })
         }
+        sidebarDefaultVisible={false}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
