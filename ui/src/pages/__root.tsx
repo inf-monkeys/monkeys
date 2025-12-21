@@ -10,7 +10,7 @@ import { WorkbenchPanelLayout } from 'src/components/layout-wrapper/workbench/pa
 
 import { useSystemConfig } from '@/apis/common';
 import { ReportDialog } from '@/components/devtools/report/dialog';
-import { AgentLayout } from '@/components/layout-wrapper/agent';
+import { AgentChatLayout } from '@/components/layout-wrapper/agent-chat';
 import { DesignLayout } from '@/components/layout-wrapper/design';
 import { EvaluationLayout } from '@/components/layout-wrapper/evaluation';
 import { MainWrapper } from '@/components/layout-wrapper/main';
@@ -48,13 +48,12 @@ const RootComponent: React.FC = () => {
     isUseWorkSpace,
     isUseShareView,
     isUseIFrame,
-    isUseAgent,
     isUseDesign,
     isUseWorkbench,
     isUsePanel,
     isUseEvaluation,
     isUseCustomNav,
-    isUseDataBrowser,
+    isAgentChatPage,
   } = useVinesRoute();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
@@ -91,11 +90,11 @@ const RootComponent: React.FC = () => {
     !isUseWorkSpace &&
     !isUseShareView &&
     !isUseIFrame &&
-    !isUseAgent &&
     !isUseDesign &&
     !isUseEvaluation &&
     !isUsePanel &&
     !isUseCustomNav &&
+    !isAgentChatPage &&
     (mode !== 'mini' || !isUseWorkbench);
 
   const { teamId } = useVinesTeam();
@@ -204,9 +203,9 @@ const RootComponent: React.FC = () => {
           {isUseIFrame && <WorkspaceIframe />}
           {isUseOutside && <Outlet />}
           {isUseWorkSpace && <WorkspaceLayout />}
-          {isUseAgent && <AgentLayout />}
           {isUseDesign && designNewTabOpenBoard && <DesignLayout />}
           {isUseEvaluation && <EvaluationLayout />}
+          {isAgentChatPage && <AgentChatLayout />}
           {((isUsePanel && !isUseIFrame) || (isUseDesign && !designNewTabOpenBoard)) && mode !== 'mini' && (
             <WorkbenchPanelLayout layoutId={layoutId} />
           )}

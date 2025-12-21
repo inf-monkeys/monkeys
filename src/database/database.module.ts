@@ -19,13 +19,6 @@ import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-clas
 import { AdminUserEntity } from './entities/admin/admin-user.entity';
 import { AdminRoleEntity } from './entities/admin/admin-role.entity';
 import { AdminPermissionEntity } from './entities/admin/admin-permission.entity';
-import { AgentV2MessageEntity } from './entities/agent-v2/agent-v2-message.entity';
-import { AgentV2SessionEntity } from './entities/agent-v2/agent-v2-session.entity';
-import { AgentV2MessageQueueEntity, AgentV2TaskStateEntity } from './entities/agent-v2/agent-v2-task-state.entity';
-import { AgentV2Entity } from './entities/agent-v2/agent-v2.entity';
-import { AgentV3SessionEntity } from './entities/agent-v3/agent-v3-session.entity';
-import { AgentV3MessageEntity } from './entities/agent-v3/agent-v3-message.entity';
-import { TldrawAgentV3BindingEntity } from './entities/agent-v3/tldraw-agent-v3-binding.entity';
 import { ApiKeyEntity } from './entities/apikey/apikey';
 import { AssetsAuthorizationEntity } from './entities/assets/asset-authorization';
 import { AssetFilterEntity } from './entities/assets/asset-filter';
@@ -82,6 +75,11 @@ import { WorkflowPageEntity } from './entities/workflow/workflow-page';
 import { DataViewEntity } from './entities/data-management/data-view.entity';
 import { DataAssetEntity } from './entities/data-management/data-asset.entity';
 import { DataViewPermissionEntity, DataAssetPermissionEntity } from './entities/data-management/data-permission.entity';
+import { AgentEntity } from './entities/agents/agent.entity';
+import { ThreadEntity } from './entities/agents/thread.entity';
+import { MessageEntity } from './entities/agents/message.entity';
+import { ToolEntity } from './entities/agents/tool.entity';
+import { ToolCallEntity } from './entities/agents/tool-call.entity';
 
 export const entities: EntityClassOrSchema[] = [
   AdminUserEntity,
@@ -155,17 +153,14 @@ export const entities: EntityClassOrSchema[] = [
   EvaluationTaskEntity,
   VREvaluationTaskEntity,
   TemporaryWorkflowEntity,
-  AgentV2Entity,
-  AgentV2SessionEntity,
-  AgentV2MessageEntity,
-  AgentV2TaskStateEntity,
-  AgentV2MessageQueueEntity,
-  AgentV3SessionEntity,
-  AgentV3MessageEntity,
-  TldrawAgentV3BindingEntity,
   ModelTrainingEntity,
   ModelTrainingConfigEntity,
   ModelTrainingConfigV2Entity,
+  AgentEntity,
+  ThreadEntity,
+  MessageEntity,
+  ToolEntity,
+  ToolCallEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

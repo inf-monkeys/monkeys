@@ -717,6 +717,18 @@ export interface AgentV3Config {
   google?: AgentV3ProviderConfig;
 }
 
+export interface AgentProviderConfig {
+  apiKey?: string;
+  baseUrl?: string;
+  models?: string[];
+}
+
+export interface NewAgentConfig {
+  openai?: AgentProviderConfig;
+  anthropic?: AgentProviderConfig;
+  google?: AgentProviderConfig;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -740,6 +752,7 @@ export interface Config {
   evaluation: EvaluationConfig;
   agentv2: AgentV2Config;
   agentv3: AgentV3Config;
+  agent: NewAgentConfig;
   modelTraining: ModelTrainingConfig;
   telemetry: TelemetryConfig;
 }
@@ -1172,6 +1185,23 @@ When answer to user:
       enabled: readConfig('agentv2.webSearch.enabled', true),
       maxTokensPerSearch: readConfig('agentv2.webSearch.maxTokensPerSearch', 2000),
       timeout: readConfig('agentv2.webSearch.timeout', 60000),
+    },
+  },
+  agent: {
+    openai: {
+      apiKey: readConfig('agent.openai.apiKey'),
+      baseUrl: readConfig('agent.openai.baseUrl'),
+      models: readConfig('agent.openai.models', []),
+    },
+    anthropic: {
+      apiKey: readConfig('agent.anthropic.apiKey'),
+      baseUrl: readConfig('agent.anthropic.baseUrl'),
+      models: readConfig('agent.anthropic.models', []),
+    },
+    google: {
+      apiKey: readConfig('agent.google.apiKey'),
+      baseUrl: readConfig('agent.google.baseUrl'),
+      models: readConfig('agent.google.models', []),
     },
   },
   modelTraining: {

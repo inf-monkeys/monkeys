@@ -5,7 +5,6 @@ import _, { get } from 'lodash';
 import qs from 'qs';
 import { undefined } from 'zod';
 
-import { preloadUgcAgentsV2, useUgcAgentsV2 } from '@/apis/agents-v2';
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
 import { IComfyuiModel } from '@/apis/comfyui-model/typings.ts';
 import { IDesignProject } from '@/apis/designs/typings.ts';
@@ -56,8 +55,7 @@ export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string,
 export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 
-export const useUgcAgents = (dto: IListUgcDto) => useUgcAgentsV2(dto);
-export const preloadUgcAgents = (dto: IListUgcDto) => preloadUgcAgentsV2(dto);
+// Agent functions removed - use @/features/agent instead
 
 export const useUgcDesignProjects = (dto: IListUgcDto) => useUgcItems<IDesignProject>(dto, '/api/design/project');
 export const preloadUgcDesignProjects = (dto: IListUgcDto) =>

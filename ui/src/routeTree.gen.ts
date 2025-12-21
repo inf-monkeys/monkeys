@@ -115,6 +115,9 @@ const TeamIdDesignDesignProjectIdIndexLazyImport = createFileRoute(
 const TeamIdComfyuiComfyuiWorkflowIdIndexLazyImport = createFileRoute(
   '/$teamId/comfyui/$comfyuiWorkflowId/',
 )()
+const TeamIdAgentsAgentIdIndexLazyImport = createFileRoute(
+  '/$teamId/agents/$agentId/',
+)()
 const TeamIdAgentAgentIdIndexLazyImport = createFileRoute(
   '/$teamId/agent/$agentId/',
 )()
@@ -531,6 +534,14 @@ const TeamIdComfyuiComfyuiWorkflowIdIndexLazyRoute =
     ),
   )
 
+const TeamIdAgentsAgentIdIndexLazyRoute =
+  TeamIdAgentsAgentIdIndexLazyImport.update({
+    path: '/$teamId/agents/$agentId/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./pages/$teamId/agents/$agentId/index.lazy').then((d) => d.Route),
+  )
+
 const TeamIdAgentAgentIdIndexLazyRoute =
   TeamIdAgentAgentIdIndexLazyImport.update({
     path: '/$teamId/agent/$agentId/',
@@ -825,6 +836,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdAgentAgentIdIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/agents/$agentId/': {
+      preLoaderRoute: typeof TeamIdAgentsAgentIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/comfyui/$comfyuiWorkflowId/': {
       preLoaderRoute: typeof TeamIdComfyuiComfyuiWorkflowIdIndexLazyImport
       parentRoute: typeof rootRoute
@@ -948,6 +963,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdModelTrainingModelTrainingIdIndexRoute,
   TeamIdActionToolsActionToolNameIndexLazyRoute,
   TeamIdAgentAgentIdIndexLazyRoute,
+  TeamIdAgentsAgentIdIndexLazyRoute,
   TeamIdComfyuiComfyuiWorkflowIdIndexLazyRoute,
   TeamIdDesignDesignProjectIdIndexLazyRoute,
   TeamIdEvaluationsModuleIdIndexLazyRoute,
