@@ -15,6 +15,7 @@ import {
 } from '@/apis/data';
 import { DataCardView } from '@/components/admin/data/data-card-view';
 import { DataDetailPanel } from '@/components/admin/data/data-detail-panel';
+import { DataEditDialog } from '@/components/admin/data/data-edit-dialog';
 import { DataSidebar } from '@/components/admin/data/data-sidebar';
 import { DataTable } from '@/components/admin/data/data-table';
 import { DataToolbar } from '@/components/admin/data/data-toolbar';
@@ -40,6 +41,8 @@ function DataManagementPage() {
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [viewingItem, setViewingItem] = useState<DataItem | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   // 游标分页优化：记录最后一条数据的时间戳和 ID
   const [cursor, setCursor] = useState<{ timestamp?: number; pinOrder?: number; id?: string } | null>(null);
   // 请求序号：用于丢弃切换分类/搜索后返回的旧请求，避免旧数据污染当前视图
@@ -255,8 +258,12 @@ function DataManagementPage() {
   };
 
   const handleEdit = (item: DataItem) => {
-    toast.info(`编辑: ${item.name}`);
-    // TODO: 打开编辑对话框
+    if (!item?.id) {
+      toast.error('无效的数据项');
+      return;
+    }
+    setEditingItemId(item.id);
+    setEditDialogOpen(true);
   };
 
   const handlePinToggle = async (item: DataItem) => {
@@ -349,6 +356,22 @@ function DataManagementPage() {
 
       {/* 右侧内容区 */}
       <div className="flex flex-1 flex-col overflow-hidden min-h-0">
+        <DataEditDialog
+          open={editDialogOpen}
+          itemId={editingItemId}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open) setEditingItemId(null);
+          }}
+          onSaved={() => {
+            // 编辑会更新 updatedTimestamp，排序可能发生变化；为确保列表一致，直接回到第一页重载
+            requestSeqRef.current += 1;
+            setCurrentPage(1);
+            setDataItems([]);
+            setCursor(null);
+            void loadDataList({ forceFirstPage: true });
+          }}
+        />
         {viewingItem ? (
           /* 详情页面 */
           <DataDetailPanel item={viewingItem} onBack={handleBackToList} />
