@@ -48,6 +48,25 @@ function DataManagementPage() {
   // 请求序号：用于丢弃切换分类/搜索后返回的旧请求，避免旧数据污染当前视图
   const requestSeqRef = useRef(0);
 
+  const sortDataItems = (items: DataItem[]): DataItem[] => {
+    return [...items].sort((a, b) => {
+      const aPin = a.pinOrder ?? 0;
+      const bPin = b.pinOrder ?? 0;
+      if (aPin !== bPin) return bPin - aPin;
+
+      const aTs = typeof a.updatedTimestamp === 'number' ? a.updatedTimestamp : Number(a.updatedTimestamp);
+      const bTs = typeof b.updatedTimestamp === 'number' ? b.updatedTimestamp : Number(b.updatedTimestamp);
+      const safeATs = Number.isFinite(aTs) ? aTs : 0;
+      const safeBTs = Number.isFinite(bTs) ? bTs : 0;
+      if (safeATs !== safeBTs) return safeBTs - safeATs;
+
+      const aId = a.id || '';
+      const bId = b.id || '';
+      if (aId === bId) return 0;
+      return aId < bId ? 1 : -1;
+    });
+  };
+
   // 加载视图数据 - 只加载分类，数据列表由下面的 useEffect 加载
   useEffect(() => {
     loadCategories();
@@ -281,12 +300,27 @@ function DataManagementPage() {
       await setDataItemPinOrder(item.id, nextPinOrder);
       toast.success(nextPinOrder > 0 ? '已置顶' : '已取消置顶');
 
-      // 置顶会改变全局排序，直接回到第一页重载，确保结果一致
-      requestSeqRef.current += 1;
-      setCurrentPage(1);
-      setDataItems([]);
-      setCursor(null);
-      void loadDataList({ forceFirstPage: true });
+      // 本地立即生效：更新 pinOrder，并在当前已加载的数据内重新排序（避免整页刷新打断滚动位置）
+      requestSeqRef.current += 1; // 丢弃可能仍在返回的旧列表请求，避免覆盖本地更新
+      setDataItems((prev) => {
+        const next = prev.map((x) => (x.id === item.id ? { ...x, pinOrder: nextPinOrder } : x));
+        const sorted = sortDataItems(next);
+
+        // 同步更新游标：下一页需要使用当前列表最后一条的游标信息
+        const last = sorted[sorted.length - 1];
+        if (last?.id) {
+          const ts = typeof last.updatedTimestamp === 'number' ? last.updatedTimestamp : Number(last.updatedTimestamp);
+          setCursor({
+            timestamp: Number.isFinite(ts) ? ts : undefined,
+            pinOrder: last.pinOrder ?? 0,
+            id: last.id,
+          });
+        } else {
+          setCursor(null);
+        }
+
+        return sorted;
+      });
     } catch (error: any) {
       toast.error(error?.message || '置顶操作失败');
     }
