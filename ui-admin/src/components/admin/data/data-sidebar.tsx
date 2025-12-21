@@ -86,6 +86,7 @@ export function DataSidebar({
   const [selectedParentId, setSelectedParentId] = useState<string | undefined>(undefined);
   const [sidebarWidth, setSidebarWidth] = useState(256); // 初始宽度 256px (w-64)
   const [isResizing, setIsResizing] = useState(false);
+  const [expandAllVersion, setExpandAllVersion] = useState(0);
 
   // 处理侧边栏宽度调整
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -252,6 +253,15 @@ export function DataSidebar({
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs hover:bg-accent/80"
+            onClick={() => setExpandAllVersion((v) => v + 1)}
+            title="展开所有节点"
+          >
+            展开
+          </Button>
+          <Button
+            variant="ghost"
             size="icon"
             className="h-7 w-7"
             onClick={onRefresh}
@@ -376,6 +386,7 @@ export function DataSidebar({
                       onCreateSubCategory={handleOpenCreateDialog}
                       level={0}
                       contentWidth={contentWidth}
+                      expandAllVersion={expandAllVersion}
                     />
                   ))}
                 </SortableContext>
@@ -404,6 +415,7 @@ interface CategoryTreeItemProps {
   onCreateSubCategory: (parentId: string) => void;
   level: number;
   contentWidth: number; // 侧边栏内容区宽度
+  expandAllVersion: number;
 }
 
 function CategoryTreeItem({
@@ -415,6 +427,7 @@ function CategoryTreeItem({
   onCreateSubCategory,
   level,
   contentWidth,
+  expandAllVersion,
 }: CategoryTreeItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -441,6 +454,10 @@ function CategoryTreeItem({
 
   // UI 统一使用“数据库”图标：不区分文件夹/子节点，避免误导为文件夹层级。
   const Icon = Database;
+
+  useEffect(() => {
+    setIsExpanded(true);
+  }, [expandAllVersion]);
 
   const handleOpenEditDialog = () => {
     setEditName(category.name);
@@ -601,6 +618,7 @@ function CategoryTreeItem({
               onCreateSubCategory={onCreateSubCategory}
               level={level + 1}
               contentWidth={contentWidth}
+              expandAllVersion={expandAllVersion}
             />
           ))}
         </div>
