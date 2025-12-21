@@ -33,7 +33,7 @@ export class DataAssetController {
   constructor(private readonly dataAssetService: DataAssetService) {}
 
   @Post()
-  @ApiOperation({ summary: '�pnD�' })
+  @ApiOperation({ summary: '创建数据资产' })
   @ApiResponse({ status: 201, type: DataAssetResponseDto })
   async createAsset(
     @CurrentAdmin() admin: AdminUserDto,
@@ -43,7 +43,7 @@ export class DataAssetController {
   }
 
   @Get()
-  @ApiOperation({ summary: '��pnD�h' })
+  @ApiOperation({ summary: '获取数据资产列表' })
   @ApiResponse({ status: 200, type: DataAssetListResponseDto })
   async getAssets(
     @CurrentAdmin() admin: AdminUserDto,
@@ -63,7 +63,7 @@ export class DataAssetController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: '��U*pnD�' })
+  @ApiOperation({ summary: '获取数据资产详情' })
   @ApiResponse({ status: 200, type: DataAssetResponseDto })
   async getAsset(
     @CurrentAdmin() admin: AdminUserDto,
@@ -73,7 +73,7 @@ export class DataAssetController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: '��pnD�' })
+  @ApiOperation({ summary: '更新数据资产' })
   @ApiResponse({ status: 200, type: DataAssetResponseDto })
   async updateAsset(
     @CurrentAdmin() admin: AdminUserDto,
@@ -96,7 +96,7 @@ export class DataAssetController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: ' dpnD�' })
+  @ApiOperation({ summary: '删除数据资产' })
   @ApiResponse({ status: 204 })
   async deleteAsset(
     @CurrentAdmin() admin: AdminUserDto,

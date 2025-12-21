@@ -19,20 +19,6 @@ export class DataBrowserService {
     private readonly dataViewRepository: DataViewRepository,
   ) {}
 
-  private normalizePinOrder(pinOrder: unknown): number {
-    const num = typeof pinOrder === 'number' ? pinOrder : typeof pinOrder === 'string' ? Number(pinOrder) : NaN;
-    if (!Number.isFinite(num)) {
-      throw new BadRequestException('pinOrder must be a finite number');
-    }
-
-    const normalized = Math.trunc(num);
-    if (normalized < 0 || normalized > 32767) {
-      throw new BadRequestException('pinOrder must be between 0 and 32767');
-    }
-
-    return normalized;
-  }
-
   /**
    * 获取视图树形结构（只读）
    * 数据浏览器只显示公开的视图分类（isPublic = true）
@@ -128,7 +114,6 @@ export class DataBrowserService {
             page,
             pageSize,
             cursorTimestamp: dto.cursorTimestamp,
-            cursorPinOrder: dto.cursorPinOrder,
             cursorId: dto.cursorId,
           }
         );
@@ -152,7 +137,6 @@ export class DataBrowserService {
           page,
           pageSize,
           cursorTimestamp: dto.cursorTimestamp,
-          cursorPinOrder: dto.cursorPinOrder,
           cursorId: dto.cursorId,
         }
       );
@@ -206,7 +190,6 @@ export class DataBrowserService {
         {
           pageSize,
           cursorTimestamp: dto.cursorTimestamp,
-          cursorPinOrder: dto.cursorPinOrder,
           cursorId: dto.cursorId,
         }
       ));
@@ -223,7 +206,6 @@ export class DataBrowserService {
       {
         pageSize,
         cursorTimestamp: dto.cursorTimestamp,
-        cursorPinOrder: dto.cursorPinOrder,
         cursorId: dto.cursorId,
       }
     ));
@@ -255,34 +237,11 @@ export class DataBrowserService {
   }
 
   /**
-   * 设置资产置顶排序权重
-   */
-  async setAssetPinOrder(userId: string, assetId: string, pinOrder: number, teamId?: string): Promise<void> {
-    const asset = await this.dataAssetRepository.findById(assetId);
-    if (!asset) {
-      throw new NotFoundException(`Asset with ID ${assetId} not found`);
-    }
-
-    // 数据浏览器只允许对已发布内容进行置顶操作
-    if (asset.status !== AssetStatus.PUBLISHED && !asset.isPublished) {
-      throw new ForbiddenException('This asset is not published');
-    }
-
-    // 基础越权保护：禁止跨团队置顶
-    if (teamId && asset.teamId && asset.teamId !== teamId && asset.teamId !== '0') {
-      throw new ForbiddenException('You have no permission to pin this asset');
-    }
-
-    await this.dataAssetRepository.updatePinOrder(assetId, this.normalizePinOrder(pinOrder));
-  }
-
-  /**
    * 转换为响应 DTO
    */
   private toResponseDto(asset: DataAssetEntity): DataAssetResponseDto {
     return {
       id: asset.id,
-      pinOrder: asset.pinOrder ?? 0,
       name: asset.name,
       viewId: asset.viewId,
       assetType: asset.assetType,

@@ -3,7 +3,6 @@ import {
   getDataList,
   getDataNextPage,
   getDataItem,
-  setAssetPinOrder,
 } from '@/apis/data-browser';
 import { DataCardView } from '@/components/data-browser/data-card-view';
 import { DataDetailPanel } from '@/components/data-browser/data-detail-panel';
@@ -32,7 +31,7 @@ export function DataBrowserPage() {
   const [hasMore, setHasMore] = useState(true);
   const [viewingItem, setViewingItem] = useState<DataItem | null>(null);
   // 游标分页优化：记录最后一条数据的时间戳和 ID
-  const [cursor, setCursor] = useState<{ timestamp?: number; pinOrder?: number; id?: string } | null>(null);
+  const [cursor, setCursor] = useState<{ timestamp?: number; id?: string } | null>(null);
   // 请求序号：用于丢弃切换视图/搜索后返回的旧请求，避免旧数据污染新视图
   const requestSeqRef = useRef(0);
 
@@ -94,7 +93,6 @@ export function DataBrowserPage() {
         const response = await getDataNextPage({
           ...commonParams,
           cursorTimestamp: cursor?.timestamp,
-          cursorPinOrder: cursor?.pinOrder,
           cursorId: cursor?.id,
         });
         if (requestSeq !== requestSeqRef.current) return;
@@ -131,7 +129,6 @@ export function DataBrowserPage() {
         const lastItem = processedItems[processedItems.length - 1];
         setCursor({
           timestamp: lastItem.updatedTimestamp,
-          pinOrder: lastItem.pinOrder ?? 0,
           id: lastItem.id,
         });
       }
@@ -166,28 +163,6 @@ export function DataBrowserPage() {
     void loadDataList({ forceFirstPage: true });
     loadCategories();
     toast.success('数据已刷新');
-  };
-
-  const handlePinToggle = async (item: DataItem) => {
-    if (!item?.id) {
-      toast.error('无效的数据项');
-      return;
-    }
-
-    try {
-      const nextPinOrder = (item.pinOrder ?? 0) > 0 ? 0 : 1;
-      await setAssetPinOrder(item.id, nextPinOrder);
-      toast.success(nextPinOrder > 0 ? '已置顶' : '已取消置顶');
-
-      // 置顶会改变全局排序，直接回到第一页重载，确保结果一致
-      requestSeqRef.current += 1;
-      setCurrentPage(1);
-      setDataItems([]);
-      setCursor(null);
-      void loadDataList({ forceFirstPage: true });
-    } catch (error: any) {
-      toast.error(error?.message || '置顶操作失败');
-    }
   };
 
   const handleView = async (item: DataItem) => {
@@ -271,7 +246,6 @@ export function DataBrowserPage() {
                   hasMore={hasMore}
                   onPageChange={handlePageChange}
                   onView={handleView}
-                  onPinToggle={handlePinToggle}
                   // 只读模式：不传递编辑/删除功能
                   onEdit={undefined}
                   onDelete={undefined}

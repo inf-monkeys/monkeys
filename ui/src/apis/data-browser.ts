@@ -25,17 +25,6 @@ const get = vinesFetcher<any>({
   }
 });
 
-const put = vinesFetcher<any>({
-  method: 'PUT',
-  simple: true,
-  responseResolver: async (response) => {
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-    return response.json();
-  }
-});
-
 // ========== 视图管理 ==========
 
 /**
@@ -140,11 +129,4 @@ export async function getDataNextPage(
  */
 export async function getDataItem(id: string): Promise<DataItem | null> {
   return await get<DataItem>(`${API_BASE}/assets/${id}`);
-}
-
-/**
- * 设置数据资产置顶排序权重（0 表示取消置顶）
- */
-export async function setAssetPinOrder(id: string, pinOrder: number): Promise<void> {
-  await put(`${API_BASE}/assets/${id}/pin`, { pinOrder } as any);
 }
