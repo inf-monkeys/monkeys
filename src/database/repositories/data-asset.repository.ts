@@ -241,6 +241,145 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     filter: DataAssetFilter,
     pagination?: DataAssetPagination
   ): Promise<[DataAssetEntity[], number]> {
+    const viewIds =
+      (filter.viewIds && filter.viewIds.length > 0
+        ? filter.viewIds
+        : filter.viewId
+          ? [filter.viewId]
+          : []) as string[];
+
+    const page = pagination?.page ?? 1;
+    const isCursorPaging = !!pagination?.cursorTimestamp && !!pagination?.cursorId;
+    const isFirstPage = !isCursorPaging && page === 1;
+
+    // 性能优化：当存在 viewIds + teamId（含全局 team_id='0'）时，单条 SQL 往往会选择按时间索引扫描再过滤 viewId，
+    // 在数据稀疏的子树场景会出现大量 Rows Removed by Filter（首页也可能出现扫数百万行拿 20 条的情况）。
+    // 这里对 viewIds 数量较小的场景做“拆分查询 + 合并”的优化：
+    // - 每个 (viewId, teamId) 子查询都能命中 (view_id, team_id, updated_timestamp, id) 索引
+    // - 每个子查询仅取 pageSize 行，然后在应用层合并排序取全局前 pageSize
+    const maxViewIdsForFanOut = 30;
+    const canFanOut =
+      !!pagination &&
+      !!filter.teamId &&
+      viewIds.length > 0 &&
+      viewIds.length <= maxViewIdsForFanOut &&
+      !!filter.status &&
+      (isCursorPaging || isFirstPage);
+
+    if (canFanOut) {
+      const teamIds = filter.teamId === '0' ? ['0'] : [filter.teamId!, '0'];
+
+      const buildShardQuery = (teamId: string, viewId: string) => {
+        const query = this.createQueryBuilder('asset').where('asset.isDeleted = :isDeleted', { isDeleted: false });
+
+        if (filter.excludeLargeFields) {
+          query.select([
+            'asset.id',
+            'asset.name',
+            'asset.viewId',
+            'asset.assetType',
+            'asset.keywords',
+            'asset.thumbnail',
+            'asset.media',
+            'asset.viewCount',
+            'asset.downloadCount',
+            'asset.status',
+            'asset.teamId',
+            'asset.creatorUserId',
+            'asset.displayName',
+            'asset.isPublished',
+            'asset.createdTimestamp',
+            'asset.updatedTimestamp',
+          ]);
+        }
+
+        // 固定等值条件（最大化索引利用）
+        query.andWhere('asset.status = :status', { status: filter.status });
+        query.andWhere('asset.teamId = :teamId', { teamId });
+        query.andWhere('asset.viewId = :viewId', { viewId });
+
+        if (filter.assetType) {
+          query.andWhere('asset.assetType = :assetType', { assetType: filter.assetType });
+        }
+
+        if (filter.creatorUserId) {
+          query.andWhere('asset.creatorUserId = :creatorUserId', { creatorUserId: filter.creatorUserId });
+        }
+
+        if (filter.keyword) {
+          query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword)', {
+            keyword: `%${filter.keyword}%`,
+          });
+        }
+
+        if (isCursorPaging) {
+          const { cursorTimestamp, cursorId } = pagination!;
+          query.andWhere(
+            '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+            { cursorTimestamp, cursorId }
+          );
+        }
+
+        query.orderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
+        query.take(pagination!.pageSize);
+        return query;
+      };
+
+      const shardQueries: Array<Promise<DataAssetEntity[]>> = [];
+      for (const viewId of viewIds) {
+        for (const teamId of teamIds) {
+          shardQueries.push(buildShardQuery(teamId, viewId).getMany());
+        }
+      }
+
+      const countPromise = (() => {
+        const query = this.createQueryBuilder('asset').where('asset.isDeleted = :isDeleted', { isDeleted: false });
+
+        query.andWhere('asset.status = :status', { status: filter.status });
+        query.andWhere('asset.teamId IN (:...teamIds)', { teamIds });
+        query.andWhere('asset.viewId IN (:...viewIds)', { viewIds });
+
+        if (filter.assetType) {
+          query.andWhere('asset.assetType = :assetType', { assetType: filter.assetType });
+        }
+
+        if (filter.creatorUserId) {
+          query.andWhere('asset.creatorUserId = :creatorUserId', { creatorUserId: filter.creatorUserId });
+        }
+
+        if (filter.keyword) {
+          query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword)', {
+            keyword: `%${filter.keyword}%`,
+          });
+        }
+
+        if (isCursorPaging) {
+          const { cursorTimestamp, cursorId } = pagination!;
+          query.andWhere(
+            '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+            { cursorTimestamp, cursorId }
+          );
+        }
+
+        return query.getCount();
+      })();
+
+      const [shardRows, total] = await Promise.all([Promise.all(shardQueries), countPromise]);
+
+      const merged = shardRows.flat();
+
+      // 去重（理论上不会重复，但为稳健起见）
+      const byId = new Map<string, DataAssetEntity>();
+      for (const row of merged) {
+        if (!row?.id) continue;
+        if (!byId.has(row.id)) byId.set(row.id, row);
+      }
+
+      const sorted = Array.from(byId.values()).sort(compareAssetCursorDesc);
+      const top = sorted.slice(0, pagination.pageSize);
+      return [top, total];
+    }
+
     const query = this.createQueryBuilder('asset')
       .where('asset.isDeleted = :isDeleted', { isDeleted: false });
 
@@ -283,10 +422,8 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     }
 
     // 3. viewIds 优先于 viewId（如果传了 viewIds，就忽略 viewId）
-    if (filter.viewIds && filter.viewIds.length > 0) {
-      query.andWhere('asset.viewId IN (:...viewIds)', { viewIds: filter.viewIds });
-    } else if (filter.viewId) {
-      query.andWhere('asset.viewId = :viewId', { viewId: filter.viewId });
+    if (viewIds.length > 0) {
+      query.andWhere('asset.viewId IN (:...viewIds)', { viewIds });
     }
 
     if (filter.assetType) {
