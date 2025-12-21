@@ -34,6 +34,26 @@ function compareAssetCursorDesc(a: Pick<DataAssetEntity, 'updatedTimestamp' | 'i
   return a.id < b.id ? 1 : -1;
 }
 
+async function runWithConcurrencyLimit<T>(tasks: Array<() => Promise<T>>, concurrency: number): Promise<T[]> {
+  if (tasks.length === 0) return [];
+
+  const limit = Math.max(1, Math.min(concurrency, tasks.length));
+  const results: T[] = new Array(tasks.length);
+  let nextIndex = 0;
+
+  const workers = Array.from({ length: limit }, async () => {
+    while (true) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      if (currentIndex >= tasks.length) return;
+      results[currentIndex] = await tasks[currentIndex]();
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
+
 @Injectable()
 export class DataAssetRepository extends Repository<DataAssetEntity> {
   constructor(private dataSource: DataSource) {
@@ -257,14 +277,19 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     // 这里对 viewIds 数量较小的场景做“拆分查询 + 合并”的优化：
     // - 每个 (viewId, teamId) 子查询都能命中 (view_id, team_id, updated_timestamp, id) 索引
     // - 每个子查询仅取 pageSize 行，然后在应用层合并排序取全局前 pageSize
-    const maxViewIdsForFanOut = 30;
-    const canFanOut =
-      !!pagination &&
-      !!filter.teamId &&
-      viewIds.length > 0 &&
-      viewIds.length <= maxViewIdsForFanOut &&
-      !!filter.status &&
-      (isCursorPaging || isFirstPage);
+    const canFanOut = (() => {
+      if (!pagination) return false;
+      if (!filter.teamId) return false;
+      if (!filter.status) return false;
+      if (viewIds.length === 0) return false;
+      if (!isCursorPaging && !isFirstPage) return false;
+
+      // 首页可以容忍更多分片查询（只发生在首次加载），游标分页保持更保守的阈值以控制 DB 压力。
+      const teamIds = filter.teamId === '0' ? ['0'] : [filter.teamId!, '0'];
+      const shardCount = viewIds.length * teamIds.length;
+      const maxShardCount = isFirstPage ? 400 : 60;
+      return shardCount <= maxShardCount;
+    })();
 
     if (canFanOut) {
       const teamIds = filter.teamId === '0' ? ['0'] : [filter.teamId!, '0'];
@@ -325,46 +350,51 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         return query;
       };
 
-      const shardQueries: Array<Promise<DataAssetEntity[]>> = [];
+      const shardTasks: Array<() => Promise<DataAssetEntity[]>> = [];
       for (const viewId of viewIds) {
         for (const teamId of teamIds) {
-          shardQueries.push(buildShardQuery(teamId, viewId).getMany());
+          shardTasks.push(() => buildShardQuery(teamId, viewId).getMany());
         }
       }
 
       const countPromise = (() => {
-        const query = this.createQueryBuilder('asset').where('asset.isDeleted = :isDeleted', { isDeleted: false });
+        const buildCountQuery = (teamId: string) => {
+          const query = this.createQueryBuilder('asset').where('asset.isDeleted = :isDeleted', { isDeleted: false });
 
-        query.andWhere('asset.status = :status', { status: filter.status });
-        query.andWhere('asset.teamId IN (:...teamIds)', { teamIds });
-        query.andWhere('asset.viewId IN (:...viewIds)', { viewIds });
+          query.andWhere('asset.status = :status', { status: filter.status });
+          query.andWhere('asset.teamId = :teamId', { teamId });
+          query.andWhere('asset.viewId IN (:...viewIds)', { viewIds });
 
-        if (filter.assetType) {
-          query.andWhere('asset.assetType = :assetType', { assetType: filter.assetType });
-        }
+          if (filter.assetType) {
+            query.andWhere('asset.assetType = :assetType', { assetType: filter.assetType });
+          }
 
-        if (filter.creatorUserId) {
-          query.andWhere('asset.creatorUserId = :creatorUserId', { creatorUserId: filter.creatorUserId });
-        }
+          if (filter.creatorUserId) {
+            query.andWhere('asset.creatorUserId = :creatorUserId', { creatorUserId: filter.creatorUserId });
+          }
 
-        if (filter.keyword) {
-          query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword)', {
-            keyword: `%${filter.keyword}%`,
-          });
-        }
+          if (filter.keyword) {
+            query.andWhere('(asset.name LIKE :keyword OR asset.displayName LIKE :keyword)', {
+              keyword: `%${filter.keyword}%`,
+            });
+          }
 
-        if (isCursorPaging) {
-          const { cursorTimestamp, cursorId } = pagination!;
-          query.andWhere(
-            '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
-            { cursorTimestamp, cursorId }
-          );
-        }
+          if (isCursorPaging) {
+            const { cursorTimestamp, cursorId } = pagination!;
+            query.andWhere(
+              '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+              { cursorTimestamp, cursorId }
+            );
+          }
 
-        return query.getCount();
+          return query.getCount();
+        };
+
+        return Promise.all(teamIds.map((t) => buildCountQuery(t))).then((counts) => counts.reduce((sum, c) => sum + c, 0));
       })();
 
-      const [shardRows, total] = await Promise.all([Promise.all(shardQueries), countPromise]);
+      const shardConcurrency = isFirstPage ? 12 : 8;
+      const [shardRows, total] = await Promise.all([runWithConcurrencyLimit(shardTasks, shardConcurrency), countPromise]);
 
       const merged = shardRows.flat();
 
@@ -554,14 +584,15 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         return query;
       };
 
-      const shardQueries: Array<Promise<DataAssetEntity[]>> = [];
+      const shardTasks: Array<() => Promise<DataAssetEntity[]>> = [];
       for (const viewId of viewIds) {
         for (const teamId of teamIds) {
-          shardQueries.push(buildShardQuery(teamId, viewId).getMany());
+          shardTasks.push(() => buildShardQuery(teamId, viewId).getMany());
         }
       }
 
-      const shardRows = await Promise.all(shardQueries);
+      // nextpage 可能被频繁调用，限制并发避免占满连接池
+      const shardRows = await runWithConcurrencyLimit(shardTasks, 8);
       const merged = shardRows.flat();
 
       // 去重（理论上不会重复，但为稳健起见）
