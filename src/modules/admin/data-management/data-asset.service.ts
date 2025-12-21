@@ -20,6 +20,20 @@ export class DataAssetService {
     private readonly dataViewRepository: DataViewRepository,
   ) {}
 
+  private normalizePinOrder(pinOrder: unknown): number {
+    const num = typeof pinOrder === 'number' ? pinOrder : typeof pinOrder === 'string' ? Number(pinOrder) : NaN;
+    if (!Number.isFinite(num)) {
+      throw new BadRequestException('pinOrder must be a finite number');
+    }
+
+    const normalized = Math.trunc(num);
+    if (normalized < 0 || normalized > 32767) {
+      throw new BadRequestException('pinOrder must be between 0 and 32767');
+    }
+
+    return normalized;
+  }
+
   /**
    * 创建资产
    */
@@ -91,6 +105,7 @@ export class DataAssetService {
             page,
             pageSize,
             cursorTimestamp: dto.cursorTimestamp,
+            cursorPinOrder: dto.cursorPinOrder,
             cursorId: dto.cursorId,
           }
         );
@@ -114,6 +129,7 @@ export class DataAssetService {
           page,
           pageSize,
           cursorTimestamp: dto.cursorTimestamp,
+          cursorPinOrder: dto.cursorPinOrder,
           cursorId: dto.cursorId,
         }
       );
@@ -167,6 +183,7 @@ export class DataAssetService {
         {
           pageSize,
           cursorTimestamp: dto.cursorTimestamp,
+          cursorPinOrder: dto.cursorPinOrder,
           cursorId: dto.cursorId,
         }
       ));
@@ -179,13 +196,14 @@ export class DataAssetService {
           teamId: dto.teamId,
           creatorUserId: dto.creatorUserId,
           excludeLargeFields: true,
-        },
-        {
-          pageSize,
-          cursorTimestamp: dto.cursorTimestamp,
-          cursorId: dto.cursorId,
-        }
-      ));
+      },
+      {
+        pageSize,
+        cursorTimestamp: dto.cursorTimestamp,
+        cursorPinOrder: dto.cursorPinOrder,
+        cursorId: dto.cursorId,
+      }
+    ));
     }
 
     return {
@@ -244,6 +262,18 @@ export class DataAssetService {
   }
 
   /**
+   * 设置资产置顶排序权重
+   */
+  async setAssetPinOrder(userId: string, assetId: string, pinOrder: number): Promise<void> {
+    const asset = await this.dataAssetRepository.findById(assetId);
+    if (!asset) {
+      throw new NotFoundException(`Asset with ID ${assetId} not found`);
+    }
+
+    await this.dataAssetRepository.updatePinOrder(assetId, this.normalizePinOrder(pinOrder));
+  }
+
+  /**
    * 删除资产
    */
   async deleteAsset(userId: string, assetId: string): Promise<void> {
@@ -288,6 +318,7 @@ export class DataAssetService {
   private toResponseDto(asset: DataAssetEntity): DataAssetResponseDto {
     return {
       id: asset.id,
+      pinOrder: asset.pinOrder ?? 0,
       name: asset.name,
       viewId: asset.viewId,
       assetType: asset.assetType,

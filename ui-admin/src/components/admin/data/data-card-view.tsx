@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MediaPreview } from '@/components/ui/media-preview';
 import type { DataItem } from '@/types/data';
-import { Edit, Eye, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Edit, Eye, Loader2, MoreHorizontal, Pin, PinOff, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 function isTextFile(url: string): boolean {
@@ -33,6 +33,7 @@ interface DataCardViewProps {
   onEdit?: (item: DataItem) => void;
   onDelete?: (item: DataItem) => void;
   onView?: (item: DataItem) => void;
+  onPinToggle?: (item: DataItem) => void;
   onSelectionChange?: (selectedIds: string[]) => void;
 }
 
@@ -47,6 +48,7 @@ export function DataCardView({
   onEdit,
   onDelete,
   onView,
+  onPinToggle,
   onSelectionChange,
 }: DataCardViewProps) {
   const hasMore = hasMoreProp ?? total > data.length;
@@ -292,6 +294,16 @@ export function DataCardView({
                                   查看详情
                                 </DropdownMenuItem>
                               )}
+                              {onPinToggle && (
+                                <DropdownMenuItem onClick={() => onPinToggle(item)}>
+                                  {(item.pinOrder ?? 0) > 0 ? (
+                                    <PinOff className="mr-2 h-4 w-4" />
+                                  ) : (
+                                    <Pin className="mr-2 h-4 w-4" />
+                                  )}
+                                  {(item.pinOrder ?? 0) > 0 ? '取消置顶' : '置顶'}
+                                </DropdownMenuItem>
+                              )}
                               {onEdit && (
                                 <DropdownMenuItem onClick={() => onEdit(item)}>
                                   <Edit className="mr-2 h-4 w-4" />
@@ -401,6 +413,16 @@ export function DataCardView({
                                 <DropdownMenuItem onClick={() => onView(item)}>
                                   <Eye className="mr-2 h-4 w-4" />
                                   查看详情
+                                </DropdownMenuItem>
+                              )}
+                              {onPinToggle && (
+                                <DropdownMenuItem onClick={() => onPinToggle(item)}>
+                                  {(item.pinOrder ?? 0) > 0 ? (
+                                    <PinOff className="mr-2 h-4 w-4" />
+                                  ) : (
+                                    <Pin className="mr-2 h-4 w-4" />
+                                  )}
+                                  {(item.pinOrder ?? 0) > 0 ? '取消置顶' : '置顶'}
                                 </DropdownMenuItem>
                               )}
                               {onEdit && (

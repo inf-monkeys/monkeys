@@ -10,6 +10,7 @@ import {
     getDataNextPage,
     getDataItem,
     importData,
+    setDataItemPinOrder,
     updateView,
 } from '@/apis/data';
 import { DataCardView } from '@/components/admin/data/data-card-view';
@@ -40,7 +41,7 @@ function DataManagementPage() {
   const [hasMore, setHasMore] = useState(true);
   const [viewingItem, setViewingItem] = useState<DataItem | null>(null);
   // 游标分页优化：记录最后一条数据的时间戳和 ID
-  const [cursor, setCursor] = useState<{ timestamp?: number; id?: string } | null>(null);
+  const [cursor, setCursor] = useState<{ timestamp?: number; pinOrder?: number; id?: string } | null>(null);
   // 请求序号：用于丢弃切换分类/搜索后返回的旧请求，避免旧数据污染当前视图
   const requestSeqRef = useRef(0);
 
@@ -102,6 +103,7 @@ function DataManagementPage() {
         const response = await getDataNextPage({
           ...commonParams,
           cursorTimestamp: cursor?.timestamp,
+          cursorPinOrder: cursor?.pinOrder,
           cursorId: cursor?.id,
         });
         if (requestSeq !== requestSeqRef.current) return;
@@ -138,6 +140,7 @@ function DataManagementPage() {
         const lastItem = processedItems[processedItems.length - 1];
         setCursor({
           timestamp: lastItem.updatedTimestamp,
+          pinOrder: lastItem.pinOrder ?? 0,
           id: lastItem.id,
         });
       }
@@ -256,6 +259,28 @@ function DataManagementPage() {
     // TODO: 打开编辑对话框
   };
 
+  const handlePinToggle = async (item: DataItem) => {
+    if (!item?.id) {
+      toast.error('无效的数据项');
+      return;
+    }
+
+    try {
+      const nextPinOrder = (item.pinOrder ?? 0) > 0 ? 0 : 1;
+      await setDataItemPinOrder(item.id, nextPinOrder);
+      toast.success(nextPinOrder > 0 ? '已置顶' : '已取消置顶');
+
+      // 置顶会改变全局排序，直接回到第一页重载，确保结果一致
+      requestSeqRef.current += 1;
+      setCurrentPage(1);
+      setDataItems([]);
+      setCursor(null);
+      void loadDataList({ forceFirstPage: true });
+    } catch (error: any) {
+      toast.error(error?.message || '置顶操作失败');
+    }
+  };
+
   const handleView = async (item: DataItem) => {
     try {
       // 获取完整的资产详情（包含 primaryContent 和 properties）
@@ -371,6 +396,7 @@ function DataManagementPage() {
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onView={handleView}
+                  onPinToggle={handlePinToggle}
                   onSelectionChange={setSelectedIds}
                 />
               )}

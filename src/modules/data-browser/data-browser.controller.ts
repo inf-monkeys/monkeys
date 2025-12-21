@@ -1,8 +1,10 @@
 import {
   Controller,
   Get,
+  Put,
   Param,
   Query,
+  Body,
   UseGuards,
   Req,
 } from '@nestjs/common';
@@ -10,6 +12,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@ne
 import { DataBrowserService } from './data-browser.service';
 import {
   QueryDataAssetDto,
+  UpdateDataAssetPinOrderDto,
   DataAssetResponseDto,
   DataAssetListResponseDto,
   DataAssetNextPageResponseDto,
@@ -132,5 +135,21 @@ export class DataBrowserController {
     @Param('id') id: string,
   ): Promise<DataAssetResponseDto> {
     return this.dataBrowserService.getAsset(request.userId, id);
+  }
+
+  /**
+   * 设置资产置顶排序权重
+   */
+  @Put('assets/:id/pin')
+  @ApiOperation({ summary: '设置数据资产置顶排序权重' })
+  @ApiParam({ name: 'id', description: '资产 ID' })
+  @ApiResponse({ status: 200, description: '设置成功' })
+  async setAssetPinOrder(
+    @Req() request: IRequest,
+    @Param('id') id: string,
+    @Body() dto: UpdateDataAssetPinOrderDto,
+  ): Promise<{ success: boolean }> {
+    await this.dataBrowserService.setAssetPinOrder(request.userId, id, dto.pinOrder, request.teamId);
+    return { success: true };
   }
 }

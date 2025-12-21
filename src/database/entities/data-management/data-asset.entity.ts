@@ -16,6 +16,15 @@ export enum AssetStatus {
 @Entity({ name: 'data_assets' })
 export class DataAssetEntity extends AdminBaseAssetEntity {
   @Column({
+    name: 'pin_order',
+    type: 'smallint',
+    default: 0,
+    nullable: false,
+    comment: '置顶排序权重（越大越靠前）',
+  })
+  pinOrder: number;
+
+  @Column({
     name: 'name',
     type: 'varchar',
     length: 500,

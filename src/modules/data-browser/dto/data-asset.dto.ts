@@ -160,11 +160,23 @@ export class MoveDataAssetDto {
 }
 
 /**
+ * 更新置顶排序权重 DTO
+ */
+export class UpdateDataAssetPinOrderDto {
+  @ApiProperty({ description: '置顶排序权重（0 表示取消置顶）', default: 1 })
+  @IsNumber()
+  pinOrder: number;
+}
+
+/**
  * 资产响应 DTO
  */
 export class DataAssetResponseDto {
   @ApiProperty({ description: '资产 ID' })
   id: string;
+
+  @ApiProperty({ description: '置顶排序权重（越大越靠前）', default: 0 })
+  pinOrder: number;
 
   @ApiProperty({ description: '资产名称' })
   name: string;
@@ -274,6 +286,11 @@ export class QueryDataAssetDto {
   @IsNumber()
   @IsOptional()
   cursorTimestamp?: number;
+
+  @ApiPropertyOptional({ description: '游标分页：上一页最后一条的 pinOrder' })
+  @IsNumber()
+  @IsOptional()
+  cursorPinOrder?: number;
 
   @ApiPropertyOptional({ description: '游标分页：上一页最后一条的 id' })
   @IsString()

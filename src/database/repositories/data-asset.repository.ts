@@ -19,6 +19,7 @@ export interface DataAssetPagination {
   page?: number;
   pageSize: number;
   // 游标分页优化（用于大数据量场景）
+  cursorPinOrder?: number; // 上一页最后一条的 pinOrder（置顶排序键）
   cursorTimestamp?: number; // 上一页最后一条的 updatedTimestamp
   cursorId?: string; // 上一页最后一条的 id（解决时间戳相同的情况）
 }
@@ -28,7 +29,13 @@ export interface DataAssetNextPageResult<T> {
   hasMore: boolean;
 }
 
-function compareAssetCursorDesc(a: Pick<DataAssetEntity, 'updatedTimestamp' | 'id'>, b: Pick<DataAssetEntity, 'updatedTimestamp' | 'id'>): number {
+function compareAssetCursorDesc(
+  a: Pick<DataAssetEntity, 'pinOrder' | 'updatedTimestamp' | 'id'>,
+  b: Pick<DataAssetEntity, 'pinOrder' | 'updatedTimestamp' | 'id'>,
+): number {
+  const aPin = a.pinOrder ?? 0;
+  const bPin = b.pinOrder ?? 0;
+  if (aPin !== bPin) return bPin - aPin;
   if (a.updatedTimestamp !== b.updatedTimestamp) return b.updatedTimestamp - a.updatedTimestamp;
   if (a.id === b.id) return 0;
   return a.id < b.id ? 1 : -1;
@@ -169,6 +176,13 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
   }
 
   /**
+   * 更新置顶排序权重（不修改 updatedTimestamp）
+   */
+  async updatePinOrder(id: string, pinOrder: number): Promise<void> {
+    await this.update({ id, isDeleted: false }, { pinOrder });
+  }
+
+  /**
    * 移动资产到另一个视图
    */
   async moveToView(assetId: string, newViewId: string): Promise<void> {
@@ -282,9 +296,19 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     const page = toFiniteNumberOrDefault(pagination?.page, 1);
     const pageSize = toFiniteNumberOrDefault(pagination?.pageSize, 20);
     const cursorTimestamp = toFiniteNumber(pagination?.cursorTimestamp);
+    let cursorPinOrder = toFiniteNumber(pagination?.cursorPinOrder);
     const cursorId = pagination?.cursorId;
     const isCursorPaging = cursorTimestamp !== undefined && !!cursorId;
     const isFirstPage = !isCursorPaging && page === 1;
+
+    // 兼容：如果前端未传 cursorPinOrder，尽量从 DB 补齐，确保游标分页在 pinOrder 排序下不丢不重。
+    if (isCursorPaging && cursorPinOrder === undefined && cursorId) {
+      const raw = await this.createQueryBuilder('asset')
+        .select('asset.pinOrder', 'pinOrder')
+        .where('asset.id = :id', { id: cursorId })
+        .getRawOne<{ pinOrder?: unknown }>();
+      cursorPinOrder = toFiniteNumber(raw?.pinOrder) ?? 0;
+    }
 
     // 性能优化：当存在 viewIds + teamId（含全局 team_id='0'）时，单条 SQL 往往会选择按时间索引扫描再过滤 viewId，
     // 在数据稀疏的子树场景会出现大量 Rows Removed by Filter（首页也可能出现扫数百万行拿 20 条的情况）。
@@ -314,6 +338,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         if (filter.excludeLargeFields) {
           query.select([
             'asset.id',
+            'asset.pinOrder',
             'asset.name',
             'asset.viewId',
             'asset.assetType',
@@ -353,12 +378,15 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
 
         if (isCursorPaging) {
           query.andWhere(
-            '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
-            { cursorTimestamp, cursorId }
+            '(asset.pinOrder < :cursorPinOrder OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp < :cursorTimestamp) OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+            { cursorPinOrder, cursorTimestamp, cursorId }
           );
         }
 
-        query.orderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
+        query
+          .orderBy('asset.pinOrder', 'DESC')
+          .addOrderBy('asset.updatedTimestamp', 'DESC')
+          .addOrderBy('asset.id', 'DESC');
         query.take(pageSize);
         return query;
       };
@@ -393,10 +421,10 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
           }
 
         if (isCursorPaging) {
-            query.andWhere(
-              '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
-              { cursorTimestamp, cursorId }
-            );
+          query.andWhere(
+            '(asset.pinOrder < :cursorPinOrder OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp < :cursorTimestamp) OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+            { cursorPinOrder, cursorTimestamp, cursorId }
+          );
         }
 
           return query.getCount();
@@ -429,6 +457,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     if (filter.excludeLargeFields) {
       query.select([
         'asset.id',
+        'asset.pinOrder',
         'asset.name',
         'asset.viewId',
         'asset.assetType',
@@ -484,7 +513,8 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       });
     }
 
-    query.orderBy('asset.updatedTimestamp', 'DESC')
+    query.orderBy('asset.pinOrder', 'DESC')
+      .addOrderBy('asset.updatedTimestamp', 'DESC')
       .addOrderBy('asset.id', 'DESC'); // 添加 id 排序，确保稳定排序
 
     if (pagination) {
@@ -496,8 +526,8 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       if (cursorTimestamp !== undefined && cursorId) {
         // 游标分页：查询比游标更旧的数据
         query.andWhere(
-          '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
-          { cursorTimestamp, cursorId }
+          '(asset.pinOrder < :cursorPinOrder OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp < :cursorTimestamp) OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+          { cursorPinOrder, cursorTimestamp, cursorId }
         );
         query.take(pageSize);
       } else if (page) {
@@ -519,11 +549,21 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
    */
   async findByFilterNextPage(
     filter: DataAssetFilter,
-    pagination: Required<Pick<DataAssetPagination, 'pageSize'>> & Pick<DataAssetPagination, 'cursorTimestamp' | 'cursorId'>
+    pagination: Required<Pick<DataAssetPagination, 'pageSize'>> & Pick<DataAssetPagination, 'cursorPinOrder' | 'cursorTimestamp' | 'cursorId'>
   ): Promise<DataAssetNextPageResult<DataAssetEntity>> {
     const pageSize = toFiniteNumberOrDefault(pagination.pageSize, 20);
     const cursorTimestamp = toFiniteNumber(pagination.cursorTimestamp);
+    let cursorPinOrder = toFiniteNumber(pagination.cursorPinOrder);
     const cursorId = pagination.cursorId;
+
+    // 兼容：如果前端未传 cursorPinOrder，尽量从 DB 补齐，确保游标分页在 pinOrder 排序下不丢不重。
+    if (cursorTimestamp !== undefined && cursorId && cursorPinOrder === undefined) {
+      const raw = await this.createQueryBuilder('asset')
+        .select('asset.pinOrder', 'pinOrder')
+        .where('asset.id = :id', { id: cursorId })
+        .getRawOne<{ pinOrder?: unknown }>();
+      cursorPinOrder = toFiniteNumber(raw?.pinOrder) ?? 0;
+    }
 
     const viewIds =
       (filter.viewIds && filter.viewIds.length > 0
@@ -555,6 +595,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         if (filter.excludeLargeFields) {
           query.select([
             'asset.id',
+            'asset.pinOrder',
             'asset.name',
             'asset.viewId',
             'asset.assetType',
@@ -593,11 +634,14 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         }
 
         query.andWhere(
-          '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
-          { cursorTimestamp, cursorId }
+          '(asset.pinOrder < :cursorPinOrder OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp < :cursorTimestamp) OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+          { cursorPinOrder, cursorTimestamp, cursorId }
         );
 
-        query.orderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
+        query
+          .orderBy('asset.pinOrder', 'DESC')
+          .addOrderBy('asset.updatedTimestamp', 'DESC')
+          .addOrderBy('asset.id', 'DESC');
         query.take(pageSize + 1);
         return query;
       };
@@ -632,6 +676,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     if (filter.excludeLargeFields) {
       query.select([
         'asset.id',
+        'asset.pinOrder',
         'asset.name',
         'asset.viewId',
         'asset.assetType',
@@ -681,12 +726,12 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       });
     }
 
-    query.orderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
+    query.orderBy('asset.pinOrder', 'DESC').addOrderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
 
     if (cursorTimestamp !== undefined && cursorId) {
       query.andWhere(
-        '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
-        { cursorTimestamp, cursorId }
+        '(asset.pinOrder < :cursorPinOrder OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp < :cursorTimestamp) OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+        { cursorPinOrder, cursorTimestamp, cursorId }
       );
     }
 
@@ -770,16 +815,20 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       });
     }
 
-    query.orderBy('asset.updatedTimestamp', 'DESC')
+    query.orderBy('asset.pinOrder', 'DESC')
+      .addOrderBy('asset.updatedTimestamp', 'DESC')
       .addOrderBy('asset.id', 'DESC');
 
     if (pagination) {
-      const { page, pageSize, cursorTimestamp, cursorId } = pagination;
+      const { page, pageSize, cursorPinOrder, cursorTimestamp, cursorId } = pagination;
 
-      if (cursorTimestamp && cursorId) {
+      const normalizedCursorTimestamp = toFiniteNumber(cursorTimestamp);
+      const normalizedCursorPinOrder = toFiniteNumber(cursorPinOrder) ?? 0;
+
+      if (normalizedCursorTimestamp !== undefined && cursorId) {
         query.andWhere(
-          '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
-          { cursorTimestamp, cursorId }
+          '(asset.pinOrder < :cursorPinOrder OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp < :cursorTimestamp) OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+          { cursorPinOrder: normalizedCursorPinOrder, cursorTimestamp: normalizedCursorTimestamp, cursorId }
         );
         query.take(pageSize);
       } else if (page) {
@@ -799,7 +848,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
   async findByViewWithDescendantsNextPage(
     viewPath: string,
     filter: DataAssetFilter,
-    pagination: Required<Pick<DataAssetPagination, 'pageSize'>> & Pick<DataAssetPagination, 'cursorTimestamp' | 'cursorId'>
+    pagination: Required<Pick<DataAssetPagination, 'pageSize'>> & Pick<DataAssetPagination, 'cursorPinOrder' | 'cursorTimestamp' | 'cursorId'>
   ): Promise<DataAssetNextPageResult<DataAssetEntity>> {
     const query = this.createQueryBuilder('asset')
       .innerJoin(DataViewEntity, 'view', 'asset.viewId = view.id')
@@ -814,6 +863,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     if (filter.excludeLargeFields) {
       query.select([
         'asset.id',
+        'asset.pinOrder',
         'asset.name',
         'asset.viewId',
         'asset.assetType',
@@ -857,13 +907,16 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       });
     }
 
-    query.orderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
+    query.orderBy('asset.pinOrder', 'DESC').addOrderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
 
-    const { pageSize, cursorTimestamp, cursorId } = pagination;
-    if (cursorTimestamp && cursorId) {
+    const { pageSize, cursorPinOrder, cursorTimestamp, cursorId } = pagination;
+    const normalizedCursorTimestamp = toFiniteNumber(cursorTimestamp);
+    const normalizedCursorPinOrder = toFiniteNumber(cursorPinOrder) ?? 0;
+
+    if (normalizedCursorTimestamp !== undefined && cursorId) {
       query.andWhere(
-        '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
-        { cursorTimestamp, cursorId }
+        '(asset.pinOrder < :cursorPinOrder OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp < :cursorTimestamp) OR (asset.pinOrder = :cursorPinOrder AND asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
+        { cursorPinOrder: normalizedCursorPinOrder, cursorTimestamp: normalizedCursorTimestamp, cursorId }
       );
     }
 

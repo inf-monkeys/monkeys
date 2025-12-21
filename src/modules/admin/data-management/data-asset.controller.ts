@@ -19,6 +19,7 @@ import {
   DataAssetListResponseDto,
   DataAssetNextPageResponseDto,
   BatchUpdateStatusDto,
+  UpdateDataAssetPinOrderDto,
 } from './dto/data-asset.dto';
 import { AdminJwtGuard } from '../guards/admin-jwt.guard';
 import { CurrentAdmin } from '../decorators/current-admin.decorator';
@@ -80,6 +81,18 @@ export class DataAssetController {
     @Body() dto: UpdateDataAssetDto,
   ): Promise<DataAssetResponseDto> {
     return this.dataAssetService.updateAsset(admin.id, id, dto);
+  }
+
+  @Put(':id/pin')
+  @ApiOperation({ summary: '设置数据资产置顶排序权重' })
+  @ApiResponse({ status: 200, description: '设置成功' })
+  async setAssetPinOrder(
+    @CurrentAdmin() admin: AdminUserDto,
+    @Param('id') id: string,
+    @Body() dto: UpdateDataAssetPinOrderDto,
+  ): Promise<{ success: boolean }> {
+    await this.dataAssetService.setAssetPinOrder(admin.id, id, dto.pinOrder);
+    return { success: true };
   }
 
   @Delete(':id')

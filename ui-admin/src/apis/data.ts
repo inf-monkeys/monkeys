@@ -204,6 +204,19 @@ export async function updateDataItem(
 }
 
 /**
+ * 设置数据资产置顶排序权重（0 表示取消置顶）
+ */
+export async function setDataItemPinOrder(
+  id: string,
+  pinOrder: number,
+): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`${API_BASE}/data/${id}/pin`, {
+    method: 'PUT',
+    body: JSON.stringify({ pinOrder }),
+  });
+}
+
+/**
  * 删除数据项
  */
 export async function deleteDataItem(id: string): Promise<void> {

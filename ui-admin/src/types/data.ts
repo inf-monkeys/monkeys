@@ -39,6 +39,7 @@ export interface DataCategory extends DataView {}
 // 数据资产
 export interface DataAsset {
   id: string;
+  pinOrder?: number;
   name: string;
   viewId: string;
   assetType: 'image' | 'video' | '3d' | 'text' | 'document' | 'audio' | 'other';
@@ -106,6 +107,7 @@ export interface AssetQueryParams {
   pageSize?: number;
   // 游标分页优化（用于大数据量场景）
   cursorTimestamp?: number;
+  cursorPinOrder?: number;
   cursorId?: string;
 }
 
