@@ -95,10 +95,14 @@ export class DataBrowserService {
       const view = await this.dataViewRepository.findById(dto.viewId);
 
       if (view) {
-        // 使用优化的 JOIN 查询（单次查询，包含所有子孙视图的资产）
-        [assets, total] = await this.dataAssetRepository.findByViewWithDescendants(
-          view.path,
+        // 先把子树视图 ID 收敛出来，再用 asset.viewId IN (...) 过滤
+        // 避免在按 updatedTimestamp 扫描时再做 view JOIN 过滤导致大量跳过行（子树稀疏时会非常慢）。
+        const descendants = await this.dataViewRepository.findDescendantsByPath(view.path);
+        const viewIds = [view.id, ...descendants.map((v) => v.id)];
+
+        [assets, total] = await this.dataAssetRepository.findByFilter(
           {
+            viewIds,
             assetType: dto.assetType,
             status: AssetStatus.PUBLISHED, // 强制只返回已发布的内容
             keyword: dto.keyword,
@@ -170,9 +174,12 @@ export class DataBrowserService {
         return { list: [], hasMore: false, pageSize };
       }
 
-      ({ list: assets, hasMore } = await this.dataAssetRepository.findByViewWithDescendantsNextPage(
-        view.path,
+      const descendants = await this.dataViewRepository.findDescendantsByPath(view.path);
+      const viewIds = [view.id, ...descendants.map((v) => v.id)];
+
+      ({ list: assets, hasMore } = await this.dataAssetRepository.findByFilterNextPage(
         {
+          viewIds,
           assetType: dto.assetType,
           status: AssetStatus.PUBLISHED,
           keyword: dto.keyword,

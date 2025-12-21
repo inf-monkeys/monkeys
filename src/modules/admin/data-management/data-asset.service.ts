@@ -74,10 +74,12 @@ export class DataAssetService {
       const view = await this.dataViewRepository.findById(dto.viewId);
 
       if (view) {
-        // 使用优化的 JOIN 查询（单次查询，包含所有子孙视图的资产）
-        [assets, total] = await this.dataAssetRepository.findByViewWithDescendants(
-          view.path,
+        const descendants = await this.dataViewRepository.findDescendantsByPath(view.path);
+        const viewIds = [view.id, ...descendants.map((v) => v.id)];
+
+        [assets, total] = await this.dataAssetRepository.findByFilter(
           {
+            viewIds,
             assetType: dto.assetType,
             status: dto.status,
             keyword: dto.keyword,
@@ -149,9 +151,12 @@ export class DataAssetService {
         return { list: [], hasMore: false, pageSize };
       }
 
-      ({ list: assets, hasMore } = await this.dataAssetRepository.findByViewWithDescendantsNextPage(
-        view.path,
+      const descendants = await this.dataViewRepository.findDescendantsByPath(view.path);
+      const viewIds = [view.id, ...descendants.map((v) => v.id)];
+
+      ({ list: assets, hasMore } = await this.dataAssetRepository.findByFilterNextPage(
         {
+          viewIds,
           assetType: dto.assetType,
           status: dto.status,
           keyword: dto.keyword,
