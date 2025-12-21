@@ -251,7 +251,11 @@ function DataManagementPage() {
     try {
       await deleteDataItem(item.id);
       toast.success('删除成功');
-      loadDataList();
+
+      // 立即从本地列表移除，避免等待重新拉取（尤其是无限滚动/大数据量时）
+      setDataItems((prev) => prev.filter((x) => x.id !== item.id));
+      setSelectedIds((prev) => prev.filter((id) => id !== item.id));
+      setTotal((prev) => Math.max(0, prev - 1));
     } catch (error: any) {
       toast.error(error.message || '删除失败');
     }
