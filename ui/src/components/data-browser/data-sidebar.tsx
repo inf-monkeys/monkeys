@@ -33,8 +33,6 @@ import {
   ChevronDown,
   ChevronRight,
   Database,
-  Folder,
-  FolderOpen,
   Plus,
   RefreshCw,
   MoreVertical,
@@ -435,11 +433,8 @@ function CategoryTreeItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const Icon = hasChildren
-    ? isExpanded
-      ? FolderOpen
-      : Folder
-    : Database;
+  // UI 统一使用“数据库”图标：不区分文件夹/子节点，避免误导为文件夹层级。
+  const Icon = Database;
 
   const handleOpenEditDialog = () => {
     setEditName(category.name);
