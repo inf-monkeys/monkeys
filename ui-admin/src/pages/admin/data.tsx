@@ -367,13 +367,14 @@ function DataManagementPage() {
             setEditDialogOpen(open);
             if (!open) setEditingItemId(null);
           }}
-          onSaved={() => {
-            // 编辑会更新 updatedTimestamp，排序可能发生变化；为确保列表一致，直接回到第一页重载
-            requestSeqRef.current += 1;
-            setCurrentPage(1);
-            setDataItems([]);
-            setCursor(null);
-            void loadDataList({ forceFirstPage: true });
+          onSaved={(updated) => {
+            // 本地立即生效：更新当前列表中的对应项（不强制回到第一页，避免打断当前滚动位置）
+            setDataItems((prev) =>
+              prev.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)),
+            );
+            if (viewingItem?.id === updated.id) {
+              setViewingItem(updated);
+            }
           }}
         />
         {viewingItem ? (
