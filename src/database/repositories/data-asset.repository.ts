@@ -34,6 +34,17 @@ function compareAssetCursorDesc(a: Pick<DataAssetEntity, 'updatedTimestamp' | 'i
   return a.id < b.id ? 1 : -1;
 }
 
+function toFiniteNumber(value: unknown): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  const num = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
+  return Number.isFinite(num) ? num : undefined;
+}
+
+function toFiniteNumberOrDefault(value: unknown, defaultValue: number): number {
+  const num = toFiniteNumber(value);
+  return num === undefined ? defaultValue : num;
+}
+
 async function runWithConcurrencyLimit<T>(tasks: Array<() => Promise<T>>, concurrency: number): Promise<T[]> {
   if (tasks.length === 0) return [];
 
@@ -268,8 +279,11 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
           ? [filter.viewId]
           : []) as string[];
 
-    const page = pagination?.page ?? 1;
-    const isCursorPaging = !!pagination?.cursorTimestamp && !!pagination?.cursorId;
+    const page = toFiniteNumberOrDefault(pagination?.page, 1);
+    const pageSize = toFiniteNumberOrDefault(pagination?.pageSize, 20);
+    const cursorTimestamp = toFiniteNumber(pagination?.cursorTimestamp);
+    const cursorId = pagination?.cursorId;
+    const isCursorPaging = cursorTimestamp !== undefined && !!cursorId;
     const isFirstPage = !isCursorPaging && page === 1;
 
     // 性能优化：当存在 viewIds + teamId（含全局 team_id='0'）时，单条 SQL 往往会选择按时间索引扫描再过滤 viewId，
@@ -338,7 +352,6 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         }
 
         if (isCursorPaging) {
-          const { cursorTimestamp, cursorId } = pagination!;
           query.andWhere(
             '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
             { cursorTimestamp, cursorId }
@@ -346,7 +359,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
         }
 
         query.orderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
-        query.take(pagination!.pageSize);
+        query.take(pageSize);
         return query;
       };
 
@@ -379,13 +392,12 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
             });
           }
 
-          if (isCursorPaging) {
-            const { cursorTimestamp, cursorId } = pagination!;
+        if (isCursorPaging) {
             query.andWhere(
               '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
               { cursorTimestamp, cursorId }
             );
-          }
+        }
 
           return query.getCount();
         };
@@ -406,7 +418,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       }
 
       const sorted = Array.from(byId.values()).sort(compareAssetCursorDesc);
-      const top = sorted.slice(0, pagination.pageSize);
+      const top = sorted.slice(0, pageSize);
       return [top, total];
     }
 
@@ -476,10 +488,12 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       .addOrderBy('asset.id', 'DESC'); // 添加 id 排序，确保稳定排序
 
     if (pagination) {
-      const { page, pageSize, cursorTimestamp, cursorId } = pagination;
+      const { page, cursorId } = pagination;
+      const pageSize = toFiniteNumberOrDefault(pagination.pageSize, 20);
+      const cursorTimestamp = toFiniteNumber(pagination.cursorTimestamp);
 
       // 优化：使用游标分页（性能更好，避免大偏移量）
-      if (cursorTimestamp && cursorId) {
+      if (cursorTimestamp !== undefined && cursorId) {
         // 游标分页：查询比游标更旧的数据
         query.andWhere(
           '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
@@ -489,7 +503,8 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       } else if (page) {
         // 传统分页：仅用于首页或兼容旧逻辑
         // 警告：大偏移量性能差，建议迁移到游标分页
-        query.skip((page - 1) * pageSize).take(pageSize);
+        const pageNum = toFiniteNumberOrDefault(page, 1);
+        query.skip((pageNum - 1) * pageSize).take(pageSize);
       } else {
         query.take(pageSize);
       }
@@ -506,6 +521,10 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
     filter: DataAssetFilter,
     pagination: Required<Pick<DataAssetPagination, 'pageSize'>> & Pick<DataAssetPagination, 'cursorTimestamp' | 'cursorId'>
   ): Promise<DataAssetNextPageResult<DataAssetEntity>> {
+    const pageSize = toFiniteNumberOrDefault(pagination.pageSize, 20);
+    const cursorTimestamp = toFiniteNumber(pagination.cursorTimestamp);
+    const cursorId = pagination.cursorId;
+
     const viewIds =
       (filter.viewIds && filter.viewIds.length > 0
         ? filter.viewIds
@@ -524,8 +543,8 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       viewIds.length > 0 &&
       viewIds.length <= maxViewIdsForFanOut &&
       !!filter.status &&
-      !!pagination.cursorTimestamp &&
-      !!pagination.cursorId;
+      cursorTimestamp !== undefined &&
+      !!cursorId;
 
     if (canFanOut) {
       const teamIds = filter.teamId === '0' ? ['0'] : [filter.teamId!, '0'];
@@ -573,7 +592,6 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
           });
         }
 
-        const { pageSize, cursorTimestamp, cursorId } = pagination;
         query.andWhere(
           '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
           { cursorTimestamp, cursorId }
@@ -603,9 +621,9 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
       }
 
       const sorted = Array.from(byId.values()).sort(compareAssetCursorDesc);
-      const top = sorted.slice(0, pagination.pageSize + 1);
-      const hasMore = top.length > pagination.pageSize;
-      return { list: hasMore ? top.slice(0, pagination.pageSize) : top, hasMore };
+      const top = sorted.slice(0, pageSize + 1);
+      const hasMore = top.length > pageSize;
+      return { list: hasMore ? top.slice(0, pageSize) : top, hasMore };
     }
 
     const query = this.createQueryBuilder('asset')
@@ -665,8 +683,7 @@ export class DataAssetRepository extends Repository<DataAssetEntity> {
 
     query.orderBy('asset.updatedTimestamp', 'DESC').addOrderBy('asset.id', 'DESC');
 
-    const { pageSize, cursorTimestamp, cursorId } = pagination;
-    if (cursorTimestamp && cursorId) {
+    if (cursorTimestamp !== undefined && cursorId) {
       query.andWhere(
         '(asset.updatedTimestamp < :cursorTimestamp OR (asset.updatedTimestamp = :cursorTimestamp AND asset.id < :cursorId))',
         { cursorTimestamp, cursorId }
