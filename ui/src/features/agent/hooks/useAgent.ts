@@ -35,9 +35,9 @@ export function useAgent(agentId: string, teamId: string) {
 /**
  * 创建 Agent
  */
-export function useCreateAgent(teamId: string) {
+export function useCreateAgent(teamId: string, userId: string) {
   return useRequest(
-    (data: CreateAgentDto) => agentApi.createAgent(teamId, data),
+    (data: CreateAgentDto) => agentApi.createAgent(teamId, userId, data),
     {
       manual: true,
     },

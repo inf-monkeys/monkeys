@@ -1,13 +1,13 @@
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { IAgent } from '@/apis/agents/typings.ts';
+import type { Agent } from '@/features/agent/types/agent.types';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { getI18nContent } from '@/utils';
 
-const columnHelper = createColumnHelper<IAssetItem<IAgent>>();
+const columnHelper = createColumnHelper<IAssetItem<Agent>>();
 
 export const createAgentsColumns = () => [
   columnHelper.accessor('iconUrl', {
@@ -15,12 +15,12 @@ export const createAgentsColumns = () => [
     cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
     maxSize: 48,
   }),
-  columnHelper.accessor('displayName', {
+  columnHelper.accessor('name', {
     id: 'title',
     cell: ({ row, getValue }) => (
       <a
         className="hover:text-primary-500 transition-colors"
-        href={`/${row.original.teamId}/agent/${row.original.id}`}
+        href={`/${row.original.teamId}/agents/${row.original.id}`}
         target="_blank"
         rel="noreferrer"
       >
@@ -32,13 +32,9 @@ export const createAgentsColumns = () => [
     id: 'description',
     cell: ({ getValue }) => RenderDescription({ description: getI18nContent(getValue() as string | I18nValue) }),
   }),
-  columnHelper.accessor('model', {
+  columnHelper.accessor((row) => (row as any).config?.model, {
     id: 'model',
     cell: ({ getValue }) => getValue() as string,
-  }),
-  columnHelper.accessor('customModelName', {
-    id: 'customModelName',
-    cell: ({ getValue }) => getValue() as string | undefined,
   }),
   columnHelper.accessor('user', {
     id: 'user',

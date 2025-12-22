@@ -21,6 +21,7 @@ export const CUSTOM_NAV_SUB_MODULE_MAP: INavListSubModuleMap = {
     'design-project': Workflows,
     'design-template': DesignTemplates,
     'innovation-method': Tools,
+    'agents': AgentsPage,
   },
   'concept-design:design-assets': MediaData,
   'data-browser': DataBrowserPage,

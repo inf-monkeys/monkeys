@@ -3,6 +3,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useModelList } from '../hooks/useAgent';
 import type { AgentConfig as AgentConfigType } from '../types/agent.types';
 import { Label } from '@/components/ui/label';
@@ -30,6 +31,7 @@ export function AgentConfig({
   onSave,
   onCancel,
 }: AgentConfigProps) {
+  const { t } = useTranslation();
   const { data: models = [] } = useModelList(teamId);
 
   const [config, setConfig] = useState<AgentConfigType>(
@@ -54,13 +56,13 @@ export function AgentConfig({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* 模型选择 */}
       <div className="space-y-2">
-        <Label htmlFor="model">Model</Label>
+        <Label htmlFor="model">{t('ugc-page.agents.create-dialog.model')}</Label>
         <Select
           value={config.model}
           onValueChange={(value) => setConfig({ ...config, model: value })}
         >
           <SelectTrigger id="model" className="w-full">
-            <SelectValue placeholder="Select a model..." />
+            <SelectValue placeholder={t('ugc-page.agents.create-dialog.model-placeholder')} />
           </SelectTrigger>
           <SelectContent>
             {models.map((model) => (
@@ -79,18 +81,18 @@ export function AgentConfig({
 
       {/* 系统指令 */}
       <div className="space-y-2">
-        <Label htmlFor="instructions">System Instructions</Label>
+        <Label htmlFor="instructions">{t('ugc-page.agents.create-dialog.instructions')}</Label>
         <Textarea
           id="instructions"
           value={config.instructions}
           onChange={(e) => setConfig({ ...config, instructions: e.target.value })}
           rows={8}
-          placeholder="Enter system instructions for the agent..."
+          placeholder={t('ugc-page.agents.create-dialog.instructions-placeholder')}
           required
           className="resize-none font-mono text-sm"
         />
         <p className="text-xs text-muted-foreground">
-          Define how the agent should behave and respond to user messages.
+          {t('ugc-page.agents.create-dialog.instructions-description')}
         </p>
       </div>
 
@@ -99,7 +101,7 @@ export function AgentConfig({
       {/* Temperature */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label>Temperature</Label>
+          <Label>{t('ugc-page.agents.create-dialog.temperature')}</Label>
           <span className="rounded-md bg-muted px-2 py-1 text-sm font-mono">
             {config.temperature?.toFixed(1)}
           </span>
@@ -113,15 +115,15 @@ export function AgentConfig({
           className="w-full"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Precise (0.0)</span>
-          <span>Balanced (1.0)</span>
-          <span>Creative (2.0)</span>
+          <span>{t('ugc-page.agents.create-dialog.temperature-precise')} (0.0)</span>
+          <span>{t('ugc-page.agents.create-dialog.temperature-balanced')} (1.0)</span>
+          <span>{t('ugc-page.agents.create-dialog.temperature-creative')} (2.0)</span>
         </div>
       </div>
 
       {/* Max Tokens */}
       <div className="space-y-2">
-        <Label htmlFor="maxTokens">Max Tokens</Label>
+        <Label htmlFor="maxTokens">{t('ugc-page.agents.create-dialog.max-tokens')}</Label>
         <input
           id="maxTokens"
           type="number"
@@ -138,7 +140,7 @@ export function AgentConfig({
 
       {/* Top P */}
       <div className="space-y-2">
-        <Label htmlFor="topP">Top P (optional)</Label>
+        <Label htmlFor="topP">{t('ugc-page.agents.create-dialog.top-p')}</Label>
         <input
           id="topP"
           type="number"
@@ -153,7 +155,7 @@ export function AgentConfig({
           min="0"
           max="1"
           step="0.1"
-          placeholder="0.0 - 1.0"
+          placeholder={t('ugc-page.agents.create-dialog.top-p-placeholder')}
         />
       </div>
 
@@ -176,7 +178,7 @@ export function AgentConfig({
           }
         />
         <Label htmlFor="tools" className="cursor-pointer font-normal">
-          Enable Tools
+          {t('ugc-page.agents.create-dialog.enable-tools')}
         </Label>
       </div>
 
@@ -197,13 +199,13 @@ export function AgentConfig({
             }
           />
           <Label htmlFor="reasoningEffort" className="cursor-pointer font-normal">
-            Enable Reasoning Effort (o1/o3 models)
+            {t('ugc-page.agents.create-dialog.enable-reasoning-effort')}
           </Label>
         </div>
 
         {config.reasoningEffort?.enabled && (
           <div className="ml-6 space-y-2">
-            <Label>Reasoning Level</Label>
+            <Label>{t('ugc-page.agents.create-dialog.reasoning-level')}</Label>
             <Select
               value={config.reasoningEffort.level}
               onValueChange={(value) =>
@@ -220,9 +222,9 @@ export function AgentConfig({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="low">{t('ugc-page.agents.create-dialog.reasoning-level-low')}</SelectItem>
+                <SelectItem value="medium">{t('ugc-page.agents.create-dialog.reasoning-level-medium')}</SelectItem>
+                <SelectItem value="high">{t('ugc-page.agents.create-dialog.reasoning-level-high')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -237,14 +239,14 @@ export function AgentConfig({
             onClick={onCancel}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
           >
-            Cancel
+            {t('ugc-page.agents.create-dialog.cancel')}
           </button>
         )}
         <button
           type="submit"
           className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
         >
-          Save Configuration
+          {t('ugc-page.agents.create-dialog.save')}
         </button>
       </div>
     </form>

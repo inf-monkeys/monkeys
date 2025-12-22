@@ -2,11 +2,11 @@
  * ThreadList - 使用 assistant-ui 原生组件
  */
 
-import { ThreadListPrimitive, ThreadListItemPrimitive } from '@assistant-ui/react';
-import { FC } from 'react';
-import { MessageSquare, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/utils';
+import { ThreadListItemPrimitive, ThreadListPrimitive } from '@assistant-ui/react';
+import { MessageSquare, Plus, Trash2 } from 'lucide-react';
+import { FC } from 'react';
 
 interface ThreadListProps {
   className?: string;
@@ -27,7 +27,7 @@ export function ThreadList({ className }: ThreadListProps) {
       </ThreadListPrimitive.New>
 
       {/* Thread Items */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-32 md:pb-36">
         <ThreadListPrimitive.Items
           components={{
             ThreadListItem: ThreadListItem,

@@ -28,6 +28,7 @@ export class AgentRepository {
   async findByTeamId(teamId: string): Promise<AgentEntity[]> {
     return await this.repository.find({
       where: { teamId, isDeleted: false },
+      relations: ['creator', 'team'],
       order: { updatedTimestamp: 'DESC' },
     });
   }

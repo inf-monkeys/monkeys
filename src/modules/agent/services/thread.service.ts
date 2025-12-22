@@ -63,8 +63,15 @@ export class ThreadService {
   /**
    * 列出用户的 Threads
    */
-  async listByUser(userId: string, teamId: string): Promise<ThreadEntity[]> {
-    return await this.threadRepository.findByUserId(userId, teamId);
+  async listByUser(userId: string, teamId: string, agentId?: string): Promise<ThreadEntity[]> {
+    const threads = await this.threadRepository.findByUserId(userId, teamId);
+
+    // 如果指定了 agentId，只返回该 agent 的 threads
+    if (agentId) {
+      return threads.filter((t) => t.agentId === agentId);
+    }
+
+    return threads;
   }
 
   /**

@@ -32,14 +32,29 @@ const directJsonResolver = async (response: Response) => {
  */
 export const agentApi = {
   /**
-   * 创建 Agent
-   */
-  createAgent: (teamId: string, data: CreateAgentDto): Promise<Agent> => {
-    return vinesFetcher<Agent, CreateAgentDto & { teamId: string }>({
+   * 创建 Agent  */
+  createAgent: async (teamId: string, userId: string, data: CreateAgentDto): Promise<Agent> => {
+    const token = localStorage.getItem('vines-token');
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(API_BASE, {
       method: 'POST',
-      simple: true,
-      responseResolver: directJsonResolver
-    })(API_BASE, { ...data, teamId }) as Promise<Agent>;
+      headers,
+      body: JSON.stringify({ ...data, teamId, createdBy: userId }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
   },
 
   /**
@@ -113,9 +128,10 @@ export const threadApi = {
   /**
    * 获取 Thread 列表
    */
-  listThreads: (teamId: string, userId?: string): Promise<Thread[]> => {
+  listThreads: (teamId: string, userId?: string, agentId?: string): Promise<Thread[]> => {
     const params = new URLSearchParams({ teamId });
     if (userId) params.append('userId', userId);
+    if (agentId) params.append('agentId', agentId);
     return vinesFetcher<Thread[]>({
       simple: true,
       responseResolver: directJsonResolver

@@ -82,7 +82,7 @@ export function useThreadListRuntime(options: UseThreadListRuntimeOptions) {
   const loadThreads = useCallback(async () => {
     setIsLoadingThreads(true);
     try {
-      const threadList = await threadApi.listThreads(teamId, userId);
+      const threadList = await threadApi.listThreads(teamId, userId, agentId);
       console.log('[loadThreads] Fetched threads from server:', threadList.length);
 
       // 用于存储合并后的 threadMap，供后续使用
@@ -124,7 +124,7 @@ export function useThreadListRuntime(options: UseThreadListRuntimeOptions) {
     } finally {
       setIsLoadingThreads(false);
     }
-  }, [teamId, userId]);
+  }, [teamId, userId, agentId]);
 
   // 加载当前 thread 的消息
   const loadThreadMessages = useCallback(

@@ -1303,6 +1303,53 @@
         }
       }
     },
+    "agents": {
+      "create-dialog": {
+        "title": "创建智能体",
+        "description": "配置你的智能体模型和指令",
+        "name": "智能体名称",
+        "name-placeholder": "请输入智能体名称",
+        "description": "描述",
+        "description-placeholder": "请输入智能体描述",
+        "name-required": "智能体名称不能为空",
+        "model": "模型",
+        "model-placeholder": "选择模型...",
+        "instructions": "系统指令",
+        "instructions-placeholder": "请输入智能体的系统指令...",
+        "instructions-description": "定义智能体应如何行为和响应用户消息。",
+        "temperature": "温度",
+        "temperature-precise": "精确",
+        "temperature-balanced": "平衡",
+        "temperature-creative": "创造",
+        "max-tokens": "最大令牌数",
+        "top-p": "Top P (可选)",
+        "top-p-placeholder": "0.0 - 1.0",
+        "enable-tools": "启用工具",
+        "enable-reasoning-effort": "启用推理能力 (o1/o3 模型)",
+        "reasoning-level": "推理级别",
+        "reasoning-level-low": "低",
+        "reasoning-level-medium": "中",
+        "reasoning-level-high": "高",
+        "cancel": "取消",
+        "save": "保存配置"
+      },
+      "ugc-view": {
+        "operate-area": {
+          "dropdown-label": "智能体操作",
+          "options": {
+            "edit-info": "编辑信息"
+          },
+          "agent-info-editor": {
+            "title": "编辑智能体信息",
+            "name": "智能体名称",
+            "name-placeholder": "请输入智能体名称",
+            "name-required": "智能体名称不能为空",
+            "description": "描述",
+            "description-placeholder": "请输入智能体描述"
+          }
+        }
+      }
+    },
     "workflow": {
       "ugc-view": {
         "columns": {

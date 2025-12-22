@@ -16,6 +16,8 @@ import { AgentService, CreateAgentDto, UpdateAgentDto } from './services/agent.s
 import { ThreadService, CreateThreadDto, UpdateThreadDto } from './services/thread.service';
 import { MessageService } from './services/message.service';
 import { StreamingService, StreamOptions } from './services/streaming.service';
+import { AgentToolExecutorService } from './services/agent-tool-executor.service';
+import { ToolCallRepository } from './repositories/tool-call.repository';
 
 /**
  * Agent Controller
@@ -33,6 +35,8 @@ export class AgentController {
     private readonly threadService: ThreadService,
     private readonly messageService: MessageService,
     private readonly streamingService: StreamingService,
+    private readonly agentToolExecutor: AgentToolExecutorService,
+    private readonly toolCallRepository: ToolCallRepository,
   ) {}
 
   // ========== Agent CRUD ==========
@@ -63,11 +67,15 @@ export class AgentController {
   }
 
   @Get('threads')
-  async listThreads(@Query('userId') userId: string, @Query('teamId') teamId: string) {
+  async listThreads(
+    @Query('userId') userId: string,
+    @Query('teamId') teamId: string,
+    @Query('agentId') agentId?: string,
+  ) {
     if (!userId || !teamId) {
       throw new BadRequestException('userId and teamId are required');
     }
-    return await this.threadService.listByUser(userId, teamId);
+    return await this.threadService.listByUser(userId, teamId, agentId);
   }
 
   @Get('threads/:threadId')
@@ -208,5 +216,67 @@ export class AgentController {
   async deleteAgent(@Param('agentId') agentId: string, @Query('teamId') teamId?: string) {
     await this.agentService.delete(agentId, teamId);
     return { success: true };
+  }
+
+  // ========== Tool Call Management（工具调用管理） ==========
+
+  /**
+   * 获取线程的待审批工具调用
+   */
+  @Get('threads/:threadId/tool-calls/pending')
+  async getPendingToolCalls(
+    @Param('threadId') threadId: string,
+    @Query('teamId') teamId: string,
+  ) {
+    if (!teamId) {
+      throw new BadRequestException('teamId is required');
+    }
+    return await this.agentToolExecutor.getPendingApprovals(threadId, teamId);
+  }
+
+  /**
+   * 审批或拒绝工具调用
+   */
+  @Post('tool-calls/:toolCallId/approve')
+  async approveToolCall(
+    @Param('toolCallId') toolCallId: string,
+    @Body() body: { approved: boolean; userId: string; teamId: string },
+  ) {
+    if (!body.userId || !body.teamId) {
+      throw new BadRequestException('userId and teamId are required');
+    }
+
+    await this.agentToolExecutor.handleApproval(
+      toolCallId,
+      body.approved,
+      body.userId,
+    );
+
+    return { success: true, approved: body.approved };
+  }
+
+  /**
+   * 获取线程的工具调用历史
+   */
+  @Get('threads/:threadId/tool-calls')
+  async getToolCallHistory(
+    @Param('threadId') threadId: string,
+    @Query('teamId') teamId?: string,
+  ) {
+    return await this.toolCallRepository.findByThreadId(threadId, teamId);
+  }
+
+  /**
+   * 获取团队的工具调用统计
+   */
+  @Get('tool-calls/stats')
+  async getToolCallStats(
+    @Query('teamId') teamId: string,
+    @Query('period') period?: 'day' | 'week' | 'month',
+  ) {
+    if (!teamId) {
+      throw new BadRequestException('teamId is required');
+    }
+    return await this.agentToolExecutor.getUsageStats(teamId, period || 'day');
   }
 }

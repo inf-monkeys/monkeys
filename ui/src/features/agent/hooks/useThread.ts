@@ -9,12 +9,12 @@ import type { CreateThreadDto, Message, Thread } from '../types/agent.types';
 /**
  * 获取 Thread 列表
  */
-export function useThreadList(teamId: string, userId?: string) {
+export function useThreadList(teamId: string, userId?: string, agentId?: string) {
   return useRequest(
-    () => threadApi.listThreads(teamId, userId),
+    () => threadApi.listThreads(teamId, userId, agentId),
     {
       ready: !!teamId,
-      refreshDeps: [teamId, userId],
+      refreshDeps: [teamId, userId, agentId],
     },
   );
 }

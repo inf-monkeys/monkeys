@@ -55,6 +55,7 @@ import { ModuleEvaluatorEntity } from './entities/evaluation/module-evaluator.en
 import { VREvaluationTaskEntity } from './entities/evaluation/vr-evaluation-task.entity';
 import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
+import { TeamQuotaEntity } from './entities/identity/team-quota';
 import { UserEntity } from './entities/identity/user';
 import { TeamMembersEntity } from './entities/identity/user-team-relationship';
 import { InstalledAppEntity } from './entities/marketplace/installed-app.entity';
@@ -109,6 +110,7 @@ export const entities: EntityClassOrSchema[] = [
   TeamEntity,
   TeamMembersEntity,
   TeamInvitesRequestsEntity,
+  TeamQuotaEntity,
   ApiKeyEntity,
   WorkflowPageEntity,
   WorkflowPageGroupEntity,

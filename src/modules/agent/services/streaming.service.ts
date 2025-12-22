@@ -1,10 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, forwardRef, Inject } from '@nestjs/common';
 import { streamText } from 'ai';
 import { ModelRegistryService } from './model-registry.service';
 import { MessageService, Message } from './message.service';
 import { ThreadService } from './thread.service';
 import { AgentService } from './agent.service';
+import { AgentToolRegistryService } from './agent-tool-registry.service';
+import { AgentToolExecutorService } from './agent-tool-executor.service';
 import { UIMessagePart } from '@/database/entities/agents/message.entity';
+import { generateDbId } from '@/common/utils';
 
 export interface StreamOptions {
   threadId: string;
@@ -42,6 +45,10 @@ export class StreamingService {
     private readonly messageService: MessageService,
     private readonly threadService: ThreadService,
     private readonly agentService: AgentService,
+    @Inject(forwardRef(() => AgentToolRegistryService))
+    private readonly agentToolRegistry: AgentToolRegistryService,
+    @Inject(forwardRef(() => AgentToolExecutorService))
+    private readonly agentToolExecutor: AgentToolExecutorService,
   ) {}
 
   /**
@@ -56,7 +63,7 @@ export class StreamingService {
       await this.threadService.setRunning(threadId, true, teamId);
 
       // 2. 保存用户消息
-      await this.messageService.saveUserMessage({
+      const userMsg = await this.messageService.saveUserMessage({
         threadId,
         teamId,
         text: userMessage,
@@ -81,29 +88,119 @@ export class StreamingService {
 
       // 7. 准备参数
       const temperature = opts.temperature ?? agent?.config.temperature ?? 0.7;
+      const maxSteps = agent?.config.stopWhen?.maxSteps || 20;
 
-      this.logger.debug(`Starting AI SDK stream for thread ${threadId}`);
+      // 8. 获取工具（如果启用）
+      let tools: Record<string, any> | undefined;
+      if (agent?.config.tools?.enabled && agentId) {
+        try {
+          tools = await this.agentToolRegistry.getToolsForAgent(agentId, teamId);
+          this.logger.debug(`Loaded ${Object.keys(tools).length} tools for agent ${agentId}`);
+        } catch (error) {
+          this.logger.warn(`Failed to load tools for agent ${agentId}:`, error.message);
+        }
+      }
 
-      // 8. 使用 AI SDK streamText
+      this.logger.debug(`Starting AI SDK stream for thread ${threadId}, tools: ${tools ? 'enabled' : 'disabled'}`);
+
+      // 9. 使用 AI SDK streamText（包含工具）
       const result = streamText({
         model,
         system: systemPrompt,
         messages: history as any,
         temperature,
+        tools,
       });
 
-      // 9. 在后台保存消息（不阻塞流）
-      // 使用异步 IIFE 来处理保存逻辑
+      // 10. 在后台处理完整流（包含工具调用）
       (async () => {
         try {
+          const parts: UIMessagePart[] = [];
+          const toolCalls: any[] = [];
+
+          // 监听完整流事件
+          for await (const event of result.fullStream) {
+            if (event.type === 'text-delta') {
+              // 文本增量 - 在完成时一起保存
+            } else if (event.type === 'tool-call') {
+              // 工具调用事件
+              const toolCallId = event.toolCallId;
+              const toolName = event.toolName;
+              const args = (event as any).args || event.input;
+
+              this.logger.debug(`Tool call: ${toolName} (${toolCallId})`);
+
+              // 执行工具
+              try {
+                const toolResult = await this.agentToolExecutor.execute({
+                  threadId,
+                  messageId: generateDbId(), // 临时 ID
+                  teamId,
+                  userId,
+                  toolCallId,
+                  toolName,
+                  args,
+                });
+
+                toolCalls.push({
+                  toolCallId,
+                  toolName,
+                  args,
+                  result: toolResult.result,
+                  error: toolResult.error,
+                });
+              } catch (error) {
+                this.logger.error(`Tool execution failed for ${toolName}:`, error);
+                toolCalls.push({
+                  toolCallId,
+                  toolName,
+                  args,
+                  error: {
+                    message: error.message || 'Tool execution failed',
+                  },
+                });
+              }
+            }
+          }
+
+          // 获取最终结果
           const fullText = await result.text;
           const usage = await result.usage;
           const finishReason = await result.finishReason;
 
+          // 构建消息 parts
+          if (fullText) {
+            parts.push({ type: 'text', text: fullText });
+          }
+
+          // 添加工具调用 parts
+          for (const tc of toolCalls) {
+            parts.push({
+              type: 'tool-call',
+              toolCallId: tc.toolCallId,
+              toolName: tc.toolName,
+              args: tc.args,
+              state: tc.error ? 'output-error' : 'output-available',
+              result: tc.result,
+              isError: !!tc.error,
+            } as any);
+
+            if (tc.result || tc.error) {
+              parts.push({
+                type: 'tool-result',
+                toolCallId: tc.toolCallId,
+                toolName: tc.toolName,
+                result: tc.result || tc.error,
+                isError: !!tc.error,
+              } as any);
+            }
+          }
+
+          // 保存完整消息
           await this.messageService.saveAssistantMessage({
             threadId,
             teamId,
-            parts: [{ type: 'text', text: fullText }],
+            parts,
             metadata: {
               model: modelId,
               tokens: usage
@@ -124,7 +221,7 @@ export class StreamingService {
         }
       })();
 
-      // 10. 返回 AI SDK 标准流响应
+      // 11. 返回 AI SDK 标准流响应
       return result;
     } catch (error) {
       this.logger.error(`Stream error for thread ${threadId}:`, error);
