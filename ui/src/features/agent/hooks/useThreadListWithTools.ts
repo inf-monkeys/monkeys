@@ -323,12 +323,17 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
           throw new Error('No response body');
         }
 
+        const contentType = response.headers.get('content-type') || '';
+        const isPlainTextStream = contentType.includes('text/plain');
+
         // 注意：threadMessages 这里是“触发 onNew 时的快照”，还没包含刚 append 的 user/assistant。
         // 本地最终会是 base + user + assistant，因此用 base + 2 作为“服务端落库完成”的最低消息数门槛。
         const baseMessagesCount = (threadMessages.get(activeThreadId) || []).length;
         const minMessagesCountAfterSaved = baseMessagesCount + 2;
 
-        // 解析 AI SDK 标准流式响应
+        // 解析流式响应：
+        // - text/plain: utf-8 文本增量（AI SDK v6 的 toTextStreamResponse）
+        // - 其它：沿用旧的 “eventType:json” 行协议解析（兼容历史实现）
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
@@ -444,7 +449,30 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          buffer += decoder.decode(value, { stream: true });
+          const chunkText = decoder.decode(value, { stream: true });
+
+          if (isPlainTextStream) {
+            // 直接把 chunk 当成文本增量追加（无需等待换行）
+            if (chunkText) {
+              const currentContent = toContentParts(assistantMessage.content);
+              const textIndex = currentContent.findIndex((c) => c.type === 'text');
+              let nextContent: MessagePart[];
+
+              if (textIndex >= 0) {
+                const existing = currentContent[textIndex] as TextMessagePart;
+                const updated: TextMessagePart = { ...existing, text: existing.text + chunkText };
+                nextContent = currentContent.map((c, i) => (i === textIndex ? (updated as MessagePart) : c));
+              } else {
+                nextContent = [...currentContent, { type: 'text', text: chunkText } as MessagePart];
+              }
+
+              assistantMessage = { ...assistantMessage, content: nextContent };
+              applyAssistantMessageUpdate();
+            }
+            continue;
+          }
+
+          buffer += chunkText;
           const lines = buffer.split('\n');
           buffer = lines.pop() || '';
 
@@ -453,12 +481,10 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
           }
         }
 
-        // 处理最后残留的 buffer（可能没有以 \n 结尾，导致整段内容都滞留在 buffer）
-        if (buffer.trim()) {
+        // 处理最后残留的 buffer（可能没有以 \n 结尾）
+        if (!isPlainTextStream && buffer.trim()) {
           const tailLines = buffer.split('\n');
-          for (const line of tailLines) {
-            processStreamLine(line);
-          }
+          for (const line of tailLines) processStreamLine(line);
           buffer = '';
         }
 
