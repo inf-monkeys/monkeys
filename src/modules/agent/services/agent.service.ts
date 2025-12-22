@@ -105,6 +105,79 @@ export class AgentService {
   }
 
   /**
+   * 获取或创建默认 Agent（如 tldraw-assistant）
+   * 如果 agent 不存在，则自动创建
+   */
+  async getOrCreateDefaultAgent(agentId: string, teamId: string, userId: string): Promise<AgentEntity> {
+    // 获取默认 agent 配置
+    const defaultAgentConfig = this.getDefaultAgentConfig(agentId);
+    if (!defaultAgentConfig) {
+      throw new NotFoundException(`Agent ${agentId} not found and is not a default agent`);
+    }
+
+    // 用 name 查找是否已存在（因为 name 在团队内唯一）
+    const existingAgent = await this.agentRepository.findByNameAndTeam(
+      defaultAgentConfig.name,
+      teamId,
+    );
+    if (existingAgent) {
+      return existingAgent;
+    }
+
+    console.log(`[AgentService] Auto-creating default agent: ${agentId} (${defaultAgentConfig.name}) for team ${teamId}`);
+
+    // 创建默认 agent
+    return await this.create({
+      teamId,
+      createdBy: userId,
+      ...defaultAgentConfig,
+    });
+  }
+
+  /**
+   * 获取默认 Agent 的配置
+   */
+  private getDefaultAgentConfig(agentId: string): Omit<CreateAgentDto, 'teamId' | 'createdBy'> | null {
+    const defaultAgents: Record<string, Omit<CreateAgentDto, 'teamId' | 'createdBy'>> = {
+      'tldraw-assistant': {
+        name: 'Tldraw Assistant',
+        description: 'AI assistant for tldraw whiteboard collaboration with canvas-aware responses',
+        iconUrl: '🎨',
+        config: {
+          model: 'openai:gpt-5.1',
+          temperature: 0.7,
+          maxTokens: 4000,
+          instructions: `You are a helpful AI assistant integrated into a tldraw whiteboard.
+
+You receive contextual information about the canvas including:
+- Screenshots of the current whiteboard
+- List of shapes currently on the canvas with their properties
+- Information about user selections and viewport
+
+Your role is to:
+- Provide helpful suggestions and explanations about the canvas content
+- Help users understand their diagrams, workflows, and designs
+- Give advice on improving layouts and organization
+- Answer questions about the content on the whiteboard
+- Provide clear, visual explanations using descriptions
+
+Note: Canvas operations (creating, editing, deleting shapes) are handled directly by the whiteboard interface.
+Focus on being a helpful expert advisor for the user's work.
+
+Be visual and creative in your explanations - describe diagrams clearly.
+Be concise, friendly, and helpful.`,
+          tools: {
+            enabled: false,
+            toolNames: [],
+          },
+        },
+      },
+    };
+
+    return defaultAgents[agentId] || null;
+  }
+
+  /**
    * 验证 Agent 配置
    */
   private validateConfig(config: AgentConfig): void {
@@ -135,9 +208,7 @@ export class AgentService {
       }
     }
 
-    // 验证 tools
-    if (config.tools?.enabled && (!config.tools.toolNames || config.tools.toolNames.length === 0)) {
-      throw new BadRequestException('toolNames is required when tools are enabled');
-    }
+    // 注意：不再验证 tools.toolNames，因为内置工具默认可用
+    // 用户可以选择性地配置额外的外部工具
   }
 }

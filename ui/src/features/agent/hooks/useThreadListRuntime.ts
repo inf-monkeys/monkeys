@@ -56,6 +56,13 @@ function convertThreadToThreadData(thread: Thread): ExternalStoreThreadData {
   };
 }
 
+function deriveThreadTitleFromText(text: string): string | null {
+  const normalized = (text || '').trim().replace(/\s+/g, ' ');
+  if (!normalized) return null;
+  const maxLen = 32;
+  return normalized.length > maxLen ? `${normalized.slice(0, maxLen)}…` : normalized;
+}
+
 /**
  * 使用 ExternalStoreRuntime 实现 ThreadListRuntime
  */
@@ -156,11 +163,8 @@ export function useThreadListRuntime(options: UseThreadListRuntimeOptions) {
     }
   }, [currentThreadId, loadThreadMessages]);
 
-  // 如果没有 threads,自动创建第一个（临时禁用以调试）
+  // 如果没有 threads,自动创建第一个
   useEffect(() => {
-    // 临时禁用自动创建逻辑，排查问题
-    return;
-
     if (!isLoadingThreads && threads.size === 0 && !currentThreadId) {
       const createInitialThread = async () => {
         try {
@@ -206,6 +210,29 @@ export function useThreadListRuntime(options: UseThreadListRuntimeOptions) {
       if (!currentThreadId) return;
       if (message.content.length !== 1 || message.content[0]?.type !== 'text') {
         throw new Error('Only text content is supported');
+      }
+
+      // 自动改名：仅在“首条用户消息”且标题为空/默认时触发
+      const existingMessages = threadMessages.get(currentThreadId) || [];
+      const activeThread = threads.get(currentThreadId);
+      if (
+        existingMessages.length === 0 &&
+        activeThread &&
+        (!activeThread.title || activeThread.title === 'New Chat')
+      ) {
+        const newTitle = deriveThreadTitleFromText(message.content[0].text);
+        if (newTitle) {
+          // 乐观更新本地
+          setThreads((prev) => {
+            const t = prev.get(currentThreadId);
+            if (!t) return prev;
+            return new Map(prev).set(currentThreadId, { ...t, title: newTitle });
+          });
+          // 异步写回服务端
+          void threadApi
+            .updateThread(currentThreadId, teamId, { title: newTitle })
+            .catch((e) => console.warn('[useThreadListRuntime] Auto-rename failed:', e));
+        }
       }
 
       const userMessage: ThreadMessageLike = {

@@ -6,23 +6,23 @@ import {
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
+import { VoiceInputButton } from "@/components/assistant-ui/voice-input-button";
 import { Button } from "@/components/ui/button";
+import { useAgentModeOptional } from "@/features/agent/contexts/AgentModeContext";
 import { cn } from "@/utils/index";
 import {
   ActionBarPrimitive,
   AssistantIf,
-  BranchPickerPrimitive,
   ComposerPrimitive,
   ErrorPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
+  useComposerRuntime,
 } from "@assistant-ui/react";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
   CheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   CopyIcon,
   DownloadIcon,
   PencilIcon,
@@ -32,16 +32,27 @@ import {
 import type { FC } from "react";
 
 export const Thread: FC = () => {
+  const agentMode = useAgentModeOptional();
+  const isCompactMode = agentMode?.isCompactMode ?? false;
+
+  // 根据模式调整样式
+  const maxWidth = isCompactMode ? "36rem" : "44rem";
+  const viewportPadding = isCompactMode ? "px-2 pt-2" : "px-4 pt-4";
+  const footerPadding = isCompactMode ? "pb-20" : "pb-32 md:pb-36";
+
   return (
     <ThreadPrimitive.Root
       className="aui-root aui-thread-root @container flex h-full flex-col bg-background"
       style={{
-        ["--thread-max-width" as string]: "44rem",
+        ["--thread-max-width" as string]: maxWidth,
       }}
     >
       <ThreadPrimitive.Viewport
         turnAnchor="top"
-        className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll scroll-smooth px-4 pt-4"
+        className={cn(
+          "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll scroll-smooth",
+          viewportPadding
+        )}
       >
         <AssistantIf condition={({ thread }) => thread.isEmpty}>
           <ThreadWelcome />
@@ -55,7 +66,10 @@ export const Thread: FC = () => {
           }}
         />
 
-        <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-background pb-32 md:pb-36">
+        <ThreadPrimitive.ViewportFooter className={cn(
+          "aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-background",
+          footerPadding
+        )}>
           <ThreadScrollToBottom />
           <Composer />
         </ThreadPrimitive.ViewportFooter>
@@ -79,14 +93,21 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const ThreadWelcome: FC = () => {
+  const agentMode = useAgentModeOptional();
+  const isCompactMode = agentMode?.isCompactMode ?? false;
+
+  const titleSize = isCompactMode ? "text-xl" : "text-2xl";
+  const subtitleSize = isCompactMode ? "text-base" : "text-xl";
+  const padding = isCompactMode ? "px-2" : "px-4";
+
   return (
     <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-(--thread-max-width) grow flex-col">
       <div className="aui-thread-welcome-center flex w-full grow flex-col items-center justify-center">
-        <div className="aui-thread-welcome-message flex size-full flex-col justify-center px-4">
-          <h1 className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in font-semibold text-2xl duration-200">
+        <div className={cn("aui-thread-welcome-message flex size-full flex-col justify-center", padding)}>
+          <h1 className={cn("aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in font-semibold duration-200", titleSize)}>
             Hello there!
           </h1>
-          <p className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in text-muted-foreground text-xl delay-75 duration-200">
+          <p className={cn("aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in text-muted-foreground delay-75 duration-200", subtitleSize)}>
             How can I help you today?
           </p>
         </div>
@@ -157,9 +178,27 @@ const Composer: FC = () => {
 };
 
 const ComposerAction: FC = () => {
+  const composer = useComposerRuntime();
+
+  const handleVoiceTranscript = (text: string) => {
+    if (!text) return;
+
+    // 获取当前输入框的文本
+    const currentText = composer.getState().text || '';
+
+    // 如果有文本，在后面添加空格
+    const newText = currentText ? `${currentText} ${text}` : text;
+
+    // 设置新文本
+    composer.setText(newText);
+  };
+
   return (
     <div className="aui-composer-action-wrapper relative mx-2 mb-2 flex items-center justify-between">
-      <ComposerAddAttachment />
+      <div className="flex items-center gap-1">
+        <ComposerAddAttachment />
+        <VoiceInputButton onTranscript={handleVoiceTranscript} />
+      </div>
 
       <AssistantIf condition={({ thread }) => !thread.isRunning}>
         <ComposerPrimitive.Send asChild>
@@ -221,7 +260,6 @@ const AssistantMessage: FC = () => {
       </div>
 
       <div className="aui-assistant-message-footer mt-1 ml-2 flex">
-        <BranchPicker />
         <AssistantActionBar />
       </div>
     </MessagePrimitive.Root>
@@ -276,8 +314,6 @@ const UserMessage: FC = () => {
           <UserActionBar />
         </div>
       </div>
-
-      <BranchPicker className="aui-user-branch-picker col-span-full col-start-1 row-start-3 -mr-1 justify-end" />
     </MessagePrimitive.Root>
   );
 };
@@ -308,12 +344,12 @@ const EditComposer: FC = () => {
         />
         <div className="aui-edit-composer-footer mx-3 mb-3 flex items-center gap-2 self-end">
           <ComposerPrimitive.Cancel asChild>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="small">
               Cancel
             </Button>
           </ComposerPrimitive.Cancel>
           <ComposerPrimitive.Send asChild>
-            <Button size="sm">Update</Button>
+            <Button size="small">Update</Button>
           </ComposerPrimitive.Send>
         </div>
       </ComposerPrimitive.Root>
@@ -321,32 +357,5 @@ const EditComposer: FC = () => {
   );
 };
 
-const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
-  className,
-  ...rest
-}) => {
-  return (
-    <BranchPickerPrimitive.Root
-      hideWhenSingleBranch
-      className={cn(
-        "aui-branch-picker-root mr-2 -ml-2 inline-flex items-center text-muted-foreground text-xs",
-        className,
-      )}
-      {...rest}
-    >
-      <BranchPickerPrimitive.Previous asChild>
-        <TooltipIconButton tooltip="Previous">
-          <ChevronLeftIcon />
-        </TooltipIconButton>
-      </BranchPickerPrimitive.Previous>
-      <span className="aui-branch-picker-state font-medium">
-        <BranchPickerPrimitive.Number /> / <BranchPickerPrimitive.Count />
-      </span>
-      <BranchPickerPrimitive.Next asChild>
-        <TooltipIconButton tooltip="Next">
-          <ChevronRightIcon />
-        </TooltipIconButton>
-      </BranchPickerPrimitive.Next>
-    </BranchPickerPrimitive.Root>
-  );
-};
+// Branch 切换在当前 ExternalStoreRuntime 未实现，先隐藏以避免报错
+const BranchPicker: FC = () => null;
