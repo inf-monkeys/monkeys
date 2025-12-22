@@ -7,6 +7,7 @@ import { AgentService } from './agent.service';
 import { Message, MessageService } from './message.service';
 import { ModelRegistryService } from './model-registry.service';
 import { ThreadService } from './thread.service';
+import { CanvasContextService } from './canvas-context.service';
 
 export interface StreamOptions {
   threadId: string;
@@ -19,6 +20,10 @@ export interface StreamOptions {
   systemPrompt?: string;
   temperature?: number;
   maxTokens?: number;
+  // Canvas context for tldraw-assistant
+  canvasData?: any;
+  selectedShapeIds?: string[];
+  viewport?: { x: number; y: number; zoom: number };
 }
 
 export interface SSEEvent {
@@ -44,6 +49,7 @@ export class StreamingService {
     private readonly messageService: MessageService,
     private readonly threadService: ThreadService,
     private readonly agentService: AgentService,
+    private readonly canvasContextService: CanvasContextService,
     @Inject(forwardRef(() => AgentToolRegistryService))
     private readonly agentToolRegistry: AgentToolRegistryService,
     @Inject(forwardRef(() => AgentToolExecutorService))
@@ -55,7 +61,7 @@ export class StreamingService {
    * 供 assistant-ui 直接使用
    */
   async streamForAssistantUI(opts: StreamOptions): Promise<any> {
-    const { threadId, teamId, userId, userMessage, imageMediaIds, agentId } = opts;
+    const { threadId, teamId, userId, userMessage, imageMediaIds, agentId, canvasData, selectedShapeIds, viewport } = opts;
 
     try {
       // 1. 设置 Thread 为运行状态
@@ -102,6 +108,25 @@ export class StreamingService {
       // 5. 获取历史消息（不包含当前用户消息），并在构建请求时显式追加本次用户输入
       const history = await this.messageService.getThreadHistory(threadId, teamId);
 
+      // 5.5 为tldraw-assistant准备canvas context
+      let canvasContextMessage = '';
+      if (agentId === 'tldraw-assistant') {
+        try {
+          // 使用前端传入的canvas数据
+          canvasContextMessage = await this.canvasContextService.buildCanvasContext({
+            threadId,
+            teamId,
+            userId,
+            canvasData,
+            selectedShapeIds,
+            viewport,
+          });
+          this.logger.debug(`Canvas context prepared: ${canvasContextMessage.substring(0, 100)}...`);
+        } catch (error) {
+          this.logger.warn(`Failed to build canvas context: ${error.message}`);
+        }
+      }
+
       // 6. 构建系统提示词
       const systemPrompt = this.buildSystemPrompt(opts.systemPrompt || agent?.config.instructions);
 
@@ -113,18 +138,26 @@ export class StreamingService {
       const messages = [
         { role: 'system', content: systemPrompt },
         ...history,
+        // 如果有canvas context，添加为assistant消息提供上下文
+        ...(canvasContextMessage
+          ? [
+              {
+                role: 'user' as const,
+                content: `[Canvas Information]\n${canvasContextMessage}`,
+              },
+            ]
+          : []),
         { role: 'user', content: userMessage },
       ] as Message[];
 
       // 8. 获取工具（如果启用）
       //
       // 重要说明：
-      // - 目前 Registry 转换出来的 AI SDK tools 仅包含 schema（无 execute），
-      //   这会导致模型在“先 tool-call 再说话”的场景卡住（尤其是 tldraw-assistant）。
-      // - 这里对 server-side tools 提供 execute（委托给 AgentToolExecutor），
-      //   对 clientSide 工具直接跳过（前端执行链路暂未在后端 tool loop 中实现）。
+      // - 只有 server-side tools 提供给模型决策调用
+      // - Client-side tools（如 tldraw）由前端自动处理，不需要模型干预
+      // - Server-side tools: 提供完整的 execute 函数，由后端处理
       //
-      // 这样至少保证：tldraw 默认 agent 不会产生“0 字节 chat 响应”，能正常给出文本回复。
+      // 这样保证：模型专注于逻辑，前端专注于UI交互
       let tools: Record<string, any> | undefined;
       if (agent?.config.tools?.enabled) {
         try {
@@ -136,12 +169,23 @@ export class StreamingService {
               const resolvedTool = await this.agentToolRegistry.getToolByName(toolName, teamId);
               const isClientSide = resolvedTool?.metadata?.clientSide === true;
 
-              // clientSide 工具：先不交给模型（否则会 tool-call 卡死）
-              if (isClientSide) continue;
+              // 跳过客户端工具 - 前端会自动处理
+              if (isClientSide) {
+                this.logger.debug(`Skipping client-side tool: ${toolName} (handled by frontend)`);
+                continue;
+              }
+
+              // Server-side 工具：提供给模型
+              const parameters = resolvedTool.parameters || { type: 'object', properties: {} };
+              // 确保 properties 和 required 字段存在
+              if (!parameters.properties) parameters.properties = {};
+              if (!parameters.required) parameters.required = [];
+
+              this.logger.debug(`Tool ${toolName} parameters:`, JSON.stringify(parameters));
 
               built[toolName] = {
                 description: resolvedTool.description,
-                parameters: resolvedTool.parameters,
+                parameters,
                 execute: async (args: any, ctx: any) => {
                   const toolCallId = ctx?.toolCallId || ctx?.id;
                   const execResult = await this.agentToolExecutor.execute({
@@ -159,6 +203,7 @@ export class StreamingService {
                   throw new Error(execResult.error?.message || 'Tool execution failed');
                 },
               };
+              this.logger.debug(`Registered server-side tool: ${toolName}`);
             } catch (e) {
               this.logger.warn(`Failed to load tool ${toolName}: ${e?.message || e}`);
             }
@@ -167,7 +212,7 @@ export class StreamingService {
           tools = Object.keys(built).length > 0 ? built : undefined;
           this.logger.log(
             `✅ Tools prepared for agent ${agent.id} (${agent.name}): ${
-              tools ? `enabled (${Object.keys(tools).length})` : 'disabled (no server-side tools)'
+              tools ? `enabled (${Object.keys(tools).length} server-side tools)` : 'disabled (no server-side tools)'
             }`,
           );
         } catch (error) {
@@ -479,7 +524,11 @@ export class StreamingService {
    */
   private buildSystemPrompt(customPrompt?: string): string {
     const base = `You are a helpful AI assistant powered by Monkeys platform.`;
-    return customPrompt ? `${base}\n\n${customPrompt}` : base;
+    const withCustom = customPrompt ? `${base}\n\n${customPrompt}` : base;
+
+    // 添加canvas context提示
+    const canvasContextAddition = this.canvasContextService.getCanvasContextSystemPromptAddition();
+    return `${withCustom}${canvasContextAddition}`;
   }
 
   /**

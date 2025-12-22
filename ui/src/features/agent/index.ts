@@ -26,3 +26,4 @@ export * from './components/TldrawToolUIs';
 
 // Contexts
 export * from './contexts/TldrawContext';
+export * from './contexts/TldrawCanvasContext';

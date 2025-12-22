@@ -17,6 +17,7 @@ import { ModelRegistryService } from './services/model-registry.service';
 import { AgentQuotaService } from './services/agent-quota.service';
 import { AgentToolRegistryService } from './services/agent-tool-registry.service';
 import { AgentToolExecutorService } from './services/agent-tool-executor.service';
+import { CanvasContextService } from './services/canvas-context.service';
 import { AgentRepository } from './repositories/agent.repository';
 import { ThreadRepository } from './repositories/thread.repository';
 import { MessageRepository } from './repositories/message.repository';
@@ -71,6 +72,9 @@ import { WorkflowModule } from '@/modules/workflow/workflow.module';
     AgentToolRegistryService,
     AgentToolExecutorService,
 
+    // Canvas Context
+    CanvasContextService,
+
     // Repositories
     AgentRepository,
     ThreadRepository,
@@ -86,6 +90,7 @@ import { WorkflowModule } from '@/modules/workflow/workflow.module';
     StreamingService,
     ModelRegistryService,
     AgentToolExecutorService,
+    CanvasContextService,
   ],
 })
 export class AgentModule {}

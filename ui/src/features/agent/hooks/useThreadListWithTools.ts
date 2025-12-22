@@ -20,6 +20,10 @@ interface UseThreadListWithToolsOptions {
   teamId: string;
   userId: string;
   agentId?: string;
+  // Canvas context provider (optional, for tldraw integration)
+  getCanvasData?: () => any;
+  getSelectedShapeIds?: () => string[];
+  getViewport?: () => { x: number; y: number; zoom: number };
 }
 
 type MessagePart = ThreadMessageLike['content'] extends readonly (infer U)[] ? U : any;
@@ -121,7 +125,7 @@ function convertThreadToThreadData(thread: Thread): ExternalStoreThreadData<'reg
 }
 
 export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
-  const { teamId, userId, agentId } = options;
+  const { teamId, userId, agentId, getCanvasData, getSelectedShapeIds, getViewport } = options;
 
   // Thread 列表状态
   const [threads, setThreads] = useState<Map<string, Thread>>(new Map());
@@ -372,6 +376,19 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
 
         console.log('[ThreadListWithTools] Sending message to /chat endpoint');
 
+        // 获取 canvas 数据（如果是 tldraw-assistant）
+        const canvasData = agentId === 'tldraw-assistant' && getCanvasData ? getCanvasData() : undefined;
+        const selectedShapeIds = agentId === 'tldraw-assistant' && getSelectedShapeIds ? getSelectedShapeIds() : undefined;
+        const viewport = agentId === 'tldraw-assistant' && getViewport ? getViewport() : undefined;
+
+        if (canvasData) {
+          console.log('[ThreadListWithTools] Including canvas context:', {
+            shapesCount: canvasData.shapes?.length || 0,
+            selectedCount: selectedShapeIds?.length || 0,
+            viewport,
+          });
+        }
+
         // 调用支持工具的 /chat 端点
         const response = await fetch(`/api/agents/threads/${activeThreadId}/chat`, {
           method: 'POST',
@@ -386,6 +403,10 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
                 content: message.content[0].text,
               },
             ],
+            // Canvas context for tldraw-assistant
+            canvasData,
+            selectedShapeIds,
+            viewport,
           }),
         });
 
@@ -573,7 +594,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
         setIsRunning(false);
       }
     },
-    [ensureActiveThread, teamId, userId, agentId, threadMessages, tryReloadMessagesUntilSaved],
+    [ensureActiveThread, teamId, userId, agentId, threadMessages, tryReloadMessagesUntilSaved, getCanvasData, getSelectedShapeIds, getViewport],
   );
 
   // 创建 ThreadListAdapter

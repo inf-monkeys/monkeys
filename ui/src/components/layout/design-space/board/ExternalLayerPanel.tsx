@@ -619,6 +619,55 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
   // agent 嵌入：在左侧 sidebar 内显示
   const [agentVisible, setAgentVisible] = useState(false);
   const [agentView, setAgentView] = useState<'thread' | 'list'>('thread'); // agent视图状态
+
+  // Canvas data getters for tldraw-assistant
+  const getCanvasData = useCallback(() => {
+    if (!editor) return null;
+    try {
+      const shapes = editor.getCurrentPageShapes();
+      return {
+        shapes: shapes.map((shape) => ({
+          id: shape.id,
+          type: shape.type,
+          props: shape.props,
+          x: shape.x,
+          y: shape.y,
+          rotation: shape.rotation,
+        })),
+        pageId: editor.getCurrentPageId(),
+      };
+    } catch (error) {
+      console.warn('[ExternalLayerPanel] Failed to get canvas data:', error);
+      return null;
+    }
+  }, [editor]);
+
+  const getSelectedShapeIds = useCallback(() => {
+    if (!editor) return [];
+    try {
+      return Array.from(editor.getSelectedShapeIds());
+    } catch (error) {
+      console.warn('[ExternalLayerPanel] Failed to get selected shapes:', error);
+      return [];
+    }
+  }, [editor]);
+
+  const getViewport = useCallback(() => {
+    if (!editor) return { x: 0, y: 0, zoom: 1 };
+    try {
+      const viewport = editor.getViewportPageBounds();
+      const zoom = editor.getZoomLevel();
+      return {
+        x: viewport.x,
+        y: viewport.y,
+        zoom,
+      };
+    } catch (error) {
+      console.warn('[ExternalLayerPanel] Failed to get viewport:', error);
+      return { x: 0, y: 0, zoom: 1 };
+    }
+  }, [editor]);
+
   // 等待占位动画样式仅注入一次（正方形+中心旋转）
   if (typeof document !== 'undefined' && !document.getElementById('mini-history-waiting-styles')) {
     const css = `
@@ -2810,6 +2859,9 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
               compact: true,
               width: undefined, // mini模式下不需要固定宽度
             }}
+            getCanvasData={getCanvasData}
+            getSelectedShapeIds={getSelectedShapeIds}
+            getViewport={getViewport}
           >
             {/* Header */}
             <div

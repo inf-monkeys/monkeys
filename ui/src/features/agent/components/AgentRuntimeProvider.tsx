@@ -32,6 +32,10 @@ interface AgentRuntimeProviderProps {
   mode?: AgentMode;
   /** 模式配置 */
   modeConfig?: Partial<AgentModeConfig>;
+  // Canvas context provider (optional, for tldraw integration)
+  getCanvasData?: () => any;
+  getSelectedShapeIds?: () => string[];
+  getViewport?: () => { x: number; y: number; zoom: number };
 }
 
 // 创建 Context 用于共享 thread 列表数据
@@ -68,6 +72,9 @@ export function AgentRuntimeProvider({
   agentId,
   mode = 'normal',
   modeConfig,
+  getCanvasData,
+  getSelectedShapeIds,
+  getViewport,
 }: AgentRuntimeProviderProps) {
   const {
     runtime,
@@ -81,6 +88,9 @@ export function AgentRuntimeProvider({
     teamId,
     userId,
     agentId,
+    getCanvasData,
+    getSelectedShapeIds,
+    getViewport,
   });
 
   const threadListContextValue: ThreadListContextValue = {

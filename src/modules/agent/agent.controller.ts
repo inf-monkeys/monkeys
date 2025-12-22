@@ -179,6 +179,10 @@ export class AgentController {
       modelId?: string;
       messages: any[]; // AI SDK messages format
       system?: string;
+      // Canvas context for tldraw-assistant
+      canvasData?: any;
+      selectedShapeIds?: string[];
+      viewport?: { x: number; y: number; zoom: number };
     },
     @Res() res: Response,
   ) {
@@ -209,6 +213,10 @@ export class AgentController {
       userMessage,
       imageMediaIds: imageMediaIds.length > 0 ? imageMediaIds : undefined,
       systemPrompt: body.system,
+      // Canvas context for tldraw-assistant
+      canvasData: body.canvasData,
+      selectedShapeIds: body.selectedShapeIds,
+      viewport: body.viewport,
     };
 
     const result = await this.streamingService.streamForAssistantUI(options);

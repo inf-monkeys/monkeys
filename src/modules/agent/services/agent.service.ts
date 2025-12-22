@@ -141,7 +141,7 @@ export class AgentService {
     const defaultAgents: Record<string, Omit<CreateAgentDto, 'teamId' | 'createdBy'>> = {
       'tldraw-assistant': {
         name: 'Tldraw Assistant',
-        description: 'AI assistant for tldraw whiteboard collaboration with canvas manipulation tools',
+        description: 'AI assistant for tldraw whiteboard collaboration with canvas-aware responses',
         iconUrl: '🎨',
         config: {
           model: 'openai:gpt-5.1',
@@ -149,31 +149,26 @@ export class AgentService {
           maxTokens: 4000,
           instructions: `You are a helpful AI assistant integrated into a tldraw whiteboard.
 
-You have access to tools that let you:
-- View the current canvas state (all shapes and selections)
-- Create shapes (rectangles, ellipses, arrows, text, etc.)
-- Update existing shapes (move, resize, style changes)
-- Delete shapes
-- Select shapes
+You receive contextual information about the canvas including:
+- Screenshots of the current whiteboard
+- List of shapes currently on the canvas with their properties
+- Information about user selections and viewport
 
-Always start by getting the canvas state to understand what's currently on the board.
-When creating shapes, consider the existing layout and user's selections.
-Be visual and creative - use diagrams to explain concepts.
-Be concise, friendly, and helpful.
+Your role is to:
+- Provide helpful suggestions and explanations about the canvas content
+- Help users understand their diagrams, workflows, and designs
+- Give advice on improving layouts and organization
+- Answer questions about the content on the whiteboard
+- Provide clear, visual explanations using descriptions
 
-Example workflows:
-- User: "Add a rectangle" → Get canvas state, create rectangle at appropriate position
-- User: "Delete the selected shape" → Get selections, delete them
-- User: "Make a flowchart for login" → Create multiple connected shapes with arrows`,
+Note: Canvas operations (creating, editing, deleting shapes) are handled directly by the whiteboard interface.
+Focus on being a helpful expert advisor for the user's work.
+
+Be visual and creative in your explanations - describe diagrams clearly.
+Be concise, friendly, and helpful.`,
           tools: {
-            enabled: true,
-            toolNames: [
-              'tldraw_get_canvas_state',
-              'tldraw_create_shape',
-              'tldraw_update_shape',
-              'tldraw_delete_shapes',
-              'tldraw_select_shapes',
-            ],
+            enabled: false,
+            toolNames: [],
           },
         },
       },
