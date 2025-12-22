@@ -23,6 +23,12 @@ export const CUSTOM_NAV_LIST_MAP: Record<string, INavListSidebar> = {
       icon: <BotIcon />,
       to: '/$teamId/nav/concept-design:design-templates-and-innovation-approaches/innovation-method',
     },
+    {
+      id: 'agents',
+      name: '智能体',
+      icon: <BotIcon />,
+      to: '/$teamId/nav/concept-design:design-templates-and-innovation-approaches/agents',
+    },
   ],
   'concept-design:design-assets': null,
   'concept-design:design-models': [

@@ -7,6 +7,7 @@ import { routeTree } from '@/routeTree.gen';
 
 import 'normalize.css';
 import '@/styles/index.scss';
+// @assistant-ui/react v0.11+ 不再需要手动导入 CSS
 
 import * as Portal from '@radix-ui/react-portal';
 import dayjs from 'dayjs';

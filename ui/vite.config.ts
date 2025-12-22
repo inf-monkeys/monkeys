@@ -60,6 +60,10 @@ export default defineConfig(() => {
       alias: {
         '@': resolve(__dirname, './src'),
       },
+      dedupe: ['@radix-ui/react-slot'],
+    },
+    optimizeDeps: {
+      include: ['@radix-ui/react-slot'],
     },
     server: {
       port: process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : 2048,

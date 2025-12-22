@@ -7,7 +7,6 @@ import { get } from 'lodash';
 import { createPortal } from 'react-dom';
 
 import { useSystemConfig } from '@/apis/common';
-import { VinesAgentViewWrapper } from '@/components/layout-wrapper/agent/view-wrapper.tsx';
 import { VinesDesignBoardViewWrapper } from '@/components/layout-wrapper/design/view-wrapper.tsx';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper.tsx';
 import { Page404 } from '@/components/layout/workspace/404.tsx';
@@ -227,11 +226,9 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
 
     return (
       <AgentStoreProvider createStore={createAgentStore}>
-        <VinesAgentViewWrapper agentId={agentId}>
-          <VinesViewFrame>
-            <View />
-          </VinesViewFrame>
-        </VinesAgentViewWrapper>
+        <VinesViewFrame>
+          <View />
+        </VinesViewFrame>
       </AgentStoreProvider>
     );
   }, [id]);

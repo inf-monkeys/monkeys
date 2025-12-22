@@ -11,9 +11,7 @@ import { CronJobModule } from './cronjobs/cron.module';
 import { DatabaseModule } from './database/database.module';
 import { RepositoryMoule } from './database/repositories.module';
 import { AdminModule } from './modules/admin/admin.module';
-import { AgentV2Module } from './modules/agent-v2/agent-v2.module';
 import { DataBrowserModule } from './modules/data-browser/data-browser.module';
-import { AgentV3Module } from './modules/agent-v3/agent-v3.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
@@ -28,15 +26,13 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { SttModule } from './modules/stt/stt.module';
 import { TemporaryWorkflowModule } from './modules/temporary-workflow/temporary-workflow.module';
 import { TenantModule } from './modules/tenant/tenant.module';
-import { TldrawAgentV2Module } from './modules/tldraw-agent-v2/tldraw-agent-v2.module';
-import { TldrawAgentModule } from './modules/tldraw-agent/tldraw-agent.module';
-import { TldrawAgentV3Module } from './modules/tldraw-agent-v3/tldraw-agent-v3.module';
 import { LLMToolsModule } from './modules/tools/llm/llm.module';
 import { MediaToolsModule } from './modules/tools/media/media.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
 import { PrometheusModule } from './prometheus/prometheus.module';
+import { AgentModule } from './modules/agent/agent.module';
 
 @Module({
   imports: [
@@ -48,8 +44,6 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     ToolsModule,
     RepositoryMoule,
     WorkflowModule,
-    AgentV2Module,
-    AgentV3Module,
     OpenapiModule,
     ScheduleModule.forRoot(),
     CronJobModule,
@@ -76,11 +70,9 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     MarketplaceModule,
     EvaluationModule,
     ModelTrainingModule,
-    TldrawAgentModule,
-    TldrawAgentV2Module,
-    TldrawAgentV3Module,
     FalModule,
     SttModule,
+    AgentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

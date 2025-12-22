@@ -1,4 +1,4 @@
-import { ConversationApps } from '@/pages/$teamId/agents/index.lazy';
+import { AgentsPage } from '@/pages/$teamId/agents/index.lazy';
 import { DataBrowserPage } from '@/pages/$teamId/data-browser/index.lazy';
 import { DesignSoftwareEvaluations } from '@/pages/$teamId/design-software-evaluations/index.lazy';
 import { DesignTemplates } from '@/pages/$teamId/design-templates/index.lazy';
@@ -21,6 +21,7 @@ export const CUSTOM_NAV_SUB_MODULE_MAP: INavListSubModuleMap = {
     'design-project': Workflows,
     'design-template': DesignTemplates,
     'innovation-method': Tools,
+    'agents': AgentsPage,
   },
   'concept-design:design-assets': MediaData,
   'data-browser': DataBrowserPage,
@@ -39,5 +40,5 @@ export const CUSTOM_NAV_SUB_MODULE_MAP: INavListSubModuleMap = {
   'designs': Designs,
   'designs-templates': DesignTemplates,
   'artist:asset-library': MediaData,
-  'ai-sessions': ConversationApps,
+  'ai-sessions': AgentsPage,
 };

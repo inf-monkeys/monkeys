@@ -78,7 +78,6 @@ const TeamIdComfyuiIndexLazyImport = createFileRoute('/$teamId/comfyui/')()
 const TeamIdComfyuiStoreIndexLazyImport = createFileRoute(
   '/$teamId/comfyui-store/',
 )()
-const TeamIdChatV2IndexLazyImport = createFileRoute('/$teamId/chat-v2/')()
 const TeamIdApplicationStoreIndexLazyImport = createFileRoute(
   '/$teamId/application-store/',
 )()
@@ -114,6 +113,9 @@ const TeamIdDesignDesignProjectIdIndexLazyImport = createFileRoute(
 )()
 const TeamIdComfyuiComfyuiWorkflowIdIndexLazyImport = createFileRoute(
   '/$teamId/comfyui/$comfyuiWorkflowId/',
+)()
+const TeamIdAgentsAgentIdIndexLazyImport = createFileRoute(
+  '/$teamId/agents/$agentId/',
 )()
 const TeamIdAgentAgentIdIndexLazyImport = createFileRoute(
   '/$teamId/agent/$agentId/',
@@ -376,13 +378,6 @@ const TeamIdComfyuiStoreIndexLazyRoute =
     import('./pages/$teamId/comfyui-store/index.lazy').then((d) => d.Route),
   )
 
-const TeamIdChatV2IndexLazyRoute = TeamIdChatV2IndexLazyImport.update({
-  path: '/$teamId/chat-v2/',
-  getParentRoute: () => rootRoute,
-} as any).lazy(() =>
-  import('./pages/$teamId/chat-v2/index.lazy').then((d) => d.Route),
-)
-
 const TeamIdApplicationStoreIndexLazyRoute =
   TeamIdApplicationStoreIndexLazyImport.update({
     path: '/$teamId/application-store/',
@@ -531,6 +526,14 @@ const TeamIdComfyuiComfyuiWorkflowIdIndexLazyRoute =
     ),
   )
 
+const TeamIdAgentsAgentIdIndexLazyRoute =
+  TeamIdAgentsAgentIdIndexLazyImport.update({
+    path: '/$teamId/agents/$agentId/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import('./pages/$teamId/agents/$agentId/index.lazy').then((d) => d.Route),
+  )
+
 const TeamIdAgentAgentIdIndexLazyRoute =
   TeamIdAgentAgentIdIndexLazyImport.update({
     path: '/$teamId/agent/$agentId/',
@@ -566,9 +569,9 @@ const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute =
     path: '/$teamId/workspace/$workflowId/image-detail/',
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
-    import(
-      './pages/$teamId/workspace/$workflowId/image-detail/index.lazy'
-    ).then((d) => d.Route),
+    import('./pages/$teamId/workspace/$workflowId/image-detail/index.lazy').then(
+      (d) => d.Route,
+    ),
   )
 
 const TeamIdWorkspaceWorkflowIdAssetDetailIndexLazyRoute =
@@ -576,9 +579,9 @@ const TeamIdWorkspaceWorkflowIdAssetDetailIndexLazyRoute =
     path: '/$teamId/workspace/$workflowId/asset-detail/',
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
-    import(
-      './pages/$teamId/workspace/$workflowId/asset-detail/index.lazy'
-    ).then((d) => d.Route),
+    import('./pages/$teamId/workspace/$workflowId/asset-detail/index.lazy').then(
+      (d) => d.Route,
+    ),
   )
 
 const TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute =
@@ -616,9 +619,9 @@ const TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyRoute =
     path: '/$teamId/design/$designProjectId/$designBoardId/',
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
-    import(
-      './pages/$teamId/design/$designProjectId/$designBoardId/index.lazy'
-    ).then((d) => d.Route),
+    import('./pages/$teamId/design/$designProjectId/$designBoardId/index.lazy').then(
+      (d) => d.Route,
+    ),
   )
 
 const TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyRoute =
@@ -626,9 +629,9 @@ const TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyRoute =
     path: '/$teamId/workspace/$workflowId/$pageId/view-iframe',
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
-    import(
-      './pages/$teamId/workspace/$workflowId/$pageId/view-iframe.lazy'
-    ).then((d) => d.Route),
+    import('./pages/$teamId/workspace/$workflowId/$pageId/view-iframe.lazy').then(
+      (d) => d.Route,
+    ),
   )
 
 const TeamIdNavNavIdAssetAssetIdIndexLazyRoute =
@@ -699,10 +702,6 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/application-store/': {
       preLoaderRoute: typeof TeamIdApplicationStoreIndexLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/chat-v2/': {
-      preLoaderRoute: typeof TeamIdChatV2IndexLazyImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/comfyui-store/': {
@@ -825,6 +824,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdAgentAgentIdIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/agents/$agentId/': {
+      preLoaderRoute: typeof TeamIdAgentsAgentIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/comfyui/$comfyuiWorkflowId/': {
       preLoaderRoute: typeof TeamIdComfyuiComfyuiWorkflowIdIndexLazyImport
       parentRoute: typeof rootRoute
@@ -917,7 +920,6 @@ export const routeTree = rootRoute.addChildren([
   TeamIdAgentIndexLazyRoute,
   TeamIdAgentsIndexLazyRoute,
   TeamIdApplicationStoreIndexLazyRoute,
-  TeamIdChatV2IndexLazyRoute,
   TeamIdComfyuiStoreIndexLazyRoute,
   TeamIdComfyuiIndexLazyRoute,
   TeamIdDataBrowserIndexLazyRoute,
@@ -948,6 +950,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdModelTrainingModelTrainingIdIndexRoute,
   TeamIdActionToolsActionToolNameIndexLazyRoute,
   TeamIdAgentAgentIdIndexLazyRoute,
+  TeamIdAgentsAgentIdIndexLazyRoute,
   TeamIdComfyuiComfyuiWorkflowIdIndexLazyRoute,
   TeamIdDesignDesignProjectIdIndexLazyRoute,
   TeamIdEvaluationsModuleIdIndexLazyRoute,

@@ -5,7 +5,6 @@ import _, { get } from 'lodash';
 import qs from 'qs';
 import { undefined } from 'zod';
 
-import { preloadUgcAgentsV2, useUgcAgentsV2 } from '@/apis/agents-v2';
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
 import { IComfyuiModel } from '@/apis/comfyui-model/typings.ts';
 import { IDesignProject } from '@/apis/designs/typings.ts';
@@ -56,8 +55,94 @@ export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string,
 export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 
-export const useUgcAgents = (dto: IListUgcDto) => useUgcAgentsV2(dto);
-export const preloadUgcAgents = (dto: IListUgcDto) => preloadUgcAgentsV2(dto);
+// Agent UGC functions
+export const useUgcAgents = (dto: IListUgcDto) => {
+  const { page, limit, search, orderColumn, orderBy, filter } = dto;
+  const teamId = filter?.teamId;
+
+  const swrUrl = teamId ? `/api/agents?teamId=${teamId}` : null;
+
+  // Custom fetcher for agents API that returns array directly
+  const fetcher = vinesFetcher<any[]>({
+    simple: true,
+    responseResolver: async (response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return await response.json();
+    },
+  });
+
+  const { data: agentsData, error, isLoading, mutate } = useSWR<any[] | undefined>(swrUrl, fetcher);
+
+  // Transform agents data to pagination format
+  const normalizedSearch = search?.trim().toLowerCase();
+  const filteredAgents = agentsData
+    ? agentsData
+        .map((agent) => ({
+          ...agent,
+          user: agent.creator, // Map creator to user for UgcView compatibility
+          creatorUserId: agent.createdBy,
+        }))
+        .filter((agent) => {
+          if (!normalizedSearch) return true;
+          const nameText = (agent.name || '').toLowerCase();
+          const descText = (agent.description || '').toLowerCase();
+          return nameText.includes(normalizedSearch) || descText.includes(normalizedSearch);
+        })
+    : [];
+
+  // Apply sorting
+  const sortedAgents = [...filteredAgents];
+  if (orderColumn && orderBy) {
+    sortedAgents.sort((a, b) => {
+      const aVal = a[orderColumn];
+      const bVal = b[orderColumn];
+      if (orderBy === 'ASC') {
+        return aVal > bVal ? 1 : -1;
+      }
+      return aVal < bVal ? 1 : -1;
+    });
+  }
+
+  // Apply pagination
+  const start = (page - 1) * limit;
+  const paginatedAgents = sortedAgents.slice(start, start + limit);
+
+  const data: IPaginationListData<IAssetItem<any>> | undefined = agentsData
+    ? {
+        list: paginatedAgents,
+        page,
+        limit,
+        total: filteredAgents.length,
+        data: paginatedAgents,
+      }
+    : undefined;
+
+  return {
+    data,
+    error,
+    isLoading,
+    mutate,
+  };
+};
+
+export const preloadUgcAgents = (dto: IListUgcDto) => {
+  const teamId = dto.filter?.teamId;
+  if (!teamId) return Promise.resolve();
+
+  const swrUrl = `/api/agents?teamId=${teamId}`;
+  const fetcher = vinesFetcher<any[]>({
+    simple: true,
+    responseResolver: async (response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return await response.json();
+    },
+  });
+  return preload(swrUrl, fetcher);
+};
 
 export const useUgcDesignProjects = (dto: IListUgcDto) => useUgcItems<IDesignProject>(dto, '/api/design/project');
 export const preloadUgcDesignProjects = (dto: IListUgcDto) =>

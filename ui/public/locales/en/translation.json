@@ -1306,6 +1306,53 @@
         }
       }
     },
+    "agents": {
+      "create-dialog": {
+        "title": "Create Agent",
+        "description": "Configure your agent with a model and instructions",
+        "name": "Agent Name",
+        "name-placeholder": "Enter agent name",
+        "description": "Description",
+        "description-placeholder": "Enter agent description",
+        "name-required": "Agent name is required",
+        "model": "Model",
+        "model-placeholder": "Select a model...",
+        "instructions": "System Instructions",
+        "instructions-placeholder": "Enter system instructions for the agent...",
+        "instructions-description": "Define how the agent should behave and respond to user messages.",
+        "temperature": "Temperature",
+        "temperature-precise": "Precise",
+        "temperature-balanced": "Balanced",
+        "temperature-creative": "Creative",
+        "max-tokens": "Max Tokens",
+        "top-p": "Top P (optional)",
+        "top-p-placeholder": "0.0 - 1.0",
+        "enable-tools": "Enable Tools",
+        "enable-reasoning-effort": "Enable Reasoning Effort (o1/o3 models)",
+        "reasoning-level": "Reasoning Level",
+        "reasoning-level-low": "Low",
+        "reasoning-level-medium": "Medium",
+        "reasoning-level-high": "High",
+        "cancel": "Cancel",
+        "save": "Save Configuration"
+      },
+      "ugc-view": {
+        "operate-area": {
+          "dropdown-label": "Agent Operations",
+          "options": {
+            "edit-info": "Edit Info"
+          },
+          "agent-info-editor": {
+            "title": "Edit Agent Info",
+            "name": "Agent Name",
+            "name-placeholder": "Enter agent name",
+            "name-required": "Agent name is required",
+            "description": "Description",
+            "description-placeholder": "Enter agent description"
+          }
+        }
+      }
+    },
     "workflow": {
       "ugc-view": {
         "columns": {

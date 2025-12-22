@@ -37,7 +37,7 @@ import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { newConvertExecutionResultToItemList } from '@/utils/execution';
 
 import { VisibilityOff, VisibilityOn } from './icons';
-import { TldrawAgentV2EmbeddedPanel } from './panel-agent-v2-embedded';
+// import { TldrawAgentV2EmbeddedPanel } from './panel-agent-v2-embedded';
 
 // 形状类型中文映射
 const getShapeTypeInChinese = (type: string, geoKind?: string): string => {
@@ -2783,11 +2783,13 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
       </div>
 
       {/* 当 agentVisible 时，显示 Agent 嵌入；其次是 mini 应用；否则显示页面+图层面板 */}
+      {/* TODO: Re-enable when agent hooks are available
       {agentVisible && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
           <TldrawAgentV2EmbeddedPanel editor={editor} boardId={boardId} onClose={() => setAgentVisible(false)} />
         </div>
-      ) : miniPage && !isLeftBodyCollapsed ? (
+      ) : */}
+      {miniPage && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', position: 'relative' }}>
           <div
             style={{

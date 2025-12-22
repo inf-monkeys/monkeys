@@ -1,5 +1,4 @@
 import { generateDbId } from '@/common/utils';
-import { AgentV2Entity } from '@/database/entities/agent-v2/agent-v2.entity';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
@@ -27,8 +26,6 @@ export class WorkflowPageService {
     private readonly builtinPinnedPageRepository: Repository<WorkflowBuiltinPinnedPageEntity>,
     @InjectRepository(ConversationAppEntity)
     private readonly conversationAppRepository: Repository<ConversationAppEntity>,
-    @InjectRepository(AgentV2Entity)
-    private readonly agentV2Repository: Repository<AgentV2Entity>,
     @InjectRepository(DesignMetadataEntity)
     private readonly designMetadataRepository: Repository<DesignMetadataEntity>,
     @InjectRepository(DesignProjectEntity)
@@ -505,30 +502,32 @@ export class WorkflowPageService {
       },
       [[], {}],
     ) as [string[], Record<string, Record<string, string>>];
-    const agentV2Apps = await this.agentV2Repository.find({
-      where: {
-        teamId,
-        isDeleted: false,
-        id: In(agentV2Ids),
-      },
-    });
-    const agentV2Pages = agentV2PageIds.map((agentV2PageId) => {
-      const { type, id } = agentV2PageInfo[agentV2PageId];
-      const isChat = type === 'chat';
-
-      return {
-        agent: agentV2Apps.find((it) => it.id === id),
-        id: agentV2PageId,
-        type: 'agentv2-' + type,
-        displayName: isChat ? '对话视图' : '配置视图',
-        agentId: id,
-        instance: {
-          name: isChat ? '对话视图' : '配置视图',
-          icon: isChat ? 'square-play' : 'bolt',
-          type,
-        },
-      };
-    });
+    // AgentV2 has been removed - return empty pages for backward compatibility
+    const agentV2Pages = [];
+    // const agentV2Apps = await this.agentV2Repository.find({
+    //   where: {
+    //     teamId,
+    //     isDeleted: false,
+    //     id: In(agentV2Ids),
+    //   },
+    // });
+    // const agentV2Pages = agentV2PageIds.map((agentV2PageId) => {
+    //   const { type, id } = agentV2PageInfo[agentV2PageId];
+    //   const isChat = type === 'chat';
+    //
+    //   return {
+    //     agent: agentV2Apps.find((it) => it.id === id),
+    //     id: agentV2PageId,
+    //     type: 'agentv2-' + type,
+    //     displayName: isChat ? '对话视图' : '配置视图',
+    //     agentId: id,
+    //     instance: {
+    //       name: isChat ? '对话视图' : '配置视图',
+    //       icon: isChat ? 'square-play' : 'bolt',
+    //       type,
+    //     },
+    //   };
+    // });
 
     // design board
     const [designBoardIds] = designBoardPageIds.reduce(
