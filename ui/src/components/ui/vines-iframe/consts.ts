@@ -1,11 +1,9 @@
-import { AgentLogsView } from 'src/view/agent-logs';
 import { VinesChatView } from 'src/view/vines-chat';
 import { VinesLogView } from 'src/view/vines-log';
 
 import { withProviders } from '@/components/ui/vines-iframe/utils.ts';
+import { AgentChat, AgentConfig } from '@/features/agent';
 import { CanvasInteractionStoreProvider, createCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
-import { AgentChatV2View } from '@/view/agent-chat-v2';
-import { AgentConfigView } from '@/view/agent-config';
 import { DesignBoardView } from '@/view/design-board';
 import { GlobalDesignBoardView } from '@/view/global-design-board';
 import { IframeWrapper } from '@/view/iframe-wrapper';
@@ -17,12 +15,10 @@ export const IFRAME_MAP = {
   log: VinesLogView,
   preview: VinesForm,
   chat: VinesChatView,
-  'agent-chat-v2': AgentChatV2View,
-  'agent-config': AgentConfigView,
-  'agent-logs': AgentLogsView,
-  'agentv2-chat': AgentChatV2View,
-  'agentv2-config': AgentConfigView,
-  'agentv2-logs': AgentLogsView,
+  'agent-chat-v2': AgentChat,
+  'agent-config': AgentConfig,
+  'agentv2-chat': AgentChat,
+  'agentv2-config': AgentConfig,
   'design-board': DesignBoardView,
   'global-design-board': GlobalDesignBoardView,
   iframe: IframeWrapper,
