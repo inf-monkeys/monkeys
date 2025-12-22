@@ -4,13 +4,13 @@
  */
 
 import {
-  useExternalStoreRuntime,
-  type AppendMessage,
-  type ExternalStoreAdapter,
-  type ExternalStoreThreadData,
-  type ExternalStoreThreadListAdapter,
-  type TextMessagePart,
-  type ThreadMessageLike,
+    useExternalStoreRuntime,
+    type AppendMessage,
+    type ExternalStoreAdapter,
+    type ExternalStoreThreadData,
+    type ExternalStoreThreadListAdapter,
+    type TextMessagePart,
+    type ThreadMessageLike,
 } from '@assistant-ui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { threadApi } from '../api/agent-api';
@@ -26,6 +26,13 @@ type MessagePart = ThreadMessageLike['content'] extends readonly (infer U)[] ? U
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function deriveThreadTitleFromText(text: string): string | null {
+  const normalized = (text || '').trim().replace(/\s+/g, ' ');
+  if (!normalized) return null;
+  const maxLen = 32;
+  return normalized.length > maxLen ? `${normalized.slice(0, maxLen)}…` : normalized;
 }
 
 /**
@@ -272,6 +279,30 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
         throw new Error('Only text content is supported');
       }
 
+      // 自动改名：仅在“首条用户消息”且标题为空/默认时触发
+      const existingMessages = threadMessages.get(activeThreadId) || [];
+      const activeThread = threads.get(activeThreadId);
+      if (
+        existingMessages.length === 0 &&
+        activeThread &&
+        (!activeThread.title || activeThread.title === 'New Chat')
+      ) {
+        const newTitle = deriveThreadTitleFromText(message.content[0].text);
+        if (newTitle) {
+          // 先乐观更新本地，避免刷新前看不到变化
+          setThreads((prev) => {
+            const t = prev.get(activeThreadId);
+            if (!t) return prev;
+            return new Map(prev).set(activeThreadId, { ...t, title: newTitle });
+          });
+
+          // 异步写回服务端
+          void threadApi
+            .updateThread(activeThreadId, teamId, { title: newTitle })
+            .catch((e) => console.warn('[ThreadListWithTools] Auto-rename failed:', e));
+        }
+      }
+
       const userMessage: ThreadMessageLike = {
         role: 'user',
         content: toContentParts(message.content),
@@ -328,7 +359,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
 
         // 注意：threadMessages 这里是“触发 onNew 时的快照”，还没包含刚 append 的 user/assistant。
         // 本地最终会是 base + user + assistant，因此用 base + 2 作为“服务端落库完成”的最低消息数门槛。
-        const baseMessagesCount = (threadMessages.get(activeThreadId) || []).length;
+        const baseMessagesCount = existingMessages.length;
         const minMessagesCountAfterSaved = baseMessagesCount + 2;
 
         // 解析流式响应：

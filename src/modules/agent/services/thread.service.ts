@@ -37,22 +37,36 @@ export class ThreadService {
   ) {}
 
   /**
+   * 将外部传入的 agentId 规范化为数据库中的真实 Agent ID
+   *
+   * - 如果传入的是数据库 ID：直接返回
+   * - 如果传入的是默认 agent 标识符（如 "tldraw-assistant"）：映射/自动创建并返回其数据库 ID
+   * - 其它情况：返回 null（表示不绑定 agent）
+   */
+  private async resolveAgentId(agentId: string, teamId: string, userId: string): Promise<string | null> {
+    if (!agentId) return null;
+
+    // 1) 优先认为它是数据库里的真实 ID
+    const byId = await this.agentRepository.findById(agentId);
+    if (byId) return byId.id;
+
+    // 2) 再尝试认为它是默认 agent 的“标识符”
+    try {
+      const agent = await this.agentService.getOrCreateDefaultAgent(agentId, teamId, userId);
+      return agent.id;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * 创建 Thread
    */
   async create(dto: CreateThreadDto): Promise<ThreadEntity> {
-    // 如果指定了 agentId，验证或自动创建
-    let validatedAgentId = dto.agentId;
-    if (dto.agentId) {
-      try {
-        // 尝试获取或创建默认 agent，并使用返回的真实数据库 ID
-        const agent = await this.agentService.getOrCreateDefaultAgent(dto.agentId, dto.teamId, dto.userId);
-        validatedAgentId = agent.id; // 使用数据库中的真实 ID，而不是传入的名称标识符
-      } catch (error) {
-        // 如果不是默认 agent 且不存在，设为 null
-        console.warn(`Agent ${dto.agentId} not found and not a default agent, creating thread without agent`);
-        validatedAgentId = null;
-      }
-    }
+    // 如果指定了 agentId：既支持传入数据库 ID，也支持默认 agent 标识符（如 "tldraw-assistant"）
+    const validatedAgentId = dto.agentId
+      ? await this.resolveAgentId(dto.agentId, dto.teamId, dto.userId)
+      : null;
 
     return await this.threadRepository.create({
       ...dto,
@@ -87,7 +101,9 @@ export class ThreadService {
 
     // 如果指定了 agentId，只返回该 agent 的 threads
     if (agentId) {
-      return threads.filter((t) => t.agentId === agentId);
+      const resolved = await this.resolveAgentId(agentId, teamId, userId);
+      if (!resolved) return [];
+      return threads.filter((t) => t.agentId === resolved);
     }
 
     return threads;
