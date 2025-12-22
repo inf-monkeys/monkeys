@@ -47,19 +47,24 @@ interface IVinesViewProps {
  * - 将真实内容通过 portal 渲染到 document.body，并用 fixed 定位到同样的 rect
  * 这样视觉位置/尺寸不变，但内容不再受 transform 影响，选框会对齐。
  */
-const TransformScaleSafePortal: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const TransformScaleSafePortal: React.FC<{ children: React.ReactNode; active: boolean }> = ({ children, active }) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const [enabled, setEnabled] = useState(false);
   const [rect, setRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
 
   useEffect(() => {
+    if (!active) {
+      setEnabled(false);
+      setRect(null);
+      return;
+    }
     if (typeof document === 'undefined') return;
     // 仅在启用了 OEM transform 缩放时启用（LF）
     setEnabled(Boolean(document.querySelector('main.oem-scale-root')));
-  }, []);
+  }, [active]);
 
   useLayoutEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !active) return;
     const el = anchorRef.current;
     if (!el) return;
 
@@ -91,7 +96,7 @@ const TransformScaleSafePortal: React.FC<{ children: React.ReactNode }> = ({ chi
     };
   }, [enabled]);
 
-  if (!enabled) return <>{children}</>;
+  if (!active || !enabled) return <>{children}</>;
 
   return (
     <>
@@ -121,6 +126,7 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
   const setVisible = useViewStore((s) => s.setVisible);
   const setFrom = useViewStore((s) => s.setFrom);
 
+  const isCurrentPage = id === pageId;
   const { data: oem } = useSystemConfig();
 
   const showFormEmbed = get(oem, 'theme.workbenchSidebarFormViewEmbed', false) as boolean;
@@ -165,7 +171,7 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
     }
 
     if (type === 'global-design-board' || type === 'design-board') {
-      const boardContent = (
+      return (
         <DesignBoardProvider
           createStore={type === 'global-design-board' ? getGlobalDesignBoardStore : createDesignBoardStore}
         >
@@ -185,9 +191,6 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
             )}
           </VinesDesignBoardViewWrapper>
         </DesignBoardProvider>
-      );
-      return (
-        <TransformScaleSafePortal>{boardContent}</TransformScaleSafePortal>
       );
     }
 
@@ -233,6 +236,13 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
     );
   }, [id]);
 
+  const wrappedContent =
+    type === 'global-design-board' || type === 'design-board' ? (
+      <TransformScaleSafePortal active={isCurrentPage}>{content}</TransformScaleSafePortal>
+    ) : (
+      content
+    );
+
   useEffect(() => {
     const finalVisible = id === pageId;
     setTimeout(
@@ -265,7 +275,7 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
       animate={id === pageId ? 'enter' : 'exit'}
       className="absolute left-0 top-0 size-full"
     >
-      {content}
+      {wrappedContent}
     </motion.div>
   );
 }
