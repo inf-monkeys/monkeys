@@ -96,17 +96,30 @@ export class ThreadService {
   /**
    * 列出用户的 Threads
    */
-  async listByUser(userId: string, teamId: string, agentId?: string): Promise<ThreadEntity[]> {
+  async listByUser(
+    userId: string,
+    teamId: string,
+    agentId?: string,
+  ): Promise<Array<ThreadEntity & { messageCount: number }>> {
     const threads = await this.threadRepository.findByUserId(userId, teamId);
 
     // 如果指定了 agentId，只返回该 agent 的 threads
+    let filteredThreads = threads;
     if (agentId) {
       const resolved = await this.resolveAgentId(agentId, teamId, userId);
       if (!resolved) return [];
-      return threads.filter((t) => t.agentId === resolved);
+      filteredThreads = threads.filter((t) => t.agentId === resolved);
     }
 
-    return threads;
+    // 计算每个 thread 的 messageCount（用于前端判断“空会话”）
+    const threadIds = filteredThreads.map((t) => t.id);
+    const counts = await this.messageRepository.countByThreadIds(threadIds);
+
+    // 注意：这里返回的是“带额外字段”的 plain object，避免修改 Entity 定义
+    return filteredThreads.map((t) => ({
+      ...(t as ThreadEntity),
+      messageCount: counts[t.id] ?? 0,
+    }));
   }
 
   /**
