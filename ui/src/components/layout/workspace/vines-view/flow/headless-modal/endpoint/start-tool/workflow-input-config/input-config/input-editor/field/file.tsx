@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
+import { Input } from '@/components/ui/input';
 import { VinesImageMaskPreview } from '@/components/ui/image-editor/mask/preview.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -24,6 +25,7 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
 
   const { multipleValues } = form.getValues();
   const enableImageMask = form.watch('enableImageMask');
+  const autoDetectAspectRatio = form.watch('autoDetectAspectRatio');
 
   return (
     isLatestWorkflowVersion && (
@@ -95,6 +97,43 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
                   <FormControl>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            name="autoDetectAspectRatio"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="flex items-center justify-between">
+                <FormLabel>自动检测宽高比</FormLabel>
+                <div className="flex-grow" />
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {autoDetectAspectRatio && (
+            <FormField
+              name="aspectRatioField"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>宽高比字段名称</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="aspect_ratio"
+                      value={field.value || ''}
+                      className="font-mono text-xs"
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">指定用于存储检测到的宽高比的字段名称（默认：aspect_ratio）</p>
                   <FormMessage />
                 </FormItem>
               )}
