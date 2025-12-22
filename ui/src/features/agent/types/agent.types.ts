@@ -113,6 +113,8 @@ export interface Thread {
   metadata?: ThreadMetadata;
   state?: ThreadState;
   lastMessageAt?: string;
+  /** 后端聚合字段：该 thread 的消息数量（用于判断是否为空会话） */
+  messageCount?: number;
   createdTimestamp: string;
   updatedTimestamp: string;
 }

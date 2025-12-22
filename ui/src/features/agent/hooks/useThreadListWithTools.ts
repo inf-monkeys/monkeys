@@ -131,9 +131,34 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
   );
   const [isRunning, setIsRunning] = useState(false);
   const [isLoadingThreads, setIsLoadingThreads] = useState(false);
+  const [hasLoadedThreadsOnce, setHasLoadedThreadsOnce] = useState(false);
   const pendingThreadCreationRef = useRef<Promise<string | null> | null>(null);
 
   const isInitializedRef = useRef(false);
+
+  const getThreadSortKey = useCallback((t: Thread): number => {
+    const candidates = [t.lastMessageAt, t.updatedTimestamp, t.createdTimestamp].filter(Boolean) as string[];
+    for (const c of candidates) {
+      const ms = Date.parse(c);
+      if (!Number.isNaN(ms)) return ms;
+    }
+    return 0;
+  }, []);
+
+  const sortedThreads = useMemo(() => {
+    const arr = Array.from(threads.values());
+    arr.sort((a, b) => getThreadSortKey(b) - getThreadSortKey(a));
+    return arr;
+  }, [threads, getThreadSortKey]);
+
+  const findEmptyThreadId = useCallback((threadMap: Map<string, Thread>): string | null => {
+    // 依然按“最新优先”的顺序去找空白 thread（更符合用户直觉）
+    const values = Array.from(threadMap.values()).sort((a, b) => getThreadSortKey(b) - getThreadSortKey(a));
+    for (const t of values) {
+      if ((t.messageCount ?? 0) === 0) return t.id;
+    }
+    return null;
+  }, [getThreadSortKey]);
 
   // 加载 thread 列表
   const loadThreads = useCallback(async () => {
@@ -142,23 +167,34 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
       const threadList = await threadApi.listThreads(teamId, userId, agentId);
       console.log('[ThreadListWithTools] Fetched threads:', threadList.length);
 
-      const threadMap = new Map(threadList.map((t) => [t.id, t]));
-      setThreads(threadMap);
+      // 先用服务端返回构造 map
+      const threadMap = new Map<string, Thread>(threadList.map((t) => [t.id, t]));
 
-      // 如果没有当前 thread 或当前 thread 不存在，选择第一个
-      setCurrentThreadId((prevId) => {
-        if (!prevId || !threadMap.has(prevId)) {
-          const firstThread = threadList[0];
-          return firstThread?.id || null;
-        }
-        return prevId;
-      });
+      // ✅ 刷新策略（按需求）：
+      // - 有“空白会话（messageCount=0）”就复用它
+      // - 否则创建新的 New Chat
+      let nextThreadId: string | null = findEmptyThreadId(threadMap);
+
+      if (!nextThreadId) {
+        const newThread = await threadApi.createThread(teamId, userId, {
+          agentId,
+          title: 'New Chat',
+        });
+        // 约定：新建 thread 视为 messageCount=0
+        threadMap.set(newThread.id, { ...newThread, messageCount: 0 });
+        setThreadMessages((prev) => new Map(prev).set(newThread.id, []));
+        nextThreadId = newThread.id;
+      }
+
+      setThreads(threadMap);
+      setCurrentThreadId(nextThreadId);
     } catch (error) {
       console.error('[ThreadListWithTools] Failed to load threads:', error);
     } finally {
       setIsLoadingThreads(false);
+      setHasLoadedThreadsOnce(true);
     }
-  }, [teamId, userId, agentId]);
+  }, [teamId, userId, agentId, findEmptyThreadId]);
 
   // 创建新 thread
   const createNewThread = useCallback(async (): Promise<Thread> => {
@@ -167,7 +203,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
       title: 'New Chat',
     });
 
-    setThreads((prev) => new Map(prev).set(newThread.id, newThread));
+    setThreads((prev) => new Map(prev).set(newThread.id, { ...newThread, messageCount: 0 }));
     setThreadMessages((prev) => new Map(prev).set(newThread.id, []));
     setCurrentThreadId(newThread.id);
 
@@ -180,6 +216,14 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
       return currentThreadId;
     }
 
+    // 优先复用空白 thread
+    const emptyThreadId = findEmptyThreadId(threads);
+    if (emptyThreadId) {
+      setCurrentThreadId(emptyThreadId);
+      return emptyThreadId;
+    }
+
+    // 其次复用任意已有 thread
     const existingThread = threads.values().next().value as Thread | undefined;
     if (existingThread?.id) {
       setCurrentThreadId(existingThread.id);
@@ -204,7 +248,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
 
     pendingThreadCreationRef.current = creationPromise;
     return creationPromise;
-  }, [currentThreadId, threads, createNewThread]);
+  }, [currentThreadId, threads, createNewThread, findEmptyThreadId]);
 
   // 加载当前 thread 的消息
   const loadMessages = useCallback(async () => {
@@ -270,10 +314,11 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
 
   // 当线程列表为空且加载完成时，自动确保一个可用线程
   useEffect(() => {
-    if (!isLoadingThreads && !currentThreadId) {
+    // 避免竞态：必须等首次 loadThreads 完成后再做兜底创建
+    if (hasLoadedThreadsOnce && !isLoadingThreads && !currentThreadId) {
       ensureActiveThread();
     }
-  }, [isLoadingThreads, currentThreadId, ensureActiveThread]);
+  }, [hasLoadedThreadsOnce, isLoadingThreads, currentThreadId, ensureActiveThread]);
 
   // 切换 thread
   const switchToThread = useCallback(async (threadId: string) => {
@@ -357,6 +402,21 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
       setThreadMessages((prev) => {
         const current = prev.get(activeThreadId) || [];
         return new Map(prev).set(activeThreadId, [...current, userMessage]);
+      });
+
+      // 本地标记该 thread 已非空（用于后续空白复用判断）
+      setThreads((prev) => {
+        const t = prev.get(activeThreadId);
+        if (!t) return prev;
+        const nowIso = new Date().toISOString();
+        const nextCount = (t.messageCount ?? 0) + 1;
+        // 同步更新 lastMessageAt/updatedTimestamp，让当前对话在列表中即时置顶（无需刷新）
+        return new Map(prev).set(activeThreadId, {
+          ...t,
+          messageCount: nextCount,
+          lastMessageAt: nowIso,
+          updatedTimestamp: nowIso,
+        });
       });
 
       setIsRunning(true);
@@ -583,7 +643,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
         ? undefined
         : currentThreadId;
 
-    const threadDataArray = Array.from(threads.values()).map(convertThreadToThreadData);
+    const threadDataArray = sortedThreads.map(convertThreadToThreadData);
 
     const currentMessages = validThreadId ? threadMessages.get(validThreadId) || [] : [];
 
@@ -648,6 +708,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
     };
   }, [
     threads,
+    sortedThreads,
     currentThreadId,
     threadMessages,
     isRunning,
@@ -664,7 +725,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
 
   return {
     runtime,
-    threads: Array.from(threads.values()),
+    threads: sortedThreads,
     currentThreadId,
     isLoadingThreads,
     switchToThread,
