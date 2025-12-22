@@ -50,6 +50,10 @@ import { LiveImageProvider } from './hooks/useLiveImage';
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { setTldrawEditor } from '@/features/agent/components/TldrawToolUIs';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
+// 逻辑关系发现功能
+import { RelationshipDiscoveryButton } from './RelationshipDiscoveryButton';
+import { RelationshipResultPanel } from './RelationshipResultPanel';
+import { useRelationshipDiscovery } from './hooks/useRelationshipDiscovery';
 import {
   InstructionShapeUtil,
   InstructionTool,
@@ -448,6 +452,15 @@ export const Board: React.FC<BoardProps> = ({
   // 追踪最后修改的shapeId
   const lastModifiedShapeIdRef = React.useRef<string | null>(null);
 
+  // 逻辑关系发现功能
+  const {
+    loading: relationshipLoading,
+    result: relationshipResult,
+    discoverRelationships,
+    applyToCanvas,
+    closeResult: closeRelationshipResult,
+  } = useRelationshipDiscovery({ editor });
+
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
   // 是否展示左侧 页面+图层 sidebar（默认 false，只读模式下隐藏）
@@ -554,11 +567,18 @@ export const Board: React.FC<BoardProps> = ({
   const components: TLComponents = React.useMemo(() => {
     const comps: TLComponents = {};
 
-    // 添加 Workflow 节点选择器和执行区域
+    // 添加 Workflow 节点选择器、执行区域和逻辑关系发现按钮
     comps.InFrontOfTheCanvas = () => (
       <>
         <OnCanvasComponentPicker />
         <WorkflowRegions />
+        {/* 逻辑关系发现按钮 - 只在非只读模式下显示 */}
+        {!isReadonlyMode && (
+          <RelationshipDiscoveryButton
+            onDiscoverRelationships={discoverRelationships}
+            loading={relationshipLoading}
+          />
+        )}
       </>
     );
 
@@ -597,7 +617,7 @@ export const Board: React.FC<BoardProps> = ({
     }
 
     return comps;
-  }, [oem, miniPage, createDefaultFrame, shouldHideToolbarForTemplate]); // 当oem、miniPage或权限变化时重新创建
+  }, [oem, miniPage, createDefaultFrame, shouldHideToolbarForTemplate, isReadonlyMode, discoverRelationships, relationshipLoading]); // 当oem、miniPage或权限变化时重新创建
 
   // 创建 frame 函数引用 createDefaultFrame
   const createFrameWithConfig = useCallback(
@@ -1394,6 +1414,15 @@ export const Board: React.FC<BoardProps> = ({
               {get(oem, 'theme.designProjects.showMiniToolsToolbar', false) && <MiniToolsToolbar />}
               <SneakySideEffects />
               <LiveImageAssets />
+              {/* 逻辑关系发现结果面板 */}
+              {!isReadonlyMode && relationshipResult && (
+                <RelationshipResultPanel
+                  result={relationshipResult}
+                  onClose={closeRelationshipResult}
+                  onApplyToCanvas={applyToCanvas}
+                  editor={editor}
+                />
+              )}
             </Tldraw>
           </LiveImageProvider>
         </TldrawErrorBoundary>
