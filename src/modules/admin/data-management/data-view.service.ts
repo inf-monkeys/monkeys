@@ -315,7 +315,28 @@ export class DataViewService {
       }
     }
 
+    this.sortTree(rootViews);
     return rootViews;
+  }
+
+  private sortTree(nodes: DataViewResponseDto[]): void {
+    nodes.sort((a, b) => {
+      const sortA = a.sort ?? 0;
+      const sortB = b.sort ?? 0;
+      if (sortA !== sortB) return sortA - sortB;
+
+      const createdA = a.createdTimestamp ?? 0;
+      const createdB = b.createdTimestamp ?? 0;
+      if (createdA !== createdB) return createdA - createdB;
+
+      return a.id.localeCompare(b.id);
+    });
+
+    for (const node of nodes) {
+      if (node.children && node.children.length > 0) {
+        this.sortTree(node.children);
+      }
+    }
   }
 
   /**
