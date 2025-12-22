@@ -1,24 +1,24 @@
+import { SuccessResponse } from '@/common/response';
 import {
-  Controller,
-  Post,
-  Get,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-  Res,
-  Headers,
   BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res
 } from '@nestjs/common';
 import { Response } from 'express';
-import { SuccessResponse } from '@/common/response';
+import { Readable } from 'stream';
+import { ToolCallRepository } from './repositories/tool-call.repository';
+import { AgentToolExecutorService } from './services/agent-tool-executor.service';
 import { AgentService, CreateAgentDto, UpdateAgentDto } from './services/agent.service';
-import { ThreadService, CreateThreadDto, UpdateThreadDto } from './services/thread.service';
 import { MessageService } from './services/message.service';
 import { StreamingService, StreamOptions } from './services/streaming.service';
-import { AgentToolExecutorService } from './services/agent-tool-executor.service';
-import { ToolCallRepository } from './repositories/tool-call.repository';
+import { CreateThreadDto, ThreadService, UpdateThreadDto } from './services/thread.service';
 
 /**
  * Agent Controller
@@ -169,6 +169,7 @@ export class AgentController {
       messages: any[]; // AI SDK messages format
       system?: string;
     },
+    @Res() res: Response,
   ) {
     // 从 messages 中提取最后一条用户消息
     const lastMessage = body.messages[body.messages.length - 1];
@@ -201,8 +202,23 @@ export class AgentController {
 
     const result = await this.streamingService.streamForAssistantUI(options);
 
-    // 返回 AI SDK 标准响应
-    return result.toTextStreamResponse();
+    // 返回 AI SDK 标准响应 (文本流)
+    const streamResponse = result.toTextStreamResponse();
+    const readable = streamResponse.body ? Readable.fromWeb(streamResponse.body as any) : null;
+
+    // 透传响应头，确保是 chunked 流式
+    streamResponse.headers.forEach((value, key) => {
+      res.setHeader(key, value);
+    });
+    // 显式禁用代理缓冲
+    res.setHeader('X-Accel-Buffering', 'no');
+
+    if (readable) {
+      res.status(streamResponse.status);
+      readable.pipe(res);
+    } else {
+      res.status(streamResponse.status).end();
+    }
   }
 
   // ========== Agent 动态路由（放在最后） ==========

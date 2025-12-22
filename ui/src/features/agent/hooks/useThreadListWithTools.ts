@@ -3,16 +3,18 @@
  * 使用 assistant-ui 标准格式，支持工具调用
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useExternalStoreRuntime,
-  type ThreadMessageLike,
   type AppendMessage,
-  type ExternalStoreThreadListAdapter,
+  type ExternalStoreAdapter,
   type ExternalStoreThreadData,
+  type ExternalStoreThreadListAdapter,
+  type TextMessagePart,
+  type ThreadMessageLike,
 } from '@assistant-ui/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { threadApi } from '../api/agent-api';
-import type { Thread, Message } from '../types/agent.types';
+import type { Message, Thread } from '../types/agent.types';
 
 interface UseThreadListWithToolsOptions {
   teamId: string;
@@ -20,23 +22,34 @@ interface UseThreadListWithToolsOptions {
   agentId?: string;
 }
 
+type MessagePart = ThreadMessageLike['content'] extends readonly (infer U)[] ? U : any;
+
 /**
- * 将后端 Message 转换为 ThreadMessageLike
+ * 规范化消息内容为可变数组，保证不会返回 string
+ */
+function toContentParts(
+  content: ThreadMessageLike['content'] | AppendMessage['content'] | Message['parts'],
+): MessagePart[] {
+  if (typeof content === 'string') {
+    return [{ type: 'text', text: content } as MessagePart];
+  }
+  return [...content] as MessagePart[];
+}
+
+/**
+ * 将后端 Message 转换为 ThreadMessageLike，容错 role 与 content
  */
 function convertMessageToThreadMessage(message: Message): ThreadMessageLike {
-  const content = message.parts.map((part) => {
+  const content = toContentParts(message.parts).map((part) => {
     if (part && typeof part === 'object' && 'type' in part) {
       return part;
     }
-    return {
-      type: 'text' as const,
-      text: typeof part === 'string' ? part : JSON.stringify(part),
-    };
+    return { type: 'text', text: JSON.stringify(part) } as MessagePart;
   });
 
   return {
     id: message.id,
-    role: message.role,
+    role: message.role || 'assistant',
     content,
     createdAt: new Date(message.createdTimestamp),
   };
@@ -45,9 +58,9 @@ function convertMessageToThreadMessage(message: Message): ThreadMessageLike {
 /**
  * 将 Thread 转换为 ExternalStoreThreadData
  */
-function convertThreadToThreadData(thread: Thread): ExternalStoreThreadData {
+function convertThreadToThreadData(thread: Thread): ExternalStoreThreadData<'regular'> {
   return {
-    threadId: thread.id,
+    id: thread.id,
     title: thread.title || 'New Chat',
     status: 'regular',
   };
@@ -64,6 +77,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
   );
   const [isRunning, setIsRunning] = useState(false);
   const [isLoadingThreads, setIsLoadingThreads] = useState(false);
+  const pendingThreadCreationRef = useRef<Promise<string | null> | null>(null);
 
   const isInitializedRef = useRef(false);
 
@@ -91,6 +105,52 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
       setIsLoadingThreads(false);
     }
   }, [teamId, userId, agentId]);
+
+  // 创建新 thread
+  const createNewThread = useCallback(async (): Promise<Thread> => {
+    const newThread = await threadApi.createThread(teamId, userId, {
+      agentId,
+      title: 'New Chat',
+    });
+
+    setThreads((prev) => new Map(prev).set(newThread.id, newThread));
+    setThreadMessages((prev) => new Map(prev).set(newThread.id, []));
+    setCurrentThreadId(newThread.id);
+
+    return newThread;
+  }, [teamId, userId, agentId]);
+
+  // 确保存在可用的 thread（必要时自动创建）
+  const ensureActiveThread = useCallback(async (): Promise<string | null> => {
+    if (currentThreadId && threads.has(currentThreadId)) {
+      return currentThreadId;
+    }
+
+    const existingThread = threads.values().next().value as Thread | undefined;
+    if (existingThread?.id) {
+      setCurrentThreadId(existingThread.id);
+      return existingThread.id;
+    }
+
+    if (pendingThreadCreationRef.current) {
+      return pendingThreadCreationRef.current;
+    }
+
+    const creationPromise = (async () => {
+      try {
+        const created = await createNewThread();
+        return created.id;
+      } catch (error) {
+        console.error('[ThreadListWithTools] Failed to ensure active thread:', error);
+        return null;
+      } finally {
+        pendingThreadCreationRef.current = null;
+      }
+    })();
+
+    pendingThreadCreationRef.current = creationPromise;
+    return creationPromise;
+  }, [currentThreadId, threads, createNewThread]);
 
   // 加载当前 thread 的消息
   const loadMessages = useCallback(async () => {
@@ -123,19 +183,12 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
     loadMessages();
   }, [loadMessages]);
 
-  // 创建新 thread
-  const createNewThread = useCallback(async (): Promise<Thread> => {
-    const newThread = await threadApi.createThread(teamId, userId, {
-      agentId,
-      title: 'New Chat',
-    });
-
-    setThreads((prev) => new Map(prev).set(newThread.id, newThread));
-    setThreadMessages((prev) => new Map(prev).set(newThread.id, []));
-    setCurrentThreadId(newThread.id);
-
-    return newThread;
-  }, [teamId, userId, agentId]);
+  // 当线程列表为空且加载完成时，自动确保一个可用线程
+  useEffect(() => {
+    if (!isLoadingThreads && !currentThreadId) {
+      ensureActiveThread();
+    }
+  }, [isLoadingThreads, currentThreadId, ensureActiveThread]);
 
   // 切换 thread
   const switchToThread = useCallback(async (threadId: string) => {
@@ -174,7 +227,8 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
   // 发送新消息（使用支持工具的 /chat 端点）
   const onNew = useCallback(
     async (message: AppendMessage) => {
-      if (!currentThreadId) {
+      const activeThreadId = await ensureActiveThread();
+      if (!activeThreadId) {
         console.warn('[ThreadListWithTools] No active thread');
         return;
       }
@@ -185,15 +239,15 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
 
       const userMessage: ThreadMessageLike = {
         role: 'user',
-        content: message.content,
+        content: toContentParts(message.content),
         id: `user-${Date.now()}`,
         createdAt: new Date(),
       };
 
       // 添加用户消息
       setThreadMessages((prev) => {
-        const current = prev.get(currentThreadId) || [];
-        return new Map(prev).set(currentThreadId, [...current, userMessage]);
+        const current = prev.get(activeThreadId) || [];
+        return new Map(prev).set(activeThreadId, [...current, userMessage]);
       });
 
       setIsRunning(true);
@@ -210,7 +264,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
         console.log('[ThreadListWithTools] Sending message to /chat endpoint');
 
         // 调用支持工具的 /chat 端点
-        const response = await fetch(`/api/agents/threads/${currentThreadId}/chat`, {
+        const response = await fetch(`/api/agents/threads/${activeThreadId}/chat`, {
           method: 'POST',
           headers,
           body: JSON.stringify({
@@ -242,14 +296,14 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
         const assistantId = `assistant-${Date.now()}`;
         let assistantMessage: ThreadMessageLike = {
           role: 'assistant',
-          content: [],
+          content: [] as MessagePart[],
           id: assistantId,
           createdAt: new Date(),
         };
 
         setThreadMessages((prev) => {
-          const current = prev.get(currentThreadId) || [];
-          return new Map(prev).set(currentThreadId, [...current, assistantMessage]);
+          const current = prev.get(activeThreadId) || [];
+          return new Map(prev).set(activeThreadId, [...current, assistantMessage]);
         });
 
         while (true) {
@@ -275,18 +329,25 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
 
               // 文本增量 (type "0")
               if (eventType === '0' && typeof parsed === 'string') {
-                const textContent = assistantMessage.content.find((c) => c.type === 'text');
-                if (textContent && 'text' in textContent) {
-                  textContent.text += parsed;
+                const currentContent = toContentParts(assistantMessage.content);
+                const textIndex = currentContent.findIndex((c) => c.type === 'text');
+                let nextContent: MessagePart[];
+
+                if (textIndex >= 0) {
+                  const existing = currentContent[textIndex] as TextMessagePart;
+                  const updated: TextMessagePart = { ...existing, text: existing.text + parsed };
+                  nextContent = currentContent.map((c, i) => (i === textIndex ? (updated as MessagePart) : c));
                 } else {
-                  assistantMessage.content.push({ type: 'text', text: parsed });
+                  nextContent = [...currentContent, { type: 'text', text: parsed } as MessagePart];
                 }
 
+                assistantMessage = { ...assistantMessage, content: nextContent };
+
                 setThreadMessages((prev) => {
-                  const current = prev.get(currentThreadId) || [];
+                  const current = prev.get(activeThreadId) || [];
                   return new Map(prev).set(
-                    currentThreadId,
-                    current.map((m) => (m.id === assistantId ? { ...assistantMessage } : m)),
+                    activeThreadId,
+                    current.map((m) => (m.id === assistantId ? assistantMessage : m)),
                   );
                 });
               }
@@ -294,24 +355,25 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
               else if (eventType === '9') {
                 console.log('[ThreadListWithTools] Tool call:', parsed);
 
+                const currentContent = toContentParts(assistantMessage.content);
+                const filtered = currentContent.filter(
+                  (c) => !(c.type === 'tool-call' && (c as any).toolCallId === parsed.toolCallId),
+                );
                 const toolCall = {
                   type: 'tool-call' as const,
                   toolCallId: parsed.toolCallId,
                   toolName: parsed.toolName,
                   args: parsed.args,
-                };
+                } as MessagePart;
+                const nextContent = [...filtered, toolCall];
 
-                // 移除旧的同 ID tool-call（如果存在）
-                assistantMessage.content = assistantMessage.content.filter(
-                  (c) => !(c.type === 'tool-call' && (c as any).toolCallId === parsed.toolCallId),
-                );
-                assistantMessage.content.push(toolCall);
+                assistantMessage = { ...assistantMessage, content: nextContent };
 
                 setThreadMessages((prev) => {
-                  const current = prev.get(currentThreadId) || [];
+                  const current = prev.get(activeThreadId) || [];
                   return new Map(prev).set(
-                    currentThreadId,
-                    current.map((m) => (m.id === assistantId ? { ...assistantMessage } : m)),
+                    activeThreadId,
+                    current.map((m) => (m.id === assistantId ? assistantMessage : m)),
                   );
                 });
               }
@@ -319,25 +381,26 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
               else if (eventType === 'a' || eventType === 'b') {
                 console.log('[ThreadListWithTools] Tool result:', parsed);
 
+                const currentContent = toContentParts(assistantMessage.content);
+                const filtered = currentContent.filter(
+                  (c) => !(c.type === 'tool-result' && (c as any).toolCallId === parsed.toolCallId),
+                );
                 const toolResult = {
                   type: 'tool-result' as const,
                   toolCallId: parsed.toolCallId,
                   toolName: parsed.toolName,
                   result: parsed.result,
                   isError: parsed.isError || false,
-                };
+                } as MessagePart;
+                const nextContent = [...filtered, toolResult];
 
-                assistantMessage.content = assistantMessage.content.filter(
-                  (c) =>
-                    !(c.type === 'tool-result' && (c as any).toolCallId === parsed.toolCallId),
-                );
-                assistantMessage.content.push(toolResult);
+                assistantMessage = { ...assistantMessage, content: nextContent };
 
                 setThreadMessages((prev) => {
-                  const current = prev.get(currentThreadId) || [];
+                  const current = prev.get(activeThreadId) || [];
                   return new Map(prev).set(
-                    currentThreadId,
-                    current.map((m) => (m.id === assistantId ? { ...assistantMessage } : m)),
+                    activeThreadId,
+                    current.map((m) => (m.id === assistantId ? assistantMessage : m)),
                   );
                 });
               }
@@ -357,11 +420,11 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
         setIsRunning(false);
       }
     },
-    [currentThreadId, teamId, userId, agentId, loadMessages],
+    [ensureActiveThread, teamId, userId, agentId, loadMessages],
   );
 
   // 创建 ThreadListAdapter
-  const threadListAdapter: ExternalStoreThreadListAdapter = useMemo(() => {
+  const threadListAdapter: ExternalStoreAdapter<ThreadMessageLike> = useMemo(() => {
     const validThreadId =
       isLoadingThreads || !currentThreadId || !threads.has(currentThreadId)
         ? undefined
@@ -379,44 +442,6 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
     });
 
     return {
-      threadId: validThreadId,
-      threads: threadDataArray,
-      archivedThreads: [],
-
-      onSwitchToNewThread: async () => {
-        console.log('[ThreadListWithTools] Creating new thread');
-        await createNewThread();
-      },
-
-      onSwitchToThread: async (threadId: string) => {
-        console.log('[ThreadListWithTools] Switching to thread:', threadId);
-        await switchToThread(threadId);
-      },
-
-      onRename: async (threadId: string, newTitle: string) => {
-        await threadApi.updateThread(threadId, teamId, { title: newTitle });
-        setThreads((prev) => {
-          const thread = prev.get(threadId);
-          if (thread) {
-            return new Map(prev).set(threadId, { ...thread, title: newTitle });
-          }
-          return prev;
-        });
-      },
-
-      onArchive: async () => {
-        // TODO: 实现归档
-      },
-
-      onUnarchive: async () => {
-        // TODO: 实现取消归档
-      },
-
-      onDelete: async (threadId: string) => {
-        console.log('[ThreadListWithTools] Deleting thread:', threadId);
-        await deleteThread(threadId);
-      },
-
       isRunning,
       messages: currentMessages,
       onNew,
@@ -426,11 +451,46 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
       onCancel: async () => {
         setIsRunning(false);
       },
-      convertMessage: async (message) => {
-        return {
-          role: message.role,
-          content: message.content,
-        };
+      convertMessage: (message) => ({
+        role: message.role || 'assistant',
+        content: toContentParts(message.content) as ThreadMessageLike['content'],
+        id: message.id ?? `msg-${Date.now()}`,
+        createdAt: message.createdAt ?? new Date(),
+      }),
+      adapters: {
+        threadList: {
+          threadId: validThreadId,
+          threads: threadDataArray,
+          archivedThreads: [],
+          onSwitchToNewThread: async () => {
+            console.log('[ThreadListWithTools] Creating new thread');
+            await createNewThread();
+          },
+          onSwitchToThread: async (threadId: string) => {
+            console.log('[ThreadListWithTools] Switching to thread:', threadId);
+            await switchToThread(threadId);
+          },
+          onRename: async (threadId: string, newTitle: string) => {
+            await threadApi.updateThread(threadId, teamId, { title: newTitle });
+            setThreads((prev) => {
+              const thread = prev.get(threadId);
+              if (thread) {
+                return new Map(prev).set(threadId, { ...thread, title: newTitle });
+              }
+              return prev;
+            });
+          },
+          onArchive: async () => {
+            // TODO: 实现归档
+          },
+          onUnarchive: async () => {
+            // TODO: 实现取消归档
+          },
+          onDelete: async (threadId: string) => {
+            console.log('[ThreadListWithTools] Deleting thread:', threadId);
+            await deleteThread(threadId);
+          },
+        } satisfies ExternalStoreThreadListAdapter,
       },
     };
   }, [

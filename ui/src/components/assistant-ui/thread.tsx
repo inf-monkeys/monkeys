@@ -8,11 +8,11 @@ import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { VoiceInputButton } from "@/components/assistant-ui/voice-input-button";
 import { Button } from "@/components/ui/button";
+import { useAgentModeOptional } from "@/features/agent/contexts/AgentModeContext";
 import { cn } from "@/utils/index";
 import {
   ActionBarPrimitive,
   AssistantIf,
-  BranchPickerPrimitive,
   ComposerPrimitive,
   ErrorPrimitive,
   MessagePrimitive,
@@ -23,8 +23,6 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   CheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   CopyIcon,
   DownloadIcon,
   PencilIcon,
@@ -32,7 +30,6 @@ import {
   SquareIcon,
 } from "lucide-react";
 import type { FC } from "react";
-import { useAgentModeOptional } from "@/features/agent/contexts/AgentModeContext";
 
 export const Thread: FC = () => {
   const agentMode = useAgentModeOptional();
@@ -263,7 +260,6 @@ const AssistantMessage: FC = () => {
       </div>
 
       <div className="aui-assistant-message-footer mt-1 ml-2 flex">
-        <BranchPicker />
         <AssistantActionBar />
       </div>
     </MessagePrimitive.Root>
@@ -318,8 +314,6 @@ const UserMessage: FC = () => {
           <UserActionBar />
         </div>
       </div>
-
-      <BranchPicker className="aui-user-branch-picker col-span-full col-start-1 row-start-3 -mr-1 justify-end" />
     </MessagePrimitive.Root>
   );
 };
@@ -363,32 +357,5 @@ const EditComposer: FC = () => {
   );
 };
 
-const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
-  className,
-  ...rest
-}) => {
-  return (
-    <BranchPickerPrimitive.Root
-      hideWhenSingleBranch
-      className={cn(
-        "aui-branch-picker-root mr-2 -ml-2 inline-flex items-center text-muted-foreground text-xs",
-        className,
-      )}
-      {...rest}
-    >
-      <BranchPickerPrimitive.Previous asChild>
-        <TooltipIconButton tooltip="Previous">
-          <ChevronLeftIcon />
-        </TooltipIconButton>
-      </BranchPickerPrimitive.Previous>
-      <span className="aui-branch-picker-state font-medium">
-        <BranchPickerPrimitive.Number /> / <BranchPickerPrimitive.Count />
-      </span>
-      <BranchPickerPrimitive.Next asChild>
-        <TooltipIconButton tooltip="Next">
-          <ChevronRightIcon />
-        </TooltipIconButton>
-      </BranchPickerPrimitive.Next>
-    </BranchPickerPrimitive.Root>
-  );
-};
+// Branch 切换在当前 ExternalStoreRuntime 未实现，先隐藏以避免报错
+const BranchPicker: FC = () => null;

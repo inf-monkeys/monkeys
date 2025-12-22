@@ -1,13 +1,13 @@
-import { Injectable, Logger, forwardRef, Inject, NotFoundException } from '@nestjs/common';
-import { streamText } from 'ai';
-import { ModelRegistryService } from './model-registry.service';
-import { MessageService, Message } from './message.service';
-import { ThreadService } from './thread.service';
-import { AgentService } from './agent.service';
-import { AgentToolRegistryService } from './agent-tool-registry.service';
-import { AgentToolExecutorService } from './agent-tool-executor.service';
-import { UIMessagePart } from '@/database/entities/agents/message.entity';
 import { generateDbId } from '@/common/utils';
+import { UIMessagePart } from '@/database/entities/agents/message.entity';
+import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { streamText } from 'ai';
+import { AgentToolExecutorService } from './agent-tool-executor.service';
+import { AgentToolRegistryService } from './agent-tool-registry.service';
+import { AgentService } from './agent.service';
+import { Message, MessageService } from './message.service';
+import { ModelRegistryService } from './model-registry.service';
+import { ThreadService } from './thread.service';
 
 export interface StreamOptions {
   threadId: string;
@@ -100,7 +100,7 @@ export class StreamingService {
       const modelId = opts.modelId || agent?.config.model || 'openai:gpt-4';
       const model = this.modelRegistry.resolveModel(modelId);
 
-      // 5. 获取历史消息
+      // 5. 获取历史消息（不包含当前用户消息），并在构建请求时显式追加本次用户输入
       const history = await this.messageService.getThreadHistory(threadId, teamId);
 
       // 6. 构建系统提示词
@@ -109,6 +109,13 @@ export class StreamingService {
       // 7. 准备参数
       const temperature = opts.temperature ?? agent?.config.temperature ?? 0.7;
       const maxSteps = agent?.config.stopWhen?.maxSteps || 20;
+
+      // 将系统提示词 + 历史 + 本次用户消息一起传入模型，确保当前轮能及时响应
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        ...history,
+        { role: 'user', content: userMessage },
+      ] as Message[];
 
       // 8. 获取工具（如果启用）
       let tools: Record<string, any> | undefined;
@@ -136,7 +143,7 @@ export class StreamingService {
       const result = streamText({
         model,
         system: systemPrompt,
-        messages: history as any,
+        messages: messages as any,
         temperature,
         tools,
       });
