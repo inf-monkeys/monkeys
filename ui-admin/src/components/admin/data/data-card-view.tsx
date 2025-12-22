@@ -34,6 +34,7 @@ interface DataCardViewProps {
   onDelete?: (item: DataItem) => void;
   onView?: (item: DataItem) => void;
   onPinToggle?: (item: DataItem) => void;
+  onPinEdit?: (item: DataItem) => void;
   onSelectionChange?: (selectedIds: string[]) => void;
 }
 
@@ -49,6 +50,7 @@ export function DataCardView({
   onDelete,
   onView,
   onPinToggle,
+  onPinEdit,
   onSelectionChange,
 }: DataCardViewProps) {
   const hasMore = hasMoreProp ?? total > data.length;
@@ -295,7 +297,21 @@ export function DataCardView({
                                 </DropdownMenuItem>
                               )}
                               {onPinToggle && (
-                                <DropdownMenuItem onClick={() => onPinToggle(item)}>
+                                <DropdownMenuItem
+                                  onClick={() => onPinToggle(item)}
+                                  onContextMenu={(e) => {
+                                    if (!onPinEdit) return;
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+                                    onPinEdit(item);
+                                  }}
+                                  title={
+                                    (item.pinOrder ?? 0) > 0
+                                      ? '左键：取消置顶；右键：调整置顶优先级'
+                                      : '左键：默认置顶（10）；右键：设置置顶优先级'
+                                  }
+                                >
                                   {(item.pinOrder ?? 0) > 0 ? (
                                     <PinOff className="mr-2 h-4 w-4" />
                                   ) : (
@@ -416,7 +432,21 @@ export function DataCardView({
                                 </DropdownMenuItem>
                               )}
                               {onPinToggle && (
-                                <DropdownMenuItem onClick={() => onPinToggle(item)}>
+                                <DropdownMenuItem
+                                  onClick={() => onPinToggle(item)}
+                                  onContextMenu={(e) => {
+                                    if (!onPinEdit) return;
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+                                    onPinEdit(item);
+                                  }}
+                                  title={
+                                    (item.pinOrder ?? 0) > 0
+                                      ? '左键：取消置顶；右键：调整置顶优先级'
+                                      : '左键：默认置顶（10）；右键：设置置顶优先级'
+                                  }
+                                >
                                   {(item.pinOrder ?? 0) > 0 ? (
                                     <PinOff className="mr-2 h-4 w-4" />
                                   ) : (

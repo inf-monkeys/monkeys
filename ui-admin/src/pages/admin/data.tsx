@@ -16,6 +16,7 @@ import {
 import { DataCardView } from '@/components/admin/data/data-card-view';
 import { DataDetailPanel } from '@/components/admin/data/data-detail-panel';
 import { DataEditDialog } from '@/components/admin/data/data-edit-dialog';
+import { PinOrderDialog } from '@/components/admin/data/pin-order-dialog';
 import { DataSidebar } from '@/components/admin/data/data-sidebar';
 import { DataTable } from '@/components/admin/data/data-table';
 import { DataToolbar } from '@/components/admin/data/data-toolbar';
@@ -43,6 +44,8 @@ function DataManagementPage() {
   const [viewingItem, setViewingItem] = useState<DataItem | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pinDialogItem, setPinDialogItem] = useState<Pick<DataItem, 'id' | 'name' | 'pinOrder'> | null>(null);
   // 游标分页优化：记录最后一条数据的时间戳和 ID
   const [cursor, setCursor] = useState<{ timestamp?: number; pinOrder?: number; id?: string } | null>(null);
   // 请求序号：用于丢弃切换分类/搜索后返回的旧请求，避免旧数据污染当前视图
@@ -289,41 +292,73 @@ function DataManagementPage() {
     setEditDialogOpen(true);
   };
 
+  const applyPinOrder = async (item: Pick<DataItem, 'id' | 'pinOrder'>, nextPinOrder: number) => {
+    if (!item?.id) {
+      toast.error('无效的数据项');
+      return;
+    }
+
+    await setDataItemPinOrder(item.id, nextPinOrder);
+    toast.success(nextPinOrder > 0 ? '已置顶' : '已取消置顶');
+
+    // 本地立即生效：更新 pinOrder，并在当前已加载的数据内重新排序（避免整页刷新打断滚动位置）
+    requestSeqRef.current += 1; // 丢弃可能仍在返回的旧列表请求，避免覆盖本地更新
+    setDataItems((prev) => {
+      const next = prev.map((x) => (x.id === item.id ? { ...x, pinOrder: nextPinOrder } : x));
+      const sorted = sortDataItems(next);
+
+      // 同步更新游标：下一页需要使用当前列表最后一条的游标信息
+      const last = sorted[sorted.length - 1];
+      if (last?.id) {
+        const ts = typeof last.updatedTimestamp === 'number' ? last.updatedTimestamp : Number(last.updatedTimestamp);
+        setCursor({
+          timestamp: Number.isFinite(ts) ? ts : undefined,
+          pinOrder: last.pinOrder ?? 0,
+          id: last.id,
+        });
+      } else {
+        setCursor(null);
+      }
+
+      return sorted;
+    });
+
+    if (viewingItem?.id === item.id) {
+      setViewingItem((prev) => (prev ? { ...prev, pinOrder: nextPinOrder } : prev));
+    }
+  };
+
   const handlePinToggle = async (item: DataItem) => {
     if (!item?.id) {
       toast.error('无效的数据项');
       return;
     }
 
-    try {
-      const nextPinOrder = (item.pinOrder ?? 0) > 0 ? 0 : 1;
-      await setDataItemPinOrder(item.id, nextPinOrder);
-      toast.success(nextPinOrder > 0 ? '已置顶' : '已取消置顶');
-
-      // 本地立即生效：更新 pinOrder，并在当前已加载的数据内重新排序（避免整页刷新打断滚动位置）
-      requestSeqRef.current += 1; // 丢弃可能仍在返回的旧列表请求，避免覆盖本地更新
-      setDataItems((prev) => {
-        const next = prev.map((x) => (x.id === item.id ? { ...x, pinOrder: nextPinOrder } : x));
-        const sorted = sortDataItems(next);
-
-        // 同步更新游标：下一页需要使用当前列表最后一条的游标信息
-        const last = sorted[sorted.length - 1];
-        if (last?.id) {
-          const ts = typeof last.updatedTimestamp === 'number' ? last.updatedTimestamp : Number(last.updatedTimestamp);
-          setCursor({
-            timestamp: Number.isFinite(ts) ? ts : undefined,
-            pinOrder: last.pinOrder ?? 0,
-            id: last.id,
-          });
-        } else {
-          setCursor(null);
-        }
-
-        return sorted;
-      });
-    } catch (error: any) {
-      toast.error(error?.message || '置顶操作失败');
+    // 已置顶：直接取消置顶（回到 0）
+    if ((item.pinOrder ?? 0) > 0) {
+      try {
+        await applyPinOrder(item, 0);
+      } catch (error: any) {
+        toast.error(error?.message || '取消置顶失败');
+      }
+      return;
     }
+
+    // 未置顶：左键默认置顶（10）
+    try {
+      await applyPinOrder(item, 10);
+    } catch (error: any) {
+      toast.error(error?.message || '置顶失败');
+    }
+  };
+
+  const handlePinEdit = (item: DataItem) => {
+    if (!item?.id) {
+      toast.error('无效的数据项');
+      return;
+    }
+    setPinDialogItem({ id: item.id, name: item.name, pinOrder: item.pinOrder });
+    setPinDialogOpen(true);
   };
 
   const handleView = async (item: DataItem) => {
@@ -380,9 +415,9 @@ function DataManagementPage() {
   };
 
   return (
-    <div className="flex h-full overflow-hidden min-h-0">
-      {/* 左侧视图导航 */}
-      <DataSidebar
+      <div className="flex h-full overflow-hidden min-h-0">
+        {/* 左侧视图导航 */}
+        <DataSidebar
         categories={categories}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
@@ -394,6 +429,18 @@ function DataManagementPage() {
 
       {/* 右侧内容区 */}
       <div className="flex flex-1 flex-col overflow-hidden min-h-0">
+        <PinOrderDialog
+          open={pinDialogOpen}
+          item={pinDialogItem}
+          onOpenChange={(open) => {
+            setPinDialogOpen(open);
+            if (!open) setPinDialogItem(null);
+          }}
+          onConfirm={async (pinOrder) => {
+            if (!pinDialogItem?.id) return;
+            await applyPinOrder(pinDialogItem, pinOrder);
+          }}
+        />
         <DataEditDialog
           open={editDialogOpen}
           itemId={editingItemId}
@@ -459,6 +506,7 @@ function DataManagementPage() {
                   onDelete={handleDelete}
                   onView={handleView}
                   onPinToggle={handlePinToggle}
+                  onPinEdit={handlePinEdit}
                   onSelectionChange={setSelectedIds}
                 />
               )}
