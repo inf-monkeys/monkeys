@@ -117,23 +117,66 @@ export class StreamingService {
       ] as Message[];
 
       // 8. 获取工具（如果启用）
+      //
+      // 重要说明：
+      // - 目前 Registry 转换出来的 AI SDK tools 仅包含 schema（无 execute），
+      //   这会导致模型在“先 tool-call 再说话”的场景卡住（尤其是 tldraw-assistant）。
+      // - 这里对 server-side tools 提供 execute（委托给 AgentToolExecutor），
+      //   对 clientSide 工具直接跳过（前端执行链路暂未在后端 tool loop 中实现）。
+      //
+      // 这样至少保证：tldraw 默认 agent 不会产生“0 字节 chat 响应”，能正常给出文本回复。
       let tools: Record<string, any> | undefined;
       if (agent?.config.tools?.enabled) {
         try {
-          // 使用 agent 实体的真实 ID，而不是传入的 agentId 字符串
-          tools = await this.agentToolRegistry.getToolsForAgent(agent.id, teamId);
-          this.logger.log(`✅ Loaded ${Object.keys(tools).length} tools for agent ${agent.id} (${agent.name})`);
-          this.logger.log(`Tool names: ${Object.keys(tools).join(', ')}`);
-          // 打印第一个工具的详细信息作为示例
-          if (Object.keys(tools).length > 0) {
-            const firstToolName = Object.keys(tools)[0];
-            this.logger.log(`First tool (${firstToolName}):`, JSON.stringify(tools[firstToolName], null, 2));
+          const toolNames = agent.config.tools.toolNames || [];
+          const built: Record<string, any> = {};
+
+          for (const toolName of toolNames) {
+            try {
+              const resolvedTool = await this.agentToolRegistry.getToolByName(toolName, teamId);
+              const isClientSide = resolvedTool?.metadata?.clientSide === true;
+
+              // clientSide 工具：先不交给模型（否则会 tool-call 卡死）
+              if (isClientSide) continue;
+
+              built[toolName] = {
+                description: resolvedTool.description,
+                parameters: resolvedTool.parameters,
+                execute: async (args: any, ctx: any) => {
+                  const toolCallId = ctx?.toolCallId || ctx?.id;
+                  const execResult = await this.agentToolExecutor.execute({
+                    threadId,
+                    // 这里没有 assistant messageId，先用 user message id 关联即可
+                    messageId: userMsg.id,
+                    teamId,
+                    userId,
+                    toolCallId,
+                    toolName,
+                    args,
+                  });
+
+                  if (execResult.success) return execResult.result;
+                  throw new Error(execResult.error?.message || 'Tool execution failed');
+                },
+              };
+            } catch (e) {
+              this.logger.warn(`Failed to load tool ${toolName}: ${e?.message || e}`);
+            }
           }
+
+          tools = Object.keys(built).length > 0 ? built : undefined;
+          this.logger.log(
+            `✅ Tools prepared for agent ${agent.id} (${agent.name}): ${
+              tools ? `enabled (${Object.keys(tools).length})` : 'disabled (no server-side tools)'
+            }`,
+          );
         } catch (error) {
-          this.logger.error(`❌ Failed to load tools for agent ${agent.id}:`, error);
+          this.logger.error(`❌ Failed to prepare tools for agent ${agent?.id}:`, error);
         }
       } else {
-        this.logger.warn(`⚠️ Tools not enabled for agent. agent?.config.tools?.enabled = ${agent?.config.tools?.enabled}`);
+        this.logger.warn(
+          `⚠️ Tools not enabled for agent. agent?.config.tools?.enabled = ${agent?.config.tools?.enabled}`,
+        );
       }
 
       this.logger.log(`🚀 Starting AI SDK stream for thread ${threadId}, tools: ${tools ? `enabled (${Object.keys(tools || {}).length} tools)` : 'disabled'}`);
