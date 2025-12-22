@@ -15,6 +15,7 @@ import { Response } from 'express';
 import { Readable } from 'stream';
 import { ToolCallRepository } from './repositories/tool-call.repository';
 import { AgentToolExecutorService } from './services/agent-tool-executor.service';
+import { AgentToolRegistryService } from './services/agent-tool-registry.service';
 import { AgentService, CreateAgentDto, UpdateAgentDto } from './services/agent.service';
 import { MessageService } from './services/message.service';
 import { StreamingService, StreamOptions } from './services/streaming.service';
@@ -37,6 +38,7 @@ export class AgentController {
     private readonly messageService: MessageService,
     private readonly streamingService: StreamingService,
     private readonly agentToolExecutor: AgentToolExecutorService,
+    private readonly agentToolRegistry: AgentToolRegistryService,
     private readonly toolCallRepository: ToolCallRepository,
   ) {}
 
@@ -60,6 +62,15 @@ export class AgentController {
   @Get('models')
   async listModels(@Query('teamId') teamId?: string) {
     const data = await this.agentService.listModels(teamId);
+    return new SuccessResponse({ data });
+  }
+
+  @Get('available-tools')
+  async getAvailableTools(@Query('teamId') teamId: string) {
+    if (!teamId) {
+      throw new BadRequestException('teamId is required');
+    }
+    const data = await this.agentToolRegistry.getAvailableTools(teamId);
     return new SuccessResponse({ data });
   }
 

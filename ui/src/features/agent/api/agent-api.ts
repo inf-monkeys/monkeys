@@ -305,14 +305,26 @@ export const chatApi = {
  */
 export const toolApi = {
   /**
-   * 获取可用工具列表
+   * 获取 Agent 可用的工具列表（内置工具 + Agent 专用工具）
    */
   listTools: async (teamId: string): Promise<Tool[]> => {
     const response = await vinesFetcher<{ data: Tool[] }>({
       simple: true,
       responseResolver: directJsonResolver,
-    })(`/api/tools?teamId=${teamId}`);
+    })(`${API_BASE}/available-tools?teamId=${teamId}`);
     // 后端返回 SuccessResponse 格式，需要提取 data 字段
+    return (response as any)?.data || [];
+  },
+
+  /**
+   * 获取工作流系统的工具列表（旧系统，兼容保留）
+   * @deprecated 请使用 listTools() 获取 Agent 专用工具
+   */
+  listWorkflowTools: async (teamId: string): Promise<Tool[]> => {
+    const response = await vinesFetcher<{ data: Tool[] }>({
+      simple: true,
+      responseResolver: directJsonResolver,
+    })(`/api/tools?teamId=${teamId}`);
     return (response as any)?.data || [];
   },
 

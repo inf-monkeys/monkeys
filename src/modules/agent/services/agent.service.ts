@@ -213,9 +213,7 @@ Example workflows:
       }
     }
 
-    // 验证 tools
-    if (config.tools?.enabled && (!config.tools.toolNames || config.tools.toolNames.length === 0)) {
-      throw new BadRequestException('toolNames is required when tools are enabled');
-    }
+    // 注意：不再验证 tools.toolNames，因为内置工具默认可用
+    // 用户可以选择性地配置额外的外部工具
   }
 }

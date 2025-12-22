@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -24,6 +24,7 @@ import { ToolCallRepository } from './repositories/tool-call.repository';
 import { ToolRepository } from './repositories/tool.repository';
 import { TeamQuotaRepository } from './repositories/team-quota.repository';
 import { ToolsModule } from '@/modules/tools/tools.module';
+import { WorkflowModule } from '@/modules/workflow/workflow.module';
 
 /**
  * Agent 模块
@@ -49,6 +50,7 @@ import { ToolsModule } from '@/modules/tools/tools.module';
       TeamQuotaEntity,
     ]),
     ToolsModule,
+    forwardRef(() => WorkflowModule), // 使用 forwardRef 避免循环依赖
     CacheModule.register({
       ttl: 3600000, // 1 hour default TTL
       max: 1000, // Maximum number of items in cache

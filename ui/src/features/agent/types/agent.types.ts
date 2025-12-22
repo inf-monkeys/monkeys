@@ -245,11 +245,16 @@ export interface SendMessageDto {
 }
 
 /**
+ * Tool 来源类型
+ */
+export type ToolSourceType = 'builtin' | 'external';
+
+/**
  * Tool 实体
  */
 export interface Tool {
-  id: string;
-  teamId: string;
+  id?: string;
+  teamId?: string;
   name: string;
   description: string;
   inputSchema: any; // JSON Schema
@@ -262,8 +267,9 @@ export interface Tool {
   isPublic?: boolean;
   version?: string;
   iconUrl?: string;
-  createdTimestamp: string;
-  updatedTimestamp: string;
+  sourceType?: ToolSourceType; // 工具来源（内置/外部）
+  createdTimestamp?: string;
+  updatedTimestamp?: string;
 }
 
 /**

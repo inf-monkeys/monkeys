@@ -3,7 +3,7 @@
  * 对接后端的 /chat 端点（支持工具调用）
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   useExternalStoreRuntime,
   type ThreadMessageLike,
@@ -11,7 +11,7 @@ import {
   type ExternalStoreAdapter,
 } from '@assistant-ui/react';
 import { threadApi } from '../api/agent-api';
-import type { Thread, Message } from '../types/agent.types';
+import type { Message } from '../types/agent.types';
 
 interface UseAssistantUIAdapterOptions {
   teamId: string;
@@ -22,21 +22,71 @@ interface UseAssistantUIAdapterOptions {
 
 /**
  * 将后端 Message 转换为 assistant-ui ThreadMessageLike
+ *
+ * 关键转换:
+ * - 将独立的 tool-result 合并到对应的 tool-call 中
+ * - assistant-ui 不支持独立的 tool-result,result 应该是 tool-call 的属性
  */
 function convertMessageToThreadMessage(message: Message): ThreadMessageLike {
-  const content = message.parts.map((part) => {
-    if (part && typeof part === 'object' && 'type' in part) {
-      return part;
+  console.log('[convertMessage] Processing message:', message.id, 'role:', message.role);
+  console.log('[convertMessage] Original parts:', JSON.stringify(message.parts, null, 2));
+
+  // 先收集所有 tool-result (按 toolCallId 索引)
+  const toolResultsMap = new Map<string, any>();
+
+  message.parts.forEach((part) => {
+    if (part && typeof part === 'object' && 'type' in part && part.type === 'tool-result') {
+      const toolResult = part as any;
+      if (toolResult.toolCallId) {
+        console.log('[convertMessage] Found tool-result:', toolResult.toolCallId);
+        toolResultsMap.set(toolResult.toolCallId, {
+          result: toolResult.result,
+          isError: toolResult.isError,
+        });
+      }
     }
-    return {
-      type: 'text' as const,
-      text: typeof part === 'string' ? part : JSON.stringify(part),
-    };
   });
+
+  // 转换 parts,跳过 tool-result,将其合并到 tool-call 中
+  const content = message.parts
+    .filter((part) => {
+      // 过滤掉独立的 tool-result
+      if (part && typeof part === 'object' && 'type' in part && part.type === 'tool-result') {
+        console.log('[convertMessage] Filtering out tool-result');
+        return false;
+      }
+      return true;
+    })
+    .map((part) => {
+      if (part && typeof part === 'object' && 'type' in part) {
+        // 如果是 tool-call,尝试合并对应的 tool-result
+        if (part.type === 'tool-call') {
+          const toolCall = part as any;
+          const toolCallId = toolCall.toolCallId;
+
+          if (toolCallId && toolResultsMap.has(toolCallId)) {
+            const resultData = toolResultsMap.get(toolCallId);
+            console.log('[convertMessage] Merging result into tool-call:', toolCallId);
+            return {
+              ...toolCall,
+              result: resultData.result,
+              isError: resultData.isError,
+            };
+          }
+        }
+        return part;
+      }
+      return {
+        type: 'text' as const,
+        text: typeof part === 'string' ? part : JSON.stringify(part),
+      };
+    });
+
+  console.log('[convertMessage] Final content:', JSON.stringify(content, null, 2));
 
   return {
     id: message.id,
-    role: message.role,
+    role: message.role as 'assistant' | 'user' | 'system',
     content,
     createdAt: new Date(message.createdTimestamp),
   };
@@ -169,20 +219,33 @@ export function useAssistantUIAdapter(options: UseAssistantUIAdapterOptions) {
 
               // 处理文本增量
               if (eventType === '0' && typeof parsed === 'string') {
-                const textContent = assistantMessage.content.find((c) => c.type === 'text');
+                const contentArray = Array.isArray(assistantMessage.content)
+                  ? assistantMessage.content
+                  : [];
+                const textContent = contentArray.find((c) => c.type === 'text');
+
                 if (textContent && 'text' in textContent) {
                   textContent.text += parsed;
                 } else {
-                  assistantMessage.content.push({ type: 'text', text: parsed });
+                  contentArray.push({ type: 'text', text: parsed });
                 }
 
+                assistantMessage = {
+                  ...assistantMessage,
+                  content: contentArray,
+                };
+
                 setMessages((prev) =>
-                  prev.map((m) => (m.id === assistantId ? { ...assistantMessage } : m)),
+                  prev.map((m) => (m.id === assistantId ? assistantMessage : m)),
                 );
               }
               // 处理工具调用
               else if (eventType === '9' || parsed.type === 'tool-call') {
                 console.log('[AssistantUI] Tool call event:', parsed);
+
+                const contentArray = Array.isArray(assistantMessage.content)
+                  ? assistantMessage.content
+                  : [];
 
                 const toolCall = {
                   type: 'tool-call' as const,
@@ -191,34 +254,48 @@ export function useAssistantUIAdapter(options: UseAssistantUIAdapterOptions) {
                   args: parsed.args,
                 };
 
-                assistantMessage.content = assistantMessage.content.filter(
+                // 移除旧的 tool-call (如果存在)
+                const filteredContent = contentArray.filter(
                   (c) => !(c.type === 'tool-call' && (c as any).toolCallId === parsed.toolCallId),
                 );
-                assistantMessage.content.push(toolCall);
+                filteredContent.push(toolCall);
+
+                assistantMessage = {
+                  ...assistantMessage,
+                  content: filteredContent,
+                };
 
                 setMessages((prev) =>
-                  prev.map((m) => (m.id === assistantId ? { ...assistantMessage } : m)),
+                  prev.map((m) => (m.id === assistantId ? assistantMessage : m)),
                 );
               }
-              // 处理工具结果
+              // 处理工具结果 - 更新现有 tool-call 的 result 字段
               else if (eventType === 'a' || parsed.type === 'tool-result') {
                 console.log('[AssistantUI] Tool result event:', parsed);
 
-                const toolResult = {
-                  type: 'tool-result' as const,
-                  toolCallId: parsed.toolCallId,
-                  toolName: parsed.toolName,
-                  result: parsed.result,
-                  isError: parsed.isError || false,
+                const contentArray = Array.isArray(assistantMessage.content)
+                  ? assistantMessage.content
+                  : [];
+
+                // 找到对应的 tool-call 并更新其 result
+                const updatedContent = contentArray.map((c) => {
+                  if (c.type === 'tool-call' && (c as any).toolCallId === parsed.toolCallId) {
+                    return {
+                      ...c,
+                      result: parsed.result,
+                      isError: parsed.isError || false,
+                    };
+                  }
+                  return c;
+                });
+
+                assistantMessage = {
+                  ...assistantMessage,
+                  content: updatedContent,
                 };
 
-                assistantMessage.content = assistantMessage.content.filter(
-                  (c) => !(c.type === 'tool-result' && (c as any).toolCallId === parsed.toolCallId),
-                );
-                assistantMessage.content.push(toolResult);
-
                 setMessages((prev) =>
-                  prev.map((m) => (m.id === assistantId ? { ...assistantMessage } : m)),
+                  prev.map((m) => (m.id === assistantId ? assistantMessage : m)),
                 );
               }
             } catch (e) {

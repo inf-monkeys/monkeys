@@ -1,4 +1,3 @@
-import { generateDbId } from '@/common/utils';
 import { UIMessagePart } from '@/database/entities/agents/message.entity';
 import { forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { streamText } from 'ai';
@@ -154,6 +153,17 @@ export class StreamingService {
           const parts: UIMessagePart[] = [];
           const toolCalls: any[] = [];
 
+          // 🔧 FIX: 先创建初始 assistant 消息,以满足 tool_calls 表的外键约束
+          const initialMessage = await this.messageService.create({
+            threadId,
+            teamId,
+            role: 'assistant',
+            parts: [], // 初始为空,稍后更新
+            metadata: {},
+          });
+          const messageId = initialMessage.id;
+          this.logger.debug(`Created initial assistant message ${messageId} for thread ${threadId}`);
+
           // 监听完整流事件
           for await (const event of result.fullStream) {
             if (event.type === 'text-delta') {
@@ -187,11 +197,11 @@ export class StreamingService {
                 this.logger.warn(`Failed to check tool ${toolName} metadata:`, error.message);
               }
 
-              // 后端执行工具
+              // 后端执行工具 - 使用真实的 messageId
               try {
                 const toolResult = await this.agentToolExecutor.execute({
                   threadId,
-                  messageId: generateDbId(), // 临时 ID
+                  messageId, // 🔧 使用真实的消息 ID
                   teamId,
                   userId,
                   toolCallId,
@@ -253,10 +263,8 @@ export class StreamingService {
             }
           }
 
-          // 保存完整消息
-          await this.messageService.saveAssistantMessage({
-            threadId,
-            teamId,
+          // 🔧 FIX: 更新消息内容(而不是创建新消息)
+          await this.messageService.update(messageId, {
             parts,
             metadata: {
               model: modelId,

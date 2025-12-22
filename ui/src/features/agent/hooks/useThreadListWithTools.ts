@@ -42,14 +42,57 @@ function toContentParts(
 
 /**
  * 将后端 Message 转换为 ThreadMessageLike，容错 role 与 content
+ *
+ * 关键转换:
+ * - 将独立的 tool-result 合并到对应的 tool-call 中
+ * - assistant-ui 不支持独立的 tool-result,result 应该是 tool-call 的属性
  */
 function convertMessageToThreadMessage(message: Message): ThreadMessageLike {
-  const content = toContentParts(message.parts).map((part) => {
-    if (part && typeof part === 'object' && 'type' in part) {
-      return part;
+  // 先收集所有 tool-result (按 toolCallId 索引)
+  const toolResultsMap = new Map<string, any>();
+
+  const parts = toContentParts(message.parts);
+  parts.forEach((part) => {
+    if (part && typeof part === 'object' && 'type' in part && part.type === 'tool-result') {
+      const toolResult = part as any;
+      if (toolResult.toolCallId) {
+        toolResultsMap.set(toolResult.toolCallId, {
+          result: toolResult.result,
+          isError: toolResult.isError,
+        });
+      }
     }
-    return { type: 'text', text: JSON.stringify(part) } as MessagePart;
   });
+
+  // 转换 parts: 过滤掉独立的 tool-result,将其合并到 tool-call 中
+  const content = parts
+    .filter((part) => {
+      // 过滤掉独立的 tool-result
+      if (part && typeof part === 'object' && 'type' in part && part.type === 'tool-result') {
+        return false;
+      }
+      return true;
+    })
+    .map((part) => {
+      if (part && typeof part === 'object' && 'type' in part) {
+        // 如果是 tool-call,尝试合并对应的 tool-result
+        if (part.type === 'tool-call') {
+          const toolCall = part as any;
+          const toolCallId = toolCall.toolCallId;
+
+          if (toolCallId && toolResultsMap.has(toolCallId)) {
+            const resultData = toolResultsMap.get(toolCallId);
+            return {
+              ...toolCall,
+              result: resultData.result,
+              isError: resultData.isError,
+            };
+          }
+        }
+        return part;
+      }
+      return { type: 'text', text: JSON.stringify(part) } as MessagePart;
+    });
 
   return {
     id: message.id,
@@ -418,22 +461,23 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
             assistantMessage = { ...assistantMessage, content: nextContent };
             applyAssistantMessageUpdate();
           }
-          // 工具结果 (type "a" or "b")
+          // 工具结果 (type "a" or "b") - 更新现有 tool-call 的 result 字段
           else if (eventType === 'a' || eventType === 'b') {
             console.log('[ThreadListWithTools] Tool result:', parsed);
 
             const currentContent = toContentParts(assistantMessage.content);
-            const filtered = currentContent.filter(
-              (c) => !(c.type === 'tool-result' && (c as any).toolCallId === parsed.toolCallId),
-            );
-            const toolResult = {
-              type: 'tool-result' as const,
-              toolCallId: parsed.toolCallId,
-              toolName: parsed.toolName,
-              result: parsed.result,
-              isError: parsed.isError || false,
-            } as MessagePart;
-            const nextContent = [...filtered, toolResult];
+
+            // 找到对应的 tool-call 并更新其 result
+            const nextContent = currentContent.map((c) => {
+              if (c.type === 'tool-call' && (c as any).toolCallId === parsed.toolCallId) {
+                return {
+                  ...c,
+                  result: parsed.result,
+                  isError: parsed.isError || false,
+                } as MessagePart;
+              }
+              return c;
+            });
 
             assistantMessage = { ...assistantMessage, content: nextContent };
             applyAssistantMessageUpdate();
