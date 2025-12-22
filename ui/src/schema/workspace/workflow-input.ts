@@ -91,6 +91,11 @@ export const workflowInputSchema = z.object({
 
   enableImageMask: z.boolean().optional(),
 
+  // 自动检测图片宽高比
+  autoDetectAspectRatio: z.boolean().optional(),
+  // 宽高比字段名称，默认为 'aspect_ratio'
+  aspectRatioField: z.string().optional(),
+
   minValue: z.number().optional(),
   maxValue: z.number().optional(),
   numberPrecision: z.number().optional(),

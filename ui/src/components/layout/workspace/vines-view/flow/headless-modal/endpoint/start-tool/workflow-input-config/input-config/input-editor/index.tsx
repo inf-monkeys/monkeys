@@ -97,6 +97,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       multipleValues: get(currentVariable, 'typeOptions.multipleValues', false),
       assetType: get(currentVariable, 'typeOptions.assetType', ''),
       enableImageMask: get(currentVariable, 'typeOptions.enableImageMask', undefined),
+      autoDetectAspectRatio: get(currentVariable, 'typeOptions.autoDetectAspectRatio', false),
+      aspectRatioField: get(currentVariable, 'typeOptions.aspectRatioField', 'aspect_ratio'),
       minValue: get(currentVariable, 'typeOptions.minValue', undefined),
       maxValue: get(currentVariable, 'typeOptions.maxValue', undefined),
       numberPrecision: get(currentVariable, 'typeOptions.numberPrecision', undefined),
@@ -126,6 +128,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       multipleValues,
       assetType,
       enableImageMask,
+      autoDetectAspectRatio,
+      aspectRatioField,
       minValue,
       maxValue,
       numberPrecision,
@@ -158,6 +162,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'maxValue',
       'numberPrecision',
       'enableImageMask',
+      'autoDetectAspectRatio',
+      'aspectRatioField',
       'tips',
       'enableSelectList',
       'selectList',
@@ -187,6 +193,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'maxValue',
       'numberPrecision',
       'enableImageMask',
+      'autoDetectAspectRatio',
+      'aspectRatioField',
       'tips',
       'enableSelectList',
       'selectList',
@@ -208,6 +216,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOption('multipleValues', multipleValues);
     setOption('assetType', assetType);
     setOption('enableImageMask', enableImageMask);
+    setOption('autoDetectAspectRatio', autoDetectAspectRatio);
+    setOption('aspectRatioField', aspectRatioField);
     setOption('minValue', minValue);
     setOption('maxValue', maxValue);
     setOption('numberPrecision', numberPrecision);
