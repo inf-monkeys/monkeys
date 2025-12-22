@@ -86,7 +86,7 @@ export function DataSidebar({
   const [selectedParentId, setSelectedParentId] = useState<string | undefined>(undefined);
   const [sidebarWidth, setSidebarWidth] = useState(256); // 初始宽度 256px (w-64)
   const [isResizing, setIsResizing] = useState(false);
-  const [expandAllVersion, setExpandAllVersion] = useState(0);
+  const [collapseAllVersion, setCollapseAllVersion] = useState(0);
 
   // 处理侧边栏宽度调整
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -255,10 +255,10 @@ export function DataSidebar({
             variant="ghost"
             size="sm"
             className="h-7 px-2 text-xs hover:bg-accent/80"
-            onClick={() => setExpandAllVersion((v) => v + 1)}
-            title="展开所有节点"
+            onClick={() => setCollapseAllVersion((v) => v + 1)}
+            title="收起所有节点"
           >
-            展开
+            收起
           </Button>
           <Button
             variant="ghost"
@@ -386,7 +386,7 @@ export function DataSidebar({
                       onCreateSubCategory={handleOpenCreateDialog}
                       level={0}
                       contentWidth={contentWidth}
-                      expandAllVersion={expandAllVersion}
+                      collapseAllVersion={collapseAllVersion}
                     />
                   ))}
                 </SortableContext>
@@ -415,7 +415,7 @@ interface CategoryTreeItemProps {
   onCreateSubCategory: (parentId: string) => void;
   level: number;
   contentWidth: number; // 侧边栏内容区宽度
-  expandAllVersion: number;
+  collapseAllVersion: number;
 }
 
 function CategoryTreeItem({
@@ -427,7 +427,7 @@ function CategoryTreeItem({
   onCreateSubCategory,
   level,
   contentWidth,
-  expandAllVersion,
+  collapseAllVersion,
 }: CategoryTreeItemProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -456,8 +456,8 @@ function CategoryTreeItem({
   const Icon = Database;
 
   useEffect(() => {
-    setIsExpanded(true);
-  }, [expandAllVersion]);
+    setIsExpanded(false);
+  }, [collapseAllVersion]);
 
   const handleOpenEditDialog = () => {
     setEditName(category.name);
@@ -618,7 +618,7 @@ function CategoryTreeItem({
               onCreateSubCategory={onCreateSubCategory}
               level={level + 1}
               contentWidth={contentWidth}
-              expandAllVersion={expandAllVersion}
+              collapseAllVersion={collapseAllVersion}
             />
           ))}
         </div>
