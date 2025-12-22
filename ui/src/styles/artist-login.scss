@@ -87,7 +87,7 @@
   overflow: hidden; // 让背景与边框一起遵守圆角
   background-clip: padding-box; // 确保内部背景不溢出圆角
   backdrop-filter: var(--login-card-blur, blur(10px));
-  z-index: 5;
+  z-index: 15;
   box-sizing: border-box;
   color: #fff;
 }
