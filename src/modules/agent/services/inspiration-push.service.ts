@@ -192,40 +192,59 @@ export class InspirationPushService {
    * 基于thread状态、最后活动时间等条件
    */
   async shouldPushInspiration(threadId: string, teamId: string): Promise<boolean> {
+    this.logger.debug(`[shouldPushInspiration] Checking for thread ${threadId}`);
+
     try {
       const thread = await this.threadService.get(threadId, teamId);
 
       if (!thread) {
+        this.logger.warn(`[shouldPushInspiration] Thread not found: ${threadId}`);
         return false;
       }
 
+      this.logger.debug(`[shouldPushInspiration] Thread found, isRunning: ${thread.state?.isRunning}`);
+
       // 如果thread正在运行，不推送
       if (thread.state?.isRunning) {
+        this.logger.debug(
+          `[shouldPushInspiration] Thread is running, skipping push`,
+        );
         return false;
       }
 
       // 检查最后一条消息的时间（可选，如果需要防止频繁推送）
+      this.logger.debug(`[shouldPushInspiration] Fetching messages for thread ${threadId}`);
       const messages = await this.messageService.getThreadMessages(threadId, teamId);
+      this.logger.debug(
+        `[shouldPushInspiration] Thread has ${messages?.length || 0} messages`,
+      );
+
       if (messages && messages.length > 0) {
         const lastMessage = messages[messages.length - 1];
         const timeSinceLastMessage = Date.now() - lastMessage.createdTimestamp;
 
-        // 如果最后一条消息是灵感推送且在5分钟内，不再推送
+        this.logger.debug(
+          `[shouldPushInspiration] Last message type: ${lastMessage.metadata?.type}, time since last: ${Math.round(timeSinceLastMessage / 1000)}s`,
+        );
+
+        // 如果最后一条消息是灵感推送且在30秒内，不再推送（冷却期）
+        const cooldownPeriod = 30 * 1000; // 30秒冷却期
         if (
           lastMessage.metadata?.type === 'inspiration_push' &&
-          timeSinceLastMessage < 5 * 60 * 1000
+          timeSinceLastMessage < cooldownPeriod
         ) {
           this.logger.debug(
-            `Last inspiration was pushed ${Math.round(timeSinceLastMessage / 1000)}s ago, skipping`,
+            `[shouldPushInspiration] Last inspiration was pushed ${Math.round(timeSinceLastMessage / 1000)}s ago (cooldown: ${cooldownPeriod / 1000}s), skipping`,
           );
           return false;
         }
       }
 
+      this.logger.log(`[shouldPushInspiration] ✅ All checks passed, should push for thread ${threadId}`);
       return true;
     } catch (error) {
       this.logger.error(
-        `Failed to check if should push inspiration for thread ${threadId}`,
+        `[shouldPushInspiration] ❌ Failed to check if should push inspiration for thread ${threadId}`,
         error.stack,
       );
       return false;

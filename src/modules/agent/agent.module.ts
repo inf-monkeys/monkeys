@@ -21,6 +21,8 @@ import { CanvasContextService } from './services/canvas-context.service';
 import { RelationshipDiscoveryService } from './services/relationship-discovery.service';
 import { CreativeStateAnalysisService } from './services/creative-state-analysis.service';
 import { InspirationPushService } from './services/inspiration-push.service';
+import { MindMapGenerationService } from './services/mind-map-generation.service';
+import { MindMapInsightService } from './services/mind-map-insight.service';
 import { AgentRepository } from './repositories/agent.repository';
 import { ThreadRepository } from './repositories/thread.repository';
 import { MessageRepository } from './repositories/message.repository';
@@ -29,6 +31,7 @@ import { ToolRepository } from './repositories/tool.repository';
 import { TeamQuotaRepository } from './repositories/team-quota.repository';
 import { ToolsModule } from '@/modules/tools/tools.module';
 import { WorkflowModule } from '@/modules/workflow/workflow.module';
+import { DesignModule } from '@/modules/design/design.module';
 
 /**
  * Agent 模块
@@ -58,6 +61,7 @@ import { WorkflowModule } from '@/modules/workflow/workflow.module';
     ]),
     ToolsModule,
     forwardRef(() => WorkflowModule), // 使用 forwardRef 避免循环依赖
+    forwardRef(() => DesignModule), // 导入 DesignModule 用于画板数据操作
     CacheModule.register({
       ttl: 3600000, // 1 hour default TTL
       max: 1000, // Maximum number of items in cache
@@ -83,6 +87,10 @@ import { WorkflowModule } from '@/modules/workflow/workflow.module';
 
     // Relationship Discovery
     RelationshipDiscoveryService,
+
+    // Mind Map Generation & Insight
+    MindMapGenerationService,
+    MindMapInsightService,
 
     // Creative State Analysis & Inspiration Push
     CreativeStateAnalysisService,

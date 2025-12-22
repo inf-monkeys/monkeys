@@ -54,6 +54,12 @@ import { createPlaceholderShape, updateShapeWithResult } from './placeholder-uti
 import { RelationshipDiscoveryButton } from './RelationshipDiscoveryButton';
 import { RelationshipResultPanel } from './RelationshipResultPanel';
 import { useRelationshipDiscovery } from './hooks/useRelationshipDiscovery';
+// 思维图谱生成功能
+import { MindMapButton } from './MindMapButton';
+import { MindMapPanel } from './MindMapPanel';
+import { useMindMapGeneration } from './hooks/useMindMapGeneration';
+// 灵感推送功能
+import { useCanvasInspirationPush } from './hooks/useCanvasInspirationPush';
 import {
   InstructionShapeUtil,
   InstructionTool,
@@ -461,6 +467,24 @@ export const Board: React.FC<BoardProps> = ({
     closeResult: closeRelationshipResult,
   } = useRelationshipDiscovery({ editor });
 
+  // 思维图谱生成功能
+  const {
+    loading: mindMapLoading,
+    result: mindMapResult,
+    aiInsight: mindMapInsight,
+    isGeneratingInsight: isMindMapInsightGenerating,
+    currentInsightType,
+    generateMindMap,
+    applyToCanvas: applyMindMapToCanvas,
+    closeResult: closeMindMapResult,
+    updateNode,
+    addNode,
+    deleteNode,
+    addEdge,
+    deleteEdge,
+    generateInsight: generateMindMapInsight,
+  } = useMindMapGeneration({ editor });
+
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
   // 是否展示左侧 页面+图层 sidebar（默认 false，只读模式下隐藏）
@@ -572,12 +596,18 @@ export const Board: React.FC<BoardProps> = ({
       <>
         <OnCanvasComponentPicker />
         <WorkflowRegions />
-        {/* 逻辑关系发现按钮 - 只在非只读模式下显示 */}
+        {/* 思维图谱和逻辑关系发现按钮 - 只在非只读模式下显示 */}
         {!isReadonlyMode && (
-          <RelationshipDiscoveryButton
-            onDiscoverRelationships={discoverRelationships}
-            loading={relationshipLoading}
-          />
+          <>
+            <MindMapButton
+              onGenerateMindMap={generateMindMap}
+              loading={mindMapLoading}
+            />
+            <RelationshipDiscoveryButton
+              onDiscoverRelationships={discoverRelationships}
+              loading={relationshipLoading}
+            />
+          </>
         )}
       </>
     );
@@ -1421,6 +1451,25 @@ export const Board: React.FC<BoardProps> = ({
                   onClose={closeRelationshipResult}
                   onApplyToCanvas={applyToCanvas}
                   editor={editor}
+                />
+              )}
+              {/* 思维图谱面板 */}
+              {!isReadonlyMode && mindMapResult && (
+                <MindMapPanel
+                  result={mindMapResult}
+                  onClose={closeMindMapResult}
+                  onApply={applyMindMapToCanvas}
+                  onUpdateNode={updateNode}
+                  onAddNode={addNode}
+                  onDeleteNode={deleteNode}
+                  onAddEdge={addEdge}
+                  onDeleteEdge={deleteEdge}
+                  onGenerateSolution={() => generateMindMapInsight('solution')}
+                  onProvideCreativity={() => generateMindMapInsight('creativity')}
+                  onDiscoverRelationship={() => generateMindMapInsight('relationship')}
+                  aiInsight={mindMapInsight}
+                  isGeneratingInsight={isMindMapInsightGenerating}
+                  currentInsightType={currentInsightType}
                 />
               )}
             </Tldraw>

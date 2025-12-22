@@ -22,6 +22,8 @@ import { RelationshipDiscoveryService, RelationshipDiscoveryRequest } from './se
 import { StreamingService, StreamOptions } from './services/streaming.service';
 import { CreateThreadDto, ThreadService, UpdateThreadDto } from './services/thread.service';
 import { InspirationPushService, InspirationPushRequest } from './services/inspiration-push.service';
+import { MindMapGenerationService, MindMapGenerationRequest } from './services/mind-map-generation.service';
+import { MindMapInsightService, MindMapInsightRequest } from './services/mind-map-insight.service';
 
 /**
  * Agent Controller
@@ -44,6 +46,8 @@ export class AgentController {
     private readonly toolCallRepository: ToolCallRepository,
     private readonly relationshipDiscovery: RelationshipDiscoveryService,
     private readonly inspirationPush: InspirationPushService,
+    private readonly mindMapGeneration: MindMapGenerationService,
+    private readonly mindMapInsight: MindMapInsightService,
   ) {}
 
   // ========== Agent CRUD ==========
@@ -187,6 +191,8 @@ export class AgentController {
       canvasData?: any;
       selectedShapeIds?: string[];
       viewport?: { x: number; y: number; zoom: number };
+      // Design board context
+      designBoardId?: string;
     },
     @Res() res: Response,
   ) {
@@ -221,6 +227,8 @@ export class AgentController {
       canvasData: body.canvasData,
       selectedShapeIds: body.selectedShapeIds,
       viewport: body.viewport,
+      // Design board context
+      designBoardId: body.designBoardId,
     };
 
     const result = await this.streamingService.streamForAssistantUI(options);
@@ -354,6 +362,53 @@ export class AgentController {
     }
 
     const data = await this.relationshipDiscovery.discoverRelationships(body);
+    return new SuccessResponse({ data });
+  }
+
+  // ========== Canvas 思维图谱生成 ==========
+
+  /**
+   * 生成思维图谱
+   *
+   * 分析选中的图形，按照需求→功能→逻辑→原型的因果映射关系生成思维图谱
+   */
+  @Post('canvas/generate-mind-map')
+  async generateMindMap(@Body() body: MindMapGenerationRequest) {
+    if (!body.teamId || !body.userId) {
+      throw new BadRequestException('teamId and userId are required');
+    }
+
+    if (!body.shapes || body.shapes.length === 0) {
+      throw new BadRequestException('At least one shape is required');
+    }
+
+    const data = await this.mindMapGeneration.generateMindMap(body);
+    return new SuccessResponse({ data });
+  }
+
+  /**
+   * 生成思维图谱洞察
+   *
+   * 基于当前知识图谱内容，生成AI洞察：
+   * - solution: 生成方案 - 提供可执行的实施方案
+   * - creativity: 提供创意 - 提供创新想法和灵感
+   * - relationship: 挖掘关系 - 深入分析节点关系
+   */
+  @Post('canvas/mind-map-insight')
+  async generateMindMapInsight(@Body() body: MindMapInsightRequest) {
+    if (!body.teamId || !body.userId) {
+      throw new BadRequestException('teamId and userId are required');
+    }
+
+    if (!body.insightType) {
+      throw new BadRequestException('insightType is required');
+    }
+
+    if (!body.nodes || body.nodes.length === 0) {
+      throw new BadRequestException('At least one node is required');
+    }
+
+    const data = await this.mindMapInsight.generateInsight(body);
     return new SuccessResponse({ data });
   }
 

@@ -21,6 +21,7 @@ import {
   TldrawUpdateShapeToolUI,
   TldrawDeleteShapesToolUI,
   TldrawSelectShapesToolUI,
+  TldrawCreateWorkflowToolUI,
 } from './TldrawToolUIs';
 
 interface AgentRuntimeProviderProps {
@@ -28,6 +29,8 @@ interface AgentRuntimeProviderProps {
   teamId: string;
   userId: string;
   agentId?: string;
+  /** 初始 threadId（可选），如果提供则优先使用这个 thread */
+  initialThreadId?: string | null;
   /** Agent 显示模式 */
   mode?: AgentMode;
   /** 模式配置 */
@@ -36,6 +39,8 @@ interface AgentRuntimeProviderProps {
   getCanvasData?: () => any;
   getSelectedShapeIds?: () => string[];
   getViewport?: () => { x: number; y: number; zoom: number };
+  // Design board ID provider (optional, for canvas persistence)
+  getDesignBoardId?: () => string | undefined;
 }
 
 // 创建 Context 用于共享 thread 列表数据
@@ -46,6 +51,8 @@ interface ThreadListContextValue {
   switchToThread: (threadId: string) => Promise<void>;
   createNewThread: () => Promise<Thread>;
   deleteThread: (threadId: string) => Promise<void>;
+  reloadThreads: () => Promise<void>;
+  reloadMessages: () => Promise<void>;
 }
 
 const ThreadListContext = createContext<ThreadListContextValue | null>(null);
@@ -70,11 +77,13 @@ export function AgentRuntimeProvider({
   teamId,
   userId,
   agentId,
+  initialThreadId,
   mode = 'normal',
   modeConfig,
   getCanvasData,
   getSelectedShapeIds,
   getViewport,
+  getDesignBoardId,
 }: AgentRuntimeProviderProps) {
   const {
     runtime,
@@ -84,13 +93,17 @@ export function AgentRuntimeProvider({
     switchToThread,
     createNewThread,
     deleteThread,
+    reloadThreads,
+    reloadMessages,
   } = useThreadListWithTools({
     teamId,
     userId,
     agentId,
+    initialThreadId,
     getCanvasData,
     getSelectedShapeIds,
     getViewport,
+    getDesignBoardId,
   });
 
   const threadListContextValue: ThreadListContextValue = {
@@ -100,6 +113,8 @@ export function AgentRuntimeProvider({
     switchToThread,
     createNewThread,
     deleteThread,
+    reloadThreads,
+    reloadMessages,
   };
 
   return (
@@ -119,6 +134,7 @@ export function AgentRuntimeProvider({
               <TldrawUpdateShapeToolUI />
               <TldrawDeleteShapesToolUI />
               <TldrawSelectShapesToolUI />
+              <TldrawCreateWorkflowToolUI />
 
               {/* Child components */}
               {children}

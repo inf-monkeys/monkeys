@@ -38,9 +38,148 @@ import { newConvertExecutionResultToItemList } from '@/utils/execution';
 
 import { VisibilityOff, VisibilityOn } from './icons';
 // import { TldrawAgentV2EmbeddedPanel } from './panel-agent-v2-embedded';
-import { AgentRuntimeProvider } from '@/features/agent/components/AgentRuntimeProvider';
+import { AgentRuntimeProvider, useThreadListContext } from '@/features/agent/components/AgentRuntimeProvider';
 import { MiniThreadList } from '@/features/agent/components/MiniThreadList';
 import { Thread } from '@/components/assistant-ui/thread';
+import { CanvasInspirationManager } from './CanvasInspirationManager';
+
+// ThreadSwitcher 组件 - 在 AgentRuntimeProvider 内部切换 thread
+const ThreadSwitcher: React.FC<{ targetThreadId: string | null }> = ({ targetThreadId }) => {
+  const { switchToThread, currentThreadId, isLoadingThreads, threads, reloadThreads, reloadMessages } = useThreadListContext();
+  const [lastSwitchedThreadId, setLastSwitchedThreadId] = useState<string | null>(null);
+  const isSwitchingRef = useRef(false);
+  const hasTriggeredReloadRef = useRef(false);
+
+  // 主切换逻辑：当 targetThreadId 变化时触发
+  useEffect(() => {
+    const performSwitch = async () => {
+      // 如果没有目标threadId，或者已经切换过这个thread，跳过
+      if (!targetThreadId || !switchToThread || targetThreadId === lastSwitchedThreadId || isSwitchingRef.current) {
+        return;
+      }
+
+      console.log('🔄 [ThreadSwitcher] 准备切换到 thread:', targetThreadId);
+      console.log('   - currentThreadId:', currentThreadId);
+      console.log('   - isLoadingThreads:', isLoadingThreads);
+      isSwitchingRef.current = true;
+      hasTriggeredReloadRef.current = false;
+
+      try {
+        // 1. 等待 threads 加载完成
+        let retries = 0;
+        const maxRetries = 30; // 最多等待 3 秒
+        while (isLoadingThreads && retries < maxRetries) {
+          console.log(`   - 等待 threads 加载完成... (${retries + 1}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, 100));
+          retries++;
+        }
+
+        if (isLoadingThreads) {
+          console.warn('⚠️ [ThreadSwitcher] Threads 加载超时，仍然尝试切换');
+        }
+
+        // 2. 验证目标 thread 是否存在于列表中
+        const threadExists = threads?.some(t => t.id === targetThreadId);
+        const threadIds = threads?.map(t => t.id) || [];
+
+        console.log(`   - 目标thread是否在列表中: ${threadExists}`);
+        console.log(`   - threads列表大小: ${threads?.length || 0}`);
+        console.log(`   - threads列表IDs:`, threadIds.slice(0, 3));
+        console.log(`   - 目标threadId: ${targetThreadId}`);
+
+        // 如果thread不在列表中，先重新加载列表
+        if (!threadExists && reloadThreads) {
+          console.warn(`⚠️ [ThreadSwitcher] 目标 thread ${targetThreadId} 不在列表中，尝试重新加载...`);
+          try {
+            await reloadThreads();
+            console.log('✅ [ThreadSwitcher] 列表重新加载完成');
+            hasTriggeredReloadRef.current = true;
+
+            // 等待并重试检查thread是否出现（最多5次）
+            let retryCount = 0;
+            const maxRetryCount = 5;
+            let threadExistsAfterReload = false;
+
+            while (retryCount < maxRetryCount) {
+              await new Promise(resolve => setTimeout(resolve, 300));
+              threadExistsAfterReload = threads?.some(t => t.id === targetThreadId) ?? false;
+
+              console.log(`   - 重试 ${retryCount + 1}/${maxRetryCount}: thread是否在列表中: ${threadExistsAfterReload}`);
+
+              if (threadExistsAfterReload) {
+                console.log('✅ [ThreadSwitcher] Thread 已出现在列表中');
+                break;
+              }
+
+              retryCount++;
+            }
+
+            if (!threadExistsAfterReload) {
+              console.error(`❌ [ThreadSwitcher] 重试${maxRetryCount}次后仍找不到 thread ${targetThreadId}`);
+            }
+          } catch (error) {
+            console.error('❌ [ThreadSwitcher] 重新加载列表失败:', error);
+          }
+        } else {
+          console.log(`✅ [ThreadSwitcher] 目标 thread 已在列表中`);
+        }
+
+        // 3. 执行切换
+        console.log(`   - 执行切换到 ${targetThreadId}...`);
+        await switchToThread(targetThreadId);
+
+        // 4. 等待状态更新和消息加载
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        console.log(`   - 切换后 currentThreadId: ${currentThreadId}`);
+
+        // 验证 Thread 组件的 key 会更新
+        console.log(`   - Thread 组件 key 将变为: ${targetThreadId || 'default'}`);
+        console.log('✅ [ThreadSwitcher] 切换完成，Thread 组件将重新挂载');
+
+        // 记录已切换的threadId
+        setLastSwitchedThreadId(targetThreadId);
+
+        // 等待一段时间后刷新消息（确保 Thread 组件已经挂载）
+        // 这个延迟应该与 handleInspirationPushed 中的 3 秒延迟匹配
+        setTimeout(async () => {
+          if (reloadMessages) {
+            console.log('🔄 [ThreadSwitcher] 面板应该已打开，触发消息刷新...');
+            try {
+              await reloadMessages();
+              console.log('✅ [ThreadSwitcher] 消息刷新完成');
+            } catch (error) {
+              console.error('❌ [ThreadSwitcher] 消息刷新失败:', error);
+            }
+          }
+        }, 3200); // 稍微多一点时间，确保面板已完全打开
+      } catch (error) {
+        console.error('❌ [ThreadSwitcher] 切换 thread 失败:', error);
+      } finally {
+        isSwitchingRef.current = false;
+      }
+    };
+
+    performSwitch();
+  }, [targetThreadId, switchToThread, lastSwitchedThreadId, isLoadingThreads, threads, reloadThreads, reloadMessages, currentThreadId]);
+
+  // 守护逻辑：当 currentThreadId 变化时，检查是否需要切换回目标 thread
+  useEffect(() => {
+    if (!targetThreadId || !currentThreadId || isSwitchingRef.current || isLoadingThreads) {
+      return;
+    }
+
+    // 如果当前 thread 不是目标 thread，并且已经完成了初始切换，则强制切换回来
+    if (currentThreadId !== targetThreadId && targetThreadId === lastSwitchedThreadId) {
+      console.warn(`⚠️ [ThreadSwitcher] 检测到 currentThreadId 被改为 ${currentThreadId}，但目标是 ${targetThreadId}，重新切换...`);
+
+      // 重置 lastSwitchedThreadId，触发重新切换
+      setLastSwitchedThreadId(null);
+    }
+  }, [currentThreadId, targetThreadId, lastSwitchedThreadId, isLoadingThreads]);
+
+  return null;
+};
 
 // 形状类型中文映射
 const getShapeTypeInChinese = (type: string, geoKind?: string): string => {
@@ -402,6 +541,103 @@ const PageItem: React.FC<{
   );
 };
 
+// Agent 内容组件 - 使用 targetThreadId 作为 key（而不是 currentThreadId）
+const AgentContent: React.FC<{
+  agentView: 'thread' | 'list';
+  setAgentView: (view: 'thread' | 'list') => void;
+  setAgentVisible: (visible: boolean) => void;
+  targetThreadId: string | null; // 新增：直接接收 targetThreadId
+}> = ({ agentView, setAgentView, setAgentVisible, targetThreadId }) => {
+  const { currentThreadId } = useThreadListContext();
+
+  // 使用 targetThreadId（如果有）或 currentThreadId 作为 key
+  const threadKey = targetThreadId || currentThreadId || 'default';
+
+  console.log('🔑 [AgentContent] Thread key:', threadKey, { targetThreadId, currentThreadId });
+
+  return (
+    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 12px',
+          borderBottom: '1px solid #e1e1e1',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* 切换按钮 */}
+          <button
+            style={{
+              width: '24px',
+              height: '24px',
+              border: '1px solid #e5e7eb',
+              background: agentView === 'list' ? '#f3f4f6' : '#fff',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease',
+            }}
+            onClick={() => setAgentView(agentView === 'thread' ? 'list' : 'thread')}
+            title={agentView === 'thread' ? '显示对话列表' : '显示对话'}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#f3f4f6';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = agentView === 'list' ? '#f3f4f6' : '#fff';
+            }}
+          >
+            <List size={14} />
+          </button>
+          <span style={{ fontSize: '14px', fontWeight: 500 }}>
+            {agentView === 'list' ? '对话列表' : 'Agent 对话'}
+          </span>
+        </div>
+        <button
+          style={{
+            width: '24px',
+            height: '24px',
+            border: 'none',
+            background: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '4px',
+            fontSize: '16px',
+            color: '#6b7280',
+          }}
+          onClick={() => setAgentVisible(false)}
+          title="关闭"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#f3f4f6';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent';
+          }}
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        {agentView === 'list' ? (
+          <MiniThreadList showHeader={false} showClose={false} className="h-full w-full border-r-0" />
+        ) : (
+          // 使用 targetThreadId 或 currentThreadId 作为 key，强制重新挂载
+          <Thread key={threadKey} />
+        )}
+      </div>
+    </div>
+  );
+};
+
 // 在黄色块中渲染的按钮组件的包装器
 const MiniTabularButtonsWrapper: React.FC<{ miniPage: any; useAbsolutePosition?: boolean }> = ({
   miniPage,
@@ -751,6 +987,49 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
     };
     window.addEventListener('agent:thread-switched', handleThreadSwitch as any);
     return () => window.removeEventListener('agent:thread-switched', handleThreadSwitch as any);
+  }, []);
+
+  // 保存需要切换到的 threadId (使用 state 而不是 ref，以便触发 ThreadSwitcher 重新渲染)
+  const [targetThreadId, setTargetThreadId] = useState<string | null>(null);
+
+  // 监听灵感推送成功事件，自动打开 Agent 面板
+  useEffect(() => {
+    const handleInspirationPushed = async (e: CustomEvent) => {
+      console.log('📢 [ExternalLayerPanel] 收到灵感推送成功事件', e.detail);
+
+      const newThreadId = e.detail?.threadId || null;
+      console.log('💾 [ExternalLayerPanel] 设置目标 threadId:', newThreadId);
+
+      // 简单粗暴的方法：先关闭 Agent 面板，等待切换完成，再打开
+      console.log('🔄 [ExternalLayerPanel] 先关闭 Agent 面板');
+      setAgentVisible(false);
+
+      // 等待一帧，确保面板已关闭
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // 1. 设置目标threadId（这会触发ThreadSwitcher执行切换）
+      console.log('🔄 [ExternalLayerPanel] 开始切换 thread');
+      setTargetThreadId(newThreadId);
+
+      // 2. 等待切换完成（给更长时间，确保消息加载完成）
+      console.log('⏳ [ExternalLayerPanel] 等待 3 秒，确保消息完全加载...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // 3. 切换到 thread 视图
+      setAgentView('thread');
+
+      // 4. 再等待一帧，让状态更新
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // 5. 重新打开 Agent 面板（此时 Thread 组件会重新挂载，并显示新消息）
+      console.log('✅ [ExternalLayerPanel] 切换完成，重新打开 Agent 面板');
+      setAgentVisible(true);
+
+      console.log('🎉 [ExternalLayerPanel] 面板已打开，应该显示新消息了');
+    };
+
+    window.addEventListener('agent:inspiration-pushed', handleInspirationPushed as any);
+    return () => window.removeEventListener('agent:inspiration-pushed', handleInspirationPushed as any);
   }, []);
   // 获取执行历史（用于历史记录视图）
   const { data: allOutputsPages } = useWorkflowExecutionAllOutputs({ limit: 1000, page: 1 });
@@ -1558,7 +1837,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
     }
   }, [totalAvailableHeight, isPageSectionCollapsed, pagesSectionHeight]);
 
-  return (
+  // 统一的 AgentRuntimeProvider - 包裹整个组件
+  const content = (
     <div
       ref={panelRef}
       className={`layer-panel-content${isLeftBodyCollapsed ? 'collapsed' : ''}`}
@@ -1567,8 +1847,8 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
         flexDirection: 'column',
       }}
     >
-      {/* 顶部按钮栏 */}
-      <div
+        {/* 顶部按钮栏 */}
+        <div
         ref={topBarRef}
         className="top-button-bar"
         style={{
@@ -2848,99 +3128,13 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
 
       {/* 当 agentVisible 时，显示 Agent 嵌入；其次是 mini 应用；否则显示页面+图层面板 */}
       {agentVisible && !isLeftBodyCollapsed && teamId && userId ? (
-        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <AgentRuntimeProvider
-            agentId="tldraw-assistant"
-            teamId={teamId}
-            userId={userId}
-            mode="mini"
-            modeConfig={{
-              showThreadList: true,
-              compact: true,
-              width: undefined, // mini模式下不需要固定宽度
-            }}
-            getCanvasData={getCanvasData}
-            getSelectedShapeIds={getSelectedShapeIds}
-            getViewport={getViewport}
-          >
-            {/* Header */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 12px',
-                borderBottom: '1px solid #e1e1e1',
-                flexShrink: 0,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {/* 切换按钮 */}
-                <button
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    border: '1px solid #e5e7eb',
-                    background: agentView === 'list' ? '#f3f4f6' : '#fff',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onClick={() => setAgentView(agentView === 'thread' ? 'list' : 'thread')}
-                  title={agentView === 'thread' ? '显示对话列表' : '显示对话'}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#f3f4f6';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = agentView === 'list' ? '#f3f4f6' : '#fff';
-                  }}
-                >
-                  <List size={14} />
-                </button>
-                <span style={{ fontSize: '14px', fontWeight: 500 }}>
-                  {agentView === 'list' ? '对话列表' : 'Agent 对话'}
-                </span>
-              </div>
-              <button
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  border: 'none',
-                  background: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '4px',
-                  fontSize: '16px',
-                  color: '#6b7280',
-                }}
-                onClick={() => setAgentVisible(false)}
-                title="关闭"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#f3f4f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                }}
-              >
-                ×
-              </button>
-            </div>
+        <AgentContent
+          agentView={agentView}
+          setAgentView={setAgentView}
+          setAgentVisible={setAgentVisible}
+          targetThreadId={targetThreadId}
+        />
 
-            {/* Content */}
-            <div style={{ flex: 1, overflow: 'hidden' }}>
-              {agentView === 'list' ? (
-                <MiniThreadList showHeader={false} showClose={false} className="h-full w-full border-r-0" />
-              ) : (
-                <Thread />
-              )}
-            </div>
-          </AgentRuntimeProvider>
-        </div>
       ) : miniPage && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', position: 'relative' }}>
           <div
@@ -3790,5 +3984,38 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
         </>
       )}
     </div>
+  );
+
+  // 如果没有 teamId 或 userId，直接返回内容（无 Agent 功能）
+  if (!teamId || !userId) {
+    return content;
+  }
+
+  // 使用统一的 AgentRuntimeProvider 包裹整个组件
+  return (
+    <AgentRuntimeProvider
+      agentId="tldraw-assistant"
+      teamId={teamId}
+      userId={userId}
+      mode="mini"
+      modeConfig={{
+        showThreadList: true,
+        compact: true,
+        width: undefined,
+      }}
+      getCanvasData={getCanvasData}
+      getSelectedShapeIds={getSelectedShapeIds}
+      getViewport={getViewport}
+      getDesignBoardId={() => boardId}
+    >
+      {/* Canvas Inspiration Manager - 始终运行 */}
+      <CanvasInspirationManager editor={editor} teamId={teamId} userId={userId} enabled={true} />
+
+      {/* ThreadSwitcher - 监听灵感推送事件并切换 thread */}
+      <ThreadSwitcher targetThreadId={targetThreadId} />
+
+      {/* 主内容 */}
+      {content}
+    </AgentRuntimeProvider>
   );
 };

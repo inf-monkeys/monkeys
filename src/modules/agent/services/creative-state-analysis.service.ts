@@ -460,15 +460,15 @@ ${textSample}
     };
 
     const stateText = {
-      [CreativeState.DIVERGENT]: '发散探索',
-      [CreativeState.CONVERGENT]: '收敛整理',
-      [CreativeState.STAGNANT]: '需要灵感',
+      [CreativeState.DIVERGENT]: '发散状态 (Divergent)',
+      [CreativeState.CONVERGENT]: '收敛状态 (Convergent)',
+      [CreativeState.STAGNANT]: '停滞状态 (Stagnant)',
     };
 
     const emoji = stateEmoji[result.state];
     const state = stateText[result.state];
 
-    let message = `${emoji} **创作状态: ${state}**\n\n`;
+    let message = `${emoji} **当前创作状态: ${state}**\n\n`;
     message += `${result.description}\n\n`;
     message += `---\n\n`;
     message += `**💡 灵感建议**\n\n`;
@@ -487,7 +487,7 @@ ${textSample}
     }
 
     message += `---\n\n`;
-    message += `${result.summary}`;
+    message += `_${result.summary}_`;
 
     return message;
   }

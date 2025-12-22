@@ -408,6 +408,72 @@ export class AgentToolRegistryService {
       },
     });
 
+    // Tldraw 工具：在画板上创建工作流节点
+    this.registerBuiltinTool({
+      name: 'tldraw_create_workflow',
+      description: 'Create a workflow node on the tldraw canvas. This allows you to generate and place workflows on the canvas based on user needs. First use list_workflows to find available workflows.',
+      parameters: {
+        type: 'object',
+        properties: {
+          workflowId: {
+            type: 'string',
+            description: 'The ID of the workflow to create (from list_workflows)',
+          },
+          x: {
+            type: 'number',
+            description: 'X coordinate position on canvas',
+            default: 100,
+          },
+          y: {
+            type: 'number',
+            description: 'Y coordinate position on canvas',
+            default: 100,
+          },
+          width: {
+            type: 'number',
+            description: 'Width of the workflow node',
+            default: 300,
+          },
+          height: {
+            type: 'number',
+            description: 'Height of the workflow node',
+            default: 200,
+          },
+        },
+        required: ['workflowId'],
+      },
+      sourceType: ToolSourceType.BUILTIN,
+      metadata: {
+        needsApproval: false,
+        timeout: 5000,
+        category: 'tldraw',
+        clientSide: true, // 前端执行
+      },
+    });
+
+    // Tldraw 工具：加载完整的画板状态
+    this.registerBuiltinTool({
+      name: 'tldraw_load_canvas_state',
+      description: 'Load a complete canvas state into tldraw. This replaces the entire canvas with the provided state including all shapes, connections, and configurations.',
+      parameters: {
+        type: 'object',
+        properties: {
+          canvasState: {
+            type: 'object',
+            description: 'The complete tldraw canvas state object including session and document data',
+          },
+        },
+        required: ['canvasState'],
+      },
+      sourceType: ToolSourceType.BUILTIN,
+      metadata: {
+        needsApproval: false,
+        timeout: 5000,
+        category: 'tldraw',
+        clientSide: true, // 前端执行
+      },
+    });
+
     this.logger.log(`Registered ${this.builtinTools.size} builtin tools`);
   }
 

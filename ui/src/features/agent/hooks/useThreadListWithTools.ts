@@ -13,6 +13,7 @@ import {
     type ThreadMessageLike,
 } from '@assistant-ui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { mutate } from 'swr';
 import { threadApi } from '../api/agent-api';
 import type { Message, Thread } from '../types/agent.types';
 
@@ -20,10 +21,14 @@ interface UseThreadListWithToolsOptions {
   teamId: string;
   userId: string;
   agentId?: string;
+  // 初始 threadId（可选），如果提供则优先使用这个 thread
+  initialThreadId?: string | null;
   // Canvas context provider (optional, for tldraw integration)
   getCanvasData?: () => any;
   getSelectedShapeIds?: () => string[];
   getViewport?: () => { x: number; y: number; zoom: number };
+  // Design board ID provider (optional, for canvas persistence)
+  getDesignBoardId?: () => string | undefined;
 }
 
 type MessagePart = ThreadMessageLike['content'] extends readonly (infer U)[] ? U : any;
@@ -125,7 +130,7 @@ function convertThreadToThreadData(thread: Thread): ExternalStoreThreadData<'reg
 }
 
 export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
-  const { teamId, userId, agentId, getCanvasData, getSelectedShapeIds, getViewport } = options;
+  const { teamId, userId, agentId, initialThreadId, getCanvasData, getSelectedShapeIds, getViewport, getDesignBoardId } = options;
 
   // Thread 列表状态
   const [threads, setThreads] = useState<Map<string, Thread>>(new Map());
@@ -174,11 +179,19 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
       // 先用服务端返回构造 map
       const threadMap = new Map<string, Thread>(threadList.map((t) => [t.id, t]));
 
-      // ✅ 刷新策略（按需求）：
-      // - 有“空白会话（messageCount=0）”就复用它
-      // - 否则创建新的 New Chat
-      let nextThreadId: string | null = findEmptyThreadId(threadMap);
+      let nextThreadId: string | null = null;
 
+      // ✅ 优先使用 initialThreadId（如果提供且存在于列表中）
+      if (initialThreadId && threadMap.has(initialThreadId)) {
+        console.log('[ThreadListWithTools] 使用 initialThreadId:', initialThreadId);
+        nextThreadId = initialThreadId;
+      }
+      // 其次，有"空白会话（messageCount=0）"就复用它
+      else {
+        nextThreadId = findEmptyThreadId(threadMap);
+      }
+
+      // 否则创建新的 New Chat
       if (!nextThreadId) {
         const newThread = await threadApi.createThread(teamId, userId, {
           agentId,
@@ -198,7 +211,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
       setIsLoadingThreads(false);
       setHasLoadedThreadsOnce(true);
     }
-  }, [teamId, userId, agentId, findEmptyThreadId]);
+  }, [teamId, userId, agentId, initialThreadId, findEmptyThreadId]);
 
   // 创建新 thread
   const createNewThread = useCallback(async (): Promise<Thread> => {
@@ -303,13 +316,17 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
     [teamId],
   );
 
-  // 初始化
+  // 初始化 & 当 initialThreadId 变化时重新加载
   useEffect(() => {
     if (!isInitializedRef.current) {
       isInitializedRef.current = true;
       loadThreads();
+    } else if (initialThreadId) {
+      // 当 initialThreadId 变化且不为空时，重新加载 threads
+      console.log('[ThreadListWithTools] initialThreadId 变化，重新加载 threads:', initialThreadId);
+      loadThreads();
     }
-  }, [loadThreads]);
+  }, [loadThreads, initialThreadId]);
 
   // 当前 thread 变化时加载消息
   useEffect(() => {
@@ -440,12 +457,14 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
         const canvasData = agentId === 'tldraw-assistant' && getCanvasData ? getCanvasData() : undefined;
         const selectedShapeIds = agentId === 'tldraw-assistant' && getSelectedShapeIds ? getSelectedShapeIds() : undefined;
         const viewport = agentId === 'tldraw-assistant' && getViewport ? getViewport() : undefined;
+        const designBoardId = agentId === 'tldraw-assistant' && getDesignBoardId ? getDesignBoardId() : undefined;
 
         if (canvasData) {
           console.log('[ThreadListWithTools] Including canvas context:', {
             shapesCount: canvasData.shapes?.length || 0,
             selectedCount: selectedShapeIds?.length || 0,
             viewport,
+            designBoardId,
           });
         }
 
@@ -467,6 +486,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
             canvasData,
             selectedShapeIds,
             viewport,
+            designBoardId,
           }),
         });
 
@@ -646,7 +666,25 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
 
         // 流结束后：不要立刻用服务端消息覆盖本地（后端落库有延迟）
         console.log('[ThreadListWithTools] Stream complete, syncing messages (retry)');
-        void tryReloadMessagesUntilSaved(activeThreadId, minMessagesCountAfterSaved);
+        await tryReloadMessagesUntilSaved(activeThreadId, minMessagesCountAfterSaved);
+
+        // 检查最新消息的metadata，看是否需要刷新画板
+        try {
+          const messageList = await threadApi.getMessages(activeThreadId, teamId);
+          const latestMessage = messageList[messageList.length - 1];
+
+          if (latestMessage?.metadata?.requiresCanvasRefresh && latestMessage?.metadata?.designBoardId) {
+            console.log('[ThreadListWithTools] Canvas refresh required, refreshing design board:', latestMessage.metadata.designBoardId);
+
+            // 使用SWR的mutate刷新画板数据（正确的API路径）
+            // 使用 mutate(key, undefined, { revalidate: true }) 强制重新获取数据
+            await mutate(`/api/design/metadata/${latestMessage.metadata.designBoardId}`, undefined, { revalidate: true });
+
+            console.log('[ThreadListWithTools] Design board refreshed successfully');
+          }
+        } catch (error) {
+          console.error('[ThreadListWithTools] Failed to check/refresh canvas:', error);
+        }
       } catch (error) {
         console.error('[ThreadListWithTools] Stream error:', error);
         throw error;
@@ -654,13 +692,14 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
         setIsRunning(false);
       }
     },
-    [ensureActiveThread, teamId, userId, agentId, threadMessages, tryReloadMessagesUntilSaved, getCanvasData, getSelectedShapeIds, getViewport],
+    [ensureActiveThread, teamId, userId, agentId, threadMessages, tryReloadMessagesUntilSaved, getCanvasData, getSelectedShapeIds, getViewport, getDesignBoardId],
   );
 
   // 创建 ThreadListAdapter
   const threadListAdapter: ExternalStoreAdapter<ThreadMessageLike> = useMemo(() => {
+    const hasCurrentThread = currentThreadId ? threads.has(currentThreadId) : false;
     const validThreadId =
-      isLoadingThreads || !currentThreadId || !threads.has(currentThreadId)
+      isLoadingThreads || !currentThreadId || !hasCurrentThread
         ? undefined
         : currentThreadId;
 
@@ -669,10 +708,13 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
     const currentMessages = validThreadId ? threadMessages.get(validThreadId) || [] : [];
 
     console.log('[ThreadListWithTools] Adapter update:', {
+      currentThreadId,
+      hasCurrentThread,
       validThreadId,
       threadsCount: threads.size,
       messagesCount: currentMessages.length,
       isRunning,
+      threadsMapKeys: Array.from(threads.keys()).slice(0, 3),
     });
 
     return {
@@ -752,5 +794,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
     switchToThread,
     createNewThread: createNewThread,
     deleteThread,
+    reloadThreads: loadThreads, // 暴露刷新函数
+    reloadMessages: loadMessages, // 暴露消息刷新函数
   };
 }
