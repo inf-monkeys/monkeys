@@ -17,7 +17,7 @@ import {
   ErrorPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
-  useComposer,
+  useComposerRuntime,
 } from "@assistant-ui/react";
 import {
   ArrowDownIcon,
@@ -178,13 +178,13 @@ const Composer: FC = () => {
 };
 
 const ComposerAction: FC = () => {
-  const composer = useComposer();
+  const composer = useComposerRuntime();
 
   const handleVoiceTranscript = (text: string) => {
     if (!text) return;
 
     // 获取当前输入框的文本
-    const currentText = composer.text || '';
+    const currentText = composer.getState().text || '';
 
     // 如果有文本，在后面添加空格
     const newText = currentText ? `${currentText} ${text}` : text;
