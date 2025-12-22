@@ -24,6 +24,10 @@ interface UseThreadListWithToolsOptions {
 
 type MessagePart = ThreadMessageLike['content'] extends readonly (infer U)[] ? U : any;
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * 规范化消息内容为可变数组，保证不会返回 string
  */
@@ -170,6 +174,37 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
     }
   }, [currentThreadId, teamId]);
 
+  const tryReloadMessagesUntilSaved = useCallback(
+    async (threadId: string, minCount: number) => {
+      // /chat 返回是流式，后端落库在后台任务里，存在短暂“拉回来的消息比本地少”的窗口。
+      // 这里做轻量重试：只有当服务端消息数量 >= 本地数量时才覆盖本地，避免把 UI 上的 assistant 消息清空。
+      const maxAttempts = 8;
+      const baseDelayMs = 200;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const messageList = await threadApi.getMessages(threadId, teamId);
+          const converted = messageList.map(convertMessageToThreadMessage);
+
+          if (converted.length >= minCount) {
+            setThreadMessages((prev) => new Map(prev).set(threadId, converted));
+            return;
+          }
+        } catch (e) {
+          // 网络/鉴权问题也不应覆盖本地消息
+          console.warn('[ThreadListWithTools] Reload messages failed (will retry):', e);
+        }
+
+        // 线性回退即可（避免过度请求）
+        await sleep(baseDelayMs * attempt);
+      }
+
+      // 最终仍未等到落库完成：保持本地消息即可
+      console.warn('[ThreadListWithTools] Reload messages skipped (server not ready)');
+    },
+    [teamId],
+  );
+
   // 初始化
   useEffect(() => {
     if (!isInitializedRef.current) {
@@ -288,6 +323,11 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
           throw new Error('No response body');
         }
 
+        // 注意：threadMessages 这里是“触发 onNew 时的快照”，还没包含刚 append 的 user/assistant。
+        // 本地最终会是 base + user + assistant，因此用 base + 2 作为“服务端落库完成”的最低消息数门槛。
+        const baseMessagesCount = (threadMessages.get(activeThreadId) || []).length;
+        const minMessagesCountAfterSaved = baseMessagesCount + 2;
+
         // 解析 AI SDK 标准流式响应
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -306,6 +346,100 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
           return new Map(prev).set(activeThreadId, [...current, assistantMessage]);
         });
 
+        const applyAssistantMessageUpdate = () => {
+          setThreadMessages((prev) => {
+            const current = prev.get(activeThreadId) || [];
+            return new Map(prev).set(
+              activeThreadId,
+              current.map((m) => (m.id === assistantId ? assistantMessage : m)),
+            );
+          });
+        };
+
+        const processStreamLine = (rawLine: string) => {
+          const line = rawLine.replace(/\r$/, '');
+          if (!line.trim() || line.startsWith(':')) return;
+
+          const colonIndex = line.indexOf(':');
+          if (colonIndex === -1) return;
+
+          const eventType = line.substring(0, colonIndex);
+          const data = line.substring(colonIndex + 1);
+
+          // AI SDK 标准格式: "0:<json-string>\n", "9:<json-object>\n", etc.
+          let parsed: any;
+          try {
+            parsed = JSON.parse(data);
+          } catch (e) {
+            // 兼容少数实现：0:hello（非 JSON 字符串）
+            if (eventType === '0') {
+              parsed = data;
+            } else {
+              console.warn('[ThreadListWithTools] Failed to parse stream data:', line, e);
+              return;
+            }
+          }
+
+          // 文本增量 (type "0")
+          if (eventType === '0' && typeof parsed === 'string') {
+            const currentContent = toContentParts(assistantMessage.content);
+            const textIndex = currentContent.findIndex((c) => c.type === 'text');
+            let nextContent: MessagePart[];
+
+            if (textIndex >= 0) {
+              const existing = currentContent[textIndex] as TextMessagePart;
+              const updated: TextMessagePart = { ...existing, text: existing.text + parsed };
+              nextContent = currentContent.map((c, i) =>
+                i === textIndex ? (updated as MessagePart) : c,
+              );
+            } else {
+              nextContent = [...currentContent, { type: 'text', text: parsed } as MessagePart];
+            }
+
+            assistantMessage = { ...assistantMessage, content: nextContent };
+            applyAssistantMessageUpdate();
+          }
+          // 工具调用 (type "9")
+          else if (eventType === '9') {
+            console.log('[ThreadListWithTools] Tool call:', parsed);
+
+            const currentContent = toContentParts(assistantMessage.content);
+            const filtered = currentContent.filter(
+              (c) => !(c.type === 'tool-call' && (c as any).toolCallId === parsed.toolCallId),
+            );
+            const toolCall = {
+              type: 'tool-call' as const,
+              toolCallId: parsed.toolCallId,
+              toolName: parsed.toolName,
+              args: parsed.args,
+            } as MessagePart;
+            const nextContent = [...filtered, toolCall];
+
+            assistantMessage = { ...assistantMessage, content: nextContent };
+            applyAssistantMessageUpdate();
+          }
+          // 工具结果 (type "a" or "b")
+          else if (eventType === 'a' || eventType === 'b') {
+            console.log('[ThreadListWithTools] Tool result:', parsed);
+
+            const currentContent = toContentParts(assistantMessage.content);
+            const filtered = currentContent.filter(
+              (c) => !(c.type === 'tool-result' && (c as any).toolCallId === parsed.toolCallId),
+            );
+            const toolResult = {
+              type: 'tool-result' as const,
+              toolCallId: parsed.toolCallId,
+              toolName: parsed.toolName,
+              result: parsed.result,
+              isError: parsed.isError || false,
+            } as MessagePart;
+            const nextContent = [...filtered, toolResult];
+
+            assistantMessage = { ...assistantMessage, content: nextContent };
+            applyAssistantMessageUpdate();
+          }
+        };
+
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
@@ -315,104 +449,22 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
           buffer = lines.pop() || '';
 
           for (const line of lines) {
-            if (!line.trim() || line.startsWith(':')) continue;
-
-            // AI SDK 标准格式: "0:text\n", "9:{...tool-call...}\n", etc.
-            const colonIndex = line.indexOf(':');
-            if (colonIndex === -1) continue;
-
-            const eventType = line.substring(0, colonIndex);
-            const data = line.substring(colonIndex + 1);
-
-            try {
-              const parsed = JSON.parse(data);
-
-              // 文本增量 (type "0")
-              if (eventType === '0' && typeof parsed === 'string') {
-                const currentContent = toContentParts(assistantMessage.content);
-                const textIndex = currentContent.findIndex((c) => c.type === 'text');
-                let nextContent: MessagePart[];
-
-                if (textIndex >= 0) {
-                  const existing = currentContent[textIndex] as TextMessagePart;
-                  const updated: TextMessagePart = { ...existing, text: existing.text + parsed };
-                  nextContent = currentContent.map((c, i) => (i === textIndex ? (updated as MessagePart) : c));
-                } else {
-                  nextContent = [...currentContent, { type: 'text', text: parsed } as MessagePart];
-                }
-
-                assistantMessage = { ...assistantMessage, content: nextContent };
-
-                setThreadMessages((prev) => {
-                  const current = prev.get(activeThreadId) || [];
-                  return new Map(prev).set(
-                    activeThreadId,
-                    current.map((m) => (m.id === assistantId ? assistantMessage : m)),
-                  );
-                });
-              }
-              // 工具调用 (type "9")
-              else if (eventType === '9') {
-                console.log('[ThreadListWithTools] Tool call:', parsed);
-
-                const currentContent = toContentParts(assistantMessage.content);
-                const filtered = currentContent.filter(
-                  (c) => !(c.type === 'tool-call' && (c as any).toolCallId === parsed.toolCallId),
-                );
-                const toolCall = {
-                  type: 'tool-call' as const,
-                  toolCallId: parsed.toolCallId,
-                  toolName: parsed.toolName,
-                  args: parsed.args,
-                } as MessagePart;
-                const nextContent = [...filtered, toolCall];
-
-                assistantMessage = { ...assistantMessage, content: nextContent };
-
-                setThreadMessages((prev) => {
-                  const current = prev.get(activeThreadId) || [];
-                  return new Map(prev).set(
-                    activeThreadId,
-                    current.map((m) => (m.id === assistantId ? assistantMessage : m)),
-                  );
-                });
-              }
-              // 工具结果 (type "a" or "b")
-              else if (eventType === 'a' || eventType === 'b') {
-                console.log('[ThreadListWithTools] Tool result:', parsed);
-
-                const currentContent = toContentParts(assistantMessage.content);
-                const filtered = currentContent.filter(
-                  (c) => !(c.type === 'tool-result' && (c as any).toolCallId === parsed.toolCallId),
-                );
-                const toolResult = {
-                  type: 'tool-result' as const,
-                  toolCallId: parsed.toolCallId,
-                  toolName: parsed.toolName,
-                  result: parsed.result,
-                  isError: parsed.isError || false,
-                } as MessagePart;
-                const nextContent = [...filtered, toolResult];
-
-                assistantMessage = { ...assistantMessage, content: nextContent };
-
-                setThreadMessages((prev) => {
-                  const current = prev.get(activeThreadId) || [];
-                  return new Map(prev).set(
-                    activeThreadId,
-                    current.map((m) => (m.id === assistantId ? assistantMessage : m)),
-                  );
-                });
-              }
-            } catch (e) {
-              console.warn('[ThreadListWithTools] Failed to parse stream data:', line, e);
-            }
+            processStreamLine(line);
           }
         }
 
-        // 流结束后重新加载完整消息
-        console.log('[ThreadListWithTools] Stream complete, reloading messages');
-        await loadMessages();
+        // 处理最后残留的 buffer（可能没有以 \n 结尾，导致整段内容都滞留在 buffer）
+        if (buffer.trim()) {
+          const tailLines = buffer.split('\n');
+          for (const line of tailLines) {
+            processStreamLine(line);
+          }
+          buffer = '';
+        }
+
+        // 流结束后：不要立刻用服务端消息覆盖本地（后端落库有延迟）
+        console.log('[ThreadListWithTools] Stream complete, syncing messages (retry)');
+        void tryReloadMessagesUntilSaved(activeThreadId, minMessagesCountAfterSaved);
       } catch (error) {
         console.error('[ThreadListWithTools] Stream error:', error);
         throw error;
@@ -420,7 +472,7 @@ export function useThreadListWithTools(options: UseThreadListWithToolsOptions) {
         setIsRunning(false);
       }
     },
-    [ensureActiveThread, teamId, userId, agentId, loadMessages],
+    [ensureActiveThread, teamId, userId, agentId, threadMessages, tryReloadMessagesUntilSaved],
   );
 
   // 创建 ThreadListAdapter
