@@ -1,3 +1,4 @@
+import { config } from '@/common/config';
 import { Logger } from '@nestjs/common';
 import { buildPublicUrl } from './thumbnail.bucket-url';
 import { ThumbnailGenerator } from './thumbnail.generator';
@@ -8,6 +9,21 @@ export class ThumbnailCoreService {
   private readonly logger = new Logger(ThumbnailCoreService.name);
 
   constructor(private readonly appConfig: ThumbnailAppConfig) {}
+
+  /**
+   * 获取文件访问 URL（如果是私有桶则返回预签名 URL）
+   */
+  private async getAccessUrl(bucket: BucketConfig, path: string): Promise<string> {
+    const publicUrl = buildPublicUrl(bucket, path);
+
+    if (!config.s3.isPrivate) {
+      return publicUrl;
+    }
+
+    // 私有桶返回预签名 URL（3天有效期）
+    const presigned = await StorageOperations.presignRead(bucket, path, 259200);
+    return presigned.url;
+  }
 
   async getThumbnail(bucket: BucketConfig, request: ThumbnailRequest): Promise<ThumbnailResult> {
     const size = this.resolveThumbnailSize(request);
@@ -36,7 +52,7 @@ export class ThumbnailCoreService {
       if (cachedMetadata) {
         const cacheETag = ThumbnailGenerator.extractEtag(cachedMetadata);
         if (cacheETag && this.isCacheValid(originalETag, cacheETag, cachedMetadata)) {
-          const url = buildPublicUrl(bucket, thumbnailPath);
+          const url = await this.getAccessUrl(bucket, thumbnailPath);
           return {
             url,
             etag: cacheETag,
@@ -52,7 +68,7 @@ export class ThumbnailCoreService {
       const dimensions = await ThumbnailGenerator.getImageDimensions(originalBuffer);
       const longestOriginal = Math.max(dimensions.width, dimensions.height);
       if (longestOriginal > 0 && longestOriginal <= size.longestSide) {
-        const originalUrl = buildPublicUrl(bucket, request.imagePath);
+        const originalUrl = await this.getAccessUrl(bucket, request.imagePath);
         return {
           url: originalUrl,
           etag: originalETag,
@@ -68,12 +84,12 @@ export class ThumbnailCoreService {
     await StorageOperations.writeFile(bucket, thumbnailPath, processedImage.buffer, {
       contentType: processedImage.contentType,
       metadata: {
-        'thumbnail-etag': thumbnailETag,
-        'source-etag': originalETag,
+        thumbnail_etag: thumbnailETag,
+        source_etag: originalETag,
       },
     });
 
-    const url = buildPublicUrl(bucket, thumbnailPath);
+    const url = await this.getAccessUrl(bucket, thumbnailPath);
 
     return {
       url,
