@@ -112,16 +112,25 @@ export class StreamingService {
 
       // 8. 获取工具（如果启用）
       let tools: Record<string, any> | undefined;
-      if (agent?.config.tools?.enabled && agentId) {
+      if (agent?.config.tools?.enabled) {
         try {
-          tools = await this.agentToolRegistry.getToolsForAgent(agentId, teamId);
-          this.logger.debug(`Loaded ${Object.keys(tools).length} tools for agent ${agentId}`);
+          // 使用 agent 实体的真实 ID，而不是传入的 agentId 字符串
+          tools = await this.agentToolRegistry.getToolsForAgent(agent.id, teamId);
+          this.logger.log(`✅ Loaded ${Object.keys(tools).length} tools for agent ${agent.id} (${agent.name})`);
+          this.logger.log(`Tool names: ${Object.keys(tools).join(', ')}`);
+          // 打印第一个工具的详细信息作为示例
+          if (Object.keys(tools).length > 0) {
+            const firstToolName = Object.keys(tools)[0];
+            this.logger.log(`First tool (${firstToolName}):`, JSON.stringify(tools[firstToolName], null, 2));
+          }
         } catch (error) {
-          this.logger.warn(`Failed to load tools for agent ${agentId}:`, error.message);
+          this.logger.error(`❌ Failed to load tools for agent ${agent.id}:`, error);
         }
+      } else {
+        this.logger.warn(`⚠️ Tools not enabled for agent. agent?.config.tools?.enabled = ${agent?.config.tools?.enabled}`);
       }
 
-      this.logger.debug(`Starting AI SDK stream for thread ${threadId}, tools: ${tools ? 'enabled' : 'disabled'}`);
+      this.logger.log(`🚀 Starting AI SDK stream for thread ${threadId}, tools: ${tools ? `enabled (${Object.keys(tools || {}).length} tools)` : 'disabled'}`);
 
       // 9. 使用 AI SDK streamText（包含工具）
       const result = streamText({

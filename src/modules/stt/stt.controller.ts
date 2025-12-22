@@ -40,18 +40,20 @@ export class SttController {
     await fs.promises.writeFile(tmpFile, file.buffer)
 
      try {
-       const apiKey =
-         process.env.STT_API_KEY ||
-         process.env.SPEECH_OPENAI_API_KEY ||
-         process.env.OPENAI_API_KEY ||
-         config.agentv2.openaiCompatible.apiKey
+      const apiKey =
+        process.env.STT_API_KEY ||
+        process.env.SPEECH_OPENAI_API_KEY ||
+        process.env.OPENAI_API_KEY ||
+        config.agent.openai?.apiKey ||
+        config.agentv2.openaiCompatible.apiKey
 
-       const baseURL =
-         process.env.STT_BASE_URL ||
-         process.env.SPEECH_OPENAI_BASE_URL ||
-         process.env.OPENAI_BASE_URL ||
-         config.agentv2.openaiCompatible.url ||
-         'https://api.cursorai.art/v1'
+      const baseURL =
+        process.env.STT_BASE_URL ||
+        process.env.SPEECH_OPENAI_BASE_URL ||
+        process.env.OPENAI_BASE_URL ||
+        config.agent.openai?.baseUrl ||
+        config.agentv2.openaiCompatible.url ||
+        'https://api.cursorai.art/v1'
 
       if (!apiKey) {
         console.error('[STT] transcribe: missing API key')

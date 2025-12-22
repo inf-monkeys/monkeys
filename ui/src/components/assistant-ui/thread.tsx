@@ -6,6 +6,7 @@ import {
 import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
+import { VoiceInputButton } from "@/components/assistant-ui/voice-input-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/index";
 import {
@@ -16,6 +17,7 @@ import {
   ErrorPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
+  useComposer,
 } from "@assistant-ui/react";
 import {
   ArrowDownIcon,
@@ -179,9 +181,27 @@ const Composer: FC = () => {
 };
 
 const ComposerAction: FC = () => {
+  const composer = useComposer();
+
+  const handleVoiceTranscript = (text: string) => {
+    if (!text) return;
+
+    // 获取当前输入框的文本
+    const currentText = composer.text || '';
+
+    // 如果有文本，在后面添加空格
+    const newText = currentText ? `${currentText} ${text}` : text;
+
+    // 设置新文本
+    composer.setText(newText);
+  };
+
   return (
     <div className="aui-composer-action-wrapper relative mx-2 mb-2 flex items-center justify-between">
-      <ComposerAddAttachment />
+      <div className="flex items-center gap-1">
+        <ComposerAddAttachment />
+        <VoiceInputButton onTranscript={handleVoiceTranscript} />
+      </div>
 
       <AssistantIf condition={({ thread }) => !thread.isRunning}>
         <ComposerPrimitive.Send asChild>

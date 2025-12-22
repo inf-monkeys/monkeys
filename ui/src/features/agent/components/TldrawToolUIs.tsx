@@ -55,30 +55,58 @@ export const TldrawGetCanvasStateToolUI = makeAssistantToolUI({
       return JSON.stringify({ error: 'Editor not available' });
     }
 
-    const shapes = editor.getCurrentPageShapes();
-    const selectedShapeIds = editor.getSelectedShapeIds();
-    const selectedShapes = shapes.filter((s: any) => selectedShapeIds.includes(s.id));
+    try {
+      // 获取所有形状
+      const shapes = editor.getCurrentPageShapes();
+      console.log('[TldrawGetCanvasState] Total shapes found:', shapes.length);
 
-    const state = {
-      totalShapes: shapes.length,
-      shapes: shapes.map((shape: any) => ({
-        id: shape.id,
-        type: shape.type,
-        x: shape.x,
-        y: shape.y,
-        rotation: shape.rotation,
-        props: shape.props,
-      })),
-      selectedShapes: selectedShapes.map((shape: any) => ({
-        id: shape.id,
-        type: shape.type,
-        x: shape.x,
-        y: shape.y,
-        props: shape.props,
-      })),
-    };
+      // 获取选中的形状 IDs
+      const selectedShapeIds = editor.getSelectedShapeIds();
+      console.log('[TldrawGetCanvasState] Selected shape IDs:', selectedShapeIds);
 
-    return JSON.stringify(state, null, 2);
+      // 过滤选中的形状
+      const selectedShapes = shapes.filter((s: any) => selectedShapeIds.includes(s.id));
+
+      // 转换形状数据，使用 page bounds 而不是原始 x/y
+      const shapesData = shapes.map((shape: any) => {
+        const bounds = editor.getShapePageBounds(shape.id);
+        return {
+          id: shape.id,
+          type: shape.type,
+          x: bounds?.x ?? shape.x,
+          y: bounds?.y ?? shape.y,
+          w: bounds?.w ?? 0,
+          h: bounds?.h ?? 0,
+          rotation: shape.rotation,
+          props: shape.props,
+        };
+      });
+
+      const selectedShapesData = selectedShapes.map((shape: any) => {
+        const bounds = editor.getShapePageBounds(shape.id);
+        return {
+          id: shape.id,
+          type: shape.type,
+          x: bounds?.x ?? shape.x,
+          y: bounds?.y ?? shape.y,
+          w: bounds?.w ?? 0,
+          h: bounds?.h ?? 0,
+          props: shape.props,
+        };
+      });
+
+      const state = {
+        totalShapes: shapes.length,
+        shapes: shapesData,
+        selectedShapes: selectedShapesData,
+      };
+
+      console.log('[TldrawGetCanvasState] Returning state:', state);
+      return JSON.stringify(state, null, 2);
+    } catch (error) {
+      console.error('[TldrawGetCanvasState] Error:', error);
+      return JSON.stringify({ error: String(error) });
+    }
   },
 });
 
@@ -106,6 +134,9 @@ export const TldrawCreateShapeToolUI = makeAssistantToolUI({
     }
 
     try {
+      console.log('[TldrawCreateShape] Creating shape:', { type, x, y, props });
+
+      // 根据 type 创建正确的 shape
       const shapePartial: TLShapePartial = {
         type: type as any,
         x,
@@ -113,9 +144,12 @@ export const TldrawCreateShapeToolUI = makeAssistantToolUI({
         props: props as any,
       };
 
-      editor.createShape(shapePartial);
+      const createdShapes = editor.createShape(shapePartial);
+      console.log('[TldrawCreateShape] Shape created:', createdShapes);
+
       return 'success';
     } catch (error) {
+      console.error('[TldrawCreateShape] Error:', error);
       return `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
   },

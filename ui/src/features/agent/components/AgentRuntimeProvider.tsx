@@ -5,7 +5,8 @@
 import { type ReactNode, createContext, useContext } from 'react';
 import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { useThreadListRuntime } from '../hooks/useThreadListRuntime';
+// import { useThreadListRuntime } from '../hooks/useThreadListRuntime';
+import { useThreadListWithTools } from '../hooks/useThreadListWithTools';
 import type { AgentMode, AgentModeConfig, Thread } from '../types/agent.types';
 import { AgentModeProvider } from '../contexts/AgentModeContext';
 import { AgentContextProvider } from '../contexts/AgentContextProvider';
@@ -76,7 +77,7 @@ export function AgentRuntimeProvider({
     switchToThread,
     createNewThread,
     deleteThread,
-  } = useThreadListRuntime({
+  } = useThreadListWithTools({
     teamId,
     userId,
     agentId,
