@@ -33,7 +33,13 @@ export class AgentToolRegistryService {
    * 获取 Agent 可用的工具（AI SDK 格式）
    */
   async getToolsForAgent(agentId: string, teamId: string): Promise<Record<string, any>> {
-    const agent = await this.agentService.get(agentId, teamId);
+    let agent;
+    try {
+      agent = await this.agentService.get(agentId, teamId);
+    } catch (error) {
+      this.logger.warn(`Agent ${agentId} not found, returning empty tools`);
+      return {}; // Agent 不存在，返回空工具列表
+    }
 
     if (!agent.config.tools?.enabled) {
       return {}; // 工具未启用
@@ -166,6 +172,141 @@ export class AgentToolRegistryService {
         needsApproval: false,
         timeout: 10000,
         category: 'search',
+      },
+    });
+
+    // Tldraw 工具：获取画布状态
+    this.registerBuiltinTool({
+      name: 'tldraw_get_canvas_state',
+      description: 'Get the current state of the tldraw canvas including all shapes and user selections',
+      parameters: {
+        type: 'object',
+        properties: {},
+        required: [],
+      },
+      sourceType: ToolSourceType.BUILTIN,
+      metadata: {
+        needsApproval: false,
+        timeout: 5000,
+        category: 'tldraw',
+        clientSide: true, // 前端执行
+      },
+    });
+
+    // Tldraw 工具：创建形状
+    this.registerBuiltinTool({
+      name: 'tldraw_create_shape',
+      description: 'Create a new shape on the tldraw canvas. Supports rectangles, ellipses, arrows, text, and more.',
+      parameters: {
+        type: 'object',
+        properties: {
+          type: {
+            type: 'string',
+            enum: ['geo', 'arrow', 'text', 'note', 'line'],
+            description: 'The type of shape to create',
+          },
+          x: {
+            type: 'number',
+            description: 'X coordinate position',
+            default: 0,
+          },
+          y: {
+            type: 'number',
+            description: 'Y coordinate position',
+            default: 0,
+          },
+          props: {
+            type: 'object',
+            description: 'Shape-specific properties. For geo: {geo: "rectangle"|"ellipse"|"triangle"|"diamond", w: number, h: number}. For text: {text: string, w: number}. For arrow: {start: {x, y}, end: {x, y}}',
+          },
+        },
+        required: ['type', 'props'],
+      },
+      sourceType: ToolSourceType.BUILTIN,
+      metadata: {
+        needsApproval: false,
+        timeout: 5000,
+        category: 'tldraw',
+        clientSide: true, // 前端执行
+      },
+    });
+
+    // Tldraw 工具：更新形状
+    this.registerBuiltinTool({
+      name: 'tldraw_update_shape',
+      description: 'Update an existing shape on the tldraw canvas',
+      parameters: {
+        type: 'object',
+        properties: {
+          shapeId: {
+            type: 'string',
+            description: 'The ID of the shape to update',
+          },
+          updates: {
+            type: 'object',
+            description: 'Properties to update (x, y, rotation, props, etc.)',
+          },
+        },
+        required: ['shapeId', 'updates'],
+      },
+      sourceType: ToolSourceType.BUILTIN,
+      metadata: {
+        needsApproval: false,
+        timeout: 5000,
+        category: 'tldraw',
+        clientSide: true, // 前端执行
+      },
+    });
+
+    // Tldraw 工具：删除形状
+    this.registerBuiltinTool({
+      name: 'tldraw_delete_shapes',
+      description: 'Delete one or more shapes from the tldraw canvas',
+      parameters: {
+        type: 'object',
+        properties: {
+          shapeIds: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description: 'Array of shape IDs to delete. If empty, deletes currently selected shapes.',
+          },
+        },
+        required: [],
+      },
+      sourceType: ToolSourceType.BUILTIN,
+      metadata: {
+        needsApproval: false,
+        timeout: 5000,
+        category: 'tldraw',
+        clientSide: true, // 前端执行
+      },
+    });
+
+    // Tldraw 工具：选择形状
+    this.registerBuiltinTool({
+      name: 'tldraw_select_shapes',
+      description: 'Select one or more shapes on the tldraw canvas',
+      parameters: {
+        type: 'object',
+        properties: {
+          shapeIds: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description: 'Array of shape IDs to select',
+          },
+        },
+        required: ['shapeIds'],
+      },
+      sourceType: ToolSourceType.BUILTIN,
+      metadata: {
+        needsApproval: false,
+        timeout: 5000,
+        category: 'tldraw',
+        clientSide: true, // 前端执行
       },
     });
 

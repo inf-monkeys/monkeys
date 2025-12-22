@@ -48,6 +48,7 @@ import { ExternalLayerPanel } from './ExternalLayerPanel';
 import { LiveImageProvider } from './hooks/useLiveImage';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
+import { setTldrawEditor } from '@/features/agent/components/TldrawToolUIs';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
 import {
   InstructionShapeUtil,
@@ -407,14 +408,17 @@ export const Board: React.FC<BoardProps> = ({
   // 使用可选链和默认值来安全获取路由参数
   let designProjectId: string | undefined;
   let designBoardId: string | undefined;
+  let teamId: string | undefined;
   try {
     const params = useParams({ from: '/$teamId/design/$designProjectId/$designBoardId/' });
     designProjectId = params?.designProjectId;
     designBoardId = params?.designBoardId;
+    teamId = params?.teamId;
   } catch {
     // 如果不在设计画板路由中，designProjectId 为 undefined
     designProjectId = undefined;
     designBoardId = undefined;
+    teamId = undefined;
   }
   const { data: designProject } = useGetDesignProject(designProjectId);
   const { data: user } = useUser();
@@ -1020,7 +1024,7 @@ export const Board: React.FC<BoardProps> = ({
             ...(leftCollapsed ? {} : {}),
           }}
         >
-          {editor && <ExternalLayerPanel editor={editor} boardId={designBoardId} />}
+          {editor && <ExternalLayerPanel editor={editor} boardId={designBoardId} teamId={teamId} userId={user?.id} />}
           {/* 右侧拖拽调宽手柄 */}
           {!leftCollapsed && (
             <div
@@ -1112,6 +1116,8 @@ export const Board: React.FC<BoardProps> = ({
               persistenceKey={persistenceKey}
               onMount={(editor: Editor) => {
                 setEditor(editor);
+                // 设置 editor 给 agent 工具使用
+                setTldrawEditor(editor);
 
                 // 重新检查只读模式（因为 onMount 可能在数据加载前执行）
                 const currentIsReadonly = isTemplate && !canEditTemplate;

@@ -11,6 +11,8 @@ import type {
   ModelConfig,
   SendMessageDto,
   Thread,
+  Tool,
+  ToolCall,
   UpdateAgentDto,
 } from '../types/agent.types';
 
@@ -54,38 +56,46 @@ export const agentApi = {
       throw new Error(error.message || `HTTP ${response.status}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    // Extract data field from SuccessResponse
+    return result.data;
   },
 
   /**
    * 获取 Agent 列表
+   * 注意：Agent Controller 返回 SuccessResponse 包装的数据
    */
-  listAgents: (teamId: string): Promise<Agent[]> => {
-    return vinesFetcher<Agent[]>({
+  listAgents: async (teamId: string): Promise<Agent[]> => {
+    const response = await vinesFetcher<{ data: Agent[] }>({
       simple: true,
       responseResolver: directJsonResolver
-    })(`${API_BASE}?teamId=${teamId}`) as Promise<Agent[]>;
+    })(`${API_BASE}?teamId=${teamId}`);
+    return (response as any)?.data || [];
   },
 
   /**
    * 获取单个 Agent
+   * 注意：Agent Controller 返回 SuccessResponse 包装的数据
    */
-  getAgent: (agentId: string, teamId: string): Promise<Agent> => {
-    return vinesFetcher<Agent>({
+  getAgent: async (agentId: string, teamId: string): Promise<Agent> => {
+    const response = await vinesFetcher<{ data: Agent }>({
       simple: true,
       responseResolver: directJsonResolver
-    })(`${API_BASE}/${agentId}?teamId=${teamId}`) as Promise<Agent>;
+    })(`${API_BASE}/${agentId}?teamId=${teamId}`);
+    return (response as any)?.data;
   },
 
   /**
    * 更新 Agent
+   * 注意：Agent Controller 返回 SuccessResponse 包装的数据
    */
-  updateAgent: (agentId: string, teamId: string, data: UpdateAgentDto): Promise<Agent> => {
-    return vinesFetcher<Agent, UpdateAgentDto & { teamId: string }>({
+  updateAgent: async (agentId: string, teamId: string, data: UpdateAgentDto): Promise<Agent> => {
+    const response = await vinesFetcher<{ data: Agent }, UpdateAgentDto & { teamId: string }>({
       method: 'PUT',
       simple: true,
       responseResolver: directJsonResolver
-    })(`${API_BASE}/${agentId}`, { ...data, teamId }) as Promise<Agent>;
+    })(`${API_BASE}/${agentId}`, { ...data, teamId });
+    return (response as any)?.data;
   },
 
   /**
@@ -101,62 +111,69 @@ export const agentApi = {
 
   /**
    * 获取可用模型列表
+   * 注意：Agent Controller 返回 SuccessResponse 包装的数据
    */
-  listModels: (teamId: string): Promise<ModelConfig[]> => {
-    return vinesFetcher<ModelConfig[]>({
+  listModels: async (teamId: string): Promise<ModelConfig[]> => {
+    const response = await vinesFetcher<{ data: ModelConfig[] }>({
       simple: true,
       responseResolver: directJsonResolver
-    })(`${API_BASE}/models?teamId=${teamId}`) as Promise<ModelConfig[]>;
+    })(`${API_BASE}/models?teamId=${teamId}`);
+    return (response as any)?.data || [];
   },
 };
 
 /**
  * Thread 相关 API
+ * 注意：Thread API 返回 SuccessResponse 包装的数据
  */
 export const threadApi = {
   /**
    * 创建 Thread
    */
-  createThread: (teamId: string, userId: string, data: CreateThreadDto): Promise<Thread> => {
-    return vinesFetcher<Thread, CreateThreadDto & { teamId: string; userId: string }>({
+  createThread: async (teamId: string, userId: string, data: CreateThreadDto): Promise<Thread> => {
+    const response = await vinesFetcher<{ data: Thread }, CreateThreadDto & { teamId: string; userId: string }>({
       method: 'POST',
       simple: true,
       responseResolver: directJsonResolver
-    })(`${API_BASE}/threads`, { ...data, teamId, userId }) as Promise<Thread>;
+    })(`${API_BASE}/threads`, { ...data, teamId, userId });
+    return (response as any)?.data;
   },
 
   /**
    * 获取 Thread 列表
    */
-  listThreads: (teamId: string, userId?: string, agentId?: string): Promise<Thread[]> => {
+  listThreads: async (teamId: string, userId?: string, agentId?: string): Promise<Thread[]> => {
     const params = new URLSearchParams({ teamId });
     if (userId) params.append('userId', userId);
     if (agentId) params.append('agentId', agentId);
-    return vinesFetcher<Thread[]>({
+    const response = await vinesFetcher<{ data: Thread[] }>({
       simple: true,
       responseResolver: directJsonResolver
-    })(`${API_BASE}/threads?${params.toString()}`) as Promise<Thread[]>;
+    })(`${API_BASE}/threads?${params.toString()}`);
+    return (response as any)?.data || [];
   },
 
   /**
    * 获取单个 Thread
    */
-  getThread: (threadId: string, teamId: string): Promise<Thread> => {
-    return vinesFetcher<Thread>({
+  getThread: async (threadId: string, teamId: string): Promise<Thread> => {
+    const response = await vinesFetcher<{ data: Thread }>({
       simple: true,
       responseResolver: directJsonResolver
-    })(`${API_BASE}/threads/${threadId}?teamId=${teamId}`) as Promise<Thread>;
+    })(`${API_BASE}/threads/${threadId}?teamId=${teamId}`);
+    return (response as any)?.data;
   },
 
   /**
    * 更新 Thread
    */
-  updateThread: (threadId: string, teamId: string, data: Partial<Thread>): Promise<Thread> => {
-    return vinesFetcher<Thread, Partial<Thread> & { teamId: string }>({
+  updateThread: async (threadId: string, teamId: string, data: Partial<Thread>): Promise<Thread> => {
+    const response = await vinesFetcher<{ data: Thread }, Partial<Thread> & { teamId: string }>({
       method: 'PUT',
       simple: true,
       responseResolver: directJsonResolver
-    })(`${API_BASE}/threads/${threadId}`, { ...data, teamId }) as Promise<Thread>;
+    })(`${API_BASE}/threads/${threadId}`, { ...data, teamId });
+    return (response as any)?.data;
   },
 
   /**
@@ -173,11 +190,12 @@ export const threadApi = {
   /**
    * 获取 Thread 的消息列表
    */
-  getMessages: (threadId: string, teamId: string): Promise<Message[]> => {
-    return vinesFetcher<Message[]>({
+  getMessages: async (threadId: string, teamId: string): Promise<Message[]> => {
+    const response = await vinesFetcher<{ data: Message[] }>({
       simple: true,
       responseResolver: directJsonResolver
-    })(`${API_BASE}/threads/${threadId}/messages?teamId=${teamId}`) as Promise<Message[]>;
+    })(`${API_BASE}/threads/${threadId}/messages?teamId=${teamId}`);
+    return (response as any)?.data || [];
   },
 };
 
@@ -279,5 +297,100 @@ export const chatApi = {
     } finally {
       reader.releaseLock();
     }
+  },
+};
+
+/**
+ * Tool 相关 API
+ */
+export const toolApi = {
+  /**
+   * 获取可用工具列表
+   */
+  listTools: async (teamId: string): Promise<Tool[]> => {
+    const response = await vinesFetcher<{ data: Tool[] }>({
+      simple: true,
+      responseResolver: directJsonResolver,
+    })(`/api/tools?teamId=${teamId}`);
+    // 后端返回 SuccessResponse 格式，需要提取 data 字段
+    return (response as any)?.data || [];
+  },
+
+  /**
+   * 获取线程的工具调用历史
+   */
+  getToolCalls: async (threadId: string, teamId: string): Promise<ToolCall[]> => {
+    const response = await vinesFetcher<{ data: ToolCall[] }>({
+      simple: true,
+      responseResolver: directJsonResolver,
+    })(`${API_BASE}/threads/${threadId}/tool-calls?teamId=${teamId}`);
+    return (response as any)?.data || [];
+  },
+
+  /**
+   * 获取待审批的工具调用
+   */
+  getPendingToolCalls: async (threadId: string, teamId: string): Promise<ToolCall[]> => {
+    const response = await vinesFetcher<{ data: ToolCall[] }>({
+      simple: true,
+      responseResolver: directJsonResolver,
+    })(`${API_BASE}/threads/${threadId}/tool-calls/pending?teamId=${teamId}`);
+    return (response as any)?.data || [];
+  },
+
+  /**
+   * 审批或拒绝工具调用
+   */
+  approveToolCall: async (
+    toolCallId: string,
+    approved: boolean,
+    teamId: string,
+    userId: string,
+  ): Promise<{ success: boolean; approved: boolean }> => {
+    const response = await vinesFetcher<
+      { data: { success: boolean; approved: boolean } },
+      { approved: boolean; teamId: string; userId: string }
+    >({
+      method: 'POST',
+      simple: true,
+      responseResolver: directJsonResolver,
+    })(`${API_BASE}/tool-calls/${toolCallId}/approve`, {
+      approved,
+      teamId,
+      userId,
+    });
+    return (response as any)?.data || { success: false, approved: false };
+  },
+
+  /**
+   * 获取工具调用统计
+   */
+  getToolCallStats: async (
+    teamId: string,
+    period: 'day' | 'week' | 'month' = 'day',
+  ): Promise<{
+    totalCalls: number;
+    successCount: number;
+    failureCount: number;
+    averageDuration: number;
+    quotaUsage: {
+      current: number;
+      limit: number;
+      percentage: number;
+    };
+    byTool: Record<string, { calls: number; avgDuration: number }>;
+  }> => {
+    const response = await vinesFetcher({
+      simple: true,
+      responseResolver: directJsonResolver,
+    })(`${API_BASE}/tool-calls/stats?teamId=${teamId}&period=${period}`);
+    return (response as any)?.data || {
+      totalCalls: 0,
+      successCount: 0,
+      failureCount: 0,
+      averageDuration: 0,
+      quotaUsage: { current: 0, limit: 0, percentage: 0 },
+      byTool: {},
+    };
   },
 };

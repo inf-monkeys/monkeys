@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { SWRConfig } from 'swr';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { routeTree } from '@/routeTree.gen';
 
@@ -39,15 +40,28 @@ declare module '@tanstack/react-router' {
   }
 }
 
+// 创建 React Query 客户端
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5分钟
+    },
+  },
+});
+
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <Suspense fallback={<Skeleton className="h-screen w-screen" />}>
-    <SWRConfig>
-      <MotionConfig transition={{ duration: 0.2 }}>
-        <AnimatePresence mode="wait">
-          <RouterProvider router={router} />
-        </AnimatePresence>
-      </MotionConfig>
-    </SWRConfig>
+    <QueryClientProvider client={queryClient}>
+      <SWRConfig>
+        <MotionConfig transition={{ duration: 0.2 }}>
+          <AnimatePresence mode="wait">
+            <RouterProvider router={router} />
+          </AnimatePresence>
+        </MotionConfig>
+      </SWRConfig>
+    </QueryClientProvider>
     <Suspense>
       <LagRadar />
     </Suspense>

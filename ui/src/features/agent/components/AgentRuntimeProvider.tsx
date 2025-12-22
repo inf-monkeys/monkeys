@@ -6,13 +6,31 @@ import { type ReactNode, createContext, useContext } from 'react';
 import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useThreadListRuntime } from '../hooks/useThreadListRuntime';
-import type { Thread } from '../types/agent.types';
+import type { AgentMode, AgentModeConfig, Thread } from '../types/agent.types';
+import { AgentModeProvider } from '../contexts/AgentModeContext';
+import { AgentContextProvider } from '../contexts/AgentContextProvider';
+import {
+  ApprovalToolUI,
+  WebSearchToolUI,
+  CalculatorToolUI,
+} from './ToolUIs';
+import {
+  TldrawGetCanvasStateToolUI,
+  TldrawCreateShapeToolUI,
+  TldrawUpdateShapeToolUI,
+  TldrawDeleteShapesToolUI,
+  TldrawSelectShapesToolUI,
+} from './TldrawToolUIs';
 
 interface AgentRuntimeProviderProps {
   children: ReactNode;
   teamId: string;
   userId: string;
   agentId?: string;
+  /** Agent 显示模式 */
+  mode?: AgentMode;
+  /** 模式配置 */
+  modeConfig?: Partial<AgentModeConfig>;
 }
 
 // 创建 Context 用于共享 thread 列表数据
@@ -40,13 +58,15 @@ export function useThreadListContext() {
 
 /**
  * Provider 组件,提供完整的 ThreadList Runtime
- * 包含必要的 TooltipProvider
+ * 包含必要的 TooltipProvider 和 AgentModeProvider
  */
 export function AgentRuntimeProvider({
   children,
   teamId,
   userId,
   agentId,
+  mode = 'normal',
+  modeConfig,
 }: AgentRuntimeProviderProps) {
   const {
     runtime,
@@ -72,10 +92,29 @@ export function AgentRuntimeProvider({
   };
 
   return (
-    <ThreadListContext.Provider value={threadListContextValue}>
-      <AssistantRuntimeProvider runtime={runtime}>
-        <TooltipProvider>{children}</TooltipProvider>
-      </AssistantRuntimeProvider>
-    </ThreadListContext.Provider>
+    <AgentModeProvider mode={mode} modeConfig={modeConfig}>
+      <AgentContextProvider teamId={teamId} userId={userId} agentId={agentId}>
+        <ThreadListContext.Provider value={threadListContextValue}>
+          <AssistantRuntimeProvider runtime={runtime}>
+            <TooltipProvider>
+              {/* Register Tool UI Components */}
+              <ApprovalToolUI />
+              <WebSearchToolUI />
+              <CalculatorToolUI />
+
+              {/* Tldraw Tool UI Components */}
+              <TldrawGetCanvasStateToolUI />
+              <TldrawCreateShapeToolUI />
+              <TldrawUpdateShapeToolUI />
+              <TldrawDeleteShapesToolUI />
+              <TldrawSelectShapesToolUI />
+
+              {/* Child components */}
+              {children}
+            </TooltipProvider>
+          </AssistantRuntimeProvider>
+        </ThreadListContext.Provider>
+      </AgentContextProvider>
+    </AgentModeProvider>
   );
 }

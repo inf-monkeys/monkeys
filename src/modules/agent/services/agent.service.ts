@@ -105,6 +105,84 @@ export class AgentService {
   }
 
   /**
+   * 获取或创建默认 Agent（如 tldraw-assistant）
+   * 如果 agent 不存在，则自动创建
+   */
+  async getOrCreateDefaultAgent(agentId: string, teamId: string, userId: string): Promise<AgentEntity> {
+    // 获取默认 agent 配置
+    const defaultAgentConfig = this.getDefaultAgentConfig(agentId);
+    if (!defaultAgentConfig) {
+      throw new NotFoundException(`Agent ${agentId} not found and is not a default agent`);
+    }
+
+    // 用 name 查找是否已存在（因为 name 在团队内唯一）
+    const existingAgent = await this.agentRepository.findByNameAndTeam(
+      defaultAgentConfig.name,
+      teamId,
+    );
+    if (existingAgent) {
+      return existingAgent;
+    }
+
+    console.log(`[AgentService] Auto-creating default agent: ${agentId} (${defaultAgentConfig.name}) for team ${teamId}`);
+
+    // 创建默认 agent
+    return await this.create({
+      teamId,
+      createdBy: userId,
+      ...defaultAgentConfig,
+    });
+  }
+
+  /**
+   * 获取默认 Agent 的配置
+   */
+  private getDefaultAgentConfig(agentId: string): Omit<CreateAgentDto, 'teamId' | 'createdBy'> | null {
+    const defaultAgents: Record<string, Omit<CreateAgentDto, 'teamId' | 'createdBy'>> = {
+      'tldraw-assistant': {
+        name: 'Tldraw Assistant',
+        description: 'AI assistant for tldraw whiteboard collaboration with canvas manipulation tools',
+        iconUrl: '🎨',
+        config: {
+          model: 'openai:gpt-5.1',
+          temperature: 0.7,
+          maxTokens: 4000,
+          instructions: `You are a helpful AI assistant integrated into a tldraw whiteboard.
+
+You have access to tools that let you:
+- View the current canvas state (all shapes and selections)
+- Create shapes (rectangles, ellipses, arrows, text, etc.)
+- Update existing shapes (move, resize, style changes)
+- Delete shapes
+- Select shapes
+
+Always start by getting the canvas state to understand what's currently on the board.
+When creating shapes, consider the existing layout and user's selections.
+Be visual and creative - use diagrams to explain concepts.
+Be concise, friendly, and helpful.
+
+Example workflows:
+- User: "Add a rectangle" → Get canvas state, create rectangle at appropriate position
+- User: "Delete the selected shape" → Get selections, delete them
+- User: "Make a flowchart for login" → Create multiple connected shapes with arrows`,
+          tools: {
+            enabled: true,
+            toolNames: [
+              'tldraw_get_canvas_state',
+              'tldraw_create_shape',
+              'tldraw_update_shape',
+              'tldraw_delete_shapes',
+              'tldraw_select_shapes',
+            ],
+          },
+        },
+      },
+    };
+
+    return defaultAgents[agentId] || null;
+  }
+
+  /**
    * 验证 Agent 配置
    */
   private validateConfig(config: AgentConfig): void {

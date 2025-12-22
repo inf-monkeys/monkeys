@@ -1,4 +1,4 @@
-import { Injectable, Logger, forwardRef, Inject } from '@nestjs/common';
+import { Injectable, Logger, forwardRef, Inject, NotFoundException } from '@nestjs/common';
 import { streamText } from 'ai';
 import { ModelRegistryService } from './model-registry.service';
 import { MessageService, Message } from './message.service';
@@ -70,10 +70,30 @@ export class StreamingService {
         mediaIds: imageMediaIds,
       });
 
-      // 3. 获取 Agent 配置
+      // 3. 获取或创建 Agent 配置
       let agent = null;
       if (agentId) {
-        agent = await this.agentService.get(agentId, teamId);
+        try {
+          // 尝试获取或自动创建默认 agent
+          this.logger.debug(`Attempting to get or create agent: ${agentId}`);
+          agent = await this.agentService.getOrCreateDefaultAgent(agentId, teamId, userId);
+          this.logger.debug(`Agent resolved: ${agent.id}, name: ${agent.name}`);
+        } catch (error) {
+          this.logger.error(`Failed to get or create default agent ${agentId}:`, error);
+          // 如果不是默认 agent 且不存在，尝试直接获取
+          if (error instanceof NotFoundException) {
+            try {
+              agent = await this.agentService.get(agentId, teamId);
+              this.logger.debug(`Agent found by direct lookup: ${agent.id}`);
+            } catch {
+              this.logger.warn(`Agent ${agentId} not found, using default configuration`);
+              // 继续执行，使用默认配置
+            }
+          } else {
+            // 其他错误，抛出
+            throw error;
+          }
+        }
       }
 
       // 4. 确定模型
@@ -130,7 +150,28 @@ export class StreamingService {
 
               this.logger.debug(`Tool call: ${toolName} (${toolCallId})`);
 
-              // 执行工具
+              // 检查工具是否为前端执行类型
+              try {
+                const tool = await this.agentToolRegistry.getToolByName(toolName, teamId);
+                const isClientSide = tool?.metadata?.clientSide === true;
+
+                if (isClientSide) {
+                  // 前端执行的工具，跳过后端执行，仅记录调用
+                  this.logger.debug(`Tool ${toolName} is client-side, skipping backend execution`);
+                  toolCalls.push({
+                    toolCallId,
+                    toolName,
+                    args,
+                    result: null, // 结果由前端提供
+                    clientSide: true,
+                  });
+                  continue;
+                }
+              } catch (error) {
+                this.logger.warn(`Failed to check tool ${toolName} metadata:`, error.message);
+              }
+
+              // 后端执行工具
               try {
                 const toolResult = await this.agentToolExecutor.execute({
                   threadId,
@@ -248,10 +289,30 @@ export class StreamingService {
         mediaIds: imageMediaIds,
       });
 
-      // 3. 获取 Agent 配置（如果提供了 agentId）
+      // 3. 获取或创建 Agent 配置（如果提供了 agentId）
       let agent = null;
       if (agentId) {
-        agent = await this.agentService.get(agentId, teamId);
+        try {
+          // 尝试获取或自动创建默认 agent
+          this.logger.debug(`[SSE] Attempting to get or create agent: ${agentId}`);
+          agent = await this.agentService.getOrCreateDefaultAgent(agentId, teamId, userId);
+          this.logger.debug(`[SSE] Agent resolved: ${agent.id}, name: ${agent.name}`);
+        } catch (error) {
+          this.logger.error(`[SSE] Failed to get or create default agent ${agentId}:`, error);
+          // 如果不是默认 agent 且不存在，尝试直接获取
+          if (error instanceof NotFoundException) {
+            try {
+              agent = await this.agentService.get(agentId, teamId);
+              this.logger.debug(`[SSE] Agent found by direct lookup: ${agent.id}`);
+            } catch {
+              this.logger.warn(`[SSE] Agent ${agentId} not found, using default configuration`);
+              // 继续执行，使用默认配置
+            }
+          } else {
+            // 其他错误，抛出
+            throw error;
+          }
+        }
       }
 
       // 4. 确定使用的模型

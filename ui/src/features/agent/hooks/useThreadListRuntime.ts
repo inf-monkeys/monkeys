@@ -156,11 +156,8 @@ export function useThreadListRuntime(options: UseThreadListRuntimeOptions) {
     }
   }, [currentThreadId, loadThreadMessages]);
 
-  // 如果没有 threads,自动创建第一个（临时禁用以调试）
+  // 如果没有 threads,自动创建第一个
   useEffect(() => {
-    // 临时禁用自动创建逻辑，排查问题
-    return;
-
     if (!isLoadingThreads && threads.size === 0 && !currentThreadId) {
       const createInitialThread = async () => {
         try {

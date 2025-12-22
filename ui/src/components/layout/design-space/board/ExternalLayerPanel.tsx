@@ -4,7 +4,7 @@ import { mutate as swrMutate } from 'swr';
 
 import { useDebounceFn, useEventEmitter, useMemoizedFn } from 'ahooks';
 import { capitalize, get } from 'lodash';
-import { ArrowLeft, Clipboard, History, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
+import { ArrowLeft, Clipboard, History, RotateCcw, Sparkles, Undo2, List } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Editor, TLShapeId } from 'tldraw';
@@ -38,6 +38,9 @@ import { newConvertExecutionResultToItemList } from '@/utils/execution';
 
 import { VisibilityOff, VisibilityOn } from './icons';
 // import { TldrawAgentV2EmbeddedPanel } from './panel-agent-v2-embedded';
+import { AgentRuntimeProvider } from '@/features/agent/components/AgentRuntimeProvider';
+import { MiniThreadList } from '@/features/agent/components/MiniThreadList';
+import { Thread } from '@/components/assistant-ui/thread';
 
 // 形状类型中文映射
 const getShapeTypeInChinese = (type: string, geoKind?: string): string => {
@@ -85,6 +88,8 @@ const getShapeTypeInChinese = (type: string, geoKind?: string): string => {
 interface ExternalLayerPanelProps {
   editor: Editor;
   boardId?: string;
+  teamId?: string;
+  userId?: string;
 }
 
 // 递归的形状项组件
@@ -574,7 +579,7 @@ const MiniTabularButtons: React.FC<{ tabular$: any; useAbsolutePosition?: boolea
   );
 };
 
-export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, boardId }) => {
+export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, boardId, teamId, userId }) => {
   const SUBMENU_WIDTH = 220;
   const [currentPageShapeIds, setCurrentPageShapeIds] = useState<TLShapeId[]>([]);
   const [pages, setPages] = useState<{ id: string; name: string }[]>([]);
@@ -613,6 +618,7 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
   >([]);
   // agent 嵌入：在左侧 sidebar 内显示
   const [agentVisible, setAgentVisible] = useState(false);
+  const [agentView, setAgentView] = useState<'thread' | 'list'>('thread'); // agent视图状态
   // 等待占位动画样式仅注入一次（正方形+中心旋转）
   if (typeof document !== 'undefined' && !document.getElementById('mini-history-waiting-styles')) {
     const css = `
@@ -687,6 +693,15 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
     const toggle = () => setAgentVisible((v) => !v);
     window.addEventListener('vines:toggle-agent-embed', toggle as any);
     return () => window.removeEventListener('vines:toggle-agent-embed', toggle as any);
+  }, []);
+
+  // 监听 agent thread 切换事件，自动切换到 thread 视图
+  useEffect(() => {
+    const handleThreadSwitch = () => {
+      setAgentView('thread');
+    };
+    window.addEventListener('agent:thread-switched', handleThreadSwitch as any);
+    return () => window.removeEventListener('agent:thread-switched', handleThreadSwitch as any);
   }, []);
   // 获取执行历史（用于历史记录视图）
   const { data: allOutputsPages } = useWorkflowExecutionAllOutputs({ limit: 1000, page: 1 });
@@ -2783,13 +2798,98 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
       </div>
 
       {/* 当 agentVisible 时，显示 Agent 嵌入；其次是 mini 应用；否则显示页面+图层面板 */}
-      {/* TODO: Re-enable when agent hooks are available
-      {agentVisible && !isLeftBodyCollapsed ? (
-        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
-          <TldrawAgentV2EmbeddedPanel editor={editor} boardId={boardId} onClose={() => setAgentVisible(false)} />
+      {agentVisible && !isLeftBodyCollapsed && teamId && userId ? (
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <AgentRuntimeProvider
+            agentId="tldraw-assistant"
+            teamId={teamId}
+            userId={userId}
+            mode="mini"
+            modeConfig={{
+              showThreadList: true,
+              compact: true,
+              width: undefined, // mini模式下不需要固定宽度
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '8px 12px',
+                borderBottom: '1px solid #e1e1e1',
+                flexShrink: 0,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {/* 切换按钮 */}
+                <button
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    border: '1px solid #e5e7eb',
+                    background: agentView === 'list' ? '#f3f4f6' : '#fff',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onClick={() => setAgentView(agentView === 'thread' ? 'list' : 'thread')}
+                  title={agentView === 'thread' ? '显示对话列表' : '显示对话'}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#f3f4f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = agentView === 'list' ? '#f3f4f6' : '#fff';
+                  }}
+                >
+                  <List size={14} />
+                </button>
+                <span style={{ fontSize: '14px', fontWeight: 500 }}>
+                  {agentView === 'list' ? '对话列表' : 'Agent 对话'}
+                </span>
+              </div>
+              <button
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  border: 'none',
+                  background: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '4px',
+                  fontSize: '16px',
+                  color: '#6b7280',
+                }}
+                onClick={() => setAgentVisible(false)}
+                title="关闭"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f3f4f6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Content */}
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              {agentView === 'list' ? (
+                <MiniThreadList showHeader={false} showClose={false} className="h-full w-full border-r-0" />
+              ) : (
+                <Thread />
+              )}
+            </div>
+          </AgentRuntimeProvider>
         </div>
-      ) : */}
-      {miniPage && !isLeftBodyCollapsed ? (
+      ) : miniPage && !isLeftBodyCollapsed ? (
         <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', position: 'relative' }}>
           <div
             style={{

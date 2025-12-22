@@ -12,6 +12,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { SuccessResponse } from '@/common/response';
 import { AgentService, CreateAgentDto, UpdateAgentDto } from './services/agent.service';
 import { ThreadService, CreateThreadDto, UpdateThreadDto } from './services/thread.service';
 import { MessageService } from './services/message.service';
@@ -43,7 +44,8 @@ export class AgentController {
 
   @Post()
   async createAgent(@Body() dto: CreateAgentDto) {
-    return await this.agentService.create(dto);
+    const data = await this.agentService.create(dto);
+    return new SuccessResponse({ data });
   }
 
   @Get()
@@ -51,19 +53,22 @@ export class AgentController {
     if (!teamId) {
       throw new BadRequestException('teamId is required');
     }
-    return await this.agentService.list(teamId);
+    const data = await this.agentService.list(teamId);
+    return new SuccessResponse({ data });
   }
 
   @Get('models')
   async listModels(@Query('teamId') teamId?: string) {
-    return await this.agentService.listModels(teamId);
+    const data = await this.agentService.listModels(teamId);
+    return new SuccessResponse({ data });
   }
 
   // ========== Thread 管理（放在 :agentId 之前） ==========
 
   @Post('threads')
   async createThread(@Body() dto: CreateThreadDto) {
-    return await this.threadService.create(dto);
+    const data = await this.threadService.create(dto);
+    return new SuccessResponse({ data });
   }
 
   @Get('threads')
@@ -75,12 +80,14 @@ export class AgentController {
     if (!userId || !teamId) {
       throw new BadRequestException('userId and teamId are required');
     }
-    return await this.threadService.listByUser(userId, teamId, agentId);
+    const data = await this.threadService.listByUser(userId, teamId, agentId);
+    return new SuccessResponse({ data });
   }
 
   @Get('threads/:threadId')
   async getThread(@Param('threadId') threadId: string, @Query('teamId') teamId?: string) {
-    return await this.threadService.get(threadId, teamId);
+    const data = await this.threadService.get(threadId, teamId);
+    return new SuccessResponse({ data });
   }
 
   @Put('threads/:threadId')
@@ -89,18 +96,20 @@ export class AgentController {
     @Body() dto: UpdateThreadDto,
     @Query('teamId') teamId?: string,
   ) {
-    return await this.threadService.update(threadId, dto, teamId);
+    const data = await this.threadService.update(threadId, dto, teamId);
+    return new SuccessResponse({ data });
   }
 
   @Delete('threads/:threadId')
   async deleteThread(@Param('threadId') threadId: string, @Query('teamId') teamId?: string) {
     await this.threadService.delete(threadId, teamId);
-    return { success: true };
+    return new SuccessResponse({ data: { success: true } });
   }
 
   @Get('threads/:threadId/messages')
   async getMessages(@Param('threadId') threadId: string, @Query('teamId') teamId?: string) {
-    return await this.messageService.getThreadMessages(threadId, teamId);
+    const data = await this.messageService.getThreadMessages(threadId, teamId);
+    return new SuccessResponse({ data });
   }
 
   @Post('threads/:threadId/stream')
@@ -200,7 +209,8 @@ export class AgentController {
 
   @Get(':agentId')
   async getAgent(@Param('agentId') agentId: string, @Query('teamId') teamId?: string) {
-    return await this.agentService.get(agentId, teamId);
+    const data = await this.agentService.get(agentId, teamId);
+    return new SuccessResponse({ data });
   }
 
   @Put(':agentId')
@@ -209,13 +219,14 @@ export class AgentController {
     @Body() dto: UpdateAgentDto,
     @Query('teamId') teamId?: string,
   ) {
-    return await this.agentService.update(agentId, dto, teamId);
+    const data = await this.agentService.update(agentId, dto, teamId);
+    return new SuccessResponse({ data });
   }
 
   @Delete(':agentId')
   async deleteAgent(@Param('agentId') agentId: string, @Query('teamId') teamId?: string) {
     await this.agentService.delete(agentId, teamId);
-    return { success: true };
+    return new SuccessResponse({ data: { success: true } });
   }
 
   // ========== Tool Call Management（工具调用管理） ==========
@@ -231,7 +242,8 @@ export class AgentController {
     if (!teamId) {
       throw new BadRequestException('teamId is required');
     }
-    return await this.agentToolExecutor.getPendingApprovals(threadId, teamId);
+    const data = await this.agentToolExecutor.getPendingApprovals(threadId, teamId);
+    return new SuccessResponse({ data });
   }
 
   /**
@@ -252,7 +264,7 @@ export class AgentController {
       body.userId,
     );
 
-    return { success: true, approved: body.approved };
+    return new SuccessResponse({ data: { success: true, approved: body.approved } });
   }
 
   /**
@@ -263,7 +275,8 @@ export class AgentController {
     @Param('threadId') threadId: string,
     @Query('teamId') teamId?: string,
   ) {
-    return await this.toolCallRepository.findByThreadId(threadId, teamId);
+    const data = await this.toolCallRepository.findByThreadId(threadId, teamId);
+    return new SuccessResponse({ data });
   }
 
   /**
@@ -277,6 +290,7 @@ export class AgentController {
     if (!teamId) {
       throw new BadRequestException('teamId is required');
     }
-    return await this.agentToolExecutor.getUsageStats(teamId, period || 'day');
+    const data = await this.agentToolExecutor.getUsageStats(teamId, period || 'day');
+    return new SuccessResponse({ data });
   }
 }

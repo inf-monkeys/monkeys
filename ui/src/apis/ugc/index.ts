@@ -62,14 +62,16 @@ export const useUgcAgents = (dto: IListUgcDto) => {
 
   const swrUrl = teamId ? `/api/agents?teamId=${teamId}` : null;
 
-  // Custom fetcher for agents API that returns array directly
+  // Custom fetcher for agents API
   const fetcher = vinesFetcher<any[]>({
     simple: true,
     responseResolver: async (response) => {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      return await response.json();
+      const result = await response.json();
+      // Extract data field from SuccessResponse
+      return result.data || [];
     },
   });
 
@@ -138,7 +140,9 @@ export const preloadUgcAgents = (dto: IListUgcDto) => {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      return await response.json();
+      const result = await response.json();
+      // Extract data field from SuccessResponse
+      return result.data || [];
     },
   });
   return preload(swrUrl, fetcher);

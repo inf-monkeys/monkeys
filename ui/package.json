@@ -56,6 +56,7 @@
     "@react-three/drei": "9.105.4",
     "@react-three/fiber": "8.15.19",
     "@tailwindcss/typography": "^0.5.12",
+    "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-router": "1.21.0",
     "@tanstack/react-table": "^8.15.3",
     "@tanstack/router-generator": "^1.131.44",

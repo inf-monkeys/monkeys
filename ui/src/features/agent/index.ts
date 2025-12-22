@@ -20,3 +20,7 @@ export * from './components/AgentConfig';
 export * from './components/AgentChat';
 export * from './components/ThreadList';
 export * from './components/AgentRuntimeProvider';
+export * from './components/TldrawToolUIs';
+
+// Contexts
+export * from './contexts/TldrawContext';
