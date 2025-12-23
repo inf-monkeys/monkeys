@@ -25,6 +25,9 @@ export class MediaPresignService {
   // URL缓存，key为原始URL，value为预签名结果
   private readonly urlCache = new Map<string, CachedPresignResult>();
 
+  // 记录已经输出过日志的缓存键，避免重复日志
+  private readonly loggedCacheHits = new Set<string>();
+
   // 缓存清理间隔（5分钟）
   private readonly CACHE_CLEANUP_INTERVAL = 60 * 60 * 1000;
 
@@ -47,12 +50,17 @@ export class MediaPresignService {
 
       // 如果缓存还有至少30%的有效期，则使用缓存
       if (remainingTime > (normalizedExpires * 1000 * 0.3)) {
-        this.logger.debug(`Using cached presigned URL for ${targetUrl} (remaining: ${Math.round(remainingTime / 1000)}s)`);
+        // 只在首次缓存命中时输出日志，避免重复刷屏
+        if (!this.loggedCacheHits.has(cacheKey)) {
+          this.logger.debug(`Using cached presigned URL for ${targetUrl} (remaining: ${Math.round(remainingTime / 1000)}s)`);
+          this.loggedCacheHits.add(cacheKey);
+        }
         const { cachedAt, ...result } = cached;
         return result;
       } else {
         // 缓存即将过期，删除它
         this.urlCache.delete(cacheKey);
+        this.loggedCacheHits.delete(cacheKey); // 同时清理日志记录
       }
     }
 
@@ -145,6 +153,7 @@ export class MediaPresignService {
       // 如果缓存已过期或即将过期（剩余时间少于10%），删除它
       if (remainingTime <= (cached.expiresIn * 1000 * 0.1)) {
         this.urlCache.delete(key);
+        this.loggedCacheHits.delete(key); // 同时清理日志记录
         cleanedCount++;
       }
     }

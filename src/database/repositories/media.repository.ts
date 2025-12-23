@@ -3,7 +3,8 @@ import { S3Helpers } from '@/common/s3';
 import { generateDbId } from '@/common/utils';
 import { MediaSource } from '@/database/entities/assets/media/media-file';
 import { CreateRichMediaDto } from '@/modules/assets/media/dto/req/create-rich-media.dto';
-import { Injectable } from '@nestjs/common';
+import { MediaUrlTransformerService } from '@/modules/assets/media/media.url-transformer.service';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Like, Raw, Repository } from 'typeorm';
 import { MediaFileEntity } from '../entities/assets/media/media-file';
@@ -15,6 +16,8 @@ export class MediaFileRepository {
     @InjectRepository(MediaFileEntity)
     private readonly mediaFileRepository: Repository<MediaFileEntity>,
     private readonly mediaFileAssetRepositroy: MediaFileAssetRepositroy,
+    @Inject(forwardRef(() => MediaUrlTransformerService))
+    private readonly urlTransformer: MediaUrlTransformerService,
   ) {}
 
   private async preprocess(records: MediaFileEntity[]) {
@@ -30,7 +33,19 @@ export class MediaFileRepository {
           }
         } catch (e) {}
       }
-      record.url = encodeURI(record.url);
+
+      // Transform URL for private buckets
+      try {
+        const transformedUrl = await this.urlTransformer.transformUrl(record.url);
+        if (transformedUrl) {
+          record.url = transformedUrl;
+        } else {
+          record.url = encodeURI(record.url);
+        }
+      } catch (e) {
+        // Fallback to original URL encoding if transformation fails
+        record.url = encodeURI(record.url);
+      }
     });
     await Promise.all(promises);
   }

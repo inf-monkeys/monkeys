@@ -10718,9 +10718,9 @@ prosemirror-state@^1.0.0, prosemirror-state@^1.2.2, prosemirror-state@^1.4.3, pr
     prosemirror-view "^1.27.0"
 
 prosemirror-tables@^1.6.4:
-  version "1.8.3"
-  resolved "https://registry.npmmirror.com/prosemirror-tables/-/prosemirror-tables-1.8.3.tgz#b10b08518b2aa3aecb8cc64303b833bd816d443c"
-  integrity sha512-wbqCR/RlRPRe41a4LFtmhKElzBEfBTdtAYWNIGHM6X2e24NN/MTNUKyXjjphfAfdQce37Kh/5yf765mLPYDe7Q==
+  version "1.8.4"
+  resolved "https://registry.npmmirror.com/prosemirror-tables/-/prosemirror-tables-1.8.4.tgz#4fd7efaf89b96cbab5b40eba658fc5e6fd1c5b6b"
+  integrity sha512-CGr2BK5sLdZx+ARbeLO4HBZYa3qSG3FmwOVmzYs0Zp7n5SkrGqj+1CeNuubFNZEr64yMAQ20SanbFyIyHWZc8w==
   dependencies:
     prosemirror-keymap "^1.2.3"
     prosemirror-model "^1.25.4"

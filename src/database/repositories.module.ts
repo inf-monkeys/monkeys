@@ -1,4 +1,5 @@
-import { Global, Module } from '@nestjs/common';
+import { MediaModule } from '@/modules/assets/media/media.module';
+import { forwardRef, Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { entities } from './database.module';
 import { ApikeyRepository } from './repositories/apikey.repository';
@@ -122,6 +123,6 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     EvaluationRepository,
     EvaluationRefactoredRepository,
   ],
-  imports: [TypeOrmModule.forFeature(entities)],
+  imports: [TypeOrmModule.forFeature(entities), forwardRef(() => MediaModule)],
 })
 export class RepositoryMoule {}

@@ -111,7 +111,19 @@ export class StorageOperations {
 
     // 尝试直接调用 presignWrite，让 opendal 自己处理是否支持
     try {
-      return await operator.presignWrite(path, expiresInSeconds);
+      const presignedRequest = await operator.presignWrite(path, expiresInSeconds);
+
+      // Azure Blob Storage 需要 x-ms-blob-type header 才能上传
+      // OpenDAL 目前无法在 SAS token 中嵌入此 header，所以我们在返回的 headers 中添加
+      // 参考: https://github.com/apache/opendal/issues/6274
+      if (bucket.provider === 'azblob') {
+        presignedRequest.headers = {
+          ...presignedRequest.headers,
+          'x-ms-blob-type': 'BlockBlob',
+        };
+      }
+
+      return presignedRequest;
     } catch (error) {
       // 如果真的不支持，会抛出错误
       throw new Error(`Bucket ${bucket.id} presignWrite 失败: ${error.message}`);

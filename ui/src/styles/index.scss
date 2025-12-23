@@ -1,13 +1,13 @@
+@use "shadcn" as *;
+@use "utils" as *;
+@use "rc-image" as *;
+
 @tailwind base;
 
 @import "cropperjs/dist/cropper.css";
 
 @tailwind components;
 @tailwind utilities;
-
-@import "shadcn";
-@import "utils";
-@import "rc-image";
 
 @layer utilities {
 
