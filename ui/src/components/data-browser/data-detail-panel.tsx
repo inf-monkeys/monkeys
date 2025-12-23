@@ -1,26 +1,28 @@
-import { useRef, useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import { MediaPreview } from '@/components/ui/media-preview';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import type { DataItem } from '@/types/data';
 import { format } from 'date-fns';
 import {
-  Calendar,
-  Eye,
-  Download,
-  FileText,
-  User,
-  Tag,
-  FolderOpen,
-  Image as ImageIcon,
-  Video,
-  File,
   ArrowLeft,
+  Calendar,
   ChevronLeft,
   ChevronRight,
+  Download,
+  Eye,
+  File,
+  FileText,
+  FolderOpen,
+  Image as ImageIcon,
+  Tag,
+  User,
+  Video,
 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 /**
  * 检测是否是文本文件
@@ -68,6 +70,13 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
   const hasMultipleImages = mediaArray.length > 1;
   const currentMedia = mediaArray[currentImageIndex] || mediaArray[0];
   const isText = isTextFile(currentMedia);
+
+  // 转换 UI（先对齐团队资产的样式；功能后续接入）
+  const [conversionType, setConversionType] = useState<'text' | 'symbol-summary' | '3d-model' | 'neural-model'>('text');
+  useEffect(() => {
+    // 对齐团队资产：图片默认转文本；文本默认转图片（这里用“文本”作占位，后续接工作流时再扩展）
+    setConversionType(isText ? 'text' : 'text');
+  }, [isText]);
 
   // 加载文本文件内容
   useEffect(() => {
@@ -297,7 +306,7 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
         {/* Right: Details */}
         <div className="w-[400px] flex-shrink-0 flex flex-col">
           <ScrollArea className="flex-1">
-            <div className="space-y-6 pr-4">
+            <div className="space-y-6 pr-4 pb-10">
               {/* Basic Information */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold">基本信息</h3>
@@ -534,10 +543,45 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
               {/* Complete JSON Data */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold">完整元数据 (JSON)</h3>
-                <div className="w-full overflow-hidden rounded-lg border bg-muted">
-                  <pre ref={metadataJsonRef} className="p-4 text-xs overflow-x-auto overflow-y-auto max-h-96 font-mono">
+                <div className="w-full max-w-full overflow-hidden rounded-lg border bg-muted">
+                  <pre
+                    ref={metadataJsonRef}
+                    className="p-4 text-xs overflow-x-auto overflow-y-auto max-h-96 font-mono whitespace-pre-wrap break-all"
+                  >
                     {JSON.stringify(item, null, 2)}
                   </pre>
+                </div>
+              </div>
+
+              {/* 转换（UI 对齐团队资产） */}
+              <div className="border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-black">
+                <div className="flex flex-col gap-3">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">转换</label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="whitespace-nowrap rounded bg-gray-100 px-2 py-1 text-sm font-medium text-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                      {isText ? '文本' : '图片'}
+                    </span>
+                    <span className="text-gray-400 dark:text-gray-500">→</span>
+                    <Select value={conversionType} onValueChange={(v) => setConversionType(v as any)}>
+                      <SelectTrigger className="h-8 w-24 shrink-0 border-gray-300 dark:border-gray-700">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">文本</SelectItem>
+                        <SelectItem value="symbol-summary">符号概括</SelectItem>
+                        <SelectItem value="3d-model">3D模型</SelectItem>
+                        <SelectItem value="neural-model">神经模型</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      size="small"
+                      className="ml-auto shrink-0 whitespace-nowrap rounded-md bg-black px-4 py-2 font-medium text-white hover:bg-black hover:text-white dark:bg-white dark:text-black"
+                      disabled={(isText && (isLoadingText || !!textError)) || (!isText && !currentMedia)}
+                      onClick={() => toast.message('转换功能待接入（本次先对齐 UI）')}
+                    >
+                      开始转换
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
