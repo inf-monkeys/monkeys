@@ -410,7 +410,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
             <div
               key={`${index}-${item.render.key}`}
               className={cn(span2 && 'col-span-2', !isPom && !isVideo && 'aspect-square')}
-              style={{ minHeight: isPom ? 320 : isVideo ? 0 : 200 }}
+              style={{ minHeight: isPom ? 320 : isVideo ? 0 : itemSize }}
             >
               {renderItem(item)}
             </div>

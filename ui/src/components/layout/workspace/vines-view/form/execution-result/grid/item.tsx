@@ -187,7 +187,7 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
               ? 'h-full'
               : isVideo
                 ? 'h-full'
-                : 'aspect-square h-full'
+                : 'h-full w-full'
             : 'h-10'
         }`}
       >
@@ -209,7 +209,7 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
                 ? 'h-full'
                 : isVideo
                   ? 'h-full'
-                  : 'aspect-square h-full'
+                  : 'h-full w-full'
               : // 非网格（masonry 等）模式下，POM 运行中卡片组固定高度避免重叠
                 isPom
                 ? 'h-[500px]'
@@ -234,7 +234,7 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
                 ? 'h-full'
                 : isVideo
                   ? 'h-full'
-                  : 'aspect-square h-full'
+                  : 'h-full w-full'
               : // 非网格（masonry 等）模式下，POM 暂停卡片组固定高度避免重叠
                 isPom
                 ? 'h-[500px]'
@@ -252,7 +252,8 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
       return (
         <div
           className={`relative overflow-hidden rounded-lg border border-input shadow-sm ${
-            displayType === 'grid' ? 'aspect-square h-full' : ''
+            // grid 模式下由外层 grid item 负责 aspect-square；这里不要再加 aspect-square，避免缩小时被 min-height 触发宽度推导导致横向溢出
+            displayType === 'grid' ? 'h-full w-full' : ''
           }`}
           // 为每个卡片增加左右外边距，避免相邻边框在视觉上贴合产生“重叠线”
           style={{ marginLeft: 6, marginRight: 6 }}
@@ -297,7 +298,7 @@ const ExecutionResultItemComponent: React.FC<IExecutionResultItemProps> = ({
                 ? 'h-full'
                 : isVideo
                   ? 'h-full'
-                  : 'aspect-square h-full'
+                  : 'h-full w-full'
               : // 非 grid 模式下，POM 卡片固定高度避免重叠
                 isPom
                 ? 'h-[500px]'
