@@ -1,4 +1,5 @@
 import React, { Dispatch, SetStateAction, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { useAsyncEffect } from 'ahooks';
 import { get } from 'lodash';
@@ -37,6 +38,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   const rowSentinelRef = useRef<HTMLDivElement>(null);
   const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const [expanded, setExpanded] = useState(false);
+  const [expandedRect, setExpandedRect] = useState<{ left: number; width: number; bottomOffset: number } | null>(null);
 
   // 虚拟列表常量
   const ITEM_SIZE = 72; // 与样式保持一致的方形边长
@@ -170,6 +172,44 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   // 展开态：滚动容器与 Sentinel
   const popupScrollRef = useRef<HTMLDivElement>(null);
   const gridSentinelRef = useRef<HTMLDivElement>(null);
+
+  // 仅做“免遮挡”：展开层通过 portal 渲染到 body，避免被画板（tldraw/iframe 的 portal fixed 层）压住
+  // 注意：这里不改变任何加载/虚拟列表逻辑，只负责测量定位
+  useLayoutEffect(() => {
+    if (!expanded) {
+      setExpandedRect(null);
+      return;
+    }
+    const el = containerRef.current;
+    if (!el || typeof window === 'undefined') return;
+
+    let raf = 0;
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      const bottomOffset = Math.max(0, window.innerHeight - r.bottom);
+      setExpandedRect({ left: r.left, width: r.width, bottomOffset });
+    };
+
+    const schedule = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
+    };
+
+    // 首帧同步测量（layout effect 阶段），避免闪烁
+    measure();
+
+    const ro = new ResizeObserver(schedule);
+    ro.observe(el);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('scroll', schedule, true);
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('scroll', schedule, true);
+    };
+  }, [expanded]);
   useEffect(() => {
     if (!expanded) return;
     const root = popupScrollRef.current;
@@ -394,77 +434,88 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
       )}
 
       {/* 展开态：上方悬浮 Popup，网格&无限滚动 */}
-      {expanded && (
-        <div
-          className={cn(
-            'absolute bottom-0 left-0 right-0 z-[1000] rounded-lg bg-slate-1',
-            themeMode === 'border' && 'border border-input',
-            themeMode === 'shadow' && 'shadow-around',
-          )}
-        >
-          <div
-            ref={popupScrollRef}
-            className="max-h-[calc(var(--oem-vh)*0.6)] overflow-y-auto p-global"
-            style={{ marginBottom: ITEM_SIZE }}
-            onScroll={onGridScroll}
-          >
-            <div style={{ height: gridTopSpacer }} />
-            <div
-              className="grid"
-              style={{
-                gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))`,
-                gap: GAP,
-              }}
-            >
-              {images.slice(firstVisibleIndex, lastVisibleIndex + 1).map((item, sliceIdx) => {
-                const index = firstVisibleIndex + sliceIdx;
-                return (
-                  <div key={item.render.key} className="aspect-square w-full overflow-hidden rounded-md">
-                    {isUniImagePreview ? (
-                      <UniImagePreviewWrapper
-                        imageUrl={item.render.origin as string}
-                        onClick={() => {
-                          setPosition(index);
-                        }}
-                      >
-                        <CarouselItemImage
-                          image={item as ImagesResultWithOrigin}
-                          index={index}
-                          handleDragStart={handleDragStart}
-                        />
-                      </UniImagePreviewWrapper>
-                    ) : (
-                      <CarouselItemImage
-                        image={item as ImagesResultWithOrigin}
-                        index={index}
-                        handleDragStart={handleDragStart}
-                        onClick={() => {
-                          setPosition(index);
-                          setOpen(true);
-                        }}
-                      />
-                    )}
+      {expanded &&
+        (typeof document !== 'undefined'
+          ? createPortal(
+              <div
+                className={cn(
+                  'rounded-lg bg-slate-1',
+                  themeMode === 'border' && 'border border-input',
+                  themeMode === 'shadow' && 'shadow-around',
+                )}
+                style={{
+                  position: 'fixed',
+                  left: expandedRect?.left ?? 0,
+                  width: expandedRect?.width ?? window.innerWidth,
+                  bottom: expandedRect?.bottomOffset ?? 0,
+                  zIndex: 50, // 与 Dialog/Popover 同层级；靠“后挂载”覆盖画板 portal（也是 50）
+                }}
+              >
+                <div
+                  ref={popupScrollRef}
+                  className="max-h-[calc(var(--oem-vh)*0.6)] overflow-y-auto p-global"
+                  style={{ marginBottom: ITEM_SIZE }}
+                  onScroll={onGridScroll}
+                >
+                  <div style={{ height: gridTopSpacer }} />
+                  <div
+                    className="grid"
+                    style={{
+                      gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))`,
+                      gap: GAP,
+                    }}
+                  >
+                    {images.slice(firstVisibleIndex, lastVisibleIndex + 1).map((item, sliceIdx) => {
+                      const index = firstVisibleIndex + sliceIdx;
+                      return (
+                        <div key={item.render.key} className="aspect-square w-full overflow-hidden rounded-md">
+                          {isUniImagePreview ? (
+                            <UniImagePreviewWrapper
+                              imageUrl={item.render.origin as string}
+                              onClick={() => {
+                                setPosition(index);
+                              }}
+                            >
+                              <CarouselItemImage
+                                image={item as ImagesResultWithOrigin}
+                                index={index}
+                                handleDragStart={handleDragStart}
+                              />
+                            </UniImagePreviewWrapper>
+                          ) : (
+                            <CarouselItemImage
+                              image={item as ImagesResultWithOrigin}
+                              index={index}
+                              handleDragStart={handleDragStart}
+                              onClick={() => {
+                                setPosition(index);
+                                setOpen(true);
+                              }}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-            <div style={{ height: gridBottomSpacer }} />
-            <div ref={gridSentinelRef} className="h-2 w-full" />
-          </div>
-          <div
-            className="absolute bottom-0 left-global flex items-center"
-            style={{ height: `calc(${ITEM_SIZE}px + (var(--global-spacing)*2))` }}
-          >
-            <Button
-              icon={expanded ? <Minimize2 /> : <Maximize2 />}
-              variant="outline"
-              size="icon"
-              onClick={() => setExpanded((s) => !s)}
-              disabled={images.length === 0}
-            />
-          </div>
-        </div>
-      )}
+                  <div style={{ height: gridBottomSpacer }} />
+                  <div ref={gridSentinelRef} className="h-2 w-full" />
+                </div>
+                <div
+                  className="absolute bottom-0 left-global flex items-center"
+                  style={{ height: `calc(${ITEM_SIZE}px + (var(--global-spacing)*2))` }}
+                >
+                  <Button
+                    icon={expanded ? <Minimize2 /> : <Maximize2 />}
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setExpanded((s) => !s)}
+                    disabled={images.length === 0}
+                  />
+                </div>
+              </div>,
+              document.body,
+            )
+          : null)}
     </div>
   );
 };
