@@ -48,7 +48,18 @@ import { ExternalLayerPanel } from './ExternalLayerPanel';
 import { LiveImageProvider } from './hooks/useLiveImage';
 // Agent 嵌入由 ExternalLayerPanel 控制
 import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
+import { setTldrawEditor } from '@/features/agent/components/TldrawToolUIs';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
+// 逻辑关系发现功能
+import { RelationshipDiscoveryButton } from './RelationshipDiscoveryButton';
+import { RelationshipResultPanel } from './RelationshipResultPanel';
+import { useRelationshipDiscovery } from './hooks/useRelationshipDiscovery';
+// 思维图谱生成功能
+import { MindMapButton } from './MindMapButton';
+import { MindMapPanel } from './MindMapPanel';
+import { useMindMapGeneration } from './hooks/useMindMapGeneration';
+// 灵感推送功能
+import { useCanvasInspirationPush } from './hooks/useCanvasInspirationPush';
 import {
   InstructionShapeUtil,
   InstructionTool,
@@ -407,14 +418,17 @@ export const Board: React.FC<BoardProps> = ({
   // 使用可选链和默认值来安全获取路由参数
   let designProjectId: string | undefined;
   let designBoardId: string | undefined;
+  let teamId: string | undefined;
   try {
     const params = useParams({ from: '/$teamId/design/$designProjectId/$designBoardId/' });
     designProjectId = params?.designProjectId;
     designBoardId = params?.designBoardId;
+    teamId = params?.teamId;
   } catch {
     // 如果不在设计画板路由中，designProjectId 为 undefined
     designProjectId = undefined;
     designBoardId = undefined;
+    teamId = undefined;
   }
   const { data: designProject } = useGetDesignProject(designProjectId);
   const { data: user } = useUser();
@@ -443,6 +457,33 @@ export const Board: React.FC<BoardProps> = ({
   const placeholderMapRef = React.useRef<Map<string, string>>(new Map());
   // 追踪最后修改的shapeId
   const lastModifiedShapeIdRef = React.useRef<string | null>(null);
+
+  // 逻辑关系发现功能
+  const {
+    loading: relationshipLoading,
+    result: relationshipResult,
+    discoverRelationships,
+    applyToCanvas,
+    closeResult: closeRelationshipResult,
+  } = useRelationshipDiscovery({ editor });
+
+  // 思维图谱生成功能
+  const {
+    loading: mindMapLoading,
+    result: mindMapResult,
+    aiInsight: mindMapInsight,
+    isGeneratingInsight: isMindMapInsightGenerating,
+    currentInsightType,
+    generateMindMap,
+    applyToCanvas: applyMindMapToCanvas,
+    closeResult: closeMindMapResult,
+    updateNode,
+    addNode,
+    deleteNode,
+    addEdge,
+    deleteEdge,
+    generateInsight: generateMindMapInsight,
+  } = useMindMapGeneration({ editor });
 
   // 获取当前模式
   const oneOnOne = get(oem, 'theme.designProjects.oneOnOne', false);
@@ -550,11 +591,24 @@ export const Board: React.FC<BoardProps> = ({
   const components: TLComponents = React.useMemo(() => {
     const comps: TLComponents = {};
 
-    // 添加 Workflow 节点选择器和执行区域
+    // 添加 Workflow 节点选择器、执行区域和逻辑关系发现按钮
     comps.InFrontOfTheCanvas = () => (
       <>
         <OnCanvasComponentPicker />
         <WorkflowRegions />
+        {/* 思维图谱和逻辑关系发现按钮 - 只在非只读模式下显示 */}
+        {!isReadonlyMode && (
+          <>
+            <MindMapButton
+              onGenerateMindMap={generateMindMap}
+              loading={mindMapLoading}
+            />
+            <RelationshipDiscoveryButton
+              onDiscoverRelationships={discoverRelationships}
+              loading={relationshipLoading}
+            />
+          </>
+        )}
       </>
     );
 
@@ -593,7 +647,7 @@ export const Board: React.FC<BoardProps> = ({
     }
 
     return comps;
-  }, [oem, miniPage, createDefaultFrame, shouldHideToolbarForTemplate]); // 当oem、miniPage或权限变化时重新创建
+  }, [oem, miniPage, createDefaultFrame, shouldHideToolbarForTemplate, isReadonlyMode, discoverRelationships, relationshipLoading]); // 当oem、miniPage或权限变化时重新创建
 
   // 创建 frame 函数引用 createDefaultFrame
   const createFrameWithConfig = useCallback(
@@ -1020,7 +1074,7 @@ export const Board: React.FC<BoardProps> = ({
             ...(leftCollapsed ? {} : {}),
           }}
         >
-          {editor && <ExternalLayerPanel editor={editor} boardId={designBoardId} />}
+          {editor && <ExternalLayerPanel editor={editor} boardId={designBoardId} teamId={teamId} userId={user?.id} />}
           {/* 右侧拖拽调宽手柄 */}
           {!leftCollapsed && (
             <div
@@ -1112,6 +1166,8 @@ export const Board: React.FC<BoardProps> = ({
               persistenceKey={persistenceKey}
               onMount={(editor: Editor) => {
                 setEditor(editor);
+                // 设置 editor 给 agent 工具使用
+                setTldrawEditor(editor);
 
                 // 重新检查只读模式（因为 onMount 可能在数据加载前执行）
                 const currentIsReadonly = isTemplate && !canEditTemplate;
@@ -1388,6 +1444,34 @@ export const Board: React.FC<BoardProps> = ({
               {get(oem, 'theme.designProjects.showMiniToolsToolbar', false) && <MiniToolsToolbar />}
               <SneakySideEffects />
               <LiveImageAssets />
+              {/* 逻辑关系发现结果面板 */}
+              {!isReadonlyMode && relationshipResult && (
+                <RelationshipResultPanel
+                  result={relationshipResult}
+                  onClose={closeRelationshipResult}
+                  onApplyToCanvas={applyToCanvas}
+                  editor={editor}
+                />
+              )}
+              {/* 思维图谱面板 */}
+              {!isReadonlyMode && mindMapResult && (
+                <MindMapPanel
+                  result={mindMapResult}
+                  onClose={closeMindMapResult}
+                  onApply={applyMindMapToCanvas}
+                  onUpdateNode={updateNode}
+                  onAddNode={addNode}
+                  onDeleteNode={deleteNode}
+                  onAddEdge={addEdge}
+                  onDeleteEdge={deleteEdge}
+                  onGenerateSolution={() => generateMindMapInsight('solution')}
+                  onProvideCreativity={() => generateMindMapInsight('creativity')}
+                  onDiscoverRelationship={() => generateMindMapInsight('relationship')}
+                  aiInsight={mindMapInsight}
+                  isGeneratingInsight={isMindMapInsightGenerating}
+                  currentInsightType={currentInsightType}
+                />
+              )}
             </Tldraw>
           </LiveImageProvider>
         </TldrawErrorBoundary>

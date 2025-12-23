@@ -10,6 +10,8 @@ export * from './hooks/useAgent';
 export * from './hooks/useAgentChat';
 export * from './hooks/useThread';
 export * from './hooks/useThreadListRuntime';
+export * from './hooks/useThreadListWithTools';
+export * from './hooks/useAssistantUIAdapter';
 
 // Types
 export * from './types/agent.types';
@@ -20,3 +22,8 @@ export * from './components/AgentConfig';
 export * from './components/AgentChat';
 export * from './components/ThreadList';
 export * from './components/AgentRuntimeProvider';
+export * from './components/TldrawToolUIs';
+
+// Contexts
+export * from './contexts/TldrawContext';
+export * from './contexts/TldrawCanvasContext';

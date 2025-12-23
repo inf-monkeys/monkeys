@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, forwardRef, Inject } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ToolCallRepository } from '../repositories/tool-call.repository';
 import { AgentToolRegistryService } from './agent-tool-registry.service';
@@ -13,6 +13,9 @@ import {
   ToolExecutionTimeoutError,
   UsageStats,
 } from '../types/tool.types';
+import { WorkflowRepository } from '@/database/repositories/workflow.repository';
+import { WorkflowExecutionService } from '@/modules/workflow/workflow.execution.service';
+import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 
 /**
  * Agent Tool Executor Service
@@ -36,6 +39,9 @@ export class AgentToolExecutorService {
     private readonly quotaService: AgentQuotaService,
     private readonly toolsForwardService: ToolsForwardService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly workflowRepository: WorkflowRepository,
+    @Inject(forwardRef(() => WorkflowExecutionService))
+    private readonly workflowExecutionService: WorkflowExecutionService,
   ) {}
 
   /**
@@ -303,6 +309,12 @@ export class AgentToolExecutorService {
     switch (toolName) {
       case 'web_search':
         return await this.builtinWebSearch(args);
+      case 'list_workflows':
+        return await this.builtinListWorkflows(args, context);
+      case 'execute_workflow':
+        return await this.builtinExecuteWorkflow(args, context);
+      case 'list_tools':
+        return await this.builtinListTools(args, context);
       default:
         throw new Error(`Builtin tool ${toolName} not implemented`);
     }
@@ -324,6 +336,165 @@ export class AgentToolExecutorService {
         },
       ],
     };
+  }
+
+  /**
+   * 内置工具：列出工作流
+   */
+  private async builtinListWorkflows(
+    args: { includeHidden?: boolean },
+    context: { teamId: string },
+  ): Promise<any> {
+    const { teamId } = context;
+    const { includeHidden = false } = args;
+
+    try {
+      // 获取团队的所有工作流
+      const workflows = await this.workflowRepository.findWorkflowByCondition({ teamId });
+
+      // 过滤和格式化
+      const formattedWorkflows = workflows
+        .filter((wf) => includeHidden || !wf.hidden)
+        .filter((wf) => wf.activated !== false) // 只返回激活的工作流
+        .map((wf) => ({
+          workflowId: wf.workflowId,
+          name: typeof wf.displayName === 'string' ? wf.displayName : wf.displayName?.['zh-CN'] || wf.displayName?.['en-US'] || wf.workflowId,
+          description: typeof wf.description === 'string' ? wf.description : wf.description?.['zh-CN'] || wf.description?.['en-US'] || '',
+          version: wf.version,
+          // 提取输入参数信息
+          inputs: (wf.variables || []).map((v) => ({
+            name: v.name,
+            displayName: typeof v.displayName === 'string' ? v.displayName : v.displayName?.['zh-CN'] || v.displayName?.['en-US'] || v.name,
+            type: v.type,
+            required: v.required || false,
+            default: v.default,
+            description: typeof v.description === 'string' ? v.description : v.description?.['zh-CN'] || v.description?.['en-US'] || '',
+          })),
+          // 提取输出配置信息
+          outputs: (wf.output || []).map((o) => ({
+            key: o.key,
+            value: o.value,
+          })),
+        }));
+
+      return {
+        count: formattedWorkflows.length,
+        workflows: formattedWorkflows,
+      };
+    } catch (error) {
+      this.logger.error('Failed to list workflows:', error);
+      throw new Error(`Failed to list workflows: ${error.message}`);
+    }
+  }
+
+  /**
+   * 内置工具：执行工作流
+   */
+  private async builtinExecuteWorkflow(
+    args: { workflowId: string; inputData: any; sync?: boolean },
+    context: { teamId: string; userId: string },
+  ): Promise<any> {
+    const { teamId, userId } = context;
+    const { workflowId, inputData, sync = true } = args;
+
+    try {
+      this.logger.log(`Executing workflow ${workflowId} for team ${teamId}`);
+
+      // 验证工作流存在（获取最新版本）
+      const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId, true);
+      if (!workflow) {
+        throw new Error(`Workflow ${workflowId} not found`);
+      }
+
+      if (!workflow.activated) {
+        throw new Error(`Workflow ${workflowId} is not activated`);
+      }
+
+      // 启动工作流
+      const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
+        teamId,
+        userId,
+        workflowId,
+        inputData,
+        triggerType: WorkflowTriggerType.MANUALLY,
+        version: workflow.version,
+      });
+
+      if (!sync) {
+        // 异步模式：立即返回实例ID
+        return {
+          workflowInstanceId,
+          status: 'started',
+          message: 'Workflow execution started. Use the workflowInstanceId to check status.',
+        };
+      }
+
+      // 同步模式：等待工作流完成
+      this.logger.log(`Waiting for workflow ${workflowInstanceId} to complete...`);
+      const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
+
+      return {
+        workflowInstanceId,
+        status: result.status,
+        output: result.output,
+        message: 'Workflow execution completed successfully.',
+      };
+    } catch (error) {
+      this.logger.error(`Failed to execute workflow ${workflowId}:`, error);
+      throw new Error(`Failed to execute workflow: ${error.message}`);
+    }
+  }
+
+  /**
+   * 内置工具：列出可用工具
+   */
+  private async builtinListTools(
+    args: { category?: string; includeParameters?: boolean },
+    context: { teamId: string },
+  ): Promise<any> {
+    const { category, includeParameters = true } = args;
+    const { teamId } = context;
+
+    try {
+      // 获取所有内置工具
+      const builtinTools = this.agentToolRegistry.getBuiltinTools();
+
+      // 获取团队的外部工具
+      const externalTools = await this.agentToolRegistry.getExternalTools(teamId);
+
+      // 合并并格式化
+      const allTools = [
+        ...builtinTools.map((tool) => ({
+          name: tool.name,
+          description: tool.description,
+          category: tool.metadata?.category || 'uncategorized',
+          sourceType: 'builtin',
+          needsApproval: tool.metadata?.needsApproval || false,
+          parameters: includeParameters ? tool.parameters : undefined,
+        })),
+        ...externalTools.map((tool) => ({
+          name: tool.name,
+          description: tool.description,
+          category: tool.category || 'uncategorized',
+          sourceType: 'external',
+          needsApproval: tool.needsApproval || false,
+          parameters: includeParameters ? tool.inputSchema : undefined,
+        })),
+      ];
+
+      // 按类别过滤
+      const filteredTools = category
+        ? allTools.filter((t) => t.category === category)
+        : allTools;
+
+      return {
+        count: filteredTools.length,
+        tools: filteredTools,
+      };
+    } catch (error) {
+      this.logger.error('Failed to list tools:', error);
+      throw new Error(`Failed to list tools: ${error.message}`);
+    }
   }
 
   /**

@@ -33,6 +33,12 @@ export class AgentRepository {
     });
   }
 
+  async findByNameAndTeam(name: string, teamId: string): Promise<AgentEntity | null> {
+    return await this.repository.findOne({
+      where: { name, teamId, isDeleted: false },
+    });
+  }
+
   async update(id: string, data: Partial<AgentEntity>): Promise<AgentEntity> {
     await this.repository.update(id, data);
     return await this.findById(id);

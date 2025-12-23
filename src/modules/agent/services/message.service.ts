@@ -129,6 +129,13 @@ export class MessageService {
   }
 
   /**
+   * 更新消息
+   */
+  async update(id: string, updates: Partial<MessageEntity>): Promise<MessageEntity> {
+    return await this.messageRepository.update(id, updates);
+  }
+
+  /**
    * 获取 Thread 的所有消息
    */
   async getThreadMessages(threadId: string, teamId?: string): Promise<MessageEntity[]> {

@@ -3,6 +3,31 @@
  */
 
 /**
+ * Agent 显示模式
+ */
+export type AgentMode = 'normal' | 'mini' | 'embed';
+
+/**
+ * Agent 模式配置
+ */
+export interface AgentModeConfig {
+  /** 显示模式 */
+  mode: AgentMode;
+  /** 是否显示线程列表 */
+  showThreadList?: boolean;
+  /** 是否紧凑布局 */
+  compact?: boolean;
+  /** 固定高度 */
+  height?: string | number;
+  /** 固定宽度 */
+  width?: string | number;
+  /** 是否可调整大小 */
+  resizable?: boolean;
+  /** 位置（仅 mini/embed 模式） */
+  position?: 'left' | 'right' | 'top' | 'bottom';
+}
+
+/**
  * Agent 配置
  */
 export interface AgentConfig {
@@ -88,6 +113,8 @@ export interface Thread {
   metadata?: ThreadMetadata;
   state?: ThreadState;
   lastMessageAt?: string;
+  /** 后端聚合字段：该 thread 的消息数量（用于判断是否为空会话） */
+  messageCount?: number;
   createdTimestamp: string;
   updatedTimestamp: string;
 }
@@ -217,6 +244,57 @@ export interface SendMessageDto {
   imageMediaIds?: string[];
   agentId?: string;
   modelId?: string;
+}
+
+/**
+ * Tool 来源类型
+ */
+export type ToolSourceType = 'builtin' | 'external';
+
+/**
+ * Tool 实体
+ */
+export interface Tool {
+  id?: string;
+  teamId?: string;
+  name: string;
+  description: string;
+  inputSchema: any; // JSON Schema
+  category?: string;
+  needsApproval?: boolean;
+  approvalPolicy?: {
+    timeout?: number;
+    requiresReason?: boolean;
+  };
+  isPublic?: boolean;
+  version?: string;
+  iconUrl?: string;
+  sourceType?: ToolSourceType; // 工具来源（内置/外部）
+  createdTimestamp?: string;
+  updatedTimestamp?: string;
+}
+
+/**
+ * ToolCall 实体
+ */
+export interface ToolCall {
+  id: string;
+  toolCallId: string;
+  threadId: string;
+  messageId: string;
+  teamId: string;
+  toolName: string;
+  input: any;
+  output?: any;
+  status: 'pending' | 'running' | 'completed' | 'error' | 'timeout';
+  isError: boolean;
+  errorText?: string;
+  approvalStatus: 'not_required' | 'pending' | 'approved' | 'rejected';
+  approvedBy?: string;
+  approvedAt?: string;
+  duration?: number;
+  createdTimestamp: string;
+  updatedTimestamp: string;
 }
 
 /**

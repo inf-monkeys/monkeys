@@ -2,8 +2,8 @@
  * AgentChat 组件 - 使用 assistant-ui 的完整聊天界面
  */
 
-import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import { Thread } from '@/components/assistant-ui/thread';
+import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import { useAgentChat } from '../hooks/useAgentChat';
 
 interface AgentChatProps {
