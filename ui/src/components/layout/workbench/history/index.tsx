@@ -172,6 +172,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
   // 展开态：滚动容器与 Sentinel
   const popupScrollRef = useRef<HTMLDivElement>(null);
   const gridSentinelRef = useRef<HTMLDivElement>(null);
+  const popupPortalRef = useRef<HTMLDivElement>(null);
 
   // 仅做“免遮挡”：展开层通过 portal 渲染到 body，避免被画板（tldraw/iframe 的 portal fixed 层）压住
   // 注意：这里不改变任何加载/虚拟列表逻辑，只负责测量定位
@@ -209,6 +210,41 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule, true);
     };
+  }, [expanded]);
+
+  // 需求：像 left sidebar 一样，点击页面其它部分后自动收起
+  useEffect(() => {
+    if (!expanded) return;
+    if (typeof document === 'undefined') return;
+
+    const onPointerDownCapture = (e: PointerEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      const containerEl = containerRef.current;
+      const popupEl = popupPortalRef.current;
+
+      // 如果在任意 Dialog/AlertDialog（含遮罩层）内点击，不触发收起
+      // 这样“关闭弹窗”不会连带把 History 收起来
+      if (target instanceof Element) {
+        if (
+          target.closest(
+            '[data-vines-dialog-content], [data-vines-overlay], [role="dialog"], [role="alertdialog"]',
+          )
+        ) {
+          return;
+        }
+      }
+
+      // 点击发生在折叠条区域 或 展开层内部：不收起
+      if (containerEl?.contains(target)) return;
+      if (popupEl?.contains(target)) return;
+
+      setExpanded(false);
+    };
+
+    // 捕获阶段更稳，避免被内部 stopPropagation 影响
+    document.addEventListener('pointerdown', onPointerDownCapture, true);
+    return () => document.removeEventListener('pointerdown', onPointerDownCapture, true);
   }, [expanded]);
   useEffect(() => {
     if (!expanded) return;
@@ -438,6 +474,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
         (typeof document !== 'undefined'
           ? createPortal(
               <div
+                ref={popupPortalRef}
                 className={cn(
                   'rounded-lg bg-slate-1',
                   themeMode === 'border' && 'border border-input',
