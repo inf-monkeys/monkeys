@@ -57,15 +57,21 @@ const GLBModel: React.FC<GLBModelProps> = ({ url, onReady }) => {
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
       const maxDim = Math.max(size.x, size.y, size.z);
-      const scale = 2 / maxDim;
 
-      // 设置相机位置
-      camera.position.set(center.x, center.y, center.z + maxDim * 2);
-      camera.lookAt(center);
+      // 计算缩放比例，使模型适合视图（与 STEP 分支保持一致的 framing 思路）
+      const desiredSize = 8; // 期望最大尺寸
+      const scale = maxDim > 0 ? desiredSize / maxDim : 1;
 
-      // 缩放模型
+      // 缩放并把模型中心移到原点（OrbitControls 默认围绕原点旋转）
       model.scale.setScalar(scale);
-      model.position.copy(center).multiplyScalar(-scale);
+      model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+
+      // 基于缩放后的半径设置相机距离，避免“缩放后模型很小但相机仍然很远”导致截图像小点
+      const sphere = box.getBoundingSphere(new THREE.Sphere());
+      const radius = sphere?.radius ?? maxDim / 2;
+      const distance = Math.max(radius * scale * 2.5, 3);
+      camera.position.set(distance, distance, distance);
+      camera.lookAt(0, 0, 0);
     }
   }, [model, camera]);
 

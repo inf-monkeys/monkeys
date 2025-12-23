@@ -5,6 +5,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import type { DataItem } from '@/types/data';
+import type { MonkeyWorkflow, ToolProperty } from '@inf-monkeys/monkeys';
+import { useNavigate } from '@tanstack/react-router';
 import { format } from 'date-fns';
 import {
   ArrowLeft,
@@ -21,14 +23,179 @@ import {
   User,
   Video,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { startTransition, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+
+import { useWorkspacePages } from '@/apis/pages';
+import { getWorkflow } from '@/apis/workflow';
+import { StepThumbnailGenerator } from '@/components/layout/ugc/step-thumbnail-generator';
+import { useVinesTeam } from '@/components/router/guard/team';
+import { useVinesRoute } from '@/components/router/use-vines-route';
+import { useSetCurrentPage } from '@/store/useCurrentPageStore';
+import { useSetWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
+import { getI18nContent } from '@/utils';
+import { getTargetInput } from '@/utils/association';
+
+const CONVERSION_FUNCTION_VALUES = ['text', 'image', 'symbol-summary', '3d-model', 'neural-model'] as const;
+type ConversionType = (typeof CONVERSION_FUNCTION_VALUES)[number];
+
+const TEXT_WORKFLOW = {
+  workflowId: '6901e37ea5296be427f9ccab',
+  pageId: '6901e37f87f27c8355da8e2d',
+} as const;
+
+const IMAGE_WORKFLOW = {
+  workflowId: '6901d6a98e22439dfb12743a',
+  pageId: '6901d6ab22a4acef6c94370c',
+} as const;
+
+const normalizeAcceptList = (accept: unknown): string[] => {
+  if (typeof accept !== 'string') return [];
+  return accept
+    .split(',')
+    .map((it) => it.trim().replace(/^\./, '').toLowerCase())
+    .filter(Boolean);
+};
+
+const isImageFileVariable = (variable?: ToolProperty): boolean => {
+  if (!variable) return false;
+  if (variable.type !== 'file') return false;
+  const acceptList = normalizeAcceptList(variable.typeOptions?.accept);
+  if (!acceptList.length) return true;
+  return acceptList.some(
+    (it) =>
+      it.includes('image/') || ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'tiff', 'svg'].includes(it.replace(/^\./, '')),
+  );
+};
+
+const is3DFileUrl = (url: string | undefined): boolean => {
+  if (!url) return false;
+  const u = url.toLowerCase();
+  return /\.(step|stp|glb|gltf|obj|fbx|stl)(\?|#|$)/.test(u);
+};
+
+const findConversionFunctionVar = (workflow?: MonkeyWorkflow): ToolProperty | undefined => {
+  const vars = workflow?.variables ?? [];
+  const CN_MAP: Record<ConversionType, string> = {
+    text: '文本',
+    image: '图片',
+    'symbol-summary': '符号概括',
+    '3d-model': '3D模型',
+    'neural-model': '神经模型',
+  };
+
+  const norm = (val: unknown) =>
+    String(val ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/[\s\-_]/g, '');
+
+  const hasConversionSelectValues = (v: ToolProperty) => {
+    const selectList = (v.typeOptions as any)?.selectList;
+    if (!Array.isArray(selectList)) return false;
+    const values = selectList.map((it: any) => String(it?.value ?? '')).filter(Boolean);
+    const labels = selectList
+      .map((it: any) => {
+        const label = it?.label ?? it?.displayName ?? it?.name ?? it?.text ?? it?.title;
+        return String(getI18nContent(label) ?? label ?? '');
+      })
+      .filter(Boolean);
+
+    const hasInternal = CONVERSION_FUNCTION_VALUES.some((x) => values.includes(x) || labels.includes(x));
+    const hasCN = Object.values(CN_MAP).some((x) => values.includes(x) || labels.includes(x));
+    const hasFuzzy =
+      CONVERSION_FUNCTION_VALUES.some((x) => values.some((v) => norm(v) === norm(x)) || labels.some((l) => norm(l) === norm(x))) ||
+      Object.values(CN_MAP).some((x) => values.some((v) => norm(v) === norm(x)) || labels.some((l) => norm(l) === norm(x)));
+    return hasInternal || hasCN;
+  };
+
+  // Prefer select list variable that contains our values (internal or CN)
+  for (const v of vars) {
+    if (v.type !== 'string') continue;
+    if (hasConversionSelectValues(v)) return v;
+  }
+  // Fallback by label/name matching
+  const byName = vars.find((v) => {
+    if (v.type !== 'string') return false;
+    const name = String(v.name ?? '');
+    const label = String(getI18nContent((v as any).displayName) ?? '');
+    return /convert|conversion|function/i.test(name) || /转换功能/.test(label);
+  });
+  return byName as any;
+};
+
+const resolveConversionValueForVar = (variable: ToolProperty | undefined, conversionType: ConversionType): string => {
+  if (!variable) return conversionType;
+  const selectList = (variable.typeOptions as any)?.selectList;
+  if (!Array.isArray(selectList) || !selectList.length) return conversionType;
+  const values = selectList.map((it: any) => String(it?.value ?? '')).filter(Boolean);
+  const norm = (val: unknown) =>
+    String(val ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/[\s\-_]/g, '');
+
+  // 1) internal values
+  if (values.includes(conversionType)) return conversionType;
+
+  // 2) CN values
+  const cnMap: Record<ConversionType, string> = {
+    text: '文本',
+    image: '图片',
+    'symbol-summary': '符号概括',
+    '3d-model': '3D模型',
+    'neural-model': '神经模型',
+  };
+  const cn = cnMap[conversionType];
+  if (values.includes(cn)) return cn;
+
+  // 3) match by label/displayName -> return the underlying value
+  const targets = [conversionType, cn].filter(Boolean).map(norm);
+  const synonyms: Partial<Record<ConversionType, string[]>> = {
+    '3d-model': ['3d', '3d模型', '3dmodel', '3d-model', '3d model'],
+    'symbol-summary': ['符号概述', '符号总结', 'symbolsummary', 'symbol summary'],
+    'neural-model': ['神经网络模型', 'neuralmodel', 'neural model'],
+  };
+  for (const s of (synonyms[conversionType] ?? [])) targets.push(norm(s));
+
+  for (const it of selectList as any[]) {
+    const rawVal = String(it?.value ?? '');
+    const rawLabelSource = it?.label ?? it?.displayName ?? it?.name ?? it?.text ?? it?.title;
+    const rawLabel = String(getI18nContent(rawLabelSource) ?? rawLabelSource ?? '');
+    if (targets.includes(norm(rawVal)) || targets.includes(norm(rawLabel))) {
+      return rawVal || rawLabel;
+    }
+  }
+
+  // 4) loose match by value list
+  const idx = values.findIndex((v) => norm(v) === norm(conversionType));
+  if (idx >= 0) return values[idx];
+
+  return conversionType;
+};
+
+const findTextInputVarName = (workflow?: MonkeyWorkflow, exclude?: string): string | undefined => {
+  const vars = workflow?.variables ?? [];
+  const candidates = vars.filter((v) => v.type === 'string' && v.name !== exclude);
+  const best =
+    candidates.find((v) => /text|prompt|content/i.test(v.name)) ??
+    candidates.find((v) => /文本/.test(String(getI18nContent((v as any).displayName) ?? ''))) ??
+    candidates[0];
+  return best?.name;
+};
+
+const findImageInputVarName = (workflow?: MonkeyWorkflow, exclude?: string): string | undefined => {
+  const vars = workflow?.variables ?? [];
+  const candidates = vars.filter((v) => v.name !== exclude);
+  const best = candidates.find((v) => isImageFileVariable(v as any));
+  return best?.name;
+};
 
 /**
  * 检测是否是文本文件
  */
-function isTextFile(url: string): boolean {
-  if (!url) return false;
+function isTextFile(url?: string | null): boolean {
+  if (!url || typeof url !== 'string') return false;
   const lowerUrl = url.toLowerCase();
   return !!lowerUrl.match(/\.(txt|md|csv|json|xml|log|conf|ini|yaml|yml)$/);
 }
@@ -41,6 +208,12 @@ interface DataDetailPanelProps {
 export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
   const previewJsonRef = useRef<HTMLPreElement>(null);
   const metadataJsonRef = useRef<HTMLPreElement>(null);
+  const navigate = useNavigate();
+  const { teamId } = useVinesTeam();
+  const setWorkbenchCacheVal = useSetWorkbenchCacheVal();
+  const setCurrentPage = useSetCurrentPage();
+  const { isUseWorkbench } = useVinesRoute();
+  const { data: workspaceData } = useWorkspacePages();
 
   // 多图轮播状态
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -69,21 +242,208 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
   const mediaArray = getMediaArray();
   const hasMultipleImages = mediaArray.length > 1;
   const currentMedia = mediaArray[currentImageIndex] || mediaArray[0];
-  const isText = isTextFile(currentMedia);
+  const primary: any = (item as any)?.primaryContent ?? null;
+  const primaryType = primary?.type as string | undefined;
+  const primaryValue = primary?.value as string | undefined;
+  const primaryUrl = primary?.url as string | undefined; // 兼容：某些数据用 primaryContent.url
+
+  const is3DSource =
+    (item as any)?.assetType === '3d' ||
+    primaryType === '3d' ||
+    is3DFileUrl(primaryValue) ||
+    is3DFileUrl(primaryUrl) ||
+    is3DFileUrl(currentMedia);
+
+  const isTextSource =
+    (item as any)?.assetType === 'text' ||
+    primaryType === 'text' ||
+    isTextFile(primaryValue) ||
+    isTextFile(primaryUrl) ||
+    isTextFile(currentMedia);
+
+  // 兼容旧逻辑：后面一些 UI/逻辑仍然用 isText
+  const isText = isTextSource;
+  const sourceLabel = isTextSource ? '文本' : is3DSource ? '3D模型' : '图片';
+
+  // 文本源可能是“内联文本”或“文本文件 URL”
+  const pickFirstUrl = (...candidates: Array<string | undefined>) => candidates.find((v) => typeof v === 'string' && /^https?:\/\//i.test(v));
+  const textUrlForFetch =
+    isTextSource &&
+    (isTextFile(primaryUrl)
+      ? primaryUrl
+      : isTextFile(primaryValue)
+        ? primaryValue
+        : isTextFile(currentMedia)
+          ? currentMedia
+          : // 没有后缀也允许（既然已判定是文本源，就尝试拉取）
+            pickFirstUrl(primaryUrl, primaryValue, currentMedia));
+
+  const inlineTextValue =
+    isTextSource && typeof primaryValue === 'string' && !/^https?:\/\//i.test(primaryValue) && !isTextFile(primaryValue) ? primaryValue : '';
+
+  const modelUrlFor3D = is3DSource ? (primaryValue || primaryUrl || currentMedia) : '';
+  const imageUrlForImage = !isTextSource && !is3DSource ? (currentMedia || primaryUrl || primaryValue) : '';
+  // 文本兜底：有些“知识资源库/文本”资产，primaryContent 可能是结构化对象而不是 {type,value}
+  const primaryObjectText =
+    isTextSource &&
+    primary &&
+    typeof primary === 'object' &&
+    !Array.isArray(primary) &&
+    !primaryValue &&
+    !primaryUrl
+      ? JSON.stringify(primary, null, 2)
+      : '';
+  const propertiesObjectText =
+    isTextSource &&
+    (item as any)?.properties &&
+    typeof (item as any).properties === 'object' &&
+    !Array.isArray((item as any).properties)
+      ? JSON.stringify((item as any).properties, null, 2)
+      : '';
+
+  const textPayloadCandidate = isTextSource
+    ? String(inlineTextValue || textContent || primaryValue || primaryUrl || primaryObjectText || propertiesObjectText || currentMedia || '').trim()
+    : '';
 
   // 转换 UI（先对齐团队资产的样式；功能后续接入）
-  const [conversionType, setConversionType] = useState<'text' | 'symbol-summary' | '3d-model' | 'neural-model'>('text');
+  const [conversionType, setConversionType] = useState<ConversionType>('text');
   useEffect(() => {
-    // 对齐团队资产：图片默认转文本；文本默认转图片（这里用“文本”作占位，后续接工作流时再扩展）
-    setConversionType(isText ? 'text' : 'text');
+    // 对齐团队资产：图片/3D 默认转文本；文本默认转图片
+    setConversionType(isTextSource ? 'image' : 'text');
   }, [isText]);
+
+  // 3D 截图：复用团队资产 StepThumbnailGenerator
+  const [pending3DScreenshot, setPending3DScreenshot] = useState<{ url: string; name: string } | null>(null);
+  const screenshotResolverRef = useRef<(blob: Blob | null) => void>();
+
+  const uploadBlobForUrl = async (blob: Blob, fileName: string): Promise<string> => {
+    const form = new FormData();
+    form.append('file', blob, fileName);
+    form.append('key', `step-thumbnails/${Date.now()}_${fileName}`);
+    const res = await fetch('/api/medias/s3/file', { method: 'POST', body: form });
+    const json = await res.json();
+    const url = json?.data ?? json?.url;
+    if (!url) throw new Error('upload failed');
+    return url as string;
+  };
+
+  const capture3DScreenshotUrl = async (fileUrl: string, fileName: string): Promise<string> => {
+    const blob = await new Promise<Blob | null>((resolve) => {
+      screenshotResolverRef.current = resolve;
+      setPending3DScreenshot({ url: fileUrl, name: fileName });
+    });
+    screenshotResolverRef.current = undefined;
+    setPending3DScreenshot(null);
+    if (!blob) throw new Error('3D截图生成失败');
+    const screenshotName = `${fileName.replace(/\.[^.]+$/, '')}_screenshot.png`;
+    return await uploadBlobForUrl(blob, screenshotName);
+  };
+
+  const handleStartConversion = async () => {
+    // 1) 选择目标工作流（固定）
+    const target = isTextSource ? TEXT_WORKFLOW : IMAGE_WORKFLOW;
+    const workflowId = target.workflowId;
+    const pageId = target.pageId;
+
+    // 2) 获取源数据（文本/图片/3D截图）
+    let payload: string = '';
+
+    if (isTextSource) {
+      if (textUrlForFetch && isLoadingText) {
+        toast.error('文本内容加载中，请稍后再试');
+        return;
+      }
+      // 即使加载失败也允许继续（用 URL/原值兜底），避免按钮一直置灰
+      if (textUrlForFetch && textError) {
+        toast.warning(`文本内容加载失败，使用原始值继续：${textError}`);
+      }
+
+      payload = textPayloadCandidate;
+      if (!payload) {
+        toast.error('未获取到可用的文本内容');
+        return;
+      }
+    } else {
+      // 图片：使用当前预览图 URL；3D：优先使用 primaryContent.value/url（模型 URL）
+      const url = is3DSource ? modelUrlFor3D : imageUrlForImage;
+      if (!url) {
+        toast.error(is3DSource ? '未获取到可用的 3D 模型地址' : '未获取到可用的图片地址');
+        return;
+      }
+      if (is3DSource) {
+        // 3D：先截图再跳转到图片工作流
+        const baseName = String(item.name || item.displayName || 'model');
+        const extMatch = /\.([a-z0-9]+)(\?|#|$)/i.exec(String(url));
+        const ext = (extMatch?.[1] ?? 'step').toLowerCase();
+        const fileName = `${baseName}.${ext}`;
+        toast.message('正在生成 3D 截图...');
+        payload = await capture3DScreenshotUrl(url, fileName);
+      } else {
+        payload = url;
+      }
+    }
+
+    // 3) 预填“资源值 + 转换功能参数”，写入 workbench cache
+    try {
+      const wf = await getWorkflow(workflowId);
+      const conversionVar = findConversionFunctionVar(wf);
+      const conversionVarName = conversionVar?.name;
+      const mappedConversionValue = resolveConversionValueForVar(conversionVar, conversionType);
+
+      const inputVar = isTextSource
+        ? findTextInputVarName(wf, conversionVarName)
+        : findImageInputVarName(wf, conversionVarName);
+
+      if (!inputVar) {
+        toast.error('未能匹配到目标工作流的输入参数字段');
+        return;
+      }
+
+      const originData: Record<string, any> = { __value: payload, __conversion: mappedConversionValue };
+      const mapper = [{ origin: '__value', target: inputVar }];
+      if (conversionVarName) mapper.push({ origin: '__conversion', target: conversionVarName });
+
+      const targetInput = await getTargetInput({ workflowId, originData, mapper });
+      setWorkbenchCacheVal(workflowId, targetInput);
+
+      // 4) 跳转到“工作台（创新方法）”固定表单视图：优先通过 pinned pages 选中工作台页面
+      if (workspaceData?.pages?.length && workspaceData?.groups?.length) {
+        const targetPage =
+          workspaceData.pages.find(
+            (p) =>
+              (p.id === pageId ||
+                p.workflow?.workflowId === workflowId ||
+                (p.workflow as any)?.id === workflowId) &&
+              p.type === 'preview',
+          ) ?? null;
+        const targetGroup = targetPage
+          ? workspaceData.groups.find((g) => g.pageIds.includes(targetPage.id))
+          : undefined;
+
+        if (targetPage && targetGroup) {
+          startTransition(() => {
+            setCurrentPage({ [teamId]: { ...targetPage, groupId: targetGroup.id } });
+          });
+          if (!isUseWorkbench) {
+            void navigate({ to: '/$teamId', params: { teamId } });
+          }
+          return;
+        }
+      }
+
+      // fallback：如果没有 pinned page，就跳到 workflow 的页面路由
+      void navigate({ to: '/$teamId/workspace/$workflowId/$pageId', params: { teamId, workflowId, pageId } });
+    } catch (e: any) {
+      toast.error(`跳转失败：${e?.message ?? '未知错误'}`);
+    }
+  };
 
   // 加载文本文件内容
   useEffect(() => {
-    if (isText && currentMedia) {
+    if (textUrlForFetch) {
       setIsLoadingText(true);
       setTextError('');
-      fetch(currentMedia)
+      fetch(textUrlForFetch)
         .then(res => {
           if (!res.ok) throw new Error('Failed to load file');
           return res.text();
@@ -97,7 +457,7 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
           setIsLoadingText(false);
         });
     }
-  }, [currentMedia, isText]);
+  }, [textUrlForFetch]);
 
   const handlePreviousImage = () => {
     setCurrentImageIndex((prev) =>
@@ -160,6 +520,13 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      {pending3DScreenshot && (
+        <StepThumbnailGenerator
+          fileUrl={pending3DScreenshot.url}
+          fileName={pending3DScreenshot.name}
+          onComplete={(blob) => screenshotResolverRef.current?.(blob)}
+        />
+      )}
       {/* Header with back button */}
       <div className="flex items-center gap-3 px-6 py-4 border-b">
         <Button variant="ghost" size="icon" onClick={onBack}>
@@ -559,7 +926,7 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">转换</label>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="whitespace-nowrap rounded bg-gray-100 px-2 py-1 text-sm font-medium text-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                      {isText ? '文本' : '图片'}
+                      {sourceLabel}
                     </span>
                     <span className="text-gray-400 dark:text-gray-500">→</span>
                     <Select value={conversionType} onValueChange={(v) => setConversionType(v as any)}>
@@ -567,7 +934,7 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="text">文本</SelectItem>
+                        {isTextSource ? <SelectItem value="image">图片</SelectItem> : <SelectItem value="text">文本</SelectItem>}
                         <SelectItem value="symbol-summary">符号概括</SelectItem>
                         <SelectItem value="3d-model">3D模型</SelectItem>
                         <SelectItem value="neural-model">神经模型</SelectItem>
@@ -576,8 +943,13 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
                     <Button
                       size="small"
                       className="ml-auto shrink-0 whitespace-nowrap rounded-md bg-black px-4 py-2 font-medium text-white hover:bg-black hover:text-white dark:bg-white dark:text-black"
-                      disabled={(isText && (isLoadingText || !!textError)) || (!isText && !currentMedia)}
-                      onClick={() => toast.message('转换功能待接入（本次先对齐 UI）')}
+                      disabled={
+                        // 文本：只在“正在拉取文本内容”时禁用，避免一直灰掉
+                        (isTextSource && !!textUrlForFetch && isLoadingText) ||
+                        (!isTextSource && !is3DSource && !imageUrlForImage) ||
+                        (!isTextSource && is3DSource && !modelUrlFor3D)
+                      }
+                      onClick={handleStartConversion}
                     >
                       开始转换
                     </Button>
