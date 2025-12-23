@@ -105,7 +105,7 @@ export const ReferenceImageCard: React.FC<{
           height: 112,
           boxSizing: 'border-box',
           borderRadius: 12,
-          zIndex: 0,
+          zIndex: 1,
         }}
         onClick={(e) => {
           if (slot.id === 'base' && (slot.previewUrl || slot.uploadedUrl) && onOpenMask) {

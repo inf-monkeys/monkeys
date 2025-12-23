@@ -142,6 +142,13 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
       try {
         // 只检测第一张图片的宽高比
         const firstImageUrl = urls[0];
+
+        // 验证URL是否有效
+        if (!firstImageUrl || typeof firstImageUrl !== 'string') {
+          console.warn('Invalid image URL for aspect ratio detection');
+          return;
+        }
+
         let aspectRatio = await detectAspectRatioFromUrl(firstImageUrl);
 
         // 查找 aspect_ratio 字段的定义，获取可用选项列表
@@ -193,8 +200,8 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
 
         console.log(`Auto-detected aspect ratio: ${aspectRatio} for field ${aspectRatioField}`);
       } catch (error) {
-        console.error('Failed to auto-detect aspect ratio:', error);
-        toast.error('无法自动检测图片宽高比');
+        // 静默失败，避免打扰用户
+        console.warn('Failed to auto-detect aspect ratio, skipping:', error);
       }
     }
   };

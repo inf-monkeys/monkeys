@@ -76,7 +76,8 @@ const VirtuaExecutionResultGridWrapperComponent: React.FC<IVirtuaExecutionResult
         // 创建下载链接并触发下载
         const link = document.createElement('a');
         link.href = blobUrl;
-        link.download = src.split('/').pop() || 'image'; // 提取文件名或使用默认名称
+        // 从 URL 中提取文件名，去除查询参数
+        link.download = src.split('/').pop()?.split('?')[0] || 'image';
         document.body.appendChild(link);
         link.click();
 

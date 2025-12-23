@@ -14,13 +14,7 @@ import { GLOBAL_DESIGN_BOARD_PAGE } from '@/components/layout/workbench/sidebar/
 import { useVinesTeam } from '@/components/router/guard/team';
 import { useVinesRoute } from '@/components/router/use-vines-route';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -35,6 +29,7 @@ import { getI18nContent } from '@/utils';
 import { getTargetInput } from '@/utils/association';
 
 import { CommonOperationBarItem } from '../common-operation-bar/item';
+import { buildAssociationOriginData } from './compat';
 
 export interface IWorkbenchOperationItemProps {
   data: IWorkflowAssociation;
@@ -74,7 +69,7 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
 
   useEffect(() => {
     if (designBoards && designBoards.length > 0) {
-      setTargetBoardId((prev) => prev && designBoards.some((b) => b.id === prev) ? prev : designBoards[0].id);
+      setTargetBoardId((prev) => (prev && designBoards.some((b) => b.id === prev) ? prev : designBoards[0].id));
     } else {
       setTargetBoardId(undefined);
     }
@@ -89,14 +84,10 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
       return;
     }
 
-    const originData = selectedOutputItems[0];
     if (data.type === 'to-workflow') {
       const targetInput = await getTargetInput({
         workflowId: data.targetWorkflowId,
-        originData: {
-          ...originData.rawOutput,
-          __value: originData.render.data,
-        },
+        originData: buildAssociationOriginData(selectedOutputItems),
         mapper: data.mapper,
       });
       setWorkbenchCacheVal(data.targetWorkflowId, targetInput);
@@ -334,9 +325,7 @@ export const OperationItem = forwardRef<HTMLDivElement, IWorkbenchOperationItemP
             <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>
               {t('common.utils.cancel', { defaultValue: 'Cancel' })}
             </Button>
-            <Button onClick={handleSendToBoard}>
-              {t('common.utils.confirm', { defaultValue: 'Confirm' })}
-            </Button>
+            <Button onClick={handleSendToBoard}>{t('common.utils.confirm', { defaultValue: 'Confirm' })}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -19,7 +19,7 @@ const createOutputSelectionStore = () =>
     selectedOutputs: new Set<string>(),
     selectedOutputItems: [],
     setSelectionMode: (mode) =>
-      set((state) => ({
+      set(() => ({
         isSelectionMode: mode,
         ...(mode ? {} : { selectedOutputs: new Set(), selectedOutputItems: [] }),
       })),
@@ -30,7 +30,7 @@ const createOutputSelectionStore = () =>
 
         if (newSelectedOutputs.has(outputId)) {
           newSelectedOutputs.delete(outputId);
-          const index = newSelectedOutputItems.findIndex((i) => i.instanceId === outputId);
+          const index = newSelectedOutputItems.findIndex((i) => i.render?.key === outputId);
           if (index !== -1) {
             newSelectedOutputItems.splice(index, 1);
           }
@@ -45,9 +45,9 @@ const createOutputSelectionStore = () =>
         };
       }),
     setOutputSelections: (items) =>
-      set((state) => {
-        const newSelectedOutputs = new Set(state.selectedOutputs);
-        const newSelectedOutputItems = [...state.selectedOutputItems];
+      set(() => {
+        const newSelectedOutputs = new Set<string>();
+        const newSelectedOutputItems: IVinesExecutionResultItem[] = [];
 
         items.forEach(({ outputId, item }) => {
           newSelectedOutputs.add(outputId);
