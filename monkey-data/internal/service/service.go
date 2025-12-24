@@ -1,0 +1,171 @@
+package service
+
+import (
+  "context"
+  "errors"
+
+  "monkey-data/internal/model"
+  "monkey-data/internal/repo"
+  "monkey-data/internal/search"
+)
+
+// Service wires storage and search for v2.
+type Service struct {
+  store  repo.Store
+  search search.Client
+}
+
+func New(store repo.Store, search search.Client) *Service {
+  return &Service{store: store, search: search}
+}
+
+func (s *Service) ensureStore() error {
+  if s.store == nil {
+    return errors.New("store not configured")
+  }
+  return nil
+}
+
+func (s *Service) ensureSearch() error {
+  if s.search == nil {
+    return errors.New("search not configured")
+  }
+  return nil
+}
+
+// SearchAssets performs view-based filtering + user tags.
+func (s *Service) SearchAssets(ctx context.Context, appID, teamID, viewID string, userTags []string, limit int, pageToken string) ([]string, string, error) {
+  if teamID == "" {
+    return nil, "", errors.New("team_id required")
+  }
+  if err := s.ensureSearch(); err != nil {
+    return nil, "", err
+  }
+  if err := s.ensureStore(); err != nil {
+    return nil, "", err
+  }
+  viewTagGroups := [][]string{}
+  if viewID != "" {
+    groups, err := s.store.GetViewTagGroups(ctx, appID, teamID, viewID)
+    if err != nil {
+      return nil, "", err
+    }
+    viewTagGroups = groups
+  }
+  return s.search.SearchAssetIDs(ctx, appID, teamID, viewTagGroups, userTags, limit, pageToken)
+}
+
+func (s *Service) CreateAsset(ctx context.Context, appID, teamID string, asset model.Asset, tagIDs []string) (string, error) {
+  if teamID == "" {
+    return "", errors.New("team_id required")
+  }
+  if err := s.ensureStore(); err != nil {
+    return "", err
+  }
+  return s.store.CreateAsset(ctx, appID, teamID, asset, tagIDs)
+}
+
+func (s *Service) UpdateAsset(ctx context.Context, appID, teamID, assetID string, updates map[string]any) error {
+  if teamID == "" {
+    return errors.New("team_id required")
+  }
+  if err := s.ensureStore(); err != nil {
+    return err
+  }
+  return s.store.UpdateAsset(ctx, appID, teamID, assetID, updates)
+}
+
+func (s *Service) DeleteAsset(ctx context.Context, appID, teamID, assetID string) error {
+  if teamID == "" {
+    return errors.New("team_id required")
+  }
+  if err := s.ensureStore(); err != nil {
+    return err
+  }
+  return s.store.DeleteAsset(ctx, appID, teamID, assetID)
+}
+
+func (s *Service) GetAsset(ctx context.Context, appID, teamID, assetID string) (model.Asset, error) {
+  if teamID == "" {
+    return model.Asset{}, errors.New("team_id required")
+  }
+  if err := s.ensureStore(); err != nil {
+    return model.Asset{}, err
+  }
+  return s.store.GetAsset(ctx, appID, teamID, assetID)
+}
+
+func (s *Service) ReplaceAssetTags(ctx context.Context, appID, teamID, assetID string, tagIDs []string) error {
+  if teamID == "" {
+    return errors.New("team_id required")
+  }
+  if err := s.ensureStore(); err != nil {
+    return err
+  }
+  return s.store.ReplaceAssetTags(ctx, appID, teamID, assetID, tagIDs)
+}
+
+func (s *Service) CreateTag(ctx context.Context, appID, teamID string, tag model.Tag) (string, error) {
+  if teamID == "" {
+    return "", errors.New("team_id required")
+  }
+  if err := s.ensureStore(); err != nil {
+    return "", err
+  }
+  return s.store.CreateTag(ctx, appID, teamID, tag)
+}
+
+func (s *Service) ListTags(ctx context.Context, appID, teamID, keyword string, limit int, pageToken string) ([]model.Tag, string, error) {
+  if teamID == "" {
+    return nil, "", errors.New("team_id required")
+  }
+  if err := s.ensureStore(); err != nil {
+    return nil, "", err
+  }
+  return s.store.ListTags(ctx, appID, teamID, keyword, limit, pageToken)
+}
+
+func (s *Service) DeleteTag(ctx context.Context, appID, teamID, tagID string) error {
+  if teamID == "" {
+    return errors.New("team_id required")
+  }
+  if err := s.ensureStore(); err != nil {
+    return err
+  }
+  return s.store.DeleteTag(ctx, appID, teamID, tagID)
+}
+
+func (s *Service) CreateView(ctx context.Context, appID, teamID string, view model.View) (string, error) {
+  if err := s.ensureStore(); err != nil {
+    return "", err
+  }
+  return s.store.CreateView(ctx, appID, teamID, view)
+}
+
+func (s *Service) UpdateView(ctx context.Context, appID, teamID, viewID string, updates map[string]any) error {
+  if err := s.ensureStore(); err != nil {
+    return err
+  }
+  return s.store.UpdateView(ctx, appID, teamID, viewID, updates)
+}
+
+func (s *Service) DeleteView(ctx context.Context, appID, teamID, viewID string) error {
+  if err := s.ensureStore(); err != nil {
+    return err
+  }
+  return s.store.DeleteView(ctx, appID, teamID, viewID)
+}
+
+func (s *Service) GetViewTree(ctx context.Context, appID, teamID string) ([]model.View, error) {
+  if err := s.ensureStore(); err != nil {
+    return nil, err
+  }
+  return s.store.GetViewTree(ctx, appID, teamID)
+}
+
+func (s *Service) ReplaceViewTags(ctx context.Context, appID, teamID, viewID string, tagIDs []string) error {
+  if err := s.ensureStore(); err != nil {
+    return err
+  }
+  return s.store.ReplaceViewTags(ctx, appID, teamID, viewID, tagIDs)
+}
