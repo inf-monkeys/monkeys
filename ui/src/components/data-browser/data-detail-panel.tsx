@@ -40,13 +40,33 @@ const CONVERSION_FUNCTION_VALUES = ['text', 'image', 'symbol-summary', '3d-model
 type ConversionType = (typeof CONVERSION_FUNCTION_VALUES)[number];
 
 const TEXT_WORKFLOW = {
-  workflowId: '6901e37ea5296be427f9ccab',
-  pageId: '6901e37f87f27c8355da8e2d',
+  workflowId: '68d8f4023d25c2ef80486265',
+  pageId: '68d8f4035fecd22a279b297a',
 } as const;
 
-const IMAGE_WORKFLOW = {
-  workflowId: '6901d6a98e22439dfb12743a',
-  pageId: '6901d6ab22a4acef6c94370c',
+const IMAGE_TO_TEXT_WORKFLOW = {
+  workflowId: '68b54a6cd8fa7d683a781f4a',
+  pageId: '68b54a6c558161884a21d62c',
+} as const;
+
+const IMAGE_TO_3D_WORKFLOW = {
+  workflowId: '68b54ab7d712d3902fed5711',
+  pageId: '68b54ab86c9ba13694f33726',
+} as const;
+
+const NEURAL_MODEL_WORKFLOW = {
+  workflowId: '694bf933b085db06c794fa59',
+  pageId: '694bf935d7fb0be8f474b96e',
+} as const;
+
+const SYMBOL_SUMMARY_WORKFLOW = {
+  workflowId: '694bfd973d0150281ee3d543',
+  pageId: '694bfd9979e9fb4981c05bcc',
+} as const;
+
+const THREE_D_TO_IMAGE_WORKFLOW = {
+  workflowId: '68f72eb64e681adc516f1977',
+  pageId: '68f72eb7111549c2d59c5302',
 } as const;
 
 const normalizeAcceptList = (accept: unknown): string[] => {
@@ -351,8 +371,17 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
   };
 
   const handleStartConversion = async () => {
-    // 1) 选择目标工作流（固定）
-    const target = isTextSource ? TEXT_WORKFLOW : IMAGE_WORKFLOW;
+    // 1) 选择目标工作流
+    const getTargetWorkflow = () => {
+      if (conversionType === 'neural-model') return NEURAL_MODEL_WORKFLOW;
+      if (conversionType === 'symbol-summary') return SYMBOL_SUMMARY_WORKFLOW;
+      if (isTextSource) return TEXT_WORKFLOW; // 文本转图片
+      if (is3DSource && conversionType === 'image') return THREE_D_TO_IMAGE_WORKFLOW; // 3D转图片
+      if (conversionType === 'text') return IMAGE_TO_TEXT_WORKFLOW; // 图转文本
+      if (conversionType === '3d-model') return IMAGE_TO_3D_WORKFLOW; // 图转3D
+      return IMAGE_TO_TEXT_WORKFLOW; // 默认
+    };
+    const target = getTargetWorkflow();
     const workflowId = target.workflowId;
     const pageId = target.pageId;
 
@@ -387,7 +416,7 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
         const extMatch = /\.([a-z0-9]+)(\?|#|$)/i.exec(String(url));
         const ext = (extMatch?.[1] ?? 'step').toLowerCase();
         const fileName = `${baseName}.${ext}`;
-        toast.message('正在生成 3D 截图...');
+        toast.message('处理中...');
         payload = await capture3DScreenshotUrl(url, fileName);
       } else {
         payload = url;
@@ -945,10 +974,25 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {isTextSource ? <SelectItem value="image">图片</SelectItem> : <SelectItem value="text">文本</SelectItem>}
-                        <SelectItem value="symbol-summary">符号概括</SelectItem>
-                        <SelectItem value="3d-model">3D模型</SelectItem>
-                        <SelectItem value="neural-model">神经模型</SelectItem>
+                        {isTextSource ? (
+                          <>
+                            <SelectItem value="image">图片</SelectItem>
+                            <SelectItem value="symbol-summary">符号概括</SelectItem>
+                            <SelectItem value="3d-model" disabled>3D模型</SelectItem>
+                            <SelectItem value="neural-model">神经模型</SelectItem>
+                          </>
+                        ) : (
+                          <>
+                            <SelectItem value="text">文本</SelectItem>
+                            <SelectItem value="symbol-summary">符号概括</SelectItem>
+                            {is3DSource ? (
+                              <SelectItem value="image">图片</SelectItem>
+                            ) : (
+                              <SelectItem value="3d-model">3D模型</SelectItem>
+                            )}
+                            <SelectItem value="neural-model">神经模型</SelectItem>
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                     <Button
