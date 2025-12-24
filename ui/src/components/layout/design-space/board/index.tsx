@@ -47,8 +47,8 @@ import { getImageSize } from '@/utils/file';
 import { ExternalLayerPanel } from './ExternalLayerPanel';
 import { LiveImageProvider } from './hooks/useLiveImage';
 // Agent 嵌入由 ExternalLayerPanel 控制
-import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { setTldrawEditor } from '@/features/agent/components/TldrawToolUIs';
+import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
 // 逻辑关系发现功能
 import { RelationshipDiscoveryButton } from './RelationshipDiscoveryButton';
@@ -58,8 +58,9 @@ import { useRelationshipDiscovery } from './hooks/useRelationshipDiscovery';
 import { MindMapButton } from './MindMapButton';
 import { MindMapPanel } from './MindMapPanel';
 import { useMindMapGeneration } from './hooks/useMindMapGeneration';
+// 从头顺序执行全部工作流
+import { RunAllWorkflowsButton } from './RunAllWorkflowsButton';
 // 灵感推送功能
-import { useCanvasInspirationPush } from './hooks/useCanvasInspirationPush';
 import {
   InstructionShapeUtil,
   InstructionTool,
@@ -599,6 +600,7 @@ export const Board: React.FC<BoardProps> = ({
         {/* 思维图谱和逻辑关系发现按钮 - 只在非只读模式下显示 */}
         {!isReadonlyMode && (
           <>
+            <RunAllWorkflowsButton />
             <MindMapButton
               onGenerateMindMap={generateMindMap}
               loading={mindMapLoading}
