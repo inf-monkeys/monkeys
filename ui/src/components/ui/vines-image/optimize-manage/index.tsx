@@ -164,7 +164,7 @@ const OptimizeManage: React.FC = () => {
           }
 
           // 获取图片文件
-          const imageBlob = await fetch(targetSrc).then((res) => res.blob());
+          const imageBlob = await fetch(targetSrc, { cache: 'no-store' }).then((res) => res.blob());
 
           const fetchImageUrl = URL.createObjectURL(imageBlob);
           url = fetchImageUrl;

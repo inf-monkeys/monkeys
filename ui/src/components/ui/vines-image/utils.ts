@@ -21,7 +21,7 @@ export const checkImageUrlAvailable = async (url: string) => {
   }
 
   try {
-    const result = (await fetch(url, { method: 'HEAD' })).ok;
+    const result = (await fetch(url, { method: 'HEAD', cache: 'no-store' })).ok;
     // 缓存结果
     urlAvailabilityCache.set(url, { result, timestamp: Date.now() });
     return result;
