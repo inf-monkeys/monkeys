@@ -17,6 +17,7 @@ import { GenericPort } from '../ports/GenericPort';
 import { getShapePortConnections } from '../ports/portConnections';
 import { getWorkflowPorts } from '../ports/shapePorts';
 import { WorkflowInputParam, WorkflowShape } from './WorkflowShape.types';
+import { registerWorkflowRuntime, unregisterWorkflowRuntime } from './workflowRuntimeRegistry';
 
 const PORT_RADIUS_PX = 8;
 
@@ -375,6 +376,17 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       });
     }
 
+    const normalizeValueByParam = (param: any, v: any) => {
+      const multiple = Boolean(param?.typeOptions?.multipleValues);
+      if (multiple) {
+        if (Array.isArray(v)) return v.filter(Boolean);
+        return v ? [v] : param.value;
+      }
+      // single value
+      if (Array.isArray(v)) return v[0] ?? param.value;
+      return v ?? param.value;
+    };
+
     // 填充参数值
     if (newConnections.length > 0) {
       const updatedParams = shape.props.inputParams.map((param) => {
@@ -386,9 +398,11 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
             if (instructionShape && instructionShape.type === 'instruction') {
               // 根据Instruction的输入模式获取值
               if (instructionShape.props.inputMode === 'image') {
-                return { ...param, value: instructionShape.props.imageUrl || param.value };
+                const v = instructionShape.props.imageUrl || param.value;
+                return { ...param, value: normalizeValueByParam(param, v) };
               } else {
-                return { ...param, value: instructionShape.props.content || param.value };
+                const v = instructionShape.props.content || param.value;
+                return { ...param, value: normalizeValueByParam(param, v) };
               }
             }
           }
@@ -397,10 +411,14 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           const outputShape = editor.getShape(connection.outputId as any) as any;
           if (outputShape && outputShape.type === 'output') {
             // 优先使用图片，如果没有图片则使用文本内容
+            const hasImages = Array.isArray(outputShape.props.images) && outputShape.props.images.length > 0;
+            if (hasImages && param?.typeOptions?.multipleValues) {
+              return { ...param, value: normalizeValueByParam(param, outputShape.props.images) };
+            }
             if (outputShape.props.imageUrl && outputShape.props.imageUrl.trim()) {
-                return { ...param, value: outputShape.props.imageUrl };
+              return { ...param, value: normalizeValueByParam(param, outputShape.props.imageUrl) };
             } else if (outputShape.props.content && outputShape.props.content.trim()) {
-              return { ...param, value: outputShape.props.content };
+              return { ...param, value: normalizeValueByParam(param, outputShape.props.content) };
             }
           }
         }
@@ -513,18 +531,22 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
     return uniqueOutputs;
   };
 
-  const handleRun = async () => {
+  const handleRun = async (opts?: { silent?: boolean }) => {
     console.log('[Workflow] 播放按钮被点击', {
       shapeId: shape.id,
       workflowId: shape.props.workflowId,
       workflowName: shape.props.workflowName,
       connections: shape.props.connections,
     });
+    const silent = Boolean(opts?.silent);
 
     if (!shape.props.workflowId || shape.props.workflowId.trim() === '') {
       console.warn('[Workflow] 工作流ID为空，取消执行');
-      alert('工作流ID为空');
-      return;
+      if (!silent) {
+        alert('工作流ID为空');
+        return;
+      }
+      throw new Error('工作流ID为空');
     }
 
     if (!shape.props.connections || shape.props.connections.length === 0) {
@@ -532,8 +554,11 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
       if (detected.length === 0) {
         console.warn('[Workflow] 没有连接的 Output 框');
-        alert('请先连接到 Output 框');
-        return;
+        if (!silent) {
+          alert('请先连接到 Output 框');
+          return;
+        }
+        throw new Error('请先连接到 Output 框');
       }
       // 同步存储 connections
       try {
@@ -586,8 +611,11 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           type: 'workflow',
           props: { ...shape.props, isRunning: false },
         });
-        alert('请先连接到 Output 框');
-        return;
+        if (!silent) {
+          alert('请先连接到 Output 框');
+          return;
+        }
+        throw new Error('请先连接到 Output 框');
       }
 
       // 调用工作流执行API
@@ -620,7 +648,8 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...vinesHeader({ useToast: true }),
+          // silent 模式下不展示任何错误 toast，交由外层（如“开始运行”）回滚并继续推进
+          ...vinesHeader({ useToast: !silent }),
         },
         body: JSON.stringify({
           inputData: inputs,
@@ -1240,8 +1269,11 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       console.log('[Workflow] 执行完成');
     } catch (error: any) {
       console.error('[Workflow] 执行失败:', error);
-      if (error.name !== 'AbortError') {
+      if (error.name !== 'AbortError' && !opts?.silent) {
         alert(`执行失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      }
+      if (opts?.silent) {
+        throw error;
       }
     } finally {
       // 更新状态为未运行
@@ -1256,6 +1288,22 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       workflowAbortControllers.delete(shape.id as any);
     }
   };
+
+  // Expose imperative runtime handlers for "Run all" orchestration.
+  // Use refs to always call the latest closures without re-registering on every render.
+  const runRef = React.useRef<(opts?: { silent?: boolean }) => Promise<void>>(async () => {});
+  const refreshInputsRef = React.useRef<() => void>(() => {});
+  runRef.current = handleRun;
+  refreshInputsRef.current = detectAndFillInstructionInputs;
+
+  React.useEffect(() => {
+    const runtime = {
+      run: (opts?: { silent?: boolean }) => runRef.current(opts),
+      refreshInputs: () => refreshInputsRef.current(),
+    };
+    registerWorkflowRuntime(shape.id as any, runtime);
+    return () => unregisterWorkflowRuntime(shape.id as any, runtime);
+  }, [shape.id]);
 
   return (
     <div

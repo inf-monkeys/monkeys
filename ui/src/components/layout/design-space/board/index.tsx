@@ -47,8 +47,8 @@ import { getImageSize } from '@/utils/file';
 import { ExternalLayerPanel } from './ExternalLayerPanel';
 import { LiveImageProvider } from './hooks/useLiveImage';
 // Agent 嵌入由 ExternalLayerPanel 控制
-import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { setTldrawEditor } from '@/features/agent/components/TldrawToolUIs';
+import { MiniToolsToolbar } from './mini-tools-toolbar.tsx';
 import { createPlaceholderShape, updateShapeWithResult } from './placeholder-utils';
 // 逻辑关系发现功能
 import { RelationshipDiscoveryButton } from './RelationshipDiscoveryButton';
@@ -58,8 +58,9 @@ import { useRelationshipDiscovery } from './hooks/useRelationshipDiscovery';
 import { MindMapButton } from './MindMapButton';
 import { MindMapPanel } from './MindMapPanel';
 import { useMindMapGeneration } from './hooks/useMindMapGeneration';
+// 从头顺序执行全部工作流
+import { RunAllWorkflowsButton } from './RunAllWorkflowsButton';
 // 灵感推送功能
-import { useCanvasInspirationPush } from './hooks/useCanvasInspirationPush';
 import {
   InstructionShapeUtil,
   InstructionTool,
@@ -181,6 +182,8 @@ interface BoardProps {
   canvasHeight?: number;
   instance?: BoardInstance;
   persistenceKey?: string;
+  /** 外部页面自行放置“开始运行”按钮时，可隐藏画布内置的悬浮按钮 */
+  hideRunAllWorkflowsButton?: boolean;
 }
 
 // 创建自定义右键菜单组件
@@ -403,6 +406,7 @@ export const Board: React.FC<BoardProps> = ({
   canvasHeight,
   instance,
   persistenceKey,
+  hideRunAllWorkflowsButton = false,
 }) => {
   // 重要：画板卸载时清理 editor，避免共享 store 中残留旧 editor 引用导致后续逻辑（如 insert-images）误用已卸载实例
   useEffect(() => {
@@ -599,6 +603,7 @@ export const Board: React.FC<BoardProps> = ({
         {/* 思维图谱和逻辑关系发现按钮 - 只在非只读模式下显示 */}
         {!isReadonlyMode && (
           <>
+            {!hideRunAllWorkflowsButton && <RunAllWorkflowsButton />}
             <MindMapButton
               onGenerateMindMap={generateMindMap}
               loading={mindMapLoading}
