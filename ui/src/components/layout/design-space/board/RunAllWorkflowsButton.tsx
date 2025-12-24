@@ -244,42 +244,6 @@ function getWorkflowGraph(editor: Editor): {
   return { workflowIds, workflowSet, edges, predecessors };
 }
 
-function getX(editor: Editor, id: string): number {
-  const b = editor.getShapePageBounds(id as any);
-  return b?.x ?? 0;
-}
-
-/**
- * Group workflow nodes by X-axis into "columns".
- * X-axis serial: columns execute left -> right.
- * Y-axis parallel: within a column, runnable nodes execute in parallel batches.
- */
-function groupWorkflowsByX(editor: Editor, workflowIds: string[]): Array<{ x: number; ids: string[] }> {
-  // Treat close x positions as the same column to reduce jitter from dragging/snapping.
-  const COLUMN_TOLERANCE_PX = 32;
-  const idsSortedByX = [...workflowIds].sort((a, b) => getX(editor, a) - getX(editor, b));
-  const cols: Array<{ x: number; ids: string[] }> = [];
-
-  for (const id of idsSortedByX) {
-    const x = getX(editor, id);
-    const last = cols[cols.length - 1];
-    if (!last || Math.abs(x - last.x) > COLUMN_TOLERANCE_PX) {
-      cols.push({ x, ids: [id] });
-    } else {
-      last.ids.push(id);
-      // keep representative x stable-ish
-      last.x = (last.x * (last.ids.length - 1) + x) / last.ids.length;
-    }
-  }
-
-  // Keep deterministic ordering inside each column (not for execution order, just for stable UI/progress)
-  for (const col of cols) {
-    col.ids.sort((a, b) => compareByYThenX(editor, a, b));
-  }
-
-  return cols.sort((a, b) => a.x - b.x);
-}
-
 export const RunAllWorkflowsButton: React.FC = track(() => {
   const editor = useEditor();
   const [running, setRunning] = React.useState(false);
@@ -319,7 +283,6 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
       let skippedNoWorkflowId = 0;
       let failedCount = 0;
       const completed = new Set<string>();
-      const cols = groupWorkflowsByX(editor, workflowIds);
       const pending = new Set<string>(workflowIds);
 
       const markDone = (id: string) => {
@@ -330,92 +293,71 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
         }
       };
 
-      // Execute columns left -> right
-      for (const col of cols) {
-        if (cancelRef.current) break;
-
-        // Only consider nodes still pending (in case we finish them earlier due to weird graphs)
-        const remainingInCol = new Set(col.ids.filter((id) => pending.has(id)));
-
-        // Within a column, execute runnable nodes in parallel batches until exhausted
-        while (remainingInCol.size > 0) {
-          if (cancelRef.current) break;
-
-          const runnable: string[] = [];
-          for (const id of remainingInCol) {
-            const preds = predecessors.get(id) || new Set<string>();
-            let ok = true;
-            for (const p of preds) {
-              if (workflowSet.has(p) && !completed.has(p)) {
-                ok = false;
-                break;
-              }
+      // 全局按依赖推进（连接线决定顺序）：只要前置节点完成，后置即可立刻进入可运行队列
+      while (!cancelRef.current && pending.size > 0) {
+        const runnable: string[] = [];
+        for (const id of pending) {
+          const preds = predecessors.get(id) || new Set<string>();
+          let ok = true;
+          for (const p of preds) {
+            if (workflowSet.has(p) && !completed.has(p)) {
+              ok = false;
+              break;
             }
-            if (ok) runnable.push(id);
           }
-
-          // If nothing is runnable (cycle or dependency points to future columns), break this column loop.
-          if (runnable.length === 0) {
-            break;
-          }
-
-          // For stability, keep runnable list ordered, though they will run in parallel.
-          runnable.sort((a, b) => compareByYThenX(editor, a, b));
-
-          // Build tasks (some might be skipped but still marked done to avoid blocking downstream)
-          const tasks: Array<{ id: string }> = [];
-          for (const id of runnable) {
-            remainingInCol.delete(id);
-
-            const s: any = editor.getShape(id as any);
-            if (!s || s.type !== 'workflow') {
-              markDone(id);
-              continue;
-            }
-
-            if (!s.props?.workflowId || String(s.props.workflowId).trim() === '') {
-              skippedNoWorkflowId += 1;
-              markDone(id);
-              continue;
-            }
-
-            tasks.push({ id });
-          }
-
-          // Refresh inputs for the whole batch first, then run the batch in parallel.
-          for (const t of tasks) {
-            try {
-              refreshWorkflowInputs(editor, t.id);
-            } catch {}
-          }
-
-          await Promise.all(
-            tasks.map(async (t) => {
-              // Snapshot current outputs so we can rollback on failure and keep the old result.
-              const outputIds = getConnectedOutputIds(editor, t.id);
-              const snap = snapshotOutputs(editor, outputIds);
-              try {
-                await waitForWorkflowFileInputsReady({
-                  editor,
-                  workflowShapeId: t.id,
-                  refreshInputs: () => refreshWorkflowInputs(editor, t.id),
-                  cancelRef,
-                });
-                // 在“从头运行”里必须用 silent 模式，让失败能被捕获并回滚输出，避免弹窗打断流程
-                await runWorkflow(editor, t.id, { silent: true });
-              } catch {
-                // 不展示具体报错信息：回滚到旧结果，并继续向下推进
-                failedCount += 1;
-                restoreOutputs(editor, snap);
-              } finally {
-                markDone(t.id);
-              }
-            }),
-          );
-
-          // Small gap to avoid hammering the API/store.
-          await sleep(50);
+          if (ok) runnable.push(id);
         }
+
+        // 若没有可运行节点：可能存在环或异常依赖，跳出让后面的 fallback 来“尽量跑完”
+        if (runnable.length === 0) break;
+
+        // 同一批次并行执行，但保持稳定排序（不影响并行，只影响统计/体验）
+        runnable.sort((a, b) => compareByYThenX(editor, a, b));
+
+        const tasks: Array<{ id: string }> = [];
+        for (const id of runnable) {
+          const s: any = editor.getShape(id as any);
+          if (!s || s.type !== 'workflow') {
+            markDone(id);
+            continue;
+          }
+          if (!s.props?.workflowId || String(s.props.workflowId).trim() === '') {
+            skippedNoWorkflowId += 1;
+            markDone(id);
+            continue;
+          }
+          tasks.push({ id });
+        }
+
+        // 批次级 refreshInputs：先把上游值同步进 inputParams，再并行启动
+        for (const t of tasks) {
+          try {
+            refreshWorkflowInputs(editor, t.id);
+          } catch {}
+        }
+
+        await Promise.all(
+          tasks.map(async (t) => {
+            const outputIds = getConnectedOutputIds(editor, t.id);
+            const snap = snapshotOutputs(editor, outputIds);
+            try {
+              await waitForWorkflowFileInputsReady({
+                editor,
+                workflowShapeId: t.id,
+                refreshInputs: () => refreshWorkflowInputs(editor, t.id),
+                cancelRef,
+              });
+              await runWorkflow(editor, t.id, { silent: true });
+            } catch {
+              failedCount += 1;
+              restoreOutputs(editor, snap);
+            } finally {
+              markDone(t.id);
+            }
+          }),
+        );
+
+        await sleep(50);
       }
 
       // Fallback: if some nodes are still pending (cycles / cross-column odd deps), finish them one-by-one by Y->X.
@@ -494,7 +436,7 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
         size="small"
         className="pointer-events-auto bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
         disabled={false}
-        title="X 轴串行、Y 轴并行：按列从左到右推进，同一列内并行执行（依赖满足后才会开始）"
+        title="按连接线依赖推进：只要前置节点完成，后置即可立刻开始；同一批可并行执行"
       >
         {running ? (current ? `运行中 ${current.index}/${current.total}（点我停止）` : '运行中（点我停止）') : '从头运行'}
       </Button>
