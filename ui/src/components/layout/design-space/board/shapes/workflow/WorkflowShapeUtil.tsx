@@ -538,10 +538,11 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       workflowName: shape.props.workflowName,
       connections: shape.props.connections,
     });
+    const silent = Boolean(opts?.silent);
 
     if (!shape.props.workflowId || shape.props.workflowId.trim() === '') {
       console.warn('[Workflow] 工作流ID为空，取消执行');
-      if (!opts?.silent) {
+      if (!silent) {
         alert('工作流ID为空');
         return;
       }
@@ -553,7 +554,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
 
       if (detected.length === 0) {
         console.warn('[Workflow] 没有连接的 Output 框');
-        if (!opts?.silent) {
+        if (!silent) {
           alert('请先连接到 Output 框');
           return;
         }
@@ -610,7 +611,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
           type: 'workflow',
           props: { ...shape.props, isRunning: false },
         });
-        if (!opts?.silent) {
+        if (!silent) {
           alert('请先连接到 Output 框');
           return;
         }
@@ -647,7 +648,8 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...vinesHeader({ useToast: true }),
+          // silent 模式下不展示任何错误 toast，交由外层（如“从头运行”）回滚并继续推进
+          ...vinesHeader({ useToast: !silent }),
         },
         body: JSON.stringify({
           inputData: inputs,

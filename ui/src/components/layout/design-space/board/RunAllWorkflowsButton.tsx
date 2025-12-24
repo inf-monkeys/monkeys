@@ -5,10 +5,98 @@ import { Editor, track, useEditor } from 'tldraw';
 import { Button } from '@/components/ui/button';
 
 import { getShapePortConnections } from './shapes/ports/portConnections';
-import { getWorkflowRuntime } from './shapes/workflow/workflowRuntimeRegistry';
+import { refreshWorkflowInputs, runWorkflow } from './shapes/workflow/workflowRunner';
 
 function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
+// 旧实现依赖组件挂载注册 runtime（视口裁剪会导致不稳定跳过），已改为使用不依赖挂载的 workflowRunner。
+
+function isFileValueReady(value: any): boolean {
+  if (value === undefined || value === null) return false;
+  if (Array.isArray(value)) return value.length > 0 && value.every((v) => isFileValueReady(v));
+  if (typeof value === 'string') {
+    const v = value.trim();
+    if (!v) return false;
+    // blob/data URL 对后端不可用（通常表示还没上传完成或是本地预览）
+    if (v.startsWith('blob:') || v.startsWith('data:')) return false;
+    return true;
+  }
+  // 兜底：某些实现可能传对象（例如包含 url / id）
+  return true;
+}
+
+function getConnectedParamNames(editor: Editor, workflowId: string): Set<string> {
+  const names = new Set<string>();
+  const connections = getShapePortConnections(editor, workflowId as any);
+  for (const c of connections) {
+    // 连接到 workflow 的输入端口（terminal === 'end'）
+    if (c.terminal === 'end' && typeof c.ownPortId === 'string' && c.ownPortId.startsWith('param_')) {
+      names.add(c.ownPortId.replace('param_', ''));
+    }
+  }
+  return names;
+}
+
+function getNotReadyFileParamNames(editor: Editor, workflowId: string): string[] {
+  const s: any = editor.getShape(workflowId as any);
+  if (!s || s.type !== 'workflow') return [];
+  const params: any[] = Array.isArray(s.props?.inputParams) ? s.props.inputParams : [];
+  if (params.length === 0) return [];
+
+  const connected = getConnectedParamNames(editor, workflowId);
+  const pending: string[] = [];
+  for (const p of params) {
+    if (!p || p.type !== 'file') continue;
+    // 只等待“来自连线”的 file 参数就绪：这类值会由上游 output / instruction 自动填充。
+    // 对于没有连线、需要用户手动上传的必填文件，不要在这里等待，否则会造成“从头运行卡住”。
+    if (!connected.has(p.name)) continue;
+    if (!isFileValueReady(p.value)) pending.push(p.name);
+  }
+  return pending;
+}
+
+async function waitForWorkflowFileInputsReady(opts: {
+  editor: Editor;
+  workflowShapeId: string;
+  refreshInputs: () => void;
+  cancelRef: React.MutableRefObject<boolean>;
+  timeoutMs?: number;
+}) {
+  const { editor, workflowShapeId, refreshInputs, cancelRef, timeoutMs = 12_000 } = opts;
+  const start = Date.now();
+  let notified = false;
+
+  while (true) {
+    if (cancelRef.current) throw new Error('Canceled');
+
+    // 尝试刷新一次连接输入（这会把 instruction/output 的最新值同步到 inputParams）
+    try {
+      refreshInputs();
+    } catch {}
+
+    // 给 editor 一点时间把 updateShape 落地
+    await sleep(50);
+
+    const pendingNames = getNotReadyFileParamNames(editor, workflowShapeId);
+    if (pendingNames.length === 0) return;
+
+    const elapsed = Date.now() - start;
+    if (!notified && elapsed > 1200) {
+      notified = true;
+      const s: any = editor.getShape(workflowShapeId as any);
+      const name = s?.props?.workflowName ? `「${s.props.workflowName}」` : '该节点';
+      toast.message(`等待${name}的图片/文件上传完成...`);
+    }
+    if (elapsed >= timeoutMs) {
+      const s: any = editor.getShape(workflowShapeId as any);
+      const name = s?.props?.workflowName ? `「${s.props.workflowName}」` : '该节点';
+      toast.message(`等待${name}的图片/文件输入超时，将继续执行（可能失败）`);
+      return;
+    }
+    await sleep(200);
+  }
 }
 
 function compareByYThenX(editor: Editor, a: string, b: string) {
@@ -228,7 +316,6 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
     setCurrent({ index: 0, total: workflowIds.length });
 
     try {
-      let skippedNoRuntime = 0;
       let skippedNoWorkflowId = 0;
       let failedCount = 0;
       const completed = new Set<string>();
@@ -276,7 +363,7 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
           runnable.sort((a, b) => compareByYThenX(editor, a, b));
 
           // Build tasks (some might be skipped but still marked done to avoid blocking downstream)
-          const tasks: Array<{ id: string; runtime: ReturnType<typeof getWorkflowRuntime> }> = [];
+          const tasks: Array<{ id: string }> = [];
           for (const id of runnable) {
             remainingInCol.delete(id);
 
@@ -292,23 +379,15 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
               continue;
             }
 
-            const runtime = getWorkflowRuntime(id);
-            if (!runtime) {
-              skippedNoRuntime += 1;
-              markDone(id);
-              continue;
-            }
-
-            tasks.push({ id, runtime });
+            tasks.push({ id });
           }
 
           // Refresh inputs for the whole batch first, then run the batch in parallel.
           for (const t of tasks) {
             try {
-              t.runtime!.refreshInputs();
+              refreshWorkflowInputs(editor, t.id);
             } catch {}
           }
-          await sleep(120);
 
           await Promise.all(
             tasks.map(async (t) => {
@@ -316,7 +395,14 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
               const outputIds = getConnectedOutputIds(editor, t.id);
               const snap = snapshotOutputs(editor, outputIds);
               try {
-                await t.runtime!.run();
+                await waitForWorkflowFileInputsReady({
+                  editor,
+                  workflowShapeId: t.id,
+                  refreshInputs: () => refreshWorkflowInputs(editor, t.id),
+                  cancelRef,
+                });
+                // 在“从头运行”里必须用 silent 模式，让失败能被捕获并回滚输出，避免弹窗打断流程
+                await runWorkflow(editor, t.id, { silent: true });
               } catch {
                 // 不展示具体报错信息：回滚到旧结果，并继续向下推进
                 failedCount += 1;
@@ -348,19 +434,18 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
             markDone(id);
             continue;
           }
-          const runtime = getWorkflowRuntime(id);
-          if (!runtime) {
-            skippedNoRuntime += 1;
-            markDone(id);
-            continue;
-          }
-          runtime.refreshInputs();
-          await sleep(120);
+          refreshWorkflowInputs(editor, id);
           // Snapshot current outputs so we can rollback on failure and keep the old result.
           const outputIds = getConnectedOutputIds(editor, id);
           const snap = snapshotOutputs(editor, outputIds);
           try {
-            await runtime.run();
+            await waitForWorkflowFileInputsReady({
+              editor,
+              workflowShapeId: id,
+              refreshInputs: () => refreshWorkflowInputs(editor, id),
+              cancelRef,
+            });
+            await runWorkflow(editor, id, { silent: true });
           } catch {
             failedCount += 1;
             restoreOutputs(editor, snap);
@@ -375,10 +460,13 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
       } else {
         // 不展示具体报错信息；失败/跳过时继续向下推进（使用原结果）。
         // 这里统一给一个“完成”的反馈即可。
-        void skippedNoRuntime;
-        void skippedNoWorkflowId;
-        void failedCount;
-        toast.success('已执行完成');
+        // 不展示具体报错信息；仅展示统计，帮助判断是否有节点被跳过/失败但已回滚。
+        const skipped = skippedNoWorkflowId;
+        const suffixParts: string[] = [];
+        if (failedCount > 0) suffixParts.push(`失败回滚 ${failedCount}`);
+        if (skipped > 0) suffixParts.push(`跳过 ${skipped}`);
+        const suffix = suffixParts.length ? `（${suffixParts.join('，')}）` : '';
+        toast.success(`已执行完成${suffix}`);
       }
     } catch (e: any) {
       // 不展示具体报错信息
