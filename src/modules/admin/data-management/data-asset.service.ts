@@ -36,9 +36,10 @@ export class DataAssetService {
 
   /**
    * 创建资产
+   * @param userId - 用户 ID（管理员鉴权时传入，租户鉴权时可为 null，此时使用 'system' 作为创建者）
    */
   async createAsset(
-    userId: string,
+    userId: string | null,
     dto: CreateDataAssetDto,
   ): Promise<DataAssetResponseDto> {
     // 验证视图是否存在
@@ -57,7 +58,7 @@ export class DataAssetService {
       files: dto.files,
       media: dto.media,
       thumbnail: dto.thumbnail,
-      creatorUserId: userId,
+      creatorUserId: userId || 'system', // 租户鉴权时使用 'system' 作为创建者
       teamId: dto.teamId || view.teamId,
       displayName: dto.displayName,
       description: dto.description,
@@ -71,9 +72,10 @@ export class DataAssetService {
    * 获取资产列表
    * 如果指定了 viewId，会返回该视图及其所有子视图的资产
    * 优化：使用 JOIN 查询，从 3 次查询降到 1-2 次
+   * @param userId - 用户 ID（管理员鉴权时传入，租户鉴权时可为 null）
    */
   async getAssets(
-    userId: string,
+    userId: string | null,
     dto: QueryDataAssetDto,
   ): Promise<DataAssetListResponseDto> {
     const page = dto.page || 1;
@@ -146,9 +148,10 @@ export class DataAssetService {
   /**
    * 获取资产下一页（不返回 total）
    * 用于滚动加载场景：避免 getManyAndCount() 带来的 COUNT(*) 开销。
+   * @param userId - 用户 ID（管理员鉴权时传入，租户鉴权时可为 null）
    */
   async getAssetsNextPage(
-    userId: string,
+    userId: string | null,
     dto: QueryDataAssetDto,
   ): Promise<DataAssetNextPageResponseDto> {
     const pageSize = dto.pageSize || 20;
@@ -215,8 +218,9 @@ export class DataAssetService {
 
   /**
    * 获取单个资产
+   * @param userId - 用户 ID（管理员鉴权时传入，租户鉴权时可为 null）
    */
-  async getAsset(userId: string, assetId: string): Promise<DataAssetResponseDto> {
+  async getAsset(userId: string | null, assetId: string): Promise<DataAssetResponseDto> {
     const asset = await this.dataAssetRepository.findById(assetId);
     if (!asset) {
       throw new NotFoundException(`Asset with ID ${assetId} not found`);
@@ -227,9 +231,10 @@ export class DataAssetService {
 
   /**
    * 更新资产
+   * @param userId - 用户 ID（管理员鉴权时传入，租户鉴权时可为 null）
    */
   async updateAsset(
-    userId: string,
+    userId: string | null,
     assetId: string,
     dto: UpdateDataAssetDto,
   ): Promise<DataAssetResponseDto> {
@@ -263,8 +268,9 @@ export class DataAssetService {
 
   /**
    * 设置资产置顶排序权重
+   * @param userId - 用户 ID（管理员鉴权时传入，租户鉴权时可为 null）
    */
-  async setAssetPinOrder(userId: string, assetId: string, pinOrder: number): Promise<void> {
+  async setAssetPinOrder(userId: string | null, assetId: string, pinOrder: number): Promise<void> {
     const asset = await this.dataAssetRepository.findById(assetId);
     if (!asset) {
       throw new NotFoundException(`Asset with ID ${assetId} not found`);
@@ -275,8 +281,9 @@ export class DataAssetService {
 
   /**
    * 删除资产
+   * @param userId - 用户 ID（管理员鉴权时传入，租户鉴权时可为 null）
    */
-  async deleteAsset(userId: string, assetId: string): Promise<void> {
+  async deleteAsset(userId: string | null, assetId: string): Promise<void> {
     const asset = await this.dataAssetRepository.findById(assetId);
     if (!asset) {
       throw new NotFoundException(`Asset with ID ${assetId} not found`);
@@ -287,17 +294,19 @@ export class DataAssetService {
 
   /**
    * 批量删除资产
+   * @param userId - 用户 ID（管理员鉴权时传入，租户鉴权时可为 null）
    */
-  async batchDeleteAssets(userId: string, assetIds: string[]): Promise<void> {
+  async batchDeleteAssets(userId: string | null, assetIds: string[]): Promise<void> {
     await this.dataAssetRepository.batchSoftDelete(assetIds);
   }
 
   /**
    * 批量更新资产状态
    * 优化：使用单次 SQL 批量更新，避免 N+1 查询问题
+   * @param userId - 用户 ID（管理员鉴权时传入，租户鉴权时可为 null）
    */
   async batchUpdateStatus(
-    userId: string,
+    userId: string | null,
     assetIds: string[],
     status: AssetStatus
   ): Promise<void> {
