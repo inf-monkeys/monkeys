@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { MediaModule } from '../assets/media/media.module';
 import { MarketplaceModule } from '../marketplace/marketplace.module';
 import { WorkflowModule } from '../workflow/workflow.module';
 import { DesignThumbnailService } from './design-thumbnail.service';
@@ -9,7 +10,7 @@ import { DesignMetadataService } from './design.metadata.service';
 import { DesignProjectService } from './design.project.service';
 
 @Module({
-  imports: [forwardRef(() => WorkflowModule), forwardRef(() => MarketplaceModule)],
+  imports: [forwardRef(() => WorkflowModule), forwardRef(() => MarketplaceModule), MediaModule],
   controllers: [DesignController],
   providers: [DesignMetadataService, DesignProjectService, DesignAssociationService, DesignAssociationCrudService, DesignThumbnailService],
   exports: [DesignMetadataService, DesignProjectService, DesignAssociationService, DesignAssociationCrudService, DesignThumbnailService],

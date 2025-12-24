@@ -1,6 +1,8 @@
+import { config } from '@/common/config';
 import { S3Helpers } from '@/common/s3';
 import { generateThumbnail } from '@/common/utils/image';
 import { DesignMetadataRepository } from '@/database/repositories/design-metadata.repository';
+import { MediaStorageService } from '@/modules/assets/media/media.storage.service';
 import { Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import sharp from 'sharp';
@@ -9,6 +11,7 @@ import sharp from 'sharp';
 export class DesignThumbnailService {
   constructor(
     private readonly designMetadataRepository: DesignMetadataRepository,
+    private readonly mediaStorageService: MediaStorageService,
   ) {}
 
   /**
@@ -46,10 +49,25 @@ export class DesignThumbnailService {
         quality: 70,
       });
 
-      // 上传到 OSS（使用 jpg 扩展名，减小体积）
+      // 上传到存储（使用 jpg 扩展名，减小体积）
       const thumbnailKey = `design-boards/page-thumbnails/${boardId}_${nanoid()}.jpg`;
-      const s3Helpers = new S3Helpers();
-      const thumbnailUrl = await s3Helpers.uploadFile(thumb.buffer, thumbnailKey, 'image/jpeg');
+      let thumbnailUrl: string;
+
+      // 根据配置选择上传方式
+      if (config.s3.enableOpendalUpload) {
+        // 使用 OpenDAL（支持 Azure Blob 等）
+        const result = await this.mediaStorageService.uploadFile({
+          key: thumbnailKey,
+          buffer: thumb.buffer,
+          contentType: 'image/jpeg',
+          randomFilename: false,
+        });
+        thumbnailUrl = result.url;
+      } else {
+        // 使用传统 S3Helpers
+        const s3Helpers = new S3Helpers();
+        thumbnailUrl = await s3Helpers.uploadFile(thumb.buffer, thumbnailKey, 'image/jpeg');
+      }
 
       // 更新数据库
       await this.designMetadataRepository.update(boardId, { thumbnailUrl });

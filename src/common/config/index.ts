@@ -205,6 +205,7 @@ export type CustomizationDesignProjects = {
   showRealtimeDrawing?: boolean; // 是否显示实时绘画工具栏
   showWorkflow?: boolean; // 是否显示 Workflow 工具栏
   showAgent?: boolean; // 是否显示 Agent 按钮
+  AgentTools?: string[]; // 启用的 Agent 工具列表，如 ['discovery-of-logical-relationships', 'mind-graph']
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
@@ -936,6 +937,7 @@ export const config: Config = {
         showRealtimeDrawing: readConfig('server.customization.designProjects.showRealtimeDrawing', false),
         showWorkflow: readConfig('server.customization.designProjects.showWorkflow', false),
         showAgent: readConfig('server.customization.designProjects.showAgent', false),
+        AgentTools: readConfig('server.customization.designProjects.AgentTools', []),
       },
       marketplace: {
         presetAppSortFileUrl: readConfig('server.customization.marketplace.presetAppSortFileUrl', undefined),

@@ -60,7 +60,7 @@ export default class RemoteUrlToFile<M extends Meta, B extends Body> extends Bas
       }),
     ]);
 
-    return fetch(optimizedImage || remoteUrl).then((response) => response.blob());
+    return fetch(optimizedImage || remoteUrl, { cache: 'no-store' }).then((response) => response.blob());
   }
 
   async prepareUpload(fileIDs: string[]): Promise<void> {
