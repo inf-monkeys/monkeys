@@ -28,6 +28,70 @@ type ViewState = {
   target: [number, number, number];
 };
 
+// ============== IndexedDB 持久化缓存 ==============
+const DB_NAME = 'vines-3d-model-cache';
+const DB_VERSION = 1;
+const STORE_NAME = 'models';
+const CACHE_EXPIRE_MS = 7 * 24 * 60 * 60 * 1000; // 7 天过期
+
+let dbPromise: Promise<IDBDatabase> | null = null;
+
+function openDB(): Promise<IDBDatabase> {
+  if (dbPromise) return dbPromise;
+
+  dbPromise = new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'url' });
+      }
+    };
+  });
+
+  return dbPromise;
+}
+
+async function getFromIndexedDB(url: string): Promise<ArrayBuffer | null> {
+  try {
+    const db = await openDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.get(url);
+
+      request.onsuccess = () => {
+        const result = request.result;
+        if (result && Date.now() - result.timestamp < CACHE_EXPIRE_MS) {
+          resolve(result.data);
+        } else {
+          resolve(null);
+        }
+      };
+      request.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function saveToIndexedDB(url: string, data: ArrayBuffer): Promise<void> {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put({ url, data, timestamp: Date.now() });
+  } catch {
+    // 静默失败，不影响主流程
+  }
+}
+
+// ============== 内存缓存 ==============
+
 // 视角缓存（按 URL）
 const viewStateCache = new Map<string, ViewState>();
 
@@ -38,6 +102,83 @@ const inflight = new Map<string, Promise<THREE.Group>>();
 // 缩略图缓存（按 URL）：列表展示用，解决多 Canvas 闪烁
 const thumbnailCache = new Map<string, string>();
 
+// 并发控制：限制同时加载的模型数量，避免大量并发请求导致服务器 502
+const MAX_CONCURRENT_LOADS = 2;
+let activeLoads = 0;
+const pendingQueue: Array<{
+  url: string;
+  resolve: (group: THREE.Group) => void;
+  reject: (error: Error) => void;
+}> = [];
+
+function processQueue() {
+  while (activeLoads < MAX_CONCURRENT_LOADS && pendingQueue.length > 0) {
+    const task = pendingQueue.shift();
+    if (!task) break;
+
+    // 再次检查缓存，可能在排队期间已被其他请求加载
+    const cached = sceneCache.get(task.url);
+    if (cached) {
+      task.resolve(cached);
+      continue;
+    }
+
+    activeLoads++;
+    doLoadScene(task.url)
+      .then(task.resolve)
+      .catch(task.reject)
+      .finally(() => {
+        activeLoads--;
+        processQueue();
+      });
+  }
+}
+
+function parseGLTFFromBuffer(buffer: ArrayBuffer): Promise<THREE.Group> {
+  return new Promise((resolve, reject) => {
+    const loader = new GLTFLoader();
+    loader.parse(
+      buffer,
+      '',
+      (gltf) => {
+        const scene = (gltf as any)?.scene || (gltf as any)?.scenes?.[0];
+        if (!scene) {
+          reject(new Error('模型为空'));
+          return;
+        }
+        resolve(scene as THREE.Group);
+      },
+      (e) => reject(e instanceof Error ? e : new Error(String(e))),
+    );
+  });
+}
+
+async function doLoadScene(url: string): Promise<THREE.Group> {
+  // 1. 先尝试从 IndexedDB 读取
+  const cachedBuffer = await getFromIndexedDB(url);
+  if (cachedBuffer) {
+    const group = await parseGLTFFromBuffer(cachedBuffer);
+    sceneCache.set(url, group);
+    return group;
+  }
+
+  // 2. 从网络加载
+  const response = await fetch(url, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`加载失败: ${response.status}`);
+  }
+  const arrayBuffer = await response.arrayBuffer();
+
+  // 3. 解析模型
+  const group = await parseGLTFFromBuffer(arrayBuffer);
+  sceneCache.set(url, group);
+
+  // 4. 异步保存到 IndexedDB（不阻塞）
+  saveToIndexedDB(url, arrayBuffer);
+
+  return group;
+}
+
 async function loadScene(url: string): Promise<THREE.Group> {
   const cached = sceneCache.get(url);
   if (cached) return cached;
@@ -46,31 +187,8 @@ async function loadScene(url: string): Promise<THREE.Group> {
   if (inflightPromise) return inflightPromise;
 
   const p = new Promise<THREE.Group>((resolve, reject) => {
-    const loader = new GLTFLoader();
-    // 尽量避免跨域贴图导致的渲染/截屏异常
-    try {
-      // three 新版本
-      (loader as any).setCrossOrigin?.('anonymous');
-      // three 旧版本
-      (loader as any).crossOrigin = 'anonymous';
-    } catch {
-      // ignore
-    }
-    loader.load(
-      url,
-      (gltf) => {
-        const scene = (gltf as any)?.scene || (gltf as any)?.scenes?.[0];
-        if (!scene) {
-          reject(new Error('模型为空'));
-          return;
-        }
-        const group = scene as THREE.Group;
-        sceneCache.set(url, group);
-        resolve(group);
-      },
-      undefined,
-      (e) => reject(e),
-    );
+    pendingQueue.push({ url, resolve, reject });
+    processQueue();
   }).finally(() => inflight.delete(url));
 
   inflight.set(url, p);
