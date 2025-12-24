@@ -20,6 +20,7 @@ import {
 } from '@/apis/designs';
 import { useWorkspacePages } from '@/apis/pages';
 import { Board } from '@/components/layout/design-space/board';
+import { RunAllWorkflowsButtonStandalone } from '@/components/layout/design-space/board/RunAllWorkflowsButton';
 import { MiniHistoryRightSidebar } from '@/components/layout/design-space/board/mini-history-right-sidebar';
 import { DesignBoardRightSidebar } from '@/components/layout/design-space/board/right-sidebar';
 import { DesignProjectVersionManager } from '@/components/layout/ugc-pages/design-project/version-manager';
@@ -627,19 +628,24 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
       {/* 右上角工具栏 - 版本管理 */}
       {designProject && !isReadonlyMode && (
         <Card className="absolute right-0 top-0 z-40 m-4 p-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="small"
-                onClick={() => setVersionManagerVisible(true)}
-                icon={<GitBranch size={16} />}
-              >
-                v{designProject.version}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>版本管理</TooltipContent>
-          </Tooltip>
+          <div className="flex flex-col gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="small"
+                  onClick={() => setVersionManagerVisible(true)}
+                  icon={<GitBranch size={16} />}
+                >
+                  v{designProject.version}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>版本管理</TooltipContent>
+            </Tooltip>
+
+            {/* 从头运行：放在版本管理下方 */}
+            <RunAllWorkflowsButtonStandalone editor={editor} mode="inline" />
+          </div>
         </Card>
       )}
 
@@ -704,6 +710,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
         editor={editor}
         setEditor={setEditor}
         instance={{ frameShapeId }}
+        hideRunAllWorkflowsButton={Boolean(designProject && !isReadonlyMode)}
       />
       {/* 右侧属性侧边栏（按 OEM 配置控制） */}
       {showRightSidebar && (

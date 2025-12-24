@@ -182,6 +182,8 @@ interface BoardProps {
   canvasHeight?: number;
   instance?: BoardInstance;
   persistenceKey?: string;
+  /** 外部页面自行放置“从头运行”按钮时，可隐藏画布内置的悬浮按钮 */
+  hideRunAllWorkflowsButton?: boolean;
 }
 
 // 创建自定义右键菜单组件
@@ -404,6 +406,7 @@ export const Board: React.FC<BoardProps> = ({
   canvasHeight,
   instance,
   persistenceKey,
+  hideRunAllWorkflowsButton = false,
 }) => {
   // 重要：画板卸载时清理 editor，避免共享 store 中残留旧 editor 引用导致后续逻辑（如 insert-images）误用已卸载实例
   useEffect(() => {
@@ -600,7 +603,7 @@ export const Board: React.FC<BoardProps> = ({
         {/* 思维图谱和逻辑关系发现按钮 - 只在非只读模式下显示 */}
         {!isReadonlyMode && (
           <>
-            <RunAllWorkflowsButton />
+            {!hideRunAllWorkflowsButton && <RunAllWorkflowsButton />}
             <MindMapButton
               onGenerateMindMap={generateMindMap}
               loading={mindMapLoading}

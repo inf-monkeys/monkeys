@@ -246,11 +246,28 @@ function getWorkflowGraph(editor: Editor): {
 
 export const RunAllWorkflowsButton: React.FC = track(() => {
   const editor = useEditor();
+  return <RunAllWorkflowsButtonBase editor={editor} mode="floating" />;
+});
+
+type RunAllWorkflowsButtonMode = 'floating' | 'inline';
+
+export const RunAllWorkflowsButtonStandalone: React.FC<{
+  editor: Editor | null;
+  mode?: RunAllWorkflowsButtonMode;
+  className?: string;
+}> = ({ editor, mode = 'inline', className }) => {
+  if (!editor) return null;
+  return <RunAllWorkflowsButtonBase editor={editor} mode={mode} className={className} />;
+};
+
+const RunAllWorkflowsButtonBase: React.FC<{
+  editor: Editor;
+  mode: RunAllWorkflowsButtonMode;
+  className?: string;
+}> = ({ editor, mode, className }) => {
   const [running, setRunning] = React.useState(false);
   const [current, setCurrent] = React.useState<{ index: number; total: number } | null>(null);
   const cancelRef = React.useRef(false);
-
-  if (!editor) return null;
 
   const handleClick = async () => {
     if (running) {
@@ -420,6 +437,26 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
     }
   };
 
+  const button = (
+    <Button
+      onClick={handleClick}
+      variant="outline"
+      size="small"
+      className={
+        className ??
+        'pointer-events-auto bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 shadow-sm'
+      }
+      disabled={false}
+      title="按连接线依赖推进：只要前置节点完成，后置即可立刻开始；同一批可并行执行"
+    >
+      {running ? (current ? `运行中 ${current.index}/${current.total}（点我停止）` : '运行中（点我停止）') : '从头运行'}
+    </Button>
+  );
+
+  if (mode === 'inline') {
+    return button;
+  }
+
   return (
     <div
       className="pointer-events-none"
@@ -430,18 +467,9 @@ export const RunAllWorkflowsButton: React.FC = track(() => {
         zIndex: 999,
       }}
     >
-      <Button
-        onClick={handleClick}
-        variant="outline"
-        size="small"
-        className="pointer-events-auto bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 shadow-sm"
-        disabled={false}
-        title="按连接线依赖推进：只要前置节点完成，后置即可立刻开始；同一批可并行执行"
-      >
-        {running ? (current ? `运行中 ${current.index}/${current.total}（点我停止）` : '运行中（点我停止）') : '从头运行'}
-      </Button>
+      {button}
     </div>
   );
-});
+};
 
 
