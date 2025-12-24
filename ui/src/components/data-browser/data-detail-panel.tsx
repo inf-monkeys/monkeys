@@ -230,7 +230,18 @@ export function DataDetailPanel({ item, onBack }: DataDetailPanelProps) {
     if (Array.isArray(item.media)) {
       return item.media;
     }
-    if (item.media) {
+    if (typeof item.media === 'string') {
+      const trimmed = item.media.trim();
+      if (trimmed.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) {
+            return parsed.filter((value) => typeof value === 'string');
+          }
+        } catch {
+          // fall through to string handling
+        }
+      }
       return [item.media];
     }
     if (item.thumbnail) {
