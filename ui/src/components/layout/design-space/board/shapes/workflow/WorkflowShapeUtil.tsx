@@ -265,6 +265,175 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
   // 获取参数连接点的引用
   const paramConnectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
+  // 兼容 select 下拉：HTML select 的 value 必须是 string，这里用 JSON 编码以保留原始类型（number/boolean/string）
+  const encodeSelectValue = React.useCallback((v: any) => {
+    if (v === '' || v === null || v === undefined) return '';
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return JSON.stringify(v);
+    // 兜底：复杂对象按字符串展示，但仍保持可序列化
+    try {
+      return JSON.stringify(v);
+    } catch {
+      return String(v);
+    }
+  }, []);
+
+  const decodeSelectValue = React.useCallback((s: string) => {
+    if (s === '' || s === null || s === undefined) return '';
+    try {
+      return JSON.parse(s);
+    } catch {
+      return s;
+    }
+  }, []);
+
+  /**
+   * 复刻工作台表单的“下拉联动过滤”逻辑：
+   * - 上游 selectList item 里可以携带 linkage：[{ name, value, selectFilter }]
+   * - selectFilter: { list: string[], reserve: boolean }
+   *   语义与工作台一致：include = list.includes(option.value) === reserve
+   *
+   * 这里从当前 inputParams 的已选值推导出：
+   * - filtersByField：某个字段的下拉候选需要按 selectFilter 过滤
+   *
+   * 注意：linkage 的 value 写入不能做成“全局自动同步”，否则会出现：
+   * - 上游 linkage 用 value='' 清空下游字段（例如“类别”变化清空“名字”）
+   * - 当你选择“名字”时，系统又因为其它联动字段变化重复应用上游清空逻辑，导致“选不了”
+   *
+   * 所以 value 写入采用“事件驱动”：仅在某个 select 字段值变更时，应用该字段选中项的 linkage（与工作台一致）。
+   */
+  const linkageDerived = React.useMemo(() => {
+    const filtersByField: Record<string, { list: string[]; reserve: boolean }> = {};
+
+    const params = shape.props.inputParams || [];
+    for (const p of params) {
+      const typeOptions: any = (p as any)?.typeOptions || {};
+      const selectList: any[] = Array.isArray(typeOptions?.selectList) ? typeOptions.selectList : [];
+      const isSelect = p.type === 'options' && (typeOptions?.enableSelectList || selectList.length > 0);
+      const multiple = Boolean(typeOptions?.multipleValues);
+      if (!isSelect || multiple) continue;
+
+      const currentVal = p.value;
+      if (currentVal === '' || currentVal === null || currentVal === undefined) continue;
+
+      const match = (a: any, b: any) => String(a ?? '') === String(b ?? '');
+      const selectedItem = selectList.find((it) => match(it?.value, currentVal));
+      const linkage: any[] = Array.isArray(selectedItem?.linkage) ? selectedItem.linkage : [];
+      if (!linkage.length) continue;
+
+      for (const link of linkage) {
+        const targetName = String(link?.name ?? '');
+        if (!targetName) continue;
+
+        // 1) 下游字段的候选过滤
+        const sf = link?.selectFilter;
+        if (sf && Array.isArray(sf.list) && sf.list.length > 0) {
+          filtersByField[targetName] = { list: sf.list.map((x: any) => String(x)), reserve: Boolean(sf.reserve) };
+        }
+      }
+    }
+
+    const signature = JSON.stringify({ f: filtersByField });
+    return { filtersByField, signature };
+  }, [shape.props.inputParams]);
+
+  const coerceLinkageValue = React.useCallback((param: any, raw: any) => {
+    const typeOptions: any = param?.typeOptions || {};
+    const multiple = Boolean(typeOptions?.multipleValues);
+
+    const toBool = (v: any) => {
+      if (typeof v === 'boolean') return v;
+      const s = String(v ?? '').toLowerCase();
+      return ['true', 'yes', '是', '1'].includes(s);
+    };
+
+    if (param.type === 'number') {
+      if (multiple) return (Array.isArray(raw) ? raw : raw ? [raw] : []).map((it) => Number(it));
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : '';
+    }
+    if (param.type === 'boolean') {
+      if (multiple) return (Array.isArray(raw) ? raw : raw ? [raw] : []).map(toBool);
+      return toBool(raw);
+    }
+    if (multiple) return Array.isArray(raw) ? raw : raw ? [raw] : [];
+    return raw;
+  }, []);
+
+  const applySelectLinkage = React.useCallback(
+    (params: any[], sourceParamName: string, selectedValue: any) => {
+      const source = params.find((p: any) => p.name === sourceParamName);
+      if (!source) return params;
+
+      const typeOptions: any = (source as any)?.typeOptions || {};
+      const selectList: any[] = Array.isArray(typeOptions?.selectList) ? typeOptions.selectList : [];
+      if (!selectList.length) return params;
+
+      const match = (a: any, b: any) => String(a ?? '') === String(b ?? '');
+      const selectedItem = selectList.find((it) => match(it?.value, selectedValue));
+      const linkage: any[] = Array.isArray(selectedItem?.linkage) ? selectedItem.linkage : [];
+      if (!linkage.length) return params;
+
+      const byName = new Map<string, any>();
+      for (const p of params) byName.set(p.name, p);
+
+      for (const link of linkage) {
+        const targetName = String(link?.name ?? '');
+        if (!targetName) continue;
+        const target = byName.get(targetName);
+        if (!target) continue;
+
+        // 与工作台一致：linkage.value 永远会写入（常用于清空下游，或联动填充值）
+        if (link && 'value' in link) {
+          const next = coerceLinkageValue(target, link.value);
+          if (JSON.stringify(target.value) !== JSON.stringify(next)) {
+            byName.set(targetName, { ...target, value: next });
+          }
+        }
+      }
+
+      return params.map((p: any) => byName.get(p.name) ?? p);
+    },
+    [coerceLinkageValue],
+  );
+
+  // 如果某个字段被过滤后当前值不在候选里，自动清空（让 placeholder 生效）
+  React.useEffect(() => {
+    const filtersByField = linkageDerived.filtersByField || {};
+    if (!filtersByField || Object.keys(filtersByField).length === 0) return;
+
+    const updated = (shape.props.inputParams || []).map((p: any) => {
+      const filter = filtersByField[p.name];
+      const typeOptions: any = p?.typeOptions || {};
+      const selectList: any[] = Array.isArray(typeOptions?.selectList) ? typeOptions.selectList : [];
+      if (!filter || !selectList.length) return p;
+
+      const list = filter.list || [];
+      const reserve = Boolean(filter.reserve);
+      const allowed = new Set(
+        selectList
+          .filter((it) => (list.length ? list.includes(String(it?.value ?? '')) === reserve : true))
+          .map((it) => String(it?.value ?? '')),
+      );
+      const cur = p.value;
+      if (cur === '' || cur === null || cur === undefined) return p;
+      if (!allowed.has(String(cur))) {
+        return { ...p, value: '' };
+      }
+      return p;
+    });
+
+    if (JSON.stringify(updated) !== JSON.stringify(shape.props.inputParams || [])) {
+      editor.updateShape<WorkflowShape>({
+        id: shape.id,
+        type: 'workflow',
+        props: {
+          ...shape.props,
+          inputParams: updated,
+        },
+      });
+    }
+  }, [linkageDerived.signature, shape.id]);
+
   // 使用新的 ConnectionBinding 系统检测连接的 Instruction 或 Output 并自动填充参数
   const detectAndFillInstructionInputs = () => {
     const newConnections: Array<{ paramName: string; instructionId?: string; outputId?: string }> = [];
@@ -1464,7 +1633,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                   ) : param.type === 'string' || param.type === 'text' ? (
                     <input
                       type="text"
-                      value={param.value || ''}
+                      value={param.value ?? ''}
                       onChange={(e) => handleParamChange(param.name, e.target.value)}
                       onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => e.stopPropagation()}
@@ -1491,7 +1660,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                             min={(param as any).typeOptions.minValue}
                             max={(param as any).typeOptions.maxValue}
                             step={(param as any).typeOptions.numberPrecision || 1}
-                            value={param.value || (param as any).typeOptions.minValue}
+                            value={(param.value ?? (param as any).typeOptions.minValue) as any}
                             onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
                             style={{
                               width: '100%',
@@ -1509,7 +1678,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                           >
                             <span>{(param as any).typeOptions.minValue}</span>
                             <span style={{ fontWeight: '600', color: '#374151' }}>
-                              {param.value || (param as any).typeOptions.minValue}
+                              {(param.value ?? (param as any).typeOptions.minValue) as any}
                             </span>
                             <span>{(param as any).typeOptions.maxValue}</span>
                           </div>
@@ -1517,7 +1686,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                       ) : (
                         <input
                           type="number"
-                          value={param.value || ''}
+                          value={param.value ?? ''}
                           onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
                           onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
@@ -1543,7 +1712,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                     >
                       <input
                         type="checkbox"
-                        checked={param.value || false}
+                        checked={Boolean(param.value)}
                         onChange={(e) => handleParamChange(param.name, e.target.checked)}
                         style={{ pointerEvents: 'auto', cursor: 'pointer' }}
                       />
@@ -1551,8 +1720,23 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                     </label>
                   ) : param.type === 'options' && (param as any).typeOptions?.options ? (
                     <select
-                      value={param.value || ''}
-                      onChange={(e) => handleParamChange(param.name, e.target.value)}
+                      value={encodeSelectValue(param.value)}
+                      onChange={(e) => {
+                        const nextVal = decodeSelectValue(e.target.value);
+                        const withSelfUpdated = (shape.props.inputParams || []).map((p: any) =>
+                          p.name === param.name ? { ...p, value: nextVal } : p,
+                        );
+                        const finalParams = applySelectLinkage(withSelfUpdated, param.name, nextVal);
+
+                        editor.updateShape<WorkflowShape>({
+                          id: shape.id,
+                          type: 'workflow',
+                          props: {
+                            ...shape.props,
+                            inputParams: finalParams,
+                          },
+                        });
+                      }}
                       onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => e.stopPropagation()}
                       style={{
@@ -1568,15 +1752,33 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                       }}
                     >
                       <option value="">请选择...</option>
-                      {((param as any).typeOptions?.options || []).map((option: any) => (
-                        <option key={option.value || option.name} value={option.value || option.name}>
-                          {option.label || option.name || option.value}
-                        </option>
-                      ))}
+                      {(() => {
+                        const typeOptions: any = (param as any).typeOptions || {};
+                        const selectList: any[] = Array.isArray(typeOptions?.selectList) ? typeOptions.selectList : [];
+                        const fallbackOptions: any[] = Array.isArray(typeOptions?.options) ? typeOptions.options : [];
+
+                        const filter = linkageDerived.filtersByField?.[param.name];
+                        const list = filter?.list || [];
+                        const reserve = Boolean(filter?.reserve);
+
+                        const items = (selectList.length ? selectList : fallbackOptions).filter((it: any) => {
+                          if (!filter || !list.length) return true;
+                          return list.includes(String(it?.value ?? it?.name ?? '')) === reserve;
+                        });
+
+                        return items.map((it: any) => (
+                          <option
+                            key={String(it?.value ?? it?.name)}
+                            value={encodeSelectValue(it?.value ?? it?.name)}
+                          >
+                            {getI18nContent(it?.label) || it?.name || String(it?.value ?? '')}
+                          </option>
+                        ));
+                      })()}
                     </select>
                   ) : (
                     <textarea
-                      value={typeof param.value === 'string' ? param.value : JSON.stringify(param.value || '')}
+                      value={typeof param.value === 'string' ? param.value : JSON.stringify(param.value ?? '')}
                       onChange={(e) => handleParamChange(param.name, e.target.value)}
                       onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => e.stopPropagation()}

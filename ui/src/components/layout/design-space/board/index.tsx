@@ -37,6 +37,7 @@ import { useSystemConfig } from '@/apis/common';
 import { useGetDesignProject } from '@/apis/designs';
 import { useInfiniteWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
 import { useUniImagePreview } from '@/components/layout-wrapper/main/uni-image-preview';
+import { toJsonSerializable } from '@/components/layout/design-space/board/shapes/workflow/normalizeWorkflowInputParams';
 import { useVinesTeam } from '@/components/router/guard/team';
 import { uploadSingleFile } from '@/components/ui/vines-uploader/standalone';
 import type { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings';
@@ -1372,6 +1373,24 @@ export const Board: React.FC<BoardProps> = ({
                   }
                   return nextShape;
                 });
+
+                // 保护：Workflow shape 的 props 必须是纯 JSON，否则会触发 tldraw ValidationError 并导致画布崩溃
+                const sanitizeWorkflowShape = (shape: TLShape) => {
+                  try {
+                    if (shape.type !== 'workflow') return shape;
+                    const anyShape = shape as any;
+                    const props = anyShape?.props ?? {};
+                    const sanitizedProps = toJsonSerializable(props);
+                    return { ...shape, props: sanitizedProps } as any;
+                  } catch {
+                    return shape;
+                  }
+                };
+
+                editor.sideEffects.registerBeforeCreateHandler('shape', (shape: TLShape) => sanitizeWorkflowShape(shape));
+                editor.sideEffects.registerBeforeChangeHandler('shape', (_prev: TLShape, next: TLShape) =>
+                  sanitizeWorkflowShape(next),
+                );
 
                 // 监听数据加载完成，执行批量迁移
                 const migrateConnectionLabels = () => {
