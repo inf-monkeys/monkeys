@@ -83,7 +83,7 @@ export function DataToolbar({
           <Input
             placeholder="搜索数据..."
             value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
+            onChange={(value) => setSearchKeyword(value ?? '')}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             className="pl-9"
           />
