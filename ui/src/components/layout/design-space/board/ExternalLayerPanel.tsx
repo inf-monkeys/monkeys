@@ -4,16 +4,16 @@ import { mutate as swrMutate } from 'swr';
 
 import { useDebounceFn, useEventEmitter, useMemoizedFn } from 'ahooks';
 import { capitalize, get } from 'lodash';
-import { ArrowLeft, Clipboard, History, RotateCcw, Sparkles, Undo2, List } from 'lucide-react';
+import { ArrowLeft, Clipboard, History, List, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Editor, TLShapeId } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
 import { useWorkflowExecutionAllOutputs } from '@/apis/workflow/execution/output';
-import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper';
+import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { Button } from '@/components/ui/button';
 import {
   Pagination,
@@ -38,9 +38,9 @@ import { newConvertExecutionResultToItemList } from '@/utils/execution';
 
 import { VisibilityOff, VisibilityOn } from './icons';
 // import { TldrawAgentV2EmbeddedPanel } from './panel-agent-v2-embedded';
+import { Thread } from '@/components/assistant-ui/thread';
 import { AgentRuntimeProvider, useThreadListContext } from '@/features/agent/components/AgentRuntimeProvider';
 import { MiniThreadList } from '@/features/agent/components/MiniThreadList';
-import { Thread } from '@/components/assistant-ui/thread';
 import { CanvasInspirationManager } from './CanvasInspirationManager';
 
 // ThreadSwitcher 组件 - 在 AgentRuntimeProvider 内部切换 thread
@@ -250,6 +250,8 @@ const ShapeItem: React.FC<{
   // 优先 meta.name；
   // frame: 优先 props.name；
   // geo: 使用 props.geo 的具体形状名（如 rectangle / ellipse 等），而不是统一的 Geo；
+  // instruction: 根据 props.inputMode 显示为 “文本节点/图片节点”，避免统一显示为 Instruction；
+  // workflow: 优先 props.workflowName（创新方法/工作流名称），避免统一显示为 Workflow；
   // 其余：props.text / props.name；再退化为 util.getText 或类型名。
   const getShapeName = (editor: Editor, shapeId: TLShapeId): string => {
     const shape = editor.getShape(shapeId);
@@ -257,12 +259,39 @@ const ShapeItem: React.FC<{
     const metaName = (shape as any).meta?.name as string | undefined;
     const propsText = (shape as any).props?.text as string | undefined;
     const propsName = (shape as any).props?.name as string | undefined;
+    const workflowName = (shape as any).props?.workflowName as string | undefined;
     const type = (shape as any).type as string;
     const geoKind = (shape as any).props?.geo as string | undefined;
+    const instructionInputMode = (shape as any).props?.inputMode as 'text' | 'image' | undefined;
 
     // 对 frame 优先读取 props.name（tldraw 默认即为"Frame"且可编辑），避免回退到"Frame shape"
     if (type === 'frame' && (propsName?.trim() || metaName?.trim())) {
       return (metaName?.trim() || propsName?.trim()) as string;
+    }
+
+    // 对 instruction 根据 inputMode 显示“文本节点/图片节点”，避免统一显示为 Instruction
+    if (type === 'instruction') {
+      const fallbackInstructionName = instructionInputMode === 'image' ? '图片节点' : '文本节点';
+      return (
+        (metaName && metaName.trim()) ||
+        fallbackInstructionName ||
+        (propsName && propsName.trim()) ||
+        (propsText && propsText.trim()) ||
+        editor.getShapeUtil(shape).getText(shape) ||
+        getShapeTypeInChinese(type)
+      );
+    }
+
+    // 对 workflow 优先读取 props.workflowName（创新方法/工作流名称），避免统一显示为 Workflow
+    if (type === 'workflow') {
+      return (
+        (metaName && metaName.trim()) ||
+        (workflowName && workflowName.trim()) ||
+        (propsName && propsName.trim()) ||
+        (propsText && propsText.trim()) ||
+        editor.getShapeUtil(shape).getText(shape) ||
+        getShapeTypeInChinese(type)
+      );
     }
 
     // 对 geo 使用具体图形名（如 Rectangle / Ellipse），避免统一显示为 Geo
@@ -374,6 +403,10 @@ const ShapeItem: React.FC<{
         // frame 的名称
         if (typeof next.props.name === 'string') {
           next.props = { ...next.props, name: trimmed || shapeName };
+        }
+        // workflow 的名称（创新方法/工作流节点标题）
+        if (typeof next.props.workflowName === 'string') {
+          next.props = { ...next.props, workflowName: trimmed || shapeName };
         }
       }
 
