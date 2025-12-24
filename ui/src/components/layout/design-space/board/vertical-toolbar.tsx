@@ -8,6 +8,7 @@ import { DefaultStylePanel, TLComponents, TldrawUiIcon, useEditor } from 'tldraw
 import { useSystemConfig } from '@/apis/common';
 import { useWorkspacePages } from '@/apis/pages';
 import { getWorkflow } from '@/apis/workflow';
+import { normalizeWorkflowInputParams } from '@/components/layout/design-space/board/shapes/workflow/normalizeWorkflowInputParams';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
 
@@ -63,6 +64,8 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
           workflowId: workflow.workflowId || workflow.id || '',
           displayName: workflow.displayName,
           description: workflow.description,
+          // 图标：优先 workflow.iconUrl，其次 page.info.iconUrl / instance.icon
+          iconUrl: (workflow as any).iconUrl || (page as any)?.info?.iconUrl || (page as any)?.instance?.icon || undefined,
           // 兼容 name 字段（如果 workflow 中没有 name，使用 displayName）
           name: (workflow as any).name || getI18nContent(workflow.displayName) || '',
         };
@@ -425,7 +428,9 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                   title={tool.label}
                   style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                 >
-                  <VinesIcon size="xs">lucide:palette</VinesIcon>
+                  <VinesIcon size="xs" className="toolbar-vines-icon">
+                    lucide:palette
+                  </VinesIcon>
                 </button>
               );
             }
@@ -625,17 +630,8 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                             // 获取工作流详细信息（包括输入参数）
                             const workflowDetail = await getWorkflow(selectedWorkflow.workflowId);
 
-                            // 转换输入参数格式
-                            const inputParams = (workflowDetail?.variables || []).map((variable: any) => ({
-                              name: variable.name,
-                              displayName: getI18nContent(variable.displayName) || variable.name,
-                              type: variable.type || 'string',
-                              value: variable.default !== undefined ? variable.default : '',
-                              required: variable.required || false,
-                              description:
-                                getI18nContent(variable.description) || getI18nContent(variable.placeholder) || '',
-                              typeOptions: variable.typeOptions || undefined,
-                            }));
+                            // 转换输入参数格式（带默认值/下拉选项兼容）
+                            const inputParams = normalizeWorkflowInputParams(workflowDetail?.variables);
 
                             const workflowTool = editor.getStateDescendant('workflow') as any;
                             if (workflowTool && workflowTool.setWorkflowData) {
@@ -679,7 +675,9 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                       }
                       style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                     >
-                      <VinesIcon size="xs">lucide:workflow</VinesIcon>
+                      <VinesIcon size="xs" className="toolbar-vines-icon">
+                        {selectedWorkflow?.iconUrl || 'lucide:workflow'}
+                      </VinesIcon>
                       <span className="caret" />
                       <span
                         className="caret-hit"
@@ -738,19 +736,8 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                                   // 获取工作流详细信息（包括输入参数）
                                   const workflowDetail = await getWorkflow(workflow.workflowId);
 
-                                  // 转换输入参数格式
-                                  const inputParams = (workflowDetail?.variables || []).map((variable: any) => ({
-                                    name: variable.name,
-                                    displayName: getI18nContent(variable.displayName) || variable.name,
-                                    type: variable.type || 'string',
-                                    value: variable.default !== undefined ? variable.default : '',
-                                    required: variable.required || false,
-                                    description:
-                                      getI18nContent(variable.description) ||
-                                      getI18nContent(variable.placeholder) ||
-                                      '',
-                                    typeOptions: variable.typeOptions || undefined,
-                                  }));
+                                  // 转换输入参数格式（带默认值/下拉选项兼容）
+                                  const inputParams = normalizeWorkflowInputParams(workflowDetail?.variables);
 
                                   // 设置工作流数据并激活工具
                                   const workflowTool = editor.getStateDescendant('workflow') as any;
@@ -789,7 +776,9 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                               }}
                               title={getI18nContent(workflow.description) || ''}
                             >
-                              <VinesIcon size="xs">lucide:workflow</VinesIcon>
+                              <VinesIcon size="xs" style={{ width: 20, height: 20 }}>
+                                {workflow?.iconUrl || 'lucide:workflow'}
+                              </VinesIcon>
                               <span
                                 style={{
                                   maxWidth: '150px',
@@ -946,7 +935,9 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                 title="Agent"
                 style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
               >
-                <VinesIcon size="xs">lucide:bot</VinesIcon>
+                <VinesIcon size="xs" className="toolbar-vines-icon">
+                  lucide:bot
+                </VinesIcon>
               </button>
             </div>
           </div>

@@ -73,10 +73,34 @@
         }
       }
 
-      svg {
+      /* 只约束按钮“直接子元素”的 svg 尺寸，避免影响 VinesIcon / TldrawUiIcon 等内部 svg 导致不居中 */
+      >svg {
         width: 18px;
         height: 18px;
         pointer-events: none;
+      }
+
+      /* 工具栏里使用 VinesIcon 的按钮（palette / workflow / agent 等）统一到 18px 视觉尺寸 */
+      .toolbar-vines-icon {
+        width: 18px !important;
+        height: 18px !important;
+        line-height: 0;
+
+        /* 内部的 lucide/custom icon wrapper（size-*）强制为 18px */
+        .size-3,
+        .size-4,
+        .size-5,
+        .size-6,
+        .size-7 {
+          width: 18px !important;
+          height: 18px !important;
+        }
+
+        svg {
+          width: 18px !important;
+          height: 18px !important;
+          display: block;
+        }
       }
     }
 
@@ -182,6 +206,25 @@
       svg {
         width: 20px;
         height: 20px;
+      }
+    }
+
+    /* workflow 下拉菜单：图标更小一些（避免被上面的 svg 规则放大） */
+    .dropdown-menu.workflow-list {
+      .dropdown-item {
+        justify-content: flex-start;
+        gap: 4px;
+
+        /* icon 和文字留一个自然的空隙 */
+        [data-alt='icon'] {
+          transform: translateY(-3px);
+          flex-shrink: 0;
+        }
+
+        svg {
+          width: 16px;
+          height: 16px;
+        }
       }
     }
 
