@@ -1681,25 +1681,22 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                       />
                     </div>
                   ) : param.type === 'string' || param.type === 'text' ? (
-                    <textarea
-                      value={String(param.value ?? '')}
+                    <input
+                      type="text"
+                      value={param.value ?? ''}
                       onChange={(e) => handleParamChange(param.name, e.target.value)}
                       onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => e.stopPropagation()}
                       placeholder={param.description || `输入${param.displayName || param.name}`}
-                      rows={3}
                       style={{
                         width: '100%',
-                        padding: '6px 8px',
+                        padding: '4px 8px',
                         fontSize: '11px',
                         border: '1px solid #D1D5DB',
                         borderRadius: '4px',
                         outline: 'none',
-                        resize: 'vertical',
                         backgroundColor: 'white',
-                        fontFamily: 'inherit',
                         pointerEvents: 'auto',
-                        minHeight: Math.min(120, Math.max(60, Number((param as any)?.typeOptions?.textareaMiniHeight ?? 0) || 0)),
                       }}
                     />
                   ) : param.type === 'number' ? (

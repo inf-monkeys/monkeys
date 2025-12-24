@@ -90,12 +90,6 @@ export function getWorkflowPorts(editor: Editor, shape: WorkflowShape | TLShapeI
   const params = workflowShape.props.inputParams || [];
 
   if (params.length > 0) {
-    const clampTextareaHeight = (raw: any) => {
-      const n = Number(raw);
-      if (!Number.isFinite(n) || n <= 0) return 60;
-      return Math.min(120, Math.max(60, n));
-    };
-
     const isFiniteNumber = (v: any) => typeof v === 'number' && Number.isFinite(v);
 
     // 精确计算端口位置，与实际 DOM 布局完全匹配
@@ -141,9 +135,6 @@ export function getWorkflowPorts(editor: Editor, shape: WorkflowShape | TLShapeI
       if (param.type === 'file') {
         // VinesUploader 高度: h-[12rem] = 192px
         inputHeight = 192;
-      } else if (param.type === 'string' || param.type === 'text') {
-        // 与 WorkflowShapeUtil 渲染对齐：string/text 默认是 textarea（带最小高度）
-        inputHeight = clampTextareaHeight((param as any)?.typeOptions?.textareaMiniHeight);
       } else if (param.type === 'number') {
         // 与工作台对齐：min/max 都存在且 numberPrecision !== 0 且 max > min 才显示滑块
         const min = (param as any)?.typeOptions?.minValue;

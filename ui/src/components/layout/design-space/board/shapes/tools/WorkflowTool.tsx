@@ -39,12 +39,6 @@ export class WorkflowTool extends StateNode {
     // 根据参数数量和类型动态调整高度（与 shapePorts.ts 保持一致）
     const params = this.workflowData?.inputParams || [];
 
-    const clampTextareaHeight = (raw: any) => {
-      const n = Number(raw);
-      if (!Number.isFinite(n) || n <= 0) return 60;
-      return Math.min(120, Math.max(60, n));
-    };
-
     const isFiniteNumber = (v: any) => typeof v === 'number' && Number.isFinite(v);
 
     // 基础高度计算
@@ -80,9 +74,6 @@ export class WorkflowTool extends StateNode {
 
         if (param.type === 'file') {
           inputHeight = 192;
-        } else if (param.type === 'string' || param.type === 'text') {
-          // 与 WorkflowShapeUtil 渲染对齐：string/text 默认是 textarea（带最小高度）
-          inputHeight = clampTextareaHeight(param.typeOptions?.textareaMiniHeight);
         } else if (param.type === 'number') {
           // 与工作台对齐：只有 min/max 都存在且 numberPrecision !== 0 且 max > min 才显示滑块
           const min = param.typeOptions?.minValue;
