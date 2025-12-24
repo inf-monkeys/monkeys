@@ -4,6 +4,26 @@ import { IPageGroup, IPinPage } from '../pages/typings';
 
 export type SystemModule = 'payment' | 'vines-ai';
 
+export type PresignUrlPattern = {
+  id: string;
+  type: 'bucket-hostname' | 'provider-hostname';
+  hostname: string;
+  preferred?: boolean;
+  bucketSegment?: string;
+};
+
+export type PresignBucket = {
+  id: string;
+  provider: string;
+  urlPatterns: PresignUrlPattern[];
+  preferredUrlPatternId: string;
+};
+
+export type StoragePresignConfig = {
+  expiresInSeconds: number;
+  buckets: PresignBucket[];
+};
+
 export enum AuthMethod {
   password = 'password',
   phone = 'phone',
@@ -292,4 +312,7 @@ export interface ISystemConfig {
   };
   module: SystemModule[] | '*';
   behavior: SystemConfigBehavior;
+  storage?: {
+    presign?: StoragePresignConfig;
+  };
 }

@@ -3,6 +3,8 @@ import { ToolsModule } from '@/modules/tools/tools.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { MediaBucketRegistryService } from './media.bucket-registry.service';
 import { MediaFileCrudController } from './media.crud.controller';
+import { MediaFrontendPresignService } from './media.frontend-presign.service';
+import { MediaPresignBucketRegistryService } from './media.presign-bucket-registry.service';
 import { MediaPresignService } from './media.presign.service';
 import { MediaFileService } from './media.service';
 import { MediaStorageService } from './media.storage.service';
@@ -12,8 +14,8 @@ import { MediaUploadController } from './media.upload.controller';
 
 @Module({
   controllers: [MediaUploadController, MediaFileCrudController],
-  providers: [MediaFileService, MediaThumbnailService, MediaBucketRegistryService, MediaPresignService, MediaStorageService, MediaUrlTransformerService],
+  providers: [MediaFileService, MediaThumbnailService, MediaBucketRegistryService, MediaPresignBucketRegistryService, MediaPresignService, MediaFrontendPresignService, MediaStorageService, MediaUrlTransformerService],
   imports: [forwardRef(() => EvaluationModule), ToolsModule],
-  exports: [MediaFileService, MediaThumbnailService, MediaBucketRegistryService, MediaPresignService, MediaStorageService, MediaUrlTransformerService],
+  exports: [MediaFileService, MediaThumbnailService, MediaBucketRegistryService, MediaPresignBucketRegistryService, MediaPresignService, MediaFrontendPresignService, MediaStorageService, MediaUrlTransformerService],
 })
 export class MediaModule {}

@@ -19,6 +19,23 @@ export type SystemConfig = {
       dark?: string;
     };
   };
+  storage?: {
+    presign?: {
+      expiresInSeconds: number;
+      buckets: Array<{
+        id: string;
+        provider: string;
+        preferredUrlPatternId: string;
+        urlPatterns: Array<{
+          id: string;
+          type: 'bucket-hostname' | 'provider-hostname';
+          hostname: string;
+          preferred?: boolean;
+          bucketSegment?: string;
+        }>;
+      }>;
+    };
+  };
 };
 
 export async function getSystemConfig(): Promise<SystemConfig | undefined> {

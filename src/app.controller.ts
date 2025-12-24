@@ -112,6 +112,31 @@ export class AppController {
       module.push('payment');
     }
 
+    const presignBuckets =
+      config.s3PresignBuckets?.map((bucket) => ({
+        id: bucket.id,
+        provider: bucket.provider,
+        urlPatterns: bucket.urlPatterns?.map((pattern) => ({
+          id: pattern.id,
+          type: pattern.type,
+          hostname: pattern.hostname,
+          preferred: pattern.preferred,
+          bucketSegment: pattern.bucketSegment,
+        })) ?? [],
+        preferredUrlPatternId: bucket.preferredUrlPatternId,
+      })) ?? [];
+    const rawPresignExpires = config?.s3?.presign?.expiresInSeconds ?? 300;
+    const parsedPresignExpires = Number(rawPresignExpires);
+    const presignExpiresInSeconds =
+      Number.isFinite(parsedPresignExpires) && parsedPresignExpires > 0 ? Math.round(parsedPresignExpires) : 300;
+
+    const storagePresign = presignBuckets.length > 0
+      ? {
+          expiresInSeconds: presignExpiresInSeconds,
+          buckets: presignBuckets,
+        }
+      : undefined;
+
     const data: ISystemConfig = {
       theme: {
         id: config.server.customization.id,
@@ -184,6 +209,7 @@ export class AppController {
       },
       module,
       behavior: config.server.behavior,
+      storage: storagePresign ? { presign: storagePresign } : undefined,
     };
     return new SuccessResponse({
       data,

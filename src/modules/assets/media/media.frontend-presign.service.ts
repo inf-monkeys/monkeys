@@ -1,38 +1,29 @@
 import { config } from '@/common/config';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MediaBucketRegistryService } from './media.bucket-registry.service';
+import { MediaPresignBucketRegistryService } from './media.presign-bucket-registry.service';
+import type { MediaPresignResult } from './media.presign.service';
 import { StorageOperations } from './thumbnail/thumbnail.storage';
-
-export interface MediaPresignResult {
-  bucketId: string;
-  signedUrl: string;
-  expiresIn: number;
-  method: string;
-  headers: Record<string, string>;
-  matchedPatternId?: string;
-  imagePath: string;
-  originalUrl: string;
-}
 
 interface CachedPresignResult extends MediaPresignResult {
   cachedAt: number; // 缓存时间戳
 }
 
 @Injectable()
-export class MediaPresignService {
+export class MediaFrontendPresignService {
   private static readonly DEFAULT_EXPIRES_IN_SECONDS = 300;
-  private readonly logger = new Logger(MediaPresignService.name);
+  private readonly logger = new Logger(MediaFrontendPresignService.name);
 
   // URL缓存，key为原始URL，value为预签名结果
   private readonly urlCache = new Map<string, CachedPresignResult>();
 
-  // 记录已经输出过日志的缓存键，避免重复日志
-  private readonly loggedCacheHits = new Set<string>();
-
   // 缓存清理间隔（5分钟）
   private readonly CACHE_CLEANUP_INTERVAL = 60 * 60 * 1000;
 
-  constructor(private readonly bucketRegistry: MediaBucketRegistryService) {
+  constructor(
+    private readonly presignBucketRegistry: MediaPresignBucketRegistryService,
+    private readonly fallbackBucketRegistry: MediaBucketRegistryService,
+  ) {
     // 启动定期清理过期缓存的任务
     this.startCacheCleanup();
   }
@@ -51,17 +42,12 @@ export class MediaPresignService {
 
       // 如果缓存还有至少30%的有效期，则使用缓存
       if (remainingTime > (normalizedExpires * 1000 * 0.3)) {
-        // 只在首次缓存命中时输出日志，避免重复刷屏
-        if (!this.loggedCacheHits.has(cacheKey)) {
-          this.logger.debug(`Using cached presigned URL for ${targetUrl} (remaining: ${Math.round(remainingTime / 1000)}s)`);
-          this.loggedCacheHits.add(cacheKey);
-        }
+        this.logger.debug(`Using cached presigned URL for ${targetUrl} (remaining: ${Math.round(remainingTime / 1000)}s)`);
         const { cachedAt, ...result } = cached;
         return result;
       } else {
         // 缓存即将过期，删除它
         this.urlCache.delete(cacheKey);
-        this.loggedCacheHits.delete(cacheKey); // 同时清理日志记录
       }
     }
 
@@ -110,9 +96,11 @@ export class MediaPresignService {
       throw new BadRequestException('url 参数格式不正确');
     }
 
-    const resolved = this.bucketRegistry.resolveBucketFromUrl(urlObject);
+    const resolved =
+      this.presignBucketRegistry.resolveBucketFromUrl(urlObject) ??
+      this.fallbackBucketRegistry.resolveBucketFromUrl(urlObject);
     if (!resolved) {
-      throw new NotFoundException(`未找到可用的缩略图存储桶: ${url}`);
+      throw new NotFoundException(`未找到可用的预签名存储桶: ${url}`);
     }
     if (!resolved.imagePath) {
       throw new BadRequestException('无法从指定 URL 中解析出文件路径');
@@ -133,10 +121,10 @@ export class MediaPresignService {
   }
 
   private getDefaultExpiresInSeconds() {
-    const raw = config?.s3?.presign?.expiresInSeconds ?? MediaPresignService.DEFAULT_EXPIRES_IN_SECONDS;
+    const raw = config?.s3?.presign?.expiresInSeconds ?? MediaFrontendPresignService.DEFAULT_EXPIRES_IN_SECONDS;
     const parsed = Number(raw);
     if (!Number.isFinite(parsed) || parsed <= 0) {
-      return MediaPresignService.DEFAULT_EXPIRES_IN_SECONDS;
+      return MediaFrontendPresignService.DEFAULT_EXPIRES_IN_SECONDS;
     }
     return Math.round(parsed);
   }
@@ -164,7 +152,6 @@ export class MediaPresignService {
       // 如果缓存已过期或即将过期（剩余时间少于10%），删除它
       if (remainingTime <= (cached.expiresIn * 1000 * 0.1)) {
         this.urlCache.delete(key);
-        this.loggedCacheHits.delete(key); // 同时清理日志记录
         cleanedCount++;
       }
     }

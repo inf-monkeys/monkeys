@@ -35,6 +35,7 @@ import { initializeGlobalViewStore } from '@/store/useGlobalViewStore';
 import { clearWorkbenchFormInputsCache } from '@/store/workbenchFormInputsCacheStore';
 import { APP_VERSION, APP_VERSION_STORAGE_KEY } from '@/utils/app-version.ts';
 import VinesEvent from '@/utils/events.ts';
+import { initOssPresignInterceptors } from '@/utils/oss-presign';
 
 const RootComponent: React.FC = () => {
   const { t } = useTranslation();
@@ -131,6 +132,10 @@ const RootComponent: React.FC = () => {
       }
     }
   }, [oem, i18n.language]);
+
+  useEffect(() => {
+    initOssPresignInterceptors(oem?.storage?.presign);
+  }, [oem?.storage?.presign]);
 
   const designNewTabOpenBoard = get(oem, 'theme.designProjects.newTabOpenBoard', true);
 

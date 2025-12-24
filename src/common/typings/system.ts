@@ -21,6 +21,21 @@ import {
 } from '../config';
 export type OemModule = 'payment' | 'vines-ai';
 
+export type PresignUrlPattern = {
+  id: string;
+  type: 'bucket-hostname' | 'provider-hostname';
+  hostname: string;
+  preferred?: boolean;
+  bucketSegment?: string;
+};
+
+export type PresignBucket = {
+  id: string;
+  provider: string;
+  urlPatterns: PresignUrlPattern[];
+  preferredUrlPatternId: string;
+};
+
 export interface ISystemConfig {
   theme: {
     id: string;
@@ -107,4 +122,10 @@ export interface ISystemConfig {
   };
   module: OemModule[] | '*';
   behavior: SystemConfigBehavior;
+  storage?: {
+    presign?: {
+      expiresInSeconds: number;
+      buckets: PresignBucket[];
+    };
+  };
 }

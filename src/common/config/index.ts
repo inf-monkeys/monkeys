@@ -487,6 +487,9 @@ export interface S3Config {
   region: string;
   bucket: string;
   publicAccessUrl: string;
+  presign: {
+    expiresInSeconds: number;
+  };
 }
 
 export interface S3ThumbnailConfig {
@@ -513,6 +516,8 @@ export interface S3ThumbnailBucketConfig {
   preferredUrlPatternId: string;
   thumbnailPrefix?: string;
 }
+
+export type S3PresignBucketConfig = S3ThumbnailBucketConfig;
 
 type RawS3ThumbnailUrlPattern = {
   id: string;
@@ -742,6 +747,7 @@ export interface Config {
   s3: S3Config;
   s3Thumbnail: S3ThumbnailConfig;
   s3ThumbnailBuckets: S3ThumbnailBucketConfig[];
+  s3PresignBuckets: S3PresignBucketConfig[];
   models: LlmModelConfig[];
   proxy: ProxyConfig;
   llm: LLmConfig;
@@ -760,6 +766,8 @@ export interface Config {
 
 const rawS3ThumbnailBuckets = readConfig('s3-thumb-buckets', []);
 const resolvedS3ThumbnailBuckets = Array.isArray(rawS3ThumbnailBuckets) ? rawS3ThumbnailBuckets.map((bucket) => normalizeS3ThumbnailBucketConfig(bucket as RawS3ThumbnailBucketConfig)) : [];
+const rawS3PresignBuckets = readConfig('s3-presign-buckets', []);
+const resolvedS3PresignBuckets = Array.isArray(rawS3PresignBuckets) ? rawS3PresignBuckets.map((bucket) => normalizeS3ThumbnailBucketConfig(bucket as RawS3ThumbnailBucketConfig)) : [];
 
 const port = readConfig('server.port', 3000);
 const appUrl = readConfig('server.appUrl', `http://127.0.0.1:${port}`);
@@ -1077,11 +1085,15 @@ export const config: Config = {
     region: readConfig('s3.region'),
     bucket: readConfig('s3.bucket'),
     publicAccessUrl: readConfig('s3.publicAccessUrl'),
+    presign: {
+      expiresInSeconds: readConfig('s3.presign.expiresInSeconds', 300),
+    },
   },
   s3Thumbnail: {
     quality: readConfig('s3-thumbnail.quality', 80),
   },
   s3ThumbnailBuckets: resolvedS3ThumbnailBuckets,
+  s3PresignBuckets: resolvedS3PresignBuckets,
   models: readConfig('models', []),
   proxy: {
     enabled: readConfig('proxy.enabled', false),
