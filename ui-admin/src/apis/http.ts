@@ -1,4 +1,5 @@
 import { clearStoredToken, getStoredToken } from './auth-storage';
+import { transformOssUrlsInObject } from '@/utils/oss-presign';
 
 function redirectToLogin() {
   clearStoredToken();
@@ -71,7 +72,10 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   if (response.status === 204) return undefined as T;
   if (!text || text.trim() === '') return undefined as T;
 
-  if (maybeJson !== undefined) return maybeJson as T;
+  if (maybeJson !== undefined) {
+    const transformed = await transformOssUrlsInObject(maybeJson, url);
+    return transformed as T;
+  }
   return text as unknown as T;
 }
 

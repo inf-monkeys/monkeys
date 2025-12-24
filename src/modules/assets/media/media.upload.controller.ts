@@ -9,6 +9,7 @@ import { Response } from 'express';
 import _ from 'lodash';
 import { Readable } from 'stream';
 import { MediaBucketRegistryService } from './media.bucket-registry.service';
+import { MediaFrontendPresignService } from './media.frontend-presign.service';
 import { MediaFileService } from './media.service';
 import { MediaStorageService } from './media.storage.service';
 
@@ -30,6 +31,7 @@ const parseBoolean = (value?: string) => {
 export class MediaUploadController {
   constructor(
     private readonly mediaFileService: MediaFileService,
+    private readonly mediaFrontendPresignService: MediaFrontendPresignService,
     private readonly mediaStorageService: MediaStorageService,
     private readonly mediaBucketRegistryService: MediaBucketRegistryService,
   ) {}
@@ -146,7 +148,7 @@ export class MediaUploadController {
   @Get('/s3/presign-v2')
   async getPreSignedUrlV2(@Query('url') url: string, @Query('redirect') redirect: string = 'true', @Res({ passthrough: true }) res: Response) {
     const redirectBoolean = parseBoolean(redirect);
-    const data = await this.mediaFileService.getPresignedUrl(url);
+    const data = await this.mediaFrontendPresignService.getPresignedUrl(url);
     if (redirectBoolean && res) {
       res.redirect(301, data.signedUrl);
       return;

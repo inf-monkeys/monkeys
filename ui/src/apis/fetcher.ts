@@ -6,6 +6,7 @@ import { getVinesToken, IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts
 import i18n from '@/i18n.ts';
 import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
+import { transformOssUrlsInObject } from '@/utils/oss-presign';
 
 import 'unfetch/polyfill';
 
@@ -198,7 +199,9 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         }
       }
 
-      return wrapper(data, raw);
+      const result = wrapper(data, raw);
+      const requestUrl = customRequest?.url || url;
+      return await transformOssUrlsInObject(result, typeof requestUrl === 'string' ? requestUrl : '');
     });
   };
 };

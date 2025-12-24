@@ -11,6 +11,7 @@ import {
     getBrandTitle,
     useSystemConfigStore,
 } from '@/store/system-config';
+import { initOssPresignInterceptors } from '@/utils/oss-presign';
 
 // Create a new router instance
 const router = createRouter({ routeTree });
@@ -26,6 +27,7 @@ async function bootstrap() {
   await useSystemConfigStore.getState().load();
   const config = useSystemConfigStore.getState().config;
   document.title = formatAdminTitle(getBrandTitle(config));
+  initOssPresignInterceptors(config?.storage?.presign);
 
   if (typeof window !== 'undefined') {
     const media = window.matchMedia('(prefers-color-scheme: dark)');

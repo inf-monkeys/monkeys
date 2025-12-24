@@ -1,27 +1,18 @@
 import { config } from '@/common/config';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MediaBucketRegistryService } from './media.bucket-registry.service';
+import { MediaPresignBucketRegistryService } from './media.presign-bucket-registry.service';
+import type { MediaPresignResult } from './media.presign.service';
 import { StorageOperations } from './thumbnail/thumbnail.storage';
-
-export interface MediaPresignResult {
-  bucketId: string;
-  signedUrl: string;
-  expiresIn: number;
-  method: string;
-  headers: Record<string, string>;
-  matchedPatternId?: string;
-  imagePath: string;
-  originalUrl: string;
-}
 
 interface CachedPresignResult extends MediaPresignResult {
   cachedAt: number; // 缓存时间戳
 }
 
 @Injectable()
-export class MediaPresignService {
+export class MediaFrontendPresignService {
   private static readonly DEFAULT_EXPIRES_IN_SECONDS = 300;
-  private readonly logger = new Logger(MediaPresignService.name);
+  private readonly logger = new Logger(MediaFrontendPresignService.name);
 
   // URL缓存，key为原始URL，value为预签名结果
   private readonly urlCache = new Map<string, CachedPresignResult>();
@@ -29,7 +20,10 @@ export class MediaPresignService {
   // 缓存清理间隔（5分钟）
   private readonly CACHE_CLEANUP_INTERVAL = 60 * 60 * 1000;
 
-  constructor(private readonly bucketRegistry: MediaBucketRegistryService) {
+  constructor(
+    private readonly presignBucketRegistry: MediaPresignBucketRegistryService,
+    private readonly fallbackBucketRegistry: MediaBucketRegistryService,
+  ) {
     // 启动定期清理过期缓存的任务
     this.startCacheCleanup();
   }
@@ -102,9 +96,11 @@ export class MediaPresignService {
       throw new BadRequestException('url 参数格式不正确');
     }
 
-    const resolved = this.bucketRegistry.resolveBucketFromUrl(urlObject);
+    const resolved =
+      this.presignBucketRegistry.resolveBucketFromUrl(urlObject) ??
+      this.fallbackBucketRegistry.resolveBucketFromUrl(urlObject);
     if (!resolved) {
-      throw new NotFoundException(`未找到可用的缩略图存储桶: ${url}`);
+      throw new NotFoundException(`未找到可用的预签名存储桶: ${url}`);
     }
     if (!resolved.imagePath) {
       throw new BadRequestException('无法从指定 URL 中解析出文件路径');
@@ -125,10 +121,10 @@ export class MediaPresignService {
   }
 
   private getDefaultExpiresInSeconds() {
-    const raw = config?.s3?.presign?.expiresInSeconds ?? MediaPresignService.DEFAULT_EXPIRES_IN_SECONDS;
+    const raw = config?.s3?.presign?.expiresInSeconds ?? MediaFrontendPresignService.DEFAULT_EXPIRES_IN_SECONDS;
     const parsed = Number(raw);
     if (!Number.isFinite(parsed) || parsed <= 0) {
-      return MediaPresignService.DEFAULT_EXPIRES_IN_SECONDS;
+      return MediaFrontendPresignService.DEFAULT_EXPIRES_IN_SECONDS;
     }
     return Math.round(parsed);
   }
