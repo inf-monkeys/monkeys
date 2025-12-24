@@ -11,6 +11,7 @@ import { useEffect, useRef } from 'react';
 import { Editor } from 'tldraw';
 import { useThreadListContext } from '@/features/agent/components/AgentRuntimeProvider';
 import { useCanvasInspirationPush } from './hooks/useCanvasInspirationPush';
+import { useSystemConfig } from '@/apis/common';
 
 interface CanvasInspirationManagerProps {
   editor: Editor | null;
@@ -25,6 +26,13 @@ export function CanvasInspirationManager({
   userId,
   enabled = true,
 }: CanvasInspirationManagerProps) {
+  // 获取系统配置
+  const { data: oem } = useSystemConfig();
+
+  // 检查是否启用了灵感推送功能
+  const agentTools = (oem as any)?.theme?.designProjects?.AgentTools || [];
+  const isInspirationPushEnabled = agentTools.includes('canvas-inspiration-push');
+
   // 获取当前 thread ID
   const { currentThreadId } = useThreadListContext();
 
@@ -42,7 +50,7 @@ export function CanvasInspirationManager({
     teamId,
     userId,
     threadId: currentThreadId || undefined,
-    enabled: enabled && !!currentThreadId, // 只有在有 threadId 时才启用
+    enabled: enabled && !!currentThreadId && isInspirationPushEnabled, // 只有在配置启用且有 threadId 时才启用
     onInspirationPushed: async (result) => {
       console.log('✨ [CanvasInspiration] 灵感推送成功，准备通知切换', result);
 
@@ -81,12 +89,16 @@ export function CanvasInspirationManager({
   // 将 testPush 暴露到 window，方便调试
   useEffect(() => {
     (window as any).testInspirationPush = testPush;
-    console.log('🎨 [CanvasInspiration] 已挂载，currentThreadId:', currentThreadId);
+    console.log('🎨 [CanvasInspiration] 已挂载', {
+      currentThreadId,
+      isInspirationPushEnabled,
+      enabled: enabled && !!currentThreadId && isInspirationPushEnabled,
+    });
 
     return () => {
       delete (window as any).testInspirationPush;
     };
-  }, [testPush, currentThreadId]);
+  }, [testPush, currentThreadId, isInspirationPushEnabled, enabled]);
 
   // 此组件不渲染任何 UI
   return null;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Editor, useEditor, track } from 'tldraw';
 import { Button } from '@/components/ui/button';
+import { useSystemConfig } from '@/apis/common';
 
 interface RelationshipDiscoveryButtonProps {
   onDiscoverRelationships: (selectedShapes: any[]) => void;
@@ -16,8 +17,13 @@ export const RelationshipDiscoveryButton: React.FC<RelationshipDiscoveryButtonPr
   ({ onDiscoverRelationships, loading = false }) => {
     const editor = useEditor();
     const [selectedShapes, setSelectedShapes] = useState<any[]>([]);
+    const { data: oem } = useSystemConfig();
 
-    if (!editor) return null;
+    // 检查是否启用了逻辑关系发现功能
+    const agentTools = (oem as any)?.theme?.designProjects?.AgentTools || [];
+    const isEnabled = agentTools.includes('discovery-of-logical-relationships');
+
+    if (!editor || !isEnabled) return null;
 
     // 获取选中的图形ID
     const selectedShapeIds = Array.from(editor.getSelectedShapeIds());

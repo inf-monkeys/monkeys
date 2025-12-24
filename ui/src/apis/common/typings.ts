@@ -159,6 +159,7 @@ export type CustomizationDesignProjects = {
   showRealtimeDrawing?: boolean; // 是否显示实时绘画工具栏，默认 false
   showWorkflow?: boolean; // 是否显示 Workflow 工具栏，默认 false
   showAgent?: boolean; // 是否显示 Agent 按钮，默认 false
+  AgentTools?: string[]; // 启用的 Agent 工具列表，如 ['discovery-of-logical-relationships', 'mind-graph']
 };
 
 export type ExtraLanguageURL = Record<'en' | 'zh', string>;
