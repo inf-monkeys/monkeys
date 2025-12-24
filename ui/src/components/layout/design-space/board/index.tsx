@@ -182,7 +182,7 @@ interface BoardProps {
   canvasHeight?: number;
   instance?: BoardInstance;
   persistenceKey?: string;
-  /** 外部页面自行放置“从头运行”按钮时，可隐藏画布内置的悬浮按钮 */
+  /** 外部页面自行放置“开始运行”按钮时，可隐藏画布内置的悬浮按钮 */
   hideRunAllWorkflowsButton?: boolean;
 }
 

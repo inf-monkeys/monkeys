@@ -643,7 +643,7 @@ const DesignBoardView: React.FC<DesignBoardViewProps> = ({ embed = false }) => {
               <TooltipContent>版本管理</TooltipContent>
             </Tooltip>
 
-            {/* 从头运行：放在版本管理下方 */}
+            {/* 开始运行：放在版本管理下方 */}
             <RunAllWorkflowsButtonStandalone editor={editor} mode="inline" />
           </div>
         </Card>

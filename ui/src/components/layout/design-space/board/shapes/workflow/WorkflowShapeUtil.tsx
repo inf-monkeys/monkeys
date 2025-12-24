@@ -648,7 +648,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // silent 模式下不展示任何错误 toast，交由外层（如“从头运行”）回滚并继续推进
+          // silent 模式下不展示任何错误 toast，交由外层（如“开始运行”）回滚并继续推进
           ...vinesHeader({ useToast: !silent }),
         },
         body: JSON.stringify({

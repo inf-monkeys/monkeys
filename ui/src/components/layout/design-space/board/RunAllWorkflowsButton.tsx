@@ -50,7 +50,7 @@ function getNotReadyFileParamNames(editor: Editor, workflowId: string): string[]
   for (const p of params) {
     if (!p || p.type !== 'file') continue;
     // 只等待“来自连线”的 file 参数就绪：这类值会由上游 output / instruction 自动填充。
-    // 对于没有连线、需要用户手动上传的必填文件，不要在这里等待，否则会造成“从头运行卡住”。
+    // 对于没有连线、需要用户手动上传的必填文件，不要在这里等待，否则会造成“开始运行卡住”。
     if (!connected.has(p.name)) continue;
     if (!isFileValueReady(p.value)) pending.push(p.name);
   }
@@ -429,7 +429,7 @@ const RunAllWorkflowsButtonBase: React.FC<{
       }
     } catch (e: any) {
       // 不展示具体报错信息
-      toast.error('从头运行失败');
+      toast.error('开始运行失败');
     } finally {
       setRunning(false);
       setCurrent(null);
@@ -449,7 +449,7 @@ const RunAllWorkflowsButtonBase: React.FC<{
       disabled={false}
       title="按连接线依赖推进：只要前置节点完成，后置即可立刻开始；同一批可并行执行"
     >
-      {running ? (current ? `运行中 ${current.index}/${current.total}（点我停止）` : '运行中（点我停止）') : '从头运行'}
+      {running ? (current ? `运行中 ${current.index}/${current.total}（点击停止）` : '运行中（点击停止）') : '开始运行'}
     </Button>
   );
 
