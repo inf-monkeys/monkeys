@@ -37,5 +37,7 @@ export type WorkflowShape = TLBaseShape<
     inputParams: WorkflowInputParam[]; // 输入参数列表
     inputConnections: WorkflowInputConnection[]; // 输入连接列表
     generatedTime: number; // 生成耗时（毫秒），0 表示未生成
+    /** 首次渲染后自动撑高，确保默认不出现滚动条（仅执行一次） */
+    autoSizeDone?: boolean;
   }
 >;

@@ -192,6 +192,7 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
       inputParams: [],
       inputConnections: [],
       generatedTime: 0,
+      autoSizeDone: false,
     };
   }
 
@@ -264,6 +265,7 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
 function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; editor: Editor }) {
   // 获取参数连接点的引用
   const paramConnectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
 
   // 兼容 select 下拉：HTML select 的 value 必须是 string，这里用 JSON 编码以保留原始类型（number/boolean/string）
   const encodeSelectValue = React.useCallback((v: any) => {
@@ -285,6 +287,8 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       return s;
     }
   }, []);
+
+  const isFiniteNumber = React.useCallback((v: any) => typeof v === 'number' && Number.isFinite(v), []);
 
   /**
    * 复刻工作台表单的“下拉联动过滤”逻辑：
@@ -1474,6 +1478,49 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
     return () => unregisterWorkflowRuntime(shape.id as any, runtime);
   }, [shape.id]);
 
+  // 首次渲染后自动撑高：确保默认不出现滚动条（只执行一次，避免影响用户手动调整尺寸）
+  React.useLayoutEffect(() => {
+    if (shape.props.autoSizeDone) return;
+    const el = contentRef.current;
+    if (!el) return;
+
+    // 用 rAF 等待布局稳定（尤其是 select/textarea/font 渲染）
+    const raf = requestAnimationFrame(() => {
+      try {
+        const scrollH = el.scrollHeight;
+        const clientH = el.clientHeight;
+        const overflow = scrollH - clientH;
+        if (overflow > 1) {
+          const nextH = Math.min(1200, (shape.props.h || 200) + overflow + 8); // 额外留 8px 缓冲避免像素抖动
+          editor.updateShape<WorkflowShape>({
+            id: shape.id,
+            type: 'workflow',
+            props: {
+              ...shape.props,
+              h: nextH,
+              autoSizeDone: true,
+            },
+          });
+        } else {
+          // 即使不溢出，也标记完成，避免后续反复测量
+          editor.updateShape<WorkflowShape>({
+            id: shape.id,
+            type: 'workflow',
+            props: {
+              ...shape.props,
+              autoSizeDone: true,
+            },
+          });
+        }
+      } catch {
+        // ignore
+      }
+    });
+
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shape.id, shape.props.autoSizeDone]);
+
   return (
     <div
       style={{
@@ -1565,7 +1612,10 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
       </div>
 
       {/* 内容区域 */}
-      <div style={{ flex: 1, padding: '12px 12px 12px 24px', position: 'relative', overflow: 'auto' }}>
+      <div
+        ref={contentRef}
+        style={{ flex: 1, padding: '12px 12px 12px 24px', position: 'relative', overflow: 'auto' }}
+      >
         <div style={{ marginBottom: '8px' }}>
           <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
             {shape.props.workflowName || '未命名工作流'}
@@ -1631,77 +1681,100 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
                       />
                     </div>
                   ) : param.type === 'string' || param.type === 'text' ? (
-                    <input
-                      type="text"
-                      value={param.value ?? ''}
+                    <textarea
+                      value={String(param.value ?? '')}
                       onChange={(e) => handleParamChange(param.name, e.target.value)}
                       onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => e.stopPropagation()}
                       placeholder={param.description || `输入${param.displayName || param.name}`}
+                      rows={3}
                       style={{
                         width: '100%',
-                        padding: '4px 8px',
+                        padding: '6px 8px',
                         fontSize: '11px',
                         border: '1px solid #D1D5DB',
                         borderRadius: '4px',
                         outline: 'none',
+                        resize: 'vertical',
                         backgroundColor: 'white',
+                        fontFamily: 'inherit',
                         pointerEvents: 'auto',
+                        minHeight: Math.min(120, Math.max(60, Number((param as any)?.typeOptions?.textareaMiniHeight ?? 0) || 0)),
                       }}
                     />
                   ) : param.type === 'number' ? (
                     <div>
                       {/* 如果有min/max值，显示滑动条 */}
-                      {(param as any).typeOptions?.minValue !== undefined &&
-                      (param as any).typeOptions?.maxValue !== undefined ? (
+                      {(() => {
+                        const typeOptions: any = (param as any).typeOptions || {};
+                        const min = typeOptions?.minValue;
+                        const max = typeOptions?.maxValue;
+                        // 与工作台对齐：min/max 都存在且 numberPrecision !== 0，且 max > min 才渲染滑动条
+                        const precision = typeOptions?.numberPrecision;
+                        const canUseSlider =
+                          !isFiniteNumber(precision) || precision === 0
+                            ? false
+                            : isFiniteNumber(min) && isFiniteNumber(max) && max > min;
+
+                        if (!canUseSlider) return null;
+
+                        const step = isFiniteNumber(precision) ? precision : 1;
+                        const v = isFiniteNumber(param.value) ? param.value : min;
+
+                        return (
+                          <div onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+                            <input
+                              type="range"
+                              min={min}
+                              max={max}
+                              step={step}
+                              value={v}
+                              onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
+                              onPointerMove={(e) => e.stopPropagation()}
+                              style={{
+                                width: '100%',
+                                pointerEvents: 'auto',
+                              }}
+                            />
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                fontSize: '10px',
+                                color: '#6B7280',
+                                marginTop: '2px',
+                              }}
+                            >
+                              <span>{min}</span>
+                              <span style={{ fontWeight: '600', color: '#374151' }}>{v as any}</span>
+                              <span>{max}</span>
+                            </div>
+                          </div>
+                        );
+                      })() ?? (
                         <div onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
                           <input
-                            type="range"
-                            min={(param as any).typeOptions.minValue}
-                            max={(param as any).typeOptions.maxValue}
-                            step={(param as any).typeOptions.numberPrecision || 1}
-                            value={(param.value ?? (param as any).typeOptions.minValue) as any}
-                            onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
+                            type="number"
+                            value={param.value ?? ''}
+                            onChange={(e) => {
+                              const n = parseFloat(e.target.value);
+                              handleParamChange(param.name, Number.isFinite(n) ? n : '');
+                            }}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => e.stopPropagation()}
+                            placeholder={param.description || `输入${param.displayName || param.name}`}
                             style={{
                               width: '100%',
+                              padding: '4px 8px',
+                              fontSize: '11px',
+                              border: '1px solid #D1D5DB',
+                              borderRadius: '4px',
+                              outline: 'none',
+                              backgroundColor: 'white',
                               pointerEvents: 'auto',
                             }}
                           />
-                          <div
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              fontSize: '10px',
-                              color: '#6B7280',
-                              marginTop: '2px',
-                            }}
-                          >
-                            <span>{(param as any).typeOptions.minValue}</span>
-                            <span style={{ fontWeight: '600', color: '#374151' }}>
-                              {(param.value ?? (param as any).typeOptions.minValue) as any}
-                            </span>
-                            <span>{(param as any).typeOptions.maxValue}</span>
-                          </div>
                         </div>
-                      ) : (
-                        <input
-                          type="number"
-                          value={param.value ?? ''}
-                          onChange={(e) => handleParamChange(param.name, parseFloat(e.target.value))}
-                          onPointerDown={(e) => e.stopPropagation()}
-                          onClick={(e) => e.stopPropagation()}
-                          placeholder={param.description || `输入${param.displayName || param.name}`}
-                          style={{
-                            width: '100%',
-                            padding: '4px 8px',
-                            fontSize: '11px',
-                            border: '1px solid #D1D5DB',
-                            borderRadius: '4px',
-                            outline: 'none',
-                            backgroundColor: 'white',
-                            pointerEvents: 'auto',
-                          }}
-                        />
                       )}
                     </div>
                   ) : param.type === 'boolean' ? (
