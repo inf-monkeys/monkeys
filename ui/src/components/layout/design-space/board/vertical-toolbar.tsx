@@ -679,6 +679,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                                   '未命名工作流',
                                 workflowDescription:
                                   getI18nContent(workflowDetail?.description || selectedWorkflow.description) || '',
+                                workflowIcon: selectedWorkflow?.iconUrl || (workflowDetail as any)?.iconUrl || '',
                                 inputParams: inputParams,
                               });
                             }
@@ -693,6 +694,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                                   selectedWorkflow.name ||
                                   '未命名工作流',
                                 workflowDescription: getI18nContent(selectedWorkflow.description) || '',
+                                workflowIcon: selectedWorkflow?.iconUrl || '',
                                 inputParams: [],
                               });
                             }
@@ -786,6 +788,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                                         '未命名工作流',
                                       workflowDescription:
                                         getI18nContent(workflowDetail?.description || workflow.description) || '',
+                                      workflowIcon: workflow?.iconUrl || (workflowDetail as any)?.iconUrl || '',
                                       inputParams: inputParams,
                                     });
                                   }
@@ -801,6 +804,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                                       workflowName:
                                         getI18nContent(workflow.displayName) || workflow.name || '未命名工作流',
                                       workflowDescription: getI18nContent(workflow.description) || '',
+                                      workflowIcon: workflow?.iconUrl || '',
                                       inputParams: [],
                                     });
                                   }

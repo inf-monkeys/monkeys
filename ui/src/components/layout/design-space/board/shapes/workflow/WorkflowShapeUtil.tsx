@@ -6,6 +6,7 @@ import { IMediaData } from '@/apis/media-data/typings';
 import { useUgcMediaData } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings';
 import { vinesHeader } from '@/apis/utils';
+import { getWorkflow } from '@/apis/workflow';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
@@ -186,6 +187,7 @@ export class WorkflowShapeUtil extends BaseBoxShapeUtil<WorkflowShape> {
       workflowId: '',
       workflowName: '',
       workflowDescription: '',
+      workflowIcon: '',
       color: 'violet',
       isRunning: false,
       connections: [],
@@ -266,6 +268,35 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
   // 获取参数连接点的引用
   const paramConnectionRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
   const contentRef = React.useRef<HTMLDivElement | null>(null);
+
+  // 兼容旧数据：历史创建的 workflow shape 可能没有 workflowIcon，这里按需懒加载补全一次
+  React.useEffect(() => {
+    const workflowId = shape.props.workflowId;
+    if (!workflowId) return;
+    if (shape.props.workflowIcon) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const detail: any = await getWorkflow(workflowId);
+        const icon = detail?.iconUrl || '';
+        if (cancelled) return;
+        if (!icon) return;
+
+        editor.updateShape<WorkflowShape>({
+          id: shape.id,
+          type: 'workflow',
+          props: { workflowIcon: icon } as any,
+        });
+      } catch {
+        // ignore
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [editor, shape.id, shape.props.workflowIcon, shape.props.workflowId]);
 
   // 兼容 select 下拉：HTML select 的 value 必须是 string，这里用 JSON 编码以保留原始类型（number/boolean/string）
   const encodeSelectValue = React.useCallback((v: any) => {
@@ -1548,26 +1579,14 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '16px',
-              height: '16px',
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M2 3.5L8 1L14 3.5V7.5C14 11 11.5 13.5 8 15C4.5 13.5 2 11 2 7.5V3.5Z"
-                stroke="#8B5CF6"
-                strokeWidth="1.5"
-                fill="none"
-              />
-              <path d="M8 5V9M8 11H8.01" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+          <div style={{ width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <VinesIcon size="xs" style={{ width: 16, height: 16, color: '#8B5CF6' }}>
+              {shape.props.workflowIcon || 'lucide:workflow'}
+            </VinesIcon>
           </div>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>创新方法</span>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>
+            {shape.props.workflowName || '未命名工作流'}
+          </span>
         </div>
         <button
           onPointerDown={(e) => {
@@ -1616,20 +1635,9 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
         ref={contentRef}
         style={{ flex: 1, padding: '12px 12px 12px 24px', position: 'relative', overflow: 'auto' }}
       >
-        <div style={{ marginBottom: '8px' }}>
-          <div style={{ fontSize: '16px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-            {shape.props.workflowName || '未命名工作流'}
-          </div>
-          {shape.props.workflowDescription && (
-            <div style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.4', marginBottom: '8px' }}>
-              {shape.props.workflowDescription}
-            </div>
-          )}
-        </div>
-
         {/* 输入参数区域 */}
         {shape.props.inputParams && shape.props.inputParams.length > 0 && (
-          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #E5E7EB', position: 'relative' }}>
+          <div style={{ position: 'relative' }}>
             <div style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>输入参数</div>
             {shape.props.inputParams.map((param, index) => {
               // 检查这个参数是否有连接
