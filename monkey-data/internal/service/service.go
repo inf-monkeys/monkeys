@@ -198,6 +198,16 @@ func (s *Service) GetViewTree(ctx context.Context, appID, teamID string) ([]mode
 	return s.store.GetViewTree(ctx, appID, teamID)
 }
 
+func (s *Service) GetViewTags(ctx context.Context, appID, teamID, viewID string) ([]string, error) {
+	if teamID == "" {
+		return nil, errors.New("team_id required")
+	}
+	if err := s.ensureStore(); err != nil {
+		return nil, err
+	}
+	return s.store.GetViewTags(ctx, appID, teamID, viewID)
+}
+
 func (s *Service) ReplaceViewTags(ctx context.Context, appID, teamID, viewID string, tagIDs []string) error {
 	if err := s.ensureStore(); err != nil {
 		return err

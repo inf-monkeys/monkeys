@@ -29,6 +29,12 @@ export interface ConductorConfig {
   workerPrefix?: string;
 }
 
+export interface MonkeyDataConfig {
+  baseUrl: string;
+  internalToken?: string;
+  timeoutMs?: number;
+}
+
 export type VinesSpaceSidebarModule =
   | 'apps'
   | 'agents'
@@ -737,6 +743,7 @@ export interface NewAgentConfig {
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
+  monkeyData: MonkeyDataConfig;
   database: DatabaseConfig;
   redis: RedisConfig;
   tools: ToolServiceConfig[];
@@ -974,6 +981,11 @@ export const config: Config = {
       concurrency: readConfig('conductor.polling.concurrency', 10),
     },
     workerPrefix: readConfig('conductor.workerPrefix'),
+  },
+  monkeyData: {
+    baseUrl: readConfig('monkeyData.baseUrl', ''),
+    internalToken: readConfig('monkeyData.internalToken', ''),
+    timeoutMs: readConfig('monkeyData.timeoutMs', 2000),
   },
   database: readConfig('database', {
     type: 'better-sqlite3',

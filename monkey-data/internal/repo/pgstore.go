@@ -711,6 +711,44 @@ func (s *PGStore) GetViewTree(ctx context.Context, appID, teamID string) ([]mode
 	return items, nil
 }
 
+func (s *PGStore) GetViewTags(ctx context.Context, appID, teamID, viewID string) ([]string, error) {
+	if s.pool == nil {
+		return nil, errors.New("pg pool not configured")
+	}
+	relTable, err := tableName(appID, "data_view_tag_relations_v2")
+	if err != nil {
+		return nil, err
+	}
+	if viewID == "" {
+		return nil, errors.New("view_id required")
+	}
+	if teamID == "" {
+		return nil, errors.New("team_id required")
+	}
+
+	rows, err := s.pool.Query(ctx,
+		fmt.Sprintf(`SELECT tag_id FROM %s WHERE team_id=$1 AND view_id=$2 AND is_deleted=false`, relTable),
+		teamID, viewID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tagIDs := []string{}
+	for rows.Next() {
+		var tagID string
+		if err := rows.Scan(&tagID); err != nil {
+			return nil, err
+		}
+		tagIDs = append(tagIDs, tagID)
+	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+	return tagIDs, nil
+}
+
 func (s *PGStore) ReplaceViewTags(ctx context.Context, appID, teamID, viewID string, tagIDs []string) error {
 	if s.pool == nil {
 		return errors.New("pg pool not configured")

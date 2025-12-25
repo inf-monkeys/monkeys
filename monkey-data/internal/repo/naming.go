@@ -18,6 +18,11 @@ func validateAppID(appID string) error {
   return nil
 }
 
+// ValidateAppID validates app_id format for external callers.
+func ValidateAppID(appID string) error {
+  return validateAppID(appID)
+}
+
 func tableName(appID, base string) (string, error) {
   if err := validateAppID(appID); err != nil {
     return "", err

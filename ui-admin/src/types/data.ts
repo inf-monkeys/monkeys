@@ -36,6 +36,13 @@ export interface DataView {
 // 数据分类（兼容旧代码）
 export interface DataCategory extends DataView {}
 
+// 标签
+export interface DataTag {
+  id: string;
+  name: string;
+  color?: string;
+}
+
 // 数据资产
 export interface DataAsset {
   id: string;

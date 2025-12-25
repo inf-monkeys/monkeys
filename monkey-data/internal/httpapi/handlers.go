@@ -387,10 +387,6 @@ func (s *Server) handleViewByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleViewTags(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
 	id := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/v2/views/"), "/tags")
 	if id == "" {
 		writeError(w, http.StatusBadRequest, "invalid view id")
@@ -401,16 +397,29 @@ func (s *Server) handleViewTags(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	var req tagListRequest
-	if err := readJSON(r, &req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid json")
-		return
+
+	switch r.Method {
+	case http.MethodGet:
+		tagIDs, err := s.service.GetViewTags(r.Context(), appID, teamID, id)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeOK(w, map[string]any{"items": tagIDs})
+	case http.MethodPut:
+		var req tagListRequest
+		if err := readJSON(r, &req); err != nil {
+			writeError(w, http.StatusBadRequest, "invalid json")
+			return
+		}
+		if err := s.service.ReplaceViewTags(r.Context(), appID, teamID, id, req.TagIDs); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		writeOK(w, map[string]any{"ok": true})
+	default:
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
 	}
-	if err := s.service.ReplaceViewTags(r.Context(), appID, teamID, id, req.TagIDs); err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	writeOK(w, map[string]any{"ok": true})
 }
 
 func (s *Server) handleViewTree(w http.ResponseWriter, r *http.Request) {

@@ -25,6 +25,7 @@ type Store interface {
   UpdateView(ctx context.Context, appID, teamID, viewID string, updates map[string]any) error
   DeleteView(ctx context.Context, appID, teamID, viewID string) error
   GetViewTree(ctx context.Context, appID, teamID string) ([]model.View, error)
+  GetViewTags(ctx context.Context, appID, teamID, viewID string) ([]string, error)
   ReplaceViewTags(ctx context.Context, appID, teamID, viewID string, tagIDs []string) error
 
   // Search helpers

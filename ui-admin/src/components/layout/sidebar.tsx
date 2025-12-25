@@ -49,6 +49,12 @@ const navItems: NavItem[] = [
     requiresAnyPermissions: [Permission.ASSET_READ],
   },
   {
+    title: '数据管理 V2',
+    href: '/admin/data-v2',
+    icon: Database,
+    requiresAnyPermissions: [Permission.ASSET_READ],
+  },
+  {
     title: '权限管理',
     href: '/admin/permissions',
     icon: Shield,
