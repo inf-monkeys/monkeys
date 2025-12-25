@@ -5,8 +5,8 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { Edit3, Eye, ImagePlus, Loader2 } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import * as THREE from 'three';
-import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d, resizeBox } from 'tldraw';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d, resizeBox } from 'tldraw';
 
 import { useSystemConfig } from '@/apis/common';
 import { createMediaFile } from '@/apis/resources';
@@ -592,7 +592,7 @@ function OutputShapeComponent({
             ))}
           </div>
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>
-            Output {effectiveEditing && '(编辑中)'}
+            输出 {effectiveEditing && '(编辑中)'}
           </span>
         </div>
 

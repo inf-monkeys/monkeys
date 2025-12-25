@@ -219,6 +219,7 @@ const getShapeTypeInChinese = (type: string, geoKind?: string): string => {
     embed: '嵌入',
     bookmark: '书签',
     highlight: '荧光笔',
+    output: '输出',
   };
 
   return shapeTypeMap[type] || capitalize(type);

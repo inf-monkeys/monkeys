@@ -1567,7 +1567,7 @@ function WorkflowShapeComponent({ shape, editor }: { shape: WorkflowShape; edito
               <path d="M8 5V9M8 11H8.01" stroke="#8B5CF6" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </div>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>Workflow</span>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>创新方法</span>
         </div>
         <button
           onPointerDown={(e) => {

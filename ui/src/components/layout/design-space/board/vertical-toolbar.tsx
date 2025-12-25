@@ -148,7 +148,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   // Workflow 相关工具（独立工具栏）
   const workflowTools = [
     { id: 'instruction', label: 'Instruction', icon: 'tool-text' },
-    { id: 'output', label: 'Output', icon: 'tool-frame' },
+    { id: 'output', label: '输出', icon: 'tool-frame' },
     { id: 'workflow', label: '工作流', icon: 'tool-workflow' },
     { id: 'workflow-node', label: '流程节点', icon: 'tool-frame' },
   ];
