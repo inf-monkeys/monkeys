@@ -8,6 +8,7 @@ export class WorkflowTool extends StateNode {
     workflowId: string;
     workflowName: string;
     workflowDescription?: string;
+    workflowIcon?: string;
     inputParams?: any[];
   } | null = null;
 
@@ -25,6 +26,7 @@ export class WorkflowTool extends StateNode {
     workflowId: string;
     workflowName: string;
     workflowDescription?: string;
+    workflowIcon?: string;
     inputParams?: any[];
   }) {
     this.workflowData = data;
@@ -105,6 +107,7 @@ export class WorkflowTool extends StateNode {
         workflowId: this.workflowData?.workflowId || '',
         workflowName: this.workflowData?.workflowName || '未命名工作流',
         workflowDescription: this.workflowData?.workflowDescription || '',
+        workflowIcon: this.workflowData?.workflowIcon || '',
         color: 'violet',
         isRunning: false,
         connections: [],

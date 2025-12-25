@@ -31,6 +31,8 @@ export type WorkflowShape = TLBaseShape<
     workflowId: string;
     workflowName: string;
     workflowDescription?: string;
+    /** 工作流图标（用于节点标题栏/工具栏展示），一般为 iconify 名称或后端返回的 iconUrl */
+    workflowIcon?: string;
     color: TLDefaultColorStyle;
     isRunning: boolean;
     connections: string[]; // 连接到的 output shape ids
