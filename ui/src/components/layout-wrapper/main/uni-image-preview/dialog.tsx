@@ -59,11 +59,12 @@ export const UniImagePreviewDialog: React.FC = () => {
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && closePreview()}>
       <DialogContent
         className={cn(
-          'max-h-[600px] max-w-[1000px] overflow-hidden transition-all',
+          'max-h-[600px] max-w-[1000px] overflow-hidden transition-all [&~div[data-vines-overlay]]:!z-[10001]',
           // imageUrl && !isLoading && instance
           //   ? 'max-h-[600px] max-w-[1000px]'
           //   : 'max-h-[calc(500px+(var(--global-spacing)*3))] max-w-[calc(275px+(var(--global-spacing)*3))]',
         )}
+        style={{ zIndex: 10001 }}
       >
         <div className="flex flex-col gap-global">
           <div className="flex size-full gap-global">
