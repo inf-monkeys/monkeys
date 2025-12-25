@@ -7,6 +7,7 @@ import { AnimatePresence } from 'framer-motion';
 import { get, keyBy } from 'lodash';
 import { CircleSlash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
 import { CustomizationFormView } from '@/apis/common/typings';
@@ -315,6 +316,29 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
     });
   };
 
+  const onResetPageGroupOrderDefault = useCallback(() => {
+    const groups = (data?.groups ?? []) as Array<IPageGroup & { createdTimestamp?: number }>;
+    if (!groups.length) return;
+
+    const groupIds = [...groups]
+      .sort((a, b) => {
+        const aTime = a.createdTimestamp ?? Number.MAX_SAFE_INTEGER;
+        const bTime = b.createdTimestamp ?? Number.MAX_SAFE_INTEGER;
+        if (aTime !== bTime) return aTime - bTime;
+        return a.id.localeCompare(b.id);
+      })
+      .map((g) => g.id);
+
+    toast.promise(
+      updateGroupSortTrigger({ groupIds }).then(() => mutate()),
+      {
+        loading: t('common.update.loading'),
+        success: t('common.update.success'),
+        error: t('common.update.error'),
+      },
+    );
+  }, [data?.groups, mutate, t, updateGroupSortTrigger]);
+
   const onPageGroupPageReorder = (newData: IPinPage[]) => {
     void updateGroupPageSortTrigger({
       pageIds: newData.filter((it) => !it.type.startsWith('global-')).map((it) => it.id),
@@ -360,6 +384,7 @@ export const WorkbenchModernModeSidebar: React.FC<IWorkbenchModernModeSidebarPro
                 groupId={groupId}
                 setGroupId={setGroupId}
                 onReorder={onPageGroupReorder}
+                onResetDefault={onResetPageGroupOrderDefault}
               />
             </div>
           ) : (

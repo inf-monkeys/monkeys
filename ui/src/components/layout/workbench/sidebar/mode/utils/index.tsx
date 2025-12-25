@@ -2,6 +2,8 @@ import { Dictionary, map } from 'lodash';
 
 import { IPinPage } from '@/apis/pages/typings.ts';
 
+const FIXED_FIRST_GROUP_ID = 'global-design-board';
+
 export const pageGroupProcess = (
   originalGroups: {
     pageIds: string[];
@@ -19,6 +21,9 @@ export const pageGroupProcess = (
   }))
     .filter((it) => it.pages?.length)
     .sort((a, b) => {
+      if (a.id === FIXED_FIRST_GROUP_ID && b.id !== FIXED_FIRST_GROUP_ID) return -1;
+      if (b.id === FIXED_FIRST_GROUP_ID && a.id !== FIXED_FIRST_GROUP_ID) return 1;
+
       const isABuiltIn = a.isBuiltIn;
       const isBBuiltIn = b.isBuiltIn;
 
