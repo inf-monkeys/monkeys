@@ -152,7 +152,6 @@ export class LiveImageShapeUtil extends ShapeUtil<LiveImageShape> {
             width={bounds.width}
             height={bounds.height}
             fill={theme.solid}
-            stroke={theme.text}
           />
         </SVGContainer>
         <FrameHeading id={shape.id} name={shape.props.name} width={bounds.width} height={bounds.height} />
