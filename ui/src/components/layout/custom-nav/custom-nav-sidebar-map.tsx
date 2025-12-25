@@ -34,15 +34,21 @@ export const CUSTOM_NAV_LIST_MAP: Record<string, INavListSidebar> = {
   'concept-design:design-models': [
     {
       id: 'llm-model',
-      name: '语言模型',
+      name: '大语言模型',
       icon: <BotIcon />,
       to: '/$teamId/nav/concept-design:design-models/llm-model',
     },
+    // {
+    //   id: 'visual-generation-model',
+    //   name: '视觉生成模型',
+    //   icon: <BotIcon />,
+    //   to: '/$teamId/nav/concept-design:design-models/visual-generation-model',
+    // },
     {
-      id: 'visual-generation-model',
+      id: 'neural-models',
       name: '视觉生成模型',
       icon: <BotIcon />,
-      to: '/$teamId/nav/concept-design:design-models/visual-generation-model',
+      to: '/$teamId/nav/concept-design:design-models/neural-models',
     },
     {
       id: 'model-training',
@@ -50,12 +56,7 @@ export const CUSTOM_NAV_LIST_MAP: Record<string, INavListSidebar> = {
       icon: <BotIcon />,
       to: '/$teamId/nav/concept-design:design-models/model-training',
     },
-    {
-      id: 'neural-models',
-      name: '神经模型',
-      icon: <BotIcon />,
-      to: '/$teamId/nav/concept-design:design-models/neural-models',
-    },
+    
   ],
   'concept-design:design-evaluations': [
     {
