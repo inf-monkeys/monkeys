@@ -90,7 +90,7 @@ func (s *PGStore) LockOutboxBatch(ctx context.Context, appID, workerID string, l
 		}
 		_, err = tx.Exec(ctx,
 			fmt.Sprintf(`UPDATE %s SET locked_at=$1, locked_by=$2 WHERE event_id = ANY($3)`, outboxTable),
-			nowMillis(), workerID, pgx.Array(ids),
+			nowMillis(), workerID, ids,
 		)
 		if err != nil {
 			return nil, err
@@ -117,7 +117,7 @@ func (s *PGStore) MarkOutboxProcessed(ctx context.Context, appID string, eventID
 	}
 	_, err = s.pool.Exec(ctx,
 		fmt.Sprintf(`UPDATE %s SET processed_timestamp=$1, locked_at=NULL, locked_by=NULL WHERE event_id = ANY($2)`, outboxTable),
-		nowMillis(), pgx.Array(eventIDs),
+		nowMillis(), eventIDs,
 	)
 	return err
 }
@@ -135,7 +135,7 @@ func (s *PGStore) MarkOutboxFailed(ctx context.Context, appID, workerID string, 
 	}
 	_, err = s.pool.Exec(ctx,
 		fmt.Sprintf(`UPDATE %s SET retry_count=retry_count+1, locked_at=$1, locked_by=$2 WHERE event_id = ANY($3)`, outboxTable),
-		nowMillis(), workerID, pgx.Array(eventIDs),
+		nowMillis(), workerID, eventIDs,
 	)
 	return err
 }

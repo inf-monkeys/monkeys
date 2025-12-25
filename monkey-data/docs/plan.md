@@ -13,13 +13,13 @@
 ## 实现计划（详细）
 
 ### 阶段 0：决策与约束确认
-- [x] 选定基础依赖：PG 驱动（pgxpool）与 OpenSearch 客户端（opensearch-go）
+- [x] 选定基础依赖：PG 驱动（pgxpool）与 Elasticsearch 客户端（go-elasticsearch/v7）
 - [x] page_token 方案：HMAC-SHA256 + base64url；若未配置密钥则降级为明文 base64url
 - [x] 是否启用 Outbox/Indexer（默认先实现搜索，Outbox 后置）
 
 ### 阶段 1：基础设施与公共组件
 - [x] 配置加载与默认值（已有 config.go 的补全）
-- [ ] 统一错误结构与响应模型（包含错误码与 message）
+- [x] 统一错误结构与响应模型（包含错误码与 message）
 - [x] 表名/索引名构造器（app_id 前缀 + *_v2 后缀）
 - [ ] 连接与健康检查（PG/OS 可选 /healthz）
 
@@ -32,7 +32,7 @@
 - [x] View 绑定 Tag：替换绑定（事务内先删后插）
 - [x] View Tag 组查询：给定 view_id -> 子树 view 列表 -> 每个 view 的 tag_ids 组
 
-### 阶段 3：Search 实现（OpenSearch）
+### 阶段 3：Search 实现（Elasticsearch 7.16）
 - [x] 查询 DSL 构造：team_id filter + (view tag 组 OR) + 用户 tags AND
 - [x] 稳定排序：updated_timestamp desc + asset_id desc
 - [x] search_after 分页：page_token 编解码（含 last_sort_values 与 tags_hash）
@@ -49,8 +49,8 @@
 - [x] Header 校验（X-App-Id / X-Team-Id / X-Internal-Token）
 
 ### 阶段 6：测试与回归
-- [ ] 单测：tag 规范化、view 组组合、page_token 编解码
-- [ ] 集成测试：多租户隔离、分页稳定性、view 语义正确性
+- [x] 单测：tag 规范化、view 组组合、page_token 编解码
+- [x] 集成测试：多租户隔离、分页稳定性、view 语义正确性
 
 ### 阶段 7：可选 Outbox/Indexer
 - [x] Outbox 写入与轮询处理

@@ -817,7 +817,7 @@ func (s *PGStore) GetViewTagGroups(ctx context.Context, appID, teamID, viewID st
 
 	tagRows, err := s.pool.Query(ctx,
 		fmt.Sprintf(`SELECT view_id, array_agg(tag_id) FROM %s WHERE team_id=$1 AND view_id = ANY($2) AND is_deleted=false GROUP BY view_id`, relTable),
-		teamID, pgx.Array(viewIDs),
+		teamID, viewIDs,
 	)
 	if err != nil {
 		return nil, err
@@ -845,15 +845,22 @@ func nowMillis() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
-func toJSONB(v any) (pgtype.JSONB, error) {
+func toJSONB(v any) ([]byte, error) {
 	if v == nil {
-		return pgtype.JSONB{Valid: false}, nil
+		return nil, nil
 	}
-	b, err := json.Marshal(v)
-	if err != nil {
-		return pgtype.JSONB{}, err
+	switch val := v.(type) {
+	case []byte:
+		return val, nil
+	case json.RawMessage:
+		return val, nil
+	default:
+		b, err := json.Marshal(v)
+		if err != nil {
+			return nil, err
+		}
+		return b, nil
 	}
-	return pgtype.JSONB{Bytes: b, Valid: true}, nil
 }
 
 func normalizeTagIDs(tagIDs []string) []string {

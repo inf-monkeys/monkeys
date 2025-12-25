@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/jackc/pgx/v5"
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
 
 	"monkey-data/internal/model"
 	"monkey-data/internal/repo"
@@ -27,11 +27,11 @@ type Config struct {
 
 type Worker struct {
 	store  *repo.PGStore
-	client *opensearch.Client
+	client *elasticsearch.Client
 	cfg    Config
 }
 
-func NewWorker(store *repo.PGStore, client *opensearch.Client, cfg Config) *Worker {
+func NewWorker(store *repo.PGStore, client *elasticsearch.Client, cfg Config) *Worker {
 	return &Worker{store: store, client: client, cfg: cfg}
 }
 
@@ -179,8 +179,8 @@ func (w *Worker) bulkApply(ctx context.Context, index string, actions []bulkActi
 	}
 
 	res, err := w.client.Bulk(
+		bytes.NewReader(buf.Bytes()),
 		w.client.Bulk.WithContext(ctx),
-		w.client.Bulk.WithBody(bytes.NewReader(buf.Bytes())),
 	)
 	if err != nil {
 		return nil, err
@@ -189,7 +189,7 @@ func (w *Worker) bulkApply(ctx context.Context, index string, actions []bulkActi
 
 	if res.StatusCode >= http.StatusBadRequest {
 		raw, _ := io.ReadAll(res.Body)
-		return nil, fmt.Errorf("opensearch bulk error: %s", string(raw))
+		return nil, fmt.Errorf("elasticsearch bulk error: %s", string(raw))
 	}
 
 	var parsed bulkResponse

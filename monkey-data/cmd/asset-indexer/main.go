@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/jackc/pgx/v5/pgxpool"
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
 
 	"monkey-data/internal/config"
 	"monkey-data/internal/indexer"
@@ -15,12 +15,15 @@ import (
 )
 
 func main() {
-	cfg := config.Load()
-	if cfg.PostgresDSN == "" {
-		log.Fatal("MONKEY_DATA_PG_DSN is required")
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("config load error: %v", err)
 	}
-	if cfg.OpenSearchURL == "" {
-		log.Fatal("MONKEY_DATA_OPENSEARCH_URL is required")
+	if cfg.PostgresDSN == "" {
+		log.Fatal("postgres dsn required (MONKEY_DATA_PG_DSN or config.yaml)")
+	}
+	if cfg.ElasticsearchURL == "" {
+		log.Fatal("elasticsearch url required (MONKEY_DATA_ES_URL or config.yaml)")
 	}
 	if cfg.WorkerAppID == "" {
 		log.Fatal("MONKEY_DATA_WORKER_APP_ID is required")
@@ -32,13 +35,13 @@ func main() {
 	}
 	store := repo.NewPGStore(pool)
 
-	osClient, err := opensearch.NewClient(opensearch.Config{
-		Addresses: []string{cfg.OpenSearchURL},
-		Username:  cfg.OpenSearchUser,
-		Password:  cfg.OpenSearchPass,
+	esClient, err := elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: []string{cfg.ElasticsearchURL},
+		Username:  cfg.ElasticsearchUser,
+		Password:  cfg.ElasticsearchPass,
 	})
 	if err != nil {
-		log.Fatalf("opensearch init error: %v", err)
+		log.Fatalf("elasticsearch init error: %v", err)
 	}
 
 	workerID := cfg.WorkerID
@@ -47,7 +50,7 @@ func main() {
 		workerID = hostname + "-" + time.Now().Format("150405")
 	}
 
-	worker := indexer.NewWorker(store, osClient, indexer.Config{
+	worker := indexer.NewWorker(store, esClient, indexer.Config{
 		AppID:        cfg.WorkerAppID,
 		WorkerID:     workerID,
 		BatchSize:    cfg.WorkerBatchSize,
