@@ -146,7 +146,15 @@ export function refreshWorkflowInputs(editor: Editor, workflowShapeId: string) {
   }
 }
 
-export async function runWorkflow(editor: Editor, workflowShapeId: string, opts?: { silent?: boolean }) {
+export async function runWorkflow(
+  editor: Editor,
+  workflowShapeId: string,
+  opts?: {
+    silent?: boolean;
+    /** 批量执行时：如果节点失败/报错，则不覆盖 Output（回滚到原结果继续向下推进） */
+    keepPreviousOutputOnFailure?: boolean;
+  },
+) {
   const silent = Boolean(opts?.silent);
 
   const shape = editor.getShape(workflowShapeId as any) as any;
@@ -266,9 +274,26 @@ export async function runWorkflow(editor: Editor, workflowShapeId: string, opts?
     if (!executionDetail) return;
 
     // 解析输出并写回 Output 框（直接复用 WorkflowShapeUtil 的 OutputShape props 结构：content/imageUrl/images/generatedTime）
+    const status = String(executionDetail?.status ?? '');
     let rawData = executionDetail?.output ?? executionDetail;
     if (rawData && typeof rawData === 'object' && 'data' in rawData && !Array.isArray(rawData)) {
       rawData = (rawData as any).data;
+    }
+
+    // 批量执行容错：如果执行状态非 COMPLETED，或返回体显式 success=false/errMsg/error，则视为失败并触发上层回滚
+    if (opts?.keepPreviousOutputOnFailure) {
+      const failedByStatus = Boolean(status) && status !== 'COMPLETED';
+      const failedByPayload =
+        rawData &&
+        typeof rawData === 'object' &&
+        (((rawData as any).success === false) ||
+          Boolean((rawData as any).errMsg) ||
+          Boolean((rawData as any).error) ||
+          Boolean((rawData as any).errors));
+
+      if (failedByStatus || failedByPayload) {
+        throw new Error(`Workflow execution failed${status ? `: ${status}` : ''}`);
+      }
     }
 
     let result: string = '';

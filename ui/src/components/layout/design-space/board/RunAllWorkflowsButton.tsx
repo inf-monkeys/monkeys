@@ -364,7 +364,7 @@ const RunAllWorkflowsButtonBase: React.FC<{
                 refreshInputs: () => refreshWorkflowInputs(editor, t.id),
                 cancelRef,
               });
-              await runWorkflow(editor, t.id, { silent: true });
+              await runWorkflow(editor, t.id, { silent: true, keepPreviousOutputOnFailure: true });
             } catch {
               failedCount += 1;
               restoreOutputs(editor, snap);
@@ -404,7 +404,7 @@ const RunAllWorkflowsButtonBase: React.FC<{
               refreshInputs: () => refreshWorkflowInputs(editor, id),
               cancelRef,
             });
-            await runWorkflow(editor, id, { silent: true });
+            await runWorkflow(editor, id, { silent: true, keepPreviousOutputOnFailure: true });
           } catch {
             failedCount += 1;
             restoreOutputs(editor, snap);
