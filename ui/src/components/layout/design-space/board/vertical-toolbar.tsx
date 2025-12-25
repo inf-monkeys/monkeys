@@ -12,6 +12,62 @@ import { normalizeWorkflowInputParams } from '@/components/layout/design-space/b
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
 
+// 设计板工具栏自定义 SVG 图标（内联代码，不依赖本地文件/OSS）
+const ToolbarSvgInput: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg viewBox="0 0 1024 1024" fill="none" aria-hidden="true" focusable="false" {...props}>
+    <path
+      d="M34.133333 273.066667a170.666667 170.666667 0 0 1 170.666667-170.666667h614.4a170.666667 170.666667 0 0 1 170.666667 170.666667v477.866666a170.666667 170.666667 0 0 1-170.666667 170.666667H204.8a170.666667 170.666667 0 0 1-170.666667-170.666667v-34.133333a34.133333 34.133333 0 1 1 68.266667 0v34.133333a102.4 102.4 0 0 0 102.4 102.4h614.4a102.4 102.4 0 0 0 102.4-102.4V273.066667a102.4 102.4 0 0 0-102.4-102.4H204.8a102.4 102.4 0 0 0-102.4 102.4v34.133333a34.133333 34.133333 0 0 1-68.266667 0V273.066667z m385.467734 44.1344a34.133333 34.133333 0 0 1 48.264533 0l170.666667 170.666666a34.133333 34.133333 0 0 1 0 48.264534l-170.666667 170.666666a34.133333 34.133333 0 0 1-48.264533-48.264533L532.002133 546.133333H68.266667a34.133333 34.133333 0 1 1 0-68.266666h463.735466l-112.401066-112.401067a34.133333 34.133333 0 0 1 0-48.264533z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const ToolbarSvgOutput: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg viewBox="0 0 1024 1024" fill="none" aria-hidden="true" focusable="false" {...props}>
+    <path
+      d="M599.04 1023.414857H248.539429c-46.811429 0-90.843429-19.017143-123.904-53.613714a186.368 186.368 0 0 1-51.2-129.682286v-656.822857C73.362286 82.139429 151.990857 0 248.685714 0h350.354286c96.621714 0 175.323429 82.066286 175.323429 183.003429v144.384h-70.875429V183.003429c0-60.123429-46.811429-109.056-104.448-109.056H248.539429c-57.490286 0-104.374857 49.005714-104.374858 109.275428v656.896c0 60.269714 46.811429 109.348571 104.374858 109.348572h350.354285c57.563429 0 104.448-49.005714 104.448-109.056V694.272h70.948572v145.993143c0.073143 100.937143-78.628571 183.149714-175.250286 183.149714z"
+      fill="currentColor"
+    />
+    <path
+      d="M563.858286 475.136h349.988571c19.382857 0 35.035429 16.384 35.035429 36.498286a35.766857 35.766857 0 0 1-35.035429 36.498285H563.931429a35.766857 35.766857 0 0 1-34.962286-36.571428c0-20.041143 15.579429-36.425143 34.962286-36.425143z"
+      fill="currentColor"
+    />
+    <path
+      d="M791.625143 589.604571l98.962286-103.204571a33.938286 33.938286 0 0 1 49.517714 0 37.595429 37.595429 0 0 1 0 51.565714L841.142857 641.243429a33.938286 33.938286 0 0 1-49.517714 0 37.814857 37.814857 0 0 1 0-51.638858z"
+      fill="currentColor"
+    />
+    <path
+      d="M791.625143 435.712l98.962286 103.277714c13.750857 14.262857 35.84 14.262857 49.517714 0a37.595429 37.595429 0 0 0 0-51.638857L841.142857 384.073143a33.938286 33.938286 0 0 0-49.517714 0 37.814857 37.814857 0 0 0 0 51.638857z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const ToolbarSvgTextInput: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg viewBox="0 0 1024 1024" fill="none" aria-hidden="true" focusable="false" {...props}>
+    <path
+      d="M896 160H128c-35.2 0-64 28.8-64 64v576c0 35.2 28.8 64 64 64h768c35.2 0 64-28.8 64-64V224c0-35.2-28.8-64-64-64z m0 608c0 16-12.8 32-32 32H160c-19.2 0-32-12.8-32-32V256c0-16 12.8-32 32-32h704c19.2 0 32 12.8 32 32v512z"
+      fill="currentColor"
+    />
+    <path
+      d="M224 288c-19.2 0-32 12.8-32 32v256c0 16 12.8 32 32 32s32-12.8 32-32V320c0-16-12.8-32-32-32z m608 480c19.2 0 32-12.8 32-32V608L704 768h128z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const ToolbarSvgLiveDraw: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg viewBox="0 0 1024 1024" fill="none" aria-hidden="true" focusable="false" {...props}>
+    <path
+      d="M749.056 233.386667c-29.632-29.632-82.538667-30.592-118.272 5.141333L319.146667 550.186667c-60.778667 60.8-93.653333 128.853333-100.906667 210.837333l-0.298667 4.117333 4.437334-0.256c80.832-7.210667 146.624-41.770667 208.149333-103.296l0.170667-0.170666L743.978667 351.573333c35.669333-35.754667 34.688-88.597333 5.077333-118.186666z m-178.624-55.189334c65.749333-65.749333 172.8-71.317333 238.954667-5.141333 66.197333 66.176 60.608 173.226667-5.12 238.933333l-0.192 0.192-313.28 309.802667c-73.301333 73.258667-157.226667 118.826667-261.632 127.957333a32.618667 32.618667 0 0 1-0.810667 0.064l-0.576 0.042667-53.354667 2.922667A42.666667 42.666667 0 0 1 129.493333 807.466667l3.626667-52.693334a42.666667 42.666667 0 0 1 0.064-0.810666c9.045333-103.402667 51.477333-189.973333 125.610667-264.128L570.453333 178.197333z"
+      fill="currentColor"
+    />
+    <path d="M448.64 700.928l-161.6-161.578667 60.330667-60.352 161.6 161.6-60.352 60.330667z" fill="currentColor" />
+    <path d="M512 768h384v85.333333H512v-85.333333z" fill="currentColor" />
+    <path d="M682.666667 597.333333h213.333333v85.333334H682.666667v-85.333334z" fill="currentColor" />
+  </svg>
+);
+
 // 导入 Workflow 节点图标
 import { AddIcon } from './workflow-examples/src/components/icons/AddIcon';
 import { ConditionalIcon } from './workflow-examples/src/components/icons/ConditionalIcon';
@@ -526,7 +582,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                       title={activeId === 'text' ? '文本输入' : '图片输入'}
                       style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                     >
-                      <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{activeId === 'text' ? 'I' : '📷'}</span>
+                      {activeId === 'text' ? <ToolbarSvgInput /> : <span style={{ fontSize: '16px' }}>📷</span>}
                       <span className="caret" />
                       <span
                         className="caret-hit"
@@ -580,7 +636,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                             setIsInstructionMenuOpen(false);
                           }}
                         >
-                          <span style={{ fontSize: '16px', fontWeight: 'bold' }}>I</span>
+                          <ToolbarSvgTextInput style={{ width: 16, height: 16, marginRight: 6, flexShrink: 0 }} />
                           <span>文本输入</span>
                         </div>
                         <div
@@ -622,7 +678,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     title={tool.label}
                     style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                   >
-                    <span style={{ fontSize: '16px', fontWeight: 'bold' }}>O</span>
+                    <ToolbarSvgOutput />
                   </button>
                 );
               }
@@ -642,7 +698,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     title={tool.label}
                     style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                   >
-                    <TldrawUiIcon icon={tool.icon} label={tool.label || tool.id} />
+                    <ToolbarSvgLiveDraw />
                   </button>
                 );
               }
