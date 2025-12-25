@@ -131,6 +131,8 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   const showRealtimeDrawing = (oem as any)?.theme?.designProjects?.showRealtimeDrawing === true;
   const showWorkflow = (oem as any)?.theme?.designProjects?.showWorkflow === true;
   const showAgent = (oem as any)?.theme?.designProjects?.showAgent === true;
+  // 工具栏分组（白色框）之间的间距：原为 20，这里整体缩小一半
+  const TOOLBAR_GROUP_GAP = 10;
 
   // 基础工具栏工具（不包含 workflow 相关工具）
   const toolbarTools = [
@@ -156,6 +158,19 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
   // Draw Fast 相关工具（独立工具栏）
   // 仅保留实时转绘草图框；结果沿用 Workflow 工具栏中的 Output 节点
   const drawfastTools = [{ id: 'live-image', label: '实时转绘', icon: 'tool-frame' }];
+
+  // 展示层：当同时开启 workflow 与实时转绘时，把“实时转绘”合并进 Workflow 同一个白色工具栏框里，
+  // 并插入到 “工作流” 后面（见 UI 期望：I / O / workflow / 实时转绘 / workflow-node）。
+  const workflowToolsForDisplay =
+    showRealtimeDrawing && showWorkflow
+      ? (() => {
+          const arr = [...workflowTools];
+          const insertIdx = arr.findIndex((t) => t.id === 'workflow');
+          if (insertIdx >= 0) arr.splice(insertIdx + 1, 0, ...drawfastTools);
+          else arr.push(...drawfastTools);
+          return arr;
+        })()
+      : workflowTools;
 
   return (
     <div
@@ -185,7 +200,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
           <DefaultStylePanel />
         </div>
       )}
-      <div style={{ display: 'flex', flexDirection: 'row', gap: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'row', gap: TOOLBAR_GROUP_GAP }}>
         <div className="custom-toolbar">
           {toolbarTools.map((tool) => {
             if (tool.id === 'shape') {
@@ -455,9 +470,10 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
           })}
         </div>
 
-        {/* Draw Fast 工具栏（独立） - 根据 OEM 配置控制显示 */}
-        {showRealtimeDrawing && (
-          <div className="custom-toolbar" style={{ marginLeft: 20 }}>
+        {/* Draw Fast 工具栏（独立） - 根据 OEM 配置控制显示
+            说明：如果 Workflow 工具栏开启，则实时转绘会合并进 Workflow 同一工具栏框中 */}
+        {showRealtimeDrawing && !showWorkflow && (
+          <div className="custom-toolbar" style={{ marginLeft: TOOLBAR_GROUP_GAP }}>
             {drawfastTools.map((tool) => {
               const isActive = currentToolId === tool.id;
               return (
@@ -482,8 +498,8 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
 
         {/* Workflow 工具栏（独立） - 根据 OEM 配置控制显示 */}
         {showWorkflow && (
-          <div className="custom-toolbar" style={{ marginLeft: 20 }}>
-            {workflowTools.map((tool) => {
+          <div className="custom-toolbar" style={{ marginLeft: TOOLBAR_GROUP_GAP }}>
+            {workflowToolsForDisplay.map((tool) => {
               if (tool.id === 'instruction') {
                 const activeId = instructionVariant;
                 const isActive = currentToolId === 'instruction';
@@ -607,6 +623,26 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                     style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                   >
                     <span style={{ fontSize: '16px', fontWeight: 'bold' }}>O</span>
+                  </button>
+                );
+              }
+
+              if (tool.id === 'live-image') {
+                const isActive = currentToolId === tool.id;
+                return (
+                  <button
+                    key={tool.id}
+                    className={`tool-button ${isActive ? 'selected' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      editor.setCurrentTool(tool.id);
+                      setCurrentToolId(tool.id);
+                    }}
+                    title={tool.label}
+                    style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
+                  >
+                    <TldrawUiIcon icon={tool.icon} label={tool.label || tool.id} />
                   </button>
                 );
               }
@@ -923,7 +959,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
 
         {/* Agent toggle button - 根据 OEM 配置控制显示 */}
         {showAgent && (
-          <div className="custom-toolbar" style={{ marginLeft: 20 }}>
+          <div className="custom-toolbar" style={{ marginLeft: TOOLBAR_GROUP_GAP }}>
             <div className="tool-group">
               <button
                 className="tool-button"
