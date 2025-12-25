@@ -18,6 +18,8 @@ interface ISpaceSidebarTabProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
 }
 
+const FIXED_GROUP_ID = 'global-design-board';
+
 export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
   children,
   icon,
@@ -34,7 +36,11 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
   const backgroundClass = isShadowTheme ? 'bg-[#f2f3f4] dark:bg-[#000000]' : 'bg-neocard';
   // 获取当前语言的显示值
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: groupId });
+  const isFixed = groupId === FIXED_GROUP_ID;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: groupId,
+    disabled: isFixed,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
