@@ -2,7 +2,7 @@
 
 ## 基本约定
 - 所有接口使用 JSON。
-- `X-App-Id` 与 `X-Team-Id` 必填，用于多租户隔离与团队过滤。
+- 除 `/healthz` 与 `/readyz` 外，`X-App-Id` 与 `X-Team-Id` 必填，用于多租户隔离与团队过滤。
 - `X-Internal-Token` 仅在配置了 `internal_token` 或 `MONKEY_DATA_INTERNAL_TOKEN` 时要求。
 - 响应格式统一为：
   - 成功：`{ "code": "OK", "data": ... }`
@@ -12,6 +12,37 @@
 - `X-App-Id`: 租户标识（表前缀/索引名前缀）。
 - `X-Team-Id`: 团队标识（强制过滤）。
 - `X-Internal-Token`: 内部调用令牌（可选，启用即必填）。
+
+## 健康检查
+
+### 存活检查
+GET `/healthz`
+
+说明：
+- 仅验证 `X-Internal-Token`（如已配置）。
+- 不依赖 Postgres/Elasticsearch。
+
+Response
+```json
+{ "code": "OK", "data": { "ok": true } }
+```
+
+### 就绪检查
+GET `/readyz`
+
+说明：
+- 仅验证 `X-Internal-Token`（如已配置）。
+- 检查 Postgres + Elasticsearch；任一不可用或未配置即返回 503。
+
+Response
+```json
+{ "code": "OK", "data": { "ok": true } }
+```
+
+失败示例
+```json
+{ "code": "INTERNAL", "data": { "message": "elasticsearch not ready: ..." } }
+```
 
 ## 资源（assets）
 
@@ -297,3 +328,4 @@ Response
 - 405：`METHOD_NOT_ALLOWED`
 - 409：`CONFLICT`
 - 500：`INTERNAL`
+- 503：`INTERNAL`

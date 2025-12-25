@@ -11,6 +11,34 @@ import (
 
 const maxLimit = 200
 
+func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	if err := s.requireInternalAuth(r); err != nil {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	writeOK(w, map[string]any{"ok": true})
+}
+
+func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	if err := s.requireInternalAuth(r); err != nil {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	if err := s.service.Ready(r.Context()); err != nil {
+		writeError(w, http.StatusServiceUnavailable, err.Error())
+		return
+	}
+	writeOK(w, map[string]any{"ok": true})
+}
+
 func (s *Server) handleSearchAssets(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")

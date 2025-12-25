@@ -24,6 +24,13 @@ func NewPGStore(pool *pgxpool.Pool) *PGStore {
 	return &PGStore{pool: pool}
 }
 
+func (s *PGStore) Ping(ctx context.Context) error {
+	if s.pool == nil {
+		return errors.New("pg pool not configured")
+	}
+	return s.pool.Ping(ctx)
+}
+
 func (s *PGStore) CreateAsset(ctx context.Context, appID, teamID string, asset model.Asset, tagIDs []string) (string, error) {
 	if s.pool == nil {
 		return "", errors.New("pg pool not configured")

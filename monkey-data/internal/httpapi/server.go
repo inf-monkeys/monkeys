@@ -46,6 +46,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) routes() {
+	s.mux.HandleFunc("/healthz", s.handleHealthz)
+	s.mux.HandleFunc("/readyz", s.handleReadyz)
 	s.mux.HandleFunc("/v2/assets/search", s.handleSearchAssets)
 	s.mux.HandleFunc("/v2/assets/", s.handleAssetByID)
 	s.mux.HandleFunc("/v2/assets", s.handleAssets)

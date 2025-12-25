@@ -21,7 +21,7 @@
 - [x] 配置加载与默认值（已有 config.go 的补全）
 - [x] 统一错误结构与响应模型（包含错误码与 message）
 - [x] 表名/索引名构造器（app_id 前缀 + *_v2 后缀）
-- [ ] 连接与健康检查（PG/OS 可选 /healthz）
+- [x] 连接与健康检查（/healthz + /readyz）
 
 ### 阶段 2：PG Repo 实现
 - [x] 资产 CRUD：创建、更新、软删除、按 id 读取

@@ -45,6 +45,22 @@ type ElasticsearchConfig struct {
 	PageTokenSecret string
 }
 
+func (c *ElasticsearchClient) Ping(ctx context.Context) error {
+	if c == nil || c.client == nil {
+		return errors.New("search not configured")
+	}
+	res, err := c.client.Ping(c.client.Ping.WithContext(ctx))
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode >= http.StatusBadRequest {
+		raw, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("elasticsearch ping failed: %s", string(raw))
+	}
+	return nil
+}
+
 func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID string, viewTagGroups [][]string, userTags []string, limit int, pageToken string) ([]string, string, error) {
 	if c == nil || c.client == nil {
 		return nil, "", errors.New("search not configured")
