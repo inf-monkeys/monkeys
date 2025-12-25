@@ -1273,7 +1273,23 @@ export const ExternalLayerPanel: React.FC<ExternalLayerPanelProps> = ({ editor, 
     try {
       const currentPageId = editor.getCurrentPageId();
       const shapeIds = editor.getSortedChildIdsForParent(currentPageId);
-      setCurrentPageShapeIds(shapeIds);
+
+      // 图层面板展示：默认把连接线（connection）放到最下面，减少视觉噪音
+      // 注意：这里只改变面板里的显示顺序，不改变画布实际 z-index / child 顺序
+      const sortedForLayerPanel = shapeIds
+        .map((id, idx) => {
+          const shape = editor.getShape(id as any) as any;
+          const type = shape?.type as string | undefined;
+          const isConnection = type === 'connection';
+          return { id, idx, isConnection };
+        })
+        .sort((a, b) => {
+          if (a.isConnection !== b.isConnection) return a.isConnection ? 1 : -1;
+          return a.idx - b.idx; // stable
+        })
+        .map((i) => i.id);
+
+      setCurrentPageShapeIds(sortedForLayerPanel);
     } catch (error) {
       console.warn('Error updating current page shapes:', error);
     }
