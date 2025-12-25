@@ -3,6 +3,7 @@ import { BaseBoxShapeUtil, Circle2d, Editor, Group2d, HTMLContainer, Rectangle2d
 import { vinesHeader } from '@/apis/utils';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 
+import { BoardIconImageInput, BoardIconTextInput } from '../../board-icons';
 import { GenericPort } from '../ports/GenericPort';
 import { getShapePortConnections } from '../ports/portConnections';
 import { getInstructionPorts } from '../ports/shapePorts';
@@ -469,20 +470,11 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '2px',
-              width: '12px',
-              height: '12px',
-            }}
-          >
-            <div style={{ width: '4px', height: '4px', backgroundColor: '#6B7280', borderRadius: '50%' }} />
-            <div style={{ width: '4px', height: '4px', backgroundColor: '#6B7280', borderRadius: '50%' }} />
-            <div style={{ width: '4px', height: '4px', backgroundColor: '#6B7280', borderRadius: '50%' }} />
-            <div style={{ width: '4px', height: '4px', backgroundColor: '#6B7280', borderRadius: '50%' }} />
-          </div>
+          {shape.props.inputMode === 'text' ? (
+            <BoardIconTextInput style={{ width: 16, height: 16, color: '#6B7280' }} />
+          ) : (
+            <BoardIconImageInput style={{ width: 16, height: 16, color: '#6B7280' }} />
+          )}
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>
             {shape.props.inputMode === 'text' ? '文本输入' : '图片输入'}
           </span>

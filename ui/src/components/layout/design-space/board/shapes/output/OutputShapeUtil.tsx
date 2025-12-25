@@ -13,6 +13,7 @@ import { createMediaFile } from '@/apis/resources';
 import { VinesResourceSource, VinesResourceType } from '@/apis/resources/typting.ts';
 import { VinesMarkdown } from '@/components/ui/markdown';
 
+import { BoardIconOutput } from '../../board-icons';
 import { OutputShape } from '../instruction/InstructionShape.types';
 import { GenericPort } from '../ports/GenericPort';
 import { getOutputPorts } from '../ports/shapePorts';
@@ -578,21 +579,9 @@ function OutputShapeComponent({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px', width: '12px', height: '12px' }}>
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                style={{
-                  width: '4px',
-                  height: '4px',
-                  backgroundColor: effectiveEditing ? '#3B82F6' : '#059669',
-                  borderRadius: '50%',
-                }}
-              />
-            ))}
-          </div>
+          <BoardIconOutput style={{ width: 16, height: 16, color: effectiveEditing ? '#3B82F6' : '#059669' }} />
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>
-            输出 {effectiveEditing && '(编辑中)'}
+            文本/图片输出 {effectiveEditing && '(编辑中)'}
           </span>
         </div>
 
