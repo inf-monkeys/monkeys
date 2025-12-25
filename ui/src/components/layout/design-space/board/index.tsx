@@ -8,28 +8,28 @@ import './index.scss';
 import { useEventEmitter } from 'ahooks';
 import { get } from 'lodash';
 import {
-  AssetRecordType,
-  createShapeId,
-  defaultBindingUtils,
-  DefaultContextMenu,
-  DefaultContextMenuContent,
-  defaultEditorAssetUrls,
-  defaultShapeTools,
-  defaultTools,
-  Editor,
-  FrameShapeUtil,
-  TLAssetStore,
-  TLComponents,
-  Tldraw,
-  TldrawUiMenuGroup,
-  TldrawUiMenuItem,
-  TLImageShape,
-  TLShape,
-  TLShapeId,
-  TLUiContextMenuProps,
-  track,
-  useEditor,
-  useToasts,
+    AssetRecordType,
+    createShapeId,
+    defaultBindingUtils,
+    DefaultContextMenu,
+    DefaultContextMenuContent,
+    defaultEditorAssetUrls,
+    defaultShapeTools,
+    defaultTools,
+    Editor,
+    FrameShapeUtil,
+    TLAssetStore,
+    TLComponents,
+    Tldraw,
+    TldrawUiMenuGroup,
+    TldrawUiMenuItem,
+    TLImageShape,
+    TLShape,
+    TLShapeId,
+    TLUiContextMenuProps,
+    track,
+    useEditor,
+    useToasts,
 } from 'tldraw';
 
 import { useUser } from '@/apis/authz/user';
@@ -63,17 +63,17 @@ import { useMindMapGeneration } from './hooks/useMindMapGeneration';
 import { RunAllWorkflowsButton } from './RunAllWorkflowsButton';
 // 灵感推送功能
 import {
-  InstructionShapeUtil,
-  InstructionTool,
-  // Workflow 节点系统
-  NodeShapeUtil,
-  NodeTool,
-  OutputShapeUtil,
-  OutputTool,
-  WorkflowConnectionBindingUtil,
-  WorkflowConnectionShapeUtil,
-  WorkflowShapeUtil,
-  WorkflowTool,
+    InstructionShapeUtil,
+    InstructionTool,
+    // Workflow 节点系统
+    NodeShapeUtil,
+    NodeTool,
+    OutputShapeUtil,
+    OutputTool,
+    WorkflowConnectionBindingUtil,
+    WorkflowConnectionShapeUtil,
+    WorkflowShapeUtil,
+    WorkflowTool,
 } from './shapes';
 import { LiveImageShapeUtil } from './shapes/live-image/LiveImageShapeUtil';
 import { LiveImageTool } from './shapes/tools/LiveImageTool';
@@ -323,7 +323,7 @@ function CustomContextMenu(props: TLUiContextMenuProps & { miniPage?: any }) {
               <TldrawUiMenuItem
                 key={`add-to-${field.name}`}
                 id={`add-to-${field.name}`}
-                label={`添加到 ${appName} - ${fieldDisplayName}（图片节点）`}
+                label={`添加到 ${appName} - ${fieldDisplayName}（图片输入）`}
                 icon="plus"
                 readonlyOk
                 onSelect={() => handleAddToApp(field.name, appName)}

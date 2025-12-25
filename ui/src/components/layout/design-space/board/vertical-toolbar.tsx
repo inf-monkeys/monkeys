@@ -507,7 +507,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                         setCurrentToolId('instruction');
                         setIsInstructionMenuOpen(false);
                       }}
-                      title={activeId === 'text' ? '文本节点' : '图片节点'}
+                      title={activeId === 'text' ? '文本输入' : '图片输入'}
                       style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 10000 }}
                     >
                       <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{activeId === 'text' ? 'I' : '📷'}</span>
@@ -565,7 +565,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                           }}
                         >
                           <span style={{ fontSize: '16px', fontWeight: 'bold' }}>I</span>
-                          <span>文本节点</span>
+                          <span>文本输入</span>
                         </div>
                         <div
                           className={`dropdown-item ${instructionVariant === 'image' ? 'active' : ''}`}
@@ -583,7 +583,7 @@ export const VerticalToolbar: TLComponents['Toolbar'] = () => {
                           }}
                         >
                           <span style={{ fontSize: '16px' }}>📷</span>
-                          <span>图片节点</span>
+                          <span>图片输入</span>
                         </div>
                       </div>
                     )}

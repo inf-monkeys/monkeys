@@ -250,7 +250,7 @@ const ShapeItem: React.FC<{
   // 优先 meta.name；
   // frame: 优先 props.name；
   // geo: 使用 props.geo 的具体形状名（如 rectangle / ellipse 等），而不是统一的 Geo；
-  // instruction: 根据 props.inputMode 显示为 “文本节点/图片节点”，避免统一显示为 Instruction；
+  // instruction: 根据 props.inputMode 显示为 “文本输入/图片输入”，避免统一显示为 Instruction；
   // workflow: 优先 props.workflowName（创新方法/工作流名称），避免统一显示为 Workflow；
   // 其余：props.text / props.name；再退化为 util.getText 或类型名。
   const getShapeName = (editor: Editor, shapeId: TLShapeId): string => {
@@ -269,9 +269,9 @@ const ShapeItem: React.FC<{
       return (metaName?.trim() || propsName?.trim()) as string;
     }
 
-    // 对 instruction 根据 inputMode 显示“文本节点/图片节点”，避免统一显示为 Instruction
+    // 对 instruction 根据 inputMode 显示“文本输入/图片输入”，避免统一显示为 Instruction
     if (type === 'instruction') {
-      const fallbackInstructionName = instructionInputMode === 'image' ? '图片节点' : '文本节点';
+      const fallbackInstructionName = instructionInputMode === 'image' ? '图片输入' : '文本输入';
       return (
         (metaName && metaName.trim()) ||
         fallbackInstructionName ||

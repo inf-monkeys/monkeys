@@ -260,14 +260,14 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
         };
         console.log('[Instruction] 使用图片输入 API:', apiEndpoint);
       } else {
-        // 文本节点模式 - 判断是文生图还是文本扩写
+        // 文本输入模式 - 判断是文生图还是文本扩写
         const isTextToImage = /[图画像]|image|picture|photo|生成图|画一|绘制/i.test(shape.props.content);
         apiEndpoint = isTextToImage ? '/api/text-expansion/text-to-image' : '/api/text-expansion/expand';
         requestBody = {
           text: shape.props.content,
           prompt: shape.props.content,
         };
-        console.log('[Instruction] 使用文本节点 API:', isTextToImage ? '文生图' : '文本扩写', apiEndpoint);
+        console.log('[Instruction] 使用文本输入 API:', isTextToImage ? '文生图' : '文本扩写', apiEndpoint);
       }
 
       // 调用 API
@@ -484,7 +484,7 @@ function InstructionShapeComponent({ shape, editor }: { shape: InstructionShape;
             <div style={{ width: '4px', height: '4px', backgroundColor: '#6B7280', borderRadius: '50%' }} />
           </div>
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>
-            {shape.props.inputMode === 'text' ? '文本节点' : '图片节点'}
+            {shape.props.inputMode === 'text' ? '文本输入' : '图片输入'}
           </span>
         </div>
         {/* 运行按钮已隐藏 */}
