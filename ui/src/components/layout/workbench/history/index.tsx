@@ -306,6 +306,44 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
     ? Math.max(0, totalGridHeight - gridTopSpacer - gridVisibleBlockHeight)
     : 0;
 
+  // 仅做"免遮挡"：展开层通过 portal 渲染到 body，避免被画板（tldraw/iframe 的 portal fixed 层）压住
+  // 注意：这里不改变任何加载/虚拟列表逻辑，只负责测量定位
+  useLayoutEffect(() => {
+    if (!expanded) {
+      setExpandedRect(null);
+      return;
+    }
+    const el = containerRef.current;
+    if (!el || typeof window === 'undefined') return;
+
+    let raf = 0;
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      const bottomOffset = Math.max(0, window.innerHeight - r.bottom);
+      setExpandedRect({ left: r.left, width: r.width, bottomOffset });
+    };
+
+    const schedule = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
+    };
+
+    // 首帧同步测量（layout effect 阶段），避免闪烁
+    measure();
+
+    const ro = new ResizeObserver(schedule);
+    ro.observe(el);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('scroll', schedule, true);
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('scroll', schedule, true);
+    };
+  }, [expanded]);
+
   return (
     <div
       className={cn(
@@ -448,7 +486,7 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
                   left: expandedRect?.left ?? 0,
                   width: expandedRect?.width ?? window.innerWidth,
                   bottom: expandedRect?.bottomOffset ?? 0,
-                  zIndex: 50, // 与 Dialog/Popover 同层级；靠“后挂载”覆盖画板 portal（也是 50）
+                  zIndex: 50, // 与 Dialog/Popover 同层级；靠"后挂载"覆盖画板 portal（也是 50）
                 }}
               >
                 <div
