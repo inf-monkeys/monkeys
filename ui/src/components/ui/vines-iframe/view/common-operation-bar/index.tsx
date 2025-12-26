@@ -132,7 +132,8 @@ export const CommonOperationBar = <T extends CommonOperationBarItemShape>({
           {expanded ? <Minimize2Icon size={20} /> : <Maximize2Icon size={20} />}
         </IconButton>
       </TooltipTrigger>
-      <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
+      {/* 画板（tldraw）等场景存在更高的 stacking context，提升 tooltip 层级避免被盖住 */}
+      <TooltipContent className="z-[9999]">{t('workbench.sidebar.toggle')}</TooltipContent>
     </Tooltip>
   );
 
@@ -230,7 +231,7 @@ export const CommonOperationBar = <T extends CommonOperationBarItemShape>({
 
                 <ScrollArea
                   ref={expandedViewportRef}
-                  className={cn(scrollAreaCls, 'flex-1', 'min-h-0')}
+                  className={cn(scrollAreaCls, 'w-full', 'flex-1', 'min-h-0')}
                   onScrollPositionChange={syncScroll('expanded')}
                   scrollBarDisabled
                 >
