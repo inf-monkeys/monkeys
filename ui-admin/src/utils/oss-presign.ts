@@ -6,7 +6,7 @@ const MAX_CONCURRENT_REQUESTS = 5;
 const FETCH_PATCH_FLAG = '__monkeysAdminOssPresignFetchPatched__';
 const PROCESSING_FLAG = '__monkeysOssPresignProcessing__';
 
-type PresignConfig = NonNullable<SystemConfig['storage']>['presign'];
+type PresignConfig = NonNullable<NonNullable<SystemConfig['storage']>['presign']>;
 type PresignBucket = NonNullable<PresignConfig>['buckets'][number];
 type PresignUrlPattern = PresignBucket['urlPatterns'][number];
 
@@ -166,10 +166,9 @@ const shouldPresignUrlWithConfig = (value: string, config: PresignConfig | null)
 
 const shouldPresignUrlSync = (value: string) => shouldPresignUrlWithConfig(value, cachedConfig);
 
-const buildAuthHeaders = () => {
+const buildAuthHeaders = (): Record<string, string> => {
   const token = getStoredToken();
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 const isCacheValid = (entry: SignedCacheEntry) => {
@@ -536,7 +535,7 @@ const patchFetch = () => {
     return init;
   };
 
-  runtime.fetch = async (input: RequestInfo, init?: RequestInit) => {
+  const patchedFetch: typeof fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     if (isRequest(input)) {
       const signed = await presignUrl(input.url);
       if (signed !== input.url) {
@@ -554,6 +553,7 @@ const patchFetch = () => {
 
     return originalFetch(input, init);
   };
+  runtime.fetch = patchedFetch;
 
   runtime[FETCH_PATCH_FLAG] = true;
 };
