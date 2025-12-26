@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-gonic/gin"
+
 	"monkey-data/internal/config"
 	"monkey-data/internal/service"
 )
@@ -13,7 +15,7 @@ import (
 type Server struct {
 	cfg     config.Config
 	service *service.Service
-	mux     *http.ServeMux
+	engine  *gin.Engine
 }
 
 type apiResponse struct {
@@ -36,28 +38,33 @@ const (
 )
 
 func NewServer(cfg config.Config, svc *service.Service) *Server {
-	s := &Server{cfg: cfg, service: svc, mux: http.NewServeMux()}
+	s := &Server{cfg: cfg, service: svc, engine: gin.New()}
 	s.routes()
 	return s
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.mux.ServeHTTP(w, r)
+	s.engine.ServeHTTP(w, r)
 }
 
 func (s *Server) routes() {
-	s.mux.HandleFunc("/healthz", s.handleHealthz)
-	s.mux.HandleFunc("/readyz", s.handleReadyz)
-	s.mux.HandleFunc("/v2/assets/search", s.handleSearchAssets)
-	s.mux.HandleFunc("/v2/assets/", s.handleAssetByID)
-	s.mux.HandleFunc("/v2/assets", s.handleAssets)
+	s.engine.Any("/healthz", s.handleHealthz)
+	s.engine.Any("/readyz", s.handleReadyz)
 
-	s.mux.HandleFunc("/v2/tags/", s.handleTagByID)
-	s.mux.HandleFunc("/v2/tags", s.handleTags)
+	s.engine.Any("/v2/assets/search", s.handleSearchAssets)
+	s.engine.Any("/v2/assets", s.handleAssets)
+	s.engine.Any("/v2/assets/", s.handleAssetByID)
+	s.engine.Any("/v2/assets/:id", s.handleAssetByID)
 
-	s.mux.HandleFunc("/v2/views/tree", s.handleViewTree)
-	s.mux.HandleFunc("/v2/views/", s.handleViewByID)
-	s.mux.HandleFunc("/v2/views", s.handleViews)
+	s.engine.Any("/v2/tags", s.handleTags)
+	s.engine.Any("/v2/tags/", s.handleTagByID)
+	s.engine.Any("/v2/tags/:id", s.handleTagByID)
+
+	s.engine.Any("/v2/views/tree", s.handleViewTree)
+	s.engine.Any("/v2/views", s.handleViews)
+	s.engine.Any("/v2/views/", s.handleViewByID)
+	s.engine.Any("/v2/views/:id/tags", s.handleViewTags)
+	s.engine.Any("/v2/views/:id", s.handleViewByID)
 }
 
 func (s *Server) requireInternalAuth(r *http.Request) error {
@@ -82,19 +89,17 @@ func (s *Server) getAppAndTeam(r *http.Request) (string, string, error) {
 	return appID, teamID, nil
 }
 
-func writeResponse(w http.ResponseWriter, status int, code string, data any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(apiResponse{Code: code, Data: data})
+func writeResponse(c *gin.Context, status int, code string, data any) {
+	c.JSON(status, apiResponse{Code: code, Data: data})
 }
 
-func writeOK(w http.ResponseWriter, data any) {
-	writeResponse(w, http.StatusOK, codeOK, data)
+func writeOK(c *gin.Context, data any) {
+	writeResponse(c, http.StatusOK, codeOK, data)
 }
 
-func writeError(w http.ResponseWriter, status int, message string) {
+func writeError(c *gin.Context, status int, message string) {
 	code := codeForStatus(status)
-	writeResponse(w, status, code, errorData{Message: message})
+	writeResponse(c, status, code, errorData{Message: message})
 }
 
 func codeForStatus(status int) string {
@@ -118,11 +123,4 @@ func readJSON(r *http.Request, dst any) error {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	return dec.Decode(dst)
-}
-
-func extractID(path, prefix string) string {
-	if !strings.HasPrefix(path, prefix) {
-		return ""
-	}
-	return strings.TrimPrefix(path, prefix)
 }

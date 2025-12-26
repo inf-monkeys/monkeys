@@ -6,99 +6,100 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"monkey-data/internal/model"
 )
 
 const maxLimit = 200
 
-func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+func (s *Server) handleHealthz(c *gin.Context) {
+	if c.Request.Method != http.MethodGet {
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	writeOK(w, map[string]any{"ok": true})
+	writeOK(c, map[string]any{"ok": true})
 }
 
-func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+func (s *Server) handleReadyz(c *gin.Context) {
+	if c.Request.Method != http.MethodGet {
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	if err := s.service.Ready(r.Context()); err != nil {
-		writeError(w, http.StatusServiceUnavailable, err.Error())
+	if err := s.service.Ready(c.Request.Context()); err != nil {
+		writeError(c, http.StatusServiceUnavailable, err.Error())
 		return
 	}
-	writeOK(w, map[string]any{"ok": true})
+	writeOK(c, map[string]any{"ok": true})
 }
 
-func (s *Server) handleSearchAssets(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+func (s *Server) handleSearchAssets(c *gin.Context) {
+	if c.Request.Method != http.MethodGet {
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
-	appID, teamID, err := s.getAppAndTeam(r)
+	appID, teamID, err := s.getAppAndTeam(c.Request)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	q := r.URL.Query()
-	viewID := q.Get("view_id")
-	tagsRaw := q.Get("tags")
-	name := q.Get("name")
-	limit := parseLimit(q.Get("limit"), 20)
-	pageToken := q.Get("page_token")
+	viewID := c.Query("view_id")
+	tagsRaw := c.Query("tags")
+	name := c.Query("name")
+	limit := parseLimit(c.Query("limit"), 20)
+	pageToken := c.Query("page_token")
 
 	userTags := splitTags(tagsRaw)
-	ids, nextToken, total, err := s.service.SearchAssets(r.Context(), appID, teamID, viewID, userTags, name, limit, pageToken)
+	ids, nextToken, total, err := s.service.SearchAssets(c.Request.Context(), appID, teamID, viewID, userTags, name, limit, pageToken)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	writeOK(w, map[string]any{
+	writeOK(c, map[string]any{
 		"items":           ids,
 		"next_page_token": nextToken,
 		"total":           total,
 	})
 }
 
-func (s *Server) handleAssets(w http.ResponseWriter, r *http.Request) {
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+func (s *Server) handleAssets(c *gin.Context) {
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	if r.Method != http.MethodPost {
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+	if c.Request.Method != http.MethodPost {
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 
-	appID, teamID, err := s.getAppAndTeam(r)
+	appID, teamID, err := s.getAppAndTeam(c.Request)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var req assetCreateRequest
-	if err := readJSON(r, &req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid json")
+	if err := readJSON(c.Request, &req); err != nil {
+		writeError(c, http.StatusBadRequest, "invalid json")
 		return
 	}
 	if req.Name == "" || req.AssetType == "" || req.PrimaryContent == nil {
-		writeError(w, http.StatusBadRequest, "name, asset_type, primary_content required")
+		writeError(c, http.StatusBadRequest, "name, asset_type, primary_content required")
 		return
 	}
 
@@ -128,93 +129,93 @@ func (s *Server) handleAssets(w http.ResponseWriter, r *http.Request) {
 		UpdatedTimestamp: req.UpdatedTimestamp,
 	}
 
-	id, err := s.service.CreateAsset(r.Context(), appID, teamID, asset, req.TagIDs)
+	id, err := s.service.CreateAsset(c.Request.Context(), appID, teamID, asset, req.TagIDs)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	writeOK(w, map[string]any{"id": id})
+	writeOK(c, map[string]any{"id": id})
 }
 
-func (s *Server) handleAssetByID(w http.ResponseWriter, r *http.Request) {
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+func (s *Server) handleAssetByID(c *gin.Context) {
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	id := extractID(r.URL.Path, "/v2/assets/")
+	id := strings.TrimSpace(c.Param("id"))
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "invalid asset id")
+		writeError(c, http.StatusBadRequest, "invalid asset id")
 		return
 	}
 
-	appID, teamID, err := s.getAppAndTeam(r)
+	appID, teamID, err := s.getAppAndTeam(c.Request)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	switch r.Method {
+	switch c.Request.Method {
 	case http.MethodGet:
-		asset, err := s.service.GetAsset(r.Context(), appID, teamID, id)
+		asset, err := s.service.GetAsset(c.Request.Context(), appID, teamID, id)
 		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		writeOK(w, asset)
+		writeOK(c, asset)
 	case http.MethodPatch, http.MethodPut:
-		updates, tagIDs, hasTags, err := parseAssetUpdates(r)
+		updates, tagIDs, hasTags, err := parseAssetUpdates(c.Request)
 		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
 		if len(updates) == 0 && !hasTags {
-			writeError(w, http.StatusBadRequest, "no updates")
+			writeError(c, http.StatusBadRequest, "no updates")
 			return
 		}
 		if len(updates) > 0 {
-			if err := s.service.UpdateAsset(r.Context(), appID, teamID, id, updates); err != nil {
-				writeError(w, http.StatusBadRequest, err.Error())
+			if err := s.service.UpdateAsset(c.Request.Context(), appID, teamID, id, updates); err != nil {
+				writeError(c, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
 		if hasTags {
-			if err := s.service.ReplaceAssetTags(r.Context(), appID, teamID, id, tagIDs); err != nil {
-				writeError(w, http.StatusBadRequest, err.Error())
+			if err := s.service.ReplaceAssetTags(c.Request.Context(), appID, teamID, id, tagIDs); err != nil {
+				writeError(c, http.StatusBadRequest, err.Error())
 				return
 			}
 		}
-		writeOK(w, map[string]any{"ok": true})
+		writeOK(c, map[string]any{"ok": true})
 	case http.MethodDelete:
-		if err := s.service.DeleteAsset(r.Context(), appID, teamID, id); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+		if err := s.service.DeleteAsset(c.Request.Context(), appID, teamID, id); err != nil {
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		writeOK(w, map[string]any{"ok": true})
+		writeOK(c, map[string]any{"ok": true})
 	default:
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }
 
-func (s *Server) handleTags(w http.ResponseWriter, r *http.Request) {
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+func (s *Server) handleTags(c *gin.Context) {
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	appID, teamID, err := s.getAppAndTeam(r)
+	appID, teamID, err := s.getAppAndTeam(c.Request)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	switch r.Method {
+	switch c.Request.Method {
 	case http.MethodPost:
 		var req tagCreateRequest
-		if err := readJSON(r, &req); err != nil {
-			writeError(w, http.StatusBadRequest, "invalid json")
+		if err := readJSON(c.Request, &req); err != nil {
+			writeError(c, http.StatusBadRequest, "invalid json")
 			return
 		}
 		if req.Name == "" {
-			writeError(w, http.StatusBadRequest, "name required")
+			writeError(c, http.StatusBadRequest, "name required")
 			return
 		}
 		now := nowMillis()
@@ -234,80 +235,79 @@ func (s *Server) handleTags(w http.ResponseWriter, r *http.Request) {
 			CreatedTimestamp: req.CreatedTimestamp,
 			UpdatedTimestamp: req.UpdatedTimestamp,
 		}
-		id, err := s.service.CreateTag(r.Context(), appID, teamID, tag)
+		id, err := s.service.CreateTag(c.Request.Context(), appID, teamID, tag)
 		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		writeOK(w, map[string]any{"id": id})
+		writeOK(c, map[string]any{"id": id})
 	case http.MethodGet:
-		q := r.URL.Query()
-		keyword := q.Get("keyword")
-		limit := parseLimit(q.Get("limit"), 20)
-		pageToken := q.Get("page_token")
-		items, nextToken, err := s.service.ListTags(r.Context(), appID, teamID, keyword, limit, pageToken)
+		keyword := c.Query("keyword")
+		limit := parseLimit(c.Query("limit"), 20)
+		pageToken := c.Query("page_token")
+		items, nextToken, err := s.service.ListTags(c.Request.Context(), appID, teamID, keyword, limit, pageToken)
 		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		writeOK(w, map[string]any{"items": items, "next_page_token": nextToken})
+		writeOK(c, map[string]any{"items": items, "next_page_token": nextToken})
 	default:
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }
 
-func (s *Server) handleTagByID(w http.ResponseWriter, r *http.Request) {
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+func (s *Server) handleTagByID(c *gin.Context) {
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	id := extractID(r.URL.Path, "/v2/tags/")
+	id := strings.TrimSpace(c.Param("id"))
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "invalid tag id")
+		writeError(c, http.StatusBadRequest, "invalid tag id")
 		return
 	}
 
-	appID, teamID, err := s.getAppAndTeam(r)
+	appID, teamID, err := s.getAppAndTeam(c.Request)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	switch r.Method {
+	switch c.Request.Method {
 	case http.MethodDelete:
-		if err := s.service.DeleteTag(r.Context(), appID, teamID, id); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+		if err := s.service.DeleteTag(c.Request.Context(), appID, teamID, id); err != nil {
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		writeOK(w, map[string]any{"ok": true})
+		writeOK(c, map[string]any{"ok": true})
 	default:
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }
 
-func (s *Server) handleViews(w http.ResponseWriter, r *http.Request) {
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+func (s *Server) handleViews(c *gin.Context) {
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	if r.Method != http.MethodPost {
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+	if c.Request.Method != http.MethodPost {
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 
-	appID, teamID, err := s.getAppAndTeam(r)
+	appID, teamID, err := s.getAppAndTeam(c.Request)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	var req viewCreateRequest
-	if err := readJSON(r, &req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid json")
+	if err := readJSON(c.Request, &req); err != nil {
+		writeError(c, http.StatusBadRequest, "invalid json")
 		return
 	}
 	if req.Name == "" || req.Path == "" {
-		writeError(w, http.StatusBadRequest, "name and path required")
+		writeError(c, http.StatusBadRequest, "name and path required")
 		return
 	}
 	now := nowMillis()
@@ -331,120 +331,115 @@ func (s *Server) handleViews(w http.ResponseWriter, r *http.Request) {
 		CreatedTimestamp: req.CreatedTimestamp,
 		UpdatedTimestamp: req.UpdatedTimestamp,
 	}
-	id, err := s.service.CreateView(r.Context(), appID, teamID, view)
+	id, err := s.service.CreateView(c.Request.Context(), appID, teamID, view)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	writeOK(w, map[string]any{"id": id})
+	writeOK(c, map[string]any{"id": id})
 }
 
-func (s *Server) handleViewByID(w http.ResponseWriter, r *http.Request) {
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+func (s *Server) handleViewByID(c *gin.Context) {
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	path := r.URL.Path
-	if strings.HasSuffix(path, "/tags") {
-		s.handleViewTags(w, r)
-		return
-	}
-	id := extractID(path, "/v2/views/")
+	id := strings.TrimSpace(c.Param("id"))
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "invalid view id")
+		writeError(c, http.StatusBadRequest, "invalid view id")
 		return
 	}
 
-	appID, teamID, err := s.getAppAndTeam(r)
+	appID, teamID, err := s.getAppAndTeam(c.Request)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	switch r.Method {
+	switch c.Request.Method {
 	case http.MethodPatch, http.MethodPut:
-		updates, err := parseViewUpdates(r)
+		updates, err := parseViewUpdates(c.Request)
 		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
 		if len(updates) == 0 {
-			writeError(w, http.StatusBadRequest, "no updates")
+			writeError(c, http.StatusBadRequest, "no updates")
 			return
 		}
-		if err := s.service.UpdateView(r.Context(), appID, teamID, id, updates); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+		if err := s.service.UpdateView(c.Request.Context(), appID, teamID, id, updates); err != nil {
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		writeOK(w, map[string]any{"ok": true})
+		writeOK(c, map[string]any{"ok": true})
 	case http.MethodDelete:
-		if err := s.service.DeleteView(r.Context(), appID, teamID, id); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+		if err := s.service.DeleteView(c.Request.Context(), appID, teamID, id); err != nil {
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		writeOK(w, map[string]any{"ok": true})
+		writeOK(c, map[string]any{"ok": true})
 	default:
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }
 
-func (s *Server) handleViewTags(w http.ResponseWriter, r *http.Request) {
-	id := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/v2/views/"), "/tags")
+func (s *Server) handleViewTags(c *gin.Context) {
+	id := strings.TrimSpace(c.Param("id"))
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "invalid view id")
+		writeError(c, http.StatusBadRequest, "invalid view id")
 		return
 	}
-	appID, teamID, err := s.getAppAndTeam(r)
+	appID, teamID, err := s.getAppAndTeam(c.Request)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	switch r.Method {
+	switch c.Request.Method {
 	case http.MethodGet:
-		tagIDs, err := s.service.GetViewTags(r.Context(), appID, teamID, id)
+		tagIDs, err := s.service.GetViewTags(c.Request.Context(), appID, teamID, id)
 		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		writeOK(w, map[string]any{"items": tagIDs})
+		writeOK(c, map[string]any{"items": tagIDs})
 	case http.MethodPut:
 		var req tagListRequest
-		if err := readJSON(r, &req); err != nil {
-			writeError(w, http.StatusBadRequest, "invalid json")
+		if err := readJSON(c.Request, &req); err != nil {
+			writeError(c, http.StatusBadRequest, "invalid json")
 			return
 		}
-		if err := s.service.ReplaceViewTags(r.Context(), appID, teamID, id, req.TagIDs); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+		if err := s.service.ReplaceViewTags(c.Request.Context(), appID, teamID, id, req.TagIDs); err != nil {
+			writeError(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		writeOK(w, map[string]any{"ok": true})
+		writeOK(c, map[string]any{"ok": true})
 	default:
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }
 
-func (s *Server) handleViewTree(w http.ResponseWriter, r *http.Request) {
-	if err := s.requireInternalAuth(r); err != nil {
-		writeError(w, http.StatusUnauthorized, "unauthorized")
+func (s *Server) handleViewTree(c *gin.Context) {
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	if r.Method != http.MethodGet {
-		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+	if c.Request.Method != http.MethodGet {
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 
-	appID, teamID, err := s.getAppAndTeam(r)
+	appID, teamID, err := s.getAppAndTeam(c.Request)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	items, err := s.service.GetViewTree(r.Context(), appID, teamID)
+	items, err := s.service.GetViewTree(c.Request.Context(), appID, teamID)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		writeError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	writeOK(w, map[string]any{"items": items})
+	writeOK(c, map[string]any{"items": items})
 }
 
 func splitTags(raw string) []string {
