@@ -45,7 +45,7 @@ function DataManagementV2Page() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchName, setSearchName] = useState('');
   const [viewMode, setViewMode] = useState<'table' | 'card'>('card');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(20);
@@ -79,12 +79,12 @@ function DataManagementV2Page() {
     setHasMore(true);
     setNextToken(null);
     setSelectedIds([]);
-  }, [teamId, selectedCategory, searchKeyword, selectedTagIds]);
+  }, [teamId, selectedCategory, searchName, selectedTagIds]);
 
   useEffect(() => {
     if (!teamId) return;
     void loadDataList();
-  }, [teamId, selectedCategory, searchKeyword, selectedTagIds, currentPage]);
+  }, [teamId, selectedCategory, searchName, selectedTagIds, currentPage]);
 
   const requireTeamId = () => {
     if (!teamId.trim()) {
@@ -122,11 +122,12 @@ function DataManagementV2Page() {
     try {
       const effectivePage = options?.forceFirstPage ? 1 : currentPage;
       const tags = selectedTagIds.length > 0 ? selectedTagIds.join(',') : undefined;
+      const name = searchName.trim();
 
       const commonParams = {
         teamId,
         viewId: selectedCategory || undefined,
-        keyword: searchKeyword || undefined,
+        name: name || undefined,
         tags,
         pageSize,
       };
@@ -178,8 +179,8 @@ function DataManagementV2Page() {
     }
   };
 
-  const handleSearch = (keyword: string) => {
-    setSearchKeyword(keyword);
+  const handleSearch = (name: string) => {
+    setSearchName(name);
   };
 
   const handlePageChange = (page: number) => {
