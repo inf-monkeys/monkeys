@@ -10,7 +10,7 @@ import { AdminUserRepository } from '@/database/repositories/admin-user.reposito
 import { AdminRoleRepository } from '@/database/repositories/admin-role.repository';
 
 @Module({
-  controllers: [DataAssetV2Controller, DataViewV2Controller, DataTagV2Controller],
+  controllers: [DataTagV2Controller, DataViewV2Controller, DataAssetV2Controller],
   providers: [
     DataManagementV2Service,
     MonkeyDataClient,
