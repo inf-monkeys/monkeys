@@ -78,6 +78,28 @@ curl -H "X-Internal-Token: monkey-data-internal-token" http://127.0.0.1:8081/hea
 curl -H "X-Internal-Token: monkey-data-internal-token" http://127.0.0.1:8081/readyz
 ```
 
+## Seed 数据（压测/验证）
+使用 `cmd/asset-seeder` 批量创建 tag 与 asset（走 HTTP API）。
+
+示例：
+```bash
+cd monkey-data
+go run .\cmd\asset-seeder\ --app-id monkeys --team-id test_team_id --total 100000 --concurrency 32 --tags 100
+```
+
+常用参数：
+- `--base-url`：API 地址（默认从 `config.yaml` 推断）
+- `--app-id` / `--team-id`：租户与团队
+- `--total`：资产数量
+- `--concurrency`：并发
+- `--tags` / `--tags-min` / `--tags-max`：标签规模与每资产标签数
+- `--creator`：creator_user_id
+- `--retries`：创建失败重试
+
+说明：
+- 若配置了 `internal_token`，Seeder 会自动带 `X-Internal-Token`。
+- Seeder 依赖 API 在线；建议先启动 `asset-api` 与 `asset-indexer`。
+
 ## 内部索引重建（HTTP）
 - `GET /v2/index/app-ids`：扫描可用 app_id。
 - `POST /v2/index/rebuild`：异步重建索引（全局并发上限 2，同一 app_id 互斥）。
