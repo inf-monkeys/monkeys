@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"monkey-data/internal/config"
 	"monkey-data/internal/httpapi"
+	"monkey-data/internal/reindex"
 	"monkey-data/internal/repo"
 	"monkey-data/internal/search"
 	"monkey-data/internal/service"
@@ -34,6 +36,7 @@ func main() {
 	store := repo.NewPGStore(pool)
 
 	var searchClient search.Client
+	var esClient *elasticsearch.Client
 	if cfg.ElasticsearchURL == "" {
 		searchClient = search.NewNoopClient()
 	} else {
@@ -47,10 +50,20 @@ func main() {
 			log.Fatalf("elasticsearch init error: %v", err)
 		}
 		searchClient = client
+		esClient, err = elasticsearch.NewClient(elasticsearch.Config{
+			Addresses: []string{cfg.ElasticsearchURL},
+			Username:  cfg.ElasticsearchUser,
+			Password:  cfg.ElasticsearchPass,
+		})
+		if err != nil {
+			log.Fatalf("elasticsearch init error: %v", err)
+		}
 	}
 
 	svc := service.New(store, searchClient)
-	srv := httpapi.NewServer(cfg, svc)
+	reindexer := reindex.NewReindexer(pool, esClient)
+	reindexMgr := reindex.NewManager(reindexer, 2)
+	srv := httpapi.NewServer(cfg, svc, reindexMgr)
 
 	log.Printf("monkey-data api listening on %s", cfg.HTTPAddr)
 	if err := http.ListenAndServe(cfg.HTTPAddr, srv); err != nil {

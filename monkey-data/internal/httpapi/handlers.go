@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"monkey-data/internal/model"
+	"monkey-data/internal/reindex"
 )
 
 const maxLimit = 200
@@ -442,6 +443,101 @@ func (s *Server) handleViewTree(c *gin.Context) {
 	writeOK(c, map[string]any{"items": items})
 }
 
+func (s *Server) handleIndexAppIDs(c *gin.Context) {
+	if c.Request.Method != http.MethodGet {
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	if s.reindex == nil {
+		writeError(c, http.StatusServiceUnavailable, "reindex not configured")
+		return
+	}
+	items, err := s.reindex.ListAppIDs(c.Request.Context())
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeOK(c, map[string]any{"items": items})
+}
+
+func (s *Server) handleIndexRebuild(c *gin.Context) {
+	if c.Request.Method != http.MethodPost {
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	if s.reindex == nil {
+		writeError(c, http.StatusServiceUnavailable, "reindex not configured")
+		return
+	}
+
+	var req reindexRequest
+	if err := readJSON(c.Request, &req); err != nil {
+		writeError(c, http.StatusBadRequest, "invalid json")
+		return
+	}
+
+	appIDs := req.AppIDs
+	if req.All {
+		list, err := s.reindex.ListAppIDs(c.Request.Context())
+		if err != nil {
+			writeError(c, http.StatusBadRequest, err.Error())
+			return
+		}
+		appIDs = list
+	}
+	if len(appIDs) == 0 {
+		writeError(c, http.StatusBadRequest, "app_ids required")
+		return
+	}
+
+	opts := reindex.Options{
+		BatchSize:   req.BatchSize,
+		DeleteIndex: boolOrDefault(req.DeleteIndex, true),
+		CreateIndex: boolOrDefault(req.CreateIndex, true),
+		Refresh:     boolOrDefault(req.Refresh, false),
+	}
+	job, err := s.reindex.StartRebuild(appIDs, opts)
+	if err != nil {
+		writeError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeOK(c, job)
+}
+
+func (s *Server) handleIndexJob(c *gin.Context) {
+	if c.Request.Method != http.MethodGet {
+		writeError(c, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	if err := s.requireInternalAuth(c.Request); err != nil {
+		writeError(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	if s.reindex == nil {
+		writeError(c, http.StatusServiceUnavailable, "reindex not configured")
+		return
+	}
+	id := strings.TrimSpace(c.Param("id"))
+	if id == "" {
+		writeError(c, http.StatusBadRequest, "invalid job id")
+		return
+	}
+	job, ok := s.reindex.GetJob(id)
+	if !ok {
+		writeError(c, http.StatusNotFound, "job not found")
+		return
+	}
+	writeOK(c, job)
+}
+
 func splitTags(raw string) []string {
 	if raw == "" {
 		return []string{}
@@ -541,6 +637,15 @@ type tagListRequest struct {
 	TagIDs []string `json:"tag_ids"`
 }
 
+type reindexRequest struct {
+	AppIDs      []string `json:"app_ids"`
+	All         bool     `json:"all"`
+	BatchSize   int      `json:"batch_size"`
+	DeleteIndex *bool    `json:"delete_index"`
+	CreateIndex *bool    `json:"create_index"`
+	Refresh     *bool    `json:"refresh"`
+}
+
 func parseAssetUpdates(r *http.Request) (map[string]any, []string, bool, error) {
 	var raw map[string]json.RawMessage
 	if err := readJSON(r, &raw); err != nil {
@@ -633,6 +738,13 @@ func normalizeName(name string) string {
 
 func nowMillis() int64 {
 	return time.Now().UnixMilli()
+}
+
+func boolOrDefault(value *bool, fallback bool) bool {
+	if value == nil {
+		return fallback
+	}
+	return *value
 }
 
 func errorsNew(msg string) error {

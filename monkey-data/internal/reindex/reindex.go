@@ -1,35 +1,123 @@
-package main
+package reindex
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
-	"log"
-	"os"
-	"sort"
-	"strconv"
+	"net/http"
 	"strings"
-	"time"
 
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"monkey-data/internal/config"
 	"monkey-data/internal/repo"
 )
 
-type options struct {
-	AppIDs      string
-	All         bool
+type Options struct {
 	BatchSize   int
 	DeleteIndex bool
 	CreateIndex bool
 	Refresh     bool
+}
+
+type Progress struct {
+	AppID     string
+	Total     int64
+	Processed int64
+	Done      bool
+}
+
+type Reindexer struct {
+	pg *pgxpool.Pool
+	es *elasticsearch.Client
+}
+
+func NewReindexer(pg *pgxpool.Pool, es *elasticsearch.Client) *Reindexer {
+	return &Reindexer{pg: pg, es: es}
+}
+
+func (r *Reindexer) DiscoverAppIDs(ctx context.Context) ([]string, error) {
+	if r == nil || r.pg == nil {
+		return nil, errors.New("postgres not configured")
+	}
+	store := repo.NewPGStore(r.pg)
+	return store.ListAppIDs(ctx)
+}
+
+func (r *Reindexer) Rebuild(ctx context.Context, appID string, opts Options, progress func(Progress)) error {
+	if r == nil || r.pg == nil {
+		return errors.New("postgres not configured")
+	}
+	if r.es == nil {
+		return errors.New("elasticsearch not configured")
+	}
+	if err := repo.ValidateAppID(appID); err != nil {
+		return err
+	}
+	opts = normalizeOptions(opts)
+
+	index := fmt.Sprintf("%s_data_assets_v2", appID)
+	if opts.DeleteIndex {
+		if err := deleteIndex(ctx, r.es, index); err != nil {
+			return err
+		}
+	}
+	if opts.CreateIndex {
+		if err := createIndex(ctx, r.es, index); err != nil {
+			return err
+		}
+	}
+
+	total, err := countAssets(ctx, r.pg, appID)
+	if err != nil {
+		return err
+	}
+	if progress != nil {
+		progress(Progress{AppID: appID, Total: total, Processed: 0})
+	}
+
+	var lastUpdated int64
+	var lastID string
+	var processed int64
+
+	for {
+		assets, err := loadAssets(ctx, r.pg, appID, lastUpdated, lastID, opts.BatchSize)
+		if err != nil {
+			return err
+		}
+		if len(assets) == 0 {
+			break
+		}
+
+		tagMap, err := loadTags(ctx, r.pg, appID, assets)
+		if err != nil {
+			return err
+		}
+		if err := bulkIndex(ctx, r.es, index, assets, tagMap); err != nil {
+			return err
+		}
+
+		last := assets[len(assets)-1]
+		lastUpdated = last.UpdatedTimestamp
+		lastID = last.ID
+		processed += int64(len(assets))
+		if progress != nil {
+			progress(Progress{AppID: appID, Total: total, Processed: processed})
+		}
+	}
+
+	if opts.Refresh {
+		if err := refreshIndex(ctx, r.es, index); err != nil {
+			return err
+		}
+	}
+	if progress != nil {
+		progress(Progress{AppID: appID, Total: total, Processed: processed, Done: true})
+	}
+	return nil
 }
 
 type assetRow struct {
@@ -42,233 +130,14 @@ type assetRow struct {
 	UpdatedTimestamp int64
 }
 
-func main() {
-	var opts options
-	flag.StringVar(&opts.AppIDs, "app-ids", "", "comma-separated app_id list; empty means prompt from scanned list")
-	flag.BoolVar(&opts.All, "all", false, "reindex all discovered app_id without prompt")
-	flag.IntVar(&opts.BatchSize, "batch-size", 500, "batch size for asset scan")
-	flag.BoolVar(&opts.DeleteIndex, "delete-index", true, "delete index before rebuild")
-	flag.BoolVar(&opts.CreateIndex, "create-index", true, "create index before rebuild")
-	flag.BoolVar(&opts.Refresh, "refresh", false, "refresh index after rebuild")
-	flag.Parse()
-
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatalf("config load error: %v", err)
+func normalizeOptions(opts Options) Options {
+	if opts.BatchSize <= 0 {
+		opts.BatchSize = 500
 	}
-	if strings.TrimSpace(cfg.PostgresDSN) == "" {
-		log.Fatal("postgres dsn required")
+	if opts.BatchSize > 2000 {
+		opts.BatchSize = 2000
 	}
-	if strings.TrimSpace(cfg.ElasticsearchURL) == "" {
-		log.Fatal("elasticsearch url required")
-	}
-
-	ctx := context.Background()
-	pg, err := pgxpool.New(ctx, cfg.PostgresDSN)
-	if err != nil {
-		log.Fatalf("pg connect error: %v", err)
-	}
-	defer pg.Close()
-	store := repo.NewPGStore(pg)
-
-	appIDs, err := resolveAppIDs(ctx, store, opts)
-	if err != nil {
-		log.Fatalf("resolve app_id failed: %v", err)
-	}
-	if len(appIDs) == 0 {
-		log.Fatal("no app_id selected")
-	}
-
-	if opts.AppIDs == "" && !opts.All {
-		if !confirmSelection(appIDs) {
-			log.Fatal("cancelled")
-		}
-	}
-
-	es, err := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: []string{cfg.ElasticsearchURL},
-		Username:  cfg.ElasticsearchUser,
-		Password:  cfg.ElasticsearchPass,
-	})
-	if err != nil {
-		log.Fatalf("elasticsearch init error: %v", err)
-	}
-
-	for _, appID := range appIDs {
-		if err := rebuildApp(ctx, pg, es, appID, opts); err != nil {
-			log.Printf("reindex failed app_id=%s err=%v", appID, err)
-			continue
-		}
-	}
-}
-
-func resolveAppIDs(ctx context.Context, store *repo.PGStore, opts options) ([]string, error) {
-	if strings.TrimSpace(opts.AppIDs) != "" {
-		return parseAppIDs(opts.AppIDs)
-	}
-	list, err := store.ListAppIDs(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if len(list) == 0 {
-		return nil, errors.New("no app_id discovered from outbox tables")
-	}
-	if opts.All {
-		return list, nil
-	}
-	return promptSelect(list)
-}
-
-func parseAppIDs(raw string) ([]string, error) {
-	items := splitTokens(raw)
-	if len(items) == 0 {
-		return nil, errors.New("empty app_id list")
-	}
-	seen := map[string]struct{}{}
-	out := make([]string, 0, len(items))
-	for _, item := range items {
-		if err := repo.ValidateAppID(item); err != nil {
-			return nil, err
-		}
-		if _, ok := seen[item]; ok {
-			continue
-		}
-		seen[item] = struct{}{}
-		out = append(out, item)
-	}
-	sort.Strings(out)
-	return out, nil
-}
-
-func promptSelect(appIDs []string) ([]string, error) {
-	log.Println("发现以下 app_id：")
-	for i, id := range appIDs {
-		log.Printf("  %d) %s", i+1, id)
-	}
-	log.Println("请输入要重建的 app_id（逗号分隔），或输入 all：")
-
-	reader := bufio.NewReader(os.Stdin)
-	line, err := reader.ReadString('\n')
-	if err != nil && !errors.Is(err, io.EOF) {
-		return nil, err
-	}
-	line = strings.TrimSpace(line)
-	if line == "" {
-		return nil, errors.New("empty selection")
-	}
-	if strings.EqualFold(line, "all") || line == "*" {
-		return appIDs, nil
-	}
-
-	tokens := splitTokens(line)
-	if len(tokens) == 0 {
-		return nil, errors.New("empty selection")
-	}
-
-	out := make([]string, 0, len(tokens))
-	seen := map[string]struct{}{}
-	for _, token := range tokens {
-		if idx, err := strconv.Atoi(token); err == nil {
-			if idx <= 0 || idx > len(appIDs) {
-				return nil, fmt.Errorf("invalid index: %d", idx)
-			}
-			val := appIDs[idx-1]
-			if _, ok := seen[val]; ok {
-				continue
-			}
-			seen[val] = struct{}{}
-			out = append(out, val)
-			continue
-		}
-		if err := repo.ValidateAppID(token); err != nil {
-			return nil, err
-		}
-		if !contains(appIDs, token) {
-			return nil, fmt.Errorf("unknown app_id: %s", token)
-		}
-		if _, ok := seen[token]; ok {
-			continue
-		}
-		seen[token] = struct{}{}
-		out = append(out, token)
-	}
-	sort.Strings(out)
-	return out, nil
-}
-
-func confirmSelection(appIDs []string) bool {
-	log.Printf("将重建以下 app_id：%s", strings.Join(appIDs, ", "))
-	log.Print("确认删除并重建索引？输入 y 继续：")
-	reader := bufio.NewReader(os.Stdin)
-	line, _ := reader.ReadString('\n')
-	line = strings.TrimSpace(line)
-	return strings.EqualFold(line, "y") || strings.EqualFold(line, "yes")
-}
-
-func rebuildApp(ctx context.Context, pg *pgxpool.Pool, es *elasticsearch.Client, appID string, opts options) error {
-	if err := repo.ValidateAppID(appID); err != nil {
-		return err
-	}
-	index := fmt.Sprintf("%s_data_assets_v2", appID)
-
-	if opts.DeleteIndex {
-		if err := deleteIndex(ctx, es, index); err != nil {
-			return err
-		}
-	}
-	if opts.CreateIndex {
-		if err := createIndex(ctx, es, index); err != nil {
-			return err
-		}
-	}
-
-	total, err := countAssets(ctx, pg, appID)
-	if err != nil {
-		return err
-	}
-	log.Printf("reindex start app_id=%s total=%d", appID, total)
-
-	var lastUpdated int64
-	var lastID string
-	var processed int64
-	start := time.Now()
-
-	for {
-		assets, err := loadAssets(ctx, pg, appID, lastUpdated, lastID, opts.BatchSize)
-		if err != nil {
-			return err
-		}
-		if len(assets) == 0 {
-			break
-		}
-
-		tagMap, err := loadTags(ctx, pg, appID, assets)
-		if err != nil {
-			return err
-		}
-		if err := bulkIndex(ctx, es, index, assets, tagMap); err != nil {
-			return err
-		}
-
-		last := assets[len(assets)-1]
-		lastUpdated = last.UpdatedTimestamp
-		lastID = last.ID
-		processed += int64(len(assets))
-
-		if processed%2000 == 0 || len(assets) < opts.BatchSize {
-			elapsed := time.Since(start).Seconds()
-			rate := float64(processed) / maxFloat(elapsed, 1)
-			log.Printf("progress app_id=%s processed=%d/%d rate=%.1f/s", appID, processed, total, rate)
-		}
-	}
-
-	if opts.Refresh {
-		if err := refreshIndex(ctx, es, index); err != nil {
-			return err
-		}
-	}
-	log.Printf("reindex done app_id=%s processed=%d", appID, processed)
-	return nil
+	return opts
 }
 
 func deleteIndex(ctx context.Context, client *elasticsearch.Client, index string) error {
@@ -281,7 +150,7 @@ func deleteIndex(ctx context.Context, client *elasticsearch.Client, index string
 		return err
 	}
 	defer res.Body.Close()
-	if res.StatusCode >= 400 && res.StatusCode != 404 {
+	if res.StatusCode >= http.StatusBadRequest && res.StatusCode != http.StatusNotFound {
 		raw, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("delete index error: %s", string(raw))
 	}
@@ -316,7 +185,7 @@ func createIndex(ctx context.Context, client *elasticsearch.Client, index string
 		return err
 	}
 	defer res.Body.Close()
-	if res.StatusCode >= 400 {
+	if res.StatusCode >= http.StatusBadRequest {
 		raw, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("create index error: %s", string(raw))
 	}
@@ -332,7 +201,7 @@ func refreshIndex(ctx context.Context, client *elasticsearch.Client, index strin
 		return err
 	}
 	defer res.Body.Close()
-	if res.StatusCode >= 400 {
+	if res.StatusCode >= http.StatusBadRequest {
 		raw, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("refresh index error: %s", string(raw))
 	}
@@ -340,12 +209,12 @@ func refreshIndex(ctx context.Context, client *elasticsearch.Client, index strin
 }
 
 func loadAssets(ctx context.Context, pg *pgxpool.Pool, appID string, lastUpdated int64, lastID string, limit int) ([]assetRow, error) {
-	if limit <= 0 {
-		limit = 200
-	}
 	table, err := tableName(appID, "data_assets_v2")
 	if err != nil {
 		return nil, err
+	}
+	if limit <= 0 {
+		limit = 500
 	}
 
 	args := make([]any, 0, 3)
@@ -456,7 +325,7 @@ func bulkIndex(ctx context.Context, client *elasticsearch.Client, index string, 
 		return err
 	}
 	defer res.Body.Close()
-	if res.StatusCode >= 400 {
+	if res.StatusCode >= http.StatusBadRequest {
 		raw, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("bulk error: %s", string(raw))
 	}
@@ -497,46 +366,8 @@ func countAssets(ctx context.Context, pg *pgxpool.Pool, appID string) (int64, er
 }
 
 func tableName(appID, base string) (string, error) {
-	appID = strings.TrimSpace(appID)
-	if err := repo.ValidateAppID(appID); err != nil {
+	if err := repo.ValidateAppID(strings.TrimSpace(appID)); err != nil {
 		return "", err
 	}
-	return `"` + appID + "_" + base + `"`, nil
-}
-
-func splitTokens(raw string) []string {
-	raw = strings.TrimSpace(raw)
-	if raw == "" {
-		return nil
-	}
-	raw = strings.ReplaceAll(raw, "\n", " ")
-	raw = strings.ReplaceAll(raw, "\t", " ")
-	segs := strings.FieldsFunc(raw, func(r rune) bool {
-		return r == ',' || r == ' ' || r == ';'
-	})
-	out := make([]string, 0, len(segs))
-	for _, seg := range segs {
-		seg = strings.TrimSpace(seg)
-		if seg == "" {
-			continue
-		}
-		out = append(out, seg)
-	}
-	return out
-}
-
-func contains(items []string, target string) bool {
-	for _, item := range items {
-		if item == target {
-			return true
-		}
-	}
-	return false
-}
-
-func maxFloat(a, b float64) float64 {
-	if a > b {
-		return a
-	}
-	return b
+	return `"` + strings.TrimSpace(appID) + "_" + base + `"`, nil
 }

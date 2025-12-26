@@ -2,7 +2,7 @@
 
 ## 基本约定
 - 所有接口使用 JSON。
-- 除 `/healthz` 与 `/readyz` 外，`X-App-Id` 与 `X-Team-Id` 必填，用于多租户隔离与团队过滤。
+- 除 `/healthz`、`/readyz` 与 `/v2/index/*` 外，`X-App-Id` 与 `X-Team-Id` 必填，用于多租户隔离与团队过滤。
 - `X-Internal-Token` 仅在配置了 `internal_token` 或 `MONKEY_DATA_INTERNAL_TOKEN` 时要求。
 - 响应格式统一为：
   - 成功：`{ "code": "OK", "data": ... }`
@@ -42,6 +42,79 @@ Response
 失败示例
 ```json
 { "code": "INTERNAL", "data": { "message": "elasticsearch not ready: ..." } }
+```
+
+## 索引重建（internal）
+
+### 列出 app_id
+GET `/v2/index/app-ids`
+
+Response
+```json
+{
+  "code": "OK",
+  "data": {
+    "items": ["monkeys", "foo"]
+  }
+}
+```
+
+### 触发重建（异步）
+POST `/v2/index/rebuild`
+
+Request
+```json
+{
+  "app_ids": ["monkeys"],
+  "all": false,
+  "batch_size": 500,
+  "delete_index": true,
+  "create_index": true,
+  "refresh": false
+}
+```
+
+Response
+```json
+{
+  "code": "OK",
+  "data": {
+    "id": "01J...",
+    "status": "running",
+    "created_timestamp": 1735000000000,
+    "started_timestamp": 1735000000000,
+    "completed_timestamp": 0,
+    "app_ids": ["monkeys"],
+    "items": [
+      { "app_id": "monkeys", "status": "running", "total": 1000, "processed": 200 }
+    ]
+  }
+}
+```
+
+说明：
+- `app_ids` 与 `all` 至少提供一个。
+- 任务异步执行；全局并发上限为 2，同一 `app_id` 不允许并发重建。
+
+### 查询任务进度
+GET `/v2/index/jobs/{id}`
+
+Response
+```json
+{
+  "code": "OK",
+  "data": {
+    "id": "01J...",
+    "status": "done",
+    "created_timestamp": 1735000000000,
+    "started_timestamp": 1735000000000,
+    "completed_timestamp": 1735000005000,
+    "app_ids": ["monkeys"],
+    "items": [
+      { "app_id": "monkeys", "status": "done", "total": 1000, "processed": 1000 }
+    ]
+  }
+}
 ```
 
 ## 资源（assets）

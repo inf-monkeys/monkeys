@@ -9,13 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"monkey-data/internal/config"
+	"monkey-data/internal/reindex"
 	"monkey-data/internal/service"
 )
 
 type Server struct {
-	cfg     config.Config
-	service *service.Service
-	engine  *gin.Engine
+	cfg      config.Config
+	service  *service.Service
+	reindex  *reindex.Manager
+	engine   *gin.Engine
 }
 
 type apiResponse struct {
@@ -37,8 +39,8 @@ const (
 	codeInternal         = "INTERNAL"
 )
 
-func NewServer(cfg config.Config, svc *service.Service) *Server {
-	s := &Server{cfg: cfg, service: svc, engine: gin.New()}
+func NewServer(cfg config.Config, svc *service.Service, reindexer *reindex.Manager) *Server {
+	s := &Server{cfg: cfg, service: svc, reindex: reindexer, engine: gin.New()}
 	s.routes()
 	return s
 }
@@ -65,6 +67,10 @@ func (s *Server) routes() {
 	s.engine.Any("/v2/views/", s.handleViewByID)
 	s.engine.Any("/v2/views/:id/tags", s.handleViewTags)
 	s.engine.Any("/v2/views/:id", s.handleViewByID)
+
+	s.engine.Any("/v2/index/app-ids", s.handleIndexAppIDs)
+	s.engine.Any("/v2/index/rebuild", s.handleIndexRebuild)
+	s.engine.Any("/v2/index/jobs/:id", s.handleIndexJob)
 }
 
 func (s *Server) requireInternalAuth(r *http.Request) error {
