@@ -58,11 +58,12 @@ func (s *Server) handleSearchAssets(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	viewID := q.Get("view_id")
 	tagsRaw := q.Get("tags")
+	name := q.Get("name")
 	limit := parseLimit(q.Get("limit"), 20)
 	pageToken := q.Get("page_token")
 
 	userTags := splitTags(tagsRaw)
-	ids, nextToken, err := s.service.SearchAssets(r.Context(), appID, teamID, viewID, userTags, limit, pageToken)
+	ids, nextToken, total, err := s.service.SearchAssets(r.Context(), appID, teamID, viewID, userTags, name, limit, pageToken)
 	if err != nil {
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
@@ -71,6 +72,7 @@ func (s *Server) handleSearchAssets(w http.ResponseWriter, r *http.Request) {
 	writeOK(w, map[string]any{
 		"items":           ids,
 		"next_page_token": nextToken,
+		"total":           total,
 	})
 }
 

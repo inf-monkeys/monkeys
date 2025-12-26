@@ -174,14 +174,6 @@ export class DataManagementV2Service {
     return roots;
   }
 
-  private matchesKeyword(asset: MonkeyAsset, keyword: string): boolean {
-    const normalized = keyword.trim().toLowerCase();
-    if (!normalized) return true;
-    const name = (asset.name || '').toLowerCase();
-    const displayName = typeof asset.extra?.display_name === 'string' ? asset.extra.display_name.toLowerCase() : '';
-    return name.includes(normalized) || displayName.includes(normalized);
-  }
-
   private async fetchAssetsByIds(teamId: string, ids: string[]): Promise<MonkeyAsset[]> {
     const tasks = ids.map(async (id) => {
       try {
@@ -198,64 +190,44 @@ export class DataManagementV2Service {
     return ids.map((id) => byId.get(id)).filter(Boolean) as MonkeyAsset[];
   }
 
-  private async searchAssets(teamId: string, viewId: string | undefined, tags: string[], keyword: string | undefined, limit: number, pageToken?: string) {
-    const normalizedKeyword = (keyword || '').trim();
-    const assets: MonkeyAsset[] = [];
-    let token = pageToken || '';
-    let remaining = limit;
-
-    while (remaining > 0) {
-      const searchRes = await this.client.searchAssets(teamId, {
-        viewId,
-        tags,
-        limit: remaining,
-        pageToken: token || undefined,
-      });
-      const ids = searchRes.items || [];
-      const nextToken = searchRes.next_page_token || '';
-      if (ids.length === 0) {
-        token = nextToken;
-        break;
-      }
-
-      const fetched = await this.fetchAssetsByIds(teamId, ids);
-      const filtered = normalizedKeyword
-        ? fetched.filter((asset) => this.matchesKeyword(asset, normalizedKeyword))
-        : fetched;
-      assets.push(...filtered);
-
-      token = nextToken;
-      if (!token) break;
-      remaining = limit - assets.length;
-    }
-
-    return { assets, nextPageToken: token };
+  private async searchAssets(teamId: string, viewId: string | undefined, tags: string[], name: string | undefined, limit: number, pageToken?: string) {
+    const searchRes = await this.client.searchAssets(teamId, {
+      viewId,
+      tags,
+      name,
+      limit,
+      pageToken: pageToken || undefined,
+    });
+    const ids = searchRes.items || [];
+    const nextToken = searchRes.next_page_token || '';
+    const total = typeof searchRes.total === 'number' ? searchRes.total : ids.length;
+    const assets = ids.length > 0 ? await this.fetchAssetsByIds(teamId, ids) : [];
+    return { assets, nextPageToken: nextToken, total };
   }
 
   async getAssets(params: {
     adminId: string;
     teamId?: string;
     viewId?: string;
-    keyword?: string;
+    name?: string;
     tags?: string;
     page?: number;
     pageSize?: number;
   }): Promise<DataListResult> {
     const teamId = this.requireTeamId(params.teamId);
     const pageSize = this.normalizeLimit(params.pageSize);
-    const { assets, nextPageToken } = await this.searchAssets(
+    const { assets, nextPageToken, total } = await this.searchAssets(
       teamId,
       params.viewId,
       this.parseTags(params.tags),
-      params.keyword,
+      params.name,
       pageSize,
       '',
     );
     const list = assets.map((asset) => this.mapAsset(asset));
-    const total = list.length + (nextPageToken ? 1 : 0);
     return {
       list,
-      total,
+      total: Math.max(total, list.length),
       page: 1,
       pageSize,
       nextPageToken: nextPageToken || undefined,
@@ -266,7 +238,7 @@ export class DataManagementV2Service {
     adminId: string;
     teamId?: string;
     viewId?: string;
-    keyword?: string;
+    name?: string;
     tags?: string;
     pageToken?: string;
     pageSize?: number;
@@ -277,7 +249,7 @@ export class DataManagementV2Service {
       teamId,
       params.viewId,
       this.parseTags(params.tags),
-      params.keyword,
+      params.name,
       pageSize,
       params.pageToken,
     );

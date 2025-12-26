@@ -112,13 +112,15 @@ func normalizeGroups(groups [][]string) [][]string {
   return out
 }
 
-func hashTags(groups [][]string, userTags []string) string {
+func hashQuery(groups [][]string, userTags []string, name string) string {
   parts := []string{}
   for _, group := range groups {
     parts = append(parts, strings.Join(group, ","))
   }
   parts = append(parts, "|")
   parts = append(parts, strings.Join(userTags, ","))
+  parts = append(parts, "|")
+  parts = append(parts, name)
   raw := strings.Join(parts, ";")
   sum := sha256.Sum256([]byte(raw))
   return hex.EncodeToString(sum[:])

@@ -145,7 +145,7 @@ Response
 ```
 
 ### 搜索资源
-GET `/v2/assets/search?view_id=...&tags=t1,t2&limit=20&page_token=...`
+GET `/v2/assets/search?view_id=...&tags=t1,t2&name=asset&limit=20&page_token=...`
 
 Response
 ```json
@@ -153,7 +153,8 @@ Response
   "code": "OK",
   "data": {
     "items": ["a2", "a1"],
-    "next_page_token": "..."
+    "next_page_token": "...",
+    "total": 200
   }
 }
 ```
@@ -162,11 +163,12 @@ Response
 - view 绑定的 tag 组：组内 AND，子 view 之间 OR。
 - 用户 `tags` 追加为 AND。
 - view 无 tag 时，默认检索全部（仅 `team_id` 过滤）。
+- `name` 为空时不参与过滤；有值时使用 ES `match` 匹配 `name` 字段。
 - 分页为 `search_after`，`page_token` 为不透明游标。
 
 分页说明：
 - `limit` 默认 20，最大 200。
-- `page_token` 绑定 `app_id/team_id/tags`，更改条件会返回 `page_token mismatch`。
+- `page_token` 绑定 `app_id/team_id/tags/name`，更改条件会返回 `page_token mismatch`。
 
 ## 标签（tags）
 

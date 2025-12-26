@@ -110,6 +110,7 @@ export interface AssetQueryParams {
   creatorUserId?: string;
   teamId?: string;
   keyword?: string;
+  name?: string;
   page?: number;
   pageSize?: number;
   // 游标分页优化（用于大数据量场景）

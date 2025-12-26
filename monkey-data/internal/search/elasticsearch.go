@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/elastic/go-elasticsearch/v7"
@@ -61,9 +62,9 @@ func (c *ElasticsearchClient) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID string, viewTagGroups [][]string, userTags []string, limit int, pageToken string) ([]string, string, error) {
+func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID string, viewTagGroups [][]string, userTags []string, name string, limit int, pageToken string) ([]string, string, int64, error) {
 	if c == nil || c.client == nil {
-		return nil, "", errors.New("search not configured")
+		return nil, "", 0, errors.New("search not configured")
 	}
 	if limit <= 0 {
 		limit = 20
@@ -74,7 +75,8 @@ func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID 
 
 	normalizedViewGroups := normalizeGroups(viewTagGroups)
 	normalizedUserTags := normalizeTags(userTags)
-	tagsHash := hashTags(normalizedViewGroups, normalizedUserTags)
+	normalizedName := strings.TrimSpace(name)
+	queryHash := hashQuery(normalizedViewGroups, normalizedUserTags, normalizedName)
 
 	anchor := int64(0)
 	lastUpdated := int64(0)
@@ -82,10 +84,10 @@ func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID 
 	if pageToken != "" {
 		payload, err := decodePageToken(c.tokenKey, pageToken)
 		if err != nil {
-			return nil, "", err
+			return nil, "", 0, err
 		}
-		if payload.AppID != appID || payload.TeamID != teamID || payload.TagsHash != tagsHash {
-			return nil, "", errors.New("page_token mismatch")
+		if payload.AppID != appID || payload.TeamID != teamID || payload.TagsHash != queryHash {
+			return nil, "", 0, errors.New("page_token mismatch")
 		}
 		anchor = payload.Anchor
 		lastUpdated = payload.LastUpdated
@@ -94,11 +96,12 @@ func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID 
 		anchor = c.timeSource().UnixMilli()
 	}
 
-	query := buildQuery(teamID, anchor, normalizedViewGroups, normalizedUserTags)
+	query := buildQuery(teamID, anchor, normalizedViewGroups, normalizedUserTags, normalizedName)
 
 	req := map[string]any{
-		"size":  limit,
-		"query": query,
+		"size":             limit,
+		"query":            query,
+		"track_total_hits": true,
 		"sort": []any{
 			map[string]any{"updated_timestamp": map[string]any{"order": "desc"}},
 			map[string]any{"asset_id": map[string]any{"order": "desc"}},
@@ -111,7 +114,7 @@ func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID 
 
 	body, err := json.Marshal(req)
 	if err != nil {
-		return nil, "", err
+		return nil, "", 0, err
 	}
 
 	index := fmt.Sprintf("%s_data_assets_v2", appID)
@@ -121,18 +124,18 @@ func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID 
 		c.client.Search.WithBody(bytes.NewReader(body)),
 	)
 	if err != nil {
-		return nil, "", err
+		return nil, "", 0, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode >= http.StatusBadRequest {
 		raw, _ := io.ReadAll(res.Body)
-		return nil, "", fmt.Errorf("elasticsearch error: %s", string(raw))
+		return nil, "", 0, fmt.Errorf("elasticsearch error: %s", string(raw))
 	}
 
 	var parsed esSearchResponse
 	if err := json.NewDecoder(res.Body).Decode(&parsed); err != nil {
-		return nil, "", err
+		return nil, "", 0, err
 	}
 
 	ids := make([]string, 0, len(parsed.Hits.Hits))
@@ -142,6 +145,10 @@ func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID 
 			continue
 		}
 		ids = append(ids, id)
+	}
+	total := parsed.Hits.Total.Value
+	if total == 0 && len(parsed.Hits.Hits) > 0 {
+		total = int64(len(parsed.Hits.Hits))
 	}
 
 	nextToken := ""
@@ -154,22 +161,25 @@ func (c *ElasticsearchClient) SearchAssetIDs(ctx context.Context, appID, teamID 
 				Anchor:      anchor,
 				LastUpdated: updated,
 				LastID:      id,
-				TagsHash:    tagsHash,
+				TagsHash:    queryHash,
 				AppID:       appID,
 				TeamID:      teamID,
 			}
 			token, err := encodePageToken(c.tokenKey, payload)
 			if err != nil {
-				return ids, "", nil
+				return ids, "", total, nil
 			}
 			nextToken = token
 		}
 	}
-	return ids, nextToken, nil
+	return ids, nextToken, total, nil
 }
 
 type esSearchResponse struct {
 	Hits struct {
+		Total struct {
+			Value int64 `json:"value"`
+		} `json:"total"`
 		Hits []struct {
 			Source map[string]any `json:"_source"`
 			Sort   []any          `json:"sort"`
@@ -177,7 +187,7 @@ type esSearchResponse struct {
 	} `json:"hits"`
 }
 
-func buildQuery(teamID string, anchor int64, viewGroups [][]string, userTags []string) map[string]any {
+func buildQuery(teamID string, anchor int64, viewGroups [][]string, userTags []string, name string) map[string]any {
 	filters := []any{
 		map[string]any{"term": map[string]any{"team_id": teamID}},
 	}
@@ -203,7 +213,13 @@ func buildQuery(teamID string, anchor int64, viewGroups [][]string, userTags []s
 	for _, tag := range userTags {
 		filters = append(filters, map[string]any{"term": map[string]any{"tag_ids": tag}})
 	}
-	return map[string]any{"bool": map[string]any{"filter": filters}}
+	boolQuery := map[string]any{"filter": filters}
+	if name != "" {
+		boolQuery["must"] = []any{
+			map[string]any{"match": map[string]any{"name": map[string]any{"query": name}}},
+		}
+	}
+	return map[string]any{"bool": boolQuery}
 }
 
 func parseSort(sort []any) (int64, string, bool) {

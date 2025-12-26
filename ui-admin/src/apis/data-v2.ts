@@ -118,7 +118,7 @@ export async function listTagsV2(params: {
 
 // ========== 资产 ==========
 
-export async function getDataListV2(params?: DataQueryParams & { teamId?: string; tags?: string; pageToken?: string }) {
+export async function getDataListV2(params?: DataQueryParams & { teamId?: string; tags?: string; pageToken?: string; name?: string }) {
   const query = buildQuery(params);
   const url = `${API_BASE}${query ? `?${query}` : ''}`;
   const response = await request<{
@@ -139,7 +139,7 @@ export async function getDataListV2(params?: DataQueryParams & { teamId?: string
 }
 
 export async function getDataNextPageV2(
-  params: DataQueryParams & { teamId?: string; tags?: string; pageToken?: string }
+  params: DataQueryParams & { teamId?: string; tags?: string; pageToken?: string; name?: string }
 ): Promise<{ items: DataItem[]; hasMore: boolean; pageSize: number; nextPageToken?: string }> {
   const query = buildQuery(params);
   const url = `${API_BASE}/nextpage${query ? `?${query}` : ''}`;

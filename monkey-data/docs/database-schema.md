@@ -115,6 +115,7 @@ Outbox 事件（用于索引异步同步）。
 - 字段：
   - `asset_id` keyword
   - `team_id` keyword
+  - `name` text
   - `tag_ids` keyword[]
   - `asset_type` keyword
   - `status` keyword

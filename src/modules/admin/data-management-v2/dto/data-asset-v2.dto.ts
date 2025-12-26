@@ -15,10 +15,10 @@ export class QueryDataAssetV2Dto {
   @IsOptional()
   viewId?: string;
 
-  @ApiPropertyOptional({ description: '搜索关键词（仅 name + displayName）' })
+  @ApiPropertyOptional({ description: '搜索名称（ES 匹配 name）' })
   @IsString()
   @IsOptional()
-  keyword?: string;
+  name?: string;
 
   @ApiPropertyOptional({ description: 'Tag ID 列表（逗号分隔）' })
   @IsString()

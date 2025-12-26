@@ -87,11 +87,12 @@ export class MonkeyDataClient {
     }
   }
 
-  searchAssets(teamId: string, params: { viewId?: string; tags?: string[]; limit: number; pageToken?: string }) {
+  searchAssets(teamId: string, params: { viewId?: string; tags?: string[]; name?: string; limit: number; pageToken?: string }) {
     const tags = params.tags?.join(',') || undefined;
-    return this.request<{ items: string[]; next_page_token?: string }>('GET', '/v2/assets/search', teamId, {
+    return this.request<{ items: string[]; next_page_token?: string; total?: number }>('GET', '/v2/assets/search', teamId, {
       params: {
         view_id: params.viewId || undefined,
+        name: params.name || undefined,
         tags,
         limit: params.limit,
         page_token: params.pageToken || undefined,

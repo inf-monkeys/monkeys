@@ -234,6 +234,7 @@ func mapAssetDoc(asset model.Asset) map[string]any {
 	return map[string]any{
 		"asset_id":          asset.ID,
 		"team_id":           asset.TeamID,
+		"name":              asset.Name,
 		"tag_ids":           asset.TagIDs,
 		"asset_type":        asset.AssetType,
 		"status":            asset.Status,

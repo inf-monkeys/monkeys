@@ -69,25 +69,25 @@ func (s *Service) Ready(ctx context.Context) error {
 }
 
 // SearchAssets performs view-based filtering + user tags.
-func (s *Service) SearchAssets(ctx context.Context, appID, teamID, viewID string, userTags []string, limit int, pageToken string) ([]string, string, error) {
+func (s *Service) SearchAssets(ctx context.Context, appID, teamID, viewID string, userTags []string, name string, limit int, pageToken string) ([]string, string, int64, error) {
 	if teamID == "" {
-		return nil, "", errors.New("team_id required")
+		return nil, "", 0, errors.New("team_id required")
 	}
 	if err := s.ensureSearch(); err != nil {
-		return nil, "", err
+		return nil, "", 0, err
 	}
 	if err := s.ensureStore(); err != nil {
-		return nil, "", err
+		return nil, "", 0, err
 	}
 	viewTagGroups := [][]string{}
 	if viewID != "" {
 		groups, err := s.store.GetViewTagGroups(ctx, appID, teamID, viewID)
 		if err != nil {
-			return nil, "", err
+			return nil, "", 0, err
 		}
 		viewTagGroups = groups
 	}
-	return s.search.SearchAssetIDs(ctx, appID, teamID, viewTagGroups, userTags, limit, pageToken)
+	return s.search.SearchAssetIDs(ctx, appID, teamID, viewTagGroups, userTags, name, limit, pageToken)
 }
 
 func (s *Service) CreateAsset(ctx context.Context, appID, teamID string, asset model.Asset, tagIDs []string) (string, error) {
