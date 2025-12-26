@@ -1,4 +1,5 @@
 import React, { Dispatch, SetStateAction, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { useAsyncEffect } from 'ahooks';
 import { get } from 'lodash';
@@ -266,6 +267,16 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
     ? Math.max(0, totalGridHeight - gridTopSpacer - gridVisibleBlockHeight)
     : 0;
 
+  const [containerRect, setContainerRect] = useState<DOMRect | null>(null);
+  useLayoutEffect(() => {
+    if (expanded && containerRef.current) {
+      const update = () => setContainerRect(containerRef.current?.getBoundingClientRect() ?? null);
+      update();
+      window.addEventListener('resize', update);
+      return () => window.removeEventListener('resize', update);
+    }
+  }, [expanded]);
+
   return (
     <div
       className={cn(
@@ -394,77 +405,85 @@ const HistoryResultInner: React.FC<HistoryResultProps> = ({ images, className, s
       )}
 
       {/* 展开态：上方悬浮 Popup，网格&无限滚动 */}
-      {expanded && (
-        <div
-          className={cn(
-            'absolute bottom-0 left-0 right-0 z-[1000] rounded-lg bg-slate-1',
-            themeMode === 'border' && 'border border-input',
-            themeMode === 'shadow' && 'shadow-around',
-          )}
-        >
+      {expanded &&
+        containerRect &&
+        createPortal(
           <div
-            ref={popupScrollRef}
-            className="max-h-[calc(var(--oem-vh)*0.6)] overflow-y-auto p-global"
-            style={{ marginBottom: ITEM_SIZE }}
-            onScroll={onGridScroll}
+            className={cn(
+              'fixed z-[1001] rounded-lg bg-slate-1',
+              themeMode === 'border' && 'border border-input',
+              themeMode === 'shadow' && 'shadow-around',
+            )}
+            style={{
+              bottom: window.innerHeight - containerRect.bottom,
+              left: containerRect.left,
+              width: containerRect.width,
+            }}
           >
-            <div style={{ height: gridTopSpacer }} />
             <div
-              className="grid"
-              style={{
-                gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))`,
-                gap: GAP,
-              }}
+              ref={popupScrollRef}
+              className="max-h-[calc(var(--oem-vh)*0.6)] overflow-y-auto p-global"
+              style={{ marginBottom: ITEM_SIZE }}
+              onScroll={onGridScroll}
             >
-              {images.slice(firstVisibleIndex, lastVisibleIndex + 1).map((item, sliceIdx) => {
-                const index = firstVisibleIndex + sliceIdx;
-                return (
-                  <div key={item.render.key} className="aspect-square w-full overflow-hidden rounded-md">
-                    {isUniImagePreview ? (
-                      <UniImagePreviewWrapper
-                        imageUrl={item.render.origin as string}
-                        onClick={() => {
-                          setPosition(index);
-                        }}
-                      >
+              <div style={{ height: gridTopSpacer }} />
+              <div
+                className="grid"
+                style={{
+                  gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))`,
+                  gap: GAP,
+                }}
+              >
+                {images.slice(firstVisibleIndex, lastVisibleIndex + 1).map((item, sliceIdx) => {
+                  const index = firstVisibleIndex + sliceIdx;
+                  return (
+                    <div key={item.render.key} className="aspect-square w-full overflow-hidden rounded-md">
+                      {isUniImagePreview ? (
+                        <UniImagePreviewWrapper
+                          imageUrl={item.render.origin as string}
+                          onClick={() => {
+                            setPosition(index);
+                          }}
+                        >
+                          <CarouselItemImage
+                            image={item as ImagesResultWithOrigin}
+                            index={index}
+                            handleDragStart={handleDragStart}
+                          />
+                        </UniImagePreviewWrapper>
+                      ) : (
                         <CarouselItemImage
                           image={item as ImagesResultWithOrigin}
                           index={index}
                           handleDragStart={handleDragStart}
+                          onClick={() => {
+                            setPosition(index);
+                            setOpen(true);
+                          }}
                         />
-                      </UniImagePreviewWrapper>
-                    ) : (
-                      <CarouselItemImage
-                        image={item as ImagesResultWithOrigin}
-                        index={index}
-                        handleDragStart={handleDragStart}
-                        onClick={() => {
-                          setPosition(index);
-                          setOpen(true);
-                        }}
-                      />
-                    )}
-                  </div>
-                );
-              })}
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ height: gridBottomSpacer }} />
+              <div ref={gridSentinelRef} className="h-2 w-full" />
             </div>
-            <div style={{ height: gridBottomSpacer }} />
-            <div ref={gridSentinelRef} className="h-2 w-full" />
-          </div>
-          <div
-            className="absolute bottom-0 left-global flex items-center"
-            style={{ height: `calc(${ITEM_SIZE}px + (var(--global-spacing)*2))` }}
-          >
-            <Button
-              icon={expanded ? <Minimize2 /> : <Maximize2 />}
-              variant="outline"
-              size="icon"
-              onClick={() => setExpanded((s) => !s)}
-              disabled={images.length === 0}
-            />
-          </div>
-        </div>
-      )}
+            <div
+              className="absolute bottom-0 left-global flex items-center"
+              style={{ height: `calc(${ITEM_SIZE}px + (var(--global-spacing)*2))` }}
+            >
+              <Button
+                icon={expanded ? <Minimize2 /> : <Maximize2 />}
+                variant="outline"
+                size="icon"
+                onClick={() => setExpanded((s) => !s)}
+                disabled={images.length === 0}
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };
