@@ -166,6 +166,7 @@ export interface UpdateViewDto {
   displayConfig?: DataView['displayConfig'];
   isPublic?: boolean;
   sort?: number;
+  teamId?: string;
 }
 
 // 移动视图 DTO

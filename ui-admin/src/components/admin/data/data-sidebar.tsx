@@ -83,6 +83,7 @@ export function DataSidebar({
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [newCategoryTeamId, setNewCategoryTeamId] = useState('0');
   const [selectedParentId, setSelectedParentId] = useState<string | undefined>(undefined);
   const [sidebarWidth, setSidebarWidth] = useState(256); // 初始宽度 256px (w-64)
   const [isResizing, setIsResizing] = useState(false);
@@ -215,10 +216,12 @@ export function DataSidebar({
       description: newCategoryDescription.trim() || undefined,
       parentId: selectedParentId === '__root__' ? undefined : selectedParentId,
       isPublic: true,
+      teamId: newCategoryTeamId.trim() || '0',
     });
 
     setNewCategoryName('');
     setNewCategoryDescription('');
+    setNewCategoryTeamId('0');
     setSelectedParentId(undefined);
     setCreateDialogOpen(false);
   };
@@ -269,7 +272,18 @@ export function DataSidebar({
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </Button>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+          <Dialog
+            open={createDialogOpen}
+            onOpenChange={(open) => {
+              setCreateDialogOpen(open);
+              if (!open) {
+                setNewCategoryName('');
+                setNewCategoryDescription('');
+                setNewCategoryTeamId('0');
+                setSelectedParentId(undefined);
+              }
+            }}
+          >
             <DialogTrigger asChild>
               <Button
                 variant="ghost"
@@ -305,6 +319,15 @@ export function DataSidebar({
                     value={newCategoryDescription}
                     onChange={(e) => setNewCategoryDescription(e.target.value)}
                     placeholder="输入视图描述（可选）"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="team-id">团队 ID</Label>
+                  <Input
+                    id="team-id"
+                    value={newCategoryTeamId}
+                    onChange={(e) => setNewCategoryTeamId(e.target.value)}
+                    placeholder="0 表示全局"
                   />
                 </div>
                 <div className="space-y-2">
@@ -433,6 +456,7 @@ function CategoryTreeItem({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editTeamId, setEditTeamId] = useState('');
   const hasChildren = category.children && category.children.length > 0;
   const isSelected = selectedCategory === category.id;
 
@@ -462,15 +486,22 @@ function CategoryTreeItem({
   const handleOpenEditDialog = () => {
     setEditName(category.name);
     setEditDescription(category.description || '');
+    setEditTeamId(category.teamId ?? '');
     setEditDialogOpen(true);
   };
 
   const handleEditSubmit = () => {
     if (!editName.trim()) return;
+    const teamId = editTeamId.trim();
+    if (!teamId) {
+      toast.error('团队 ID 不能为空');
+      return;
+    }
 
     onUpdateCategory(category.id, {
       name: editName.trim(),
       description: editDescription.trim() || undefined,
+      teamId,
     });
 
     setEditDialogOpen(false);
@@ -589,6 +620,15 @@ function CategoryTreeItem({
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
                 placeholder="输入视图描述（可选）"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-team-id">团队 ID</Label>
+              <Input
+                id="edit-team-id"
+                value={editTeamId}
+                onChange={(e) => setEditTeamId(e.target.value)}
+                placeholder="0 表示全局"
               />
             </div>
           </div>

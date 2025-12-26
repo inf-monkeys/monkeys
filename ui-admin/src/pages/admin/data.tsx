@@ -382,7 +382,8 @@ function DataManagementPage() {
 
   const handleCreateCategory = async (data: CreateViewDto) => {
     try {
-      await createView(data);
+      const teamId = data.teamId?.toString().trim() || '0';
+      await createView({ ...data, teamId });
       toast.success('创建成功');
       loadCategories();
     } catch (error: any) {
@@ -392,7 +393,12 @@ function DataManagementPage() {
 
   const handleUpdateCategory = async (categoryId: string, data: UpdateViewDto) => {
     try {
-      await updateView(categoryId, data);
+      const teamId = data.teamId?.toString().trim();
+      if (teamId !== undefined && !teamId) {
+        toast.error('团队 ID 不能为空');
+        return;
+      }
+      await updateView(categoryId, { ...data, teamId });
       toast.success('更新成功');
       loadCategories();
     } catch (error: any) {
