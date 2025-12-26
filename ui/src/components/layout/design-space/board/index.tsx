@@ -8,28 +8,28 @@ import './index.scss';
 import { useEventEmitter } from 'ahooks';
 import { get } from 'lodash';
 import {
-    AssetRecordType,
-    createShapeId,
-    defaultBindingUtils,
-    DefaultContextMenu,
-    DefaultContextMenuContent,
-    defaultEditorAssetUrls,
-    defaultShapeTools,
-    defaultTools,
-    Editor,
-    FrameShapeUtil,
-    TLAssetStore,
-    TLComponents,
-    Tldraw,
-    TldrawUiMenuGroup,
-    TldrawUiMenuItem,
-    TLImageShape,
-    TLShape,
-    TLShapeId,
-    TLUiContextMenuProps,
-    track,
-    useEditor,
-    useToasts,
+  AssetRecordType,
+  createShapeId,
+  defaultBindingUtils,
+  DefaultContextMenu,
+  DefaultContextMenuContent,
+  defaultEditorAssetUrls,
+  defaultShapeTools,
+  defaultTools,
+  Editor,
+  FrameShapeUtil,
+  TLAssetStore,
+  TLComponents,
+  Tldraw,
+  TldrawUiMenuGroup,
+  TldrawUiMenuItem,
+  TLImageShape,
+  TLShape,
+  TLShapeId,
+  TLUiContextMenuProps,
+  track,
+  useEditor,
+  useToasts,
 } from 'tldraw';
 
 import { useUser } from '@/apis/authz/user';
@@ -63,17 +63,17 @@ import { useMindMapGeneration } from './hooks/useMindMapGeneration';
 import { RunAllWorkflowsButton } from './RunAllWorkflowsButton';
 // 灵感推送功能
 import {
-    InstructionShapeUtil,
-    InstructionTool,
-    // Workflow 节点系统
-    NodeShapeUtil,
-    NodeTool,
-    OutputShapeUtil,
-    OutputTool,
-    WorkflowConnectionBindingUtil,
-    WorkflowConnectionShapeUtil,
-    WorkflowShapeUtil,
-    WorkflowTool,
+  InstructionShapeUtil,
+  InstructionTool,
+  // Workflow 节点系统
+  NodeShapeUtil,
+  NodeTool,
+  OutputShapeUtil,
+  OutputTool,
+  WorkflowConnectionBindingUtil,
+  WorkflowConnectionShapeUtil,
+  WorkflowShapeUtil,
+  WorkflowTool,
 } from './shapes';
 import { LiveImageShapeUtil } from './shapes/live-image/LiveImageShapeUtil';
 import { LiveImageTool } from './shapes/tools/LiveImageTool';
@@ -604,7 +604,8 @@ export const Board: React.FC<BoardProps> = ({
         {/* 思维图谱和逻辑关系发现按钮 - 只在非只读模式下显示 */}
         {!isReadonlyMode && (
           <>
-            {!hideRunAllWorkflowsButton && <RunAllWorkflowsButton />}
+            {/* 开始运行按钮只在 oem 是 concept-design 时显示 */}
+            {!hideRunAllWorkflowsButton && oem?.theme.id === 'concept-design' && <RunAllWorkflowsButton />}
             <MindMapButton
               onGenerateMindMap={generateMindMap}
               loading={mindMapLoading}
